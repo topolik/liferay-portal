@@ -57,8 +57,36 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Britt Courtney
  * @author Brian Wing Shun Chan
+ * @author Tomas Polesovsky
  */
-public class BasicAuthHeaderAutoLogin implements AutoLogin {
+public class BasicAuthHeaderAutoLogin
+	implements AutoLogin, PortalAuthenticator {
+
+	public AuthenticationResult authenticate(AuthenticationContext authContext)
+		throws AuthException {
+
+		//TBD should this method return null if loginResult is null?  This
+		//was inconsistent...
+		AuthenticationResult result = new AuthenticationResult();
+
+		try {
+			String[] loginResult = login(
+				authContext.getHttpServletRequest(),
+				authContext.getHttpServletResponse());
+
+			if (loginResult != null) {
+
+				result.setState(AuthenticationResult.State.SUCCESS);
+				result.setUserId(Long.valueOf(loginResult[0]));
+				result.setPassword(loginResult[1]);
+			}
+		}
+		catch (AutoLoginException e) {
+			throw new AuthException(e);
+		}
+
+		return result;
+	}
 
 	public String[] login(
 			HttpServletRequest request, HttpServletResponse response)
