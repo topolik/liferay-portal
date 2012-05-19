@@ -14,12 +14,23 @@
 
 package com.liferay.portal.security.sac;
 
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.security.MethodSecurity;
+import com.liferay.portal.security.PortalAuthenticationManager;
 import com.liferay.portal.security.RemoteMethodAccessType;
+import com.liferay.portal.security.auth.AuthSettingsUtil;
+import com.liferay.portal.security.auth.AuthenticationConfig;
+import com.liferay.portal.security.auth.AuthenticationContext;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * @author Tomas Polesovsky
@@ -29,6 +40,8 @@ import java.lang.reflect.Method;
 public class ServiceAccessControlManagerImpl {
 	public void accept(Method method, MethodSecurity methodSecurity)
 		throws SecurityException {
+
+		checkAllowedHosts();
 
 		RemoteMethodAccessType remoteMethodAccessType =
 			methodSecurity.remoteMethodAccessType();
@@ -42,6 +55,48 @@ public class ServiceAccessControlManagerImpl {
 
 				throw new SecurityException("Authenticated access required.");
 			}
+		}
+	}
+
+	protected void checkAllowedHosts() {
+		PortalAuthenticationManager portalAuthenticationManager =
+			PortalAuthenticationManager.getInstance();
+
+		AuthenticationContext authenticationContext =
+			portalAuthenticationManager.getAuthenticationContext();
+
+		if (authenticationContext == null) {
+			// TODO: PortalAuthenticationFilter & PortalAuthenticationManager is
+			// not mapped to all URLs!!!!
+			return;
+		}
+
+		AuthenticationConfig authenticationConfig =
+			authenticationContext.getAuthenticationConfig();
+
+		Properties properties = authenticationConfig.getSettings();
+
+		boolean remoteHostEnabled = GetterUtil.getBoolean(
+			properties.getProperty("remote.hosts.enabled"), false);
+
+		if (!remoteHostEnabled) {
+			throw new SecurityException("Remote access denied.");
+		}
+
+		String[] hosts = StringUtil.split(
+			properties.getProperty("remote.hosts.allowed"));
+
+		Set<String> hostsAllowed = new HashSet(Arrays.asList(hosts));
+
+		HttpServletRequest httpServletRequest =
+			authenticationContext.getHttpServletRequest();
+
+		boolean accessAllowed = AuthSettingsUtil.isAccessAllowed(
+			httpServletRequest, hostsAllowed);
+
+		if (!accessAllowed) {
+			throw new SecurityException(
+				"Access denied for " + httpServletRequest.getRemoteAddr());
 		}
 	}
 
