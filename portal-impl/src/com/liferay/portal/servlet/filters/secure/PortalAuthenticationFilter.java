@@ -78,7 +78,7 @@ public class PortalAuthenticationFilter extends BasePortalFilter {
 
 		redirectURL.append(Http.HTTPS_WITH_SLASH);
 		redirectURL.append(httpServletRequest.getServerName());
-		redirectURL.append(httpServletRequest.getServletPath());
+		redirectURL.append(httpServletRequest.getRequestURI());
 
 		String queryString = httpServletRequest.getQueryString();
 
