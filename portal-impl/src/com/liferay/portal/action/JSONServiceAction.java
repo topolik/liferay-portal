@@ -31,7 +31,6 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextUtil;
 import com.liferay.portal.struts.JSONAction;
@@ -50,8 +49,6 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import jodd.util.Wildcard;
 
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionMapping;
@@ -83,9 +80,6 @@ public class JSONServiceAction extends JSONAction {
 
 		String className = ParamUtil.getString(request, "serviceClassName");
 		String methodName = ParamUtil.getString(request, "serviceMethodName");
-
-		checkMethodPublicAccess(
-			request, methodName, PropsValues.JSON_SERVICE_PUBLIC_METHODS);
 
 		String[] serviceParameters = getStringArrayFromJSON(
 			request, "serviceParameters");
@@ -145,24 +139,6 @@ public class JSONServiceAction extends JSONAction {
 		}
 
 		return null;
-	}
-
-	protected void checkMethodPublicAccess(
-			HttpServletRequest request, String methodName,
-			String[] publicMethods)
-		throws PrincipalException {
-
-		if ((methodName != null) && (publicMethods.length > 0)) {
-			if (Wildcard.matchOne(methodName, publicMethods) != -1) {
-				return;
-			}
-		}
-
-		String remoteUser = request.getRemoteUser();
-
-		if (remoteUser == null) {
-			throw new PrincipalException("Public access denied");
-		}
 	}
 
 	protected Object getArgValue(

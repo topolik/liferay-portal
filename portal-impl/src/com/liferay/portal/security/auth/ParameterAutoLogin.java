@@ -29,8 +29,31 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Minhchau Dang
+ * @author Tomas Polesovsky
  */
-public class ParameterAutoLogin implements AutoLogin {
+public class ParameterAutoLogin implements AutoLogin, PortalAuthenticator {
+
+	public AuthenticationResult authenticate(AuthenticationContext authContext)
+		throws AuthException {
+
+		AuthenticationResult result = new AuthenticationResult();
+
+		try {
+			String[] loginResult = login(authContext.getHttpServletRequest(),
+				authContext.getHttpServletResponse());
+
+			if (loginResult != null) {
+				result.setState(AuthenticationResult.State.SUCCESS);
+				result.setUserId(Long.valueOf(loginResult[0]));
+				result.setPassword(loginResult[1]);
+			}
+		}
+		catch (AutoLoginException e) {
+			throw new AuthException(e);
+		}
+
+		return result;
+	}
 
 	public String[] login(
 			HttpServletRequest request, HttpServletResponse response)
