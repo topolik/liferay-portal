@@ -41,7 +41,7 @@ public class ServiceAccessControlManagerImpl {
 	public void accept(Method method, MethodSecurity methodSecurity)
 		throws SecurityException {
 
-		checkAllowedHosts();
+		checkIPFilter();
 
 		RemoteMethodAccessType remoteMethodAccessType =
 			methodSecurity.remoteMethodAccessType();
@@ -58,7 +58,7 @@ public class ServiceAccessControlManagerImpl {
 		}
 	}
 
-	protected void checkAllowedHosts() {
+	protected void checkIPFilter() {
 		PortalAuthenticationManager portalAuthenticationManager =
 			PortalAuthenticationManager.getInstance();
 
@@ -66,8 +66,7 @@ public class ServiceAccessControlManagerImpl {
 			portalAuthenticationManager.getAuthenticationContext();
 
 		if (authenticationContext == null) {
-			// TODO: PortalAuthenticationFilter & PortalAuthenticationManager is
-			// not mapped to all URLs!!!!
+			// TODO: PortalAuthenticationFilter is not mapped to all URLs!!!!
 			return;
 		}
 
@@ -76,15 +75,19 @@ public class ServiceAccessControlManagerImpl {
 
 		Properties properties = authenticationConfig.getSettings();
 
-		boolean remoteHostEnabled = GetterUtil.getBoolean(
-			properties.getProperty("remote.hosts.enabled"), false);
+		boolean ipFilterEnabled= GetterUtil.getBoolean(
+			properties.getProperty("ip-filter.enabled"), true);
 
-		if (!remoteHostEnabled) {
-			throw new SecurityException("Remote access denied.");
+		if (!ipFilterEnabled) {
+			return;
 		}
 
 		String[] hosts = StringUtil.split(
-			properties.getProperty("remote.hosts.allowed"));
+			properties.getProperty("ip-filter.hosts.allowed"));
+
+		if(hosts.length == 0){
+			throw new SecurityException("Remote access denied");
+		}
 
 		Set<String> hostsAllowed = new HashSet(Arrays.asList(hosts));
 

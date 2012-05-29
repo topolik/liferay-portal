@@ -23,6 +23,7 @@ import com.liferay.portal.security.auth.AuthenticationConfig;
 import com.liferay.portal.security.auth.PortalAuthenticator;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -45,9 +46,9 @@ public class ServletFilterAuthenticationLoader {
 		return null;
 	}
 
-	protected List<AuthenticationRule> loadConfiguration() {
+	protected LinkedList<AuthenticationRule> loadConfiguration() {
 		// TODO: make it extensible for Hooks
-		List<AuthenticationRule> result = new ArrayList<AuthenticationRule>();
+		LinkedList<AuthenticationRule> result = new LinkedList<AuthenticationRule>();
 
 		boolean finished = false;
 
@@ -59,7 +60,7 @@ public class ServletFilterAuthenticationLoader {
 			if ((configProps != null) && (configProps.size() > 0)) {
 				AuthenticationRule rule = loadConfiguration(configProps);
 
-				result.add(rule);
+				result.push(rule);
 			}
 			else {
 				finished = true;

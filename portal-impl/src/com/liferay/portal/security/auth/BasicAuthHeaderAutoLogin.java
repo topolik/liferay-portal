@@ -65,8 +65,6 @@ public class BasicAuthHeaderAutoLogin
 	public AuthenticationResult authenticate(AuthenticationContext authContext)
 		throws AuthException {
 
-		//TBD should this method return null if loginResult is null?  This
-		//was inconsistent...
 		AuthenticationResult result = new AuthenticationResult();
 
 		try {
@@ -83,6 +81,10 @@ public class BasicAuthHeaderAutoLogin
 		}
 		catch (AutoLoginException e) {
 			throw new AuthException(e);
+		}
+
+		if(authContext.getAuthenticationPhase()==AuthenticationPhase.PHASE_1){
+			result.setState(AuthenticationResult.State.NOT_APPLICABLE);
 		}
 
 		return result;

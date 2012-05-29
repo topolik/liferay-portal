@@ -64,7 +64,7 @@ public class PortalAuthenticationFilter extends BasePortalFilter {
 		AuthenticationConfig authenticationConfig =
 			authenticationContext.getAuthenticationConfig();
 
-		if (authenticationConfig.isSecure() || httpServletRequest.isSecure()) {
+		if (!authenticationConfig.isSecure() || httpServletRequest.isSecure()) {
 			return false;
 		}
 

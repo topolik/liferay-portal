@@ -69,11 +69,12 @@ public class PortalAuthenticationManager {
 				"AuthenticationContext is not set!");
 		}
 
-		AuthenticationResult result = createGuestAuthenticationResult(request);
+		AuthenticationResult guestResult =
+			createGuestAuthenticationResult(request);
 
 		try {
 			// create guest authorization context
-			createAuthorizationContext(result);
+			createAuthorizationContext(guestResult);
 		}
 		catch (Exception e) {
 			throw new RuntimeException(
@@ -81,27 +82,34 @@ public class PortalAuthenticationManager {
 					+ e.getMessage(), e);
 		}
 
+		AuthenticationResult pipelineResult = null;
 		if (requiredAuthenticator) {
 			authenticationContext.setAuthenticationPhase(
 				AuthenticationPhase.PHASE_1);
 
-			result = authenticateRequiredPipeline(authenticationContext);
+			pipelineResult =
+				authenticateRequiredPipeline(authenticationContext);
 		}
 		else {
 			authenticationContext.setAuthenticationPhase(
 				AuthenticationPhase.PHASE_2);
 
-			result = authenticateOptionalPipeline(authenticationContext);
+			pipelineResult =
+				authenticateOptionalPipeline(authenticationContext);
 		}
 
-		AuthenticationResult.State resultState = result.getState();
+		// there is no authentication configured
+		if(pipelineResult == null){
+			return guestResult;
+		}
 
-		if ((result != null) &&
-			(resultState == AuthenticationResult.State.SUCCESS)) {
+		AuthenticationResult.State resultState = pipelineResult.getState();
+
+		if (resultState == AuthenticationResult.State.SUCCESS) {
 
 			try {
 				// create successful authorization context
-				createAuthorizationContext(result);
+				createAuthorizationContext(pipelineResult);
 			}
 			catch (Exception e) {
 				throw new RuntimeException(
@@ -110,7 +118,7 @@ public class PortalAuthenticationManager {
 			}
 		}
 
-		return result;
+		return pipelineResult;
 	}
 
 	public AuthenticationContext getAuthenticationContext() {
@@ -155,6 +163,7 @@ public class PortalAuthenticationManager {
 
 						// no problem - let's try another authenticator
 						case INVALID_CREDENTIALS:
+						case NOT_APPLICABLE:
 
 						default: break;
 					}
@@ -189,6 +198,9 @@ public class PortalAuthenticationManager {
 				// result is not null - we want to process the result
 				if (result != null) {
 					switch (result.getState()) {
+						// authenticator cannot be applied, let's continue
+						case NOT_APPLICABLE:
+
 						// all authenticators must be successful
 						case SUCCESS: {
 							break;

@@ -27,7 +27,14 @@ package com.liferay.portal.security.auth;
 public class AuthenticationResult {
 
 	public enum State {
-		SUCCESS, IN_PROGRESS, INVALID_CREDENTIALS
+		/** Authentication has been successful */
+		SUCCESS,
+		/** We are in the middle of the authentication process */
+		IN_PROGRESS,
+		/** Authentication has not been successful */
+		INVALID_CREDENTIALS,
+		/** Authentication cannot be applied */
+		NOT_APPLICABLE
 	}
 
 	public String getPassword() {
