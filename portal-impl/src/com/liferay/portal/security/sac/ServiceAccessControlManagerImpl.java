@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
@@ -25,12 +25,14 @@ import com.liferay.portal.security.auth.AuthenticationContext;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Tomas Polesovsky
@@ -85,7 +87,7 @@ public class ServiceAccessControlManagerImpl {
 		String[] hosts = StringUtil.split(
 			properties.getProperty("ip-filter.hosts.allowed"));
 
-		if(hosts.length == 0){
+		if (hosts.length == 0) {
 			throw new SecurityException("Remote access denied");
 		}
 

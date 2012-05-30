@@ -44,4 +44,5 @@ public interface PortalAuthenticator {
 	public AuthenticationResult authenticate(
 			AuthenticationContext authenticationContext)
 		throws AuthException;
+
 }

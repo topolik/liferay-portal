@@ -39,6 +39,10 @@ public class AuthenticationRule {
 		_patterns.add(requestUri);
 	}
 
+	public AuthenticationConfig getAuthenticationConfig() {
+		return _authenticationConfig;
+	}
+
 	/**
 	 * See {@link #match(String)}.
 	 */
@@ -67,10 +71,6 @@ public class AuthenticationRule {
 	 */
 	public void registerAuthenticationConfig(AuthenticationConfig config) {
 		_authenticationConfig = config;
-	}
-
-	public AuthenticationConfig getAuthenticationConfig() {
-		return _authenticationConfig;
 	}
 
 	private AuthenticationConfig _authenticationConfig;

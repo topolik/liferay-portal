@@ -39,7 +39,8 @@ public class ParameterAutoLogin implements AutoLogin, PortalAuthenticator {
 		AuthenticationResult result = new AuthenticationResult();
 
 		try {
-			String[] loginResult = login(authContext.getHttpServletRequest(),
+			String[] loginResult = login(
+				authContext.getHttpServletRequest(),
 				authContext.getHttpServletResponse());
 
 			if (loginResult != null) {

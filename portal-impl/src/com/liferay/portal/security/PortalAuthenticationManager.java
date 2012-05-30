@@ -100,7 +100,7 @@ public class PortalAuthenticationManager {
 		}
 
 		// there is no authentication configured
-		if(pipelineResult == null){
+		if (pipelineResult == null) {
 			return guestResult;
 		}
 
@@ -227,7 +227,6 @@ public class PortalAuthenticationManager {
 
 		return result;
 	}
-
 
 	protected void createAuthorizationContext(AuthenticationResult result)
 		throws AuthException{

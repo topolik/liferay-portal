@@ -83,7 +83,7 @@ public class BasicAuthHeaderAutoLogin
 			throw new AuthException(e);
 		}
 
-		if(authContext.getAuthenticationPhase()==AuthenticationPhase.PHASE_1){
+		if (authContext.getAuthenticationPhase()==AuthenticationPhase.PHASE_1) {
 			result.setState(AuthenticationResult.State.NOT_APPLICABLE);
 		}
 

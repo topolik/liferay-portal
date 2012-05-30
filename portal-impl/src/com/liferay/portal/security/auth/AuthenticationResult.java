@@ -28,12 +28,9 @@ public class AuthenticationResult {
 
 	public enum State {
 		/** Authentication has been successful */
-		SUCCESS,
-		/** We are in the middle of the authentication process */
-		IN_PROGRESS,
-		/** Authentication has not been successful */
-		INVALID_CREDENTIALS,
-		/** Authentication cannot be applied */
+		SUCCESS, /** We are in the middle of the authentication process */
+		IN_PROGRESS, /** Authentication has not been successful */
+		INVALID_CREDENTIALS, /** Authentication cannot be applied */
 		NOT_APPLICABLE
 	}
 

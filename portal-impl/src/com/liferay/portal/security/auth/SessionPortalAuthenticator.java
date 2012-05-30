@@ -51,4 +51,5 @@ public class SessionPortalAuthenticator implements PortalAuthenticator {
 			throw new AuthException(e);
 		}
 	}
+
 }
