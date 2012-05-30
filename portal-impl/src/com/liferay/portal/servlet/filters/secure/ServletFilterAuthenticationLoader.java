@@ -23,7 +23,6 @@ import com.liferay.portal.security.auth.AuthenticationConfig;
 import com.liferay.portal.security.auth.PortalAuthenticator;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -35,7 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ServletFilterAuthenticationLoader {
 
 	public AuthenticationConfig load(HttpServletRequest request) {
-		List<AuthenticationRule> rules = loadConfiguration();
+		List<AuthenticationRule> rules = getConfiguration();
 
 		for (AuthenticationRule rule : rules) {
 			if (rule.match(request)) {
@@ -46,35 +45,34 @@ public class ServletFilterAuthenticationLoader {
 		return null;
 	}
 
-	protected LinkedList<AuthenticationRule> loadConfiguration() {
+	protected List<AuthenticationRule> getConfiguration() {
 		// TODO: make it extensible for Hooks
-		LinkedList<AuthenticationRule> result = new LinkedList<AuthenticationRule>();
 
-		boolean finished = false;
+		if (_rules == null) {
+			ArrayList<AuthenticationRule> rules =
+				new ArrayList<AuthenticationRule>();
 
-		for (int i = 0; i < Integer.MAX_VALUE && !finished; i++) {
-			String prefix = "portal.api.authentication.config["+i+"].";
+			for (int i = 0; i < Short.MAX_VALUE; i++) {
+				String prefix = "portal.api.authentication.config[" + i + "].";
 
-			Properties configProps = PropsUtil.getProperties(prefix, true);
+				Properties configProps = PropsUtil.getProperties(prefix, true);
 
-			if ((configProps != null) && (configProps.size() > 0)) {
+				if ((configProps == null) || (configProps.size() <= 0)) {
+					break;
+				}
+
 				AuthenticationRule rule = loadConfiguration(configProps);
 
-				result.push(rule);
+				rules.add(0, rule);
 			}
-			else {
-				finished = true;
-			}
+
+			_rules = rules;
 		}
 
-		return result;
+		return _rules;
 	}
 
 	protected AuthenticationRule loadConfiguration(Properties configProps) {
-		if (configProps == null) {
-			return null;
-		}
-
 		AuthenticationRule rule = new AuthenticationRule();
 		AuthenticationConfig config = new AuthenticationConfig();
 
@@ -82,6 +80,7 @@ public class ServletFilterAuthenticationLoader {
 		config.setSettings(configProps);
 
 		String[] urls = StringUtil.split(configProps.getProperty("urls"));
+
 		for (String url : urls) {
 			rule.addPattern(url);
 		}
@@ -126,4 +125,7 @@ public class ServletFilterAuthenticationLoader {
 
 		return rule;
 	}
+
+	private static List<AuthenticationRule> _rules;
+
 }

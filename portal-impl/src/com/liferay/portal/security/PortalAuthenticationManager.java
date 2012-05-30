@@ -69,8 +69,8 @@ public class PortalAuthenticationManager {
 				"AuthenticationContext is not set!");
 		}
 
-		AuthenticationResult guestResult =
-			createGuestAuthenticationResult(request);
+		AuthenticationResult guestResult = createGuestAuthenticationResult(
+			request);
 
 		try {
 			// create guest authorization context
@@ -83,19 +83,20 @@ public class PortalAuthenticationManager {
 		}
 
 		AuthenticationResult pipelineResult = null;
+
 		if (requiredAuthenticator) {
 			authenticationContext.setAuthenticationPhase(
 				AuthenticationPhase.PHASE_1);
 
-			pipelineResult =
-				authenticateRequiredPipeline(authenticationContext);
+			pipelineResult = authenticateRequiredPipeline(
+				authenticationContext);
 		}
 		else {
 			authenticationContext.setAuthenticationPhase(
 				AuthenticationPhase.PHASE_2);
 
-			pipelineResult =
-				authenticateOptionalPipeline(authenticationContext);
+			pipelineResult = authenticateOptionalPipeline(
+				authenticationContext);
 		}
 
 		// there is no authentication configured
@@ -122,13 +123,13 @@ public class PortalAuthenticationManager {
 	}
 
 	public AuthenticationContext getAuthenticationContext() {
-		return _authenticationContexThreadLocal .get();
+		return _authenticationContexThreadLocal.get();
 	}
 
 	public void setAuthenticationContext(
 		AuthenticationContext authenticationContext) {
 
-		_authenticationContexThreadLocal .set(authenticationContext);
+		_authenticationContexThreadLocal.set(authenticationContext);
 	}
 
 	protected AuthenticationResult authenticateOptionalPipeline(
