@@ -1072,7 +1072,8 @@ Liferay.Service.registerClass(
 		subscribe: true,
 		unsubscribe: true,
 		updateArticle: true,
-		updateContent: true
+		updateContent: true,
+		updateStatus: true
 	}
 );
 
