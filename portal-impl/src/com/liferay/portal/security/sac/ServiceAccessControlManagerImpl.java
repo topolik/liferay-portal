@@ -55,6 +55,13 @@ public class ServiceAccessControlManagerImpl {
 			if ((permissionChecker == null) ||
 				!permissionChecker.isSignedIn()) {
 
+				AuthenticationContext authCtx = PortalAuthenticationManager.
+					getInstance().getAuthenticationContext();
+
+				if (authCtx != null) {
+					authCtx.setAccessDenied(true);
+				}
+
 				throw new SecurityException("Authenticated access required.");
 			}
 		}

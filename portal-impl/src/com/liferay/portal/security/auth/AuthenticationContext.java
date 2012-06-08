@@ -38,6 +38,14 @@ public class AuthenticationContext {
 		return _httpServletResponse;
 	}
 
+	public boolean isAccessDenied() {
+		return _accessDenied;
+	}
+
+	public void setAccessDenied(boolean accessDenied) {
+		_accessDenied = accessDenied;
+	}
+
 	public void setAuthenticationConfig(
 		AuthenticationConfig authenticationConfig) {
 
@@ -58,6 +66,7 @@ public class AuthenticationContext {
 		_httpServletResponse = response;
 	}
 
+	private boolean _accessDenied;
 	private AuthenticationConfig _authenticationConfig;
 	private AuthenticationPhase _authenticationPhase;
 	private HttpServletRequest _httpServletRequest;

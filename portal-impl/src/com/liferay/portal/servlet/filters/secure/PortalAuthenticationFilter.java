@@ -16,7 +16,9 @@ package com.liferay.portal.servlet.filters.secure;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.servlet.ByteBufferServletResponse;
 import com.liferay.portal.kernel.servlet.ProtectedServletRequest;
+import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -28,6 +30,7 @@ import com.liferay.portal.security.auth.AuthenticationContext;
 import com.liferay.portal.security.auth.AuthenticationResult;
 import com.liferay.portal.servlet.filters.BasePortalFilter;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.util.servlet.filters.CacheResponseUtil;
 
 import java.io.IOException;
 
@@ -140,7 +143,8 @@ public class PortalAuthenticationFilter extends BasePortalFilter {
 		// we don't need to continue if optional authentication didn't
 		// changed current user
 		if ((authenticationResult == null) && !applyRequiredAuthenticators) {
-			httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			portalAuthenticationManager.getAuthenticationContext().
+				setAccessDenied(true);
 
 			return;
 		}
@@ -156,14 +160,14 @@ public class PortalAuthenticationFilter extends BasePortalFilter {
 		return new ServletFilterAuthenticationLoader().load(request);
 	}
 
-	protected void initAuthenticationContext(AuthenticationConfig config,
-			HttpServletRequest request, HttpServletResponse response) {
+	protected void initAuthenticationContext(
+		AuthenticationConfig config, HttpServletRequest request,
+		HttpServletResponse response) {
 
 		PortalAuthenticationManager pam =
 			PortalAuthenticationManager.getInstance();
 
 		AuthenticationContext context = new AuthenticationContext();
-
 		context.setAuthenticationConfig(config);
 		context.setRequest(request);
 		context.setResponse(response);
@@ -191,9 +195,12 @@ public class PortalAuthenticationFilter extends BasePortalFilter {
 			return;
 		}
 
+		ByteBufferServletResponse bufferedResponse = null;
+
 		try {
+			bufferedResponse = new ByteBufferServletResponse(response);
 			// 1st authentication phase
-			authenticate(request, response, filterChain, true);
+			authenticate(request, bufferedResponse, filterChain, true);
 		}
 		catch (Throwable ex) {
 			Throwable cause = ex;
@@ -207,11 +214,52 @@ public class PortalAuthenticationFilter extends BasePortalFilter {
 			if (!(cause instanceof SecurityException)) {
 				throw new RuntimeException(ex);
 			}
-
-			// 2nd authentication phase
-			authenticate(request, response, filterChain, false);
 		}
 
+		AuthenticationContext authenticationContext =
+			PortalAuthenticationManager.getInstance().
+				getAuthenticationContext();
+
+		// 2nd authentication cannot be executed on request with message-body,
+		// because content-body cannot be read twice from request InputStream.
+		// http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.3:
+		// 	The presence of a message-body in a request is signaled by
+		// 	the inclusion of a Content-Length or Transfer-Encoding header field
+		// 	in the request's message-headers
+		boolean hasRequestMessageBody = false;
+		if ((request.getHeader("Content-Length") != null) ||
+			(request.getHeader("Transfer-Encoding") != null)) {
+
+			hasRequestMessageBody = true;
+		}
+
+		// 2nd authentication phase
+		if (!hasRequestMessageBody && authenticationContext.isAccessDenied()) {
+			authenticationContext.setAccessDenied(false);
+
+			bufferedResponse = new ByteBufferServletResponse(response);
+
+			try {
+				authenticate(request, bufferedResponse, filterChain, false);
+			}
+			catch (Throwable ex) {
+				Throwable cause = ex;
+
+				while (!(cause instanceof SecurityException) &&
+					(cause.getCause() != null)) {
+
+					cause = cause.getCause();
+				}
+
+				if (!(cause instanceof SecurityException)) {
+					throw new RuntimeException(ex);
+				}
+			}
+		}
+
+		CacheResponseUtil.setHeaders(response, bufferedResponse.getHeaders());
+
+		ServletResponseUtil.write(response, bufferedResponse.getByteBuffer());
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

@@ -82,9 +82,6 @@ public class JSONServlet extends HttpServlet {
 				}
 			}
 		}
-		catch (SecurityException se) {
-			throw new ServletException(se);
-		}
 		catch (Exception e) {
 			_log.error(e, e);
 		}
