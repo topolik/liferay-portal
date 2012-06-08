@@ -229,6 +229,10 @@
 			<finder-column name="groupId" />
 			<finder-column name="parentFolderId" />
 		</finder>
+		<finder name="G_N" return-type="JournalFolder">
+			<finder-column name="groupId" />
+			<finder-column name="name" />
+		</finder>
 		<finder name="G_P_N" return-type="JournalFolder" unique="true">
 			<finder-column name="groupId" />
 			<finder-column name="parentFolderId" />

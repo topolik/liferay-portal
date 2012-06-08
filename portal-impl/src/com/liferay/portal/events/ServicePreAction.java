@@ -437,6 +437,17 @@ public class ServicePreAction extends Action {
 				request.setAttribute(WebKeys.REQUESTED_LAYOUT, layout);
 			}
 
+			String ppid = ParamUtil.getString(request, "p_p_id");
+
+			if (Validator.isNull(controlPanelCategory) &&
+				Validator.isNotNull(ppid) &&
+				(LiferayWindowState.isPopUp(request) ||
+				 LiferayWindowState.isExclusive(request))) {
+
+				controlPanelCategory =
+					_CONTROL_PANEL_CATEGORY_PORTLET_PREFIX + ppid;
+			}
+
 			boolean viewableGroup = LayoutPermissionUtil.contains(
 				permissionChecker, layout, controlPanelCategory, true,
 				ActionKeys.VIEW);

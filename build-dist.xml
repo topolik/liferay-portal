@@ -201,7 +201,6 @@
 		<echo file="app.server.${user.name}.properties">
 			app.server.type=tomcat
 
-			app.server.tomcat.dir=${app.server.parent.dir}/tomcat-6.0.35
 			app.server.tomcat.version=6.0.35
 			app.server.tomcat.zip.url=http://archive.apache.org/dist/tomcat/tomcat-6/v6.0.35/bin/apache-tomcat-6.0.35.zip
 		</echo>
@@ -1111,22 +1110,7 @@ release was successful.</echo>
 			</then>
 		</if>
 
-		<script classpathref="project.classpath" language="beanshell">
-			String appServerTomcatDir = project.getProperty("app.server.tomcat.dir");
-
-			int forwardSlashPos = appServerTomcatDir.lastIndexOf("/");
-			int backSlashPos = appServerTomcatDir.lastIndexOf("\\");
-
-			int pos = forwardSlashPos;
-
-			if ((backSlashPos != -1) &amp;&amp; (backSlashPos > forwardSlashPos)) {
-				pos = backSlashPos;
-			}
-
-			String appServerTomcatDirName = appServerTomcatDir.substring(pos + 1);
-
-			project.setProperty("app.server.tomcat.dir.name", appServerTomcatDirName);
-		</script>
+		<basename file="${app.server.tomcat.dir}" property="app.server.tomcat.dir.name" />
 
 		<unzip
 			dest="${app.server.parent.dir}"

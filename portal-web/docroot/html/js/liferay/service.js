@@ -1048,8 +1048,6 @@ Liferay.Service.register("Liferay.Service.Journal", "com.liferay.portlet.journal
 Liferay.Service.registerClass(
 	Liferay.Service.Journal, "JournalArticle",
 	{
-		getBeanIdentifier: true,
-		setBeanIdentifier: true,
 		addArticle: true,
 		copyArticle: true,
 		deleteArticle: true,
@@ -1074,15 +1072,14 @@ Liferay.Service.registerClass(
 		subscribe: true,
 		unsubscribe: true,
 		updateArticle: true,
-		updateContent: true
+		updateContent: true,
+		updateStatus: true
 	}
 );
 
 Liferay.Service.registerClass(
 	Liferay.Service.Journal, "JournalFeed",
 	{
-		getBeanIdentifier: true,
-		setBeanIdentifier: true,
 		addFeed: true,
 		deleteFeed: true,
 		getFeed: true,
@@ -1093,8 +1090,6 @@ Liferay.Service.registerClass(
 Liferay.Service.registerClass(
 	Liferay.Service.Journal, "JournalFolder",
 	{
-		getBeanIdentifier: true,
-		setBeanIdentifier: true,
 		addFolder: true,
 		deleteFolder: true,
 		getFolder: true,
@@ -1110,8 +1105,6 @@ Liferay.Service.registerClass(
 Liferay.Service.registerClass(
 	Liferay.Service.Journal, "JournalStructure",
 	{
-		getBeanIdentifier: true,
-		setBeanIdentifier: true,
 		addStructure: true,
 		copyStructure: true,
 		deleteStructure: true,
@@ -1126,8 +1119,6 @@ Liferay.Service.registerClass(
 Liferay.Service.registerClass(
 	Liferay.Service.Journal, "JournalTemplate",
 	{
-		getBeanIdentifier: true,
-		setBeanIdentifier: true,
 		addTemplate: true,
 		copyTemplate: true,
 		deleteTemplate: true,

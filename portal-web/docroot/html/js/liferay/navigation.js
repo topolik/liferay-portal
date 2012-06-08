@@ -22,7 +22,20 @@ AUI.add(
 		var Navigation = A.Component.create(
 			{
 				ATTRS: {
+					hasAddLayoutPermission: {
+						value: false
+					},
+
 					hasPermission: {
+						value: false
+					},
+
+					isAddable: {
+						getter: function(value) {
+							var instance = this;
+
+							return instance.get('hasAddLayoutPermission') && instance.get('navBlock').hasClass('modify-pages');
+						},
 						value: false
 					},
 
@@ -209,14 +222,14 @@ AUI.add(
 					_makeAddable: function() {
 						var instance = this;
 
-						if (instance.get('isModifiable')) {
+						if (instance.get('isAddable')) {
 							var prototypeMenuNode = A.one('#layoutPrototypeTemplate');
 
 							if (prototypeMenuNode) {
 								instance._prototypeMenuTemplate = prototypeMenuNode.html();
 							}
 
-							if (instance.get('hasPermission')) {
+							if (instance.get('hasAddLayoutPermission')) {
 								var addPageButton = A.one('#addPage');
 
 								if (addPageButton) {
