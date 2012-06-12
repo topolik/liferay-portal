@@ -138,6 +138,11 @@ public class PortalAuthenticationFilter extends BasePortalFilter {
 					httpServletRequest,
 					String.valueOf(authenticationResult.getUserId()));
 			}
+
+			AuthenticationContext authContext =
+				portalAuthenticationManager.getAuthenticationContext();
+
+			authContext.setAuthenticationResult(authenticationResult);
 		}
 
 		// we don't need to continue if optional authentication didn't

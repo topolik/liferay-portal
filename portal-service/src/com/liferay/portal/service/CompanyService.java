@@ -20,6 +20,8 @@ import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.security.MethodSecurity;
+import com.liferay.portal.security.RemoteMethodAccessType;
 
 /**
  * The interface for the company remote service.
@@ -104,6 +106,7 @@ public interface CompanyService extends BaseService {
 	* @throws SystemException if a system exception occurred
 	*/
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	@MethodSecurity(remoteMethodAccessType = RemoteMethodAccessType.AUTHENTICATED)
 	public com.liferay.portal.model.Company getCompanyById(long companyId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;

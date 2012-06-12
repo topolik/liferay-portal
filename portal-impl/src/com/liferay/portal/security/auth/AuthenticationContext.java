@@ -30,6 +30,10 @@ public class AuthenticationContext {
 		return _authenticationPhase;
 	}
 
+	public AuthenticationResult getAuthenticationResult() {
+		return _authenticationResult;
+	}
+
 	public HttpServletRequest getHttpServletRequest() {
 		return _httpServletRequest;
 	}
@@ -58,6 +62,12 @@ public class AuthenticationContext {
 		_authenticationPhase = authenticationPhase;
 	}
 
+	public void setAuthenticationResult(
+		AuthenticationResult authenticationResult) {
+
+		this._authenticationResult = authenticationResult;
+	}
+
 	public void setRequest(HttpServletRequest request) {
 		_httpServletRequest = request;
 	}
@@ -69,6 +79,7 @@ public class AuthenticationContext {
 	private boolean _accessDenied;
 	private AuthenticationConfig _authenticationConfig;
 	private AuthenticationPhase _authenticationPhase;
+	private AuthenticationResult _authenticationResult;
 	private HttpServletRequest _httpServletRequest;
 	private HttpServletResponse _httpServletResponse;
 

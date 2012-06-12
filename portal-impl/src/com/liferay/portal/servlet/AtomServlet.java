@@ -21,10 +21,14 @@ import com.liferay.portal.kernel.atom.AtomCollectionAdapterRegistryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.PortalAuthenticationManager;
+import com.liferay.portal.security.auth.AuthenticationContext;
+import com.liferay.portal.security.auth.AuthenticationResult;
 import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
+import com.liferay.portal.service.UserLocalServiceUtil;
 
 import java.util.List;
 
@@ -58,28 +62,49 @@ public class AtomServlet extends AbderaServlet {
 		return atomProvider;
 	}
 
+	/**
+	 * Backward compatibility with SecureFilter for versions <= 6.1
+	 */
+	@Deprecated
+	protected void resolveUser(HttpServletRequest request) throws Exception {
+		UserResolver userResolver = new UserResolver(request);
+
+		CompanyThreadLocal.setCompanyId(userResolver.getCompanyId());
+
+		User user = userResolver.getUser();
+
+		if (user != null) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("User " + user.getUserId());
+			}
+
+			PermissionChecker permissionChecker =
+				PermissionCheckerFactoryUtil.create(user);
+
+			PermissionThreadLocal.setPermissionChecker(permissionChecker);
+
+			AtomUtil.saveUserInRequest(request, user);
+		}
+	}
+
 	@Override
 	protected void service(
 			HttpServletRequest request, HttpServletResponse response)
 		throws ServletException {
 
+		AuthenticationContext authCtx = PortalAuthenticationManager.
+			getInstance().getAuthenticationContext();
+
 		try {
-			UserResolver userResolver = new UserResolver(request);
+			if (authCtx == null) {
+				resolveUser(request);
+			}
+			else {
+				AuthenticationResult authResult =
+					authCtx.getAuthenticationResult();
 
-			CompanyThreadLocal.setCompanyId(userResolver.getCompanyId());
-
-			User user = userResolver.getUser();
-
-			if (user != null) {
-				if (_log.isDebugEnabled()) {
-					_log.debug("User " + user.getUserId());
-				}
-
-				PermissionChecker permissionChecker =
-					PermissionCheckerFactoryUtil.create(user);
-
-				PermissionThreadLocal.setPermissionChecker(permissionChecker);
-
+				long userId = authResult.getUserId();
+				User user = UserLocalServiceUtil.getUser(userId);
 				AtomUtil.saveUserInRequest(request, user);
 			}
 
