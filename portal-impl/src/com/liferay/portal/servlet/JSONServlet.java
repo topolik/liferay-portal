@@ -18,14 +18,8 @@ import com.liferay.portal.action.JSONServiceAction;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.PluginContextListener;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.model.User;
-import com.liferay.portal.security.auth.PrincipalThreadLocal;
+import com.liferay.portal.security.RemoteAccessTypeThreadLocal;
 import com.liferay.portal.security.pacl.PACLClassLoaderUtil;
-import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
-import com.liferay.portal.security.permission.PermissionThreadLocal;
-import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.struts.JSONAction;
 
 import java.io.IOException;
@@ -59,7 +53,7 @@ public class JSONServlet extends HttpServlet {
 		throws IOException, ServletException {
 
 		try {
-			resolveRemoteUser(request);
+			RemoteAccessTypeThreadLocal.setRemoteAccess(true);
 
 			if (_pluginClassLoader == null) {
 				_jsonAction.execute(null, null, request, response);
@@ -80,6 +74,9 @@ public class JSONServlet extends HttpServlet {
 				}
 			}
 		}
+		catch (SecurityException se) {
+			throw new ServletException(se);
+		}
 		catch (Exception e) {
 			_log.error(e, e);
 		}
@@ -91,29 +88,6 @@ public class JSONServlet extends HttpServlet {
 		jsonAction.setServletContext(servletContext);
 
 		return jsonAction;
-	}
-
-	protected void resolveRemoteUser(HttpServletRequest request)
-		throws Exception {
-
-		String remoteUser = request.getRemoteUser();
-
-		if (_log.isDebugEnabled()) {
-			_log.debug("Remote user " + remoteUser);
-		}
-
-		if (remoteUser != null) {
-			PrincipalThreadLocal.setName(remoteUser);
-
-			long userId = GetterUtil.getLong(remoteUser);
-
-			User user = UserLocalServiceUtil.getUserById(userId);
-
-			PermissionChecker permissionChecker =
-				PermissionCheckerFactoryUtil.create(user);
-
-			PermissionThreadLocal.setPermissionChecker(permissionChecker);
-		}
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(JSONServlet.class);

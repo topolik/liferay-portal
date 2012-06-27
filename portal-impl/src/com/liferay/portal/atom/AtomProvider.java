@@ -96,23 +96,18 @@ public class AtomProvider extends AbstractWorkspaceProvider {
 
 		RegexTargetResolver targetResolver = new RegexTargetResolver();
 
-		for (String base : _BASES) {
+		targetResolver.setPattern(_SERVICE_PATTERN, TargetType.TYPE_SERVICE);
 
-			targetResolver.setPattern(
-				base + "?(\\?[^#]*)?", TargetType.TYPE_SERVICE);
+		targetResolver.setPattern(
+			_COLLECTION_PATTERN, TargetType.TYPE_COLLECTION, "collection");
 
-			targetResolver.setPattern(
-				base + "/([^/#?;]+)(\\?[^#]*)?", TargetType.TYPE_COLLECTION,
-				"collection");
+		targetResolver.setPattern(
+			_COLLECTION_ENTRY_PATTERN, TargetType.TYPE_ENTRY, "collection",
+			"entry");
 
-			targetResolver.setPattern(
-				base + "/([^/#?]+)/([^/#?:]+)(\\?[^#]*)?",
-				TargetType.TYPE_ENTRY, "collection", "entry");
-
-			targetResolver.setPattern(
-				base + "/([^/#?]+)/([^/#?]+):media(\\?[^#]*)?",
-				TargetType.TYPE_MEDIA, "collection", "media");
-		}
+		targetResolver.setPattern(
+			_COLLECTION_MEDIA_PATTERN, TargetType.TYPE_MEDIA, "collection",
+			"media");
 
 		setTargetResolver(targetResolver);
 	}
@@ -125,7 +120,11 @@ public class AtomProvider extends AbstractWorkspaceProvider {
 		addWorkspace(_workspace);
 	}
 
-	private static final String[] _BASES = {"/api/secure/atom", "/api/atom"};
+	private static final String _BASE = "/api/atom";
+	private static final String _COLLECTION_ENTRY_PATTERN = _BASE + "/([^/#?]+)/([^/#?:]+)(\\?[^#]*)?";
+	private static final String _COLLECTION_MEDIA_PATTERN = _BASE + "/([^/#?]+)/([^/#?]+):media(\\?[^#]*)?";
+	private static final String _COLLECTION_PATTERN = _BASE + "/([^/#?;]+)(\\?[^#]*)?";
+	private static final String _SERVICE_PATTERN = _BASE + "?(\\?[^#]*)?";
 
 	private SimpleWorkspaceInfo _workspace;
 
