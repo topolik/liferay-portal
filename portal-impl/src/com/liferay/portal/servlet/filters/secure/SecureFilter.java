@@ -271,18 +271,23 @@ public class SecureFilter extends BasePortalFilter {
 			}
 
 			if (request != null) {
+				boolean remoteAccess =
+					RemoteAccessTypeThreadLocal.isRemoteAccess();
+
 				try {
 					RemoteAccessTypeThreadLocal.setRemoteAccess(true);
 
 					processFilter(getClass(), request, response, filterChain);
 				}
-
 				catch(SecurityException se) {
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
 					if (_log.isErrorEnabled()) {
 						_log.error("Access denied: ", se);
 					}
+				}
+				finally {
+					RemoteAccessTypeThreadLocal.setRemoteAccess(remoteAccess);
 				}
 			}
 		}
