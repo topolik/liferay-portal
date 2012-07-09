@@ -86,8 +86,8 @@ public class SecureFilter extends BasePortalFilter {
 				PropsUtil.get(propertyPrefix + "https.required"));
 		}
 
-		for (int i = 0; i < hostsAllowedArray.length; i++) {
-			_hostsAllowed.add(hostsAllowedArray[i]);
+		for (String element : hostsAllowedArray) {
+			_hostsAllowed.add(element);
 		}
 	}
 
