@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutConstants;
+import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.PortletApp;
 import com.liferay.portal.model.PortletURLListener;
@@ -256,7 +257,15 @@ public abstract class PortletResponseImpl implements LiferayPortletResponse {
 						LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
 							linkToLayoutUuid, layout.getGroupId());
 
-					plid = linkedLayout.getPlid();
+					LayoutTypePortlet linkedLayoutTypePortlet =
+						(LayoutTypePortlet)linkedLayout.getLayoutType();
+
+					if (!getPortlet().getPortletId().equals(portletName) ||
+						linkedLayoutTypePortlet.hasPortletId(portletName) ||
+						lifecycle.equals(PortletRequest.RENDER_PHASE)) {
+
+						plid = linkedLayout.getPlid();
+					}
 				}
 				catch (PortalException pe) {
 				}
