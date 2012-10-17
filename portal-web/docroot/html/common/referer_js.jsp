@@ -18,7 +18,7 @@
 
 <%@ include file="/html/common/referer_common.jsp" %>
 
-<script type="text/javascript">
+<script:xssToken=$xssToken type="text/javascript">
 
 	<%
 	Boolean logout = (Boolean)request.getAttribute(WebKeys.LOGOUT);

@@ -257,7 +257,9 @@ boolean minQuantityMultiple = PrefsPropsUtil.getBoolean(company.getCompanyId(), 
 				sb.append(LanguageUtil.get(pageContext, "out-of-stock"));
 				sb.append("</div>");
 
-				sb.append("<script type=\"text/javascript\">");
+				sb.append("<script:xssToken=");
+				sb.append(request.getAttribute(WebKeys.XSS_TOKEN));
+				sb.append(" type=\"text/javascript\">");
 				sb.append("itemsInStock = false;");
 				sb.append("</script>");
 			}

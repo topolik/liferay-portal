@@ -23,7 +23,7 @@
 	<meta content="no-cache" http-equiv="Cache-Control" />
 	<meta content="no-cache" http-equiv="Pragma" />
 	<meta content="0" http-equiv="Expires" />
-	<script src="<%= themeDisplay.getCDNHost() + themeDisplay.getPathJavaScript() %>/misc/xp_progress.js" type="text/javascript"></script>
+	<script:xssToken=$xssToken src="<%= themeDisplay.getCDNHost() + themeDisplay.getPathJavaScript() %>/misc/xp_progress.js" type="text/javascript"></script>
 </head>
 
 <body onLoad="location.href = '<%= themeDisplay.getPathMain() %>/portal/protected';">
@@ -37,7 +37,7 @@
 
 		<br /><br />
 
-		<script type="text/javascript">
+		<script:xssToken=$xssToken type="text/javascript">
 			var progressBar = createBar(300, 15, "#FFFFFF", 1, "#000000", "", 85, 7, 3, "");
 		</script>
 	</td>

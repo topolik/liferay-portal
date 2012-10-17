@@ -31,7 +31,7 @@ String movie = ParamUtil.getString(request, "movie");
 	<title><%= HtmlUtil.escape(title) %></title>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 
-	<script src="<%= themeDisplay.getCDNHost() + themeDisplay.getPathJavaScript() %>/misc/swfobject.js" type="text/javascript"></script>
+	<script:xssToken=$xssToken src="<%= themeDisplay.getCDNHost() + themeDisplay.getPathJavaScript() %>/misc/swfobject.js" type="text/javascript"></script>
 </head>
 
 <body leftmargin="0" marginheight="0" marginwidth="0" rightmargin="0" topmargin="0">
@@ -41,7 +41,7 @@ String movie = ParamUtil.getString(request, "movie");
 <c:if test="<%= Validator.isNotNull(movie) %>">
 	<div id="flashMovie"></div>
 
-	<script type="text/javascript">
+	<script:xssToken=$xssToken type="text/javascript">
 		var so = new SWFObject("<%= HtmlUtil.escapeJS(movie) %>", "flashMovie", "<%= HtmlUtil.escapeJS(width) %>", "<%= HtmlUtil.escapeJS(height) %>", "6", "#FFFFFF");
 
 		so.write("flashMovie");

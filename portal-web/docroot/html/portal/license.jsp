@@ -415,7 +415,7 @@ dateFormatDateTime.setTimeZone(timeZone);
 			*ports are not initialized until the server has processed a request.
 		</div>
 
-		<script type="text/javascript">
+		<script:xssToken=$xssToken type="text/javascript">
 			Liferay.provide(
 				window,
 				'sendClusterRequest',

@@ -159,4 +159,6 @@ public interface WebKeys {
 
 	public static final String XUGGLER_INSTALL_STATUS = "XUGGLER_INSTALL_STATUS";
 
+	public static final String XSS_TOKEN = "XSS_TOKEN";
+
 }

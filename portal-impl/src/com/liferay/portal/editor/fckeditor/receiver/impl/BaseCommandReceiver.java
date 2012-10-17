@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UniqueList;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Organization;
 import com.liferay.portal.service.GroupLocalServiceUtil;
@@ -242,13 +243,13 @@ public abstract class BaseCommandReceiver implements CommandReceiver {
 				}
 			}
 
-			_writeUploadResponse(returnValue, response);
+			_writeUploadResponse(returnValue, request, response);
 		}
 		finally {
 			StreamUtil.cleanUp(inputStream);
 		}
 
-		_writeUploadResponse(returnValue, response);
+		_writeUploadResponse(returnValue, request, response);
 	}
 
 	public void getFolders(
@@ -463,14 +464,17 @@ public abstract class BaseCommandReceiver implements CommandReceiver {
 	}
 
 	private void _writeUploadResponse(
-		String returnValue, HttpServletResponse response) {
+		String returnValue, HttpServletRequest request,
+		HttpServletResponse response) {
 
 		try {
 			StringBundler sb = new StringBundler(7);
 
 			String newName = StringPool.BLANK;
 
-			sb.append("<script type=\"text/javascript\">");
+			sb.append("<script:xssToken=");
+			sb.append(request.getAttribute(WebKeys.XSS_TOKEN));
+			sb.append(" type=\"text/javascript\">");
 			sb.append("window.parent.frames['frmUpload'].OnUploadCompleted(");
 			sb.append(returnValue);
 			sb.append(",'");

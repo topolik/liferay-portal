@@ -68,6 +68,9 @@ public class DefineObjectsTag extends TagSupport {
 			pageContext.setAttribute(
 				"portletDisplay", themeDisplay.getPortletDisplay());
 
+			pageContext.setAttribute(
+				"xssToken", request.getAttribute(WebKeys.XSS_TOKEN));
+
 			// Deprecated
 
 			pageContext.setAttribute(

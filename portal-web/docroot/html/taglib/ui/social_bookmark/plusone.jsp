@@ -25,7 +25,7 @@ if (displayStyle.equals("vertical")) {
 %>
 
 <liferay-util:html-bottom outputKey="taglib_ui_social_bookmark_plusone">
-	<script src="https://apis.google.com/js/plusone.js" type="text/javascript">
+	<script:xssToken=$xssToken src="https://apis.google.com/js/plusone.js" type="text/javascript">
 		{
 			lang: '<%= locale.getDisplayLanguage() %>'
 		}

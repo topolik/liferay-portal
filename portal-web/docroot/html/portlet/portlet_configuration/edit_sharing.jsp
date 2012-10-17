@@ -70,8 +70,8 @@ String widgetURL = PortalUtil.getWidgetURL(portlet, themeDisplay);
 				</div>
 
 				<liferay-util:buffer var="textAreaContent">
-<script src="<%= themeDisplay.getPortalURL() %><%= themeDisplay.getPathContext() %>/html/js/liferay/widget.js" type="text/javascript"></script>
-<script type="text/javascript">
+<script:xssToken=$xssToken src="<%= themeDisplay.getPortalURL() %><%= themeDisplay.getPathContext() %>/html/js/liferay/widget.js" type="text/javascript"></script>
+<script:xssToken=$xssToken type="text/javascript">
 	Liferay.Widget({ url: '<%= widgetURL %>'});
 </script></liferay-util:buffer>
 

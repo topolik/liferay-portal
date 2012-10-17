@@ -15,6 +15,7 @@
 package com.liferay.taglib.portlet;
 
 import com.liferay.portal.kernel.util.JavaConstants;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PortalUtil;
 
 import javax.portlet.PortletConfig;
@@ -117,6 +118,10 @@ public class DefineObjectsTag extends TagSupport {
 
 			pageContext.setAttribute(portletResponseAttrName, portletResponse);
 		}
+
+		pageContext.setAttribute(
+			"xssToken", request.getAttribute(WebKeys.XSS_TOKEN));
+
 
 		return SKIP_BODY;
 	}

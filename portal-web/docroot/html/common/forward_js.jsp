@@ -16,6 +16,6 @@
 
 <%@ include file="/html/common/forward_common.jsp" %>
 
-<script type="text/javascript">
+<script:xssToken=$xssToken type="text/javascript">
 	location.href = '<%= HtmlUtil.escapeJS(forwardURL) %>';
 </script>

@@ -14,7 +14,7 @@
  */
 --%>
 
-<script type="text/javascript">
+<script:xssToken=${pageScope['xssToken']} type="text/javascript">
 	// <![CDATA[
 		var Liferay = {
 			Browser: {
@@ -318,10 +318,10 @@
 	<c:when test="<%= themeDisplay.isThemeJsFastLoad() %>">
 		<c:choose>
 			<c:when test="<%= themeDisplay.isThemeJsBarebone() %>">
-				<script src="<%= HtmlUtil.escape(PortalUtil.getStaticResourceURL(request, themeDisplay.getCDNDynamicResourcesHost() + themeDisplay.getPathJavaScript() + "/barebone.jsp", "minifierBundleId=javascript.barebone.files", javaScriptLastModified)) %>" type="text/javascript"></script>
+				<script:xssToken=${pageScope['xssToken']} src="<%= HtmlUtil.escape(PortalUtil.getStaticResourceURL(request, themeDisplay.getCDNDynamicResourcesHost() + themeDisplay.getPathJavaScript() + "/barebone.jsp", "minifierBundleId=javascript.barebone.files", javaScriptLastModified)) %>" type="text/javascript"></script>
 			</c:when>
 			<c:otherwise>
-				<script src="<%= HtmlUtil.escape(PortalUtil.getStaticResourceURL(request, themeDisplay.getCDNDynamicResourcesHost() + themeDisplay.getPathJavaScript() + "/everything.jsp", "minifierBundleId=javascript.everything.files", javaScriptLastModified)) %>" type="text/javascript"></script>
+				<script:xssToken=${pageScope['xssToken']} src="<%= HtmlUtil.escape(PortalUtil.getStaticResourceURL(request, themeDisplay.getCDNDynamicResourcesHost() + themeDisplay.getPathJavaScript() + "/everything.jsp", "minifierBundleId=javascript.everything.files", javaScriptLastModified)) %>" type="text/javascript"></script>
 			</c:otherwise>
 		</c:choose>
 	</c:when>
@@ -340,7 +340,7 @@
 		for (String javaScriptFile : javaScriptFiles) {
 		%>
 
-			<script src="<%= themeDisplay.getCDNHost() + themeDisplay.getPathJavaScript() %>/<%= javaScriptFile %>?t=<%= javaScriptLastModified %>" type="text/javascript"></script>
+			<script:xssToken=${pageScope['xssToken']} src="<%= themeDisplay.getCDNHost() + themeDisplay.getPathJavaScript() %>/<%= javaScriptFile %>?t=<%= javaScriptLastModified %>" type="text/javascript"></script>
 
 		<%
 		}
@@ -349,7 +349,7 @@
 	</c:otherwise>
 </c:choose>
 
-<script type="text/javascript">
+<script:xssToken=${pageScope['xssToken']} type="text/javascript">
 	// <![CDATA[
 		<c:if test="<%= (layoutTypePortlet != null) %>">
 
@@ -409,7 +409,7 @@ for (String analyticsType : PropsValues.SITES_FORM_ANALYTICS) {
 			%>
 
 			<c:if test="<%= Validator.isNotNull(googleAnalyticsId) %>">
-				<script type="text/javascript">
+				<script:xssToken=${pageScope['xssToken']} type="text/javascript">
 					var _gaq = _gaq || [];
 
 					_gaq.push(['_setAccount', '<%= googleAnalyticsId %>']);

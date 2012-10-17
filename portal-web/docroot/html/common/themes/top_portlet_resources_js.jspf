@@ -43,7 +43,7 @@
 				portletResourceStaticURLs.add(headerPortalJavaScript);
 	%>
 
-				<script src="<%= HtmlUtil.escape(headerPortalJavaScript) %>" type="text/javascript"></script>
+				<script:xssToken=$xssToken src="<%= HtmlUtil.escape(headerPortalJavaScript) %>" type="text/javascript"></script>
 
 	<%
 			}
@@ -68,7 +68,7 @@
 				portletResourceStaticURLs.add(headerPortletJavaScript);
 	%>
 
-				<script src="<%= HtmlUtil.escape(headerPortletJavaScript) %>" type="text/javascript"></script>
+				<script:xssToken=$xssToken src="<%= HtmlUtil.escape(headerPortletJavaScript) %>" type="text/javascript"></script>
 
 	<%
 			}

@@ -61,7 +61,7 @@ StringBundler pageBottomSB = OutputTag.getData(request, WebKeys.PAGE_BOTTOM);
 
 <%-- Theme JavaScript --%>
 
-<script src="<%= HtmlUtil.escape(PortalUtil.getStaticResourceURL(request, themeDisplay.getPathThemeJavaScript() + "/main.js")) %>" type="text/javascript"></script>
+<script:xssToken=$xssToken src="<%= HtmlUtil.escape(PortalUtil.getStaticResourceURL(request, themeDisplay.getPathThemeJavaScript() + "/main.js")) %>" type="text/javascript"></script>
 
 <c:if test="<%= layout != null %>">
 
@@ -75,7 +75,7 @@ StringBundler pageBottomSB = OutputTag.getData(request, WebKeys.PAGE_BOTTOM);
 	UnicodeProperties layoutTypeSettings = layout.getTypeSettingsProperties();
 	%>
 
-	<script type="text/javascript">
+	<script:xssToken=$xssToken type="text/javascript">
 		// <![CDATA[
 			<%= GetterUtil.getString(layoutSetSettings.getProperty("javascript")) %>
 

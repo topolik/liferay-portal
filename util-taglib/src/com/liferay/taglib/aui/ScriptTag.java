@@ -199,7 +199,9 @@ public class ScriptTag extends BaseScriptTag {
 	protected void processEndTag(ScriptData scriptData) throws Exception {
 		JspWriter jspWriter = pageContext.getOut();
 
-		jspWriter.write("<script type=\"text/javascript\">\n// <![CDATA[\n");
+		String xssToken = (String) pageContext.getRequest().getAttribute(WebKeys.XSS_TOKEN);
+
+		jspWriter.write("<script:xssToken="+xssToken+" type=\"text/javascript\">\n// <![CDATA[\n");
 
 		StringBundler rawSB = scriptData.getRawSB();
 
