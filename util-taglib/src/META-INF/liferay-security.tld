@@ -103,4 +103,14 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
+    <tag>
+       <name>xss</name>
+        <tag-class>com.liferay.taglib.security.XSSTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
 </taglib>

@@ -417,7 +417,11 @@
 			<param-value>xml-rpc.servlet.</param-value>
 		</init-param>
 	</filter>
-	<filter-mapping>
+    <filter>
+        <filter-name>XSS Filter</filter-name>
+        <filter-class>com.liferay.portal.servlet.filters.xss.XSSFilter</filter-class>
+    </filter>
+    <filter-mapping>
 		<filter-name>Ignore Filter - FTL</filter-name>
 		<url-pattern>*.ftl</url-pattern>
 	</filter-mapping>
@@ -1076,4 +1080,28 @@
 		<dispatcher>INCLUDE</dispatcher>
 		<dispatcher>REQUEST</dispatcher>
 	</filter-mapping>
+    <filter-mapping>
+        <filter-name>XSS Filter</filter-name>
+        <url-pattern>/c/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>XSS Filter</filter-name>
+        <url-pattern>/group/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>XSS Filter</filter-name>
+        <url-pattern>/user/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>XSS Filter</filter-name>
+        <url-pattern>/web/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
 </web-app>

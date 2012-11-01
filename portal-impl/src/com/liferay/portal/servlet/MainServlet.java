@@ -1171,6 +1171,13 @@ public class MainServlet extends ActionServlet {
 			return true;
 		}
 
+		if(request.getParameter("csp") != null){
+			String cspHeaderValue = "default-src 'none'; script-src http://localhost:8080; style-src http://localhost:8080; img-src http://localhost:8080; connect-src http://localhost:8080; frame-src 'self'";
+			response.addHeader("Content-Security-Policy", cspHeaderValue);
+			response.addHeader("X-Content-Security-Policy", cspHeaderValue);
+			response.addHeader("X-WebKit-CSP", cspHeaderValue);
+		}
+
 		if (_HTTP_HEADER_VERSION_VERBOSITY_DEFAULT) {
 		}
 		else if (_HTTP_HEADER_VERSION_VERBOSITY_PARTIAL) {
