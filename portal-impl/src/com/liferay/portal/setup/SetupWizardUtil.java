@@ -133,8 +133,10 @@ public class SetupWizardUtil {
 	public static void updateLanguage(
 		HttpServletRequest request, HttpServletResponse response) {
 
+		String defaultLangaugeId = LocaleUtil.getDefault().toString();
+
 		String languageId = ParamUtil.getString(
-			request, "companyLocale", PropsValues.COMPANY_DEFAULT_LOCALE);
+			request, "companyLocale", defaultLangaugeId);
 
 		Locale locale = LocaleUtil.fromLanguageId(languageId);
 
@@ -474,8 +476,10 @@ public class SetupWizardUtil {
 			AccountLocalServiceUtil.updateAccount(account);
 		}
 
+		String defaultLangaugeId = LocaleUtil.getDefault().toString();
+
 		String languageId = ParamUtil.getString(
-			request, "companyLocale", PropsValues.COMPANY_DEFAULT_LOCALE);
+			request, "companyLocale", defaultLangaugeId);
 
 		User defaultUser = company.getDefaultUser();
 
