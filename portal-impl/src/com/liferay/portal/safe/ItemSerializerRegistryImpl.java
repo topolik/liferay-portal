@@ -23,7 +23,8 @@ import com.liferay.portal.kernel.safe.serializer.NoSuchItemSerializerException;
 import com.liferay.portal.kernel.safe.serializer.SerializedItem;
 
 /**
- * Dummy implementation throwing UnsupportedOperationException
+ * Provides a dummy Item Serializer Registry that throws {@link
+ * UnsupportedOperationExceptions}s.
  *
  * @author Tomas Polesovsky
  */

@@ -15,7 +15,7 @@
 package com.liferay.portal.kernel.safe.model;
 
 /**
- * Implements simple common methods of {@link Item} interface.
+ * Implements the methods of the {@link Item} interface.
  *
  * @author Tomas Polesovsky
  */

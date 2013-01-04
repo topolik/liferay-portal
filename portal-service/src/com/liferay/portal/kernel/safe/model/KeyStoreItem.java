@@ -17,7 +17,7 @@ package com.liferay.portal.kernel.safe.model;
 import java.security.KeyStore;
 
 /**
- * Holds KeyStore instance to be saved in portal safe.
+ * Retrieves and holds the KeyStore instance to be saved in portal safe.
  *
  * @author Tomas Polesovsky
  */

@@ -40,8 +40,8 @@ public interface PortalSafe {
 	 *
 	 * @param  companyId the primary key of the company
 	 * @param  groupId the primary key of the group
-	 * @return names of all items in the safe associated with the company and
-	 *         group. These names can be used for loading and removing items
+	 * @return the names of all items in the safe associated with the company
+	 *         and group. These names can be used for loading and removing items
 	 *         from the safe.
 	 * @throws PortalSafeException if a PortalSafeException occurred. The
 	 *         exception may be a {@link
