@@ -428,6 +428,15 @@ public class LayoutServiceWrapper implements LayoutService,
 		return _layoutService.getLayouts(groupId, privateLayout, parentLayoutId);
 	}
 
+	public java.util.List<com.liferay.portal.model.Layout> getLayouts(
+		long groupId, boolean privateLayout, long parentLayoutId,
+		boolean incomplete, int start, int end)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _layoutService.getLayouts(groupId, privateLayout,
+			parentLayoutId, incomplete, start, end);
+	}
+
 	/**
 	* Imports the layouts from the byte array.
 	*

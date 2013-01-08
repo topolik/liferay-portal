@@ -218,6 +218,10 @@ public abstract class BaseDB implements DB {
 		return _SUPPORTS_INLINE_DISTINCT;
 	}
 
+	public boolean isSupportsQueryingAfterException() {
+		return _SUPPORTS_QUERYING_AFTER_EXCEPTION;
+	}
+
 	public boolean isSupportsScrollableResults() {
 		return _SUPPORTS_SCROLLABLE_RESULTS;
 	}
@@ -1018,6 +1022,8 @@ public abstract class BaseDB implements DB {
 	private static final boolean _SUPPORTS_DATE_MILLISECONDS = true;
 
 	private static final boolean _SUPPORTS_INLINE_DISTINCT = true;
+
+	private static final boolean _SUPPORTS_QUERYING_AFTER_EXCEPTION = true;
 
 	private static final boolean _SUPPORTS_SCROLLABLE_RESULTS = true;
 

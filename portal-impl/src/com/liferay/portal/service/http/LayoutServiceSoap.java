@@ -392,6 +392,22 @@ public class LayoutServiceSoap {
 		}
 	}
 
+	public static com.liferay.portal.model.LayoutSoap[] getLayouts(
+		long groupId, boolean privateLayout, long parentLayoutId,
+		boolean incomplete, int start, int end) throws RemoteException {
+		try {
+			java.util.List<com.liferay.portal.model.Layout> returnValue = LayoutServiceUtil.getLayouts(groupId,
+					privateLayout, parentLayoutId, incomplete, start, end);
+
+			return com.liferay.portal.model.LayoutSoap.toSoapModels(returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	/**
 	* Sets the layouts for the group, replacing and prioritizing all layouts of
 	* the parent layout.

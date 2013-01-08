@@ -921,6 +921,17 @@ public class LayoutLocalServiceUtil {
 	}
 
 	/**
+	* Returns all the layouts without resource permissions
+	*
+	* @return all the layouts without resource permissions
+	* @throws SystemException if a system exception occurred
+	*/
+	public static java.util.List<com.liferay.portal.model.Layout> getNoPermissionLayouts(
+		long roleId) throws com.liferay.portal.kernel.exception.SystemException {
+		return getService().getNoPermissionLayouts(roleId);
+	}
+
+	/**
 	* Returns all the layouts whose friendly URLs are <code>null</code>
 	*
 	* @return all the layouts whose friendly URLs are <code>null</code>

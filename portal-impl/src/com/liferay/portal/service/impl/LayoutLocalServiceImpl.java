@@ -1237,6 +1237,18 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Returns all the layouts without resource permissions
+	 *
+	 * @return all the layouts without resource permissions
+	 * @throws SystemException if a system exception occurred
+	 */
+	public List<Layout> getNoPermissionLayouts(long roleId)
+		throws SystemException {
+
+		return layoutFinder.findByNoPermissions(roleId);
+	}
+
+	/**
 	 * Returns all the layouts whose friendly URLs are <code>null</code>
 	 *
 	 * @return all the layouts whose friendly URLs are <code>null</code>

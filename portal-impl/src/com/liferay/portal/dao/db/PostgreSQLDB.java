@@ -94,6 +94,11 @@ public class PostgreSQLDB extends BaseDB {
 		return indexes;
 	}
 
+	@Override
+	public boolean isSupportsQueryingAfterException() {
+		return _SUPPORTS_QUERYING_AFTER_EXCEPTION;
+	}
+
 	protected PostgreSQLDB() {
 		super(TYPE_POSTGRESQL);
 	}
@@ -198,6 +203,8 @@ public class PostgreSQLDB extends BaseDB {
 		" bytea", " bool", " timestamp", " double precision", " integer",
 		" bigint", " text", " text", " varchar", "", "commit"
 	};
+
+	private static final boolean _SUPPORTS_QUERYING_AFTER_EXCEPTION = false;
 
 	private static PostgreSQLDB _instance = new PostgreSQLDB();
 

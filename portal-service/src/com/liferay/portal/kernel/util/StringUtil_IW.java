@@ -146,6 +146,10 @@ public class StringUtil_IW {
 		StringUtil.lowerCase(array);
 	}
 
+	public java.lang.String lowerCaseFirstLetter(java.lang.String s) {
+		return StringUtil.lowerCaseFirstLetter(s);
+	}
+
 	public boolean matches(java.lang.String s, java.lang.String pattern) {
 		return StringUtil.matches(s, pattern);
 	}

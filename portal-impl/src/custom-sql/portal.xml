@@ -172,17 +172,6 @@
 				)
 		]]>
 	</sql>
-	<sql id="com.liferay.portal.service.persistence.GroupFinder.findByNullFriendlyURL">
-		<![CDATA[
-			SELECT
-				{Group_.*}
-			FROM
-				Group_
-			WHERE
-				(Group_.type_ != 4 OR Group_.type_ IS NULL) AND
-				(friendlyURL = '' OR friendlyURL IS NULL OR friendlyURL = '/null')
-		]]>
-	</sql>
 	<sql id="com.liferay.portal.service.persistence.GroupFinder.findByNoLayouts">
 		<![CDATA[
 			SELECT
@@ -197,6 +186,17 @@
 				(Group_.type_ != 4) AND
 				(LayoutSet.privateLayout = ?) AND
 				(LayoutSet.pageCount = 0)
+		]]>
+	</sql>
+	<sql id="com.liferay.portal.service.persistence.GroupFinder.findByNullFriendlyURL">
+		<![CDATA[
+			SELECT
+				{Group_.*}
+			FROM
+				Group_
+			WHERE
+				(Group_.type_ != 4 OR Group_.type_ IS NULL) AND
+				(friendlyURL = '' OR friendlyURL IS NULL OR friendlyURL = '/null')
 		]]>
 	</sql>
 	<sql id="com.liferay.portal.service.persistence.GroupFinder.findBySystem">
@@ -418,6 +418,28 @@
 			WHERE
 				(Group_.liveGroupId = 0) AND
 				(Users_Groups.userId = ?)
+		]]>
+	</sql>
+	<sql id="com.liferay.portal.service.persistence.LayoutFinder.findByNoPermissions">
+		<![CDATA[
+			SELECT
+				{Layout.*}
+			FROM
+				Layout
+			WHERE
+				(plid NOT IN (
+					SELECT
+						Layout.plid
+					FROM
+						Layout
+					INNER JOIN
+						ResourcePermission ON
+							(ResourcePermission.companyId = Layout.companyId) AND
+							(ResourcePermission.name = Layout.name) AND
+							(ResourcePermission.scope = ?) AND
+							(resourcePermission.primKey = CAST_TEXT(Layout.plid)) AND
+							(ResourcePermission.roleId = ?)
+				))
 		]]>
 	</sql>
 	<sql id="com.liferay.portal.service.persistence.LayoutFinder.findByNullFriendlyURL">

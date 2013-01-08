@@ -108,6 +108,8 @@ public interface DB {
 
 	public boolean isSupportsInlineDistinct();
 
+	public boolean isSupportsQueryingAfterException();
+
 	public boolean isSupportsScrollableResults();
 
 	public boolean isSupportsStringCaseSensitiveQuery();

@@ -268,12 +268,14 @@ public class SampleSQLBuilder {
 		processTemplate(_tplBlogsEntry, context);
 	}
 
-	public void insertDDLRecord(DDLRecord ddlRecord, DDLRecordSet ddlRecordSet)
+	public void insertDDLRecord(
+			DDLRecord ddlRecord, DDLRecordSet ddlRecordSet, int ddlRecordCount)
 		throws Exception {
 
 		Map<String, Object> context = getContext();
 
 		put(context, "ddlRecord", ddlRecord);
+		put(context, "ddlRecordCount", ddlRecordCount);
 		put(context, "ddlRecordSet", ddlRecordSet);
 
 		processTemplate(_tplDDLRecord, context);
@@ -365,19 +367,15 @@ public class SampleSQLBuilder {
 	}
 
 	public void insertUser(
-			Contact contact, Group group, List<Long> groupIds,
-			List<Long> organizationIds, List<Layout> privateLayouts,
-			List<Layout> publicLayouts, List<Role> roleIds, User user)
+			Contact contact, List<Long> groupIds, List<Long> organizationIds,
+			List<Role> roleIds, User user)
 		throws Exception {
 
 		Map<String, Object> context = getContext();
 
 		put(context, "contact", contact);
-		put(context, "group", group);
 		put(context, "groupIds", groupIds);
 		put(context, "organizationIds", organizationIds);
-		put(context, "privateLayouts", privateLayouts);
-		put(context, "publicLayouts", publicLayouts);
 		put(context, "roleIds", roleIds);
 		put(context, "user", user);
 

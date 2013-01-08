@@ -298,7 +298,7 @@ public class SitesUtil {
 	}
 
 	public static void copyPortletPermissions(
-		Layout targetLayout, Layout sourceLayout)
+			Layout targetLayout, Layout sourceLayout)
 		throws Exception {
 
 		long companyId = targetLayout.getCompanyId();
@@ -893,6 +893,15 @@ public class SitesUtil {
 		doMergeLayoutPrototypeLayout(group, layout);
 	}
 
+	/**
+	 * @deprecated {@link #mergeLayoutPrototypeLayout(Group, Layout)}
+	 */
+	public static void mergeLayoutProtypeLayout(Group group, Layout layout)
+		throws Exception {
+
+		mergeLayoutPrototypeLayout(group, layout);
+	}
+
 	public static void mergeLayoutSetPrototypeLayouts(
 			Group group, LayoutSet layoutSet)
 		throws Exception {
@@ -1019,6 +1028,16 @@ public class SitesUtil {
 				LayoutLocalServiceVirtualLayoutsAdvice.class.getName(),
 				String.valueOf(layoutSet.getLayoutSetId()), owner, false);
 		}
+	}
+
+	/**
+	 * @deprecated {@link #mergeLayoutSetPrototypeLayouts(Group, LayoutSet)}
+	 */
+	public static void mergeLayoutSetProtypeLayouts(
+			Group group, LayoutSet layoutSet)
+		throws Exception {
+
+		mergeLayoutSetPrototypeLayouts(group, layoutSet);
 	}
 
 	public static void resetPrototype(Layout layout)
