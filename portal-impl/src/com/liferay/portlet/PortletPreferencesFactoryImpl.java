@@ -407,7 +407,7 @@ public class PortletPreferencesFactoryImpl
 		throws SystemException {
 
 		return getPortletSetup(
-			scopeGroupId, layout, portletId, defaultPreferences, false);
+			scopeGroupId, layout, portletId, defaultPreferences, true);
 	}
 
 	@Override
