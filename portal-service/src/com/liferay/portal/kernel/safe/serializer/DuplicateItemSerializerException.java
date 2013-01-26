@@ -15,9 +15,8 @@
 package com.liferay.portal.kernel.safe.serializer;
 
 /**
- * Thrown when {@link ItemSerializerRegistryUtil} tries to register a {@link
- * ItemSerializer} but registry already contains instance of the same or similar
- * serializer.
+ * Thrown when {@link ItemSerializerRegistryUtil} tries to register an {@link
+ * ItemSerializer} of a type that is already registered.
  *
  * @author Tomas Polesovsky
  */

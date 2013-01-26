@@ -17,7 +17,7 @@ package com.liferay.portal.kernel.safe.model;
 import com.liferay.portal.kernel.safe.PortalSafeException;
 
 /**
- * Thrown when portal safe is unable to find the item.
+ * Thrown when the portal safe is unable to find an item.
  *
  * @author Tomas Polesovsky
  */

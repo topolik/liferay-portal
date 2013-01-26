@@ -17,8 +17,9 @@ package com.liferay.portal.kernel.safe.serializer;
 import com.liferay.portal.kernel.safe.model.Item;
 
 /**
- * Stores {@link ItemSerializer}s and use them for storing and loading {@link
- * Item}s in their serialized form {@link SerializedItem}.
+ * Specifies the item serializer registry interface for handling {@link
+ * com.liferay.portal.kernel.safe.serializer.ItemSerializer} registration, and
+ * reading/writing serialized items.
  *
  * @author Tomas Polesovsky
  */
@@ -28,26 +29,27 @@ public interface ItemSerializerRegistry {
 	 * Removes the serializer from the registry.
 	 *
 	 * @param  serializer the serializer to be removed.
-	 * @return <code>true</code> if serializer was found in the registry and
-	 *         successfully removed, <code>false</code> otherwise
+	 * @return <code>true</code> if the serializer was found in the registry and
+	 *         successfully removed; <code>false</code> otherwise
 	 */
 	public boolean deregisterSerializer(ItemSerializer serializer);
 
 	/**
-	 * Tries to parse the serializedItem and create a new {@link Item}
-	 * descendant using one of registered serializers.
+	 * Reads the serialized item, parsing it, and creating a new {@link
+	 * com.liferay.portal.kernel.safe.model.Item} descendant using a registered
+	 * serializer.
 	 *
 	 * <p>
-	 * Implementation MUST make sure that returning {@link Item}'s common
-	 * attributes like companyId and groupId are initialized from the
-	 * serializedItem.
+	 * Implementation MUST make sure the returned item's common attributes, like
+	 * its company ID and group ID, are initialized from the the serialized
+	 * item.
 	 * </p>
 	 *
-	 * @param  serializedItem serialized form of item to be read
-	 * @return deserialized instance of the serializedItem
-	 * @throws ItemSerializerException if the deserialization process fails
-	 * @throws NoSuchItemSerializerException if no suitable serializer is found
-	 *         to parse the serializedItem
+	 * @param  serializedItem the serialized form of the item to be read
+	 * @return deserialized the instance of the serialized item
+	 * @throws ItemSerializerException if the deserialization process failed
+	 * @throws NoSuchItemSerializerException if no suitable serializer was found
+	 *         to parse the serialized item
 	 */
 	public Item read(SerializedItem serializedItem)
 		throws ItemSerializerException, NoSuchItemSerializerException;
@@ -56,22 +58,22 @@ public interface ItemSerializerRegistry {
 	 * Adds the serializer into the registry.
 	 *
 	 * @param  serializer the serializer to be registered
-	 * @throws
+	 * @throws DuplicateItemSerializerException if the type of serializer is
+	 *         already registered
 	 */
 	public void registerSerializer(ItemSerializer serializer)
 		throws DuplicateItemSerializerException;
 
 	/**
-	 * Tries to convert the item into returned {@link SerializedItem} using one
-	 * of registered serializers.
+	 * Converts the item into a serialized item using a registered serializer.
 	 *
 	 * <p>
-	 * Implementation MUST make sure that returning {@link SerializedItem}'s
-	 * common attributes like companyId and groupId are initialized from the
+	 * Implementation MUST make sure that returned serialized item's common
+	 * attributes, like its company ID and group ID, are initialized from the
 	 * item.
 	 * </p>
 	 *
-	 * @param  item the item to be converted into binary form.
+	 * @param  item the item to be serialized.
 	 * @return serialized form of the item
 	 * @throws ItemSerializerException if the serialization process fails
 	 * @throws NoSuchItemSerializerException if no suitable serializer is found

@@ -15,7 +15,7 @@
 package com.liferay.portal.kernel.safe.model;
 
 /**
- * Implements the methods of the {@link Item} interface.
+ * Provides the base implementation of the {@link Item} interface.
  *
  * @author Tomas Polesovsky
  */

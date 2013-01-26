@@ -17,7 +17,8 @@ package com.liferay.portal.kernel.safe.storage;
 import com.liferay.portal.kernel.safe.PortalSafeException;
 
 /**
- * Thrown in a case of internal exception in a {@link Storage} implementation.
+ * Thrown when an exception in an underlying {@link Storage} implementation
+ * occurs.
  *
  * @author Tomas Polesovsky
  */

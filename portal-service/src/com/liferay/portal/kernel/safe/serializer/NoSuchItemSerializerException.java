@@ -15,9 +15,9 @@
 package com.liferay.portal.kernel.safe.serializer;
 
 /**
- * Thrown by {@link ItemSerializerRegistry} when no {@link ItemSerializer} is
- * found for converting {@link com.liferay.portal.kernel.safe.model.Item} into
- * {@link SerializedItem} and vice-versa.
+ * Thrown by an {@link ItemSerializerRegistry} when no {@link ItemSerializer} is
+ * found for serializing an {@link com.liferay.portal.kernel.safe.model.Item} into
+ * a {@link SerializedItem} or vice-versa.
  *
  * @author Tomas Polesovsky
  */

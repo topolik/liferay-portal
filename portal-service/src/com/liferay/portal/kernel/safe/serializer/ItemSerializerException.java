@@ -17,8 +17,7 @@ package com.liferay.portal.kernel.safe.serializer;
 import com.liferay.portal.kernel.safe.PortalSafeException;
 
 /**
- * Thrown when an exception occurs while serialization or de-serialization
- * process.
+ * Thrown when an exception occurs serializing or deserializing an item.
  *
  * @author Tomas Polesovsky
  */

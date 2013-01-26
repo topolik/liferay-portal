@@ -21,8 +21,9 @@ import com.liferay.portal.kernel.safe.model.Item;
 import java.util.List;
 
 /**
- * Provides a dummy Portal Safe implementation that throws {@link
- * UnsupportedOperationException}s.
+ * Provides a dummy {@link com.liferay.portal.kernel.safe.PortalSafe}
+ * implementation that throws exceptions of type {@link
+ * UnsupportedOperationException}.
  *
  * @author Tomas Polesovsky
  */

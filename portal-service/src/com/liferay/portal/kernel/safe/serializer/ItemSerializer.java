@@ -17,63 +17,64 @@ package com.liferay.portal.kernel.safe.serializer;
 import com.liferay.portal.kernel.safe.model.Item;
 
 /**
- * Converts instance of {@link Item} into its binary form - {@link
- * SerializedItem} and vice versa.
+ * Serializes and deserializes {@link Item} objects to and from {@link
+ * SerializedItem} objects.
  *
  * @author Tomas Polesovsky
  */
 public interface ItemSerializer<T extends Item> {
 
 	/**
-	 * Returns unique ID of the serializer. UID is used to identify a serializer
-	 * for deserialization of {@link SerializedItem} using {@link
-	 * #read(SerializedItem)} method.
+	 * Returns the serializer's unique ID (UID). The UID identifies the
+	 * serialized item's serializer for use in deserialization.
 	 *
-	 * @return ID that identifies this class, usually a constant.
+	 * @return the serializer's unique ID, usually a constant.
 	 */
 	public long getSerializerUID();
 
 	/**
-	 * Returns the class that is able to covert descendant of {@link Item} into
-	 * {@link SerializedItem}.
+	 * Returns the class of the type <code>T</code> that is able to serialize
+	 * {@link Item} descendants into {@link SerializedItem} objects.
 	 *
-	 * @return class of the type <code>T</code> that is able to serialize,
-	 *         usually a constant.
+	 * @return the class of the type <code>T</code> that is able to serialize
+	 *         {@link Item} descendants into {@link SerializedItem} objects. The
+	 *         class is usually a constant.
 	 */
 	public Class getSupportedClass();
 
 	/**
-	 * Convert SerializedItem into new instance of {@link Item} using {@link
-	 * SerializedItem#getItemStream()}.
+	 * Deserializes a {@link SerializedItem} into a new instance of the {@link
+	 * Item} descendant. Calls {@link SerializedItem#getItemStream()}.
 	 *
 	 * <p>
-	 * Implementation MUST copy companyId and groupId from the item into the
-	 * result. Serializer may use {@link SerializedItem#getHeader()} to read
-	 * item's metadata that was previously stored by the {@link
-	 * #read(SerializedItem)} method.
+	 * Implementations MUST copy the serialized item's company ID and group ID
+	 * into the the new {@link Item}. The serializer may use {@link
+	 * SerializedItem#getHeader()} to access any metadata previously stored for
+	 * the item.
 	 * </p>
 	 *
-	 * @param  serializedItem the serialized item to be converted
-	 * @return new instance of {@link Item} descendant
-	 * @throws ItemSerializerException if deserialization fails
+	 * @param  serializedItem the item to be deserialized
+	 * @return the deserialized item as new instance of the {@link Item}
+	 *         descendant
+	 * @throws ItemSerializerException if deserialization failed
 	 */
 	public T read(SerializedItem serializedItem) throws ItemSerializerException;
 
 	/**
-	 * Serializes internal representation of the item into InputStream and
-	 * stores in result using {@link
+	 * Serializes an internal representation of the item into an {@link
+	 * java.io.InputStream} and stores it in a {@link SerializedItem} via {@link
 	 * SerializedItem#setItemStream(java.io.InputStream)}.
 	 *
 	 * <p>
-	 * Implementation MUST copy companyId and groupId from the item into the
-	 * result. Serializer may use {@link SerializedItem#setHeader(byte[])} to
-	 * store any metadata. The header will be then available in the {@link
-	 * #read(SerializedItem)} method.
+	 * Implementations MUST copy the serialized item's company ID and group ID
+	 * into the the {@link SerializedItem}. The serializer may use {@link
+	 * SerializedItem#setHeader(byte[])} to store the item's metadata, making it
+	 * available for {@link #read(SerializedItem)}.
 	 * </p>
 	 *
 	 * @param  item the item to be serialized
-	 * @return new instance with
-	 * @throws ItemSerializerException if serialization fails
+	 * @return the serialized item as new instance of {@link SerializedItem}
+	 * @throws ItemSerializerException if serialization failed
 	 */
 	public SerializedItem write(T item) throws ItemSerializerException;
 

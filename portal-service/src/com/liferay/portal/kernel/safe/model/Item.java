@@ -15,7 +15,7 @@
 package com.liferay.portal.kernel.safe.model;
 
 /**
- * Specifies an interface for items that are stored in portal safe.
+ * The interface for an item to store in the portal safe.
  *
  * @author Tomas Polesovsky
  */

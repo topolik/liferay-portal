@@ -17,7 +17,7 @@ package com.liferay.portal.kernel.safe;
 import com.liferay.portal.kernel.exception.PortalException;
 
 /**
- * General exception for Portal Safe.
+ * The base class for all exceptions related to the portal safe.
  *
  * @author Tomas Polesovsky
  */
