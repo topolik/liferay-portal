@@ -122,6 +122,31 @@ public class PortletContainerImpl implements PortletContainer {
 
 			return _doProcessAction(request, response, portlet);
 		}
+		catch (PrincipalException e){
+			String url = null;
+
+			LastPath lastPath = (LastPath)request.getAttribute(
+				WebKeys.LAST_PATH);
+
+			if (lastPath != null) {
+				StringBundler sb = new StringBundler(3);
+
+				sb.append(PortalUtil.getPortalURL(request));
+				sb.append(lastPath.getContextPath());
+				sb.append(lastPath.getPath());
+
+				url = sb.toString();
+			}
+			else {
+				url = String.valueOf(request.getRequestURI());
+			}
+
+			_log.warn(
+				"Reject processAction for " + url + " on " +
+					portlet.getPortletId());
+
+			return ActionResult.EMPTY_ACTION_RESULT;
+		}
 		catch (Exception e) {
 			throw new PortletContainerException(e);
 		}
@@ -150,6 +175,31 @@ public class PortletContainerImpl implements PortletContainer {
 
 			_doRender(request, response, portlet);
 		}
+		catch (PrincipalException e){
+			String url = null;
+
+			LastPath lastPath = (LastPath)request.getAttribute(
+				WebKeys.LAST_PATH);
+
+			if (lastPath != null) {
+				StringBundler sb = new StringBundler(3);
+
+				sb.append(PortalUtil.getPortalURL(request));
+				sb.append(lastPath.getContextPath());
+				sb.append(lastPath.getPath());
+
+				url = sb.toString();
+			}
+			else {
+				url = String.valueOf(request.getRequestURI());
+			}
+
+			_log.warn(
+				"Reject render for " + url + " on " +
+					portlet.getPortletId());
+
+			return;
+		}
 		catch (Exception e) {
 			throw new PortletContainerException(e);
 		}
@@ -164,6 +214,36 @@ public class PortletContainerImpl implements PortletContainer {
 			checkAuthorization(request, portlet);
 
 			_doServeResource(request, response, portlet);
+		}
+		catch (PrincipalException e){
+			String url = null;
+
+			LastPath lastPath = (LastPath)request.getAttribute(
+				WebKeys.LAST_PATH);
+
+			if (lastPath != null) {
+				StringBundler sb = new StringBundler(3);
+
+				sb.append(PortalUtil.getPortalURL(request));
+				sb.append(lastPath.getContextPath());
+				sb.append(lastPath.getPath());
+
+				url = sb.toString();
+			}
+			else {
+				url = String.valueOf(request.getRequestURI());
+			}
+
+			response.setHeader(
+				HttpHeaders.CACHE_CONTROL,
+				HttpHeaders.CACHE_CONTROL_NO_CACHE_VALUE);
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+
+			_log.warn(
+				"Reject serveResource for " + url + " on " +
+					portlet.getPortletId());
+
+			return;
 		}
 		catch (Exception e) {
 			throw new PortletContainerException(e);
