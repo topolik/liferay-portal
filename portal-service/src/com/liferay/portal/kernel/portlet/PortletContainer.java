@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.portlet;
 
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.Portlet;
 
@@ -28,6 +30,9 @@ import javax.servlet.http.HttpServletResponse;
  * @author Shuyang Zhou
  */
 public interface PortletContainer {
+
+	public void initPortletOnLayout(HttpServletRequest request, Portlet portlet)
+		throws PortletContainerException;
 
 	public void preparePortlet(HttpServletRequest request, Portlet portlet)
 		throws PortletContainerException;

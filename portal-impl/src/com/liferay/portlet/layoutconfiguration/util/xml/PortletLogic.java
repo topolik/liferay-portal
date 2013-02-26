@@ -107,23 +107,10 @@ public class PortletLogic extends RuntimeLogic {
 		Portlet portlet = PortletLocalServiceUtil.getPortletById(
 			themeDisplay.getCompanyId(), portletId);
 
+		PortletContainerUtil.initPortletOnLayout(_request, portlet);
+
 		// See LayoutTypePortletImpl#getStaticPortlets for why we only clone
 		// non-instanceable portlets
-
-		if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
-				portletId) < 1) {
-
-			PortletPreferencesFactoryUtil.getPortletSetup(_request, portletId);
-
-			PortletLayoutListener portletLayoutListener =
-				portlet.getPortletLayoutListenerInstance();
-
-			if (portletLayoutListener != null) {
-				portletLayoutListener.onAddToLayout(
-					portletId, themeDisplay.getPlid());
-			}
-		}
 
 		if (!portlet.isInstanceable()) {
 			portlet = (Portlet)portlet.clone();

@@ -55,6 +55,12 @@ public class RestrictPortletContainerWrapper implements PortletContainer {
 		_portletContainer = portletContainer;
 	}
 
+	public void initPortletOnLayout(HttpServletRequest request, Portlet portlet)
+		throws PortletContainerException {
+		
+		_portletContainer.initPortletOnLayout(request, portlet);
+	}
+
 	public void preparePortlet(HttpServletRequest request, Portlet portlet)
 		throws PortletContainerException {
 

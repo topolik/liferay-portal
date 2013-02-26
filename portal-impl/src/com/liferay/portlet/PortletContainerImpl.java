@@ -170,6 +170,39 @@ public class PortletContainerImpl implements PortletContainer {
 		}
 	}
 
+	public void initPortletOnLayout(HttpServletRequest request, Portlet portlet)
+		throws PortletContainerException {
+
+		try {
+			if (_portletContainerPermission.isFirstTimeExecuted(
+					request, portlet)) {
+
+				ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+					WebKeys.THEME_DISPLAY);
+
+				long plid = themeDisplay.getPlid();
+
+				String portletId = portlet.getPortletId();
+
+				PortletPreferencesFactoryUtil.getPortletSetup(
+					request, portletId);
+
+				PortalUtil.addPortletDefaultResource(request, portlet);
+
+				PortletLayoutListener portletLayoutListener =
+					portlet.getPortletLayoutListenerInstance();
+
+				if (portletLayoutListener != null) {
+					portletLayoutListener.onAddToLayout(portletId, plid);
+				}
+			}
+		} catch (PortalException e) {
+			throw new PortletContainerException(e);
+		} catch (SystemException e) {
+			throw new PortletContainerException(e);
+		}
+	}
+
 	protected void checkAuthorization(
 			HttpServletRequest request, Portlet portlet)
 		throws Exception {

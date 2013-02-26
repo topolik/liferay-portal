@@ -47,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PortletContainerUtil {
 
+
 	public static List<LayoutTypePortlet> getLayoutTypePortlets(Layout layout)
 		throws PortletContainerException {
 
@@ -96,6 +97,14 @@ public class PortletContainerUtil {
 
 		return _portletContainer;
 	}
+
+	public static void initPortletOnLayout(
+			HttpServletRequest request, Portlet portlet)
+		throws PortletContainerException {
+
+		getPortletContainer().initPortletOnLayout(request, portlet);
+	}
+
 
 	public static void preparePortlet(
 			HttpServletRequest request, Portlet portlet)
