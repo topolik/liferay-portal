@@ -119,6 +119,9 @@ public class PortletContainerPermissionImpl {
 		return false;
 	}
 
+	/*
+	 * Copied from PortalImpl.isAllowAddPortletDefaultResource()
+	 */
 	protected boolean grantedByPPAuth(
 		HttpServletRequest request, Portlet portlet) {
 
@@ -181,6 +184,9 @@ public class PortletContainerPermissionImpl {
 		return false;
 	}
 
+	/*
+	 * Copied from PortletContainerImpl
+	 */
 	protected boolean hasAccessPermission(
 			HttpServletRequest request, Portlet portlet)
 		throws SystemException, PortalException {
@@ -204,6 +210,9 @@ public class PortletContainerPermissionImpl {
 
 	}
 
+	/*
+	 * Copied from LayoutTypePortletImpl.hasPortletId()
+	 */
 	protected boolean isFirstTimeExecuted(
 			HttpServletRequest request, Portlet portlet)
 		throws SystemException, PortalException {
@@ -227,6 +236,9 @@ public class PortletContainerPermissionImpl {
 		return false;
 	}
 
+	/*
+	 * Copied from PortalImpl.isAllowAddPortletDefaultResource()
+	 */
 	protected boolean isLayoutConfigurationPortletAllowedOnPage(
 			ThemeDisplay themeDisplay, Layout layout, String portletId)
 		throws SystemException, PortalException {
@@ -305,6 +317,9 @@ public class PortletContainerPermissionImpl {
 		return portlet.isActive() && !portlet.isUndeployedPortlet();
 	}
 
+	/*
+	 * Copied from PortalImpl.isAllowAddPortletDefaultResource()
+	 */
 	protected boolean isPortletOnControlPanelLayout(
 			ThemeDisplay themeDisplay, Layout layout, String portletId)
 		throws SystemException {
@@ -318,6 +333,9 @@ public class PortletContainerPermissionImpl {
 		return false;
 	}
 
+	/*
+	 * Copied from PortalImpl.isAllowAddPortletDefaultResource()
+	 */
 	protected boolean isPortletOnPage(HttpServletRequest request, Portlet portlet)
 		throws SystemException, PortalException {
 
@@ -358,6 +376,9 @@ public class PortletContainerPermissionImpl {
 		return false;
 	}
 
+	/*
+	 * Copied from PortalImpl.isAllowAddPortletDefaultResource()
+	 */
 	protected boolean isPortletOnPanelLayout(
 		ThemeDisplay themeDisplay, Layout layout, String portletId) {
 
@@ -378,6 +399,9 @@ public class PortletContainerPermissionImpl {
 		return false;
 	}
 
+	/*
+	 * Copied from PortalImpl.isAllowAddPortletDefaultResource()
+	 */
 	protected boolean isPortletOnPortletLayout(
 			ThemeDisplay themeDisplay, Layout layout, String portletId)
 		throws SystemException, PortalException {
