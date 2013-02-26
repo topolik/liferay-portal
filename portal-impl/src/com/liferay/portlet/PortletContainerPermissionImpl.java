@@ -70,9 +70,17 @@ public class PortletContainerPermissionImpl {
 			}
 		}
 
-		if(isPortletAlive && grantedByPPAuth(request, portlet)){
+		if(isPortletAlive && isPortletOnPage(request, portlet)){
 			if(_log.isDebugEnabled()){
-				_log.debug("Portlet " + portlet.getPortletId() + " was authorized based on p_p_auth check");
+				_log.debug("Portlet " + portlet.getPortletId() + " is on the page");
+			}
+
+			if(isFirstTimeExecuted(request, portlet)){
+				if(_log.isDebugEnabled()){
+					_log.debug("Portlet " + portlet.getPortletId() + " is executed for the first time");
+				}
+
+				PortalUtil.addPortletDefaultResource(request, portlet);
 			}
 
 			if(hasAccessPermission(request, portlet)) {
@@ -87,17 +95,10 @@ public class PortletContainerPermissionImpl {
 			}
 		}
 
-		if(isPortletAlive && isPortletOnPage(request, portlet)){
+
+		if(isPortletAlive && grantedByPPAuth(request, portlet)){
 			if(_log.isDebugEnabled()){
-				_log.debug("Portlet " + portlet.getPortletId() + " is on the page");
-			}
-
-			if(isFirstTimeExecuted(request, portlet)){
-				if(_log.isDebugEnabled()){
-					_log.debug("Portlet " + portlet.getPortletId() + " is executed for the first time");
-				}
-
-				PortalUtil.addPortletDefaultResource(request, portlet);
+				_log.debug("Portlet " + portlet.getPortletId() + " was authorized based on p_p_auth check");
 			}
 
 			if(hasAccessPermission(request, portlet)) {
