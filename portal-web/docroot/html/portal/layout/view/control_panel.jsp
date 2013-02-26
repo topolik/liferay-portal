@@ -57,22 +57,22 @@ String category = PortalUtil.getControlPanelCategory(ppid, themeDisplay);
 
 List<Layout> scopeLayouts = new ArrayList<Layout>();
 
-Portlet portlet = null;
+Portlet portlet = PortletLocalServiceUtil.getPortletById(company.getCompanyId(), ppid);
 
-boolean denyAccess = true;
-
-if (Validator.isNull(ppid)) {
-	denyAccess = false;
-}
-else {
-	portlet = PortletLocalServiceUtil.getPortletById(company.getCompanyId(), ppid);
-
-	if ((portlet != null) &&
-		(portlet.isSystem() || PortletPermissionUtil.hasControlPanelAccessPermission(permissionChecker, scopeGroupId, portlet) || PortalUtil.isAllowAddPortletDefaultResource(request, portlet))) {
-
-		denyAccess = false;
-	}
-}
+//boolean denyAccess = true;
+//
+//if (Validator.isNull(ppid)) {
+//	denyAccess = false;
+//}
+//else {
+//	portlet = PortletLocalServiceUtil.getPortletById(company.getCompanyId(), ppid);
+//
+//	if ((portlet != null) &&
+//		(portlet.isSystem() || PortletPermissionUtil.hasControlPanelAccessPermission(permissionChecker, scopeGroupId, portlet) || PortalUtil.isAllowAddPortletDefaultResource(request, portlet))) {
+//
+//		denyAccess = false;
+//	}
+//}
 
 request.setAttribute("control_panel.jsp-ppid", ppid);
 %>

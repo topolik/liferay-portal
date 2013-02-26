@@ -914,20 +914,20 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 				}
 
 				if ((portlet != null) && portlet.isActive()) {
-					ThemeDisplay themeDisplay =
-						(ThemeDisplay)request.getAttribute(
-							WebKeys.THEME_DISPLAY);
-
-					Layout layout = themeDisplay.getLayout();
-					PermissionChecker permissionChecker =
-						themeDisplay.getPermissionChecker();
-
-					if (!PortletPermissionUtil.contains(
-							permissionChecker, layout, portlet,
-							ActionKeys.VIEW)) {
-
-						throw new PrincipalException();
-					}
+//					ThemeDisplay themeDisplay =
+//						(ThemeDisplay)request.getAttribute(
+//							WebKeys.THEME_DISPLAY);
+//
+//					Layout layout = themeDisplay.getLayout();
+//					PermissionChecker permissionChecker =
+//						themeDisplay.getPermissionChecker();
+//
+//					if (!PortletPermissionUtil.contains(
+//							permissionChecker, layout, portlet,
+//							ActionKeys.VIEW)) {
+//
+//						throw new PrincipalException();
+//					}
 				}
 				else if ((portlet != null) && !portlet.isActive()) {
 					SessionErrors.add(
