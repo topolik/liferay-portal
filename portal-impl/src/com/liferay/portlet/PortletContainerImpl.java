@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.portlet.LiferayPortletMode;
 import com.liferay.portal.kernel.portlet.PortletContainer;
 import com.liferay.portal.kernel.portlet.PortletContainerException;
 import com.liferay.portal.kernel.portlet.PortletContainerUtil;
+import com.liferay.portal.kernel.portlet.PortletLayoutListener;
 import com.liferay.portal.kernel.portlet.PortletModeFactory;
 import com.liferay.portal.kernel.portlet.WindowStateFactory;
 import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
@@ -49,6 +50,7 @@ import com.liferay.portal.model.PortletPreferencesIds;
 import com.liferay.portal.model.PublicRenderParameter;
 import com.liferay.portal.model.User;
 import com.liferay.portal.security.auth.AuthTokenUtil;
+import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
@@ -116,6 +118,8 @@ public class PortletContainerImpl implements PortletContainer {
 		throws PortletContainerException {
 
 		try {
+			checkAuthorization(request, portlet);
+
 			return _doProcessAction(request, response, portlet);
 		}
 		catch (Exception e) {
@@ -142,6 +146,8 @@ public class PortletContainerImpl implements PortletContainer {
 		throws PortletContainerException {
 
 		try {
+			checkAuthorization(request, portlet);
+
 			_doRender(request, response, portlet);
 		}
 		catch (Exception e) {
@@ -155,11 +161,33 @@ public class PortletContainerImpl implements PortletContainer {
 		throws PortletContainerException {
 
 		try {
+			checkAuthorization(request, portlet);
+
 			_doServeResource(request, response, portlet);
 		}
 		catch (Exception e) {
 			throw new PortletContainerException(e);
 		}
+	}
+
+	protected void checkAuthorization(
+			HttpServletRequest request, Portlet portlet)
+		throws Exception {
+
+		if(portlet == null){
+			return;
+		}
+
+		HttpServletRequest ownerLayoutRequest = getOwnerLayoutRequestWrapper(
+			request, portlet);
+
+		if(_portletContainerPermission.isAuthorized(
+			ownerLayoutRequest, portlet)){
+
+			return;
+		}
+
+		throw new PrincipalException();
 	}
 
 	protected HttpServletRequest getOwnerLayoutRequestWrapper(
@@ -385,35 +413,35 @@ public class PortletContainerImpl implements PortletContainer {
 		Layout ownerLayout = (Layout)ownerLayoutRequest.getAttribute(
 			WebKeys.LAYOUT);
 
-		boolean allowAddPortletDefaultResource =
-			PortalUtil.isAllowAddPortletDefaultResource(
-				ownerLayoutRequest, portlet);
-
-		if (!allowAddPortletDefaultResource) {
-			String url = null;
-
-			LastPath lastPath = (LastPath)request.getAttribute(
-				WebKeys.LAST_PATH);
-
-			if (lastPath != null) {
-				StringBundler sb = new StringBundler(3);
-
-				sb.append(PortalUtil.getPortalURL(request));
-				sb.append(lastPath.getContextPath());
-				sb.append(lastPath.getPath());
-
-				url = sb.toString();
-			}
-			else {
-				url = String.valueOf(request.getRequestURI());
-			}
-
-			_log.error(
-				"Reject processAction for " + url + " on " +
-					portlet.getPortletId());
-
-			return ActionResult.EMPTY_ACTION_RESULT;
-		}
+//		boolean allowAddPortletDefaultResource =
+//			PortalUtil.isAllowAddPortletDefaultResource(
+//				ownerLayoutRequest, portlet);
+//
+//		if (!allowAddPortletDefaultResource) {
+//			String url = null;
+//
+//			LastPath lastPath = (LastPath)request.getAttribute(
+//				WebKeys.LAST_PATH);
+//
+//			if (lastPath != null) {
+//				StringBundler sb = new StringBundler(3);
+//
+//				sb.append(PortalUtil.getPortalURL(request));
+//				sb.append(lastPath.getContextPath());
+//				sb.append(lastPath.getPath());
+//
+//				url = sb.toString();
+//			}
+//			else {
+//				url = String.valueOf(request.getRequestURI());
+//			}
+//
+//			_log.error(
+//				"Reject processAction for " + url + " on " +
+//					portlet.getPortletId());
+//
+//			return ActionResult.EMPTY_ACTION_RESULT;
+//		}
 
 		Layout layout = (Layout)request.getAttribute(WebKeys.LAYOUT);
 
@@ -506,16 +534,16 @@ public class PortletContainerImpl implements PortletContainer {
 
 			long scopeGroupId = themeDisplay.getScopeGroupId();
 
-			boolean access = PortletPermissionUtil.hasAccessPermission(
-				permissionChecker, scopeGroupId, ownerLayout, portlet,
-				portletMode);
-
-			if (access) {
+//			boolean access = PortletPermissionUtil.hasAccessPermission(
+//				permissionChecker, scopeGroupId, ownerLayout, portlet,
+//				portletMode);
+//
+//			if (access) {
 				invokerPortlet.processAction(
 					actionRequestImpl, actionResponseImpl);
 
 				actionResponseImpl.transferHeaders(response);
-			}
+//			}
 
 			RenderParametersPool.put(
 				request, layout.getPlid(), portlet.getPortletId(),
@@ -851,40 +879,40 @@ public class PortletContainerImpl implements PortletContainer {
 		Layout ownerLayout = (Layout)ownerLayoutRequest.getAttribute(
 			WebKeys.LAYOUT);
 
-		boolean allowAddPortletDefaultResource =
-			PortalUtil.isAllowAddPortletDefaultResource(
-				ownerLayoutRequest, portlet);
-
-		if (!allowAddPortletDefaultResource) {
-			String url = null;
-
-			LastPath lastPath = (LastPath)request.getAttribute(
-				WebKeys.LAST_PATH);
-
-			if (lastPath != null) {
-				StringBundler sb = new StringBundler(3);
-
-				sb.append(PortalUtil.getPortalURL(request));
-				sb.append(lastPath.getContextPath());
-				sb.append(lastPath.getPath());
-
-				url = sb.toString();
-			}
-			else {
-				url = String.valueOf(request.getRequestURI());
-			}
-
-			response.setHeader(
-				HttpHeaders.CACHE_CONTROL,
-				HttpHeaders.CACHE_CONTROL_NO_CACHE_VALUE);
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-
-			_log.error(
-				"Reject serveResource for " + url + " on " +
-					portlet.getPortletId());
-
-			return;
-		}
+//		boolean allowAddPortletDefaultResource =
+//			PortalUtil.isAllowAddPortletDefaultResource(
+//				ownerLayoutRequest, portlet);
+//
+//		if (!allowAddPortletDefaultResource) {
+//			String url = null;
+//
+//			LastPath lastPath = (LastPath)request.getAttribute(
+//				WebKeys.LAST_PATH);
+//
+//			if (lastPath != null) {
+//				StringBundler sb = new StringBundler(3);
+//
+//				sb.append(PortalUtil.getPortalURL(request));
+//				sb.append(lastPath.getContextPath());
+//				sb.append(lastPath.getPath());
+//
+//				url = sb.toString();
+//			}
+//			else {
+//				url = String.valueOf(request.getRequestURI());
+//			}
+//
+//			response.setHeader(
+//				HttpHeaders.CACHE_CONTROL,
+//				HttpHeaders.CACHE_CONTROL_NO_CACHE_VALUE);
+//			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//
+//			_log.error(
+//				"Reject serveResource for " + url + " on " +
+//					portlet.getPortletId());
+//
+//			return;
+//		}
 
 		WindowState windowState = (WindowState)request.getAttribute(
 			WebKeys.WINDOW_STATE);
@@ -961,16 +989,16 @@ public class PortletContainerImpl implements PortletContainer {
 
 			long scopeGroupId = themeDisplay.getScopeGroupId();
 
-			boolean access = PortletPermissionUtil.hasAccessPermission(
-				permissionChecker, scopeGroupId, ownerLayout, portlet,
-				portletMode);
-
-			if (access) {
+//			boolean access = PortletPermissionUtil.hasAccessPermission(
+//				permissionChecker, scopeGroupId, ownerLayout, portlet,
+//				portletMode);
+//
+//			if (access) {
 				invokerPortlet.serveResource(
 					resourceRequestImpl, resourceResponseImpl);
 
 				resourceResponseImpl.transferHeaders(response);
-			}
+//			}
 		}
 		finally {
 			ServiceContextThreadLocal.popServiceContext();
@@ -981,5 +1009,7 @@ public class PortletContainerImpl implements PortletContainer {
 		GetterUtil.getBoolean(PropsUtil.get(ScriptDataFilter.class.getName()));
 
 	private static Log _log = LogFactoryUtil.getLog(PortletContainerImpl.class);
+
+	private PortletContainerPermissionImpl _portletContainerPermission = new PortletContainerPermissionImpl();
 
 }

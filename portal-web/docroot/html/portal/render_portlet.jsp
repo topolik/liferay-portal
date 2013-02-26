@@ -36,7 +36,8 @@ boolean allowAddPortletDefaultResource = PortalUtil.isAllowAddPortletDefaultReso
 boolean runtimePortlet = (renderPortletResource != null) && renderPortletResource.booleanValue();
 
 if (allowAddPortletDefaultResource && !portlet.isUndeployedPortlet()) {
-	PortalUtil.addPortletDefaultResource(request, portlet);
+// don't create the permissions here, delegate it to PortletContainer
+//	PortalUtil.addPortletDefaultResource(request, portlet);
 }
 
 boolean stateMax = layoutTypePortlet.hasStateMaxPortletId(portletId);
@@ -145,12 +146,14 @@ else if (modePrint) {
 
 boolean access = false;
 
-if (portlet.isUndeployedPortlet()) {
-	access = true;
-}
-else if (allowAddPortletDefaultResource) {
-	access = PortletPermissionUtil.hasAccessPermission(permissionChecker, themeDisplay.getScopeGroupId(), layout, portlet, portletMode);
-}
+//if (portlet.isUndeployedPortlet()) {
+//	access = true;
+//}
+//else if (allowAddPortletDefaultResource) {
+//	access = PortletPermissionUtil.hasAccessPermission(permissionChecker, themeDisplay.getScopeGroupId(), layout, portlet, portletMode);
+//}
+// we are here => we've managed to go through PortletContainer checks
+access = true;
 
 InvokerPortlet invokerPortlet = null;
 

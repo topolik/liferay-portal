@@ -1286,6 +1286,10 @@
 		<priority value="WARN" />
 	</category>
 
+    <category name="com.liferay.portlet.PortletContainerPermissionImpl">
+        <priority value="ALL" />
+    </category>
+
 	<root>
 		<priority value="INFO" />
 		<appender-ref ref="CONSOLE" />

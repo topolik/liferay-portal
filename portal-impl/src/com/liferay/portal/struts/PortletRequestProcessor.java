@@ -571,24 +571,28 @@ public class PortletRequestProcessor extends TilesRequestProcessor {
 				throw new PrincipalException();
 			}
 			else if (portlet.isActive()) {
-				if (PortalUtil.isAllowAddPortletDefaultResource(
-						request, portlet)) {
-
-					PortalUtil.addPortletDefaultResource(request, portlet);
-				}
-
-				ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-					WebKeys.THEME_DISPLAY);
-
-				Layout layout = themeDisplay.getLayout();
-				PermissionChecker permissionChecker =
-					themeDisplay.getPermissionChecker();
-
-				if (!PortletPermissionUtil.contains(
-						permissionChecker, layout, portlet, ActionKeys.VIEW)) {
-
-					throw new PrincipalException();
-				}
+// Permission checking here doesn't make sense.
+// It can be a performance improvement, but currently I can't say this is the
+// correct place for the check.
+//
+//				if (PortalUtil.isAllowAddPortletDefaultResource(
+//						request, portlet)) {
+//
+//					PortalUtil.addPortletDefaultResource(request, portlet);
+//				}
+//
+//				ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+//					WebKeys.THEME_DISPLAY);
+//
+//				Layout layout = themeDisplay.getLayout();
+//				PermissionChecker permissionChecker =
+//					themeDisplay.getPermissionChecker();
+//
+//				if (!PortletPermissionUtil.contains(
+//						permissionChecker, layout, portlet, ActionKeys.VIEW)) {
+//
+//					throw new PrincipalException();
+//				}
 			}
 			else if (!portlet.isActive()) {
 				ForwardConfig forwardConfig = actionMapping.findForward(
