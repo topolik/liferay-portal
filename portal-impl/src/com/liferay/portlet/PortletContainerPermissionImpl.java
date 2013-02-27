@@ -101,7 +101,11 @@ public class PortletContainerPermissionImpl {
 				_log.debug("Portlet " + portlet.getPortletId() + " was authorized based on p_p_auth check");
 			}
 
-			if(hasAccessPermission(request, portlet)) {
+			// for the sake of backward compatibility, add-default-resource must
+			// bypass all portlet container checks
+
+			if(true) {
+//			if(hasAccessPermission(request, portlet)) {
 				if(_log.isDebugEnabled()){
 					_log.debug("User has access to portlet " + portlet.getPortletId());
 				}
