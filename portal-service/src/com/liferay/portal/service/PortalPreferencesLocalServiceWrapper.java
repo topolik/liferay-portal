@@ -247,6 +247,13 @@ public class PortalPreferencesLocalServiceWrapper
 		_portalPreferencesLocalService.setBeanIdentifier(beanIdentifier);
 	}
 
+	public javax.portlet.PortletPreferences addPreferences(long companyId,
+		long ownerId, int ownerType)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _portalPreferencesLocalService.addPreferences(companyId,
+			ownerId, ownerType);
+	}
+
 	public com.liferay.portal.model.PortalPreferences addPortalPreferences(
 		long companyId, long ownerId, int ownerType,
 		java.lang.String defaultPreferences)
@@ -255,16 +262,25 @@ public class PortalPreferencesLocalServiceWrapper
 			ownerId, ownerType, defaultPreferences);
 	}
 
-	public javax.portlet.PortletPreferences getPreferences(long companyId,
+	public javax.portlet.PortletPreferences fetchPreferences(long companyId,
 		long ownerId, int ownerType)
 		throws com.liferay.portal.kernel.exception.SystemException {
+		return _portalPreferencesLocalService.fetchPreferences(companyId,
+			ownerId, ownerType);
+	}
+
+	public javax.portlet.PortletPreferences getPreferences(long companyId,
+		long ownerId, int ownerType)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
 		return _portalPreferencesLocalService.getPreferences(companyId,
 			ownerId, ownerType);
 	}
 
 	public javax.portlet.PortletPreferences getPreferences(long companyId,
 		long ownerId, int ownerType, java.lang.String defaultPreferences)
-		throws com.liferay.portal.kernel.exception.SystemException {
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
 		return _portalPreferencesLocalService.getPreferences(companyId,
 			ownerId, ownerType, defaultPreferences);
 	}

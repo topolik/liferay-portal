@@ -348,14 +348,14 @@ public class SitesImpl implements Sites {
 		for (String sourcePortletId : sourcePortletIds) {
 			PortletPreferences sourcePreferences =
 				PortletPreferencesFactoryUtil.getPortletSetup(
-					sourceLayout, sourcePortletId, null);
+					sourceLayout, sourcePortletId);
 
 			PortletPreferencesImpl sourcePreferencesImpl =
 				(PortletPreferencesImpl)sourcePreferences;
 
 			PortletPreferences targetPreferences =
 				PortletPreferencesFactoryUtil.getPortletSetup(
-					targetLayout, sourcePortletId, null);
+					targetLayout, sourcePortletId);
 
 			PortletPreferencesImpl targetPreferencesImpl =
 				(PortletPreferencesImpl)targetPreferences;

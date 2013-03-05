@@ -128,7 +128,7 @@ public class AssetPublisherUtil {
 		PortletPreferences portletPreferences =
 			PortletPreferencesFactoryUtil.getPortletSetup(
 				themeDisplay.getScopeGroupId(), layout,
-				referringPortletResource, null);
+				referringPortletResource);
 
 		String selectionStyle = portletPreferences.getValue(
 			"selectionStyle", "dynamic");

@@ -96,7 +96,7 @@ public class StagingUtil {
 
 	public static void deleteRecentLayoutRevisionId(
 			HttpServletRequest request, long layoutSetBranchId, long plid)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		getStaging().deleteRecentLayoutRevisionId(
 			request, layoutSetBranchId, plid);
@@ -104,7 +104,7 @@ public class StagingUtil {
 
 	public static void deleteRecentLayoutRevisionId(
 			User user, long layoutSetBranchId, long plid)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		getStaging().deleteRecentLayoutRevisionId(
 			user, layoutSetBranchId, plid);
@@ -215,7 +215,7 @@ public class StagingUtil {
 	}
 
 	public static long getRecentLayoutSetBranchId(User user, long layoutSetId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		return getStaging().getRecentLayoutSetBranchId(user, layoutSetId);
 	}
@@ -340,7 +340,7 @@ public class StagingUtil {
 	public static void setRecentLayoutBranchId(
 			HttpServletRequest request, long layoutSetBranchId, long plid,
 			long layoutBranchId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		getStaging().setRecentLayoutBranchId(
 			request, layoutSetBranchId, plid, layoutBranchId);
@@ -348,7 +348,7 @@ public class StagingUtil {
 
 	public static void setRecentLayoutBranchId(
 			User user, long layoutSetBranchId, long plid, long layoutBranchId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		getStaging().setRecentLayoutBranchId(
 			user, layoutSetBranchId, plid, layoutBranchId);
@@ -357,7 +357,7 @@ public class StagingUtil {
 	public static void setRecentLayoutRevisionId(
 			HttpServletRequest request, long layoutSetBranchId, long plid,
 			long layoutRevisionId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		getStaging().setRecentLayoutRevisionId(
 			request, layoutSetBranchId, plid, layoutRevisionId);
@@ -365,7 +365,7 @@ public class StagingUtil {
 
 	public static void setRecentLayoutRevisionId(
 			User user, long layoutSetBranchId, long plid, long layoutRevisionId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		getStaging().setRecentLayoutRevisionId(
 			user, layoutSetBranchId, plid, layoutRevisionId);
@@ -380,7 +380,7 @@ public class StagingUtil {
 
 	public static void setRecentLayoutSetBranchId(
 			User user, long layoutSetId, long layoutSetBranchId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		getStaging().setRecentLayoutSetBranchId(
 			user, layoutSetId, layoutSetBranchId);

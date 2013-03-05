@@ -17,19 +17,15 @@ package com.liferay.taglib.portletext;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletContainerUtil;
-import com.liferay.portal.kernel.portlet.PortletLayoutListener;
 import com.liferay.portal.kernel.portlet.RestrictPortletServletRequest;
+import com.liferay.portal.kernel.portlet.RuntimePortletUtil;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.servlet.PipingServletResponse;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.Portlet;
-import com.liferay.portal.service.PortletLocalServiceUtil;
-import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortletKeys;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -96,24 +92,8 @@ public class RuntimeTag extends TagSupport {
 				}
 			}
 
-			Portlet portlet = getPortlet(
-				themeDisplay.getCompanyId(), portletId);
-
-			if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
-					portletId) < 1) {
-
-				PortletPreferencesFactoryUtil.getPortletSetup(
-					request, portletId, defaultPreferences);
-
-				PortletLayoutListener portletLayoutListener =
-					portlet.getPortletLayoutListenerInstance();
-
-				if (portletLayoutListener != null) {
-					portletLayoutListener.onAddToLayout(
-						portletId, themeDisplay.getPlid());
-				}
-			}
+			Portlet portlet = RuntimePortletUtil.getPortlet(
+				request, themeDisplay, portletId, defaultPreferences);
 
 			PortletContainerUtil.render(request, response, portlet);
 		}
@@ -160,28 +140,6 @@ public class RuntimeTag extends TagSupport {
 
 	public void setQueryString(String queryString) {
 		_queryString = queryString;
-	}
-
-	/**
-	 * @see com.liferay.portal.model.impl.LayoutTypePortletImpl#getStaticPortlets(
-	 *      String)
-	 */
-	protected static Portlet getPortlet(long companyId, String portletId)
-		throws Exception {
-
-		Portlet portlet = PortletLocalServiceUtil.getPortletById(
-			companyId, portletId);
-
-		// See LayoutTypePortletImpl#getStaticPortlets for why we only clone
-		// non-instanceable portlets
-
-		if (!portlet.isInstanceable()) {
-			portlet = (Portlet)portlet.clone();
-		}
-
-		portlet.setStatic(true);
-
-		return portlet;
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(RuntimeTag.class);

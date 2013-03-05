@@ -18,7 +18,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletLayoutListener;
 import com.liferay.portal.kernel.portlet.PortletLayoutListenerException;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UniqueList;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Document;
@@ -64,8 +63,12 @@ public class JournalContentPortletLayoutListener
 			Layout layout = LayoutLocalServiceUtil.getLayout(plid);
 
 			PortletPreferences preferences =
-				PortletPreferencesFactoryUtil.getPortletSetup(
-					layout, portletId, StringPool.BLANK);
+				PortletPreferencesFactoryUtil.fetchPortletSetup(
+					layout, portletId);
+
+			if (preferences == null) {
+				return;
+			}
 
 			String articleId = preferences.getValue("articleId", null);
 
@@ -102,7 +105,7 @@ public class JournalContentPortletLayoutListener
 
 			PortletPreferences preferences =
 				PortletPreferencesFactoryUtil.getPortletSetup(
-					layout, portletId, StringPool.BLANK);
+					layout, portletId);
 
 			String articleId = preferences.getValue("articleId", null);
 

@@ -14,9 +14,11 @@
 
 package com.liferay.portal.service.impl;
 
+import com.liferay.portal.NoSuchPortletPreferencesException;
 import com.liferay.portal.kernel.concurrent.LockRegistry;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -29,7 +31,6 @@ import com.liferay.portal.service.base.PortalPreferencesLocalServiceBaseImpl;
 import com.liferay.portlet.PortalPreferencesImpl;
 import com.liferay.portlet.PortalPreferencesWrapper;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
-import com.liferay.portlet.PortletPreferencesThreadLocal;
 
 import java.util.concurrent.locks.Lock;
 
@@ -40,6 +41,22 @@ import javax.portlet.PortletPreferences;
  */
 public class PortalPreferencesLocalServiceImpl
 	extends PortalPreferencesLocalServiceBaseImpl {
+
+	public PortletPreferences addPreferences(
+			long companyId, long ownerId, int ownerType)
+		throws SystemException {
+
+		PortalPreferences portalPreferences = addPortalPreferences(
+			companyId, ownerId, ownerType, null);
+
+		PortalPreferencesImpl portalPreferencesImpl =
+			(PortalPreferencesImpl)PortletPreferencesFactoryUtil.fromXML(
+				companyId, ownerId, ownerType,
+				portalPreferences.getPreferences());
+
+		return new PortalPreferencesWrapper(portalPreferencesImpl);
+	}
+
 
 	public PortalPreferences addPortalPreferences(
 			long companyId, long ownerId, int ownerType,
@@ -81,9 +98,28 @@ public class PortalPreferencesLocalServiceImpl
 		return portalPreferences;
 	}
 
-	public PortletPreferences getPreferences(
+	public PortletPreferences fetchPreferences(
 			long companyId, long ownerId, int ownerType)
 		throws SystemException {
+
+		PortalPreferences portalPreferences =
+			portalPreferencesPersistence.fetchByO_O(ownerId, ownerType);
+
+		if (portalPreferences == null) {
+			return null;
+		}
+
+		PortalPreferencesImpl portalPreferencesImpl =
+			(PortalPreferencesImpl)PortletPreferencesFactoryUtil.fromXML(
+				companyId, ownerId, ownerType,
+				portalPreferences.getPreferences());
+
+		return new PortalPreferencesWrapper(portalPreferencesImpl);
+	}
+
+	public PortletPreferences getPreferences(
+			long companyId, long ownerId, int ownerType)
+		throws PortalException, SystemException {
 
 		return getPreferences(companyId, ownerId, ownerType, null);
 	}
@@ -91,7 +127,7 @@ public class PortalPreferencesLocalServiceImpl
 	public PortletPreferences getPreferences(
 			long companyId, long ownerId, int ownerType,
 			String defaultPreferences)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		DB db = DBFactoryUtil.getDB();
 
@@ -164,22 +200,13 @@ public class PortalPreferencesLocalServiceImpl
 	protected PortletPreferences doGetPreferences(
 			long companyId, long ownerId, int ownerType,
 			String defaultPreferences)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences =
 			portalPreferencesPersistence.fetchByO_O(ownerId, ownerType);
 
 		if (portalPreferences == null) {
-			if (PortletPreferencesThreadLocal.isStrict() &&
-				Validator.isNull(defaultPreferences)) {
-
-				return new PortalPreferencesWrapper(
-					new PortalPreferencesImpl());
-			}
-
-			portalPreferences =
-				portalPreferencesLocalService.addPortalPreferences(
-					companyId, ownerId, ownerType, defaultPreferences);
+			throw new NoSuchPortletPreferencesException();
 		}
 
 		PortalPreferencesImpl portalPreferencesImpl =

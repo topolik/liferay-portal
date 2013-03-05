@@ -176,6 +176,7 @@ page import="com.liferay.portlet.PortalPreferences" %><%@
 page import="com.liferay.portlet.PortletConfigFactoryUtil" %><%@
 page import="com.liferay.portlet.PortletInstanceFactoryUtil" %><%@
 page import="com.liferay.portlet.PortletPreferencesFactoryUtil" %><%@
+page import="com.liferay.portlet.PortletPreferencesImpl" %><%@
 page import="com.liferay.portlet.PortletResponseImpl" %><%@
 page import="com.liferay.portlet.PortletSetupUtil" %><%@
 page import="com.liferay.portlet.PortletURLFactoryUtil" %><%@

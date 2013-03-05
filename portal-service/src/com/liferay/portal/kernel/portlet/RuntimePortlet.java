@@ -12,25 +12,21 @@
  * details.
  */
 
-package com.liferay.portlet;
+package com.liferay.portal.kernel.portlet;
 
-import com.liferay.portal.kernel.util.InitialThreadLocal;
+import com.liferay.portal.model.Portlet;
+import com.liferay.portal.theme.ThemeDisplay;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
- * @author Brian Wing Shun Chan
+ * @author Raymond Augé
  */
-public class PortletPreferencesThreadLocal {
+public interface RuntimePortlet {
 
-	public static boolean isStrict() {
-		return _strict.get();
-	}
-
-	public static void setStrict(boolean strict) {
-		_strict.set(strict);
-	}
-
-	private static ThreadLocal<Boolean> _strict =
-		new InitialThreadLocal<Boolean>(
-			PortletPreferencesThreadLocal.class + "._strict", false);
+	public Portlet getPortlet(
+			HttpServletRequest request, ThemeDisplay themeDisplay,
+			String portletId, String defaultPreferences)
+		throws Exception;
 
 }

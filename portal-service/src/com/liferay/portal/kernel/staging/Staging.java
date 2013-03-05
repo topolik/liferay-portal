@@ -67,11 +67,11 @@ public interface Staging {
 
 	public void deleteRecentLayoutRevisionId(
 			HttpServletRequest request, long layoutSetBranchId, long plid)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public void deleteRecentLayoutRevisionId(
 			User user, long layoutSetBranchId, long plid)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link #disableStaging(Group, ServiceContext)}
@@ -132,7 +132,7 @@ public interface Staging {
 		HttpServletRequest request, long layoutSetId);
 
 	public long getRecentLayoutSetBranchId(User user, long layoutSetId)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public String getSchedulerGroupName(String destinationName, long groupId);
 
@@ -191,27 +191,27 @@ public interface Staging {
 	public void setRecentLayoutBranchId(
 			HttpServletRequest request, long layoutSetBranchId, long plid,
 			long layoutBranchId)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public void setRecentLayoutBranchId(
 			User user, long layoutSetBranchId, long plid, long layoutBranchId)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public void setRecentLayoutRevisionId(
 			HttpServletRequest request, long layoutSetBranchId, long plid,
 			long layoutRevisionId)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public void setRecentLayoutRevisionId(
 			User user, long layoutSetBranchId, long plid, long layoutRevisionId)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public void setRecentLayoutSetBranchId(
 		HttpServletRequest request, long layoutSetId, long layoutSetBranchId);
 
 	public void setRecentLayoutSetBranchId(
 			User user, long layoutSetId, long layoutSetBranchId)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public void unscheduleCopyFromLive(PortletRequest PortletRequest)
 		throws Exception;

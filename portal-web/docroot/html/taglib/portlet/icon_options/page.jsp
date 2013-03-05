@@ -51,7 +51,11 @@
 	<c:if test="<%= portlet != null %>">
 
 		<%
-		PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(layout, portletDisplay.getId());
+		PortletPreferences portletSetup = PortletPreferencesFactoryUtil.fetchLayoutPortletSetup(layout, portletDisplay.getId());
+
+		if (portletSetup == null) {
+			portletSetup = new PortletPreferencesImpl();
+		}
 
 		boolean widgetShowAddAppLink = GetterUtil.getBoolean(portletSetup.getValue("lfrWidgetShowAddAppLink", null), PropsValues.THEME_PORTLET_SHARING_DEFAULT);
 

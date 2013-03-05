@@ -14,6 +14,7 @@
 
 package com.liferay.portlet;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -165,6 +166,9 @@ public class PortletPreferencesImpl
 
 			PortletPreferencesLocalServiceUtil.updatePreferences(
 				getOwnerId(), getOwnerType(), _plid, _portletId, this);
+		}
+		catch (PortalException pe) {
+			throw new IOException(pe.getMessage());
 		}
 		catch (SystemException se) {
 			throw new IOException(se.getMessage());
