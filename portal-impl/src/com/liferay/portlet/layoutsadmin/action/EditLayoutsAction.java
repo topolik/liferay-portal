@@ -399,8 +399,12 @@ public class EditLayoutsAction extends PortletAction {
 				permissionChecker, layout, ActionKeys.VIEW);
 		}
 		else {
-			GroupPermissionUtil.check(
-				permissionChecker, group, ActionKeys.VIEW);
+			if (!GroupPermissionUtil.contains(
+					permissionChecker, group, ActionKeys.VIEW)) {
+
+				GroupPermissionUtil.check(
+					permissionChecker, group, ActionKeys.MANAGE_LAYOUTS);
+			}
 		}
 	}
 
