@@ -389,25 +389,6 @@ public class EditLayoutsAction extends PortletAction {
 		portletRequestDispatcher.include(resourceRequest, resourceResponse);
 	}
 
-	protected void checkPermission(
-			PermissionChecker permissionChecker, Group group, Layout layout,
-			long selPlid)
-		throws PortalException, SystemException {
-
-		if (selPlid > 0) {
-			LayoutPermissionUtil.check(
-				permissionChecker, layout, ActionKeys.VIEW);
-		}
-		else {
-			if (!GroupPermissionUtil.contains(
-					permissionChecker, group, ActionKeys.VIEW)) {
-
-				GroupPermissionUtil.check(
-					permissionChecker, group, ActionKeys.MANAGE_LAYOUTS);
-			}
-		}
-	}
-
 	protected void checkPermissions(PortletRequest portletRequest)
 		throws Exception {
 
@@ -437,43 +418,49 @@ public class EditLayoutsAction extends PortletAction {
 			long parentPlid = ParamUtil.getLong(portletRequest, "parentPlid");
 
 			if (parentPlid == LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
-				if (!GroupPermissionUtil.contains(
+				if (GroupPermissionUtil.contains(
 						permissionChecker, group.getGroupId(),
 						ActionKeys.ADD_LAYOUT)) {
 
-					throw new PrincipalException();
+					return;
 				}
 			}
 			else {
-				layout = LayoutLocalServiceUtil.getLayout(parentPlid);
+				if (LayoutPermissionUtil.contains(
+						permissionChecker, parentPlid, ActionKeys.ADD_LAYOUT)) {
 
-				if (!LayoutPermissionUtil.contains(
-						permissionChecker, layout, ActionKeys.ADD_LAYOUT)) {
-
-					throw new PrincipalException();
+					return;
 				}
 			}
 		}
 		else if (cmd.equals(Constants.DELETE)) {
-			if (!LayoutPermissionUtil.contains(
+			if (LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.DELETE)) {
 
-				throw new PrincipalException();
+				return;
 			}
 		}
 		else if (cmd.equals(Constants.UPDATE)) {
 			if (group.isCompany()) {
-				if (!permissionChecker.isCompanyAdmin()) {
-					throw new PrincipalException();
+				if (permissionChecker.isCompanyAdmin()) {
+					return;
 				}
 			}
 			else if (group.isLayoutPrototype()) {
-				LayoutPrototypePermissionUtil.check(
-					permissionChecker, group.getClassPK(), ActionKeys.UPDATE);
+				if (LayoutPrototypePermissionUtil.contains(
+						permissionChecker, group.getClassPK(),
+						ActionKeys.UPDATE)) {
+
+					return;
+				}
 			}
 			else if (group.isLayoutSetPrototype()) {
-				LayoutSetPrototypePermissionUtil.check(
-					permissionChecker, group.getClassPK(), ActionKeys.UPDATE);
+				if (LayoutSetPrototypePermissionUtil.contains(
+						permissionChecker, group.getClassPK(),
+						ActionKeys.UPDATE)) {
+
+					return;
+				}
 			}
 			else if (group.isUser()) {
 				long groupUserId = group.getClassPK();
@@ -482,12 +469,19 @@ public class EditLayoutsAction extends PortletAction {
 
 				long[] organizationIds = groupUser.getOrganizationIds();
 
-				UserPermissionUtil.check(
-					permissionChecker, groupUserId, organizationIds,
-					ActionKeys.UPDATE);
+				if (UserPermissionUtil.contains(
+						permissionChecker, groupUserId, organizationIds,
+						ActionKeys.UPDATE)) {
+
+					return;
+				}
 			}
 			else {
-				checkPermission(permissionChecker, group, layout, selPlid);
+				if (containsPermissions(
+						permissionChecker, group, layout, selPlid)) {
+
+					return;
+				}
 			}
 		}
 		else if (cmd.equals("publish_to_live")) {
@@ -503,24 +497,64 @@ public class EditLayoutsAction extends PortletAction {
 					permissionChecker, group.getGroupId(),
 					ActionKeys.PUBLISH_STAGING);
 
-				if (!hasUpdateLayoutPermission && !publishToLive) {
-					throw new PrincipalException();
+				if (hasUpdateLayoutPermission || publishToLive) {
+					return;
 				}
+
 			}
 			else {
-				checkPermission(permissionChecker, group, layout, selPlid);
+				if (containsPermissions(
+						permissionChecker, group, layout, selPlid)) {
+
+					return;
+				}
 			}
 		}
 		else if (cmd.equals("reset_customized_view")) {
-			if (!LayoutPermissionUtil.contains(
+			if (LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.CUSTOMIZE)) {
 
-				throw new PrincipalException();
+				return;
 			}
 		}
 		else {
-			checkPermission(permissionChecker, group, layout, selPlid);
+			if (containsPermissions(
+					permissionChecker, group, layout, selPlid)) {
+
+				return;
+			}
 		}
+
+		throw new PrincipalException();
+	}
+
+	protected boolean containsPermissions(
+			PermissionChecker permissionChecker, Group group, Layout layout,
+			long selPlid)
+		throws PortalException, SystemException {
+
+		if (selPlid > 0) {
+			if (LayoutPermissionUtil.contains(
+					permissionChecker, layout, ActionKeys.VIEW)) {
+
+				return true;
+			}
+		}
+		else {
+			if (GroupPermissionUtil.contains(
+					permissionChecker, group, ActionKeys.VIEW)) {
+
+				return true;
+			}
+
+			if (GroupPermissionUtil.contains(
+					permissionChecker, group, ActionKeys.MANAGE_LAYOUTS)) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	protected void deleteLayoutRevision(ActionRequest actionRequest)
