@@ -494,22 +494,20 @@ public class EditLayoutsAction extends PortletAction {
 		}
 
 		if (cmd.equals("publish_to_live")) {
-			boolean hasUpdateLayoutPermission = false;
-
-			if (layout != null) {
-				hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
-					permissionChecker, layout, ActionKeys.UPDATE);
-			}
-
 			if (group.isCompany() || group.isSite()) {
-				boolean publishToLive = GroupPermissionUtil.contains(
-					permissionChecker, group.getGroupId(),
-					ActionKeys.PUBLISH_STAGING);
+				if ((layout != null) &&
+						LayoutPermissionUtil.contains(
+							permissionChecker, layout, ActionKeys.UPDATE)) {
 
-				if (hasUpdateLayoutPermission || publishToLive) {
 					return;
 				}
 
+				if (GroupPermissionUtil.contains(
+						permissionChecker, group.getGroupId(),
+						ActionKeys.PUBLISH_STAGING)) {
+
+					return;
+				}
 			}
 			else {
 				if (containsPermissions(
