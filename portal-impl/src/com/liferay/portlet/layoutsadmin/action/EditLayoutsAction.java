@@ -432,15 +432,21 @@ public class EditLayoutsAction extends PortletAction {
 					return;
 				}
 			}
+
+			throw new PrincipalException();
 		}
-		else if (cmd.equals(Constants.DELETE)) {
+
+		if (cmd.equals(Constants.DELETE)) {
 			if (LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.DELETE)) {
 
 				return;
 			}
+
+			throw new PrincipalException();
 		}
-		else if (cmd.equals(Constants.UPDATE)) {
+
+		if (cmd.equals(Constants.UPDATE)) {
 			if (group.isCompany()) {
 				if (permissionChecker.isCompanyAdmin()) {
 					return;
@@ -483,8 +489,11 @@ public class EditLayoutsAction extends PortletAction {
 					return;
 				}
 			}
+
+			throw new PrincipalException();
 		}
-		else if (cmd.equals("publish_to_live")) {
+
+		if (cmd.equals("publish_to_live")) {
 			boolean hasUpdateLayoutPermission = false;
 
 			if (layout != null) {
@@ -509,20 +518,22 @@ public class EditLayoutsAction extends PortletAction {
 					return;
 				}
 			}
+
+			throw new PrincipalException();
 		}
-		else if (cmd.equals("reset_customized_view")) {
+
+		if (cmd.equals("reset_customized_view")) {
 			if (LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.CUSTOMIZE)) {
 
 				return;
 			}
-		}
-		else {
-			if (containsPermissions(
-					permissionChecker, group, layout, selPlid)) {
 
-				return;
-			}
+			throw new PrincipalException();
+		}
+
+		if (containsPermissions(permissionChecker, group, layout, selPlid)) {
+			return;
 		}
 
 		throw new PrincipalException();
