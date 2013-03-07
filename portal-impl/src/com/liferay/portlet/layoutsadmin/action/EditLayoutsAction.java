@@ -414,16 +414,6 @@ public class EditLayoutsAction extends PortletAction {
 			layout = LayoutLocalServiceUtil.getLayout(selPlid);
 		}
 
-		if (cmd.equals(Constants.DELETE)) {
-			if (LayoutPermissionUtil.contains(
-					permissionChecker, layout, ActionKeys.DELETE)) {
-
-				return;
-			}
-
-			throw new PrincipalException();
-		}
-
 		if (cmd.equals(Constants.UPDATE)) {
 			if (group.isCompany()) {
 				if (permissionChecker.isCompanyAdmin()) {
