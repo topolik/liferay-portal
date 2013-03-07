@@ -16,6 +16,7 @@ package com.liferay.portal.security.pwd;
 
 import com.liferay.portal.PwdEncryptorException;
 import com.liferay.portal.kernel.util.Base64;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Digester;
 import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -26,11 +27,19 @@ import com.liferay.portal.util.PropsUtil;
 
 import java.io.UnsupportedEncodingException;
 
+import java.nio.ByteBuffer;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import jodd.util.BCrypt;
 
@@ -64,6 +73,8 @@ public class PwdEncryptor {
 
 	public static final String TYPE_NONE = "NONE";
 
+	public static final String TYPE_PBKDF2 = "PBKDF2";
+
 	public static final String TYPE_SHA = "SHA";
 
 	public static final String TYPE_SHA_256 = "SHA-256";
@@ -94,8 +105,9 @@ public class PwdEncryptor {
 			String currentEncryptedPassword)
 		throws PwdEncryptorException {
 
-		if (algorithm.equals(TYPE_BCRYPT)) {
-			byte[] saltBytes = _getSaltFromBCrypt(currentEncryptedPassword);
+		if (algorithm.startsWith(TYPE_BCRYPT)) {
+			byte[] saltBytes = _getSaltFromBCrypt(
+				algorithm, currentEncryptedPassword);
 
 			return encodePassword(algorithm, clearTextPassword, saltBytes);
 		}
@@ -108,6 +120,12 @@ public class PwdEncryptor {
 		}
 		else if (algorithm.equals(TYPE_NONE)) {
 			return clearTextPassword;
+		}
+		else if (algorithm.startsWith(TYPE_PBKDF2)) {
+			byte[] saltBytes = _getSaltFromPBKDF2(
+				algorithm, currentEncryptedPassword);
+
+			return encodePassword(algorithm, clearTextPassword, saltBytes);
 		}
 		else if (algorithm.equals(TYPE_SSHA)) {
 			byte[] saltBytes = _getSaltFromSSHA(currentEncryptedPassword);
@@ -124,7 +142,7 @@ public class PwdEncryptor {
 		throws PwdEncryptorException {
 
 		try {
-			if (algorithm.equals(TYPE_BCRYPT)) {
+			if (algorithm.startsWith(TYPE_BCRYPT)) {
 				String salt = new String(saltBytes);
 
 				return BCrypt.hashpw(clearTextPassword, salt);
@@ -134,6 +152,55 @@ public class PwdEncryptor {
 
 				return Crypt.crypt(
 					saltBytes, clearTextPassword.getBytes(Digester.ENCODING));
+			}
+			else if (algorithm.startsWith(TYPE_PBKDF2)) {
+				if (saltBytes.length < 12) {
+					throw new PwdEncryptorException("Unsupported salt length");
+				}
+
+				int keySize = _DEFAULT_PBKDF2_KEY_SIZE;
+
+				int slashIndex = algorithm.indexOf(CharPool.SLASH);
+				if (slashIndex > -1) {
+					int startIndex = slashIndex + 1;
+					int endIndex = algorithm.indexOf(
+						CharPool.SLASH, startIndex);
+
+					if (endIndex > startIndex) {
+						keySize = GetterUtil.getInteger(
+							algorithm.substring(startIndex, endIndex), keySize);
+					}
+
+					algorithm = algorithm.substring(0, slashIndex);
+				}
+
+				byte[] onlySaltBytes = new byte[saltBytes.length - 4];
+
+				ByteBuffer buff = ByteBuffer.wrap(saltBytes);
+				int rounds = buff.getInt();
+				buff.get(onlySaltBytes);
+
+				PBEKeySpec keySpec = new PBEKeySpec(
+					clearTextPassword.toCharArray(), onlySaltBytes, rounds,
+					keySize);
+
+				SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(
+					algorithm);
+
+				byte[] key;
+				try {
+					key = keyFactory.generateSecret(keySpec).getEncoded();
+				} catch (InvalidKeySpecException e) {
+					throw new PwdEncryptorException(
+						"Unable to generate hash: " + e.getMessage(), e);
+				}
+
+				ByteBuffer result = ByteBuffer.allocate(
+					saltBytes.length + key.length);
+
+				result.put(saltBytes);
+				result.put(key);
+				return Base64.encode(result.array());
 			}
 			else if (algorithm.equals(TYPE_SSHA)) {
 				byte[] clearTextPasswordBytes = clearTextPassword.getBytes(
@@ -187,14 +254,25 @@ public class PwdEncryptor {
 		}
 	}
 
-	private static byte[] _getSaltFromBCrypt(String bcryptString)
+	private static byte[] _getSaltFromBCrypt(
+			String algorithm, String bcryptString)
 		throws PwdEncryptorException {
 
 		byte[] saltBytes = null;
 
 		try {
+			int rounds = _DEFAULT_BCRYPT_ROUNDS;
+
+			Matcher algorithmRoundsMatcher = _algorithmRounds.matcher(
+				algorithm);
+
+			if (algorithmRoundsMatcher.matches()) {
+				rounds = GetterUtil.getInteger(
+					algorithmRoundsMatcher.group(1), rounds);
+			}
+
 			if (Validator.isNull(bcryptString)) {
-				String salt = BCrypt.gensalt();
+				String salt = BCrypt.gensalt(rounds);
 
 				saltBytes = salt.getBytes(StringPool.UTF8);
 			}
@@ -223,7 +301,7 @@ public class PwdEncryptor {
 
 				// Generate random salt
 
-				Random random = new Random();
+				Random random = new SecureRandom();
 
 				int numSaltChars = SALT_CHARS.length;
 
@@ -255,6 +333,55 @@ public class PwdEncryptor {
 		}
 
 		return saltBytes;
+	}
+
+	private static byte[] _getSaltFromPBKDF2(
+			String algorithm, String pbkdf2String)
+		throws PwdEncryptorException {
+
+		byte[] roundsWithSalt = new byte[12];
+
+		if (Validator.isNull(pbkdf2String)) {
+			byte[] saltBytes = new byte[8];
+
+			SecureRandom random = new SecureRandom();
+
+			random.nextBytes(saltBytes);
+
+			int rounds = _DEFAULT_PBKDF2_ROUNDS;
+
+			Matcher algorithmRoundsMatcher = _algorithmRounds.matcher(
+				algorithm);
+
+			if (algorithmRoundsMatcher.matches()) {
+				rounds = GetterUtil.getInteger(
+					algorithmRoundsMatcher.group(1), rounds);
+			}
+
+			ByteBuffer buff = ByteBuffer.allocate(12);
+			buff.putInt(rounds);
+			buff.put(saltBytes);
+
+			roundsWithSalt = buff.array();
+
+			return roundsWithSalt;
+		}
+		else {
+			try {
+				byte[] saltPlusDigest = Base64.decode(pbkdf2String);
+
+				System.arraycopy(
+					saltPlusDigest, 0, roundsWithSalt, 0,
+					roundsWithSalt.length);
+
+				return roundsWithSalt;
+			}
+			catch (Exception e) {
+				throw new PwdEncryptorException(
+					"Unable to extract salt from encrypted password: " +
+						e.getMessage());
+			}
+		}
 	}
 
 	private static byte[] _getSaltFromSSHA(String sshaString)
@@ -294,5 +421,12 @@ public class PwdEncryptor {
 
 		return saltBytes;
 	}
+
+	private static final Pattern _algorithmRounds = Pattern.compile(
+		"^.*/([0-9]+)$");
+
+	private static final int _DEFAULT_BCRYPT_ROUNDS = 10;
+	private static final int _DEFAULT_PBKDF2_KEY_SIZE = 160;
+	private static final int _DEFAULT_PBKDF2_ROUNDS = 128000;
 
 }
