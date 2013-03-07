@@ -414,28 +414,6 @@ public class EditLayoutsAction extends PortletAction {
 			layout = LayoutLocalServiceUtil.getLayout(selPlid);
 		}
 
-		if (cmd.equals(Constants.ADD)) {
-			long parentPlid = ParamUtil.getLong(portletRequest, "parentPlid");
-
-			if (parentPlid == LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
-				if (GroupPermissionUtil.contains(
-						permissionChecker, group.getGroupId(),
-						ActionKeys.ADD_LAYOUT)) {
-
-					return;
-				}
-			}
-			else {
-				if (LayoutPermissionUtil.contains(
-						permissionChecker, parentPlid, ActionKeys.ADD_LAYOUT)) {
-
-					return;
-				}
-			}
-
-			throw new PrincipalException();
-		}
-
 		if (cmd.equals(Constants.DELETE)) {
 			if (LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.DELETE)) {
