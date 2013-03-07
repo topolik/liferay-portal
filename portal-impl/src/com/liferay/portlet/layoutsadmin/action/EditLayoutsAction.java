@@ -414,53 +414,6 @@ public class EditLayoutsAction extends PortletAction {
 			layout = LayoutLocalServiceUtil.getLayout(selPlid);
 		}
 
-		if (cmd.equals(Constants.UPDATE)) {
-			if (group.isCompany()) {
-				if (permissionChecker.isCompanyAdmin()) {
-					return;
-				}
-			}
-			else if (group.isLayoutPrototype()) {
-				if (LayoutPrototypePermissionUtil.contains(
-						permissionChecker, group.getClassPK(),
-						ActionKeys.UPDATE)) {
-
-					return;
-				}
-			}
-			else if (group.isLayoutSetPrototype()) {
-				if (LayoutSetPrototypePermissionUtil.contains(
-						permissionChecker, group.getClassPK(),
-						ActionKeys.UPDATE)) {
-
-					return;
-				}
-			}
-			else if (group.isUser()) {
-				long groupUserId = group.getClassPK();
-
-				User groupUser = UserLocalServiceUtil.getUserById(groupUserId);
-
-				long[] organizationIds = groupUser.getOrganizationIds();
-
-				if (UserPermissionUtil.contains(
-						permissionChecker, groupUserId, organizationIds,
-						ActionKeys.UPDATE)) {
-
-					return;
-				}
-			}
-			else {
-				if (containsPermissions(
-						permissionChecker, group, layout, selPlid)) {
-
-					return;
-				}
-			}
-
-			throw new PrincipalException();
-		}
-
 		if (cmd.equals("publish_to_live")) {
 			if (group.isCompany() || group.isSite()) {
 				if ((layout != null) &&
