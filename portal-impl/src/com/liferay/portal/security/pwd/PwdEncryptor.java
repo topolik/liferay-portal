@@ -15,9 +15,12 @@
 package com.liferay.portal.security.pwd;
 
 import com.liferay.portal.PwdEncryptorException;
+import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.InstanceFactory;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.ClassLoaderUtil;
 import com.liferay.portal.util.PropsUtil;
 
@@ -31,6 +34,11 @@ public class PwdEncryptor {
 		GetterUtil.getString(
 			PropsUtil.get(
 				PropsKeys.PASSWORDS_ENCRYPTION_ALGORITHM)).toUpperCase();
+
+	public static final String PASSWORDS_ENCRYPTOR_OLD_ALGORITHM =
+		GetterUtil.getString(
+			PropsUtil.get(
+				PropsKeys.PASSWORDS_ENCRYPTOR_OLD_ALGORITHM)).toUpperCase();
 
 	public static final char[] SALT_CHARS =
 		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./"
@@ -61,6 +69,8 @@ public class PwdEncryptor {
 
 	public static final String TYPE_UFC_CRYPT = "UFC-CRYPT";
 
+	public static final String TYPE_UPGRADE = "OLD";
+
 	public static String encrypt(String clearTextPassword)
 		throws PwdEncryptorException {
 
@@ -81,8 +91,57 @@ public class PwdEncryptor {
 
 		_initialize();
 
-		return _passwordEncryptor.encrypt(
+		if (Validator.isNotNull(currentEncryptedPassword)) {
+			algorithm = _parseAlgorithm(currentEncryptedPassword, algorithm);
+			currentEncryptedPassword = _cleanEncryptedPassword(
+				currentEncryptedPassword);
+		}
+
+		boolean upgradeAlgorithm = false;
+
+		if (Validator.isNotNull(algorithm) && algorithm.equals(TYPE_UPGRADE)) {
+			upgradeAlgorithm = true;
+			algorithm = _upgradeSupport(algorithm);
+		}
+
+		String hash = _passwordEncryptor.encrypt(
 			algorithm, clearTextPassword, currentEncryptedPassword);
+
+		StringBuilder result = new StringBuilder(4);
+		result.append(StringPool.OPEN_CURLY_BRACE);
+
+		if (upgradeAlgorithm) {
+			result.append(TYPE_UPGRADE);
+		}
+		else {
+			result.append(algorithm);
+		}
+
+		result.append(StringPool.CLOSE_CURLY_BRACE);
+		result.append(hash);
+
+		return result.toString();
+	}
+
+	private static String _cleanEncryptedPassword(
+		String currentEncryptedPassword) {
+
+		int endPos = _getPrefixEndPos(currentEncryptedPassword);
+
+		if (endPos > -1) {
+			currentEncryptedPassword = currentEncryptedPassword.substring(
+				endPos + 1);
+		}
+
+		return currentEncryptedPassword;
+	}
+
+	private static int _getPrefixEndPos(String currentEncryptedPassword) {
+		if (currentEncryptedPassword.charAt(0) == CharPool.OPEN_CURLY_BRACE) {
+			return currentEncryptedPassword.indexOf(CharPool.CLOSE_CURLY_BRACE);
+		}
+
+		return -1;
 	}
 
 	private static void _initialize() throws PwdEncryptorException {
@@ -107,9 +166,34 @@ public class PwdEncryptor {
 			}
 			catch (Exception e) {
 				throw new PwdEncryptorException(
-					"Unable to initialize encryptor " + e.getMessage(), e);
+					"Unable to initialize encryptor: " + e.getMessage(), e);
 			}
 		}
+	}
+
+	private static String _parseAlgorithm(
+		String currentEncryptedPassword, String algorithm) {
+
+		int endPos = _getPrefixEndPos(currentEncryptedPassword);
+
+		if (endPos > -1) {
+			algorithm = currentEncryptedPassword.substring(1, endPos);
+		}
+
+		return algorithm;
+	}
+
+	private static String _upgradeSupport(String algorithm) {
+		algorithm = GetterUtil.getString(
+			PropsUtil.get(
+				PropsKeys.PASSWORDS_ENCRYPTION_ALGORITHM))
+			.toUpperCase();
+
+		if (Validator.isNull(algorithm)) {
+			algorithm = PASSWORDS_ENCRYPTOR_OLD_ALGORITHM;
+		}
+
+		return algorithm;
 	}
 
 	private static PasswordEncryptor _passwordEncryptor;

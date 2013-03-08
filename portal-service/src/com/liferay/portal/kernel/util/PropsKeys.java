@@ -1787,9 +1787,14 @@ public interface PropsKeys {
 
 	public static final String PASSWORDS_DIGEST_ENCODING = "passwords.digest.encoding";
 
+	/**
+	 * @deprecated As of 6.2.0
+	 */
 	public static final String PASSWORDS_ENCRYPTION_ALGORITHM = "passwords.encryption.algorithm";
 
 	public static final String PASSWORDS_ENCRYPTOR = "passwords.encryptor";
+
+	public static final String PASSWORDS_ENCRYPTOR_OLD_ALGORITHM = "passwords.encryptor.old.algorithm";
 
 	public static final String PASSWORDS_PASSWORDPOLICYTOOLKIT_CHARSET_LOWERCASE = "passwords.passwordpolicytoolkit.charset.lowercase";
 

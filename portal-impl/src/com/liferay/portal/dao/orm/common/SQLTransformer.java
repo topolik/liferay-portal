@@ -273,6 +273,35 @@ public class SQLTransformer {
 		return newSQL.replaceAll("(?i)replace\\(", "str_replace(");
 	}
 
+	private String _replaceSimpleConcat(String sql) {
+		String delimiter;
+
+		if (_vendorDerby || _vendorFirebird || _vendorInformix ||
+			_vendorIngres) {
+
+			delimiter = "||";
+		}
+		else if (_vendorSQLServer || _vendorSybase) {
+			delimiter = "+";
+		}
+		else {
+			return sql;
+		}
+
+		Matcher m = _concatPattern.matcher(sql);
+		boolean changed = true;
+		while (changed && sql.toUpperCase().contains("CONCAT(")) {
+			String newSQL = m.replaceAll(" $1 " + delimiter + " $2 ");
+
+			changed = !newSQL.equals(sql);
+			sql = newSQL;
+
+			m = _concatPattern.matcher(sql);
+		}
+
+		return sql;
+	}
+
 	private String _replaceUnion(String sql) {
 		Matcher matcher = _unionAllPattern.matcher(sql);
 
@@ -292,6 +321,7 @@ public class SQLTransformer {
 		newSQL = _replaceCastText(newSQL);
 		newSQL = _replaceCrossJoin(newSQL);
 		newSQL = _replaceIntegerDivision(newSQL);
+		newSQL = _replaceSimpleConcat(newSQL);
 
 		if (_vendorDB2) {
 			newSQL = _replaceLike(newSQL);
@@ -421,6 +451,9 @@ public class SQLTransformer {
 		"CAST_LONG\\((.+?)\\)", Pattern.CASE_INSENSITIVE);
 	private static Pattern _castTextPattern = Pattern.compile(
 		"CAST_TEXT\\((.+?)\\)", Pattern.CASE_INSENSITIVE);
+	private static Pattern _concatPattern = Pattern.compile(
+		"CONCAT\\(([^,]+),([^\\)]+)\\)", Pattern.CASE_INSENSITIVE);
+
 	private static Pattern _integerDivisionPattern = Pattern.compile(
 		"INTEGER_DIV\\((.+?),(.+?)\\)", Pattern.CASE_INSENSITIVE);
 	private static Pattern _jpqlCountPattern = Pattern.compile(
@@ -433,7 +466,6 @@ public class SQLTransformer {
 		"(!?=)( -([0-9]+)?)", Pattern.CASE_INSENSITIVE);
 	private static Pattern _unionAllPattern = Pattern.compile(
 		"SELECT \\* FROM(.*)TEMP_TABLE(.*)", Pattern.CASE_INSENSITIVE);
-
 	private DB _db;
 	private Map<String, String> _transformedSqls;
 	private boolean _vendorDB2;

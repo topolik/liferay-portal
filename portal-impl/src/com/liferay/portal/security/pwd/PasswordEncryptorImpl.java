@@ -57,50 +57,24 @@ public class PasswordEncryptorImpl implements PasswordEncryptor {
 				"Parameter clearTextPassword cannot be null!");
 		}
 
-		if (Validator.isNotNull(currentEncryptedPassword) &&
-			(currentEncryptedPassword.charAt(0) == CharPool.OPEN_CURLY_BRACE)) {
-
-			int endPos = currentEncryptedPassword.indexOf(
-				CharPool.CLOSE_CURLY_BRACE);
-
-			if (endPos > -1) {
-				algorithm = currentEncryptedPassword.substring(1, endPos);
-				currentEncryptedPassword = currentEncryptedPassword.substring(
-					endPos + 1);
-			}
-		}
-
 		if (Validator.isNull(algorithm)) {
 			algorithm = _PASSWORDS_ENCRYPTOR_LIFERAY_ALGORITHM;
 		}
 
-		String hash;
-
 		if (algorithm.startsWith(PwdEncryptor.TYPE_BCRYPT)) {
-			hash =
-				encryptUsingBCrypt(
+			return encryptUsingBCrypt(
 					algorithm, clearTextPassword, currentEncryptedPassword);
 		}
-		else if (algorithm.startsWith(PwdEncryptor.TYPE_PBKDF2)) {
-			hash =
-				encryptUsingPBKDF2(
+
+		if (algorithm.startsWith(PwdEncryptor.TYPE_PBKDF2)) {
+			return encryptUsingPBKDF2(
 					algorithm, clearTextPassword, currentEncryptedPassword);
 		}
-		else {
 
-			// backwards compatibility
+		// backwards compatibility
 
-			hash = _parent.encrypt(
-				algorithm, clearTextPassword, currentEncryptedPassword);
-		}
-
-		StringBuilder result = new StringBuilder(4);
-		result.append(StringPool.OPEN_CURLY_BRACE);
-		result.append(algorithm);
-		result.append(StringPool.CLOSE_CURLY_BRACE);
-		result.append(hash);
-
-		return result.toString();
+		return _parent.encrypt(
+			algorithm, clearTextPassword, currentEncryptedPassword);
 	}
 
 	protected String encryptUsingBCrypt(

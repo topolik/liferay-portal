@@ -26,6 +26,12 @@ public class UpgradeUser extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
+		upgradeContact();
+
+		upgradePasswords();
+	}
+
+	protected void upgradeContact() throws Exception {
 		long classNameId = PortalUtil.getClassNameId(User.class);
 
 		runSQL("update Contact_ set classNameId = " + classNameId);
@@ -38,6 +44,12 @@ public class UpgradeUser extends UpgradeProcess {
 		sb.append("where User_.contactId = Contact_.contactId)");
 
 		runSQL(sb.toString());
+	}
+
+	private void upgradePasswords() throws Exception {
+		runSQL(
+			"update User_ set password_ = concat('{OLD}', password_) " +
+				"WHERE passwordEncrypted <> 0");
 	}
 
 }
