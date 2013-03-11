@@ -111,6 +111,10 @@ public class PwdEncryptorTest extends PowerMockito {
 		String algorithm = "PBKDF2WithHmacSHA1";
 		testAlgorithm(algorithm);
 		testEdgeCases(algorithm);
+		testAlgorithmWithEmptyVariations(
+			algorithm, "password",
+			"{PBKDF2WithHmacSHA1}AAAAoAAB9ADLWNtXOKmwZIImJSU9bjMO9ABSK48L" +
+				"TqsBgLka");
 	}
 
 	@Test
@@ -118,6 +122,10 @@ public class PwdEncryptorTest extends PowerMockito {
 		String algorithm = "PBKDF2WithHmacSHA1/50000";
 		testAlgorithm(algorithm);
 		testEdgeCases(algorithm);
+		testAlgorithmWithEmptyVariations(
+			algorithm, "password",
+			"{PBKDF2WithHmacSHA1/50000}AAAAoAAAw1B2QW+W/zl4N4lkdgOumkUnjpF" +
+				"BqnaSZUHK3qBr");
 	}
 
 	@Test
@@ -125,6 +133,10 @@ public class PwdEncryptorTest extends PowerMockito {
 		String algorithm = "PBKDF2WithHmacSHA1/128/50000";
 		testAlgorithm(algorithm);
 		testEdgeCases(algorithm);
+		testAlgorithmWithEmptyVariations(
+			algorithm, "password",
+			"{PBKDF2WithHmacSHA1/128/50000}AAAAoAAAw1A3TTatq3olJmxXB/RWtFv" +
+				"Sm0BSrKE62BClGHwo");
 	}
 
 	@Test
@@ -171,6 +183,9 @@ public class PwdEncryptorTest extends PowerMockito {
 		String algorithm = PwdEncryptor.TYPE_SSHA;
 		testAlgorithm(algorithm);
 		testEdgeCasesAllowEmptyPass(algorithm);
+		testAlgorithmWithEmptyVariations(
+			algorithm, "password",
+			"{SSHA}2EWEKeVpSdd79PkTX5vaGXH5uQ028Smy/H1NmA==");
 	}
 
 	@Test
