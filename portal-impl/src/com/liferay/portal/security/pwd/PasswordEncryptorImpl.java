@@ -18,11 +18,8 @@ import com.liferay.portal.PwdEncryptorException;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.PropsUtil;
-
-import java.io.UnsupportedEncodingException;
 
 import java.nio.ByteBuffer;
 
@@ -82,10 +79,24 @@ public class PasswordEncryptorImpl implements PasswordEncryptor {
 			String currentEncryptedPassword)
 		throws PwdEncryptorException {
 
-		byte[] saltBytes = _getSaltFromBCrypt(
-			algorithm, currentEncryptedPassword);
+		String salt;
 
-		String salt = new String(saltBytes);
+		if (Validator.isNull(currentEncryptedPassword)) {
+			int rounds = _DEFAULT_BCRYPT_ROUNDS;
+
+			Matcher algorithmRoundsMatcher = _algorithmRounds.matcher(
+				algorithm);
+
+			if (algorithmRoundsMatcher.matches()) {
+				rounds = GetterUtil.getInteger(
+					algorithmRoundsMatcher.group(1), _DEFAULT_BCRYPT_ROUNDS);
+			}
+
+			salt = BCrypt.gensalt(rounds);
+		}
+		else {
+			salt = currentEncryptedPassword.substring(0, 29);
+		}
 
 		return BCrypt.hashpw(clearTextPassword, salt);
 	}
@@ -144,42 +155,6 @@ public class PasswordEncryptorImpl implements PasswordEncryptor {
 		result.put(saltBytes);
 		result.put(key);
 		return Base64.encode(result.array());
-	}
-
-	private byte[] _getSaltFromBCrypt(String algorithm, String bcryptString)
-		throws PwdEncryptorException {
-
-		byte[] saltBytes;
-
-		try {
-			int rounds = _DEFAULT_BCRYPT_ROUNDS;
-
-			Matcher algorithmRoundsMatcher = _algorithmRounds.matcher(
-				algorithm);
-
-			if (algorithmRoundsMatcher.matches()) {
-				rounds = GetterUtil.getInteger(
-					algorithmRoundsMatcher.group(1), rounds);
-			}
-
-			if (Validator.isNull(bcryptString)) {
-				String salt = BCrypt.gensalt(rounds);
-
-				saltBytes = salt.getBytes(StringPool.UTF8);
-			}
-			else {
-				String salt = bcryptString.substring(0, 29);
-
-				saltBytes = salt.getBytes(StringPool.UTF8);
-			}
-		}
-		catch (UnsupportedEncodingException uee) {
-			throw new PwdEncryptorException(
-				"Unable to extract salt from encrypted password: " +
-					uee.getMessage());
-		}
-
-		return saltBytes;
 	}
 
 	private byte[] _getSaltFromPBKDF2(String algorithm, String pbkdf2String)
