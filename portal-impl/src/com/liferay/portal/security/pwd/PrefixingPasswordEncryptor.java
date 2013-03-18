@@ -54,7 +54,9 @@ public class PrefixingPasswordEncryptor extends BasePasswordEncryptor {
 
 				if (endPos > 0) {
 					algorithmInsideHash = true;
+
 					algorithm = currentEncryptedPassword.substring(1, endPos);
+
 					currentEncryptedPassword =
 						currentEncryptedPassword.substring(endPos + 1);
 				}
@@ -69,9 +71,13 @@ public class PrefixingPasswordEncryptor extends BasePasswordEncryptor {
 		}
 
 		StringBuilder result = new StringBuilder(4);
+
 		result.append(StringPool.OPEN_CURLY_BRACE);
+
 		result.append(getAlgorithmName(algorithm));
+
 		result.append(StringPool.CLOSE_CURLY_BRACE);
+
 		result.append(hash);
 
 		return result.toString();
@@ -79,6 +85,7 @@ public class PrefixingPasswordEncryptor extends BasePasswordEncryptor {
 
 	protected String getAlgorithmName(String algorithm) {
 		int slashIndex = algorithm.indexOf(CharPool.SLASH);
+
 		if (slashIndex > 0) {
 			return algorithm.substring(0, slashIndex);
 		}
@@ -86,6 +93,6 @@ public class PrefixingPasswordEncryptor extends BasePasswordEncryptor {
 		return algorithm;
 	}
 
-	PasswordEncryptor _parentPasswordEncryptor;
+	private PasswordEncryptor _parentPasswordEncryptor;
 
 }

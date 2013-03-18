@@ -45,9 +45,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 	public void setUp() {
 		new DigesterUtil().setDigester(new DigesterImpl());
 
-		PasswordEncryptorUtil passwordEncryptorUtil =
-			new PasswordEncryptorUtil();
-
 		CompositePasswordEncryptor compositePasswordEncryptor =
 			new CompositePasswordEncryptor();
 
@@ -74,6 +71,9 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 
 		prefixingPasswordEncryptor.setParentPasswordEncryptor(
 			compositePasswordEncryptor);
+
+		PasswordEncryptorUtil passwordEncryptorUtil =
+			new PasswordEncryptorUtil();
 
 		passwordEncryptorUtil.setPasswordEncryptor(prefixingPasswordEncryptor);
 	}
@@ -182,8 +182,8 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 
 	@Test
 	public void testEncryptPBKDF2With50000Rounds() throws Exception {
-		String algorithm = PasswordEncryptorUtil.TYPE_PBKDF2 +
-			"WithHmacSHA1/50000";
+		String algorithm =
+			PasswordEncryptorUtil.TYPE_PBKDF2 + "WithHmacSHA1/50000";
 
 		testAlgorithm(algorithm);
 
@@ -194,8 +194,8 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 
 	@Test
 	public void testEncryptPBKDF2With50000RoundsAnd128Key() throws Exception {
-		String algorithm = PasswordEncryptorUtil.TYPE_PBKDF2 +
-			"WithHmacSHA1/128/50000";
+		String algorithm =
+			PasswordEncryptorUtil.TYPE_PBKDF2 + "WithHmacSHA1/128/50000";
 
 		testAlgorithm(algorithm);
 
