@@ -18,11 +18,13 @@ import com.liferay.portal.PwdEncryptorException;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.util.PropsValues;
 
 /**
  * @author Tomas Polesovsky
  */
-public class PrefixingPasswordEncryptor extends BasePasswordEncryptor {
+public class LegacyAlgorithmAwarePasswordEncryptor
+	extends BasePasswordEncryptor {
 
 	public String[] getSupportedAlgorithmTypes() {
 		return _parentPasswordEncryptor.getSupportedAlgorithmTypes();
@@ -40,35 +42,34 @@ public class PrefixingPasswordEncryptor extends BasePasswordEncryptor {
 			String currentEncryptedPassword)
 		throws PwdEncryptorException {
 
-		boolean algorithmInsideHash = false;
+		boolean legacyEncrypted = false;
 
-		if (Validator.isNull(currentEncryptedPassword)) {
-			algorithmInsideHash = true;
-		}
-		else {
-			if (currentEncryptedPassword.charAt(0) ==
-				CharPool.OPEN_CURLY_BRACE) {
+		if (Validator.isNotNull(currentEncryptedPassword) &&
+			(currentEncryptedPassword.charAt(0) == CharPool.OPEN_CURLY_BRACE)) {
 
-				int endPos = currentEncryptedPassword.indexOf(
-					CharPool.CLOSE_CURLY_BRACE);
+			int endPos = currentEncryptedPassword.indexOf(
+				CharPool.CLOSE_CURLY_BRACE);
 
-				if (endPos > 0) {
-					algorithmInsideHash = true;
+			if (endPos > 0) {
+				algorithm = currentEncryptedPassword.substring(1, endPos);
 
-					algorithm = currentEncryptedPassword.substring(1, endPos);
+				currentEncryptedPassword =
+					currentEncryptedPassword.substring(endPos + 1);
 
-					currentEncryptedPassword =
-						currentEncryptedPassword.substring(endPos + 1);
-				}
+				legacyEncrypted = true;
 			}
 		}
 
-		String hash = _parentPasswordEncryptor.encrypt(
-			algorithm, clearTextPassword, currentEncryptedPassword);
+		if (Validator.isNull(
+				PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY) ||
+			!legacyEncrypted) {
 
-		if (!algorithmInsideHash) {
-			return hash;
+			return _parentPasswordEncryptor.encrypt(
+				algorithm, clearTextPassword, currentEncryptedPassword);
 		}
+
+		String encryptedPassword = _parentPasswordEncryptor.encrypt(
+			algorithm, clearTextPassword, currentEncryptedPassword);
 
 		StringBuilder result = new StringBuilder(4);
 
@@ -78,7 +79,7 @@ public class PrefixingPasswordEncryptor extends BasePasswordEncryptor {
 
 		result.append(StringPool.CLOSE_CURLY_BRACE);
 
-		result.append(hash);
+		result.append(encryptedPassword);
 
 		return result.toString();
 	}

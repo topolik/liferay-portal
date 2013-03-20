@@ -15,8 +15,10 @@
 package com.liferay.portal.security.pwd;
 
 import com.liferay.portal.PwdEncryptorException;
+import com.liferay.portal.dao.orm.hibernate.RestrictionsFactoryImpl;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.PropsUtil;
 
 /**
@@ -28,9 +30,9 @@ import com.liferay.portal.util.PropsUtil;
 public class PasswordEncryptorUtil {
 
 	public static final String PASSWORDS_ENCRYPTION_ALGORITHM =
-			GetterUtil.getString(
-				PropsUtil.get(
-					PropsKeys.PASSWORDS_ENCRYPTION_ALGORITHM)).toUpperCase();
+		GetterUtil.getString(
+			PropsUtil.get(
+				PropsKeys.PASSWORDS_ENCRYPTION_ALGORITHM)).toUpperCase();
 
 	public static final char[] SALT_CHARS =
 		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./"
@@ -64,14 +66,17 @@ public class PasswordEncryptorUtil {
 	public static String encrypt(String clearTextPassword)
 		throws PwdEncryptorException {
 
-		return encrypt(null, clearTextPassword, null);
+		return encrypt(clearTextPassword, null);
 	}
 
 	public static String encrypt(
 			String clearTextPassword, String currentEncryptedPassword)
 		throws PwdEncryptorException {
 
-		return encrypt(null, clearTextPassword, currentEncryptedPassword);
+
+		return encrypt(
+			PASSWORDS_ENCRYPTION_ALGORITHM, clearTextPassword,
+			currentEncryptedPassword);
 	}
 
 	public static String encrypt(
