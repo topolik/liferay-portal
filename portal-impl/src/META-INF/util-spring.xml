@@ -675,12 +675,6 @@
 			<bean class="com.liferay.portal.service.permission.PasswordPolicyPermissionImpl" />
 		</property>
 	</bean>
-	<bean id="com.liferay.portal.security.pwd.PasswordEncryptor" class="com.liferay.portal.security.pwd.UpgradePasswordEncryptor">
-		<property name="parentPasswordEncryptor" ref="com.liferay.portal.security.pwd.PrefixingPasswordEncryptor" />
-	</bean>
-	<bean id="com.liferay.portal.security.pwd.PrefixingPasswordEncryptor" class="com.liferay.portal.security.pwd.PrefixingPasswordEncryptor">
-		<property name="parentPasswordEncryptor" ref="com.liferay.portal.security.pwd.CompositePasswordEncryptor" />
-	</bean>
 	<bean id="com.liferay.portal.security.pwd.CompositePasswordEncryptor" class="com.liferay.portal.security.pwd.CompositePasswordEncryptor">
 		<property name="defaultPasswordEncryptor">
 			<bean class="com.liferay.portal.security.pwd.DefaultPasswordEncryptor" />
@@ -694,6 +688,9 @@
 				<bean class="com.liferay.portal.security.pwd.SSHAPasswordEncryptor" />
 			</util:list>
 		</property>
+	</bean>
+	<bean id="com.liferay.portal.security.pwd.PasswordEncryptor" class="com.liferay.portal.security.pwd.LegacyAlgorithmAwarePasswordEncryptorTest">
+		<property name="parentPasswordEncryptor" ref="com.liferay.portal.security.pwd.CompositePasswordEncryptor" />
 	</bean>
 	<bean id="com.liferay.portal.security.pwd.PasswordEncryptorUtil" class="com.liferay.portal.security.pwd.PasswordEncryptorUtil">
 		<property name="passwordEncryptor" ref="com.liferay.portal.security.pwd.PasswordEncryptor" />

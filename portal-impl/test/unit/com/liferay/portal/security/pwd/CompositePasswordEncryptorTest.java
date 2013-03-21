@@ -38,7 +38,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PowerMockIgnore({"javax.crypto.*" })
 @PrepareForTest(PropsUtil.class)
 @RunWith(PowerMockRunner.class)
-public class PasswordEncryptorUtilTest extends PowerMockito {
+public class CompositePasswordEncryptorTest extends PowerMockito {
 
 	@Before
 	public void setUp() {
@@ -65,22 +65,10 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 
 		compositePasswordEncryptor.setPasswordEncryptors(passwordEncryptors);
 
-		PrefixingPasswordEncryptor prefixingPasswordEncryptor =
-			new PrefixingPasswordEncryptor();
-
-		prefixingPasswordEncryptor.setParentPasswordEncryptor(
-			compositePasswordEncryptor);
-
-		UpgradePasswordEncryptor upgradePasswordEncryptor =
-			new UpgradePasswordEncryptor();
-
-		upgradePasswordEncryptor.setParentPasswordEncryptor(
-			prefixingPasswordEncryptor);
-
 		PasswordEncryptorUtil passwordEncryptorUtil =
 			new PasswordEncryptorUtil();
 
-		passwordEncryptorUtil.setPasswordEncryptor(upgradePasswordEncryptor);
+		passwordEncryptorUtil.setPasswordEncryptor(compositePasswordEncryptor);
 	}
 
 	@Test
@@ -114,10 +102,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(
 			algorithm, "password",
 			"$2a$10$/ST7LsB.7AAHsn/tlK6hr.nudQaBbJhPX9KfRSSzsn.1ij45lVzaK");
-
-		testUpgradeAlgorithm(
-			algorithm, "password",
-			"$2a$10$/ST7LsB.7AAHsn/tlK6hr.nudQaBbJhPX9KfRSSzsn.1ij45lVzaK");
 	}
 
 	@Test
@@ -125,10 +109,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		String algorithm = PasswordEncryptorUtil.TYPE_BCRYPT + "/10";
 
 		testAlgorithm(algorithm);
-
-		testAlgorithm(
-			algorithm, "password",
-			"$2a$10$/ST7LsB.7AAHsn/tlK6hr.nudQaBbJhPX9KfRSSzsn.1ij45lVzaK");
 	}
 
 	@Test
@@ -149,8 +129,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(algorithm);
 
 		testAlgorithm(algorithm, "password", "SNbUMVY9kKQpY");
-
-		testUpgradeAlgorithm(algorithm, "password", "SNbUMVY9kKQpY");
 	}
 
 	@Test
@@ -160,8 +138,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(algorithm);
 
 		testAlgorithm(algorithm, "password", "8DiBqIxuORNfDsxg79YJuQ==");
-
-		testUpgradeAlgorithm(algorithm, "password", "8DiBqIxuORNfDsxg79YJuQ==");
 	}
 
 	@Test
@@ -171,8 +147,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(algorithm);
 
 		testAlgorithm(algorithm, "password", "X03MO1qnZdYdgyfeuILPmQ==");
-
-		testUpgradeAlgorithm(algorithm, "password", "X03MO1qnZdYdgyfeuILPmQ==");
 	}
 
 	@Test
@@ -182,8 +156,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(algorithm);
 
 		testAlgorithm(algorithm, "password", "password");
-
-		testUpgradeAlgorithm(algorithm, "password", "password");
 	}
 
 	@Test
@@ -228,9 +200,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(algorithm);
 
 		testAlgorithm(algorithm, "password", "W6ph5Mm5Pz8GgiULbPgzG37mj9g=");
-
-		testUpgradeAlgorithm(
-			algorithm, "password", "W6ph5Mm5Pz8GgiULbPgzG37mj9g=");
 	}
 
 	@Test
@@ -240,9 +209,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(algorithm);
 
 		testAlgorithm(algorithm, "password", "W6ph5Mm5Pz8GgiULbPgzG37mj9g=");
-
-		testUpgradeAlgorithm(
-			algorithm, "password", "W6ph5Mm5Pz8GgiULbPgzG37mj9g=");
 	}
 
 	@Test
@@ -252,10 +218,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(algorithm);
 
 		testAlgorithm(
-			algorithm, "password",
-			"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=");
-
-		testUpgradeAlgorithm(
 			algorithm, "password",
 			"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=");
 	}
@@ -270,11 +232,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 			algorithm, "password",
 			"qLZLq9CsqRpZvbt3YbQh1PK7OCgNOnW6DyHyvrxFWD1EbFmGYMl" +
 				"M5oDEfRnDB4On");
-
-		testUpgradeAlgorithm(
-			algorithm, "password",
-			"qLZLq9CsqRpZvbt3YbQh1PK7OCgNOnW6DyHyvrxFWD1EbFmGYMl" +
-				"M5oDEfRnDB4On");
 	}
 
 	@Test
@@ -285,9 +242,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 
 		testAlgorithm(
 			algorithm, "password", "2EWEKeVpSdd79PkTX5vaGXH5uQ028Smy/H1NmA==");
-
-		testUpgradeAlgorithm(
-			algorithm, "password", "2EWEKeVpSdd79PkTX5vaGXH5uQ028Smy/H1NmA==");
 	}
 
 	@Test
@@ -297,40 +251,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		testAlgorithm(algorithm);
 
 		testAlgorithm(algorithm, "password", "2lrTlR/pWPUOQ");
-
-		testUpgradeAlgorithm(algorithm, "password", "2lrTlR/pWPUOQ");
-	}
-
-	@Test
-	public void testUpgradeCustomAlgorithm() throws Exception {
-		setCustomUpgradeAlgorithm(PasswordEncryptorUtil.TYPE_SHA_256);
-
-		String sha256Encrypted =
-			PasswordEncryptorUtil.encrypt(
-				"password", "XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=");
-
-		Assert.assertEquals(
-			"XohImNooBHFR0OVvjcYpJ3NgPQ1qq73WKhHvch0VQtg=", sha256Encrypted);
-
-		String newPassword = PasswordEncryptorUtil.encrypt("password");
-
-		Assert.assertTrue(newPassword.startsWith("{PBKDF2WITHHMACSHA1}"));
-	}
-
-	@Test
-	public void testUpgradeStandardAlgorithm() throws Exception {
-		String shaEncrypted = PasswordEncryptorUtil.encrypt(
-			"password", "W6ph5Mm5Pz8GgiULbPgzG37mj9g=");
-
-		Assert.assertEquals("W6ph5Mm5Pz8GgiULbPgzG37mj9g=", shaEncrypted);
-	}
-
-	protected void setCustomUpgradeAlgorithm(String algorithm) {
-		UpgradePasswordEncryptor upgradePasswordEncryptor =
-			(UpgradePasswordEncryptor)new PasswordEncryptorUtil()
-				.getPasswordEncryptor();
-
-		upgradePasswordEncryptor.setPasswordsEncryptionAlgorithm(algorithm);
 	}
 
 	protected void testAlgorithm(String algorithm) throws Exception {
@@ -372,17 +292,6 @@ public class PasswordEncryptorUtilTest extends PowerMockito {
 		}
 		catch (Exception e) {
 		}
-	}
-
-	protected void testUpgradeAlgorithm(
-			String algorithm, String password, String encrypted)
-		throws Exception {
-
-		setCustomUpgradeAlgorithm(algorithm);
-
-		String actual = PasswordEncryptorUtil.encrypt(password, encrypted);
-
-		Assert.assertEquals(encrypted, actual);
 	}
 
 }
