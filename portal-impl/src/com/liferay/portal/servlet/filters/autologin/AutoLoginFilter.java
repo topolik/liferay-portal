@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.ProtectedServletRequest;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.InstancePool;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
@@ -31,6 +32,7 @@ import com.liferay.portal.servlet.filters.BasePortalFilter;
 import com.liferay.portal.util.Portal;
 import com.liferay.portal.util.PortalInstances;
 import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
 
@@ -187,6 +189,13 @@ public class AutoLoginFilter extends BasePortalFilter {
 
 					String redirect = (String)request.getAttribute(
 						AutoLogin.AUTO_LOGIN_REDIRECT);
+
+					if (Validator.isNull(redirect) && (credentials != null)) {
+						redirect = ParamUtil.getString(
+							request,
+							StringPool.UNDERLINE + PortletKeys.LOGIN +
+								"_redirect");
+					}
 
 					if (Validator.isNotNull(redirect)) {
 						response.sendRedirect(redirect);
