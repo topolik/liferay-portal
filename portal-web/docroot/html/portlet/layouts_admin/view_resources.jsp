@@ -1,6 +1,3 @@
-<%@ page import="com.liferay.portal.security.permission.ActionKeys" %>
-
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%--
 /**
  * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
@@ -42,11 +39,9 @@ SitesUtil.addPortletBreadcrumbEntries(group, pagesName, redirectURL, request, re
 			<c:when test="<%= (selPlid > 0) && LayoutPermissionUtil.contains(permissionChecker, selPlid, ActionKeys.VIEW) %>">
 				<liferay-util:include page="/html/portlet/layouts_admin/edit_layout.jsp" />
 			</c:when>
-			<c:otherwise>
-				<c:if test="<%= (liveGroupId > 0) && (GroupPermissionUtil.contains(permissionChecker, liveGroupId, ActionKeys.VIEW) || GroupPermissionUtil.contains(permissionChecker, liveGroupId, ActionKeys.MANAGE_LAYOUTS) ) %>">
-					<liferay-util:include page="/html/portlet/layouts_admin/edit_layout_set.jsp" />
-				</c:if>
-			</c:otherwise>
+			<c:when test="<%= (liveGroupId > 0) && GroupPermissionUtil.contains(permissionChecker, liveGroupId, ActionKeys.VIEW) %>">
+				<liferay-util:include page="/html/portlet/layouts_admin/edit_layout_set.jsp" />
+			</c:when>
 		</c:choose>
 	</div>
 </c:if>
