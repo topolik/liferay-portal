@@ -150,6 +150,14 @@ public interface LiferayPortletURL
 	public boolean isSecure();
 
 	/**
+	 * Returns <code>true</code> if this URL will not generate any sensitive
+	 * information.
+	 *
+	 * @return <code>true</code> when URL doesn't contain any sensitive data
+	 */
+	public boolean isUnsafe();
+
+	/**
 	 * Sets whether this URL is an anchor pointing to the specified portlet on
 	 * the page.
 	 *
@@ -305,5 +313,12 @@ public interface LiferayPortletURL
 	public void setRefererPlid(long refererPlid);
 
 	public void setRemovedParameterNames(Set<String> removedParamNames);
+
+	/**
+	 * Sets unsafe flag. Unsafe URLs cannot contain any sensitive information.
+	 *
+	 * @param unsafe true when no sensitive information is to be generated
+	 */
+	public void setUnsafe(boolean unsafe);
 
 }

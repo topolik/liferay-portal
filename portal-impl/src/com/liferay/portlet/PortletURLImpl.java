@@ -384,6 +384,10 @@ public class PortletURLImpl
 		return _secure;
 	}
 
+	public boolean isUnsafe() {
+		return _unsafe;
+	}
+
 	public void removePublicRenderParameter(String name) {
 		if (name == null) {
 			throw new IllegalArgumentException();
@@ -646,6 +650,11 @@ public class PortletURLImpl
 		clearCache();
 	}
 
+	public void setUnsafe(boolean unsafe) {
+		_unsafe = unsafe;
+		clearCache();
+	}
+
 	public void setWindowState(String windowState) throws WindowStateException {
 		setWindowState(WindowStateFactory.getWindowState(windowState));
 	}
@@ -721,7 +730,9 @@ public class PortletURLImpl
 	}
 
 	protected void addPortletAuthToken(StringBundler sb, Key key) {
-		if (!PropsValues.PORTLET_ADD_DEFAULT_RESOURCE_CHECK_ENABLED) {
+		if (!PropsValues.PORTLET_ADD_DEFAULT_RESOURCE_CHECK_ENABLED ||
+			_unsafe) {
+
 			return;
 		}
 
@@ -815,7 +826,7 @@ public class PortletURLImpl
 		Key key = null;
 
 		try {
-			if (_encrypt) {
+			if (_encrypt && !_unsafe) {
 				Company company = PortalUtil.getCompany(_request);
 
 				key = company.getKeyObj();
@@ -895,7 +906,7 @@ public class PortletURLImpl
 			}
 		}
 
-		if (_doAsUserId > 0) {
+		if ((_doAsUserId > 0) && !_unsafe) {
 			try {
 				Company company = PortalUtil.getCompany(_request);
 
@@ -1040,7 +1051,7 @@ public class PortletURLImpl
 			sb.setIndex(sb.index() - 1);
 		}
 
-		if (_encrypt) {
+		if (_encrypt && !_unsafe) {
 			sb.append(StringPool.AMPERSAND + WebKeys.ENCRYPT + "=1");
 		}
 
@@ -1421,6 +1432,7 @@ public class PortletURLImpl
 	private String _resourceID;
 	private boolean _secure;
 	private String _toString;
+	private boolean _unsafe;
 	private boolean _windowStateRestoreCurrentView;
 	private String _windowStateString;
 	private boolean _wsrp;
