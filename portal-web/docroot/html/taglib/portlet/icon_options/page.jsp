@@ -72,7 +72,8 @@
 			<c:if test="<%= widgetShowAddAppLink %>">
 
 				<%
-				String widgetHREF = "javascript:Liferay.PortletSharing.showWidgetInfo('" + PortalUtil.getWidgetURL(portlet, themeDisplay) + "');";
+				String ppAuthToken = AuthTokenUtil.getToken(request, themeDisplay.getPlid(), "133");
+				String widgetHREF = "javascript:Liferay.PortletSharing.showWidgetInfo('" + PortalUtil.getWidgetURL(portlet, themeDisplay) + "', '" + ppAuthToken + "');";
 				%>
 
 				<liferay-ui:icon
@@ -112,7 +113,8 @@
 			<c:if test="<%= netvibesShowAddAppLinks %>">
 
 				<%
-				String netvibesHREF = "javascript:Liferay.PortletSharing.showNetvibesInfo('" + PortalUtil.getNetvibesURL(portlet, themeDisplay) + "');";
+				String ppAuthToken = AuthTokenUtil.getToken(request, themeDisplay.getPlid(), "133");
+				String netvibesHREF = "javascript:Liferay.PortletSharing.showNetvibesInfo('" + PortalUtil.getNetvibesURL(portlet, themeDisplay) + "', '" + ppAuthToken + "');";
 				%>
 
 				<liferay-ui:icon

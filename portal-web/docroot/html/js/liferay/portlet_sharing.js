@@ -3,7 +3,7 @@ Liferay.namespace('PortletSharing');
 Liferay.provide(
 	Liferay.PortletSharing,
 	'showNetvibesInfo',
-	function(netvibesURL) {
+	function(netvibesURL, ppAuthToken) {
 		var A = AUI();
 
 		var portletURL = Liferay.PortletURL.createResourceURL();
@@ -11,6 +11,8 @@ Liferay.provide(
 		portletURL.setPortletId(133);
 
 		portletURL.setParameter('netvibesURL', netvibesURL);
+
+		portletURL.setParameter('p_p_auth', ppAuthToken);
 
 		var dialog = new A.Dialog(
 			{
@@ -35,7 +37,7 @@ Liferay.provide(
 Liferay.provide(
 	Liferay.PortletSharing,
 	'showWidgetInfo',
-	function(widgetURL) {
+	function(widgetURL, ppAuthToken) {
 		var A = AUI();
 
 		var portletURL = Liferay.PortletURL.createResourceURL();
@@ -43,6 +45,8 @@ Liferay.provide(
 		portletURL.setPortletId(133);
 
 		portletURL.setParameter('widgetURL', widgetURL);
+
+		portletURL.setParameter('p_p_auth', ppAuthToken);
 
 		var dialog = new A.Dialog(
 			{
