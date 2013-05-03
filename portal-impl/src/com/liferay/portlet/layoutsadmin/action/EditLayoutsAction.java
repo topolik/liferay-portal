@@ -395,21 +395,6 @@ public class EditLayoutsAction extends PortletAction {
 		portletRequestDispatcher.include(resourceRequest, resourceResponse);
 	}
 
-	protected void checkPermission(
-			PermissionChecker permissionChecker, Group group, Layout layout,
-			long selPlid)
-		throws PortalException, SystemException {
-
-		if (selPlid > 0) {
-			LayoutPermissionUtil.check(
-				permissionChecker, layout, ActionKeys.VIEW);
-		}
-		else {
-			GroupPermissionUtil.check(
-				permissionChecker, group, ActionKeys.VIEW);
-		}
-	}
-
 	protected void checkPermissions(PortletRequest portletRequest)
 		throws Exception {
 
@@ -435,94 +420,77 @@ public class EditLayoutsAction extends PortletAction {
 			layout = LayoutLocalServiceUtil.getLayout(selPlid);
 		}
 
-		if (cmd.equals(Constants.ADD)) {
-			long parentPlid = ParamUtil.getLong(portletRequest, "parentPlid");
-
-			if (parentPlid == LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
-				if (!GroupPermissionUtil.contains(
-						permissionChecker, group.getGroupId(),
-						ActionKeys.ADD_LAYOUT)) {
-
-					throw new PrincipalException();
-				}
-			}
-			else {
-				layout = LayoutLocalServiceUtil.getLayout(parentPlid);
-
-				if (!LayoutPermissionUtil.contains(
-						permissionChecker, layout, ActionKeys.ADD_LAYOUT)) {
-
-					throw new PrincipalException();
-				}
-			}
-		}
-		else if (cmd.equals(Constants.DELETE)) {
-			if (!LayoutPermissionUtil.contains(
-					permissionChecker, layout, ActionKeys.DELETE)) {
-
-				throw new PrincipalException();
-			}
-		}
-		else if (cmd.equals(Constants.UPDATE)) {
-			if (group.isCompany()) {
-				if (!permissionChecker.isCompanyAdmin()) {
-					throw new PrincipalException();
-				}
-			}
-			else if (group.isLayoutPrototype()) {
-				LayoutPrototypePermissionUtil.check(
-					permissionChecker, group.getClassPK(), ActionKeys.UPDATE);
-			}
-			else if (group.isLayoutSetPrototype()) {
-				LayoutSetPrototypePermissionUtil.check(
-					permissionChecker, group.getClassPK(), ActionKeys.UPDATE);
-			}
-			else if (group.isUser()) {
-				long groupUserId = group.getClassPK();
-
-				User groupUser = UserLocalServiceUtil.getUserById(groupUserId);
-
-				long[] organizationIds = groupUser.getOrganizationIds();
-
-				UserPermissionUtil.check(
-					permissionChecker, groupUserId, organizationIds,
-					ActionKeys.UPDATE);
-			}
-			else {
-				checkPermission(permissionChecker, group, layout, selPlid);
-			}
-		}
-		else if (cmd.equals("publish_to_live")) {
-			boolean hasUpdateLayoutPermission = false;
-
-			if (layout != null) {
-				hasUpdateLayoutPermission = LayoutPermissionUtil.contains(
-					permissionChecker, layout, ActionKeys.UPDATE);
-			}
-
+		if (cmd.equals("publish_to_live")) {
 			if (group.isCompany() || group.isSite()) {
-				boolean publishToLive = GroupPermissionUtil.contains(
-					permissionChecker, group.getGroupId(),
-					ActionKeys.PUBLISH_STAGING);
+				if ((layout != null) &&
+						LayoutPermissionUtil.contains(
+							permissionChecker, layout, ActionKeys.UPDATE)) {
 
-				if (!hasUpdateLayoutPermission && !publishToLive) {
-					throw new PrincipalException();
+					return;
+				}
+
+				if (GroupPermissionUtil.contains(
+						permissionChecker, group.getGroupId(),
+						ActionKeys.PUBLISH_STAGING)) {
+
+					return;
 				}
 			}
 			else {
-				checkPermission(permissionChecker, group, layout, selPlid);
+				if (containsPermissions(
+						permissionChecker, group, layout, selPlid)) {
+
+					return;
+				}
 			}
+
+			throw new PrincipalException();
 		}
-		else if (cmd.equals("reset_customized_view")) {
-			if (!LayoutPermissionUtil.contains(
+
+		if (cmd.equals("reset_customized_view")) {
+			if (LayoutPermissionUtil.contains(
 					permissionChecker, layout, ActionKeys.CUSTOMIZE)) {
 
-				throw new PrincipalException();
+				return;
+			}
+
+			throw new PrincipalException();
+		}
+
+		if (containsPermissions(permissionChecker, group, layout, selPlid)) {
+			return;
+		}
+
+		throw new PrincipalException();
+	}
+
+	protected boolean containsPermissions(
+			PermissionChecker permissionChecker, Group group, Layout layout,
+			long selPlid)
+		throws PortalException, SystemException {
+
+		if (selPlid > 0) {
+			if (LayoutPermissionUtil.contains(
+					permissionChecker, layout, ActionKeys.VIEW)) {
+
+				return true;
 			}
 		}
 		else {
-			checkPermission(permissionChecker, group, layout, selPlid);
+			if (GroupPermissionUtil.contains(
+					permissionChecker, group, ActionKeys.VIEW)) {
+
+				return true;
+			}
+
+			if (GroupPermissionUtil.contains(
+					permissionChecker, group, ActionKeys.MANAGE_LAYOUTS)) {
+
+				return true;
+			}
 		}
+
+		return false;
 	}
 
 	protected void deleteLayoutRevision(ActionRequest actionRequest)
