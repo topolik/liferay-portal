@@ -639,7 +639,7 @@ public class PortletContainerImpl implements PortletContainer {
 
 		PortletPreferences portletPreferences =
 			PortletPreferencesFactoryUtil.getPortletSetup(
-				scopeGroupId, layout, portlet.getPortletId(), null);
+				scopeGroupId, layout, portlet.getPortletId());
 
 		EventRequestImpl eventRequestImpl = EventRequestFactory.create(
 			request, portlet, invokerPortlet, portletContext, windowState,

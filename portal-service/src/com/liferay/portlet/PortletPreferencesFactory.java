@@ -34,6 +34,34 @@ import javax.servlet.http.HttpSession;
  */
 public interface PortletPreferencesFactory {
 
+	public PortletPreferences addLayoutPortletSetup(
+			Layout layout, String portletId)
+		throws SystemException;
+
+	public PortletPreferences addPortletSetup(
+			HttpServletRequest request, String portletId)
+		throws PortalException, SystemException;
+
+	public PortletPreferences addPortletSetup(
+			HttpServletRequest request, String portletId,
+			String defaultPreferences)
+		throws PortalException, SystemException;
+
+	public PortletPreferences fetchLayoutPortletSetup(
+			Layout layout, String portletId)
+		throws SystemException;
+
+	public PortletPreferences fetchPortletSetup(
+			HttpServletRequest request, String portletId)
+		throws PortalException, SystemException;
+
+	public PortletPreferences fetchPortletSetup(Layout layout, String portletId)
+		throws PortalException, SystemException;
+
+	public PortletPreferences fetchPortletSetup(
+			long scopeGroupId, Layout layout, String portletId)
+		throws PortalException, SystemException;
+
 	public PortletPreferences fromDefaultXML(String xml) throws SystemException;
 
 	public PortletPreferences fromXML(
@@ -47,21 +75,21 @@ public interface PortletPreferencesFactory {
 
 	public PortletPreferences getLayoutPortletSetup(
 			Layout layout, String portletId)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public PortalPreferences getPortalPreferences(HttpServletRequest request)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public PortalPreferences getPortalPreferences(
 			HttpSession session, long companyId, long userId, boolean signedIn)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public PortalPreferences getPortalPreferences(
 			long companyId, long userId, boolean signedIn)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public PortalPreferences getPortalPreferences(PortletRequest portletRequest)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public PortletPreferences getPortletPreferences(
 			HttpServletRequest request, String portletId)
@@ -84,19 +112,12 @@ public interface PortletPreferencesFactory {
 			HttpServletRequest request, String portletId)
 		throws PortalException, SystemException;
 
-	public PortletPreferences getPortletSetup(
-			HttpServletRequest request, String portletId,
-			String defaultPreferences)
+	public PortletPreferences getPortletSetup(Layout layout, String portletId)
 		throws PortalException, SystemException;
 
 	public PortletPreferences getPortletSetup(
-			Layout layout, String portletId, String defaultPreferences)
-		throws SystemException;
-
-	public PortletPreferences getPortletSetup(
-			long scopeGroupId, Layout layout, String portletId,
-			String defaultPreferences)
-		throws SystemException;
+			long scopeGroupId, Layout layout, String portletId)
+		throws PortalException, SystemException;
 
 	public PortletPreferences getPortletSetup(PortletRequest portletRequest)
 		throws PortalException, SystemException;
@@ -108,19 +129,11 @@ public interface PortletPreferencesFactory {
 	public Map<Long, PortletPreferences> getPortletSetupMap(
 			long companyId, long groupId, long ownerId, int ownerType,
 			String portletId, boolean privateLayout)
-		throws SystemException;
+		throws PortalException, SystemException;
 
 	public PortletPreferences getPreferences(HttpServletRequest request);
 
 	public PreferencesValidator getPreferencesValidator(Portlet portlet);
-
-	public PortletPreferences getStrictLayoutPortletSetup(
-			Layout layout, String portletId)
-		throws SystemException;
-
-	public PortletPreferences getStrictPortletSetup(
-			Layout layout, String portletId)
-		throws SystemException;
 
 	public String toXML(PortalPreferences portalPreferences);
 

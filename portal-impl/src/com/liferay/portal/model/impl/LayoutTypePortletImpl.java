@@ -1188,7 +1188,7 @@ public class LayoutTypePortletImpl
 					layout.getGroupId(), 0, layout, sourcePortletId, false);
 
 			javax.portlet.PortletPreferences sourcePortletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
+				PortletPreferencesLocalServiceUtil.getPreferences(
 					portletPreferencesIds);
 
 			portletPreferencesIds =

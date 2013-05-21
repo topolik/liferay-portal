@@ -556,7 +556,7 @@ public abstract class PortletResponseImpl implements LiferayPortletResponse {
 
 			if (_portletSetup == null) {
 				_portletSetup =
-					PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(
+					PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 						layout, _portletName);
 			}
 
@@ -566,16 +566,17 @@ public abstract class PortletResponseImpl implements LiferayPortletResponse {
 			if (Validator.isNotNull(linkToLayoutUuid) &&
 				includeLinkToLayoutUuid) {
 
-				try {
-					Layout linkedLayout =
-						LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
-							linkToLayoutUuid, layout.getGroupId(),
-							layout.isPrivateLayout());
+				Layout linkedLayout =
+					LayoutLocalServiceUtil.getLayoutByUuidAndGroupId(
+						linkToLayoutUuid, layout.getGroupId(),
+						layout.isPrivateLayout());
 
-					plid = linkedLayout.getPlid();
-				}
-				catch (PortalException pe) {
-				}
+				plid = linkedLayout.getPlid();
+			}
+		}
+		catch (PortalException pe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(pe);
 			}
 		}
 		catch (SystemException se) {

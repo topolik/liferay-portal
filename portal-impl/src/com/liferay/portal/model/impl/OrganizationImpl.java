@@ -224,8 +224,18 @@ public class OrganizationImpl extends OrganizationBaseImpl {
 		long ownerId = getOrganizationId();
 		int ownerType = PortletKeys.PREFS_OWNER_TYPE_ORGANIZATION;
 
-		return PortalPreferencesLocalServiceUtil.getPreferences(
+		PortletPreferences preferences =
+			PortalPreferencesLocalServiceUtil.fetchPreferences(
+				companyId, ownerId, ownerType);
+
+		if (preferences != null) {
+			return preferences;
+		}
+
+		preferences = PortalPreferencesLocalServiceUtil.addPreferences(
 			companyId, ownerId, ownerType);
+
+		return preferences;
 	}
 
 	public int getPrivateLayoutsPageCount() {

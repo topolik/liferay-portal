@@ -246,7 +246,7 @@ public class ExportImportAction extends EditConfigurationAction {
 
 				PortletPreferences preferences =
 					PortletPreferencesFactoryUtil.getPortletSetup(
-						layout, portlet.getPortletId(), StringPool.BLANK);
+						layout, portlet.getPortletId());
 
 				long lastPublishDate = GetterUtil.getLong(
 					preferences.getValue(

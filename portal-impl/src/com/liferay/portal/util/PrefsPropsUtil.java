@@ -248,8 +248,16 @@ public class PrefsPropsUtil {
 		long ownerId = companyId;
 		int ownerType = PortletKeys.PREFS_OWNER_TYPE_COMPANY;
 
-		return _portalPreferencesLocalService.getPreferences(
-			companyId, ownerId, ownerType);
+		PortletPreferences preferences =
+			_portalPreferencesLocalService.fetchPreferences(
+				companyId, ownerId, ownerType);
+
+		if (preferences == null) {
+			preferences = _portalPreferencesLocalService.addPreferences(
+				companyId, ownerId, ownerType);
+		}
+
+		return preferences;
 	}
 
 	public static Properties getProperties(

@@ -3993,7 +3993,7 @@ public class PortalImpl implements Portal {
 
 		try {
 			PortletPreferences portletSetup =
-				PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(
+				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 					layout, portletId);
 
 			String scopeType = GetterUtil.getString(

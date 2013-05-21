@@ -51,11 +51,7 @@ boolean modeHelp = layoutTypePortlet.hasModeHelpPortletId(portletId);
 boolean modePreview = layoutTypePortlet.hasModePreviewPortletId(portletId);
 boolean modePrint = layoutTypePortlet.hasModePrintPortletId(portletId);
 
-PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(layout, portletId);
-
 PortletPreferencesIds portletPreferencesIds = PortletPreferencesFactoryUtil.getPortletPreferencesIds(request, portletId);
-
-PortletPreferences portletPreferences = null;
 
 Group group = null;
 boolean privateLayout = false;
@@ -73,23 +69,27 @@ else {
 	privateLayout = layout.isPrivateLayout();
 }
 
-if (allowAddPortletDefaultResource) {
-	portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
+PortletPreferences portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
 
-	String scopeLayoutUuid = portletPreferences.getValue("lfrScopeLayoutUuid", null);
+String scopeLayoutUuid = portletPreferences.getValue("lfrScopeLayoutUuid", null);
 
-	if (Validator.isNotNull(scopeLayoutUuid)) {
-		Layout scopeLayout = LayoutLocalServiceUtil.fetchLayoutByUuidAndGroupId(scopeLayoutUuid, group.getGroupId(), privateLayout);
+if (Validator.isNotNull(scopeLayoutUuid)) {
+	Layout scopeLayout = LayoutLocalServiceUtil.fetchLayoutByUuidAndGroupId(scopeLayoutUuid, group.getGroupId(), privateLayout);
 
-		if (scopeLayout != null) {
-			portletPreferencesIds = PortletPreferencesFactoryUtil.getPortletPreferencesIds(request, scopeLayout, portletId);
+	if (scopeLayout != null) {
+		portletPreferencesIds = PortletPreferencesFactoryUtil.getPortletPreferencesIds(request, scopeLayout, portletId);
 
-			portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
-		}
+		portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
 	}
 }
+
+PortletPreferences portletSetup = null;
+
+if (portletPreferencesIds.getOwnerType() == PortletKeys.PREFS_OWNER_TYPE_LAYOUT) {
+	portletSetup = portletPreferences;
+}
 else {
-	portletPreferences = PortletPreferencesLocalServiceUtil.getStrictPreferences(portletPreferencesIds);
+	portletSetup = PortletPreferencesFactoryUtil.getLayoutPortletSetup(layout, portletId);
 }
 
 long portletItemId = ParamUtil.getLong(request, "p_p_i_id");

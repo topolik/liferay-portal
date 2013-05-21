@@ -29,6 +29,7 @@ import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.PortletConfigFactoryUtil;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 
@@ -98,8 +99,15 @@ public class DefaultConfigurationAction
 			portletResource, ActionKeys.CONFIGURATION);
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getPortletSetup(
-				actionRequest, portletResource);
+			PortletPreferencesFactoryUtil.fetchPortletSetup(
+				PortalUtil.getHttpServletRequest(actionRequest),
+				portletResource);
+
+		if (portletPreferences == null) {
+			portletPreferences = PortletPreferencesFactoryUtil.addPortletSetup(
+					PortalUtil.getHttpServletRequest(actionRequest),
+					portletResource);
+		}
 
 		for (Map.Entry<String, String> entry : properties.entrySet()) {
 			String name = entry.getKey();

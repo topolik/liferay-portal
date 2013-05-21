@@ -22,7 +22,6 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.security.auth.PrincipalException;
@@ -194,7 +193,7 @@ public class EditQuestionAction extends PortletAction {
 
 		PortletPreferences preferences =
 			PortletPreferencesFactoryUtil.getPortletSetup(
-				layout, referringPortletResource, StringPool.BLANK);
+				layout, referringPortletResource);
 
 		preferences.setValue(
 			"questionId", String.valueOf(question.getQuestionId()));

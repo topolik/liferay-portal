@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.shopping.util;
 
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -59,9 +60,7 @@ public class ShoppingPreferences {
 
 			Locale[] locales = Locale.getAvailableLocales();
 
-			for (int i = 0; i < locales.length; i++) {
-				Locale locale = locales[i];
-
+			for (Locale locale : locales) {
 				if (locale.getCountry().length() == 2) {
 					Currency currency = Currency.getInstance(locale);
 
@@ -92,7 +91,7 @@ public class ShoppingPreferences {
 	};
 
 	public static ShoppingPreferences getInstance(long companyId, long groupId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		return new ShoppingPreferences(companyId, groupId);
 	}
@@ -446,7 +445,7 @@ public class ShoppingPreferences {
 	}
 
 	protected ShoppingPreferences(long companyId, long groupId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		long ownerId = groupId;
 		int ownerType = PortletKeys.PREFS_OWNER_TYPE_GROUP;

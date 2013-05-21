@@ -361,7 +361,7 @@ public class StagingImpl implements Staging {
 
 	public void deleteRecentLayoutRevisionId(
 			HttpServletRequest request, long layoutSetBranchId, long plid)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences =
 			PortletPreferencesFactoryUtil.getPortalPreferences(request);
@@ -372,7 +372,7 @@ public class StagingImpl implements Staging {
 
 	public void deleteRecentLayoutRevisionId(
 			User user, long layoutSetBranchId, long plid)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences = getPortalPreferences(user);
 
@@ -681,7 +681,7 @@ public class StagingImpl implements Staging {
 	}
 
 	public long getRecentLayoutSetBranchId(User user, long layoutSetId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences = getPortalPreferences(user);
 
@@ -1158,7 +1158,7 @@ public class StagingImpl implements Staging {
 	public void setRecentLayoutBranchId(
 			HttpServletRequest request, long layoutSetBranchId, long plid,
 			long layoutBranchId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences =
 			PortletPreferencesFactoryUtil.getPortalPreferences(request);
@@ -1169,7 +1169,7 @@ public class StagingImpl implements Staging {
 
 	public void setRecentLayoutBranchId(
 			User user, long layoutSetBranchId, long plid, long layoutBranchId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences = getPortalPreferences(user);
 
@@ -1180,7 +1180,7 @@ public class StagingImpl implements Staging {
 	public void setRecentLayoutRevisionId(
 			HttpServletRequest request, long layoutSetBranchId, long plid,
 			long layoutRevisionId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences =
 			PortletPreferencesFactoryUtil.getPortalPreferences(request);
@@ -1191,7 +1191,7 @@ public class StagingImpl implements Staging {
 
 	public void setRecentLayoutRevisionId(
 			User user, long layoutSetBranchId, long plid, long layoutRevisionId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences = getPortalPreferences(user);
 
@@ -1210,7 +1210,7 @@ public class StagingImpl implements Staging {
 
 	public void setRecentLayoutSetBranchId(
 			User user, long layoutSetId, long layoutSetBranchId)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		PortalPreferences portalPreferences = getPortalPreferences(user);
 
@@ -1612,7 +1612,7 @@ public class StagingImpl implements Staging {
 	}
 
 	protected PortalPreferences getPortalPreferences(User user)
-		throws SystemException {
+		throws PortalException, SystemException {
 
 		boolean signedIn = !user.isDefaultUser();
 
