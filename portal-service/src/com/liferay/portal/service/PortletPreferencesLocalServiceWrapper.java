@@ -390,6 +390,7 @@ public class PortletPreferencesLocalServiceWrapper
 	}
 
 	@Override
+	@Deprecated
 	public javax.portlet.PortletPreferences getStrictPreferences(
 		long companyId, long ownerId, int ownerType, long plid,
 		java.lang.String portletId)
@@ -399,6 +400,7 @@ public class PortletPreferencesLocalServiceWrapper
 	}
 
 	@Override
+	@Deprecated
 	public javax.portlet.PortletPreferences getStrictPreferences(
 		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds)
 		throws com.liferay.portal.kernel.exception.SystemException {

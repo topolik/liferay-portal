@@ -51,11 +51,11 @@ boolean modeHelp = layoutTypePortlet.hasModeHelpPortletId(portletId);
 boolean modePreview = layoutTypePortlet.hasModePreviewPortletId(portletId);
 boolean modePrint = layoutTypePortlet.hasModePrintPortletId(portletId);
 
-PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(layout, portletId);
+PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getLayoutPortletSetup(layout, portletId);
 
 PortletPreferencesIds portletPreferencesIds = PortletPreferencesFactoryUtil.getPortletPreferencesIds(request, portletId);
 
-PortletPreferences portletPreferences = null;
+PortletPreferences portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
 
 Group group = null;
 boolean privateLayout = false;
@@ -74,8 +74,6 @@ else {
 }
 
 if (allowAddPortletDefaultResource) {
-	portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
-
 	String scopeLayoutUuid = portletPreferences.getValue("lfrScopeLayoutUuid", null);
 
 	if (Validator.isNotNull(scopeLayoutUuid)) {
@@ -87,9 +85,6 @@ if (allowAddPortletDefaultResource) {
 			portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
 		}
 	}
-}
-else {
-	portletPreferences = PortletPreferencesLocalServiceUtil.getStrictPreferences(portletPreferencesIds);
 }
 
 long portletItemId = ParamUtil.getLong(request, "p_p_i_id");

@@ -363,6 +363,7 @@ public class PortletPreferencesLocalServiceUtil {
 		return getService().getPreferences(portletPreferencesIds);
 	}
 
+	@Deprecated
 	public static javax.portlet.PortletPreferences getStrictPreferences(
 		long companyId, long ownerId, int ownerType, long plid,
 		java.lang.String portletId)
@@ -372,6 +373,7 @@ public class PortletPreferencesLocalServiceUtil {
 			portletId);
 	}
 
+	@Deprecated
 	public static javax.portlet.PortletPreferences getStrictPreferences(
 		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds)
 		throws com.liferay.portal.kernel.exception.SystemException {

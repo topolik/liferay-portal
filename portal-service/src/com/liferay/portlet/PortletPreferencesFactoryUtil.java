@@ -155,6 +155,14 @@ public class PortletPreferencesFactoryUtil {
 	}
 
 	public static PortletPreferences getPortletSetup(
+			Layout layout, String portletId)
+		throws SystemException {
+
+		return getPortletPreferencesFactory().getPortletSetup(
+			layout, portletId);
+	}
+
+	public static PortletPreferences getPortletSetup(
 			Layout layout, String portletId, String defaultPreferences)
 		throws SystemException {
 
@@ -207,6 +215,7 @@ public class PortletPreferencesFactoryUtil {
 		return getPortletPreferencesFactory().getPreferencesValidator(portlet);
 	}
 
+	@Deprecated
 	public static PortletPreferences getStrictLayoutPortletSetup(
 			Layout layout, String portletId)
 		throws SystemException {
@@ -215,6 +224,7 @@ public class PortletPreferencesFactoryUtil {
 			layout, portletId);
 	}
 
+	@Deprecated
 	public static PortletPreferences getStrictPortletSetup(
 			Layout layout, String portletId)
 		throws SystemException {

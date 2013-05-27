@@ -267,6 +267,7 @@ public class PortletPreferencesLocalServiceImpl
 	}
 
 	@Override
+	@Deprecated
 	public javax.portlet.PortletPreferences getStrictPreferences(
 			long companyId, long ownerId, int ownerType, long plid,
 			String portletId)
@@ -286,6 +287,7 @@ public class PortletPreferencesLocalServiceImpl
 	}
 
 	@Override
+	@Deprecated
 	public javax.portlet.PortletPreferences getStrictPreferences(
 			PortletPreferencesIds portletPreferencesIds)
 		throws SystemException {

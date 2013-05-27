@@ -180,7 +180,7 @@ StringBundler pageTopSB = OutputTag.getData(request, WebKeys.PAGE_TOP);
 
 		<%
 		for (Portlet portlet : portlets) {
-			PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(layout, portlet.getPortletId());
+			PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getLayoutPortletSetup(layout, portlet.getPortletId());
 
 			String portletSetupCss = portletSetup.getValue("portletSetupCss", StringPool.BLANK);
 		%>

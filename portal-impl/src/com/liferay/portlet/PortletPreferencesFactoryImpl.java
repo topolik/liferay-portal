@@ -391,6 +391,13 @@ public class PortletPreferencesFactoryImpl
 	}
 
 	@Override
+	public PortletPreferences getPortletSetup(Layout layout, String portletId)
+		throws SystemException {
+
+		return getPortletSetup(
+			LayoutConstants.DEFAULT_PLID, layout, portletId, null);
+	}
+
 	public PortletPreferences getPortletSetup(
 			Layout layout, String portletId, String defaultPreferences)
 		throws SystemException {
@@ -485,6 +492,7 @@ public class PortletPreferencesFactoryImpl
 	}
 
 	@Override
+	@Deprecated
 	public PortletPreferences getStrictLayoutPortletSetup(
 			Layout layout, String portletId)
 		throws SystemException {
@@ -503,6 +511,7 @@ public class PortletPreferencesFactoryImpl
 	}
 
 	@Override
+	@Deprecated
 	public PortletPreferences getStrictPortletSetup(
 			Layout layout, String portletId)
 		throws SystemException {

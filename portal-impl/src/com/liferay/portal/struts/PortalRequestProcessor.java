@@ -252,7 +252,7 @@ public class PortalRequestProcessor extends TilesRequestProcessor {
 				request, portletId);
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesLocalServiceUtil.getStrictPreferences(
+			PortletPreferencesLocalServiceUtil.getPreferences(
 				portletPreferencesIds);
 
 		PortletConfig portletConfig = PortletConfigFactoryUtil.create(
