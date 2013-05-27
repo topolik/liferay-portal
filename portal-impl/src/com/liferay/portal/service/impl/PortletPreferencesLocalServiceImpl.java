@@ -343,31 +343,19 @@ public class PortletPreferencesLocalServiceImpl
 			String portletId, String defaultPreferences)
 		throws SystemException {
 
+		String preferencesXML = defaultPreferences;
+
 		PortletPreferences portletPreferences =
 			portletPreferencesPersistence.fetchByO_O_P_P(
 				ownerId, ownerType, plid, portletId);
 
-		if (portletPreferences == null) {
-			Portlet portlet = portletLocalService.getPortletById(
-				companyId, portletId);
-
-			if (PortletPreferencesThreadLocal.isStrict() &&
-				(Validator.isNull(defaultPreferences) ||
-				 ((portlet != null) && portlet.isUndeployedPortlet()))) {
-
-				return new PortletPreferencesImpl();
-			}
-
-			portletPreferences =
-				portletPreferencesLocalService.addPortletPreferences(
-					companyId, ownerId, ownerType, plid, portletId, portlet,
-					defaultPreferences);
+		if (portletPreferences != null) {
+			preferencesXML = portletPreferences.getPreferences();
 		}
 
 		PortletPreferencesImpl portletPreferencesImpl =
 			(PortletPreferencesImpl)PortletPreferencesFactoryUtil.fromXML(
-				companyId, ownerId, ownerType, plid, portletId,
-				portletPreferences.getPreferences());
+				companyId, ownerId, ownerType, plid, portletId, preferencesXML);
 
 		return portletPreferencesImpl;
 	}

@@ -29,7 +29,6 @@ import com.liferay.portal.service.base.PortalPreferencesLocalServiceBaseImpl;
 import com.liferay.portlet.PortalPreferencesImpl;
 import com.liferay.portlet.PortalPreferencesWrapper;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
-import com.liferay.portlet.PortletPreferencesThreadLocal;
 
 import java.util.concurrent.locks.Lock;
 
@@ -171,26 +170,18 @@ public class PortalPreferencesLocalServiceImpl
 			String defaultPreferences)
 		throws SystemException {
 
+		String preferencesXML = defaultPreferences;
+
 		PortalPreferences portalPreferences =
 			portalPreferencesPersistence.fetchByO_O(ownerId, ownerType);
 
-		if (portalPreferences == null) {
-			if (PortletPreferencesThreadLocal.isStrict() &&
-				Validator.isNull(defaultPreferences)) {
-
-				return new PortalPreferencesWrapper(
-					new PortalPreferencesImpl());
-			}
-
-			portalPreferences =
-				portalPreferencesLocalService.addPortalPreferences(
-					companyId, ownerId, ownerType, defaultPreferences);
+		if (portalPreferences != null) {
+			preferencesXML = portalPreferences.getPreferences();
 		}
 
 		PortalPreferencesImpl portalPreferencesImpl =
 			(PortalPreferencesImpl)PortletPreferencesFactoryUtil.fromXML(
-				companyId, ownerId, ownerType,
-				portalPreferences.getPreferences());
+				companyId, ownerId, ownerType, preferencesXML);
 
 		return new PortalPreferencesWrapper(portalPreferencesImpl);
 	}
