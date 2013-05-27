@@ -117,11 +117,19 @@ public interface PortletPreferencesFactory {
 
 	public PreferencesValidator getPreferencesValidator(Portlet portlet);
 
+	/**
+	 * @deprecated As of 6.2.0 please use {@link
+	 * #getLayoutPortletSetup(com.liferay.portal.model.Layout, String)}
+	 */
 	@Deprecated
 	public PortletPreferences getStrictLayoutPortletSetup(
 			Layout layout, String portletId)
 		throws SystemException;
 
+	/**
+	 * @deprecated As of 6.2.0 please use {@link
+	 * #getPortletSetup(com.liferay.portal.model.Layout, String)}
+	 */
 	@Deprecated
 	public PortletPreferences getStrictPortletSetup(
 			Layout layout, String portletId)

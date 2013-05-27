@@ -363,6 +363,10 @@ public class PortletPreferencesLocalServiceUtil {
 		return getService().getPreferences(portletPreferencesIds);
 	}
 
+	/**
+	 * @deprecated As of 6.2.0 please use {@link
+	 * #getPreferences(long, long, int, long, String)}
+	 */
 	@Deprecated
 	public static javax.portlet.PortletPreferences getStrictPreferences(
 		long companyId, long ownerId, int ownerType, long plid,
@@ -373,6 +377,10 @@ public class PortletPreferencesLocalServiceUtil {
 			portletId);
 	}
 
+	/**
+	 * @deprecated As of 6.2.0 please use {@link
+	 * #getPreferences(long, long, int, long, String)}
+	 */
 	@Deprecated
 	public static javax.portlet.PortletPreferences getStrictPreferences(
 		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds)

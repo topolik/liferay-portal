@@ -215,6 +215,10 @@ public class PortletPreferencesFactoryUtil {
 		return getPortletPreferencesFactory().getPreferencesValidator(portlet);
 	}
 
+	/**
+	 * @deprecated As of 6.2.0 please use {@link
+	 * #getLayoutPortletSetup(com.liferay.portal.model.Layout, String)}
+	 */
 	@Deprecated
 	public static PortletPreferences getStrictLayoutPortletSetup(
 			Layout layout, String portletId)
@@ -224,6 +228,10 @@ public class PortletPreferencesFactoryUtil {
 			layout, portletId);
 	}
 
+	/**
+	 * @deprecated As of 6.2.0 please use {@link
+	 * #getPortletSetup(com.liferay.portal.model.Layout, String)}
+	 */
 	@Deprecated
 	public static PortletPreferences getStrictPortletSetup(
 			Layout layout, String portletId)

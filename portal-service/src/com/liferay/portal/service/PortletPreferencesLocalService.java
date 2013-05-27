@@ -306,6 +306,10 @@ public interface PortletPreferencesLocalService extends BaseLocalService,
 		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
+	/**
+	 * @deprecated As of 6.2.0 please use {@link
+	 * #getPreferences(long, long, int, long, String)}
+	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	@Deprecated
 	public javax.portlet.PortletPreferences getStrictPreferences(
@@ -313,6 +317,10 @@ public interface PortletPreferencesLocalService extends BaseLocalService,
 		java.lang.String portletId)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
+	/**
+	 * @deprecated As of 6.2.0 please use {@link
+	 * #getPreferences(com.liferay.portal.model.PortletPreferencesIds)}
+	 */
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	@Deprecated
 	public javax.portlet.PortletPreferences getStrictPreferences(
