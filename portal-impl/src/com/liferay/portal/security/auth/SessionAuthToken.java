@@ -64,6 +64,15 @@ public class SessionAuthToken implements AuthToken {
 	}
 
 	@Override
+	public String getSystemPortletToken(
+		HttpServletRequest request, long plid, String portletId) {
+
+		return getSessionAuthenticationToken(
+			request, PortletPermissionUtil.getPrimaryKey(plid, portletId) +
+				_SYSTEM);
+	}
+
+	@Override
 	public String getToken(HttpServletRequest request) {
 		return getSessionAuthenticationToken(request, _PORTAL);
 	}
@@ -157,5 +166,7 @@ public class SessionAuthToken implements AuthToken {
 	}
 
 	private static final String _PORTAL = "PORTAL";
+
+	private static final String _SYSTEM = "_SYSTEM";
 
 }
