@@ -817,6 +817,23 @@ public class PortletURLImpl
 		sb.append(StringPool.AMPERSAND);
 	}
 
+	protected void addSystemPortletToken(StringBundler sb, Key key) {
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(
+			getPortletId());
+
+		if ((portlet == null) || !portlet.isSystem()) {
+			return;
+		}
+
+		String systemPortletToken = AuthTokenUtil.getSystemPortletToken(
+			_request, _plid, _portletId);
+
+		sb.append("p_s_auth");
+		sb.append(StringPool.EQUAL);
+		sb.append(processValue(key, systemPortletToken));
+		sb.append(StringPool.AMPERSAND);
+	}
+
 	protected void clearCache() {
 		_reservedParameters = null;
 		_toString = null;
@@ -927,6 +944,8 @@ public class PortletURLImpl
 		}
 
 		addPortletAuthToken(sb, key);
+
+		addSystemPortletToken(sb, key);
 
 		for (Map.Entry<String, String> entry :
 				getReservedParameterMap().entrySet()) {

@@ -329,6 +329,12 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 		PortletMode portletMode = PortletModeFactory.getPortletMode(
 			ParamUtil.getString(request, "p_p_mode"));
 
+		if (PortletMode.VIEW.equals(portletMode) &&
+			isAccessAllowedToSystemPortlet(request, portlet)) {
+
+			return true;
+		}
+
 		return PortletPermissionUtil.hasAccessPermission(
 			permissionChecker, themeDisplay.getScopeGroupId(), layout, portlet,
 			portletMode);
@@ -338,7 +344,7 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			HttpServletRequest request, Portlet portlet)
 		throws PortalException, SystemException {
 
-		if (portlet.isSystem()) {
+		if (isAccessAllowedToSystemPortlet(request, portlet)) {
 			return;
 		}
 
@@ -382,6 +388,32 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 		}
 
 		if (isAccessGrantedByPortletAuthenticationToken(request, portlet)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	protected boolean isAccessAllowedToSystemPortlet(
+			HttpServletRequest request, Portlet portlet)
+		throws PortalException, SystemException {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		long plid = themeDisplay.getPlid();
+
+		String psAuth = request.getParameter("p_s_auth");
+
+		if (Validator.isNull(psAuth)) {
+			return false;
+		}
+
+		String systemPortletToken =
+			AuthTokenUtil.getSystemPortletToken(
+				request, plid, portlet.getPortletId());
+
+		if (systemPortletToken.equals(psAuth)) {
 			return true;
 		}
 
