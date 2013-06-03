@@ -34,6 +34,13 @@ public class AuthTokenWrapper implements AuthToken {
 	}
 
 	@Override
+	public String getSystemPortletToken(
+		HttpServletRequest request, long plid, String portletId) {
+
+		return _authToken.getSystemPortletToken(request, plid, portletId);
+	}
+
+	@Override
 	public String getToken(HttpServletRequest request) {
 		return _authToken.getToken(request);
 	}

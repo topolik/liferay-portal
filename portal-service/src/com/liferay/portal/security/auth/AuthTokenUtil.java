@@ -36,6 +36,12 @@ public class AuthTokenUtil {
 		return _authToken;
 	}
 
+	public static String getSystemPortletToken(
+		HttpServletRequest request, long plid, String portletId) {
+
+		return getAuthToken().getSystemPortletToken(request, plid, portletId);
+	}
+
 	public static String getToken(HttpServletRequest request) {
 		return getAuthToken().getToken(request);
 	}

@@ -21,9 +21,13 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Amos Fong
  */
+/* TODO: refactor the interface to be more accurate to current checking logic */
 public interface AuthToken {
 
 	public void check(HttpServletRequest request) throws PortalException;
+
+	public String getSystemPortletToken(
+		HttpServletRequest request, long plid, String portletId);
 
 	public String getToken(HttpServletRequest request);
 
