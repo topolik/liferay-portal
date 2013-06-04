@@ -398,6 +398,14 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			HttpServletRequest request, Portlet portlet)
 		throws PortalException, SystemException {
 
+		String portletId = portlet.getPortletId();
+
+		if (ArrayUtil.contains(
+				PropsValues.PORTLET_SYSTEM_TOKEN_WHITELIST, portletId)) {
+
+			return true;
+		}
+
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
@@ -409,9 +417,8 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			return false;
 		}
 
-		String systemPortletToken =
-			AuthTokenUtil.getSystemPortletToken(
-				request, plid, portlet.getPortletId());
+		String systemPortletToken = AuthTokenUtil.getSystemPortletToken(
+			request, plid, portletId);
 
 		if (systemPortletToken.equals(psAuth)) {
 			return true;

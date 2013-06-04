@@ -1442,6 +1442,8 @@ public class PropsValues {
 
 	public static final String PORTLET_RESOURCE_ID_BANNED_PATHS_REGEXP = PropsUtil.get(PropsKeys.PORTLET_RESOURCE_ID_BANNED_PATHS_REGEXP);
 
+	public static final String[] PORTLET_SYSTEM_TOKEN_WHITELIST = PropsUtil.getArray(PropsKeys.PORTLET_SYSTEM_TOKEN_WHITELIST);
+
 	public static final boolean PORTLET_URL_ANCHOR_ENABLE = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.PORTLET_URL_ANCHOR_ENABLE));
 
 	public static final boolean PORTLET_URL_APPEND_PARAMETERS = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.PORTLET_URL_APPEND_PARAMETERS));

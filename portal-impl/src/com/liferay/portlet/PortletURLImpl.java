@@ -825,6 +825,12 @@ public class PortletURLImpl
 			return;
 		}
 
+		if (ArrayUtil.contains(
+				PropsValues.PORTLET_SYSTEM_TOKEN_WHITELIST, _portletId)) {
+
+			return;
+		}
+
 		String systemPortletToken = AuthTokenUtil.getSystemPortletToken(
 			_request, _plid, _portletId);
 
