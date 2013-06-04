@@ -443,7 +443,7 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			return true;
 		}
 
-		Set<String> whitelist = _portletSecurity.getWhitelist();
+		Set<String> whitelist = _portletSecurity.getPortletAuthTokenWhitelist();
 
 		if (whitelist.contains(portletId)) {
 			return true;
@@ -458,7 +458,7 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 			strutsAction = ParamUtil.getString(request, "struts_action");
 		}
 
-		Set<String> whitelistActions = _portletSecurity.getWhitelistActions();
+		Set<String> whitelistActions = _portletSecurity.getPortletAuthTokenWhitelistActions();
 
 		if (whitelistActions.contains(strutsAction)) {
 			return true;

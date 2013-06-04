@@ -30,20 +30,20 @@ public class PortletSecurityUtil {
 		return _portletSecurity;
 	}
 
-	public static Set<String> getWhitelist() {
-		return getPortletSecurity().getWhitelist();
+	public static Set<String> getPortletAuthTokenWhitelist() {
+		return getPortletSecurity().getPortletAuthTokenWhitelist();
 	}
 
-	public static Set<String> getWhitelistActions() {
-		return getPortletSecurity().getWhitelistActions();
+	public static Set<String> getPortletAuthTokenWhitelistActions() {
+		return getPortletSecurity().getPortletAuthTokenWhitelistActions();
 	}
 
-	public static Set<String> resetWhitelist() {
-		return getPortletSecurity().resetWhitelist();
+	public static Set<String> resetPortletAuthTokenWhitelist() {
+		return getPortletSecurity().resetPortletAuthTokenWhitelist();
 	}
 
-	public static Set<String> resetWhitelistActions() {
-		return getPortletSecurity().resetWhitelistActions();
+	public static Set<String> resetPortletAuthTokenWhitelistActions() {
+		return getPortletSecurity().resetPortletAuthTokenWhitelistActions();
 	}
 
 	public void setPortletSecurity(PortletSecurity portletSecurity) {

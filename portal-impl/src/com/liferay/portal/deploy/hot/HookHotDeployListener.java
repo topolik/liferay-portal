@@ -2472,14 +2472,14 @@ public class HookHotDeployListener
 				portalProperties,
 				PORTLET_ADD_DEFAULT_RESOURCE_CHECK_WHITELIST)) {
 
-			PortletSecurityUtil.resetWhitelist();
+			PortletSecurityUtil.resetPortletAuthTokenWhitelist();
 		}
 
 		if (containsKey(
 				portalProperties,
 				PORTLET_ADD_DEFAULT_RESOURCE_CHECK_WHITELIST_ACTIONS)) {
 
-			PortletSecurityUtil.resetWhitelistActions();
+			PortletSecurityUtil.resetPortletAuthTokenWhitelistActions();
 		}
 
 		CacheUtil.clearCache();

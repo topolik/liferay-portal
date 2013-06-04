@@ -29,22 +29,22 @@ import java.util.Set;
 public class PortletSecurityImpl implements PortletSecurity {
 
 	public PortletSecurityImpl() {
-		resetWhitelist();
-		resetWhitelistActions();
+		resetPortletAuthTokenWhitelist();
+		resetPortletAuthTokenWhitelistActions();
 	}
 
 	@Override
-	public Set<String> getWhitelist() {
+	public Set<String> getPortletAuthTokenWhitelist() {
 		return _whitelist;
 	}
 
 	@Override
-	public Set<String> getWhitelistActions() {
+	public Set<String> getPortletAuthTokenWhitelistActions() {
 		return _whitelistActions;
 	}
 
 	@Override
-	public Set<String> resetWhitelist() {
+	public Set<String> resetPortletAuthTokenWhitelist() {
 		_whitelist = SetUtil.fromArray(
 			PropsValues.PORTLET_ADD_DEFAULT_RESOURCE_CHECK_WHITELIST);
 		_whitelist = Collections.unmodifiableSet(_whitelist);
@@ -53,7 +53,7 @@ public class PortletSecurityImpl implements PortletSecurity {
 	}
 
 	@Override
-	public Set<String> resetWhitelistActions() {
+	public Set<String> resetPortletAuthTokenWhitelistActions() {
 		_whitelistActions = SetUtil.fromArray(
 			PropsValues.PORTLET_ADD_DEFAULT_RESOURCE_CHECK_WHITELIST_ACTIONS);
 		_whitelistActions = Collections.unmodifiableSet(_whitelistActions);
