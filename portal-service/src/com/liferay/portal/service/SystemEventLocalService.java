@@ -239,6 +239,11 @@ public interface SystemEventLocalService extends BaseLocalService,
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
+	public void addSystemEvent(long groupId, java.lang.String className,
+		long classPK, java.lang.String classUuid, int type)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException;
+
 	public void deleteSystemEvents(long groupId)
 		throws com.liferay.portal.kernel.exception.SystemException;
 

@@ -280,6 +280,15 @@ public class SystemEventLocalServiceWrapper implements SystemEventLocalService,
 	}
 
 	@Override
+	public void addSystemEvent(long groupId, java.lang.String className,
+		long classPK, java.lang.String classUuid, int type)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		_systemEventLocalService.addSystemEvent(groupId, className, classPK,
+			classUuid, type);
+	}
+
+	@Override
 	public void deleteSystemEvents(long groupId)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		_systemEventLocalService.deleteSystemEvents(groupId);

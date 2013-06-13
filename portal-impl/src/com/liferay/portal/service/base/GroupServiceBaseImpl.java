@@ -253,10 +253,6 @@ import com.liferay.portlet.journal.service.JournalTemplateLocalService;
 import com.liferay.portlet.journal.service.JournalTemplateService;
 import com.liferay.portlet.journal.service.persistence.JournalArticleFinder;
 import com.liferay.portlet.journal.service.persistence.JournalArticlePersistence;
-import com.liferay.portlet.journal.service.persistence.JournalStructureFinder;
-import com.liferay.portlet.journal.service.persistence.JournalStructurePersistence;
-import com.liferay.portlet.journal.service.persistence.JournalTemplateFinder;
-import com.liferay.portlet.journal.service.persistence.JournalTemplatePersistence;
 import com.liferay.portlet.messageboards.service.MBBanLocalService;
 import com.liferay.portlet.messageboards.service.MBBanService;
 import com.liferay.portlet.messageboards.service.MBCategoryLocalService;
@@ -4565,44 +4561,6 @@ public abstract class GroupServiceBaseImpl extends BaseServiceImpl
 	}
 
 	/**
-	 * Returns the journal structure persistence.
-	 *
-	 * @return the journal structure persistence
-	 */
-	public JournalStructurePersistence getJournalStructurePersistence() {
-		return journalStructurePersistence;
-	}
-
-	/**
-	 * Sets the journal structure persistence.
-	 *
-	 * @param journalStructurePersistence the journal structure persistence
-	 */
-	public void setJournalStructurePersistence(
-		JournalStructurePersistence journalStructurePersistence) {
-		this.journalStructurePersistence = journalStructurePersistence;
-	}
-
-	/**
-	 * Returns the journal structure finder.
-	 *
-	 * @return the journal structure finder
-	 */
-	public JournalStructureFinder getJournalStructureFinder() {
-		return journalStructureFinder;
-	}
-
-	/**
-	 * Sets the journal structure finder.
-	 *
-	 * @param journalStructureFinder the journal structure finder
-	 */
-	public void setJournalStructureFinder(
-		JournalStructureFinder journalStructureFinder) {
-		this.journalStructureFinder = journalStructureFinder;
-	}
-
-	/**
 	 * Returns the journal template local service.
 	 *
 	 * @return the journal template local service
@@ -4638,44 +4596,6 @@ public abstract class GroupServiceBaseImpl extends BaseServiceImpl
 	public void setJournalTemplateService(
 		JournalTemplateService journalTemplateService) {
 		this.journalTemplateService = journalTemplateService;
-	}
-
-	/**
-	 * Returns the journal template persistence.
-	 *
-	 * @return the journal template persistence
-	 */
-	public JournalTemplatePersistence getJournalTemplatePersistence() {
-		return journalTemplatePersistence;
-	}
-
-	/**
-	 * Sets the journal template persistence.
-	 *
-	 * @param journalTemplatePersistence the journal template persistence
-	 */
-	public void setJournalTemplatePersistence(
-		JournalTemplatePersistence journalTemplatePersistence) {
-		this.journalTemplatePersistence = journalTemplatePersistence;
-	}
-
-	/**
-	 * Returns the journal template finder.
-	 *
-	 * @return the journal template finder
-	 */
-	public JournalTemplateFinder getJournalTemplateFinder() {
-		return journalTemplateFinder;
-	}
-
-	/**
-	 * Sets the journal template finder.
-	 *
-	 * @param journalTemplateFinder the journal template finder
-	 */
-	public void setJournalTemplateFinder(
-		JournalTemplateFinder journalTemplateFinder) {
-		this.journalTemplateFinder = journalTemplateFinder;
 	}
 
 	/**
@@ -6012,18 +5932,10 @@ public abstract class GroupServiceBaseImpl extends BaseServiceImpl
 	protected JournalStructureLocalService journalStructureLocalService;
 	@BeanReference(type = JournalStructureService.class)
 	protected JournalStructureService journalStructureService;
-	@BeanReference(type = JournalStructurePersistence.class)
-	protected JournalStructurePersistence journalStructurePersistence;
-	@BeanReference(type = JournalStructureFinder.class)
-	protected JournalStructureFinder journalStructureFinder;
 	@BeanReference(type = JournalTemplateLocalService.class)
 	protected JournalTemplateLocalService journalTemplateLocalService;
 	@BeanReference(type = JournalTemplateService.class)
 	protected JournalTemplateService journalTemplateService;
-	@BeanReference(type = JournalTemplatePersistence.class)
-	protected JournalTemplatePersistence journalTemplatePersistence;
-	@BeanReference(type = JournalTemplateFinder.class)
-	protected JournalTemplateFinder journalTemplateFinder;
 	@BeanReference(type = MBBanLocalService.class)
 	protected MBBanLocalService mbBanLocalService;
 	@BeanReference(type = MBBanService.class)
