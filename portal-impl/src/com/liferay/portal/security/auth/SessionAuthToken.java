@@ -138,7 +138,7 @@ public class SessionAuthToken implements AuthToken {
 		long companyId, String ppid, String strutsAction) {
 
 		Set<String> authTokenIgnoreActions =
-			PortalUtil.getAuthTokenIgnoreActions();
+			AuthTokenWhitelistUtil.getPortletCSRFWhitelistActions();
 
 		if (!authTokenIgnoreActions.contains(strutsAction)) {
 			return false;
@@ -177,7 +177,7 @@ public class SessionAuthToken implements AuthToken {
 		String rootPortletId = PortletConstants.getRootPortletId(portletId);
 
 		Set<String> authTokenIgnorePortlets =
-			PortalUtil.getAuthTokenIgnorePortlets();
+			AuthTokenWhitelistUtil.getPortletCSRFWhitelist();
 
 		return authTokenIgnorePortlets.contains(rootPortletId);
 	}
