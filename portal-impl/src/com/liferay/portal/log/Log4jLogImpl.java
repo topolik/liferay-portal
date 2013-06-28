@@ -34,8 +34,8 @@ public class Log4jLogImpl extends AbstractSecureLog<Level> {
 	}
 
 	@Override
-	protected void doLog(Level level, String msg, Throwable t) {
-		_logger.log(_FQCN, level, msg, t);
+	protected void doLog(Level level, String msg) {
+		_logger.log(_FQCN, level, msg, null);
 	}
 
 	@Override

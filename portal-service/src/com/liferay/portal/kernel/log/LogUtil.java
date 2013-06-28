@@ -15,8 +15,16 @@
 package com.liferay.portal.kernel.log;
 
 import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
+import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.util.Html;
+import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.KMPSearch;
 import com.liferay.portal.kernel.util.StackTraceUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnsyncPrintWriterPool;
+import com.liferay.portal.kernel.util.Validator;
+
+import java.nio.CharBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +35,7 @@ import javax.servlet.jsp.JspException;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author László Csontos
  */
 public class LogUtil {
 
@@ -100,6 +109,10 @@ public class LogUtil {
 		}
 	}
 
+	public static String sanitize(Object msg) {
+		return _sanitize(msg, true, true);
+	}
+
 	private static void _log(Log log, Throwable cause) {
 		StackTraceElement[] steArray = cause.getStackTrace();
 
@@ -156,5 +169,117 @@ public class LogUtil {
 
 		log.error(StackTraceUtil.getStackTrace(cause));
 	}
+
+	private static String _sanitize(
+		Object msg, boolean sanitizeCrlf, boolean sanitizeHtml) {
+
+		if (msg == null) {
+			return StringPool.BLANK;
+		}
+
+		String originalMessage = msg.toString();
+
+		if (Validator.isBlank(originalMessage)) {
+			return originalMessage;
+		}
+
+		String sanitizedMessage = originalMessage;
+
+		if (sanitizeCrlf) {
+			sanitizedMessage = _sanitizeCrlf(sanitizedMessage);
+		}
+
+		if (sanitizeHtml) {
+			Html html = HtmlUtil.getHtml();
+
+			if (html != null) {
+				sanitizedMessage = html.escape(sanitizedMessage);
+			}
+		}
+
+		if (!sanitizedMessage.equals(originalMessage)) {
+			sanitizedMessage = sanitizedMessage.concat(" [Encoded]");
+		}
+
+		return sanitizedMessage;
+	}
+
+	private static String _sanitizeCrlf(String msg) {
+		CharBuffer charBuffer = CharBuffer.wrap(msg);
+
+		UnsyncStringWriter unsyncStringWriter = new UnsyncStringWriter(
+			charBuffer.capacity());
+
+		while (charBuffer.hasRemaining()) {
+			int eolPos = KMPSearch.search(
+				charBuffer, 0, StringPool.OS_EOL, _OS_EOL_NEXTS);
+
+			boolean steFound = false;
+
+			if (eolPos == -1) {
+				eolPos = charBuffer.limit() - charBuffer.position();
+			}
+			else {
+				for (int i = 0; i < _STACKTRACE_ELEMENT_TOKENS.length; i++) {
+					int[] nexts = _STACKTRACE_ELEMENT_TOKENS_NEXTS[i];
+					String token = _STACKTRACE_ELEMENT_TOKENS[i];
+
+					int stePos = KMPSearch.search(
+						charBuffer, eolPos, token, nexts);
+
+					if (eolPos == (stePos - _OS_EOL_LENGTH)) {
+						steFound = true;
+
+						break;
+					}
+				}
+			}
+
+			for (int i = 0; i < eolPos; i++) {
+				char c = charBuffer.charAt(i);
+
+				if ((c == CharPool.NEW_LINE) || (c == CharPool.RETURN)) {
+					c = CharPool.UNDERLINE;
+				}
+
+				unsyncStringWriter.write(c);
+			}
+
+			int nextPos = charBuffer.position() + eolPos + _OS_EOL_LENGTH;
+
+			if (nextPos > charBuffer.limit()) {
+				nextPos = charBuffer.limit();
+			}
+
+			if (nextPos < charBuffer.limit()) {
+				String sanitizedEol = StringPool.UNDERLINE;
+
+				if (steFound) {
+					sanitizedEol = StringPool.OS_EOL;
+				}
+
+				unsyncStringWriter.write(sanitizedEol);
+			}
+
+			charBuffer.position(nextPos);
+		}
+
+		return unsyncStringWriter.toString();
+	}
+
+	private static final int _OS_EOL_LENGTH = StringPool.OS_EOL.length();
+
+	private static final int[] _OS_EOL_NEXTS = KMPSearch.generateNexts(
+		StringPool.OS_EOL);
+
+	private static final String[] _STACKTRACE_ELEMENT_TOKENS = {
+		"\tat ", "Caused by: ", "\t... "
+	};
+
+	private static final int[][] _STACKTRACE_ELEMENT_TOKENS_NEXTS = {
+		KMPSearch.generateNexts(_STACKTRACE_ELEMENT_TOKENS[0]),
+		KMPSearch.generateNexts(_STACKTRACE_ELEMENT_TOKENS[1]),
+		KMPSearch.generateNexts(_STACKTRACE_ELEMENT_TOKENS[2])
+	};
 
 }

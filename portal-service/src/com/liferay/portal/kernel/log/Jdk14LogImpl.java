@@ -31,8 +31,8 @@ public class Jdk14LogImpl extends AbstractSecureLog<Level> {
 	}
 
 	@Override
-	protected void doLog(Level level, String msg, Throwable t) {
-		_logger.log(level, msg, t);
+	protected void doLog(Level level, String msg) {
+		_logger.log(level, msg);
 	}
 
 	@Override
