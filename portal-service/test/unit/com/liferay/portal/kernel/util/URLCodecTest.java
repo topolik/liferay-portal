@@ -29,12 +29,12 @@ public class URLCodecTest {
 	public void testDecodeURL() throws Exception {
 		for (int i = 0; i < _RAW_URLS.length; i++) {
 			String result = URLCodec.decodeURL(
-				_ENCODED_URLS[i], StringPool.UTF8, false);
+				_ENCODED_URLS[i], StringPool.UTF8);
 
 			Assert.assertEquals(_RAW_URLS[i], result);
 
 			result = URLCodec.decodeURL(
-				_ESCAPE_SPACES_ENCODED_URLS[i], StringPool.UTF8, true);
+				_ESCAPE_SPACES_ENCODED_URLS[i], StringPool.UTF8);
 
 			Assert.assertEquals(_RAW_URLS[i], result);
 		}
@@ -53,6 +53,27 @@ public class URLCodecTest {
 			Assert.assertTrue(
 				_ESCAPE_SPACES_ENCODED_URLS[i].equalsIgnoreCase(result));
 		}
+	}
+
+	@Test
+	public void testIsEncodedURL() throws Exception {
+		for (int i = 0; i < _RAW_URLS.length; i++) {
+			Assert.assertTrue(URLCodec.isEncodedURL(_ENCODED_URLS[i]));
+		}
+
+		Assert.assertTrue(URLCodec.isEncodedURL(_RAW_URLS[0]));
+		Assert.assertTrue(URLCodec.isEncodedURL(_RAW_URLS[1]));
+		Assert.assertTrue(URLCodec.isEncodedURL(_RAW_URLS[2]));
+		Assert.assertTrue(URLCodec.isEncodedURL(_RAW_URLS[3]));
+		Assert.assertFalse(URLCodec.isEncodedURL(_RAW_URLS[4]));
+		Assert.assertFalse(URLCodec.isEncodedURL(_RAW_URLS[5]));
+		Assert.assertFalse(URLCodec.isEncodedURL(_RAW_URLS[6]));
+
+		Assert.assertFalse(URLCodec.isEncodedURL(_RAW_URLS[7]));
+		Assert.assertTrue(
+			URLCodec.isEncodedURL(_RAW_URLS[7], StringPool.UTF8, true));
+
+		Assert.assertFalse(URLCodec.isEncodedURL(_RAW_URLS[8]));
 	}
 
 	private static final String[] _ENCODED_URLS = new String[9];

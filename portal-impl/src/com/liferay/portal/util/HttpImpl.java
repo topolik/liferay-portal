@@ -236,7 +236,7 @@ public class HttpImpl implements Http {
 	@Override
 	public String decodePath(String path) {
 		path = StringUtil.replace(path, StringPool.SLASH, _TEMP_SLASH);
-		path = decodeURL(path, true);
+		path = decodeURL(path);
 		path = StringUtil.replace(path, _TEMP_SLASH, StringPool.SLASH);
 
 		return path;
@@ -244,12 +244,7 @@ public class HttpImpl implements Http {
 
 	@Override
 	public String decodeURL(String url) {
-		return decodeURL(url, false);
-	}
-
-	@Override
-	public String decodeURL(String url, boolean unescapeSpaces) {
-		return URLCodec.decodeURL(url, StringPool.UTF8, unescapeSpaces);
+		return URLCodec.decodeURL(url, StringPool.UTF8);
 	}
 
 	public void destroy() {
@@ -636,6 +631,21 @@ public class HttpImpl implements Http {
 	}
 
 	@Override
+	public boolean isEncodedPath(String path) {
+		return isEncodedURL(path, true);
+	}
+
+	@Override
+	public boolean isEncodedURL(String encodedURLString) {
+		return isEncodedURL(encodedURLString, false);
+	}
+
+	@Override
+	public boolean isEncodedURL(String encodedURLString, boolean useExtended) {
+		return URLCodec.isEncodedURL(encodedURLString, useExtended);
+	}
+
+	@Override
 	public boolean isNonProxyHost(String host) {
 		if (_nonProxyHostsPattern != null) {
 			Matcher matcher = _nonProxyHostsPattern.matcher(host);
@@ -879,6 +889,11 @@ public class HttpImpl implements Http {
 		else {
 			return url;
 		}
+	}
+
+	@Override
+	public String sanitize(String location) {
+		return StringUtil.replace(location, _CRLF, _SPACES);
 	}
 
 	@Override
@@ -1352,6 +1367,10 @@ public class HttpImpl implements Http {
 		}
 	}
 
+	private static final String[] _CRLF = new String[] {
+		StringPool.NEW_LINE, StringPool.RETURN
+	};
+
 	private static final String _DEFAULT_USER_AGENT =
 		"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)";
 
@@ -1385,6 +1404,10 @@ public class HttpImpl implements Http {
 
 	private static final String _PROXY_USERNAME = GetterUtil.getString(
 		PropsUtil.get(HttpImpl.class.getName() + ".proxy.username"));
+
+	private static final String[] _SPACES = new String[] {
+		StringPool.SPACE, StringPool.SPACE
+	};
 
 	private static final String _TEMP_SLASH = "_LIFERAY_TEMP_SLASH_";
 

@@ -65,8 +65,6 @@ public interface Http {
 
 	public String decodeURL(String url);
 
-	public String decodeURL(String url, boolean unescapeSpaces);
-
 	public String encodeParameters(String url);
 
 	public String encodePath(String path);
@@ -115,6 +113,12 @@ public interface Http {
 
 	public boolean hasProxyConfig();
 
+	public boolean isEncodedPath(String path);
+
+	public boolean isEncodedURL(String url);
+
+	public boolean isEncodedURL(String url, boolean useExtended);
+
 	public boolean isNonProxyHost(String host);
 
 	public boolean isProxyHost(String host);
@@ -139,6 +143,8 @@ public interface Http {
 	public String removeParameter(String url, String name);
 
 	public String removeProtocol(String url);
+
+	public String sanitize(String location);
 
 	public String setParameter(String url, String name, boolean value);
 

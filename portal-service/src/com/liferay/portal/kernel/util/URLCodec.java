@@ -34,17 +34,17 @@ import java.util.BitSet;
 public class URLCodec {
 
 	public static String decodeURL(String encodedURLString) {
-		return decodeURL(encodedURLString, StringPool.UTF8, false);
+		return decodeURL(encodedURLString, StringPool.UTF8);
 	}
 
 	public static String decodeURL(
-		String encodedURLString, boolean unescapeSpaces) {
+		String encodedURLString, String charsetName) {
 
-		return decodeURL(encodedURLString, StringPool.UTF8, unescapeSpaces);
+		return decodeURL(encodedURLString, charsetName, false);
 	}
 
 	public static String decodeURL(
-		String encodedURLString, String charsetName, boolean unescapeSpaces) {
+		String encodedURLString, String charsetName, boolean useExtended) {
 
 		if (encodedURLString == null) {
 			return null;
@@ -54,71 +54,15 @@ public class URLCodec {
 			return StringPool.BLANK;
 		}
 
-		/*if (unescapeSpaces) {
-			encodedURLString = StringUtil.replace(
-				encodedURLString, "%20", StringPool.PLUS);
-		}*/
-
 		StringBuilder sb = null;
 
-		CharsetDecoder charsetDecoder = null;
+		try {
+			sb = _decode(encodedURLString, charsetName, useExtended);
+		}
+		catch (CharacterCodingException cce) {
+			_log.error(cce, cce);
 
-		for (int i = 0; i < encodedURLString.length(); i++) {
-			char c = encodedURLString.charAt(i);
-
-			switch (c) {
-				case CharPool.PERCENT:
-					ByteBuffer byteBuffer = _getEncodedByteBuffer(
-						encodedURLString, i);
-
-					if (charsetDecoder == null) {
-						charsetDecoder = CharsetDecoderUtil.getCharsetDecoder(
-							charsetName);
-					}
-
-					CharBuffer charBuffer = null;
-
-					try {
-						charBuffer = charsetDecoder.decode(byteBuffer);
-					}
-					catch (CharacterCodingException cce) {
-						_log.error(cce, cce);
-
-						return StringPool.BLANK;
-					}
-
-					if (sb == null) {
-						sb = new StringBuilder(encodedURLString.length());
-
-						if (i > 0) {
-							sb.append(encodedURLString, 0, i);
-						}
-					}
-
-					sb.append(charBuffer);
-
-					i += byteBuffer.capacity() * 3 - 1;
-
-					break;
-
-				case CharPool.PLUS:
-					if (sb == null) {
-						sb = new StringBuilder(encodedURLString.length());
-
-						if (i > 0) {
-							sb.append(encodedURLString, 0, i);
-						}
-					}
-
-					sb.append(CharPool.SPACE);
-
-					break;
-
-				default:
-					if (sb != null) {
-						sb.append(c);
-					}
-			}
+			return StringPool.BLANK;
 		}
 
 		if (sb == null) {
@@ -252,6 +196,38 @@ public class URLCodec {
 		}
 	}
 
+	public static boolean isEncodedURL(String encodedURLString) {
+		return isEncodedURL(encodedURLString, StringPool.UTF8, false);
+	}
+
+	public static boolean isEncodedURL(
+		String encodedURLString, boolean unescapeSlash) {
+
+		return isEncodedURL(encodedURLString, StringPool.UTF8, unescapeSlash);
+	}
+
+	public static boolean isEncodedURL(
+		String encodedURLString, String charsetName, boolean unescapeSlash) {
+
+		StringBuilder sb = null;
+
+		try {
+			sb = _decode(encodedURLString, charsetName, unescapeSlash);
+		}
+		catch (CharacterCodingException cce) {
+			return false;
+		}
+		catch (IllegalArgumentException iae) {
+			return false;
+		}
+
+		if (sb != null) {
+			return true;
+		}
+
+		return false;
+	}
+
 	private static int _charToHex(char c) {
 		if ((c >= CharPool.LOWER_CASE_A) && (c <= CharPool.LOWER_CASE_Z)) {
 			return c - CharPool.LOWER_CASE_A + 10;
@@ -266,6 +242,78 @@ public class URLCodec {
 		}
 
 		throw new IllegalArgumentException(c + " is not a hex char");
+	}
+
+	private static StringBuilder _decode(
+			String encodedURLString, String charsetName, boolean useExtended)
+		throws CharacterCodingException {
+
+		StringBuilder sb = null;
+
+		CharsetDecoder charsetDecoder = null;
+
+		for (int i = 0; i < encodedURLString.length(); i++) {
+			char c = encodedURLString.charAt(i);
+
+			switch (c) {
+				case CharPool.PERCENT:
+					ByteBuffer byteBuffer = _getEncodedByteBuffer(
+						encodedURLString, i);
+
+					if (charsetDecoder == null) {
+						charsetDecoder = CharsetDecoderUtil.getCharsetDecoder(
+							charsetName);
+					}
+
+					CharBuffer charBuffer = null;
+
+					charBuffer = charsetDecoder.decode(byteBuffer);
+
+					if (sb == null) {
+						sb = new StringBuilder(encodedURLString.length());
+
+						if (i > 0) {
+							sb.append(encodedURLString, 0, i);
+						}
+					}
+
+					sb.append(charBuffer);
+
+					i += byteBuffer.capacity() * 3 - 1;
+
+					break;
+
+				case CharPool.PLUS:
+					if (sb == null) {
+						sb = new StringBuilder(encodedURLString.length());
+
+						if (i > 0) {
+							sb.append(encodedURLString, 0, i);
+						}
+					}
+
+					sb.append(CharPool.SPACE);
+
+					break;
+
+				default:
+					if (!_validChars.get(c) &&
+						!(useExtended && _validCharsExtended.get(c))) {
+
+						return null;
+					}
+
+					if (sb == null) {
+						sb = new StringBuilder();
+					}
+
+					if (sb != null) {
+						sb.append(c);
+					}
+			}
+		}
+
+		return sb;
 	}
 
 	private static ByteBuffer _getEncodedByteBuffer(
@@ -329,6 +377,8 @@ public class URLCodec {
 
 	private static BitSet _validChars = new BitSet(256);
 
+	private static BitSet _validCharsExtended = new BitSet(256);
+
 	static {
 		for (int i = 'a'; i <= 'z'; i++) {
 			_validChars.set(i);
@@ -346,6 +396,11 @@ public class URLCodec {
 		_validChars.set('_');
 		_validChars.set('.');
 		_validChars.set('*');
+
+		_validCharsExtended = (BitSet)_validChars.clone();
+
+		_validCharsExtended.set(':');
+		_validCharsExtended.set('/');
 	}
 
 }

@@ -12,38 +12,41 @@
  * details.
  */
 
-package com.liferay.portal.kernel.portlet;
+package com.liferay.portal.kernel.servlet;
 
 import com.liferay.portal.kernel.util.HttpUtil;
 
-import javax.portlet.ActionResponse;
-import javax.portlet.filter.ActionResponseWrapper;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
- * @author Brian Wing Shun Chan
+ * @author László Csontos
  */
-public class NoRedirectActionResponse extends ActionResponseWrapper {
+public class SecureServletResponseWrapper extends HttpServletResponseWrapper {
 
-	public NoRedirectActionResponse(ActionResponse actionResponse) {
-		super(actionResponse);
-	}
-
-	public String getRedirectLocation() {
-		return _redirectLocation;
+	public SecureServletResponseWrapper(HttpServletResponse response) {
+		super(response);
 	}
 
 	@Override
-	public void sendRedirect(String location) {
+	public void addHeader(String name, String value) {
+		super.addHeader(name, HttpUtil.sanitize(value));
+	}
 
-		// Disable send redirect
-
+	@Override
+	public void sendRedirect(String location) throws IOException {
 		if (!HttpUtil.isEncodedPath(location)) {
 			location = HttpUtil.encodePath(location);
 		}
 
-		_redirectLocation = location;
+		super.sendRedirect(location);
 	}
 
-	private String _redirectLocation;
+	@Override
+	public void setHeader(String name, String value) {
+		super.setHeader(name, HttpUtil.sanitize(value));
+	}
 
 }
