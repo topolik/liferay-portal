@@ -14,7 +14,7 @@
 
 package com.liferay.portal.log;
 
-import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.AbstractSecureLog;
 import com.liferay.portal.kernel.log.LogWrapper;
 
 import org.apache.log4j.Level;
@@ -23,55 +23,10 @@ import org.apache.log4j.Logger;
 /**
  * @author Brian Wing Shun Chan
  */
-public class Log4jLogImpl implements Log {
+public class Log4jLogImpl extends AbstractSecureLog<Level> {
 
 	public Log4jLogImpl(Logger logger) {
 		_logger = logger;
-	}
-
-	@Override
-	public void debug(Object msg) {
-		_logger.log(_FQCN, Level.DEBUG, msg, null);
-	}
-
-	@Override
-	public void debug(Object msg, Throwable t) {
-		_logger.log(_FQCN, Level.DEBUG, msg, t);
-	}
-
-	@Override
-	public void debug(Throwable t) {
-		_logger.log(_FQCN, Level.DEBUG, null, t);
-	}
-
-	@Override
-	public void error(Object msg) {
-		_logger.log(_FQCN, Level.ERROR, msg, null);
-	}
-
-	@Override
-	public void error(Object msg, Throwable t) {
-		_logger.log(_FQCN, Level.ERROR, msg, t);
-	}
-
-	@Override
-	public void error(Throwable t) {
-		_logger.log(_FQCN, Level.ERROR, null, t);
-	}
-
-	@Override
-	public void fatal(Object msg) {
-		_logger.log(_FQCN, Level.FATAL, msg, null);
-	}
-
-	@Override
-	public void fatal(Object msg, Throwable t) {
-		_logger.log(_FQCN, Level.FATAL, msg, t);
-	}
-
-	@Override
-	public void fatal(Throwable t) {
-		_logger.log(_FQCN, Level.FATAL, null, t);
 	}
 
 	public Logger getWrappedLogger() {
@@ -79,78 +34,43 @@ public class Log4jLogImpl implements Log {
 	}
 
 	@Override
-	public void info(Object msg) {
-		_logger.log(_FQCN, Level.INFO, msg, null);
+	protected void doLog(Level level, String msg) {
+		_logger.log(_FQCN, level, msg, null);
 	}
 
 	@Override
-	public void info(Object msg, Throwable t) {
-		_logger.log(_FQCN, Level.INFO, msg, t);
+	protected Level getDebugLevel() {
+		return Level.DEBUG;
 	}
 
 	@Override
-	public void info(Throwable t) {
-		_logger.log(_FQCN, Level.INFO, null, t);
+	protected Level getErrorLevel() {
+		return Level.ERROR;
 	}
 
 	@Override
-	public boolean isDebugEnabled() {
-		return _logger.isDebugEnabled();
+	protected Level getFatalLevel() {
+		return Level.FATAL;
 	}
 
 	@Override
-	public boolean isErrorEnabled() {
-		return _logger.isEnabledFor(Level.ERROR);
+	protected Level getInfoLevel() {
+		return Level.INFO;
 	}
 
 	@Override
-	public boolean isFatalEnabled() {
-		return _logger.isEnabledFor(Level.FATAL);
+	protected Level getTraceLevel() {
+		return Level.TRACE;
 	}
 
 	@Override
-	public boolean isInfoEnabled() {
-		return _logger.isInfoEnabled();
+	protected Level getWarnLevel() {
+		return Level.WARN;
 	}
 
 	@Override
-	public boolean isTraceEnabled() {
-		return _logger.isTraceEnabled();
-	}
-
-	@Override
-	public boolean isWarnEnabled() {
-		return _logger.isEnabledFor(Level.WARN);
-	}
-
-	@Override
-	public void trace(Object msg) {
-		_logger.log(_FQCN, Level.TRACE, msg, null);
-	}
-
-	@Override
-	public void trace(Object msg, Throwable t) {
-		_logger.log(_FQCN, Level.TRACE, msg, t);
-	}
-
-	@Override
-	public void trace(Throwable t) {
-		_logger.log(_FQCN, Level.TRACE, null, t);
-	}
-
-	@Override
-	public void warn(Object msg) {
-		_logger.log(_FQCN, Level.WARN, msg, null);
-	}
-
-	@Override
-	public void warn(Object msg, Throwable t) {
-		_logger.log(_FQCN, Level.WARN, msg, t);
-	}
-
-	@Override
-	public void warn(Throwable t) {
-		_logger.log(_FQCN, Level.WARN, null, t);
+	protected boolean isLevelEnabled(Level level) {
+		return _logger.isEnabledFor(level);
 	}
 
 	private static final String _FQCN = LogWrapper.class.getName();
