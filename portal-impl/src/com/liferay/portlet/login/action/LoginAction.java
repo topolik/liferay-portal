@@ -38,6 +38,8 @@ import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.login.util.LoginUtil;
 
+import java.io.IOException;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
@@ -98,39 +100,7 @@ public class LoginAction extends PortletAction {
 			}
 		}
 		catch (Exception e) {
-			if (e instanceof AuthException) {
-				Throwable cause = e.getCause();
-
-				if (cause instanceof PasswordExpiredException ||
-					cause instanceof UserLockoutException) {
-
-					SessionErrors.add(actionRequest, cause.getClass());
-				}
-				else {
-					if (_log.isInfoEnabled()) {
-						_log.info("Authentication failed");
-					}
-
-					SessionErrors.add(actionRequest, e.getClass());
-				}
-			}
-			else if (e instanceof CompanyMaxUsersException ||
-					 e instanceof CookieNotSupportedException ||
-					 e instanceof NoSuchUserException ||
-					 e instanceof PasswordExpiredException ||
-					 e instanceof UserEmailAddressException ||
-					 e instanceof UserIdException ||
-					 e instanceof UserLockoutException ||
-					 e instanceof UserPasswordException ||
-					 e instanceof UserScreenNameException) {
-
-				SessionErrors.add(actionRequest, e.getClass());
-			}
-			else {
-				_log.error(e, e);
-
-				PortalUtil.sendError(e, actionRequest, actionResponse);
-			}
+			handleAuthException(actionRequest, actionResponse, e);
 		}
 	}
 
@@ -166,6 +136,50 @@ public class LoginAction extends PortletAction {
 		}
 
 		return portalURL.concat(redirect);
+	}
+
+	protected void handleAuthException(
+			ActionRequest actionRequest, ActionResponse actionResponse,
+			Exception e)
+		throws IOException {
+
+		if (e instanceof AuthException) {
+			Throwable cause = e.getCause();
+
+			if (cause instanceof PasswordExpiredException ||
+				cause instanceof UserLockoutException) {
+
+				SessionErrors.add(actionRequest, cause.getClass());
+			}
+			else {
+				if (_log.isInfoEnabled()) {
+					_log.info("Authentication failed");
+				}
+
+				SessionErrors.add(actionRequest, e.getClass());
+			}
+
+			setStatusFound(actionResponse);
+		}
+		else if (e instanceof CompanyMaxUsersException ||
+				 e instanceof CookieNotSupportedException ||
+				 e instanceof NoSuchUserException ||
+				 e instanceof PasswordExpiredException ||
+				 e instanceof UserEmailAddressException ||
+				 e instanceof UserIdException ||
+				 e instanceof UserLockoutException ||
+				 e instanceof UserPasswordException ||
+				 e instanceof UserScreenNameException) {
+
+			SessionErrors.add(actionRequest, e.getClass());
+
+			setStatusFound(actionResponse);
+		}
+		else {
+			_log.error(e, e);
+
+			PortalUtil.sendError(e, actionRequest, actionResponse);
+		}
 	}
 
 	@Override
@@ -223,6 +237,13 @@ public class LoginAction extends PortletAction {
 				}
 			}
 		}
+	}
+
+	protected void setStatusFound(ActionResponse actionResponse) {
+		HttpServletResponse response = PortalUtil.getHttpServletResponse(
+			actionResponse);
+
+		response.setStatus(HttpServletResponse.SC_FOUND);
 	}
 
 	private static final boolean _CHECK_METHOD_ON_PROCESS_ACTION = false;

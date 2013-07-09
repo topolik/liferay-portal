@@ -597,6 +597,7 @@
 		<configuration-action-class>com.liferay.portlet.login.action.ConfigurationActionImpl</configuration-action-class>
 		<preferences-owned-by-group>true</preferences-owned-by-group>
 		<use-default-template>false</use-default-template>
+		<action-url-redirect>true</action-url-redirect>
 		<private-request-attributes>false</private-request-attributes>
 		<private-session-attributes>false</private-session-attributes>
 		<render-weight>50</render-weight>
