@@ -15,12 +15,11 @@
 package com.liferay.portal.kernel.servlet;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
  * @author Brian Wing Shun Chan
  */
-public class UncommittedServletResponse extends HttpServletResponseWrapper {
+public class UncommittedServletResponse extends SecureServletResponseWrapper {
 
 	public UncommittedServletResponse(HttpServletResponse response) {
 		super(response);

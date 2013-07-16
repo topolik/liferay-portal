@@ -230,6 +230,10 @@ public class HttpUtil {
 		return getHttp().removeProtocol(url);
 	}
 
+	public static String sanitizeHeader(String location) {
+		return getHttp().sanitizeHeader(location);
+	}
+
 	public static String setParameter(String url, String name, boolean value) {
 		return getHttp().setParameter(url, name, value);
 	}

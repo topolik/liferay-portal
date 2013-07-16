@@ -16,31 +16,33 @@ package com.liferay.portal.kernel.servlet;
 
 import com.liferay.portal.kernel.util.HttpUtil;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
- * @author Peter Shin
- * @author Brian Wing Shun Chan
+ * @author László Csontos
  */
-public class NoRedirectServletResponse extends HttpServletResponseWrapper {
+public class SecureServletResponseWrapper extends HttpServletResponseWrapper {
 
-	public NoRedirectServletResponse(HttpServletResponse response) {
+	public SecureServletResponseWrapper(HttpServletResponse response) {
 		super(response);
 	}
 
-	public String getRedirectLocation() {
-		return _redirectLocation;
+	@Override
+	public void addHeader(String name, String value) {
+		super.addHeader(name, HttpUtil.sanitizeHeader(value));
 	}
 
 	@Override
-	public void sendRedirect(String location) {
-
-		// Disable send redirect
-
-		_redirectLocation = HttpUtil.sanitizeHeader(location);
+	public void sendRedirect(String location) throws IOException {
+		super.sendRedirect(HttpUtil.sanitizeHeader(location));
 	}
 
-	private String _redirectLocation;
+	@Override
+	public void setHeader(String name, String value) {
+		super.setHeader(name, HttpUtil.sanitizeHeader(value));
+	}
 
 }
