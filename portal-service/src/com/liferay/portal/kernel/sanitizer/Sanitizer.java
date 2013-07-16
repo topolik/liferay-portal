@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.sanitizer;
 
+import com.liferay.portal.kernel.util.StringPool;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -24,6 +26,10 @@ import java.util.Map;
  * @author Brian Wing Shun Chan
  */
 public interface Sanitizer {
+
+	public static final String[] CRLF = new String[] {
+		StringPool.NEW_LINE, StringPool.RETURN
+	};
 
 	public static final String MODE_ALL = "ALL";
 

@@ -14,10 +14,17 @@
 
 package com.liferay.portal.kernel.sanitizer;
 
+import com.liferay.portal.kernel.io.unsync.UnsyncStringWriter;
 import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermission;
+import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import java.nio.CharBuffer;
 
 import java.util.Map;
 
@@ -130,6 +137,52 @@ public class SanitizerUtil {
 		return getSanitizer().sanitize(
 			companyId, groupId, userId, className, classPK, contentType, modes,
 			s, options);
+	}
+
+	public static void sanitizeCrlf(CharBuffer cb, UnsyncStringWriter writer) {
+		sanitizeCrlf(cb, writer, -1);
+	}
+
+	public static void sanitizeCrlf(
+		CharBuffer cb, UnsyncStringWriter writer, int limit) {
+
+		sanitizeCrlf(cb, writer, limit, CharPool.UNDERLINE);
+	}
+
+	public static void sanitizeCrlf(
+		CharBuffer cb, UnsyncStringWriter writer, int limit, char replacement) {
+
+		if ((limit < 0) || (limit > cb.limit())) {
+			limit = cb.limit();
+		}
+
+		for (int i = 0; i < limit; i++) {
+			char c = cb.charAt(i);
+
+			if ((c == CharPool.NEW_LINE) || (c == CharPool.RETURN)) {
+				c = replacement;
+			}
+
+			writer.write(c);
+		}
+	}
+
+	public static String sanitizeCrlf(String s) {
+		return sanitizeCrlf(s, CharPool.UNDERLINE);
+	}
+
+	public static String sanitizeCrlf(String s, char replacement) {
+		if (Validator.isBlank(s)) {
+			return StringPool.BLANK;
+		}
+
+		String replacementString = String.valueOf(replacement);
+
+		String[] replacements = new String[] {
+			replacementString, replacementString
+		};
+
+		return StringUtil.replace(s, Sanitizer.CRLF, replacements);
 	}
 
 	public void setSanitizer(Sanitizer sanitizer) {
