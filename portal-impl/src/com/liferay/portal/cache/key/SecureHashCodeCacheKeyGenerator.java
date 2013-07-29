@@ -20,15 +20,6 @@ import com.liferay.portal.kernel.util.StringBundler;
 import java.security.SecureRandom;
 
 /**
- * This cache key generator should be used in cases where an attacker is able to
- * modify input vector being encoded. This may result in cache poisoning using
- * collision attack.<br />
- *<br />
- * Warning, this implementation must not be used for cluster wide caches,
- * every class instance generates different result for the same input.<br />
- *<br />
- * Code based on {@link HashCodeCacheKeyGenerator}
- *
  * @author Tomas Polesovsky
  */
 public class SecureHashCodeCacheKeyGenerator extends BaseCacheKeyGenerator {
