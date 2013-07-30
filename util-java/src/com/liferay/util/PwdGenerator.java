@@ -34,7 +34,7 @@ public class PwdGenerator {
 	public static final String KEY3 = "abcdefghijklmnopqrstuvwxyz";
 
 	/**
-	 * @deprecated As of 6.2.0, please use {@link #getRandomString()}
+	 * @deprecated As of 6.2.0, renamed to {@link #getRandomString()}
 	 */
 	@Deprecated
 	public static String getPassword() {
@@ -42,7 +42,7 @@ public class PwdGenerator {
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, please use {@link #getRandomString(int)}
+	 * @deprecated As of 6.2.0, renamed to {@link #getRandomString(int)}
 	 */
 	@Deprecated
 	public static String getPassword(int length) {
@@ -50,7 +50,7 @@ public class PwdGenerator {
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, please use {@link #getRandomString(String, int)}
+	 * @deprecated As of 6.2.0, renamed to {@link #getRandomString(String, int)}
 	 */
 	@Deprecated
 	public static String getPassword(String key, int length) {
@@ -58,7 +58,7 @@ public class PwdGenerator {
 	}
 
 	/**
-	 * @deprecated As of 6.2.0, please use {@link
+	 * @deprecated As of 6.2.0, renamed to {@link
 	 *             #getRandomString(String, int, boolean)}
 	 */
 	@Deprecated
@@ -68,8 +68,12 @@ public class PwdGenerator {
 		return _generate(false, key, length, useAllKeys);
 	}
 
+	/**
+	 * @deprecated As of 6.2.0, replaced by {@link #getSecurePinNumber()}
+	 */
+	@Deprecated
 	public static String getPinNumber() {
-		return getSecurePassword(KEY1, 4, false);
+		return _generate(false, KEY1, 4, true);
 	}
 
 	public static String getRandomFileName() {
@@ -114,6 +118,10 @@ public class PwdGenerator {
 		String key, int length, boolean useAllKeys) {
 
 		return _generate(true, key, length, useAllKeys);
+	}
+
+	public static String getSecurePinNumber() {
+		return getSecurePassword(KEY1, 4, false);
 	}
 
 	private static String _generate(
