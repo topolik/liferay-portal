@@ -6165,6 +6165,27 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public boolean isSecure(HttpServletRequest request) {
+		if (!PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS) {
+			return request.isSecure();
+		}
+
+		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
+			return true;
+		}
+
+		String ppid = ParamUtil.getString(request, "p_p_id", StringPool.BLANK);
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (themeDisplay == null) {
+			return request.isSecure();
+		}
+
+		if (!themeDisplay.isSignedIn() && ppid.equals(PortletKeys.LOGIN)) {
+			return true;
+		}
+
 		HttpSession session = request.getSession();
 
 		if (session == null) {
@@ -6174,19 +6195,11 @@ public class PortalImpl implements Portal {
 		Boolean httpsInitial = (Boolean)session.getAttribute(
 			WebKeys.HTTPS_INITIAL);
 
-		boolean secure = false;
-
-		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS &&
-			!PropsValues.SESSION_ENABLE_PHISHING_PROTECTION &&
-			(httpsInitial != null) && !httpsInitial.booleanValue()) {
-
-			secure = false;
-		}
-		else {
-			secure = request.isSecure();
+		if (httpsInitial == null) {
+			return request.isSecure();
 		}
 
-		return secure;
+		return httpsInitial;
 	}
 
 	@Override
