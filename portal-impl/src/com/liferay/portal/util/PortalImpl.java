@@ -1653,17 +1653,11 @@ public class PortalImpl implements Portal {
 			createAccountURL.setParameter(
 				"struts_action", "/login/create_account");
 			createAccountURL.setPortletMode(PortletMode.VIEW);
+			createAccountURL.setSecure(request.isSecure() ||
+				PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS);
 			createAccountURL.setWindowState(WindowState.MAXIMIZED);
 
-			if (!PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS) {
-				return createAccountURL.toString();
-			}
-
-			String portalURL = getPortalURL(request);
-			String portalURLSecure = getPortalURL(request, true);
-
-			return StringUtil.replaceFirst(
-				createAccountURL.toString(), portalURL, portalURLSecure);
+			return createAccountURL.toString();
 		}
 
 		try {
