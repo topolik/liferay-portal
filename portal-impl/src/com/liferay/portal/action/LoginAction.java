@@ -111,6 +111,7 @@ public class LoginAction extends Action {
 
 		if (!redirect.startsWith(Http.HTTP)) {
 			String portalURL = PortalUtil.getPortalURL(request);
+
 			redirect = portalURL.concat(redirect);
 		}
 

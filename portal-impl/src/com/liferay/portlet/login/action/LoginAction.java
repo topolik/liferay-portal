@@ -193,6 +193,7 @@ public class LoginAction extends PortletAction {
 
 				if (!redirect.startsWith(Http.HTTP)) {
 					String portalURL = PortalUtil.getPortalURL(request);
+
 					redirect = portalURL.concat(redirect);
 				}
 
@@ -202,10 +203,7 @@ public class LoginAction extends PortletAction {
 				boolean doActionAfterLogin = ParamUtil.getBoolean(
 					actionRequest, "doActionAfterLogin");
 
-				if (doActionAfterLogin) {
-					return;
-				}
-				else {
+				if (!doActionAfterLogin) {
 					actionResponse.sendRedirect(themeDisplay.getPathMain());
 				}
 			}
