@@ -31,12 +31,23 @@ public class RandomUtil {
 		return _random;
 	}
 
+	public static Random getSecureRandom() {
+		return _secureRandom;
+	}
+
 	public void setRandom(Random random) {
 		PortalRuntimePermission.checkSetBeanProperty(getClass());
 
 		_random = random;
 	}
 
+	public void setSecureRandom(Random random) {
+		PortalRuntimePermission.checkSetBeanProperty(getClass());
+
+		_secureRandom = random;
+	}
+
 	private static Random _random;
+	private static Random _secureRandom;
 
 }

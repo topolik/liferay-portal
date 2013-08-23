@@ -523,6 +523,9 @@
 		<property name="random">
 			<bean class="com.liferay.portal.util.RandomImpl" />
 		</property>
+		<property name="secureRandom">
+			<bean class="com.liferay.portal.util.SecureRandomImpl" />
+		</property>
 	</bean>
 	<bean id="com.liferay.portal.kernel.util.ServiceBeanMethodInvocationFactoryUtil" class="com.liferay.portal.kernel.util.ServiceBeanMethodInvocationFactoryUtil">
 		<property name="serviceBeanMethodInvocationFactory">
