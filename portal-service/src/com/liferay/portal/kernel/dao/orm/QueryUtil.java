@@ -19,7 +19,7 @@ import com.liferay.portal.kernel.dao.db.DBFactoryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.Randomizer;
+import com.liferay.portal.kernel.util.RandomUtil;
 import com.liferay.portal.kernel.util.UnmodifiableList;
 
 import java.util.ArrayList;
@@ -251,7 +251,7 @@ public class QueryUtil {
 			return list(query, dialect, ALL_POS, ALL_POS, true);
 		}
 
-		int[] scrollIds = Randomizer.getInstance().nextInt(total, num);
+		int[] scrollIds = RandomUtil.getRandom().nextInt(total, num);
 
 		List<Object> list = new ArrayList<Object>();
 
