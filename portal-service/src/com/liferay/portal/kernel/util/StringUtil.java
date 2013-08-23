@@ -1890,9 +1890,7 @@ public class StringUtil {
 	 *         string
 	 */
 	public static String randomize(String s) {
-		Randomizer randomizer = Randomizer.getInstance();
-
-		return randomizer.randomize(s);
+		return RandomUtil.getRandom().randomize(s);
 	}
 
 	public static String randomString() {

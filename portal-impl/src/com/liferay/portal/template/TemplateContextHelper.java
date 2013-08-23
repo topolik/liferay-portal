@@ -41,7 +41,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil_IW;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
 import com.liferay.portal.kernel.util.PropsUtil;
-import com.liferay.portal.kernel.util.Randomizer_IW;
+import com.liferay.portal.kernel.util.RandomUtil;
 import com.liferay.portal.kernel.util.StaticFieldGetter;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil_IW;
@@ -602,8 +602,14 @@ public class TemplateContextHelper {
 		// Randomizer
 
 		try {
-			variables.put(
-				"randomizer", Randomizer_IW.getInstance().getWrappedInstance());
+
+			// For backward compatibility
+
+			variables.put("randomizer", RandomUtil.getRandom());
+
+			// New
+
+			variables.put("random", RandomUtil.getRandom());
 		}
 		catch (SecurityException se) {
 			_log.error(se, se);

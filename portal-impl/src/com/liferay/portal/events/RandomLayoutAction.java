@@ -19,7 +19,7 @@ import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.Randomizer;
+import com.liferay.portal.kernel.util.RandomUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.Layout;
@@ -79,7 +79,7 @@ public class RandomLayoutAction extends Action {
 
 			if (layouts.size() > 0) {
 				Layout randomLayout = layouts.get(
-					Randomizer.getInstance().nextInt(layouts.size()));
+					RandomUtil.getRandom().nextInt(layouts.size()));
 
 				themeDisplay.setLayout(randomLayout);
 				themeDisplay.setLayoutTypePortlet(

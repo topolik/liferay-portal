@@ -12,35 +12,21 @@
  * details.
  */
 
-package com.liferay.portal.kernel.util;
+package com.liferay.portal.util;
+
+import com.liferay.portal.kernel.util.Random;
 
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 /**
- * @author Brian Wing Shun Chan
- *
- * @deprecated As of 6.2.0, replaced by
- * 	{@link com.liferay.portal.kernel.util.RandomUtil RandomUtil}
+ * @author Sampsa Sohlman
  */
-public class Randomizer extends Random {
+class RandomHelperUtil {
 
-	public static Randomizer getInstance() {
-		return _instance;
-	}
-
-	public Randomizer() {
-		super();
-	}
-
-	public Randomizer(long seed) {
-		super(seed);
-	}
-
-	public int[] nextInt(int n, int size) {
+	static int[] nextInt(Random random, int n, int size) {
 		if (size > n) {
 			size = n;
 		}
@@ -49,7 +35,7 @@ public class Randomizer extends Random {
 
 		for (int i = 0; i < size; i++) {
 			while (true) {
-				Integer value = new Integer(nextInt(n));
+				Integer value = new Integer(random.nextInt(n));
 
 				if (!set.contains(value)) {
 					set.add(value);
@@ -70,11 +56,11 @@ public class Randomizer extends Random {
 		return array;
 	}
 
-	public void randomize(char[] array) {
+	static void randomize(Random random, char[] array) {
 		int length = array.length;
 
 		for (int i = 0; i < length - 1; i++) {
-			int x = nextInt(length);
+			int x = random.nextInt(length);
 			char y = array[i];
 
 			array[i] = array[i + x];
@@ -84,11 +70,11 @@ public class Randomizer extends Random {
 		}
 	}
 
-	public void randomize(int[] array) {
+	static void randomize(Random random, int[] array) {
 		int length = array.length;
 
 		for (int i = 0; i < length - 1; i++) {
-			int x = nextInt(length);
+			int x = random.nextInt(length);
 			int y = array[i];
 
 			array[i] = array[i + x];
@@ -98,13 +84,13 @@ public class Randomizer extends Random {
 		}
 	}
 
-	public void randomize(List<Object> list) {
+	static void randomize(Random random, List<Object> list) {
 		int size = list.size();
 
 		for (int i = 0; i <= size; i++) {
 			Object obj = list.get(i);
 
-			int j = nextInt(size);
+			int j = random.nextInt(size);
 
 			list.set(i, list.get(i + j));
 			list.set(i + j, obj);
@@ -113,11 +99,11 @@ public class Randomizer extends Random {
 		}
 	}
 
-	public void randomize(Object[] array) {
+	static void randomize(Random random, Object[] array) {
 		int length = array.length;
 
 		for (int i = 0; i < length - 1; i++) {
-			int x = nextInt(length);
+			int x = random.nextInt(length);
 			Object y = array[i];
 
 			array[i] = array[i + x];
@@ -127,18 +113,16 @@ public class Randomizer extends Random {
 		}
 	}
 
-	public String randomize(String s) {
+	static String randomize(Random random, String s) {
 		if (s == null) {
 			return null;
 		}
 
 		char[] array = s.toCharArray();
 
-		randomize(array);
+		randomize(random, array);
 
 		return new String(array);
 	}
-
-	private static Randomizer _instance = new Randomizer();
 
 }
