@@ -772,6 +772,10 @@ public class PropsValues {
 
 	public static final String HTTP_HEADER_VERSION_VERBOSITY = PropsUtil.get(PropsKeys.HTTP_HEADER_VERSION_VERBOSITY);
 
+	public static final int HTTP_PORT = GetterUtil.getInteger(PropsUtil.get(PropsKeys.HTTP_PORT), -1);
+
+	public static final int HTTPS_PORT = GetterUtil.getInteger(PropsUtil.get(PropsKeys.HTTPS_PORT), -1);
+
 	public static final String IFRAME_PASSWORD_PASSWORD_TOKEN_ROLE = PropsUtil.get(PropsKeys.IFRAME_PASSWORD_PASSWORD_TOKEN_ROLE);
 
 	public static final boolean IMAGE_AUTO_SCALE = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.IMAGE_AUTO_SCALE));
