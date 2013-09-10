@@ -24,3 +24,7 @@
 	showParentGroups="<%= showParentGroups %>"
 	showPortletBreadcrumb="<%= showPortletBreadcrumb %>"
 />
+
+<%
+System.out.println(com.liferay.portal.kernel.util.FileUtil.createTempFile("xyz"));
+%>
