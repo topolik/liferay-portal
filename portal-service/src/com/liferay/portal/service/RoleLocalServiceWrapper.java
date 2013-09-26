@@ -796,6 +796,14 @@ public class RoleLocalServiceWrapper implements RoleLocalService,
 	}
 
 	@Override
+	public java.util.List<com.liferay.portal.model.Role> getGroupRelatedRoles(
+		long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _roleLocalService.getGroupRelatedRoles(groupId);
+	}
+
+	@Override
 	public java.util.List<com.liferay.portal.model.Role> getResourceBlockRoles(
 		long resourceBlockId, java.lang.String className,
 		java.lang.String actionId)
@@ -987,10 +995,10 @@ public class RoleLocalServiceWrapper implements RoleLocalService,
 
 	@Override
 	public java.util.List<com.liferay.portal.model.Role> getTeamRoles(
-		long groupId, long[] skipRoleIds)
+		long groupId, long[] excludedRoleIds)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return _roleLocalService.getTeamRoles(groupId, skipRoleIds);
+		return _roleLocalService.getTeamRoles(groupId, excludedRoleIds);
 	}
 
 	/**
