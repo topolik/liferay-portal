@@ -596,6 +596,7 @@ public class PortletURLImpl
 	@Override
 	public void setPlid(long plid) {
 		_plid = plid;
+
 		_layout = null;
 		_layoutFriendlyURL = null;
 
@@ -605,6 +606,7 @@ public class PortletURLImpl
 	@Override
 	public void setPortletId(String portletId) {
 		_portletId = portletId;
+
 		_portlet = null;
 		_escapeXml = null;
 
@@ -1057,6 +1059,7 @@ public class PortletURLImpl
 					publicRenderParameter.getQName());
 
 			sb.append(HttpUtil.encodeURL(removePublicRenderParameterName));
+
 			sb.append(StringPool.EQUAL);
 			sb.append(processValue(key, entry.getValue()[0]));
 			sb.append(StringPool.AMPERSAND);
