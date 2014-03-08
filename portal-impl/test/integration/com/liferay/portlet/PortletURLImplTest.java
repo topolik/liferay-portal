@@ -121,9 +121,9 @@ public class PortletURLImplTest {
 
 		ThemeDisplay themeDisplay = new ThemeDisplay();
 
+		themeDisplay.setLayout(_sourceLayout);
 		themeDisplay.setPathMain("/c");
 		themeDisplay.setScopeGroupId(_group.getGroupId());
-		themeDisplay.setLayout(_sourceLayout);
 		themeDisplay.setSecure(false);
 		themeDisplay.setServerName("liferay.com");
 		themeDisplay.setServerPort(80);
