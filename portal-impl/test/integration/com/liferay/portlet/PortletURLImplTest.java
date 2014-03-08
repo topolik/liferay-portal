@@ -189,8 +189,6 @@ public class PortletURLImplTest {
 
 	@Test
 	public void testCopyCurrentRenderParameters() throws Exception {
-		List<String[]> expectedURLParts = new ArrayList<String[]>();
-
 		Map<String, String[]> renderParameters =
 			new HashMap<String, String[]>();
 
@@ -204,10 +202,6 @@ public class PortletURLImplTest {
 			_request, _targetLayout.getPlid(), _PORTLET_ID_DDM,
 			renderParameters);
 
-		Set<String> removedParameterNames = new HashSet<String>();
-
-		removedParameterNames.add("d");
-
 		PortletURLImpl portletURL = new PortletURLImpl(
 			_request, _PORTLET_ID_DDM, _targetLayout.getPlid(),
 			PortletRequest.RENDER_PHASE);
@@ -216,25 +210,26 @@ public class PortletURLImplTest {
 		portletURL.setParameter("a", "a1");
 		portletURL.setParameter("b", "b2");
 
+		Set<String> removedParameterNames = new HashSet<String>();
+
+		removedParameterNames.add("d");
+
 		portletURL.setRemovedParameterNames(removedParameterNames);
+
+		List<String[]> expectedURLParts = new ArrayList<String[]>();
 
 		addExpectedURLPart(
 			"http://domain2.net/destination-layout?", expectedURLParts);
-
 		addExpectedURLPart(
 			"p_p_id", _PORTLET_ID_DDM, false, false, expectedURLParts);
-
 		addExpectedURLPart(
 			"p_p_lifecycle", "0", false, false, expectedURLParts);
-
 		addExpectedURLPart(
 			"a", new String[]{"a1", "a0"}, false, false, _PORTLET_ID_DDM,
 			expectedURLParts);
-
 		addExpectedURLPart(
 			"b", new String[]{"b2", "b0", "b1"}, false, false, _PORTLET_ID_DDM,
 			expectedURLParts);
-
 		addExpectedURLPart(
 			"c", "c0", false, false, _PORTLET_ID_DDM, expectedURLParts);
 
@@ -252,33 +247,25 @@ public class PortletURLImplTest {
 		portletURL.setCopyCurrentRenderParameters(true);
 		portletURL.setParameter("a", "a1");
 		portletURL.setParameter("b", "b2");
-
 		portletURL.setRemovedParameterNames(removedParameterNames);
 
 		addExpectedURLPart(
 			"http://domain2.net/destination-layout?", expectedURLParts);
-
 		addExpectedURLPart(
 			"p_p_id", _PORTLET_ID_DDM, false, false, expectedURLParts);
-
 		addExpectedURLPart(
 			"p_p_lifecycle", "2", false, false, expectedURLParts);
-
 		addExpectedURLPart(
 			"p_p_cacheability", "cacheLevelPage", false, false,
 			expectedURLParts);
-
 		addExpectedURLPart(
 			"a", new String[]{"a1", "a0"}, false, false, _PORTLET_ID_DDM,
 			expectedURLParts);
-
 		addExpectedURLPart(
 			"b", new String[]{"b2", "b0", "b1"}, false, false, _PORTLET_ID_DDM,
 			expectedURLParts);
-
 		addExpectedURLPart(
 			"c", "c0", false, false, _PORTLET_ID_DDM, expectedURLParts);
-
 		addExpectedURLPart(
 			"d", "d0", false, false, _PORTLET_ID_DDM, expectedURLParts);
 
@@ -293,7 +280,7 @@ public class PortletURLImplTest {
 
 		String url2 = portletURL.generateToString();
 
-		Assert.assertEquals("Both URLs should be the same", url1, url2);
+		Assert.assertEquals(url1, url2);
 	}
 
 	@Test
