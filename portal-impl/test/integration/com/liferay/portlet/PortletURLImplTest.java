@@ -144,16 +144,6 @@ public class PortletURLImplTest {
 
 	@After
 	public void tearDown() throws Exception {
-		PortletPreferencesLocalServiceUtil.deletePortletPreferencesByPlid(
-			_sourceLayout.getPlid());
-
-		PortletPreferencesLocalServiceUtil.deletePortletPreferencesByPlid(
-			_targetLayout.getPlid());
-
-		LayoutLocalServiceUtil.deleteLayout(_sourceLayout);
-
-		LayoutLocalServiceUtil.deleteLayout(_targetLayout);
-
 		GroupLocalServiceUtil.deleteGroup(_group);
 	}
 
