@@ -119,8 +119,6 @@ public class PortletURLImplTest {
 
 		LayoutTestUtil.addPortletToLayout(_targetLayout, _PORTLET_ID_WIKI);
 
-		_request = new MockHttpServletRequest();
-
 		ThemeDisplay themeDisplay = new ThemeDisplay();
 
 		themeDisplay.setPathMain("/c");
@@ -1746,7 +1744,7 @@ public class PortletURLImplTest {
 	private Field _portletUrlAnchorEnableField;
 	private Field _portletUrlAppendParametersField;
 	private Field _portletUrlEscapeXMLField;
-	private MockHttpServletRequest _request;
+	private MockHttpServletRequest _request = new MockHttpServletRequest();
 	private Layout _sourceLayout;
 	private Layout _targetLayout;
 
