@@ -34,10 +34,8 @@ import com.liferay.portal.security.auth.AuthTokenUtil;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.service.GroupLocalServiceUtil;
-import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.LayoutSetLocalServiceUtil;
 import com.liferay.portal.service.PortletLocalServiceUtil;
-import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.test.LiferayIntegrationJUnitTestRunner;
 import com.liferay.portal.test.MainServletExecutionTestListener;
 import com.liferay.portal.theme.PortletDisplay;
@@ -192,11 +190,11 @@ public class PortletURLImplTest {
 		Map<String, String[]> renderParameters =
 			new HashMap<String, String[]>();
 
-		renderParameters.put("a", new String[]{"a0"});
-		renderParameters.put("b", new String[]{"b0", "b1"});
+		renderParameters.put("a", new String[] {"a0"});
+		renderParameters.put("b", new String[] {"b0", "b1"});
 		renderParameters.put(
-			namespace("c", _PORTLET_ID_DDM), new String[]{"c0"});
-		renderParameters.put("d", new String[]{"d0"});
+			namespace("c", _PORTLET_ID_DDM), new String[] {"c0"});
+		renderParameters.put("d", new String[] {"d0"});
 
 		RenderParametersPool.put(
 			_request, _targetLayout.getPlid(), _PORTLET_ID_DDM,
@@ -225,10 +223,10 @@ public class PortletURLImplTest {
 		addExpectedURLPart(
 			"p_p_lifecycle", "0", false, false, expectedURLParts);
 		addExpectedURLPart(
-			"a", new String[]{"a1", "a0"}, false, false, _PORTLET_ID_DDM,
+			"a", new String[] {"a1", "a0"}, false, false, _PORTLET_ID_DDM,
 			expectedURLParts);
 		addExpectedURLPart(
-			"b", new String[]{"b2", "b0", "b1"}, false, false, _PORTLET_ID_DDM,
+			"b", new String[] {"b2", "b0", "b1"}, false, false, _PORTLET_ID_DDM,
 			expectedURLParts);
 		addExpectedURLPart(
 			"c", "c0", false, false, _PORTLET_ID_DDM, expectedURLParts);
@@ -259,10 +257,10 @@ public class PortletURLImplTest {
 			"p_p_cacheability", "cacheLevelPage", false, false,
 			expectedURLParts);
 		addExpectedURLPart(
-			"a", new String[]{"a1", "a0"}, false, false, _PORTLET_ID_DDM,
+			"a", new String[] {"a1", "a0"}, false, false, _PORTLET_ID_DDM,
 			expectedURLParts);
 		addExpectedURLPart(
-			"b", new String[]{"b2", "b0", "b1"}, false, false, _PORTLET_ID_DDM,
+			"b", new String[] {"b2", "b0", "b1"}, false, false, _PORTLET_ID_DDM,
 			expectedURLParts);
 		addExpectedURLPart(
 			"c", "c0", false, false, _PORTLET_ID_DDM, expectedURLParts);
@@ -292,7 +290,7 @@ public class PortletURLImplTest {
 
 		portletApp.getContainerRuntimeOptions().put(
 			LiferayPortletConfig.RUNTIME_OPTION_ESCAPE_XML,
-			new String[]{"false"});
+			new String[] {"false"});
 
 		List<String[]> expectedURLParts = new ArrayList<String[]>();
 
@@ -322,7 +320,7 @@ public class PortletURLImplTest {
 
 		portletApp.getContainerRuntimeOptions().put(
 			LiferayPortletConfig.RUNTIME_OPTION_ESCAPE_XML,
-			new String[]{"true"});
+			new String[] {"true"});
 
 		expectedURLParts.clear();
 
@@ -688,7 +686,7 @@ public class PortletURLImplTest {
 
 		containerRuntimeOptions.put(
 			LiferayPortletConfig.RUNTIME_OPTION_ESCAPE_XML,
-			new String[]{"true"});
+			new String[] {"true"});
 
 		Portlet portlet = PortletLocalServiceUtil.getPortletById(
 			PortalUtil.getCompanyId(_request), _PORTLET_ID_DDM);
@@ -951,7 +949,7 @@ public class PortletURLImplTest {
 	protected void addExpectedURLPart(
 		String part, List<String[]> expectedURLParts) {
 
-		expectedURLParts.add(new String[]{part});
+		expectedURLParts.add(new String[] {part});
 	}
 
 	protected void addExpectedURLPart(
@@ -960,7 +958,7 @@ public class PortletURLImplTest {
 		throws Exception {
 
 		addExpectedURLPart(
-			name, new String[]{value}, encrypt, escapeXML, null,
+			name, new String[] {value}, encrypt, escapeXML, null,
 			expectedURLParts);
 	}
 
@@ -970,7 +968,7 @@ public class PortletURLImplTest {
 		throws Exception {
 
 		addExpectedURLPart(
-			name, new String[]{value}, encrypt, escapeXML, portletId,
+			name, new String[] {value}, encrypt, escapeXML, portletId,
 			expectedURLParts);
 	}
 
@@ -1138,17 +1136,17 @@ public class PortletURLImplTest {
 		addExpectedURLPart(
 			"a", "a", encrypt, escapeXML, portletId, expectedURLParts);
 
-		portletURL.setParameter("b", new String[]{"b1", "b2"});
+		portletURL.setParameter("b", new String[] {"b1", "b2"});
 
 		addExpectedURLPart(
-			"b", new String[]{"b1", "b2"}, encrypt, escapeXML, portletId,
+			"b", new String[] {"b1", "b2"}, encrypt, escapeXML, portletId,
 			expectedURLParts);
 
 		portletURL.setParameter("c", "c1");
 		portletURL.setParameter("c", "c2", true);
 
 		addExpectedURLPart(
-			"c", new String[]{"c1", "c2"}, encrypt, escapeXML, portletId,
+			"c", new String[] {"c1", "c2"}, encrypt, escapeXML, portletId,
 			expectedURLParts);
 
 		portletURL.setParameter("d", "d1");
@@ -1158,17 +1156,17 @@ public class PortletURLImplTest {
 			"d", "d2", encrypt, escapeXML, portletId, expectedURLParts);
 
 		portletURL.setParameter("e", "e0");
-		portletURL.setParameter("e", new String[]{"e1", "e2"}, true);
+		portletURL.setParameter("e", new String[] {"e1", "e2"}, true);
 
 		addExpectedURLPart(
-			"e", new String[]{"e0", "e1", "e2"}, encrypt, escapeXML, portletId,
+			"e", new String[] {"e0", "e1", "e2"}, encrypt, escapeXML, portletId,
 			expectedURLParts);
 
 		portletURL.setParameter("f", "f0");
-		portletURL.setParameter("f", new String[]{"f1", "f2"}, false);
+		portletURL.setParameter("f", new String[] {"f1", "f2"}, false);
 
 		addExpectedURLPart(
-			"f", new String[]{"f1", "f2"}, encrypt, escapeXML, portletId,
+			"f", new String[] {"f1", "f2"}, encrypt, escapeXML, portletId,
 			expectedURLParts);
 
 		portletURL.setParameter(
@@ -1303,7 +1301,7 @@ public class PortletURLImplTest {
 
 				if (isPortletUrlAppendParameters) {
 					addExpectedURLPart(
-						autopropagatedParameter, new String[]{value, "1"},
+						autopropagatedParameter, new String[] {value, "1"},
 						encrypt, escapeXML, portletId, expectedURLParts);
 				}
 				else {
@@ -1509,17 +1507,17 @@ public class PortletURLImplTest {
 		addExpectedURLPart(
 			"a", "a", false, false, portletId, expectedParameters);
 
-		portletURL.setParameter("b", new String[]{"b1", "b2"});
+		portletURL.setParameter("b", new String[] {"b1", "b2"});
 
 		addExpectedURLPart(
-			"b", new String[]{"b1", "b2"}, false, false, portletId,
+			"b", new String[] {"b1", "b2"}, false, false, portletId,
 			expectedParameters);
 
 		portletURL.setParameter("c", "c1");
 		portletURL.setParameter("c", "c2", true);
 
 		addExpectedURLPart(
-			"c", new String[]{"c1", "c2"}, false, false, portletId,
+			"c", new String[] {"c1", "c2"}, false, false, portletId,
 			expectedParameters);
 
 		portletURL.setParameter("d", "d1");
@@ -1529,17 +1527,17 @@ public class PortletURLImplTest {
 			"d", "d2", false, false, portletId, expectedParameters);
 
 		portletURL.setParameter("e", "e0");
-		portletURL.setParameter("e", new String[]{"e1", "e2"}, true);
+		portletURL.setParameter("e", new String[] {"e1", "e2"}, true);
 
 		addExpectedURLPart(
-			"e", new String[]{"e0", "e1", "e2"}, false, false, portletId,
+			"e", new String[] {"e0", "e1", "e2"}, false, false, portletId,
 			expectedParameters);
 
 		portletURL.setParameter("f", "f0");
-		portletURL.setParameter("f", new String[]{"f1", "f2"}, false);
+		portletURL.setParameter("f", new String[] {"f1", "f2"}, false);
 
 		addExpectedURLPart(
-			"f", new String[]{"f1", "f2"}, false, false, portletId,
+			"f", new String[] {"f1", "f2"}, false, false, portletId,
 			expectedParameters);
 
 		portletURL.setParameter(
@@ -1621,7 +1619,7 @@ public class PortletURLImplTest {
 
 				if (isPortletUrlAppendParameters) {
 					addExpectedURLPart(
-						autopropagatedParameter, new String[]{value, "1"},
+						autopropagatedParameter, new String[] {value, "1"},
 						false, false, portletId, expectedParameters);
 				}
 				else {
@@ -1685,10 +1683,10 @@ public class PortletURLImplTest {
 	private static final int _ACTION_URL_TYPE = 1;
 
 	private static final String[] _AMPERSAND =
-		new String[]{StringPool.AMPERSAND};
+		new String[] {StringPool.AMPERSAND};
 
 	private static final String[] _AMPERSAND_ESCAPED =
-		new String[]{StringPool.AMPERSAND + "amp;"};
+		new String[] {StringPool.AMPERSAND + "amp;"};
 
 	private static final String _COMPANY_KEY =
 		"rO0ABXNyAB9qYXZheC5jcnlwdG8uc3BlYy5TZWNyZXRLZXlTcGVjW0cLZuIwYU0CAAJM" +
