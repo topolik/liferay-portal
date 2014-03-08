@@ -137,7 +137,6 @@ public class PortletURLImplTest {
 
 		Company company = PortalUtil.getCompany(_request);
 
-		company.setKeyObj(null);
 		company.setKey(_COMPANY_KEY);
 
 		_key = company.getKeyObj();
