@@ -88,21 +88,6 @@ public class PortletURLImplTest {
 
 	@Before
 	public void setUp() throws Exception {
-		_portletUrlAnchorEnableField = ReflectionUtil.getDeclaredField(
-			PropsValues.class, "PORTLET_URL_ANCHOR_ENABLE");
-
-		_portletUrlAnchorEnableField.set(null, false);
-
-		_portletUrlAppendParametersField = ReflectionUtil.getDeclaredField(
-			PropsValues.class, "PORTLET_URL_APPEND_PARAMETERS");
-
-		_portletUrlAppendParametersField.set(null, false);
-
-		_portletUrlEscapeXMLField = ReflectionUtil.getDeclaredField(
-			PropsValues.class, "PORTLET_URL_ESCAPE_XML");
-
-		_portletUrlEscapeXMLField.set(null, false);
-
 		_group = GroupTestUtil.addGroup("TestGroup");
 
 		LayoutSetLocalServiceUtil.updateVirtualHost(
@@ -140,6 +125,21 @@ public class PortletURLImplTest {
 		company.setKey(_COMPANY_KEY);
 
 		_key = company.getKeyObj();
+
+		_portletUrlAnchorEnableField = ReflectionUtil.getDeclaredField(
+			PropsValues.class, "PORTLET_URL_ANCHOR_ENABLE");
+
+		_portletUrlAnchorEnableField.set(null, false);
+
+		_portletUrlAppendParametersField = ReflectionUtil.getDeclaredField(
+			PropsValues.class, "PORTLET_URL_APPEND_PARAMETERS");
+
+		_portletUrlAppendParametersField.set(null, false);
+
+		_portletUrlEscapeXMLField = ReflectionUtil.getDeclaredField(
+			PropsValues.class, "PORTLET_URL_ESCAPE_XML");
+
+		_portletUrlEscapeXMLField.set(null, false);
 	}
 
 	@After
@@ -1716,7 +1716,7 @@ public class PortletURLImplTest {
 	private static final String _COMPANY_KEY =
 		"rO0ABXNyAB9qYXZheC5jcnlwdG8uc3BlYy5TZWNyZXRLZXlTcGVjW0cLZuIwYU0CAAJM" +
 			"AAlhbGdvcml0aG10ABJMamF2YS9sYW5nL1N0cmluZztbAANrZXl0AAJbQnhwdAAD" +
-			"QUVTdXIAAltCrPMX+AYIVOACAAB4cAAAABDAkqmOGU4a6Kq2rZgmKMJj";
+				"QUVTdXIAAltCrPMX+AYIVOACAAB4cAAAABDAkqmOGU4a6Kq2rZgmKMJj";
 
 	private static final String _PORTLET_ID_DDM =
 		PortletKeys.DYNAMIC_DATA_MAPPING;
