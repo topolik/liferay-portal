@@ -88,6 +88,11 @@ public class PortletURLImplTest {
 
 	@Before
 	public void setUp() throws Exception {
+		_portletUrlAnchorEnableField = ReflectionUtil.getDeclaredField(
+			PropsValues.class, "PORTLET_URL_ANCHOR_ENABLE");
+
+		_portletUrlAnchorEnableField.set(null, false);
+
 		_portletUrlAppendParametersField = ReflectionUtil.getDeclaredField(
 			PropsValues.class, "PORTLET_URL_APPEND_PARAMETERS");
 
@@ -97,11 +102,6 @@ public class PortletURLImplTest {
 			PropsValues.class, "PORTLET_URL_ESCAPE_XML");
 
 		_portletUrlEscapeXMLField.set(null, false);
-
-		_portletUrlAnchorEnableField = ReflectionUtil.getDeclaredField(
-			PropsValues.class, "PORTLET_URL_ANCHOR_ENABLE");
-
-		_portletUrlAnchorEnableField.set(null, false);
 
 		_group = GroupTestUtil.addGroup("TestGroup");
 
