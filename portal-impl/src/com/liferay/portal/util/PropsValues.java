@@ -536,6 +536,8 @@ public class PropsValues {
 
 	public static String DEFAULT_WAP_THEME_ID = PropsUtil.get(PropsKeys.DEFAULT_WAP_THEME_ID);
 
+	public static final boolean DIGITAL_CERTIFICATE_AUTH_ENABLED = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.DIGITAL_CERTIFICATE_AUTH_ENABLED));
+
 	public static final boolean DIRECT_SERVLET_CONTEXT_ENABLED = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.DIRECT_SERVLET_CONTEXT_ENABLED));
 
 	public static final boolean DIRECT_SERVLET_CONTEXT_RELOAD = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.DIRECT_SERVLET_CONTEXT_RELOAD));

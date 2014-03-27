@@ -605,6 +605,8 @@ public interface PropsKeys {
 
 	public static final String DEFAULT_WAP_THEME_ID = "default.wap.theme.id";
 
+	public static final String DIGITAL_CERTIFICATE_AUTH_ENABLED = "digital.certificate.auth.enabled";
+
 	public static final String DIRECT_SERVLET_CONTEXT_ENABLED = "direct.servlet.context.enabled";
 
 	public static final String DIRECT_SERVLET_CONTEXT_RELOAD = "direct.servlet.context.reload";
