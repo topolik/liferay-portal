@@ -103,10 +103,6 @@ if (Validator.isNotNull(roleTypesParam)) {
 	roleTypes = StringUtil.split(roleTypesParam, 0);
 }
 
-if (group.isCompany()) {
-	roleTypes = new int[] {RoleConstants.TYPE_REGULAR};
-}
-
 PortletURL actionPortletURL = renderResponse.createActionURL();
 
 actionPortletURL.setParameter("struts_action", "/portlet_configuration/edit_permissions");
@@ -234,10 +230,6 @@ definePermissionsURL.setRefererPlid(plid);
 
 		if (modelResource.equals(Role.class.getName())) {
 			modelResourceRoleId = GetterUtil.getLong(resourcePrimKey);
-
-			Role role = RoleLocalServiceUtil.getRole(modelResourceRoleId);
-
-			roles.remove(role);
 		}
 
 		roles.addAll(RoleLocalServiceUtil.getTeamRoles(groupId, new long[] {modelResourceRoleId}));
