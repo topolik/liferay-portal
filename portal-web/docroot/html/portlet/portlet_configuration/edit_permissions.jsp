@@ -253,35 +253,35 @@ definePermissionsURL.setRefererPlid(plid);
 				itr.remove();
 			}
 
-			if (name.equals(RoleConstants.GUEST) && modelResource.equals(Layout.class.getName())) {
-				Layout resourceLayout = LayoutLocalServiceUtil.getLayout(GetterUtil.getLong(resourcePrimKey));
-
-				if (resourceLayout.isPrivateLayout()) {
-					Group resourceLayoutGroup = resourceLayout.getGroup();
-
-					if (!resourceLayoutGroup.isLayoutSetPrototype()) {
-						itr.remove();
-					}
-				}
-			}
-
-			if (name.equals(RoleConstants.GUEST) && Validator.isNotNull(portletResource)) {
-				int pos = resourcePrimKey.indexOf(PortletConstants.LAYOUT_SEPARATOR);
-
-				if (pos > 0) {
-					long resourcePlid = GetterUtil.getLong(resourcePrimKey.substring(0, pos));
-
-					Layout resourceLayout = LayoutLocalServiceUtil.getLayout(resourcePlid);
-
-					if (resourceLayout.isPrivateLayout()) {
-						Group resourceLayoutGroup = resourceLayout.getGroup();
-
-						if (!resourceLayoutGroup.isLayoutPrototype() && !resourceLayoutGroup.isLayoutSetPrototype()) {
-							itr.remove();
-						}
-					}
-				}
-			}
+//			if (name.equals(RoleConstants.GUEST) && modelResource.equals(Layout.class.getName())) {
+//				Layout resourceLayout = LayoutLocalServiceUtil.getLayout(GetterUtil.getLong(resourcePrimKey));
+//
+//				if (resourceLayout.isPrivateLayout()) {
+//					Group resourceLayoutGroup = resourceLayout.getGroup();
+//
+//					if (!resourceLayoutGroup.isLayoutSetPrototype()) {
+//						itr.remove();
+//					}
+//				}
+//			}
+//
+//			if (name.equals(RoleConstants.GUEST) && Validator.isNotNull(portletResource)) {
+//				int pos = resourcePrimKey.indexOf(PortletConstants.LAYOUT_SEPARATOR);
+//
+//				if (pos > 0) {
+//					long resourcePlid = GetterUtil.getLong(resourcePrimKey.substring(0, pos));
+//
+//					Layout resourceLayout = LayoutLocalServiceUtil.getLayout(resourcePlid);
+//
+//					if (resourceLayout.isPrivateLayout()) {
+//						Group resourceLayoutGroup = resourceLayout.getGroup();
+//
+//						if (!resourceLayoutGroup.isLayoutPrototype() && !resourceLayoutGroup.isLayoutSetPrototype()) {
+//							itr.remove();
+//						}
+//					}
+//				}
+//			}
 		}
 		%>
 

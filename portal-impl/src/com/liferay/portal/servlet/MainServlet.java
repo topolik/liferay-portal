@@ -65,6 +65,9 @@ import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.security.jaas.JAASHelper;
+import com.liferay.portal.security.permission.ActionKeys;
+import com.liferay.portal.security.permission.PermissionChecker;
+import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.security.permission.ResourceActionsUtil;
 import com.liferay.portal.server.capabilities.ServerCapabilitiesUtil;
 import com.liferay.portal.service.CompanyLocalServiceUtil;
@@ -75,6 +78,7 @@ import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.service.ThemeLocalServiceUtil;
 import com.liferay.portal.service.UserLocalServiceUtil;
+import com.liferay.portal.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.servlet.filters.absoluteredirects.AbsoluteRedirectsResponse;
 import com.liferay.portal.servlet.filters.i18n.I18nFilter;
 import com.liferay.portal.setup.SetupWizardUtil;
@@ -1192,7 +1196,29 @@ public class MainServlet extends ActionServlet {
 
 				Group group = layout.getGroup();
 
-				plid = group.getDefaultPublicPlid();
+				plid = LayoutConstants.DEFAULT_PLID;
+
+				// try to stay in private pages
+
+				if (layout.isPrivateLayout()) {
+					PermissionChecker permissionChecker =
+						PermissionThreadLocal.getPermissionChecker();
+
+					long privatePlid = group.getDefaultPrivatePlid();
+					Layout privateLayout = LayoutLocalServiceUtil.getLayout(
+						privatePlid);
+
+					if (permissionChecker != null
+						&& LayoutPermissionUtil.contains(
+							permissionChecker, privateLayout, ActionKeys.VIEW)) {
+
+						plid = privatePlid;
+					}
+				}
+
+				if (plid == LayoutConstants.DEFAULT_PLID) {
+					plid = group.getDefaultPublicPlid();
+				}
 
 				if ((plid == LayoutConstants.DEFAULT_PLID) ||
 					group.isStagingGroup()) {
