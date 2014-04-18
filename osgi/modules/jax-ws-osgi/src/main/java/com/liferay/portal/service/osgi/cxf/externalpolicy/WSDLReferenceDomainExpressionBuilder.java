@@ -1,4 +1,4 @@
-package com.liferay.portal.service.osgi.externalpolicy;
+package com.liferay.portal.service.osgi.cxf.externalpolicy;
 
 import org.apache.cxf.ws.policy.attachment.external.DomainExpression;
 import org.apache.cxf.ws.policy.attachment.external.DomainExpressionBuilder;

@@ -1,4 +1,4 @@
-package com.liferay.portal.service.osgi.externalpolicy;
+package com.liferay.portal.service.osgi.cxf.externalpolicy;
 
 import org.apache.cxf.Bus;
 import org.apache.cxf.endpoint.Endpoint;
@@ -9,7 +9,6 @@ import org.apache.cxf.ws.policy.PolicyEngineImpl;
 import org.apache.cxf.ws.policy.PolicyProvider;
 import org.apache.cxf.ws.policy.ServiceModelPolicyUpdater;
 import org.apache.cxf.ws.policy.WSPolicyFeature;
-import org.apache.cxf.ws.policy.attachment.external.ExternalAttachmentProvider;
 import org.apache.neethi.Policy;
 
 /**

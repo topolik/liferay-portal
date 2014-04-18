@@ -1,4 +1,4 @@
-package com.liferay.portal.service.osgi.externalpolicy;
+package com.liferay.portal.service.osgi.cxf.externalpolicy;
 
 import org.apache.cxf.service.model.BindingFaultInfo;
 import org.apache.cxf.service.model.BindingMessageInfo;

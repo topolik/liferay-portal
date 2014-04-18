@@ -1,10 +1,8 @@
-package com.liferay.portal.service.osgi;
+package com.liferay.portal.service.osgi.cxf;
 
-import org.apache.cxf.Bus;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
 
 /**
  * @author Tomas Polesovsky

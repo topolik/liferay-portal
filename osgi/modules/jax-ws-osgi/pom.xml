@@ -65,7 +65,8 @@
                         <Bundle-Activator>com.liferay.portal.service.osgi.Activator</Bundle-Activator>
                         <Private-Package>
                             com.liferay.portal.service.osgi,
-                            com.liferay.portal.service.osgi.externalpolicy,
+                            com.liferay.portal.service.osgi.cxf,
+                            com.liferay.portal.service.osgi.cxf.externalpolicy,
                             com.liferay.portal.service.remote,
                         </Private-Package>
                         <!--<Import-Package>-->

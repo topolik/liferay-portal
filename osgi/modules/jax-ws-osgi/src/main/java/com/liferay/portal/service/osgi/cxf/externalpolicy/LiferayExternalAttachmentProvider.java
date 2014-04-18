@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.liferay.portal.service.osgi.externalpolicy;
+package com.liferay.portal.service.osgi.cxf.externalpolicy;
 
 import org.apache.cxf.Bus;
 import org.apache.cxf.common.i18n.BundleUtils;

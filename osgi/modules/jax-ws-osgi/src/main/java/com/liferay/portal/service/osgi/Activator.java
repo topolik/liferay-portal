@@ -1,8 +1,8 @@
 package com.liferay.portal.service.osgi;
 
-import com.liferay.portal.service.osgi.externalpolicy.LiferayWSPolicyFeature;
-import com.liferay.portal.service.osgi.externalpolicy.LiferayExternalAttachmentProvider;
-import com.liferay.portal.service.remote.JAXWSService;
+import com.liferay.portal.service.osgi.cxf.LiferayCXFOSGiServlet;
+import com.liferay.portal.service.osgi.cxf.externalpolicy.LiferayWSPolicyFeature;
+import com.liferay.portal.service.osgi.cxf.externalpolicy.LiferayExternalAttachmentProvider;
 import com.liferay.portal.service.remote.JAXWSServiceImpl;
 import com.liferay.portal.service.remote.JAXWSServiceImpl1;
 import com.liferay.portal.service.remote.JAXWSServiceImpl2;
