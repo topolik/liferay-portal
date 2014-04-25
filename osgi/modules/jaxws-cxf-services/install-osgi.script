@@ -1,0 +1,77 @@
+
+# First uninstall, if previously installed
+
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/slf4j-api-1.7.5.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/slf4j-jdk14-1.7.5.jar
+uninstall file:/tmp/cxf/org.apache.servicemix.bundles.asm-3.3.1_1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/xmlschema-core-2.1.0.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/neethi-3.0.3.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/stax2-api-3.1.1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/woodstox-core-asl-4.2.0.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-core-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/joda-time-2.2.jar
+uninstall file:/tmp/cxf/org.apache.servicemix.bundles.jasypt-1.9.1_2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/commons-codec-1.9.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/xmlsec-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/org.apache.servicemix.bundles.opensaml-2.6.0_3.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-policy-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-bindings-wss10-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-bindings-wss11-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-bindings-wssc-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-bindings-wsu10-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-ws-security-common-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-ws-security-stax-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-ws-security-dom-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-ws-security-policy-stax-2.0.0-rc1.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-policy-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-wsdl-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-bindings-soap-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-databinding-jaxb-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-addr-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-transports-http-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-bindings-xml-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-frontend-simple-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-frontend-jaxws-3.0.0-milestone2.jar
+uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-security-3.0.0-milestone2.jar
+
+refresh
+
+# Now start
+
+install file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/slf4j-jdk14-1.7.5.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/slf4j-api-1.7.5.jar
+felix:start file:/tmp/cxf/org.apache.servicemix.bundles.asm-3.3.1_1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/xmlschema-core-2.1.0.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/neethi-3.0.3.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/stax2-api-3.1.1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/woodstox-core-asl-4.2.0.jar
+
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-core-3.0.0-milestone2.jar
+
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/joda-time-2.2.jar
+felix:start file:/tmp/cxf/org.apache.servicemix.bundles.jasypt-1.9.1_2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/commons-codec-1.9.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/xmlsec-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/org.apache.servicemix.bundles.opensaml-2.6.0_3.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-policy-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-bindings-wss10-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-bindings-wss11-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-bindings-wssc-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-bindings-wsu10-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-ws-security-common-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-ws-security-stax-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-ws-security-dom-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/wss4j-ws-security-policy-stax-2.0.0-rc1.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-policy-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-wsdl-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-bindings-soap-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-databinding-jaxb-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-addr-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-transports-http-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-bindings-xml-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-frontend-simple-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-frontend-jaxws-3.0.0-milestone2.jar
+felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-security-3.0.0-milestone2.jar
+# felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-services-sts-core-3.0.0-milestone2.jar ... CXF Security Token Service: ??? later ???
+
+refresh
