@@ -30,9 +30,10 @@ wget http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.serv
 wget http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.jasypt/1.9.1_2/org.apache.servicemix.bundles.jasypt-1.9.1_2.jar -O /tmp/cxf/org.apache.servicemix.bundles.jasypt-1.9.1_2.jar
 # opensaml-2.6.0.jar:
 wget http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.opensaml/2.6.0_3/org.apache.servicemix.bundles.opensaml-2.6.0_3.jar -O /tmp/cxf/org.apache.servicemix.bundles.opensaml-2.6.0_3.jar
-
+# javassist-3.12.1.ga_1.jar
+wget http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.javassist/3.12.1.ga_1/org.apache.servicemix.bundles.javassist-3.12.1.ga_1.jar  -O /tmp/cxf/org.apache.servicemix.bundles.javassist-3.12.1.ga_1.jar
 # 5: Initialize keystores in the project
-cd PROJECT_DIR... (/opt/liferay.git/portal.git/osgi/modules/jax-ws-osgi/)
+cd PROJECT_DIR... (/opt/liferay.git/portal.git/osgi/modules/jaxws-cxf-services/)
 cd keys
 ./create.sh
 cd ..
@@ -44,8 +45,8 @@ mvn clean package
 
 # 8: Run application
 
-uninstall file:/opt/liferay.git/portal.git/osgi/modules/jax-ws-osgi/target/jaxws-test-osgi-1.0.0.jar
-felix:start file:/opt/liferay.git/portal.git/osgi/modules/jax-ws-osgi/target/jaxws-test-osgi-1.0.0.jar
+uninstall file:/opt/liferay.git/portal.git/osgi/modules/jaxws-cxf-services/target/jaxws-cxf-services-1.0.0.jar
+felix:start file:/opt/liferay.git/portal.git/osgi/modules/jaxws-cxf-services/target/jaxws-cxf-services-1.0.0.jar
 
 # 9: Go to http://localhost:11112/soap and verify WSDLs to contain some policies
 

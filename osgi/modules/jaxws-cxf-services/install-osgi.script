@@ -1,6 +1,7 @@
 
 # First uninstall, if previously installed
 
+uninstall file:/tmp/cxf/org.apache.servicemix.bundles.javassist-3.12.1.ga_1.jar
 uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/slf4j-api-1.7.5.jar
 uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/slf4j-jdk14-1.7.5.jar
 uninstall file:/tmp/cxf/org.apache.servicemix.bundles.asm-3.3.1_1.jar
@@ -37,7 +38,7 @@ uninstall file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-security-3.0.0
 refresh
 
 # Now start
-
+install file:/tmp/cxf/org.apache.servicemix.bundles.javassist-3.12.1.ga_1.jar
 install file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/slf4j-jdk14-1.7.5.jar
 felix:start file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/slf4j-api-1.7.5.jar
 felix:start file:/tmp/cxf/org.apache.servicemix.bundles.asm-3.3.1_1.jar
