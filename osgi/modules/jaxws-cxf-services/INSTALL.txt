@@ -43,6 +43,12 @@ mvn clean package
 
 # 7. Install CXF into OSGi using gogo telnet console using install-osgi.script
 
+# 7.2 - compile and install cxf-rt-ws-policy-patch
+cd /opt/liferay.git/portal/osgi/modules/cxf-rt-ws-policy-patch
+mvn package
+install file:/opt/liferay.git/portal/osgi/modules/cxf-rt-ws-policy-patch/target/cxf-rt-ws-policy-patch-1.0.0.jar
+refresh file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-policy-3.0.0-milestone2.jar
+
 # 8: Run application
 
 uninstall file:/opt/liferay.git/portal.git/osgi/modules/jaxws-cxf-services/target/jaxws-cxf-services-1.0.0.jar

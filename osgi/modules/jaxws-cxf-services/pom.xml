@@ -109,6 +109,7 @@
 							com.liferay.portal.service.osgi,
 							com.liferay.portal.service.osgi.cxf,
 							com.liferay.portal.service.osgi.cxf.externalpolicy,
+							com.liferay.portal.service.osgi.wrapper,
 							com.liferay.portal.service.remote,
 						</Private-Package>
 						<!--<Import-Package>-->
