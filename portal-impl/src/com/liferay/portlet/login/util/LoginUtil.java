@@ -26,15 +26,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
 import com.liferay.portal.kernel.servlet.SessionMessages;
-import com.liferay.portal.kernel.util.CookieKeys;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.Http;
-import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.*;
 import com.liferay.portal.liveusers.LiveUsers;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.CompanyConstants;
@@ -492,6 +484,23 @@ public class LoginUtil {
 		}
 
 		return session;
+	}
+
+	public static String sanitizeURLForRedirectAfterLogin(String url) {
+		String csrfToken = HttpUtil.getParameter(url, "p_auth", false);
+		String lifecycle = HttpUtil.getParameter(url, "p_p_lifecycle", false);
+		String requestPortletAuthenticationToken = HttpUtil.getParameter(
+			url, "p_p_auth", false);
+
+		if (Validator.isBlank(csrfToken) &&
+			(Validator.isBlank(lifecycle) || !lifecycle.equals("1")) &&
+			Validator.isBlank(requestPortletAuthenticationToken)) {
+
+			return url;
+		}
+		else {
+			return HttpUtil.getPath(url);
+		}
 	}
 
 	public static void sendPassword(ActionRequest actionRequest)

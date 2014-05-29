@@ -156,6 +156,9 @@ public class LoginAction extends Action {
 
 		String loginRedirect = ParamUtil.getString(request, "redirect");
 
+		loginRedirect = LoginUtil.sanitizeURLForRedirectAfterLogin(
+			loginRedirect);
+
 		loginRedirect = PortalUtil.escapeRedirect(loginRedirect);
 
 		if (Validator.isNotNull(loginRedirect)) {
