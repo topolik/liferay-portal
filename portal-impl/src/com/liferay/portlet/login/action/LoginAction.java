@@ -204,6 +204,8 @@ public class LoginAction extends PortletAction {
 
 		String redirect = ParamUtil.getString(actionRequest, "redirect");
 
+		redirect = LoginUtil.sanitizeURLForRedirectAfterLogin(redirect);
+
 		if (Validator.isNotNull(redirect)) {
 			redirect = PortalUtil.escapeRedirect(redirect);
 
