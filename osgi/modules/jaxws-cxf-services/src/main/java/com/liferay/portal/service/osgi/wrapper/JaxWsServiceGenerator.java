@@ -385,7 +385,7 @@ public class JaxWsServiceGenerator {
 		CtClass wrapper = _pool.makeClass(wrapperName);
 
 		wrapper.addInterface(asCtClass(Serializable.class));
-		wrapper.addInterface(asCtClass(MethodParameterWrapper.class));
+		wrapper.addInterface(asCtClass(ClassWrapper.class));
 		wrapper.addConstructor(CtNewConstructor.defaultConstructor(wrapper));
 
 		// create emtpy method to reference from setters, we create the content

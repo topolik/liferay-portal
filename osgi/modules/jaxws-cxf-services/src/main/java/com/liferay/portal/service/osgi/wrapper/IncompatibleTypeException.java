@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2014 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,7 +17,20 @@ package com.liferay.portal.service.osgi.wrapper;
 /**
  * @author Tomas Polesovsky
  */
-public class ServiceWrapper {
+public class IncompatibleTypeException extends Throwable {
+	public IncompatibleTypeException() {
+		super();
+	}
 
+	public IncompatibleTypeException(String message) {
+		super(message);
+	}
 
+	public IncompatibleTypeException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+	public IncompatibleTypeException(Throwable cause) {
+		super(cause);
+	}
 }

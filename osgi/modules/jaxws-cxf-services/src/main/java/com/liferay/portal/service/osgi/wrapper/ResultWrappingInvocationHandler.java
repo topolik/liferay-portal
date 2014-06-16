@@ -68,7 +68,7 @@ public class ResultWrappingInvocationHandler implements InvocationHandler {
 
 		Class wrapperClass = _generator.loadWrapperClass(returnType);
 
-		MethodParameterWrapper wrapper = (MethodParameterWrapper)wrapperClass.newInstance();
+		ClassWrapper wrapper = (ClassWrapper)wrapperClass.newInstance();
 
 		wrapper.wrap(result);
 

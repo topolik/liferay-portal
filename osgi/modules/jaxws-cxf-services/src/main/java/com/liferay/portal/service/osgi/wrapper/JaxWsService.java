@@ -14,9 +14,24 @@
 
 package com.liferay.portal.service.osgi.wrapper;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Tomas Polesovsky
  */
-public interface MethodParameterWrapper {
-	void wrap(Object originalInterfaceInstance);
+public abstract class JaxWsService extends ClassWrapper {
+
+	public void setMetadata(JaxWsServiceMetadata metadata) {
+		this._metadata = metadata;
+
+		super.wrapClass(metadata.getService());
+	}
+
+	public JaxWsServiceMetadata getMetadata() {
+		return _metadata;
+	}
+
+	private JaxWsServiceMetadata _metadata;
 }

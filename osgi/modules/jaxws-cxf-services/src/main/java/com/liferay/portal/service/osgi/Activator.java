@@ -2,7 +2,8 @@ package com.liferay.portal.service.osgi;
 
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
 import com.liferay.portal.service.osgi.cxf.LiferayCXFOSGiServlet;
-import com.liferay.portal.service.osgi.wrapper.JaxWsServiceGenerator;
+import com.liferay.portal.service.osgi.wrapper.JaxWsServiceFactory;
+import com.liferay.portal.service.osgi.wrapper.JaxWsServiceMetadata;
 import com.liferay.portal.service.remote.JAXWSService2;
 import com.liferay.portal.service.remote.JAXWSServiceImpl2;
 import org.apache.cxf.BusFactory;
@@ -25,9 +26,11 @@ import org.osgi.framework.ServiceRegistration;
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author Tomas Polesovsky
@@ -39,13 +42,13 @@ public class Activator implements BundleActivator, ServiceListener {
 	// TODO: until we have the right @REMOTE annotation, use JSONWebService annotation
 	private static final Class PORTAL_REMOTE_SERVICE_ANNOTATION = JSONWebService.class;
 
-	private JaxWsServiceGenerator _wrapper;
+	private JaxWsServiceFactory _serviceFactory;
 
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
 		try {
 
-			_wrapper = new JaxWsServiceGenerator();
+			_serviceFactory = new JaxWsServiceFactory();
 			_bundleContext = bundleContext;
 			_cxfServlet = new LiferayCXFOSGiServlet();
 
@@ -88,7 +91,7 @@ public class Activator implements BundleActivator, ServiceListener {
 		}
 
 		_httpServer = null;
-		_wrapper = null;
+		_serviceFactory = null;
 
 		if (_serviceRegistration != null) {
 			_bundleContext.ungetService(_serviceRegistration.getReference());
@@ -118,9 +121,18 @@ public class Activator implements BundleActivator, ServiceListener {
 		Object webService = service;
 		if (hasAnnotation(service.getClass(), PORTAL_REMOTE_SERVICE_ANNOTATION)) {
 			try {
-				if(counter==100){return;}
-				webService = _wrapper.wrapPortalService(service);
-				counter++;
+				// TODO: remove
+				if(counter==100){return;}counter++;
+
+				HashMap<String, Object> configuration = new HashMap<String, Object>();
+				JaxWsServiceMetadata metadata = new JaxWsServiceMetadata();
+				metadata.setService(service);
+				metadata.setConfiguration(configuration);
+				for (String key : serviceReference.getPropertyKeys()) {
+					configuration.put(key, serviceReference.getProperty(key));
+				}
+
+				webService = _serviceFactory.createService(metadata);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return;
@@ -180,7 +192,7 @@ public class Activator implements BundleActivator, ServiceListener {
 			}
 		}
 
-		_wrapper.detachServiceClass(service.getClass());
+		_serviceFactory.detachServiceClass(service.getClass());
 
 	}
 
