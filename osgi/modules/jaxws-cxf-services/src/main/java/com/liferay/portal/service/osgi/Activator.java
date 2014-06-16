@@ -33,7 +33,8 @@ import java.util.Map;
  * @author Tomas Polesovsky
  */
 public class Activator implements BundleActivator, ServiceListener {
-	// todo - test
+	// todo
+	// - test
 	private ServiceRegistration _serviceRegistration;
 	// TODO: until we have the right @REMOTE annotation, use JSONWebService annotation
 	private static final Class PORTAL_REMOTE_SERVICE_ANNOTATION = JSONWebService.class;
