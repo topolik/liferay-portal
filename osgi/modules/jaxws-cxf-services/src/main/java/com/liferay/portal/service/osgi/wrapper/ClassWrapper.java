@@ -36,7 +36,7 @@ public abstract class ClassWrapper implements Serializable {
 			key.append(",");
 		}
 
-		key.append(") ");
+		key.append("):");
 
 		key.append(method.getReturnType().getName());
 
@@ -49,16 +49,14 @@ public abstract class ClassWrapper implements Serializable {
 		initMethods();
 	}
 
-	public Object invoke(String methodName, Object... args) throws Exception {
+	public Object invoke(String methodName, Object[] unwrappedArgs) throws Exception {
 		Method originalMethod = _methodsIndex.get(methodName);
 
 		if (originalMethod == null) {
 			throw new Exception("Unable to find original method!");
 		}
 
-		Object[] unwrappedArguments = unwrap(args);
-
-		Object result = originalMethod.invoke(_wrappedClass, unwrappedArguments);
+		Object result = originalMethod.invoke(_wrappedClass, unwrappedArgs);
 
 		return wrap(result);
 
@@ -75,11 +73,43 @@ public abstract class ClassWrapper implements Serializable {
 		_methodsIndex = methodsIndex;
 	}
 
-	private Object[] unwrap(Object[] args) {
-		throw new UnsupportedOperationException("");
+	private Object unwrap(boolean arg) {
+		return Boolean.valueOf(arg);
 	}
 
-	private Object wrap(Object result) {
+	private Object unwrap(byte arg) {
+		return Byte.valueOf(arg);
+	}
+
+	private Object unwrap(char arg) {
+		return Character.valueOf(arg);
+	}
+
+	private Object unwrap(double arg) {
+		return Double.valueOf(arg);
+	}
+
+	private Object unwrap(float arg) {
+		return Float.valueOf(arg);
+	}
+
+	private Object unwrap(int arg) {
+		return Integer.valueOf(arg);
+	}
+
+	private Object unwrap(long arg) {
+		return Long.valueOf(arg);
+	}
+
+	private Object unwrap(short arg) {
+		return Short.valueOf(arg);
+	}
+
+	private Object unwrap(Object arg) {
+		return Byte.valueOf(arg);
+	}
+
+	private Object wrap(double result) {
 		throw new UnsupportedOperationException("");
 	}
 

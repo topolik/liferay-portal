@@ -17,6 +17,7 @@ package com.liferay.portal.service.osgi.wrapper;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.util.AggregateClassLoader;
+import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.MethodComparator;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -152,16 +153,13 @@ public class JaxWsServiceFactory {
 				serviceCtClass.addMethod(serviceMethod);
 			} catch (IncompatibleMethodException e) {
 				// TODO: logging service
-				e.printStackTrace();
+				//e.printStackTrace();
+				System.out.println(e.getMessage());
 			}
 		}
 
-		try {
-			return (Class<JaxWsService>) classLoader.loadClass(serviceName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(
-				"Unable to define service " + serviceName, e);
-		}
+		return (Class<JaxWsService>) serviceCtClass.toClass(
+			classLoader, classLoader.getClass().getProtectionDomain());
 	}
 
 	protected CtMethod generateWebMethod(
@@ -185,10 +183,24 @@ public class JaxWsServiceFactory {
 		CtMethod wrappingMethod = generateMethodDeclaration(
 			method, serviceCtClass, classLoader);
 
-		String methodBody = ("{ return ($r) super.invoke(\"%1$s\", $$); }");
+		StringBuffer methodBody = new StringBuffer();
+		methodBody.append("{");
+		methodBody.append("String methodKey = \"%1$s\";");
+
+		methodBody.append("Object[] unwrappedArguments = new Object[] {");
+		for (int i = 0; i < method.getParameterTypes().length; i++) {
+			methodBody.append("unwrap($" + i + ")");
+			if ((i + 1) < method.getParameterTypes().length) {
+				methodBody.append(",");
+			}
+		}
+		methodBody.append("};");
+
+		methodBody.append("return ($r) super.invoke(methodKey, wrappedArguments);");
+		methodBody.append("}");
 
 		wrappingMethod.setBody(String.format(
-			methodBody, ClassWrapper.generateMethodKey(method)));
+			methodBody.toString(), ClassWrapper.generateMethodKey(method)));
 
 		return wrappingMethod;
 	}
@@ -248,7 +260,8 @@ public class JaxWsServiceFactory {
 		throws IncompatibleTypeException, NotFoundException,
 		CannotCompileException {
 
-		if(isMarshalable(originalClass)) {
+		ClassUtil
+		if(!isMarshalable(originalClass)) {
 			throw new IncompatibleTypeException(
 				"The type cannot be marshalled " + originalClass.getName());
 		}
