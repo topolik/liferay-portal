@@ -34,6 +34,7 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.annotation.Annotation;
 import javassist.bytecode.annotation.StringMemberValue;
+import org.apache.commons.lang.ClassUtils;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
@@ -260,7 +261,6 @@ public class JaxWsServiceFactory {
 		throws IncompatibleTypeException, NotFoundException,
 		CannotCompileException {
 
-		ClassUtil
 		if(!isMarshalable(originalClass)) {
 			throw new IncompatibleTypeException(
 				"The type cannot be marshalled " + originalClass.getName());
@@ -268,6 +268,10 @@ public class JaxWsServiceFactory {
 
 		if (canJAXBHandle(originalClass)) {
 			return asCtClass(originalClass);
+		}
+
+		if (originalClass.isPrimitive()) {
+			return asCtClass(ClassUtils.primitiveToWrapper(originalClass));
 		}
 
 		if (Map.class.isAssignableFrom(originalClass)) {
@@ -405,7 +409,7 @@ public class JaxWsServiceFactory {
 		return "soap." + serviceClass.getSimpleName() + _SOAP;
 	}
 
-	protected boolean isMarshalable(Class aClass) {
+	protected static boolean isMarshalable(Class aClass) {
 		Class[] unmarshableClasses = {
 			ThemeDisplay.class, ServiceContext.class, SearchContext.class};
 
@@ -418,7 +422,7 @@ public class JaxWsServiceFactory {
 		return true;
 	}
 
-	protected boolean canJAXBHandle(Class returnType) {
+	protected static boolean canJAXBHandle(Class returnType) {
 		Class[] builtIn = {
 			javax.activation.DataHandler.class, java.awt.Image.class,
 			java.lang.String.class, java.math.BigInteger.class,
@@ -429,10 +433,6 @@ public class JaxWsServiceFactory {
 			javax.xml.transform.Source.class,
 			Boolean.class, Byte.class, Double.class, Float.class, Long.class,
 			Integer.class, Short.class, Character.class};
-
-		if (returnType.isPrimitive()) {
-			return true;
-		}
 
 		for (Class builtInClass : builtIn) {
 			if (returnType.equals(builtInClass)) {

@@ -14,9 +14,13 @@
 
 package com.liferay.portal.service.osgi.wrapper;
 
+import org.apache.commons.lang.ClassUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,7 +62,7 @@ public abstract class ClassWrapper implements Serializable {
 
 		Object result = originalMethod.invoke(_wrappedClass, unwrappedArgs);
 
-		return wrap(result);
+		return wrapReturnType(result);
 
 	}
 
@@ -73,43 +77,72 @@ public abstract class ClassWrapper implements Serializable {
 		_methodsIndex = methodsIndex;
 	}
 
-	private Object unwrap(boolean arg) {
-		return Boolean.valueOf(arg);
+	private Object unwrap(Object obj, Class resultType) {
+		if (obj == null) {
+			return null;
+		}
+
+		Class actualType = obj.getClass();
+
+		if (resultType.isPrimitive()) {
+			return obj;
+		}
+
+		if (resultType.getName().startsWith("com.liferay")){
+			throw new UnsupportedOperationException("Unable to create original class!");
+		}
+
+		throw new UnsupportedOperationException("Unsupported type: " + actualType.getName());
 	}
 
-	private Object unwrap(byte arg) {
-		return Byte.valueOf(arg);
-	}
+	private Object wrapReturnType(Object result) {
+		if (result == null) {
+			return null;
+		}
+		Class resultClass = result.getClass();
 
-	private Object unwrap(char arg) {
-		return Character.valueOf(arg);
-	}
+		if (resultClass.isPrimitive()) {
+			return result;
 
-	private Object unwrap(double arg) {
-		return Double.valueOf(arg);
-	}
+		}
 
-	private Object unwrap(float arg) {
-		return Float.valueOf(arg);
-	}
+		if(!JaxWsServiceFactory.isMarshalable(resultClass)) {
+			throw new IncompatibleTypeException(
+				"The type cannot be marshalled " + resultClass.getName());
+		}
 
-	private Object unwrap(int arg) {
-		return Integer.valueOf(arg);
-	}
+		if (JaxWsServiceFactory.canJAXBHandle(resultClass)) {
+			return resultClass;
+		}
 
-	private Object unwrap(long arg) {
-		return Long.valueOf(arg);
-	}
+		if (Map.class.isAssignableFrom(resultClass)) {
+			return new HashMap((Map) result);
+		}
 
-	private Object unwrap(short arg) {
-		return Short.valueOf(arg);
-	}
+		if (List.class.isAssignableFrom(resultClass) || resultClass.isArray()) {
+			return new ArrayList((List) result);
+		}
 
-	private Object unwrap(Object arg) {
-		return Byte.valueOf(arg);
-	}
+		// TODO: support wider range of "model" classes
+		if (resultClass.getName().startsWith("com.liferay")){
+			try {
+				ClassWrapper beanWrapper = JaxWsF
+				return generateBeanWrapper(resultClass, classLoader);
+			}
+			catch (IncompatibleMethodException e) {
+				throw new IncompatibleTypeException(
+					"The type cannot be marshalled " + resultClass.getName(),
+					e);
+			}
+		}
 
-	private Object wrap(double result) {
+		if (resultClass.isInterface()) {
+			throw new IncompatibleTypeException(
+				"Unable to marshall interface " + resultClass.getName());
+		}
+
+		// TODO: let's be optimistic and try it :)
+		return asCtClass(resultClass);
 		throw new UnsupportedOperationException("");
 	}
 
