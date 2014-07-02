@@ -1,9 +1,6 @@
-# 0. Update portal-ext.properties, configure correct versions required by CXF 3.0:
+# 0. Update portal-ext.properties, configure correct version for portal-embedded spring.io:
 module.framework.system.packages.extra=\
 \
-	# CXF 3.0 dependencies
-	com.ctc.wstx;version="3.2.4",\
-	com.ctc.wstx.stax;version="3.2.4",\
 	org.springframework.core.io;version="3.1.0",\
 	... + all the current configuration from portal.properties ...
 
@@ -32,6 +29,7 @@ wget http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.serv
 wget http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.opensaml/2.6.0_3/org.apache.servicemix.bundles.opensaml-2.6.0_3.jar -O /tmp/cxf/org.apache.servicemix.bundles.opensaml-2.6.0_3.jar
 # javassist-3.12.1.ga_1.jar
 wget http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.javassist/3.12.1.ga_1/org.apache.servicemix.bundles.javassist-3.12.1.ga_1.jar  -O /tmp/cxf/org.apache.servicemix.bundles.javassist-3.12.1.ga_1.jar
+
 # 5: Initialize keystores in the project
 cd PROJECT_DIR... (/opt/liferay.git/portal.git/osgi/modules/jaxws-cxf-services/)
 cd keys
@@ -49,9 +47,17 @@ mvn package
 install file:/opt/liferay.git/portal/osgi/modules/cxf-rt-ws-policy-patch/target/cxf-rt-ws-policy-patch-1.0.0.jar
 refresh file:/tmp/cxf/apache-cxf-3.0.0-milestone2/lib/cxf-rt-ws-policy-3.0.0-milestone2.jar
 
+
+# 8. Download nad install commons-lang
+
+wget http://central.maven.org/maven2/commons-lang/commons-lang/2.6/commons-lang-2.6.jar -O /tmp/cxf/commons-lang-2.6.jar
+install file:/tmp/cxf/commons-lang-2.6.jar
+
 # 8: Run application
 
 uninstall file:/opt/liferay.git/portal.git/osgi/modules/jaxws-cxf-services/target/jaxws-cxf-services-1.0.0.jar
+resolve
+refresh
 felix:start file:/opt/liferay.git/portal.git/osgi/modules/jaxws-cxf-services/target/jaxws-cxf-services-1.0.0.jar
 
 # 9: Go to http://localhost:11112/soap and verify WSDLs to contain some policies

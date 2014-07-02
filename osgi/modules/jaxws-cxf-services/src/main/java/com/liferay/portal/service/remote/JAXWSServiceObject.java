@@ -2,46 +2,23 @@ package com.liferay.portal.service.remote;
 
 import javax.xml.bind.annotation.XmlType;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Tomas Polesovsky
  */
 @XmlType
-public class JAXWSServiceObject {
-	private String stringParam;
-	private Date dateParam;
-	private int intParam;
+public interface JAXWSServiceObject {
+	public String getStringParam();
 
-	public String getStringParam() {
-		return stringParam;
-	}
+	public void setStringParam(String stringParam);
 
-	public void setStringParam(String stringParam) {
-		this.stringParam = stringParam;
-	}
+	public Date getDateParam();
+	public void setDateParam(Date dateParam);
 
-	public Date getDateParam() {
-		return dateParam;
-	}
+	public int getIntParam();
 
-	public void setDateParam(Date dateParam) {
-		this.dateParam = dateParam;
-	}
+	public void setIntParam(int intParam);
 
-	public int getIntParam() {
-		return intParam;
-	}
-
-	public void setIntParam(int intParam) {
-		this.intParam = intParam;
-	}
-
-	@Override
-	public String toString() {
-		return "JAXWSServiceObject{" +
-			"stringParam='" + stringParam + '\'' +
-			", dateParam=" + dateParam +
-			", intParam=" + intParam +
-			'}';
-	}
+	public List<JAXWSServiceObject> getChildren();
 }

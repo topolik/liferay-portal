@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author Tomas Polesovsky
@@ -57,12 +56,15 @@ public class Activator implements BundleActivator, ServiceListener {
 			try {
 				initExternalAttachmentsProvider();
 
-				registerPortalServices();
-
 				// TODO: simple test if it works with correct @WebService
 				JAXWSService2 service = new JAXWSServiceImpl2();
 				_serviceRegistration = _bundleContext.registerService(
 					service.getClass().getName(), service, null);
+				ServiceEvent artificialEvent = new ServiceEvent(
+						ServiceEvent.REGISTERED, _serviceRegistration.getReference());
+				serviceChanged(artificialEvent);
+
+				registerPortalServicesListener();
 
 			} catch (Throwable e) {
 				stop(_bundleContext);
@@ -75,6 +77,8 @@ public class Activator implements BundleActivator, ServiceListener {
 
 	@Override
 	public void stop(BundleContext bundleContext) {
+		_bundleContext.removeServiceListener(this);
+
 		if (_endpoints != null) {
 			for (Endpoint endpoint : _endpoints) {
 				endpoint.stop();
@@ -122,7 +126,7 @@ public class Activator implements BundleActivator, ServiceListener {
 		if (hasAnnotation(service.getClass(), PORTAL_REMOTE_SERVICE_ANNOTATION)) {
 			try {
 				// TODO: remove
-				if(counter==100){return;}counter++;
+				if(counter==2){return;}counter++;
 
 				HashMap<String, Object> configuration = new HashMap<String, Object>();
 				JaxWsServiceMetadata metadata = new JaxWsServiceMetadata();
@@ -216,21 +220,22 @@ public class Activator implements BundleActivator, ServiceListener {
 		return getAnnotatedClass(cls.getSuperclass(), annotation);
 	}
 
-	protected void registerPortalServices() throws InvalidSyntaxException {
+	protected void registerPortalServicesListener() throws InvalidSyntaxException {
 		String filter = "(objectclass=*)";
 		_bundleContext.addServiceListener(this, filter);
 
 		ServiceReference[] existingServices =
 			_bundleContext.getServiceReferences(null, filter);
 
-		if (existingServices != null) {
-			for (int i = 0; i < existingServices.length; i++) {
-				ServiceEvent artificialEvent = new ServiceEvent(
-						ServiceEvent.REGISTERED, existingServices[i]);
-
-				serviceChanged(artificialEvent);
-			}
-		}
+		//TODO: make working
+//		if (existingServices != null) {
+//			for (int i = 0; i < existingServices.length; i++) {
+//				ServiceEvent artificialEvent = new ServiceEvent(
+//						ServiceEvent.REGISTERED, existingServices[i]);
+//
+//				serviceChanged(artificialEvent);
+//			}
+//		}
 	}
 
 	protected void initExternalAttachmentsProvider() throws Exception {

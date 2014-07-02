@@ -22,6 +22,11 @@
             <version>3.12.1.ga_1</version>
         </dependency>
         <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-core</artifactId>
             <version>${cxf.version}</version>
@@ -109,7 +114,8 @@
 							com.liferay.portal.service.osgi,
 							com.liferay.portal.service.osgi.cxf,
 							com.liferay.portal.service.osgi.cxf.externalpolicy,
-							com.liferay.portal.service.osgi.wrapper,
+                            com.liferay.portal.service.osgi.wrapper,
+                            com.liferay.portal.service.osgi.wrapper.adapter,
 							com.liferay.portal.service.remote,
 						</Private-Package>
 						<!--<Import-Package>-->

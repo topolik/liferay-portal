@@ -15,18 +15,11 @@
 package com.liferay.portal.service.osgi.wrapper;
 
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
-import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.kernel.util.AggregateClassLoader;
 import com.liferay.portal.kernel.util.MethodComparator;
-import com.liferay.portal.service.ServiceContext;
-import com.liferay.portal.theme.ThemeDisplay;
 import javassist.CannotCompileException;
-import javassist.ClassClassPath;
-import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
-import javassist.CtNewMethod;
 import javassist.Loader;
 import javassist.NotFoundException;
 import javassist.bytecode.AnnotationsAttribute;
@@ -38,26 +31,27 @@ import javax.jws.WebMethod;
 import javax.jws.WebService;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Tomas Polesovsky
  */
-public class JaxWsServiceFactory {
+public class JaxWsServiceFactory extends JavassistFactory {
 
 	public JaxWsServiceFactory() {
-		init();
+		super(new JaxWsClassPool());
+
+		_typeWrapperFactory = new TypeWrapperFactory(getPool());
+
+		initClassLoading();
 	}
 
-	protected void init() {
-		_pool = new ClassPool(true);
-		_pool.appendClassPath(new ClassClassPath(getClass()));
+	protected void initClassLoading() {
+		addClassLoader(getClass().getClassLoader());
+//		addClassLoader(new Loader(getClass().getClassLoader(), getPool()));
+//		appendClassPath(getClass());
 	}
 
 	public void detachServiceClass(Class serviceClass) {
@@ -66,7 +60,7 @@ public class JaxWsServiceFactory {
 
 		if (webServiceClass != null) {
 			try {
-				CtClass webServiceCtClass = _pool.getCtClass(
+				CtClass webServiceCtClass = getPool().getCtClass(
 					generateClassName(webServiceClass));
 
 				webServiceCtClass.defrost();
@@ -76,30 +70,19 @@ public class JaxWsServiceFactory {
 		}
 	}
 
-	public Class loadWrapperClass(Class originalClass) {
-		String wrapperName = generateClassName(originalClass);
-
-		if (!hasCtClass(wrapperName)) {
-			throw new NoClassDefFoundError(wrapperName);
-		}
-
-		try {
-			return _pool.getClassLoader().loadClass(wrapperName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("Internal exception", e);
-		}
-	}
-
 	public JaxWsService createService(
 			JaxWsServiceMetadata jaxWsServiceMetadata)
 		throws NotFoundException, CannotCompileException,
-		IllegalAccessException, InstantiationException {
+		IllegalAccessException, InstantiationException, ClassNotFoundException {
 
 		Class jaxWsServiceDefinitionClass =
 			findJaxWsServiceDefinitionClass(jaxWsServiceMetadata);
 
+		addClassLoader(jaxWsServiceDefinitionClass.getClassLoader());
+
+		// TODO: remove all classloader references
 		ClassLoader serviceClassloader =
-			createServiceClassloader(jaxWsServiceDefinitionClass);
+			null;
 
 		Class<JaxWsService> jaxWsServiceClass = generateJaxWsServiceClass(
 			jaxWsServiceDefinitionClass, serviceClassloader,
@@ -125,13 +108,13 @@ public class JaxWsServiceFactory {
 	protected Class<JaxWsService> generateJaxWsServiceClass(
 			Class definitionClass, ClassLoader classLoader,
 			JaxWsServiceMetadata metadata)
-		throws NotFoundException, CannotCompileException {
+		throws NotFoundException, CannotCompileException, ClassNotFoundException {
 
-		_pool.appendClassPath(new ClassClassPath(definitionClass));
+		appendClassPath(definitionClass);
 
-		String serviceName = generateClassName(definitionClass);
+		String serviceName = definitionClass.getName() + "SOAP";
 
-		CtClass serviceCtClass = _pool.makeClass(serviceName);
+		CtClass serviceCtClass = getPool().makeClass(serviceName);
 
 		serviceCtClass.addInterface(asCtClass(Serializable.class));
 		serviceCtClass.setSuperclass(asCtClass(JaxWsService.class));
@@ -152,16 +135,13 @@ public class JaxWsServiceFactory {
 				serviceCtClass.addMethod(serviceMethod);
 			} catch (IncompatibleMethodException e) {
 				// TODO: logging service
-				e.printStackTrace();
+				//e.printStackTrace();
+				System.out.println(e.getMessage());
 			}
 		}
 
-		try {
-			return (Class<JaxWsService>) classLoader.loadClass(serviceName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(
-				"Unable to define service " + serviceName, e);
-		}
+		return (Class<JaxWsService>) getPool().getClassLoader().loadClass(
+			serviceName);
 	}
 
 	protected CtMethod generateWebMethod(
@@ -170,131 +150,33 @@ public class JaxWsServiceFactory {
 		throws NotFoundException, CannotCompileException,
 		IncompatibleMethodException {
 
-		CtMethod webMethod = wrapMethod(method, serviceCtClass, classLoader);
+		CtMethod webMethod = _typeWrapperFactory.generateMethodDeclaration(
+			method, serviceCtClass, _MAX_DEPTH);
+
+		StringBuffer methodBody = new StringBuffer();
+		methodBody.append("{");
+		methodBody.append("String methodKey = \"%1$s\";");
+		methodBody.append("return ($r) super.invoke(methodKey, $args);");
+		methodBody.append("}");
+
+		webMethod.setBody(String.format(
+			methodBody.toString(), JaxWsService.generateMethodKey(method)));
 
 		addWebMethodAnnotation(method, webMethod, webMethodNames);
 
 		return webMethod;
 	}
 
-	protected CtMethod wrapMethod(
-			Method method, CtClass serviceCtClass, ClassLoader classLoader)
-		throws NotFoundException, IncompatibleMethodException,
-		CannotCompileException {
-
-		CtMethod wrappingMethod = generateMethodDeclaration(
-			method, serviceCtClass, classLoader);
-
-		String methodBody = ("{ return ($r) super.invoke(\"%1$s\", $$); }");
-
-		wrappingMethod.setBody(String.format(
-			methodBody, ClassWrapper.generateMethodKey(method)));
-
-		return wrappingMethod;
-	}
-
-	private CtMethod generateMethodDeclaration(
-			Method method, CtClass serviceCtClass, ClassLoader classLoader)
-		throws NotFoundException, IncompatibleMethodException,
-		CannotCompileException {
-
-		Class[] parameterTypes = method.getParameterTypes();
-		CtClass[] parameters = new CtClass[parameterTypes.length];
-		for (int i = 0; i < parameters.length; i++) {
-			Class parameterClass = parameterTypes[i];
-			try {
-				parameters[i] = wrapType(parameterClass, classLoader);
-			} catch (IncompatibleTypeException e) {
-				throw new IncompatibleMethodException(
-					"Unable to register method " +
-						method.getDeclaringClass().getName() + "." +
-						ClassWrapper.generateMethodKey(method) +
-						" invalid parameter " + parameterClass
-					, e);
-			}
-		}
-
-		CtClass[] exceptions = null;
-		if (method.getExceptionTypes().length > 0) {
-			exceptions = new CtClass[]{asCtClass(Exception.class)};
-		}
-		else {
-			exceptions = new CtClass[0];
-		}
-
-		Class returnType = method.getReturnType();
-		CtClass ctReturnType = null;
-		try {
-			ctReturnType = wrapType(returnType, classLoader);
-		} catch (IncompatibleTypeException e) {
-			throw new IncompatibleMethodException(
-				"Unable to register method " +
-					method.getDeclaringClass().getName() + "." +
-					ClassWrapper.generateMethodKey(method) +
-					" invalid return type " + returnType
-				, e);
-		}
-
-		String methodName = method.getName();
-
-		CtMethod result = CtNewMethod.abstractMethod(
-			ctReturnType, methodName, parameters, exceptions,
-			serviceCtClass);
-
-		return result;
-	}
-
-	private CtClass wrapType(Class originalClass, ClassLoader classLoader)
-		throws IncompatibleTypeException, NotFoundException,
-		CannotCompileException {
-
-		if(isMarshalable(originalClass)) {
-			throw new IncompatibleTypeException(
-				"The type cannot be marshalled " + originalClass.getName());
-		}
-
-		if (canJAXBHandle(originalClass)) {
-			return asCtClass(originalClass);
-		}
-
-		if (Map.class.isAssignableFrom(originalClass)) {
-			return asCtClass(HashMap.class);
-		}
-
-		if (List.class.isAssignableFrom(originalClass) || originalClass.isArray()) {
-			return asCtClass(ArrayList.class);
-		}
-
-		// TODO: support wider range of "model" classes
-		if (originalClass.getName().startsWith("com.liferay")){
-			try {
-				return generateBeanWrapper(originalClass, classLoader);
-			}
-			catch (IncompatibleMethodException e) {
-				throw new IncompatibleTypeException(
-					"The type cannot be marshalled " + originalClass.getName(),
-					e);
-			}
-		}
-
-		if (originalClass.isInterface()) {
-			throw new IncompatibleTypeException(
-				"Unable to marshall interface " + originalClass.getName());
-		}
-
-		// TODO: let's be optimistic and try it :)
-		return asCtClass(originalClass);
-	}
-
-	protected ClassLoader createServiceClassloader(Class serviceDefinition) {
-		AggregateClassLoader aggregateClassLoader = new AggregateClassLoader(
-			getClass().getClassLoader());
-
-		aggregateClassLoader.addClassLoader(serviceDefinition.getClassLoader());
-		Loader loader = new Loader(aggregateClassLoader, _pool);
-
-		return loader;
-	}
+//	protected ClassLoader createServiceClassloader(Class serviceDefinition) {
+//		AggregateClassLoader aggregateClassLoader =
+//			new AggregateClassLoader(null);
+//
+//		aggregateClassLoader.addClassLoader(getClass().getClassLoader());
+//		aggregateClassLoader.addClassLoader(serviceDefinition.getClassLoader());
+//		aggregateClassLoader.addClassLoader(new Loader(getPool()));
+//
+//		return aggregateClassLoader;
+//	}
 
 	protected void addWebServiceAnnotation(
 		CtClass generatedInterface, String serviceName) {
@@ -343,93 +225,6 @@ public class JaxWsServiceFactory {
 		generatedMethod.getMethodInfo().addAttribute(attr);
 	}
 
-
-	protected CtClass generateBeanWrapper(
-			Class interfaceClass, ClassLoader classLoader)
-		throws NotFoundException, CannotCompileException,
-			IncompatibleMethodException {
-
-		String wrapperName = generateClassName(interfaceClass);
-
-		// cross dependency, the interface wrapper has been already generated
-		if (hasCtClass(wrapperName)) {
-			return asCtClass(wrapperName);
-		}
-
-		CtClass wrapper = _pool.makeClass(wrapperName);
-
-		wrapper.addInterface(asCtClass(Serializable.class));
-		wrapper.setSuperclass(asCtClass(ClassWrapper.class));
-		wrapper.addConstructor(CtNewConstructor.defaultConstructor(wrapper));
-
-		Method[] methods = interfaceClass.getDeclaredMethods();
-		Arrays.sort(methods, new MethodComparator());
-
-		List<String> fields = new ArrayList<String>();
-		// add get/set methods
-		for (Method method : methods) {
-			String fieldName = parseFieldName(method);
-
-			if (fieldName == null) {
-				continue;
-			}
-
-			wrapper.addMethod(wrapMethod(method, wrapper, classLoader));
-			fields.add(fieldName);
-		}
-
-		return wrapper;
-	}
-
-	protected String generateClassName(Class serviceClass) {
-		if (Map.class.isAssignableFrom(serviceClass)) {
-			return HashMap.class.getName();
-		}
-		if (List.class.isAssignableFrom(serviceClass) || serviceClass.isArray()) {
-			return ArrayList.class.getName();
-		}
-
-		return "soap." + serviceClass.getSimpleName() + _SOAP;
-	}
-
-	protected boolean isMarshalable(Class aClass) {
-		Class[] unmarshableClasses = {
-			ThemeDisplay.class, ServiceContext.class, SearchContext.class};
-
-		for (Class unmarshableClass: unmarshableClasses) {
-			if (aClass.isAssignableFrom(unmarshableClass)) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	protected boolean canJAXBHandle(Class returnType) {
-		Class[] builtIn = {
-			javax.activation.DataHandler.class, java.awt.Image.class,
-			java.lang.String.class, java.math.BigInteger.class,
-			java.math.BigDecimal.class, java.net.URI.class,
-			java.util.Calendar.class, java.util.Date.class,
-			java.util.UUID.class, javax.xml.datatype.XMLGregorianCalendar.class,
-			javax.xml.datatype.Duration.class, javax.xml.namespace.QName.class,
-			javax.xml.transform.Source.class,
-			Boolean.class, Byte.class, Double.class, Float.class, Long.class,
-			Integer.class, Short.class, Character.class};
-
-		if (returnType.isPrimitive()) {
-			return true;
-		}
-
-		for (Class builtInClass : builtIn) {
-			if (returnType.equals(builtInClass)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	private Class findAnnotatedClass(Class cls, Class annotation) {
 		if (cls == null) {
 			return null;
@@ -446,89 +241,8 @@ public class JaxWsServiceFactory {
 		return findAnnotatedClass(cls.getSuperclass(), annotation);
 	}
 
-	private String parseFieldName(Method method) {
-		String methodName = method.getName();
-
-		int index = 0;
-
-		if ((methodName.length() > 3) && methodName.startsWith("get")) {
-			if (method.getReturnType() == Void.class) {
-				return null;
-			}
-
-			if (method.getParameterTypes().length != 0) {
-				return null;
-			}
-
-			if (Character.isLowerCase(methodName.charAt(3))) {
-				return null;
-			}
-
-			index = 3;
-		}
-		else if ((methodName.length() > 3) && methodName.startsWith("set")) {
-			if (method.getReturnType() != Void.class) {
-				return null;
-			}
-
-			if (method.getParameterTypes().length != 1) {
-				return null;
-			}
-
-			if (Character.isLowerCase(methodName.charAt(3))) {
-				return null;
-			}
-
-			index = 3;
-		}
-		else if ((methodName.length() > 2) && methodName.startsWith("is")) {
-			if (method.getReturnType() == Void.class) {
-				return null;
-			}
-
-			if (method.getParameterTypes().length != 0) {
-				return null;
-			}
-
-			if (Character.isLowerCase(methodName.charAt(2))) {
-				return null;
-			}
-
-			index = 2;
-		}
-		else {
-			return null;
-		}
-
-		String result = "" + Character.toLowerCase(methodName.charAt(index));
-
-		if (methodName.length() > (index)) {
-			result += methodName.substring(index + 1);
-		}
-
-		return result;
-	}
-
-	private CtClass asCtClass(Class aClass) throws NotFoundException {
-		return asCtClass(aClass.getName());
-	}
-
-	private CtClass asCtClass(String className) throws NotFoundException {
-		return _pool.getCtClass(className);
-	}
-
-	private boolean hasCtClass(String className) {
-		try {
-			asCtClass(className);
-		} catch (NotFoundException e) {
-			return false;
-		}
-
-		return true;
-	}
-
-	private static final String _SOAP = "SOAP";
-	private ClassPool _pool;
+	private static final int _MAX_DEPTH = 5;
+	private TypeWrapperFactory _typeWrapperFactory;
 	// TODO: until we have the right @REMOTE annotation, use JSONWebService annotation
 	private static final Class PORTAL_REMOTE_SERVICE_ANNOTATION = JSONWebService.class;
 }

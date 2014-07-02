@@ -1,5 +1,6 @@
 package com.liferay.portal.service.remote;
 
+import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
 import org.apache.cxf.annotations.Policies;
 import org.apache.cxf.annotations.Policy;
 
@@ -10,11 +11,10 @@ import javax.jws.WebService;
  * @author Tomas Polesovsky
  */
 
-@WebService
+@JSONWebService
 public interface JAXWSService2 {
 
 	public JAXWSServiceObject getObject();
 
-	@Oneway
 	public void setObject(JAXWSServiceObject jaxwsServiceObject);
 }
