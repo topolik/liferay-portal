@@ -7955,10 +7955,7 @@ public class PortalImpl implements Portal {
 
 		boolean useGroupVirtualHostName = false;
 
-		if (canonicalURL ||
-			!StringUtil.equalsIgnoreCase(
-				themeDisplay.getServerName(), _LOCALHOST)) {
-
+		if (canonicalURL) {
 			useGroupVirtualHostName = true;
 		}
 
