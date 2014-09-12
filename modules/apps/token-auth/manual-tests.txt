@@ -1,0 +1,22 @@
+$ curl http://localhost:8080/api/jsonws/TokenClientService.tokenclient/add \
+  -u test@liferay.com:test \
+  -d name='remoteApp' \
+  -d 'configuration={"security-manager-services-profile":"read"}'
+
+{"clientId":"21cc7541-4657-47b0-918b-57248ca68500","clientName":"remoteApp","companyId":10156,"configuration":{"security-manager-services-profile":"read"},"ownerId":10202,"state":"VALID"}
+
+
+
+$ curl http://localhost:8080/api/jsonws/JWTTokenService.jwttoken/issue \
+  -u test@liferay.com:test \
+  -d tokenClientId='21cc7541-4657-47b0-918b-57248ca68500'
+
+"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDIwMiIsImF1ZCI6IjIxY2M3NTQxLTQ2NTctNDdiMC05MThiLTU3MjQ4Y2E2ODUwMCIsImp0aSI6Imh3MFJtV21uIiwiaWF0IjoxNDEwNTM1ODM1fQ.fs9ZXbkiR_b2CGq_tDzJ8vjS7e_G-fUAEeYtiwPjjaQ"
+
+
+$ curl 'http://localhost:8080/api/jsonws/user/get-user-by-id/user-id/10202' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDIwMiIsImF1ZCI6IjIxY2M3NTQxLTQ2NTctNDdiMC05MThiLTU3MjQ4Y2E2ODUwMCIsImp0aSI6Imh3MFJtV21uIiwiaWF0IjoxNDEwNTM1ODM1fQ.fs9ZXbkiR_b2CGq_tDzJ8vjS7e_G-fUAEeYtiwPjjaQ'
+
+$ curl 'http://localhost:8080/api/jsonws/user/get-user-by-id/user-id/10202' -H 'X-Application-Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDIwMiIsImF1ZCI6IjIxY2M3NTQxLTQ2NTctNDdiMC05MThiLTU3MjQ4Y2E2ODUwMCIsImp0aSI6Imh3MFJtV21uIiwiaWF0IjoxNDEwNTM1ODM1fQ.fs9ZXbkiR_b2CGq_tDzJ8vjS7e_G-fUAEeYtiwPjjaQ'
+
+$ curl 'http://localhost:8080/api/jsonws/user/get-user-by-id/user-id/10202?applicationToken=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMDIwMiIsImF1ZCI6IjIxY2M3NTQxLTQ2NTctNDdiMC05MThiLTU3MjQ4Y2E2ODUwMCIsImp0aSI6Imh3MFJtV21uIiwiaWF0IjoxNDEwNTM1ODM1fQ.fs9ZXbkiR_b2CGq_tDzJ8vjS7e_G-fUAEeYtiwPjjaQ'
+
