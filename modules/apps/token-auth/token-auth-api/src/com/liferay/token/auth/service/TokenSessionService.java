@@ -12,10 +12,16 @@
  * details.
  */
 
-package com.liferay.token.auth;
+package com.liferay.token.auth.service;
+
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.token.auth.model.TokenSession;
 
 /**
  * @author Tomas Polesovsky
  */
-public class AccessControlAdvisorImpl {
+public interface TokenSessionService {
+	boolean isValid(TokenSession tokenSession) throws PortalException;
+
+	void create(TokenSession tokenSession);
 }

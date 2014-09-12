@@ -14,6 +14,7 @@
 
 package com.liferay.token.auth.model;
 
+
 import java.util.Date;
 
 /**
@@ -36,12 +37,12 @@ public class TokenSession {
 		this._token = token;
 	}
 
-	public TokenClient getTokenClient() {
-		return _tokenClient;
+	public String getTokenClientId() {
+		return _tokenClientId;
 	}
 
-	public void setTokenClient(TokenClient tokenClient) {
-		this._tokenClient = tokenClient;
+	public void setTokenClientId(String tokenClientId) {
+		this._tokenClientId = tokenClientId;
 	}
 
 	public String getTokenType() {
@@ -63,6 +64,17 @@ public class TokenSession {
 	private Date _issued;
 	private String _token;
 	private String _tokenType;
-	private TokenClient _tokenClient;
+	private String _tokenClientId;
 	private long _userId;
+
+	@Override
+	public String toString() {
+		return "TokenSession{" +
+			"_issued=" + _issued +
+			", _token='" + _token + '\'' +
+			", _tokenType='" + _tokenType + '\'' +
+			", _tokenClientId='" + _tokenClientId + '\'' +
+			", _userId=" + _userId +
+			'}';
+	}
 }

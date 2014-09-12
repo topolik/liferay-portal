@@ -1,0 +1,10 @@
+Bundle-Name: Liferay Token Auth JWT Support
+Bundle-SymbolicName: com.liferay.token.auth.jwt
+Bundle-Version: 1.0.0
+Import-Package:\
+	*
+Include-Resource:\
+	classes,\
+	@lib/nimbus-jose-jwt.jar,\
+	@lib/jcip-annotations.jar,\
+	@lib/json-smart.jar

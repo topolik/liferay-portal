@@ -1,0 +1,10 @@
+Bundle-Name: Liferay Token Auth API
+Bundle-SymbolicName: com.liferay.token.auth.api
+Bundle-Version: 1.0.0
+Import-Package: *
+Export-Package: \
+	com.liferay.token.auth.model,\
+	com.liferay.token.auth.persistence,\
+	com.liferay.token.auth.service,\
+	com.liferay.token.auth.verifier
+Include-Resource: classes

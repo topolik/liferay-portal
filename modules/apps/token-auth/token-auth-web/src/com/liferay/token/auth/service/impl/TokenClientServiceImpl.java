@@ -12,26 +12,23 @@
  * details.
  */
 
-package com.liferay.token.auth.service;
+package com.liferay.token.auth.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
-import com.liferay.portal.model.GroupConstants;
 import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.model.User;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.service.ResourceLocalService;
-import com.liferay.portal.service.UserLocalService;
-import com.liferay.portlet.bookmarks.model.BookmarksEntry;
 import com.liferay.token.auth.model.TokenClient;
 import com.liferay.token.auth.persistence.TokenClientPersistence;
+import com.liferay.token.auth.service.TokenClientService;
+import com.liferay.token.auth.permission.TokenClientPermission;
 import com.liferay.token.auth.util.ActionKeys;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -46,9 +43,10 @@ import java.util.Properties;
 	service = TokenClientService.class
 )
 @JSONWebService
-public class TokenClientService {
+public class TokenClientServiceImpl implements TokenClientService {
 
-	public TokenClient add(String name, Properties policy)
+	@Override
+	public TokenClient add(String name, Properties configuration)
 		throws PortalException {
 
 		_tokenClientPermission.check(null, ActionKeys.ADD_CLIENT);
@@ -57,11 +55,11 @@ public class TokenClientService {
 
 		TokenClient tokenClient = new TokenClient();
 		tokenClient.setClientName(name);
-		tokenClient.setClientPolicy(policy);
+		tokenClient.setConfiguration(configuration);
 		tokenClient.setCompanyId(permissionChecker.getCompanyId());
 		tokenClient.setOwnerId(permissionChecker.getUserId());
 
-		_tokenClientPersistence.update(tokenClient);
+		tokenClient = _tokenClientPersistence.update(tokenClient);
 
 		_resourceLocalService.addResources(
 			tokenClient.getCompanyId(), 0, tokenClient.getOwnerId(),
@@ -71,6 +69,7 @@ public class TokenClientService {
 		return tokenClient;
 	}
 
+	@Override
 	public TokenClient findById(String clientId) throws PortalException {
 		TokenClient tokenClient = _tokenClientPersistence.findById(clientId);
 
@@ -79,12 +78,14 @@ public class TokenClientService {
 		return tokenClient;
 	}
 
+	@Override
 	public List<TokenClient> getAll() throws PortalException {
 		List<TokenClient> tokenClients = _tokenClientPersistence.findAll();
 
 		return _tokenClientPermission.filter(tokenClients, ActionKeys.VIEW);
 	}
 
+	@Override
 	public List<TokenClient> findByOwnerId(long ownerId)
 		throws PortalException {
 
@@ -94,6 +95,7 @@ public class TokenClientService {
 		return _tokenClientPermission.filter(tokenClients, ActionKeys.VIEW);
 	}
 
+	@Override
 	public boolean isRevoked(String clientId) throws PortalException {
 		TokenClient tokenClient = _tokenClientPersistence.findById(clientId);
 
@@ -110,18 +112,20 @@ public class TokenClientService {
 		return false;
 	}
 
+	@Override
 	public void remove(String clientId) throws PortalException {
 		TokenClient tokenClient = _tokenClientPersistence.findById(clientId);
 
 		_tokenClientPermission.check(tokenClient, ActionKeys.UPDATE);
 
-		_tokenClientPersistence.remove(tokenClient);
+		_tokenClientPersistence.remove(clientId);
 
 		_resourceLocalService.deleteResource(
 			tokenClient.getCompanyId(), TokenClient.class.getName(),
 			ResourceConstants.SCOPE_INDIVIDUAL, clientId);
 	}
 
+	@Override
 	public void revoke(String clientId) throws PortalException {
 		TokenClient tokenClient = _tokenClientPersistence.findById(clientId);
 
@@ -132,6 +136,7 @@ public class TokenClientService {
 		_tokenClientPersistence.update(tokenClient);
 	}
 
+	@Override
 	public void update(TokenClient tokenClient) throws PortalException {
 		_tokenClientPermission.check(tokenClient, ActionKeys.UPDATE);
 
@@ -149,15 +154,22 @@ public class TokenClientService {
 		return permissionChecker;
 	}
 
-	@Reference
-	public void setTokenClientPersistence(
+	@Reference(unbind = "-")
+	protected void setTokenClientPersistence(
 		TokenClientPersistence tokenClientPersistence) {
 
 		this._tokenClientPersistence = tokenClientPersistence;
 	}
 
-	@Reference
-	public void setResourceLocalService(
+	@Reference(unbind = "-")
+	protected void setTokenClientPermission(
+		TokenClientPermission tokenClientPermission) {
+
+		this._tokenClientPermission = tokenClientPermission;
+	}
+
+	@Reference(unbind = "-")
+	protected void setResourceLocalService(
 		ResourceLocalService resourceLocalService) {
 
 		this._resourceLocalService = resourceLocalService;
@@ -165,44 +177,6 @@ public class TokenClientService {
 
 	private ResourceLocalService _resourceLocalService;
 	private TokenClientPersistence _tokenClientPersistence;
-	private TokenClientPermission _tokenClientPermission =
-		new TokenClientPermission();
+	private TokenClientPermission _tokenClientPermission;
 
-	private class TokenClientPermission {
-		public void check(TokenClient tokenClient, String actionId)
-			throws PortalException {
-
-			if (!contains(tokenClient, actionId)) {
-				throw new PrincipalException();
-			}
-		}
-
-		public boolean contains(TokenClient tokenClient, String actionId) {
-			PermissionChecker permissionChecker =
-				PermissionThreadLocal.getPermissionChecker();
-
-			String primaryKey = "0";
-
-			if (tokenClient != null) {
-				primaryKey = tokenClient.getClientId();
-			}
-
-			return permissionChecker.hasPermission(
-				0, TokenClient.class.getName(), primaryKey, actionId);
-		}
-
-		public List<TokenClient> filter(
-			List<TokenClient> tokenClients, String action) {
-
-			List<TokenClient> result = new ArrayList(tokenClients.size());
-
-			for (TokenClient tokenClient : tokenClients) {
-				if (contains(tokenClient, ActionKeys.VIEW)) {
-					result.add(tokenClient);
-				}
-			}
-
-			return result;
-		}
-	}
 }

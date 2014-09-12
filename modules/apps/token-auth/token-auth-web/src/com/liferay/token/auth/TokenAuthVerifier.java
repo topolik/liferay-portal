@@ -12,46 +12,54 @@
  * details.
  */
 
-package com.liferay.token.auth.verifier;
+package com.liferay.token.auth;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.auth.AccessControlContext;
 import com.liferay.portal.security.auth.AuthException;
-import com.liferay.portal.security.auth.AuthToken;
 import com.liferay.portal.security.auth.AuthVerifier;
 import com.liferay.portal.security.auth.AuthVerifierResult;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceTracker;
+import com.liferay.token.auth.model.TokenClient;
 import com.liferay.token.auth.model.TokenSession;
-import com.liferay.token.auth.service.TokenSessionService;
+import com.liferay.token.auth.persistence.TokenClientPersistence;
+import com.liferay.token.auth.verifier.TokenVerificationException;
+import com.liferay.token.auth.verifier.TokenVerifier;
+import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 /**
  * @author Tomas Polesovsky
  */
+@Component(
+	immediate = true,
+	property = {
+		"hosts.allowed=",
+		"urls.includes=/api/*,/xmlrpc/*",
+		"urls.excludes=/api/liferay/do"
+	},
+	service = AuthVerifier.class
+)
 public class TokenAuthVerifier implements AuthVerifier {
 
 	public TokenAuthVerifier() {
 		Registry registry = RegistryUtil.getRegistry();
 
-		_serviceTracker = registry.trackServices(TokenVerifier.class);
-
-		_serviceTracker.open();
+		_tokenVerifierServiceTracker = registry.trackServices(TokenVerifier.class);
+		_tokenVerifierServiceTracker.open();
 	}
 
 	@Override
 	public String getAuthType() {
-		return getClass().getName();
+		return AUTH_TYPE;
 	}
 
 	@Override
@@ -70,7 +78,24 @@ public class TokenAuthVerifier implements AuthVerifier {
 				return authVerifierResult;
 			}
 
+			TokenClient tokenClient = _tokenClientPersistence.findById(
+				tokenSession.getTokenClientId());
 
+			if (!tokenClient.getState().equals(TokenClient.State.VALID)) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Attempt to access API using revoked token! " +
+							"Remote IP: " +
+							accessControlContext.getRequest().getRemoteAddr() +
+							" TokenSession: " + tokenSession);
+				}
+
+				throw new AuthException("The application has been revoked!");
+			}
+
+			Map<String, Object> settings = authVerifierResult.getSettings();
+			settings.put(TOKEN_CLIENT, tokenClient);
+			settings.put(TOKEN_SESSION, tokenSession);
 
 			authVerifierResult.setPassword("");
 			authVerifierResult.setState(AuthVerifierResult.State.SUCCESS);
@@ -78,8 +103,8 @@ public class TokenAuthVerifier implements AuthVerifier {
 
 		}
 		catch (TokenVerificationException e) {
-			if (_log.isInfoEnabled() && Validator.isNotNull(e.getMessage())) {
-				_log.info(e.getMessage());
+			if (_log.isDebugEnabled()) {
+				_log.debug(e);
 			}
 
 			authVerifierResult.setState(
@@ -92,17 +117,11 @@ public class TokenAuthVerifier implements AuthVerifier {
 		return authVerifierResult;
 	}
 
-	@Reference
-	public void setTokenSessionService(
-		TokenSessionService tokenSessionService) {
-		this._tokenSessionService = tokenSessionService;
-	}
-
 	protected TokenSession getTokenSession(
 			HttpServletRequest request, HttpServletResponse response)
 		throws TokenVerificationException {
 
-		TokenVerifier[] tokenVerifiers = _serviceTracker.getServices(
+		TokenVerifier[] tokenVerifiers = _tokenVerifierServiceTracker.getServices(
 			new TokenVerifier[0]);
 
 		for (TokenVerifier tokenVerifier : tokenVerifiers) {
@@ -115,46 +134,23 @@ public class TokenAuthVerifier implements AuthVerifier {
 		return null;
 	}
 
-	protected String getValidToken(HttpServletRequest request) {
-		String authorizationHeader = request.getHeader(_AUTHORIZATION);
-
-		String[] values = StringUtil.split(authorizationHeader);
-
-		for (String value : values) {
-			StringTokenizer stringTokenizer = new StringTokenizer(value);
-
-			String authorization = stringTokenizer.nextToken();
-
-			if (!authorization.equalsIgnoreCase(_BEARER)) {
-				continue;
-			}
-
-			String token = stringTokenizer.nextToken();
-
-			if (verifyToken(token)) {
-				return token;
-			}
-		}
-
-		String applicationToken = request.getHeader(_X_APPLICATION_TOKEN);
-		if (verifyToken(applicationToken)) {
-			return applicationToken;
-		}
-
-		return null;
+	@Reference
+	protected void setTokenClientPersistence(TokenClientPersistence tokenClientPersistence) {
+		this._tokenClientPersistence = tokenClientPersistence;
 	}
 
-	protected boolean verifyToken(String token) {
-		return false;
-	}
+	public static final String AUTH_TYPE = TokenAuthVerifier.class.getName();
 
-	private ServiceTracker<?, TokenVerifier> _serviceTracker;
-	private TokenSessionService _tokenSessionService;
+	public static final String TOKEN_CLIENT =
+		TokenAuthVerifier.class.getName() + "_TOKEN_CLIENT";
 
-	private static final String _APPLICATION_TOKEN = "applicationToken";
-	private static final String _AUTHORIZATION = "Authorization";
-	private static final String _BEARER = "Bearer";
-	private static final String _X_APPLICATION_TOKEN = "x-application-token";
+	public static final String TOKEN_SESSION =
+		TokenAuthVerifier.class.getName() + "_TOKEN_SESSION";
+
+	private ServiceTracker<?, TokenVerifier>
+		_tokenVerifierServiceTracker;
+
+	private TokenClientPersistence _tokenClientPersistence;
 
 	private static Log _log = LogFactoryUtil.getLog(
 		TokenAuthVerifier.class);

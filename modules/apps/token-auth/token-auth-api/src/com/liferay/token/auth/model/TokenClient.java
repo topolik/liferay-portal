@@ -26,7 +26,7 @@ public class TokenClient implements Cloneable {
 		TokenClient result = new TokenClient();
 		result._clientId = _clientId;
 		result._clientName = _clientName;
-		result._clientPolicy = new Properties(_clientPolicy);
+		result._configuration.putAll(_configuration);
 		result._companyId = _companyId;
 		result._state = _state;
 		result._ownerId = _ownerId;
@@ -49,12 +49,12 @@ public class TokenClient implements Cloneable {
 		this._clientName = clientName;
 	}
 
-	public Properties getClientPolicy() {
-		return _clientPolicy;
+	public Properties getConfiguration() {
+		return _configuration;
 	}
 
-	public void setClientPolicy(Properties clientPolicy) {
-		this._clientPolicy = clientPolicy;
+	public void setConfiguration(Properties configuration) {
+		this._configuration = configuration;
 	}
 
 	public long getCompanyId() {
@@ -89,8 +89,8 @@ public class TokenClient implements Cloneable {
 
 	private String _clientId;
 	private String _clientName;
-	private Properties _clientPolicy;
 	private long _companyId;
+	private Properties _configuration = new Properties();
 	private State _state = State.VALID;
 	private long _ownerId;
 }
