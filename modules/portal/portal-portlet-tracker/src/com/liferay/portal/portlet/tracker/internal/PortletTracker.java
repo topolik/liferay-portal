@@ -328,8 +328,18 @@ public class PortletTracker
 		_resourceActionLocalService.checkResourceActions(
 			portletModel.getPortletId(), portletActions);
 
+		String servletContextName =
+			portletModel.getPortletApp().getServletContextName();
+
+		String portletModelName = portletModel.getPortletId();
+
+		if (servletContextName != null) {
+			portletModelName = portletModelName.concat(
+				PortletConstants.WAR_SEPARATOR).concat(servletContextName);
+		}
+
 		List<String> modelNames = _resourceActions.getPortletModelResources(
-			portletModel.getPortletId());
+			portletModelName);
 
 		for (String modelName : modelNames) {
 			List<String> modelActions =
