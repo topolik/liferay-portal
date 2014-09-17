@@ -60,7 +60,7 @@ public class TokenSessionServiceImpl implements TokenSessionService {
 	}
 
 	@Override
-	public void create(TokenSession tokenSession) {
+	public void add(TokenSession tokenSession) {
 		_sessions.add(tokenSession);
 	}
 

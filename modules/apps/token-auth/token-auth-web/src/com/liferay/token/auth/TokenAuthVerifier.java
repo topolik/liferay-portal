@@ -25,7 +25,8 @@ import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceTracker;
 import com.liferay.token.auth.model.TokenClient;
 import com.liferay.token.auth.model.TokenSession;
-import com.liferay.token.auth.persistence.TokenClientPersistence;
+import com.liferay.token.auth.permission.SystemPermissionChecker;
+import com.liferay.token.auth.service.TokenClientService;
 import com.liferay.token.auth.verifier.TokenVerificationException;
 import com.liferay.token.auth.verifier.TokenVerifier;
 import org.osgi.service.component.annotations.Component;
@@ -33,6 +34,7 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 import java.util.Properties;
 
@@ -53,7 +55,8 @@ public class TokenAuthVerifier implements AuthVerifier {
 	public TokenAuthVerifier() {
 		Registry registry = RegistryUtil.getRegistry();
 
-		_tokenVerifierServiceTracker = registry.trackServices(TokenVerifier.class);
+		_tokenVerifierServiceTracker = registry.trackServices(
+			TokenVerifier.class);
 		_tokenVerifierServiceTracker.open();
 	}
 
@@ -70,7 +73,7 @@ public class TokenAuthVerifier implements AuthVerifier {
 		AuthVerifierResult authVerifierResult = new AuthVerifierResult();
 
 		try {
-			TokenSession tokenSession = getTokenSession(
+			final TokenSession tokenSession = getTokenSession(
 				accessControlContext.getRequest(),
 				accessControlContext.getResponse());
 
@@ -78,8 +81,14 @@ public class TokenAuthVerifier implements AuthVerifier {
 				return authVerifierResult;
 			}
 
-			TokenClient tokenClient = _tokenClientPersistence.findById(
-				tokenSession.getTokenClientId());
+			TokenClient tokenClient = SystemPermissionChecker.runAsSystem(
+				new PrivilegedExceptionAction<TokenClient>(){
+				@Override
+				public TokenClient run() throws Exception {
+					return _tokenClientService.findById(
+						tokenSession.getTokenClientId());
+				}
+			});
 
 			if (!tokenClient.getState().equals(TokenClient.State.VALID)) {
 				if (_log.isWarnEnabled()) {
@@ -121,8 +130,8 @@ public class TokenAuthVerifier implements AuthVerifier {
 			HttpServletRequest request, HttpServletResponse response)
 		throws TokenVerificationException {
 
-		TokenVerifier[] tokenVerifiers = _tokenVerifierServiceTracker.getServices(
-			new TokenVerifier[0]);
+		TokenVerifier[] tokenVerifiers =
+			_tokenVerifierServiceTracker.getServices(new TokenVerifier[0]);
 
 		for (TokenVerifier tokenVerifier : tokenVerifiers) {
 			TokenSession tokenSession = tokenVerifier.verify(request, response);
@@ -135,8 +144,10 @@ public class TokenAuthVerifier implements AuthVerifier {
 	}
 
 	@Reference
-	protected void setTokenClientPersistence(TokenClientPersistence tokenClientPersistence) {
-		this._tokenClientPersistence = tokenClientPersistence;
+	protected void setTokenClientService(
+		TokenClientService tokenClientService) {
+
+		this._tokenClientService = tokenClientService;
 	}
 
 	public static final String AUTH_TYPE = TokenAuthVerifier.class.getName();
@@ -150,9 +161,10 @@ public class TokenAuthVerifier implements AuthVerifier {
 	private ServiceTracker<?, TokenVerifier>
 		_tokenVerifierServiceTracker;
 
-	private TokenClientPersistence _tokenClientPersistence;
+	private TokenClientService _tokenClientService;
 
 	private static Log _log = LogFactoryUtil.getLog(
 		TokenAuthVerifier.class);
 
 }
+

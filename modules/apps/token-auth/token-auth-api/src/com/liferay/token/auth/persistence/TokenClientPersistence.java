@@ -12,22 +12,25 @@
  * details.
  */
 
-package com.liferay.token.auth.verifier;
+package com.liferay.token.auth.persistence;
 
-import com.liferay.token.auth.model.TokenSession;
+import com.liferay.token.auth.model.TokenClient;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @author Tomas Polesovsky
  */
-public interface TokenVerifier {
+public interface TokenClientPersistence {
+	public TokenClient add(TokenClient tokenClient);
 
-	public TokenSession verify(
-			HttpServletRequest request, HttpServletResponse response)
-		throws TokenVerificationException;
+	public TokenClient update(TokenClient tokenClient);
 
+	public boolean remove(String tokenClientId);
+
+	public TokenClient findById(String clientId);
+
+	public List<TokenClient> findAll();
+
+	public List<TokenClient> findByOwnerId(long ownerId);
 }
-
-

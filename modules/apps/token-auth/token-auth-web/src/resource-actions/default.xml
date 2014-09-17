@@ -44,6 +44,7 @@
                 <action-key>ADD_CLIENT</action-key>
                 <action-key>DELETE</action-key>
                 <action-key>PERMISSIONS</action-key>
+                <action-key>REVOKE</action-key>
                 <action-key>UPDATE</action-key>
                 <action-key>VIEW</action-key>
             </supports>
@@ -53,6 +54,7 @@
                 <action-key>ADD_CLIENT</action-key>
                 <action-key>DELETE</action-key>
                 <action-key>PERMISSIONS</action-key>
+                <action-key>REVOKE</action-key>
                 <action-key>UPDATE</action-key>
                 <action-key>VIEW</action-key>
             </guest-unsupported>

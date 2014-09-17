@@ -21,4 +21,5 @@ public class ActionKeys
 	extends com.liferay.portal.security.permission.ActionKeys {
 
 	public static final String ADD_CLIENT = "ADD_CLIENT";
+	public static final String REVOKE = "REVOKE";
 }

@@ -129,7 +129,7 @@ public class TokenClientServiceImpl implements TokenClientService {
 	public void revoke(String clientId) throws PortalException {
 		TokenClient tokenClient = _tokenClientPersistence.findById(clientId);
 
-		_tokenClientPermission.check(tokenClient, ActionKeys.UPDATE);
+		_tokenClientPermission.check(tokenClient, ActionKeys.REVOKE);
 
 		tokenClient.setState(TokenClient.State.REVOKED);
 
@@ -154,21 +154,21 @@ public class TokenClientServiceImpl implements TokenClientService {
 		return permissionChecker;
 	}
 
-	@Reference(unbind = "-")
+	@Reference
 	protected void setTokenClientPersistence(
 		TokenClientPersistence tokenClientPersistence) {
 
 		this._tokenClientPersistence = tokenClientPersistence;
 	}
 
-	@Reference(unbind = "-")
+	@Reference
 	protected void setTokenClientPermission(
 		TokenClientPermission tokenClientPermission) {
 
 		this._tokenClientPermission = tokenClientPermission;
 	}
 
-	@Reference(unbind = "-")
+	@Reference
 	protected void setResourceLocalService(
 		ResourceLocalService resourceLocalService) {
 

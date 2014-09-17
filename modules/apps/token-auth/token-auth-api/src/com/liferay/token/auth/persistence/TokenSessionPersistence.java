@@ -12,31 +12,28 @@
  * details.
  */
 
-package com.liferay.token.auth.service;
+package com.liferay.token.auth.persistence;
 
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.token.auth.model.TokenSession;
 
-import java.util.Date;
 import java.util.List;
 
 /**
  * @author Tomas Polesovsky
  */
-public interface TokenSessionService {
-	public void add(TokenSession tokenSession);
+public interface TokenSessionPersistence {
+	public TokenSession add(TokenSession tokenSession);
 
-	public TokenSession get(String token);
+	public TokenSession update(TokenSession tokenSession);
 
-	public List<TokenSession> getClientTokens(String tokenClientId);
+	public boolean remove(String tokenSessionId);
 
-	public List<TokenSession> getUserSessions(String tokenClientId, long userId);
+	public TokenSession findByToken(String token);
 
-	public boolean isValid(TokenSession tokenSession) throws PortalException;
+	public List<TokenSession> findAll();
 
-	public void remove(String token);
+	public List<TokenSession> findByOwnerId(long ownerId);
 
-	public void removeExpired(String tokenClientId, Date issued);
+	public List<TokenSession> findByTokenClientId(long tokenClientId);
 
-	public void update(TokenSession tokenSession);
 }
