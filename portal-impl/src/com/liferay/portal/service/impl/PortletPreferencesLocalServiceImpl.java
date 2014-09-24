@@ -74,7 +74,8 @@ public class PortletPreferencesLocalServiceImpl
 		portletPreferences.setPreferences(defaultPreferences);
 
 		try {
-			portletPreferencesPersistence.update(portletPreferences);
+			portletPreferences = portletPreferencesPersistence.update(
+				portletPreferences);
 		}
 		catch (SystemException se) {
 			if (_log.isWarnEnabled()) {
