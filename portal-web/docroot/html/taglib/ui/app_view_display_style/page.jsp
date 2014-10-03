@@ -25,6 +25,13 @@ Map<String, String> requestParams = (Map<String, String>)request.getAttribute("l
 %>
 
 <c:if test="<%= displayStyles.length > 1 %>">
+
+	<%
+	if (!ArrayUtil.contains(displayStyles, displayStyle)) {
+		displayStyle = displayStyles[0];
+	}
+	%>
+
 	<span class="display-style-buttons-container" id="<portlet:namespace />displayStyleButtonsContainer">
 		<div class="display-style-buttons" id="<portlet:namespace />displayStyleButtons">
 			<aui:nav-item anchorCssClass="btn btn-default" dropdown="<%= true %>" iconCssClass='<%= "icon-" + _getIcon(displayStyle) %>'>
