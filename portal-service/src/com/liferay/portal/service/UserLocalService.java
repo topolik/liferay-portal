@@ -142,8 +142,11 @@ public interface UserLocalService extends BaseLocalService,
 	*
 	* @param passwordPolicyId the primary key of the password policy
 	* @param userIds the primary keys of the users
+	* @throws PortalException if a password policy or user with the primary key
+	could not be found
 	*/
-	public void addPasswordPolicyUsers(long passwordPolicyId, long[] userIds);
+	public void addPasswordPolicyUsers(long passwordPolicyId, long[] userIds)
+		throws com.liferay.portal.kernel.exception.PortalException;
 
 	public void addRoleUser(long roleId, com.liferay.portal.model.User user);
 
