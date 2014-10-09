@@ -484,15 +484,15 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		PasswordPolicy passwordPolicy =
 			passwordPolicyLocalService.getPasswordPolicy(passwordPolicyId);
 
-		boolean changeRequired = passwordPolicy.getChangeRequired();
+		if (passwordPolicy.getChangeRequired()) {
+			return;
+		}
 
-		if (!changeRequired) {
-			for (int i = 0; i < userIds.length; i++) {
-				if (getUserById(userIds[i]).getPasswordReset() !=
-						changeRequired) {
+		for (long userId : userIds) {
+			User user = getUserById(userId);
 
-					updatePasswordReset(userIds[i], changeRequired);
-				}
+			if (user.getPasswordReset()) {
+				updatePasswordReset(userId, false);
 			}
 		}
 	}

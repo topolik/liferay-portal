@@ -26,7 +26,7 @@ boolean passwordResetDisabled = false;
 if (((selUser == null) || (selUser.getLastLoginDate() == null)) && ((passwordPolicy == null) || (passwordPolicy.isChangeable() && passwordPolicy.isChangeRequired()))) {
 	passwordResetDisabled = true;
 }
-if ((passwordPolicy != null) && !passwordPolicy.isChangeable()) {
+else if ((passwordPolicy != null) && !passwordPolicy.isChangeable()) {
 	passwordResetDisabled = true;
 }
 
