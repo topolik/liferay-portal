@@ -165,9 +165,12 @@ public class UserLocalServiceUtil {
 	*
 	* @param passwordPolicyId the primary key of the password policy
 	* @param userIds the primary keys of the users
+	* @throws PortalException if a password policy or user with the primary key
+	could not be found
 	*/
 	public static void addPasswordPolicyUsers(long passwordPolicyId,
-		long[] userIds) {
+		long[] userIds)
+		throws com.liferay.portal.kernel.exception.PortalException {
 		getService().addPasswordPolicyUsers(passwordPolicyId, userIds);
 	}
 

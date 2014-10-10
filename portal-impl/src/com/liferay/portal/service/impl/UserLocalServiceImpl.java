@@ -469,13 +469,32 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * Assigns the password policy to the users, removing any other currently
 	 * assigned password policies.
 	 *
-	 * @param passwordPolicyId the primary key of the password policy
-	 * @param userIds the primary keys of the users
+	 * @param  passwordPolicyId the primary key of the password policy
+	 * @param  userIds the primary keys of the users
+	 * @throws PortalException if a password policy or user with the primary key
+	 *         could not be found
 	 */
 	@Override
-	public void addPasswordPolicyUsers(long passwordPolicyId, long[] userIds) {
+	public void addPasswordPolicyUsers(long passwordPolicyId, long[] userIds)
+		throws PortalException {
+
 		passwordPolicyRelLocalService.addPasswordPolicyRels(
 			passwordPolicyId, User.class.getName(), userIds);
+
+		PasswordPolicy passwordPolicy =
+			passwordPolicyLocalService.getPasswordPolicy(passwordPolicyId);
+
+		if (passwordPolicy.getChangeRequired()) {
+			return;
+		}
+
+		for (long userId : userIds) {
+			User user = getUserById(userId);
+
+			if (user.getPasswordReset()) {
+				updatePasswordReset(userId, false);
+			}
+		}
 	}
 
 	/**
