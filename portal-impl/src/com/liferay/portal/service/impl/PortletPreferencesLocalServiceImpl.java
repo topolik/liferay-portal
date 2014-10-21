@@ -30,6 +30,7 @@ import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.model.PortletPreferences;
 import com.liferay.portal.model.PortletPreferencesIds;
 import com.liferay.portal.service.base.PortletPreferencesLocalServiceBaseImpl;
+import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletPreferencesImpl;
@@ -74,7 +75,8 @@ public class PortletPreferencesLocalServiceImpl
 		portletPreferences.setPreferences(defaultPreferences);
 
 		try {
-			portletPreferencesPersistence.update(portletPreferences);
+			portletPreferences = portletPreferencesPersistence.update(
+				portletPreferences);
 		}
 		catch (SystemException se) {
 			if (_log.isWarnEnabled()) {
@@ -353,7 +355,8 @@ public class PortletPreferencesLocalServiceImpl
 
 			if (strict &&
 				(Validator.isNull(defaultPreferences) ||
-				 ((portlet != null) && portlet.isUndeployedPortlet()))) {
+				 ((portlet != null) && portlet.isUndeployedPortlet())) &&
+				(ownerType != PortletKeys.PREFS_OWNER_TYPE_USER)) {
 
 				return new StrictPortletPreferencesImpl(
 					companyId, ownerId, ownerType, plid, portletId, null,
