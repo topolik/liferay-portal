@@ -129,7 +129,11 @@
 
 		<script classpathref="project.classpath" language="beanshell">
 			<![CDATA[
+				import java.io.File;
+
 				import java.util.concurrent.TimeUnit;
+
+				import org.apache.commons.io.FileUtils;
 
 				import org.json.JSONObject;
 
@@ -166,6 +170,23 @@
 					}
 
 					return url;
+				}
+
+				public String getConsoleErrorMessage(String githubJenkinsFailureURL) {
+					String consoleOutput = toString(githubJenkinsFailureURL + "/logText/progressiveText");
+
+					int x = consoleOutput.lastIndexOf("BUILD FAILED");
+					int y = consoleOutput.lastIndexOf("Total time:");
+
+					String errorMessage = consoleOutput.substring(x, y - 2);
+
+					return fixJSON(errorMessage);
+				}
+
+				public String getDeprecatedMethodErrorMessage(File file) {
+					String errorMessage = FileUtils.readFileToString(file);
+
+					return fixJSON(errorMessage);
 				}
 
 				public String getRebaseErrorMessage(String githubJenkinsFailureURL) {
@@ -295,11 +316,16 @@
 						sb.append("</a>");
 						sb.append("<pre>RESULT: ");
 
-						if (githubJenkinsFailureURL.contains("source")) {
+						File file = new File(project.getProperty("github.jenkins.shared.dir") + "/javac.output.txt");
+
+						if (file.exists()) {
+							sb.append(getDeprecatedMethodErrorMessage(file));
+						}
+						else if (githubJenkinsFailureURL.contains("source")) {
 							sb.append(getRebaseErrorMessage(githubJenkinsFailureURL));
 						}
 						else {
-							sb.append(jsonObject.get("result"));
+							sb.append(getConsoleErrorMessage(githubJenkinsFailureURL));
 						}
 
 						sb.append("</pre>");
