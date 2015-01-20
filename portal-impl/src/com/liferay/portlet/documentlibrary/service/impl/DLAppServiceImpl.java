@@ -208,6 +208,14 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 
 		mimeType = DLAppUtil.getMimeType(sourceFileName, mimeType, title, file);
 
+		String extension = DLAppUtil.getExtension(title, sourceFileName);
+		String mimeTypeExtension = DLAppUtil.getExtension(
+			title, sourceFileName, mimeType);
+
+		title = DLAppUtil.fixExtension(title, extension, mimeTypeExtension);
+		sourceFileName = DLAppUtil.fixExtension(
+			sourceFileName, extension, mimeTypeExtension);
+
 		Repository repository = getRepository(repositoryId);
 
 		FileEntry fileEntry = repository.addFileEntry(
@@ -265,31 +273,27 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			size = 0;
 		}
 
-		if (Validator.isNull(mimeType) ||
-			mimeType.equals(ContentTypes.APPLICATION_OCTET_STREAM)) {
+		String extension = DLAppUtil.getExtension(title, sourceFileName);
 
-			String extension = DLAppUtil.getExtension(title, sourceFileName);
+		if (size == 0) {
+			mimeType = MimeTypesUtil.getExtensionContentType(extension);
+		}
+		else {
+			File file = null;
 
-			if (size == 0) {
-				mimeType = MimeTypesUtil.getExtensionContentType(extension);
+			try {
+				file = FileUtil.createTempFile(is);
+
+				return addFileEntry(
+					repositoryId, folderId, sourceFileName, mimeType, title,
+					description, changeLog, file, serviceContext);
 			}
-			else {
-				File file = null;
-
-				try {
-					file = FileUtil.createTempFile(is);
-
-					return addFileEntry(
-						repositoryId, folderId, sourceFileName, mimeType, title,
-						description, changeLog, file, serviceContext);
-				}
-				catch (IOException ioe) {
-					throw new SystemException(
-						"Unable to write temporary file", ioe);
-				}
-				finally {
-					FileUtil.delete(file);
-				}
+			catch (IOException ioe) {
+				throw new SystemException(
+					"Unable to write temporary file", ioe);
+			}
+			finally {
+				FileUtil.delete(file);
 			}
 		}
 
