@@ -35,7 +35,6 @@ import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchException;
 import com.liferay.portal.kernel.transaction.TransactionCommitCallbackRegistryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
-import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
@@ -43,7 +42,6 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Lock;
 import com.liferay.portal.security.permission.ActionKeys;
@@ -208,6 +206,14 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 
 		mimeType = DLAppUtil.getMimeType(sourceFileName, mimeType, title, file);
 
+		String extension = DLAppUtil.getExtension(title, sourceFileName);
+		String mimeTypeExtension = DLAppUtil.getExtension(
+			title, sourceFileName, mimeType);
+
+		title = DLAppUtil.fixExtension(title, extension, mimeTypeExtension);
+		sourceFileName = DLAppUtil.fixExtension(
+			sourceFileName, extension, mimeTypeExtension);
+
 		Repository repository = getRepository(repositoryId);
 
 		FileEntry fileEntry = repository.addFileEntry(
@@ -265,31 +271,26 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			size = 0;
 		}
 
-		if (Validator.isNull(mimeType) ||
-			mimeType.equals(ContentTypes.APPLICATION_OCTET_STREAM)) {
-
+		if (size == 0) {
 			String extension = DLAppUtil.getExtension(title, sourceFileName);
+			mimeType = MimeTypesUtil.getExtensionContentType(extension);
+		}
+		else {
+			File file = null;
 
-			if (size == 0) {
-				mimeType = MimeTypesUtil.getExtensionContentType(extension);
+			try {
+				file = FileUtil.createTempFile(is);
+
+				return addFileEntry(
+					repositoryId, folderId, sourceFileName, mimeType, title,
+					description, changeLog, file, serviceContext);
 			}
-			else {
-				File file = null;
-
-				try {
-					file = FileUtil.createTempFile(is);
-
-					return addFileEntry(
-						repositoryId, folderId, sourceFileName, mimeType, title,
-						description, changeLog, file, serviceContext);
-				}
-				catch (IOException ioe) {
-					throw new SystemException(
-						"Unable to write temporary file", ioe);
-				}
-				finally {
-					FileUtil.delete(file);
-				}
+			catch (IOException ioe) {
+				throw new SystemException(
+					"Unable to write temporary file", ioe);
+			}
+			finally {
+				FileUtil.delete(file);
 			}
 		}
 
@@ -388,6 +389,15 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 		DLFolderPermission.check(
 			getPermissionChecker(), groupId, folderId, ActionKeys.ADD_DOCUMENT);
 
+		mimeType = DLAppUtil.getMimeType(fileName, mimeType, fileName, file);
+
+		String extension = DLAppUtil.getExtension(fileName, fileName);
+		String mimeTypeExtension = DLAppUtil.getExtension(
+			fileName, fileName, mimeType);
+
+		fileName = DLAppUtil.fixExtension(
+			fileName, extension, mimeTypeExtension);
+
 		return TempFileEntryUtil.addTempFileEntry(
 			groupId, getUserId(), folderName, fileName, file, mimeType);
 	}
@@ -422,6 +432,24 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 
 		DLFolderPermission.check(
 			getPermissionChecker(), groupId, folderId, ActionKeys.ADD_DOCUMENT);
+
+		if (inputStream != null) {
+			File file = null;
+
+			try {
+				file = FileUtil.createTempFile(inputStream);
+
+				return addTempFileEntry(
+					groupId, folderId, folderName, fileName, file, mimeType);
+			}
+			catch (IOException ioe) {
+				throw new SystemException(
+					"Unable to write temporary file", ioe);
+			}
+			finally {
+				FileUtil.delete(file);
+			}
+		}
 
 		return TempFileEntryUtil.addTempFileEntry(
 			groupId, getUserId(), folderName, fileName, inputStream, mimeType);
@@ -2906,6 +2934,14 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 
 		mimeType = DLAppUtil.getMimeType(sourceFileName, mimeType, title, file);
 
+		String extension = DLAppUtil.getExtension(title, sourceFileName);
+		String mimeTypeExtension = DLAppUtil.getExtension(
+			title, sourceFileName, mimeType);
+
+		title = DLAppUtil.fixExtension(title, extension, mimeTypeExtension);
+		sourceFileName = DLAppUtil.fixExtension(
+			sourceFileName, extension, mimeTypeExtension);
+
 		Repository repository = getFileEntryRepository(fileEntryId);
 
 		FileEntry fileEntry = repository.updateFileEntry(
@@ -2964,32 +3000,26 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		if (Validator.isNull(mimeType) ||
-			mimeType.equals(ContentTypes.APPLICATION_OCTET_STREAM)) {
-
+		if (size == 0) {
 			String extension = DLAppUtil.getExtension(title, sourceFileName);
+			mimeType = MimeTypesUtil.getExtensionContentType(extension);
+		}
+		else {
+			File file = null;
 
-			if (size == 0) {
-				mimeType = MimeTypesUtil.getExtensionContentType(extension);
+			try {
+				file = FileUtil.createTempFile(is);
+
+				return updateFileEntry(
+					fileEntryId, sourceFileName, mimeType, title, description,
+					changeLog, majorVersion, file, serviceContext);
 			}
-			else {
-				File file = null;
-
-				try {
-					file = FileUtil.createTempFile(is);
-
-					return updateFileEntry(
-						fileEntryId, sourceFileName, mimeType, title,
-						description, changeLog, majorVersion, file,
-						serviceContext);
-				}
-				catch (IOException ioe) {
-					throw new SystemException(
-						"Unable to write temporary file", ioe);
-				}
-				finally {
-					FileUtil.delete(file);
-				}
+			catch (IOException ioe) {
+				throw new SystemException(
+					"Unable to write temporary file", ioe);
+			}
+			finally {
+				FileUtil.delete(file);
 			}
 		}
 
@@ -3029,6 +3059,16 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 				changeLog, majorVersion, null, 0, serviceContext);
 		}
 
+		mimeType = DLAppUtil.getMimeType(sourceFileName, mimeType, title, file);
+
+		String extension = DLAppUtil.getExtension(title, sourceFileName);
+		String mimeTypeExtension = DLAppUtil.getExtension(
+			title, sourceFileName, mimeType);
+
+		title = DLAppUtil.fixExtension(title, extension, mimeTypeExtension);
+		sourceFileName = DLAppUtil.fixExtension(
+			sourceFileName, extension, mimeTypeExtension);
+
 		Repository repository = getFileEntryRepository(fileEntryId);
 
 		FileEntry fileEntry = repository.updateFileEntry(
@@ -3054,6 +3094,29 @@ public class DLAppServiceImpl extends DLAppServiceBaseImpl {
 			boolean majorVersion, InputStream is, long size,
 			ServiceContext serviceContext)
 		throws PortalException {
+
+		if (size == 0) {
+			String extension = DLAppUtil.getExtension(title, sourceFileName);
+			mimeType = MimeTypesUtil.getExtensionContentType(extension);
+		}
+		else {
+			File file = null;
+
+			try {
+				file = FileUtil.createTempFile(is);
+
+				return updateFileEntryAndCheckIn(
+					fileEntryId, sourceFileName, mimeType, title, description,
+					changeLog, majorVersion, file, serviceContext);
+			}
+			catch (IOException ioe) {
+				throw new SystemException(
+					"Unable to write temporary file", ioe);
+			}
+			finally {
+				FileUtil.delete(file);
+			}
+		}
 
 		Repository repository = getFileEntryRepository(fileEntryId);
 
