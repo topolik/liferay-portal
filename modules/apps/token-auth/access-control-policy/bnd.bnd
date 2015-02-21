@@ -1,6 +1,0 @@
-Bundle-Name: Liferay Access Control Policy
-Bundle-SymbolicName: com.liferay.security.acpolicy
-Bundle-Version: 1.0.0
-Import-Package: *
-Export-Package: com.liferay.security.acpolicy
-Include-Resource: classes

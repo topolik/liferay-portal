@@ -23,9 +23,12 @@ import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.security.ac.AccessControlPolicy;
+import com.liferay.portal.security.ac.AccessControlThreadLocal;
+import com.liferay.portal.security.ac.AccessControlUtil;
 import com.liferay.portal.security.ac.AccessControlled;
+import com.liferay.portal.security.ac.BaseAccessControlPolicy;
 import com.liferay.portal.security.auth.AccessControlContext;
-import com.liferay.security.acpolicy.AccessControlPolicy;
 import com.liferay.token.auth.TokenAuthVerifier;
 import com.liferay.token.auth.model.TokenClient;
 import org.osgi.service.component.ComponentContext;
@@ -50,7 +53,7 @@ import java.util.Properties;
 	},
 	service = AccessControlPolicy.class
 )
-public class TokenClientScopeACPolicy implements AccessControlPolicy {
+public class TokenClientScopeACPolicy extends BaseAccessControlPolicy {
 
 	@Activate
 	public void activate(ComponentContext componentContext) {
@@ -101,10 +104,13 @@ public class TokenClientScopeACPolicy implements AccessControlPolicy {
 	}
 
 	@Override
-	public void check(
-			Method method, AccessControlled accessControlled,
-			AccessControlContext accessControlContext)
+	public void onServiceRemoteAccess(
+			Method method, Object[] arguments,
+			AccessControlled accessControlled)
 		throws SecurityException {
+
+		AccessControlContext accessControlContext =
+			AccessControlUtil.getAccessControlContext();
 
 		Map<String, Object> settings = accessControlContext.getSettings();
 

@@ -2,7 +2,7 @@
 <!DOCTYPE project>
 
 <project>
-    <property name="import.shared" value="access-control-policy,token-auth-api" />
+    <property name="import.shared" value="token-auth-api" />
 
     <import file="../../../../tools/sdk/build-common-osgi-plugin.xml" />
 
