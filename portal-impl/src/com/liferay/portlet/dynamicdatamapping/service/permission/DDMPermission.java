@@ -16,29 +16,37 @@ package com.liferay.portlet.dynamicdatamapping.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.security.auth.PrincipalException;
+import com.liferay.portal.security.permission.BaseResourcePermission;
 import com.liferay.portal.security.permission.PermissionChecker;
 
 /**
  * @author Bruno Basto
  */
-public class DDMPermission {
+public class DDMPermission extends BaseResourcePermission {
 
 	public static void check(
-			PermissionChecker permissionChecker, long groupId, String name,
-			String actionId)
+			PermissionChecker permissionChecker, long groupId,
+			String resourceName, String actionId)
 		throws PortalException {
 
-		if (!contains(permissionChecker, groupId, name, actionId)) {
+		if (!contains(permissionChecker, groupId, resourceName, actionId)) {
 			throw new PrincipalException();
 		}
 	}
 
 	public static boolean contains(
-		PermissionChecker permissionChecker, long groupId, String name,
+		PermissionChecker permissionChecker, long classPK, String resourceName,
 		String actionId) {
 
-		return permissionChecker.hasPermission(
-			groupId, name, groupId, actionId);
+		return contains(
+			permissionChecker, resourceName, resourceName, classPK, actionId);
+	}
+
+	@Override
+	public Boolean checkResource(
+		PermissionChecker permissionChecker, long classPK, String actionId) {
+
+		return null;
 	}
 
 }
