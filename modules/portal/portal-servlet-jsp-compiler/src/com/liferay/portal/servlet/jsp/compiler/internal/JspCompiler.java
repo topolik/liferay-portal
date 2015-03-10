@@ -107,7 +107,6 @@ public class JspCompiler extends Jsr199JavaCompiler {
 
 		_bundle = _allParticipatingBundles[0];
 
-		_bundleContext = _bundle.getBundleContext();
 		_resourceResolver = new JspResourceResolver(
 			_bundle, _jspBundle, _logger);
 
@@ -301,10 +300,12 @@ public class JspCompiler extends Jsr199JavaCompiler {
 
 		tldMappings = new HashMap<>();
 
-		ServiceReference<SAXParserFactory> saxParserFactoryServiceReference =
-			_bundleContext.getServiceReference(SAXParserFactory.class);
+		BundleContext bundleContext = _jspBundle.getBundleContext();
 
-		SAXParserFactory saxParserFactory = _bundleContext.getService(
+		ServiceReference<SAXParserFactory> saxParserFactoryServiceReference =
+			bundleContext.getServiceReference(SAXParserFactory.class);
+
+		SAXParserFactory saxParserFactory = bundleContext.getService(
 			saxParserFactoryServiceReference);
 
 		saxParserFactory.setNamespaceAware(false);
@@ -393,9 +394,9 @@ public class JspCompiler extends Jsr199JavaCompiler {
 		"http://xml.org/sax/features/external-parameter-entities";
 	private static final String _SAX_LOAD_EXTERNAL_DTD =
 		"http://apache.org/xml/features/nonvalidating/load-external-dtd";
+
 	private Bundle[] _allParticipatingBundles;
 	private Bundle _bundle;
-	private BundleContext _bundleContext;
 	private final List<File> _classPath = new ArrayList<>();
 	private Bundle _jspBundle;
 	private Logger _logger;
