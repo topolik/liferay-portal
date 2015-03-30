@@ -21,4 +21,8 @@
 		<fieldset class="input-container" disabled="disabled">
 	</c:if>
 
+	<c:if test="<%= PropsValues.PORTLET_ADD_DEFAULT_RESOURCE_CHECK_ENABLED %>">
+		<input name="p_auth" type="hidden" value="<%= AuthTokenUtil.getToken(request) %>" />
+	</c:if>
+
 	<aui:input name="formDate" type="hidden" value="<%= System.currentTimeMillis() %>" />

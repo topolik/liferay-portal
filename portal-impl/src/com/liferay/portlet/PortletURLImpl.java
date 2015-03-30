@@ -763,33 +763,6 @@ public class PortletURLImpl
 		}
 	}
 
-	protected void addPortalAuthToken(StringBundler sb, Key key) {
-		if (!PropsValues.AUTH_TOKEN_CHECK_ENABLED ||
-			!_lifecycle.equals(PortletRequest.ACTION_PHASE)) {
-
-			return;
-		}
-
-		Portlet portlet = getPortlet();
-
-		if (portlet == null) {
-			return;
-		}
-
-		String strutsAction = getParameter("struts_action");
-
-		if (AuthTokenWhitelistUtil.isPortletCSRFWhitelisted(
-				portlet.getCompanyId(), _portletId, strutsAction)) {
-
-			return;
-		}
-
-		sb.append("p_auth");
-		sb.append(StringPool.EQUAL);
-		sb.append(processValue(key, AuthTokenUtil.getToken(_request)));
-		sb.append(StringPool.AMPERSAND);
-	}
-
 	protected void addPortletAuthToken(StringBundler sb, Key key) {
 		if (!PropsValues.PORTLET_ADD_DEFAULT_RESOURCE_CHECK_ENABLED) {
 			return;
@@ -897,11 +870,7 @@ public class PortletURLImpl
 		if (Validator.isNull(_layoutFriendlyURL)) {
 			sb.append(portalURL);
 			sb.append(themeDisplay.getPathMain());
-			sb.append("/portal/layout?");
-
-			addPortalAuthToken(sb, key);
-
-			sb.append("p_l_id");
+			sb.append("/portal/layout?p_l_id");
 			sb.append(StringPool.EQUAL);
 			sb.append(processValue(key, _plid));
 			sb.append(StringPool.AMPERSAND);
@@ -945,8 +914,6 @@ public class PortletURLImpl
 			}
 
 			sb.append(StringPool.QUESTION);
-
-			addPortalAuthToken(sb, key);
 		}
 
 		addPortletAuthToken(sb, key);
