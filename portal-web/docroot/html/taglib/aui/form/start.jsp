@@ -16,9 +16,21 @@
 
 <%@ include file="/html/taglib/aui/form/init.jsp" %>
 
+<%
+String authToken = HttpUtil.getParameter(action, "p_auth", false);
+
+if (Validator.isNotNull(authToken)) {
+	action = HttpUtil.removeParameter(action, "p_auth");
+}
+%>
+
 <form action="<%= HtmlUtil.escape(action) %>" class="form <%= cssClass %> <%= inlineLabels ? "field-labels-inline" : StringPool.BLANK %>" data-fm-namespace="<%= namespace %>"  id="<%= namespace + name %>" method="<%= method %>" name="<%= namespace + name %>" <%= InlineUtil.buildDynamicAttributes(dynamicAttributes) %>>
 	<c:if test="<%= Validator.isNotNull(onSubmit) %>">
 		<fieldset class="input-container" disabled="disabled">
+	</c:if>
+
+	<c:if test="<%= Validator.isNotNull(authToken) %>">
+		<input name="p_auth" type="hidden" value="<%= authToken %>" />
 	</c:if>
 
 	<aui:input name="formDate" type="hidden" value="<%= System.currentTimeMillis() %>" />
