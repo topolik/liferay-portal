@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
+import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.SecurityPortletContainerWrapper;
@@ -64,6 +65,8 @@ public class SessionAuthToken implements AuthToken {
 			return;
 		}
 
+		String sessionToken = null;
+
 		if (origin.equals(SecurityPortletContainerWrapper.class.getName())) {
 			String ppid = ParamUtil.getString(request, "p_p_id");
 
@@ -77,6 +80,12 @@ public class SessionAuthToken implements AuthToken {
 
 				return;
 			}
+
+			ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+			sessionToken = popSessionAuthenticationToken(
+				request, themeDisplay.getPlid(), ppid);
 		}
 
 		String csrfToken = ParamUtil.getString(request, "p_auth");
@@ -85,8 +94,9 @@ public class SessionAuthToken implements AuthToken {
 			csrfToken = GetterUtil.getString(request.getHeader("X-CSRF-Token"));
 		}
 
-		String sessionToken = getSessionAuthenticationToken(
-			request, _CSRF, false);
+		if (sessionToken == null) {
+			sessionToken = getSessionAuthenticationToken(request, _CSRF, false);
+		}
 
 		if (!csrfToken.equals(sessionToken)) {
 			throw new PrincipalException("Invalid authentication token");
@@ -154,6 +164,21 @@ public class SessionAuthToken implements AuthToken {
 		}
 
 		return sessionAuthenticationToken;
+	}
+
+	protected String popSessionAuthenticationToken(
+		HttpServletRequest request, long plid, String portletId) {
+
+		HttpSession session = request.getSession();
+
+		String tokenKey = WebKeys.AUTHENTICATION_TOKEN.concat(
+			PortletPermissionUtil.getPrimaryKey(plid, portletId));
+
+		String token = (String)session.getAttribute(tokenKey);
+
+		session.removeAttribute(tokenKey);
+
+		return token;
 	}
 
 	private static final String _CSRF = "#CSRF";
