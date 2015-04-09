@@ -784,9 +784,11 @@ public class PortletURLImpl
 			return;
 		}
 
+		String token = AuthTokenUtil.getToken(_request, _plid, _portletId);
+
 		sb.append("p_auth");
 		sb.append(StringPool.EQUAL);
-		sb.append(processValue(key, AuthTokenUtil.getToken(_request)));
+		sb.append(processValue(key, token));
 		sb.append(StringPool.AMPERSAND);
 	}
 
