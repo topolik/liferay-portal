@@ -442,17 +442,38 @@ public interface UserLocalService extends BaseLocalService,
 	*
 	* @param companyId the primary key of the user's company
 	* @param authType the type of authentication to perform
+	* @param login either the user's email address, screen name, or
+	primary key depending on the value of <code>authType</code>
+	* @param password the user's password
+	* @return the user's primary key if authentication is successful;
+	<code>0</code> otherwise
+	* @throws PortalException if a portal exception occurred
+	* @deprecated As of 7.0.0, replaced by {@link #authenticateForBasic(long,
+	String, String)}
+	*/
+	@java.lang.Deprecated
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long authenticateForBasic(long companyId, java.lang.String authType,
+		java.lang.String login, java.lang.String password)
+		throws PortalException;
+
+	/**
+	* Attempts to authenticate the user using HTTP basic access authentication,
+	* without using the AuthPipeline. Primarily used for authenticating users
+	* of <code>tunnel-web</code>.
+	*
+	* @param companyId the primary key of the user's company
 	* @param login either the user's email address, screen name, or primary
-	key depending on the value of <code>authType</code>
+	key depending on the <code>authType</code> property of the given
+	company
 	* @param password the user's password
 	* @return the user's primary key if authentication is successful;
 	<code>0</code> otherwise
 	* @throws PortalException if a portal exception occurred
 	*/
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public long authenticateForBasic(long companyId, java.lang.String authType,
-		java.lang.String login, java.lang.String password)
-		throws PortalException;
+	public long authenticateForBasic(long companyId, java.lang.String login,
+		java.lang.String password) throws PortalException;
 
 	/**
 	* Attempts to authenticate the user using HTTP digest access
@@ -2357,6 +2378,18 @@ public interface UserLocalService extends BaseLocalService,
 	*/
 	public com.liferay.portal.model.User updateLastLogin(long userId,
 		java.lang.String loginIP) throws PortalException;
+
+	/**
+	* Updates whether the user is locked out from logging in.
+	*
+	* @param companyId the primary key of the user's company
+	* @param login either the user's email address, screen name, or primary
+	key depending on the <code>authType</code> property of the given
+	company
+	* @throws PortalException if a portal exception occurred
+	*/
+	public void updateLockout(long companyId, java.lang.String login)
+		throws PortalException;
 
 	/**
 	* Updates whether the user is locked out from logging in.

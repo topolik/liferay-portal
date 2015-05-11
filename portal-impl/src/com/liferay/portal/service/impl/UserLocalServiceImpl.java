@@ -1162,30 +1162,10 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * without using the AuthPipeline. Primarily used for authenticating users
 	 * of <code>tunnel-web</code>.
 	 *
-	 * <p>
-	 * Authentication type specifies what <code>login</code> contains.The valid
-	 * values are:
-	 * </p>
-	 *
-	 * <ul>
-	 * <li>
-	 * <code>CompanyConstants.AUTH_TYPE_EA</code> - <code>login</code> is the
-	 * user's email address
-	 * </li>
-	 * <li>
-	 * <code>CompanyConstants.AUTH_TYPE_SN</code> - <code>login</code> is the
-	 * user's screen name
-	 * </li>
-	 * <li>
-	 * <code>CompanyConstants.AUTH_TYPE_ID</code> - <code>login</code> is the
-	 * user's primary key
-	 * </li>
-	 * </ul>
-	 *
 	 * @param  companyId the primary key of the user's company
-	 * @param  authType the type of authentication to perform
 	 * @param  login either the user's email address, screen name, or primary
-	 *         key depending on the value of <code>authType</code>
+	 *         key depending on the <code>authType</code> property of the given
+	 *         company
 	 * @param  password the user's password
 	 * @return the user's primary key if authentication is successful;
 	 *         <code>0</code> otherwise
@@ -1194,24 +1174,14 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public long authenticateForBasic(
-			long companyId, String authType, String login, String password)
+			long companyId, String login, String password)
 		throws PortalException {
 
 		if (PropsValues.AUTH_LOGIN_DISABLED) {
 			return 0;
 		}
 
-		User user = null;
-
-		if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
-			user = fetchUserByEmailAddress(companyId, login);
-		}
-		else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
-			user = fetchUserByScreenName(companyId, login);
-		}
-		else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
-			user = userPersistence.fetchByPrimaryKey(GetterUtil.getLong(login));
-		}
+		User user = fetchUserByLogin(companyId, login);
 
 		if (user == null) {
 			return 0;
@@ -1230,6 +1200,15 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			if (_log.isInfoEnabled()) {
 				_log.info(
 					"Basic authentication is disabled for inactive user " +
+						user.getUserId());
+			}
+
+			return 0;
+		}
+		else if (user.isLockout()) {
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					"Basic authentication is disabled for locked out user " +
 						user.getUserId());
 			}
 
@@ -1254,6 +1233,52 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Attempts to authenticate the user using HTTP basic access authentication,
+	 * without using the AuthPipeline. Primarily used for authenticating users
+	 * of <code>tunnel-web</code>.
+	 *
+	 * <p>
+	 * Authentication type specifies what <code>login</code> contains.The valid
+	 * values are:
+	 * </p>
+	 *
+	 * <ul>
+	 * <li>
+	 * <code>CompanyConstants.AUTH_TYPE_EA</code> - <code>login</code> is the
+	 * user's email address
+	 * </li>
+	 * <li>
+	 * <code>CompanyConstants.AUTH_TYPE_SN</code> - <code>login</code> is the
+	 * user's screen name
+	 * </li>
+	 * <li>
+	 * <code>CompanyConstants.AUTH_TYPE_ID</code> - <code>login</code> is the
+	 * user's primary key
+	 * </li>
+	 * </ul>
+	 *
+	 * @param      companyId the primary key of the user's company
+	 * @param      authType the type of authentication to perform
+	 * @param      login either the user's email address, screen name, or
+	 *             primary key depending on the value of <code>authType</code>
+	 * @param      password the user's password
+	 * @return     the user's primary key if authentication is successful;
+	 *             <code>0</code> otherwise
+	 * @throws     PortalException if a portal exception occurred
+	 * @deprecated As of 7.0.0, replaced by {@link #authenticateForBasic(long,
+	 *             String, String)}
+	 */
+	@Deprecated
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long authenticateForBasic(
+			long companyId, String authType, String login, String password)
+		throws PortalException {
+
+		return authenticateForBasic(companyId, login, password);
 	}
 
 	/**
@@ -1313,6 +1338,15 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			if (_log.isInfoEnabled()) {
 				_log.info(
 					"Digest authentication is disabled for inactive user " +
+						user.getUserId());
+			}
+
+			return 0;
+		}
+		else if (user.isLockout()) {
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					"Digest authentication is disabled for locked out user " +
 						user.getUserId());
 			}
 
@@ -4707,6 +4741,48 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	/**
 	 * Updates whether the user is locked out from logging in.
 	 *
+	 * @param  companyId the primary key of the user's company
+	 * @param  login either the user's email address, screen name, or primary
+	 *         key depending on the <code>authType</code> property of the given
+	 *         company
+	 * @throws PortalException if a portal exception occurred
+	 */
+	@Override
+	public void updateLockout(long companyId, String login)
+		throws PortalException {
+
+		if (PropsValues.AUTH_LOGIN_DISABLED) {
+			return;
+		}
+
+		User user = fetchUserByLogin(companyId, login);
+
+		if (user == null) {
+			return;
+		}
+
+		checkLoginFailure(user);
+
+		if (LDAPSettingsUtil.isPasswordPolicyEnabled(user.getCompanyId())) {
+			return;
+		}
+
+		PasswordPolicy passwordPolicy = user.getPasswordPolicy();
+
+		int maxFailures = passwordPolicy.getMaxFailure();
+
+		if (passwordPolicy.isLockout()) {
+			if ((user.getFailedLoginAttempts() >= maxFailures) &&
+				(maxFailures != 0)) {
+
+				updateLockout(user, true);
+			}
+		}
+	}
+
+	/**
+	 * Updates whether the user is locked out from logging in.
+	 *
 	 * @param  user the user
 	 * @param  lockout whether the user is locked out
 	 * @return the user
@@ -6068,6 +6144,26 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		queryConfig.setScoreEnabled(false);
 
 		return searchContext;
+	}
+
+	protected User fetchUserByLogin(long companyId, String login)
+		throws PortalException {
+
+		Company company = companyLocalService.getCompany(companyId);
+
+		String authType = company.getAuthType();
+
+		if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
+			return fetchUserByEmailAddress(companyId, login);
+		}
+		else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
+			return fetchUserByScreenName(companyId, login);
+		}
+		else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
+			return userPersistence.fetchByPrimaryKey(GetterUtil.getLong(login));
+		}
+
+		return null;
 	}
 
 	protected Date getBirthday(

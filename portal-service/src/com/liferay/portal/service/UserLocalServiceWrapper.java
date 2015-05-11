@@ -535,19 +535,43 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	*
 	* @param companyId the primary key of the user's company
 	* @param authType the type of authentication to perform
-	* @param login either the user's email address, screen name, or primary
-	key depending on the value of <code>authType</code>
+	* @param login either the user's email address, screen name, or
+	primary key depending on the value of <code>authType</code>
 	* @param password the user's password
 	* @return the user's primary key if authentication is successful;
 	<code>0</code> otherwise
 	* @throws PortalException if a portal exception occurred
+	* @deprecated As of 7.0.0, replaced by {@link #authenticateForBasic(long,
+	String, String)}
 	*/
+	@Deprecated
 	@Override
 	public long authenticateForBasic(long companyId, java.lang.String authType,
 		java.lang.String login, java.lang.String password)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userLocalService.authenticateForBasic(companyId, authType,
 			login, password);
+	}
+
+	/**
+	* Attempts to authenticate the user using HTTP basic access authentication,
+	* without using the AuthPipeline. Primarily used for authenticating users
+	* of <code>tunnel-web</code>.
+	*
+	* @param companyId the primary key of the user's company
+	* @param login either the user's email address, screen name, or primary
+	key depending on the <code>authType</code> property of the given
+	company
+	* @param password the user's password
+	* @return the user's primary key if authentication is successful;
+	<code>0</code> otherwise
+	* @throws PortalException if a portal exception occurred
+	*/
+	@Override
+	public long authenticateForBasic(long companyId, java.lang.String login,
+		java.lang.String password)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userLocalService.authenticateForBasic(companyId, login, password);
 	}
 
 	/**
@@ -2969,6 +2993,21 @@ public class UserLocalServiceWrapper implements UserLocalService,
 		java.lang.String loginIP)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userLocalService.updateLastLogin(userId, loginIP);
+	}
+
+	/**
+	* Updates whether the user is locked out from logging in.
+	*
+	* @param companyId the primary key of the user's company
+	* @param login either the user's email address, screen name, or primary
+	key depending on the <code>authType</code> property of the given
+	company
+	* @throws PortalException if a portal exception occurred
+	*/
+	@Override
+	public void updateLockout(long companyId, java.lang.String login)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_userLocalService.updateLockout(companyId, login);
 	}
 
 	/**
