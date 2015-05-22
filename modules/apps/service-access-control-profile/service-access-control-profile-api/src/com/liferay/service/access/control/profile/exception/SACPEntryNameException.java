@@ -12,27 +12,31 @@
  * details.
  */
 
-package com.liferay.service.access.control.profile.model.impl;
+package com.liferay.service.access.control.profile.exception;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
-
-import java.util.List;
+import com.liferay.portal.kernel.exception.PortalException;
 
 /**
  * @author Brian Wing Shun Chan
  */
 @ProviderType
-public class SACPEntryImpl extends SACPEntryBaseImpl {
+public class SACPEntryNameException extends PortalException {
 
-	public List<String> getAllowedServicesList() {
-		String[] allowedServices = StringUtil.split(
-			getAllowedServices(), StringPool.NEW_LINE);
+	public SACPEntryNameException() {
+	}
 
-		return ListUtil.toList(allowedServices);
+	public SACPEntryNameException(String msg) {
+		super(msg);
+	}
+
+	public SACPEntryNameException(String msg, Throwable cause) {
+		super(msg, cause);
+	}
+
+	public SACPEntryNameException(Throwable cause) {
+		super(cause);
 	}
 
 }

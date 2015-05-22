@@ -12,27 +12,14 @@
  * details.
  */
 
-package com.liferay.service.access.control.profile.model.impl;
-
-import aQute.bnd.annotation.ProviderType;
-
-import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
-
-import java.util.List;
+package com.liferay.service.access.control.profile.constants;
 
 /**
- * @author Brian Wing Shun Chan
+ * @author Mika Koivisto
  */
-@ProviderType
-public class SACPEntryImpl extends SACPEntryBaseImpl {
+public class SACPConstants {
 
-	public List<String> getAllowedServicesList() {
-		String[] allowedServices = StringUtil.split(
-			getAllowedServices(), StringPool.NEW_LINE);
-
-		return ListUtil.toList(allowedServices);
-	}
+	public static final String SERVICE_NAME =
+		"com.liferay.service.access.control.profile";
 
 }
