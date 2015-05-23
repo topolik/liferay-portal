@@ -49,7 +49,6 @@ import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.PortletConfigFactoryUtil;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -377,7 +376,7 @@ public class ComboServlet extends HttpServlet {
 				"Illegal access: " + request.getRequestURL() +
 					"?" + request.getQueryString());
 
-			throw new FileNotFoundException(modulePath + " not found");
+			return null;
 		}
 
 		String portletId = getModulePortletId(modulePath);
