@@ -369,6 +369,16 @@ public class ComboServlet extends HttpServlet {
 			String modulePath)
 		throws Exception {
 
+		if (modulePath.contains("/WEB-INF") ||
+			modulePath.contains("/META-INF")) {
+
+			_log.error(
+				"Illegal access: " + request.getRequestURL() +
+					"?" + request.getQueryString());
+
+			return null;
+		}
+
 		String portletId = getModulePortletId(modulePath);
 
 		Portlet portlet = PortletLocalServiceUtil.getPortletById(portletId);
