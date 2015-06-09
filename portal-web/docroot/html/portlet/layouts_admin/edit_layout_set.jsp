@@ -68,7 +68,7 @@ else {
 	<portlet:param name="struts_action" value="/layouts_admin/edit_layout_set" />
 </portlet:actionURL>
 
-<aui:form action="<%= editLayoutSetURL %>" cssClass="edit-layoutset-form" enctype="multipart/form-data" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + liferayPortletResponse.getNamespace() + "saveLayoutset();" %>'>
+<aui:form action="<%= editLayoutSetURL %>" cssClass="edit-layoutset-form" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + liferayPortletResponse.getNamespace() + "saveLayoutset();" %>'>
 	<aui:input name="<%= Constants.CMD %>" type="hidden" />
 	<aui:input name="redirect" type="hidden" value="<%= redirectURL.toString() %>" />
 	<aui:input name="groupId" type="hidden" value="<%= groupId %>" />
@@ -89,6 +89,8 @@ else {
 <aui:script>
 	function <portlet:namespace />saveLayoutset(action) {
 		var form = AUI.$(document.<portlet:namespace />fm);
+
+		form.prop('encoding', 'multipart/form-data');
 
 		form.fm('<%= Constants.CMD %>').val(action ? action : 'update');
 
