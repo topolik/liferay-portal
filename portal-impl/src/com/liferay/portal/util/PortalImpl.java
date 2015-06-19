@@ -927,6 +927,40 @@ public class PortalImpl implements Portal {
 	}
 
 	@Override
+	public void generateHttpAuthorizationHeaders(
+		HttpServletRequest request, HttpServletResponse response,
+		boolean digest) {
+
+		if (!digest) {
+			response.setHeader(
+				HttpHeaders.WWW_AUTHENTICATE,
+				"Basic realm=\"" + PORTAL_REALM + "\"");
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+			return;
+		}
+
+		// Must generate a new nonce for each 401 (RFC2617, 3.2.1)
+
+		StringBundler sb = new StringBundler(4);
+
+		sb.append("Digest realm=\"");
+		sb.appendPORTAL_REALM);
+		sb.append("\", nonce=\"");
+
+		String nonce = NonceUtil.generate(
+			PortalInstances.getCompanyId(request), request.getRemoteAddr());
+
+		sb.append(nonce);
+
+		sb.append("\"");
+
+		response.setHeader(HttpHeaders.WWW_AUTHENTICATE, sb.toString());
+
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	}
+
+	@Override
 	public String generateRandomKey(HttpServletRequest request, String input) {
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
