@@ -628,27 +628,42 @@ jdbc.default.password=${database.password}]]></echo>
 		</sequential>
 	</macrodef>
 
+	<macrodef name="get-testray-case-defect">
+		<sequential>
+			<if>
+				<isset property="test.class" />
+				<then>
+					<get-testcase-property property.name="known.issues" />
+				</then>
+			</if>
+
+			<condition property="testray.case.defect" value="${known.issues}" else="">
+				<isset property="known.issues" />
+			</condition>
+		</sequential>
+	</macrodef>
+
 	<macrodef name="get-testray-components">
 		<sequential>
-			<property file="${basedir}/test.run.properties" />
-
 			<if>
+				<isset property="test.class" />
+				<then>
+					<get-testcase-property property.name="testray.component.names" />
+					<get-testcase-property property.name="testray.main.component.name" />
+				</then>
+			</if>
+
+			<condition property="testray.main.component.name" value="">
 				<not>
 					<isset property="testray.main.component.name" />
 				</not>
-				<then>
-					<property name="testray.main.component.name" value="" />
-				</then>
-			</if>
+			</condition>
 
-			<if>
+			<condition property="testray.component.names" value="${testray.main.component.name}">
 				<not>
 					<isset property="testray.component.names" />
 				</not>
-				<then>
-					<property name="testray.component.names" value="${testray.main.component.name}" />
-				</then>
-			</if>
+			</condition>
 		</sequential>
 	</macrodef>
 
@@ -693,6 +708,40 @@ jdbc.default.password=${database.password}]]></echo>
 		</sequential>
 	</macrodef>
 
+	<macrodef name="get-testray-run-id">
+		<sequential>
+			<var name="testray.run.id" unset="true" />
+
+			<propertyregex
+				input="${app.server.version}"
+				override="true"
+				property="app.server.major.version"
+				regexp="(\d+\.\d+).*"
+				replace="\1"
+			/>
+
+			<propertyregex
+				input="${browser.version}"
+				override="true"
+				property="browser.major.version"
+				regexp="(\d+\.\d+).*"
+				replace="\1"
+			/>
+
+			<get-database-property property.name="database.version" />
+
+			<propertyregex
+				input="${database.version}"
+				override="true"
+				property="database.major.version"
+				regexp="(\d+\.?\d+?).*"
+				replace="\1"
+			/>
+
+			<property name="testray.run.id" value="${app.server.type}-${app.server.major.version} ${database.type}-${database.major.version} ${browser.type}-${browser.major.version} ${operating.system.type}-${operating.system.version} jdk${java.jdk.version}-${java.jdk.type}" />
+		</sequential>
+	</macrodef>
+
 	<macrodef name="get-testray-team-name">
 		<sequential>
 			<script classpathref="project.classpath" language="beanshell">
@@ -723,6 +772,68 @@ jdbc.default.password=${database.password}]]></echo>
 					}
 				]]>
 			</script>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="get-testray-testcase-description">
+		<sequential>
+			<if>
+				<isset property="test.class" />
+				<then>
+					<get-testcase-property property.name="description" />
+				</then>
+			</if>
+
+			<condition property="testray.testcase.description" value="${description}" else="">
+				<isset property="description" />
+			</condition>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="get-testray-testcase-name">
+		<sequential>
+			<var name="testray.testcase.name" unset="true" />
+
+			<if>
+				<isset property="test.class" />
+				<then>
+					<get-poshi-test-name />
+
+					<property name="testray.testcase.name" value="${poshi.test.name}" />
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="get-testray-testcase-priority">
+		<sequential>
+			<var name="testray.testcase.priority" unset="true" />
+
+			<if>
+				<isset property="test.class" />
+				<then>
+					<get-testcase-property property.name="priority" />
+
+					<property name="testray.testcase.priority" value="${priority}" />
+				</then>
+			</if>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="get-testray-testcase-product-edition">
+		<sequential>
+			<if>
+				<isset property="test.class" />
+				<then>
+					<get-testcase-property property.name="testray.testcase.product.edition" />
+				</then>
+			</if>
+
+			<condition property="testray.testcase.product.edition" value="CE">
+				<not>
+					<isset property="testray.testcase.product.edition" />
+				</not>
+			</condition>
 		</sequential>
 	</macrodef>
 
@@ -1789,7 +1900,7 @@ org.apache.catalina.startup.ClassLoaderFactory.level=INFO]]>
 			<if>
 				<equals arg1="@{app.server.bundle.index}" arg2="0" />
 				<then>
-					<record action="stop" name="log" />
+					<record action="stop" name="${project.dir}/log" />
 				</then>
 			</if>
 		</sequential>
@@ -1871,7 +1982,7 @@ org.apache.catalina.startup.ClassLoaderFactory.level=INFO]]>
 				<then>
 					<antcall target="clean-up-logs" />
 
-					<record action="start" name="log" />
+					<record action="start" name="${project.dir}/log" />
 				</then>
 			</if>
 
@@ -1915,7 +2026,7 @@ org.apache.catalina.startup.ClassLoaderFactory.level=INFO]]>
 					</not>
 				</and>
 				<then>
-					<record action="stop" name="log" />
+					<record action="stop" name="${project.dir}/log" />
 				</then>
 			</if>
 		</sequential>
@@ -1932,7 +2043,7 @@ org.apache.catalina.startup.ClassLoaderFactory.level=INFO]]>
 				<then>
 					<antcall target="clean-up-logs" />
 
-					<record action="start" name="log" />
+					<record action="start" name="${project.dir}/log" />
 				</then>
 			</if>
 
@@ -2096,8 +2207,8 @@ create database lportal${database.index} character set utf8;</echo>
 					<equals arg1="${database.type}" arg2="db2" />
 					<then>
 						<replace file="create.sql">
-							<replacetoken>create database lportal;</replacetoken>
-							<replacevalue>create database lportal pagesize 8192;</replacevalue>
+							<replacetoken>drop database lportal;</replacetoken>
+							<replacevalue></replacevalue>
 						</replace>
 					</then>
 					<elseif>
@@ -2153,23 +2264,16 @@ go]]></replacevalue>
 		<get-env-java-jdk />
 		<get-env-liferay-portal />
 		<get-env-operating-system />
-
-		<if>
-			<isset property="test.class" />
-			<then>
-				<get-testcase-property property.name="testray.component.names" />
-				<get-testcase-property property.name="testray.main.component.name" />
-				<get-testcase-property property.name="testray.testcase.description" />
-				<get-testcase-property property.name="testray.testcase.name" />
-				<get-testcase-property property.name="testray.testcase.priority" />
-				<get-testcase-property property.name="testray.testcase.product.edition" />
-			</then>
-		</if>
-
+		<get-testray-case-defect />
 		<get-testray-components />
 		<get-testray-logs />
 		<get-testray-project-name />
+		<get-testray-run-id />
 		<get-testray-team-name />
+		<get-testray-testcase-description />
+		<get-testray-testcase-name />
+		<get-testray-testcase-priority />
+		<get-testray-testcase-product-edition />
 
 		<if>
 			<isset property="env.TEST_BUILD_FIX_PACK_NAME" />
@@ -2210,6 +2314,7 @@ go]]></replacevalue>
 		<property name="test.case.properties">
 			<![CDATA[
 				<properties>
+					<property name="testray.case.defect" value="${testray.case.defect}" />
 					<property name="testray.component.names" value="${testray.component.names}" />
 					<property name="testray.main.component.name" value="${testray.main.component.name}" />
 					<property name="testray.team.name" value="${testray.team.name}" />
@@ -2252,6 +2357,7 @@ go]]></replacevalue>
 					<property name="testray.product.type" value="${testray.product.type}" />
 					<property name="testray.product.version" value="${testray.product.version}" />
 					<property name="testray.project.name" value="${testray.project.name}" />
+					<property name="testray.run.id" value="${testray.run.id}" />
 				</properties>
 			]]>
 		</property>
@@ -2619,6 +2725,14 @@ go]]></replacevalue>
 		</if>
 	</target>
 
+	<target name="curl-execute">
+		<fail message="Please set the property ${curl.args}." unless="curl.args" />
+
+		<exec executable="curl">
+			<arg line="${curl.args}" />
+		</exec>
+	</target>
+
 	<target name="delete-liferay-home">
 		<if>
 			<not>
@@ -2654,6 +2768,12 @@ go]]></replacevalue>
 				</ant>
 			</then>
 		</if>
+	</target>
+
+	<target name="deploy-lcs-environment-token">
+		<copy todir="${liferay.home}/data">
+			<fileset dir="${selenium.output.dir}" includes="lcs-cluster-entry-token-*.txt" />
+		</copy>
 	</target>
 
 	<target name="deploy-license-xml">
@@ -3553,17 +3673,6 @@ hibernate.dialect=com.liferay.portal.dao.orm.hibernate.DB2Dialect
 custom.sql.function.isnull=CAST(? AS VARCHAR(32672)) IS NULL
 custom.sql.function.isnotnull=CAST(? AS VARCHAR(32672)) IS NOT NULL</echo>
 			</then>
-			<elseif>
-				<equals arg1="${database.type}" arg2="oracle" />
-				<then>
-					<echo file="portal-impl/src/portal-ext.properties" append="true">
-
-jdbc.default.acquireIncrement=1
-jdbc.default.maxPoolSize=5
-jdbc.default.minPoolSize=1
-jdbc.default.numHelperThreads=1</echo>
-				</then>
-			</elseif>
 			<elseif>
 				<equals arg1="${database.type}" arg2="sybase" />
 				<then>
@@ -4956,7 +5065,15 @@ module.framework.properties.osgi.console=11312</echo>
 				<equals arg1="${test.build.unit}" arg2="true" />
 			</not>
 			<then>
-				<ant dir="portal-impl" target="build-selenium-block" inheritAll="false" />
+				<if>
+					<equals arg1="${test.poshi.runner.enabled}" arg2="true" />
+					<then>
+						<antcall target="record-test-generated-properties" />
+					</then>
+					<else>
+						<ant dir="portal-impl" target="build-selenium-block" inheritAll="false" />
+					</else>
+				</if>
 			</then>
 		</if>
 
@@ -5205,6 +5322,10 @@ cluster.link.bind.addr["cluster-link-udp"]=127.0.0.1</echo>
 				<if>
 					<equals arg1="${database.type}" arg2="db2" />
 					<then>
+						<exec executable="${db2.executable}">
+							<arg line="drop db lportal" />
+						</exec>
+
 						<exec executable="${db2.executable}" failonerror="true">
 							<arg value="-fcreate.sql" />
 							<arg value="-t" />
@@ -5399,6 +5520,31 @@ if (ppstate.equals("normal")) {
 
 	<target name="record-test-class-file-names">
 		<record-test-class-file-names />
+	</target>
+
+	<target name="record-test-generated-properties">
+		<fail message="Please set the property ${test.class}." unless="test.class" />
+
+		<get-poshi-test-name />
+
+		<gradle-execute failonerror="false" task="writePoshiProperties">
+			<arg value="--build-file=portal-web/build-test.gradle" />
+			<arg value="-PcomponentNames=${component.names}" />
+			<arg value="-PposhiTestName=${poshi.test.name}" />
+			<arg value="-PproductNames=${product.names}" />
+			<arg value="-PtestCaseAvailablePropertyNames=${test.case.available.property.names}" />
+		</gradle-execute>
+
+		<move file="portal-web/test.generated.properties" tofile="test.generated.properties" />
+
+		<loadfile failonerror="false" property="test.generated.properties.content" srcfile="test.generated.properties" />
+
+		<echo>##</echo>
+		<echo>## test.generated.properties</echo>
+		<echo>##</echo>
+		<echo></echo>
+		<echo>${test.generated.properties.content}</echo>
+		<echo></echo>
 	</target>
 
 	<target name="record-test-plugin-names">
@@ -5602,12 +5748,19 @@ if (ppstate.equals("normal")) {
 	<target name="run-poshi-runner">
 		<get-poshi-test-name />
 
+		<tstamp>
+			<format property="current.date" pattern="yyyy-MM-dd" />
+		</tstamp>
+
+		<property name="test.console.log.file.name" value="${liferay.home}/logs/liferay.${current.date}.xml" />
+
 		<gradle-execute failonerror="false" task="runPoshi">
 			<arg value="--build-file=portal-web/build-test.gradle" />
 			<arg value="-PposhiTestName=${poshi.test.name}" />
 			<arg value="-PsaveScreenshot=${test.save.screenshot}" />
 			<arg value="-PseleniumLoggerEnabled=${test.selenium.logger.enabled}" />
 			<arg value="-PtestCaseAvailablePropertyNames=${test.case.available.property.names}" />
+			<arg value="-PtestConsoleLogFileName=${test.console.log.file.name}" />
 			<arg value="-PtestSkipTearDown=${test.skip.tear.down}" />
 		</gradle-execute>
 	</target>

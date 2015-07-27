@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.tunnel.TunnelAuthenticationManagerUtil;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifier;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifierResult;
+import com.liferay.portal.kernel.security.service.access.policy.ServiceAccessPolicyThreadLocal;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.security.auth.AccessControlContext;
@@ -27,12 +28,15 @@ import com.liferay.portal.security.auth.AuthException;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 
 /**
  * @author Zsolt Berentey
@@ -42,10 +46,17 @@ import org.osgi.service.component.annotations.Component;
 	property = {
 		"auth.verifier.TunnelingServletAuthVerifier.hosts.allowed=255.255.255.255",
 		"auth.verifier.TunnelingServletAuthVerifier.urls.excludes=",
-		"auth.verifier.TunnelingServletAuthVerifier.urls.includes=/api/liferay/do"
+		"auth.verifier.TunnelingServletAuthVerifier.urls.includes=/api/liferay/do",
+		"service.access.policy.name=DEFAULT_USER"
 	}
 )
 public class TunnelingServletAuthVerifier implements AuthVerifier {
+
+	@Activate
+	@Modified
+	public void activate(Map<String, Object> properties) {
+		_properties = properties;
+	}
 
 	@Override
 	public String getAuthType() {
@@ -66,6 +77,12 @@ public class TunnelingServletAuthVerifier implements AuthVerifier {
 				authVerifierResult.setPassword(credentials[1]);
 				authVerifierResult.setState(AuthVerifierResult.State.SUCCESS);
 				authVerifierResult.setUserId(Long.valueOf(credentials[0]));
+
+				String serviceAccessPolicyName = (String)_properties.get(
+					"service.access.policy.name");
+
+				ServiceAccessPolicyThreadLocal.addActiveServiceAccessPolicyName(
+					serviceAccessPolicyName);
 			}
 		}
 		catch (AuthException ae) {
@@ -113,5 +130,7 @@ public class TunnelingServletAuthVerifier implements AuthVerifier {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		TunnelingServletAuthVerifier.class);
+
+	private Map<String, Object> _properties;
 
 }

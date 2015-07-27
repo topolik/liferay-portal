@@ -1176,86 +1176,6 @@
 		</attribute>
 	</tag>
 	<tag>
-		<name>ddm-template-renderer</name>
-		<tag-class>com.liferay.taglib.ui.DDMTemplateRendererTag</tag-class>
-		<body-content>JSP</body-content>
-		<attribute>
-			<name>className</name>
-			<required>true</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>contextObjects</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>displayStyle</name>
-			<required>true</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>displayStyleGroupId</name>
-			<required>true</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>entries</name>
-			<required>true</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-	</tag>
-	<tag>
-		<name>ddm-template-selector</name>
-		<tag-class>com.liferay.taglib.ui.DDMTemplateSelectorTag</tag-class>
-		<body-content>JSP</body-content>
-		<attribute>
-			<name>className</name>
-			<required>true</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>defaultDisplayStyle</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>displayStyle</name>
-			<required>true</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>displayStyleGroupId</name>
-			<required>true</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>displayStyles</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>icon</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>label</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>refreshURL</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>showEmptyOption</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-	</tag>
-	<tag>
 		<name>diff</name>
 		<tag-class>com.liferay.taglib.ui.DiffTag</tag-class>
 		<body-content>JSP</body-content>
@@ -1351,7 +1271,7 @@
 		</attribute>
 		<attribute>
 			<name>formAction</name>
-			<required>true</required>
+			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
@@ -1362,11 +1282,6 @@
 		<attribute>
 			<name>hideControls</name>
 			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<name>paginationURL</name>
-			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
@@ -1973,11 +1888,6 @@
 			<rtexprvalue>true</rtexprvalue>
 			<type>boolean</type>
 		</attribute>
-		<attribute>
-			<name>view</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
 	</tag>
 	<tag>
 		<description>Creates an icon to associate with deactivating an item.</description>
@@ -2147,6 +2057,12 @@
 			<name>message</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>scroll</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
 		</attribute>
 		<attribute>
 			<description>Whether to add the <![CDATA[<code>select</code>]]> CSS class to the icon menu. If set to <![CDATA[<code>true</code>]]>, the selected icon is added to the icon menu's trigger when the icon is selected. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -4816,6 +4732,11 @@
 		<tag-class>com.liferay.taglib.ui.SectionTag</tag-class>
 		<tei-class>com.liferay.taglib.ui.SectionTei</tei-class>
 		<body-content>JSP</body-content>
+		<attribute>
+			<name>data</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
 	</tag>
 	<tag>
 		<name>sites-directory</name>
@@ -5495,6 +5416,11 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<name>showLink</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<name>showUserDetails</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -5522,6 +5448,21 @@
 		<attribute>
 			<name>view</name>
 			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	<tag>
+		<name>user-group-search-container-results</name>
+		<tag-class>com.liferay.taglib.ui.UserGroupSearchContainerResultsTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>searchTerms</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>userGroupParams</name>
+			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>

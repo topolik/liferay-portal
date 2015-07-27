@@ -81,6 +81,10 @@ public class SetupTestableTomcatTask
 		return _moduleFrameworkBaseDir;
 	}
 
+	public File getTomcatBinDir() {
+		return new File(getTomcatDir(), "bin");
+	}
+
 	@InputDirectory
 	public File getTomcatDir() {
 		return _tomcatAppServer.getDir();
@@ -224,6 +228,8 @@ public class SetupTestableTomcatTask
 		if (!contains("bin/setenv.bat", jmxOptions)) {
 			try (PrintWriter printWriter = getAppendPrintWriter(
 					"bin/setenv.bat")) {
+
+				printWriter.println();
 
 				printWriter.print("set \"JMX_OPTS=");
 				printWriter.print(jmxOptions);
@@ -392,8 +398,8 @@ public class SetupTestableTomcatTask
 			public void doCall(CopySpec copySpec) {
 				File moduleFrameworkBaseDir = getModuleFrameworkBaseDir();
 
-				copySpec.from(new File(moduleFrameworkBaseDir, "modules"));
-				copySpec.into(new File(moduleFrameworkBaseDir, "test"));
+				copySpec.from(new File(moduleFrameworkBaseDir, "test"));
+				copySpec.into(new File(moduleFrameworkBaseDir, "modules"));
 			}
 
 		};

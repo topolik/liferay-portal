@@ -41,7 +41,7 @@ import com.liferay.portlet.asset.model.AssetEntry;
 import com.liferay.portlet.asset.model.AssetLink;
 import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetLinkLocalServiceUtil;
-import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
+import com.liferay.portlet.dynamicdatamapping.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.util.test.DDMTemplateTestUtil;
 import com.liferay.portlet.exportimport.configuration.ExportImportConfigurationConstants;
 import com.liferay.portlet.exportimport.configuration.ExportImportConfigurationSettingsMapFactory;
@@ -412,8 +412,8 @@ public abstract class BasePortletExportImportTestCase
 		Map<String, Serializable> settingsMap =
 			ExportImportConfigurationSettingsMapFactory.buildExportSettingsMap(
 				user.getUserId(), layout.getPlid(), layout.getGroupId(),
-				portletId, exportParameterMap, StringPool.BLANK,
-				user.getLocale(), user.getTimeZone(), StringPool.BLANK);
+				portletId, exportParameterMap, user.getLocale(),
+				user.getTimeZone(), StringPool.BLANK);
 
 		ExportImportConfiguration exportImportConfiguration =
 			ExportImportConfigurationLocalServiceUtil.
@@ -439,8 +439,8 @@ public abstract class BasePortletExportImportTestCase
 					buildImportSettingsMap(
 						user.getUserId(), importedLayout.getPlid(),
 						importedGroup.getGroupId(), portletId,
-						importParameterMap, StringPool.BLANK, user.getLocale(),
-						user.getTimeZone(), StringPool.BLANK);
+						importParameterMap, user.getLocale(),
+						user.getTimeZone());
 
 			exportImportConfiguration =
 				ExportImportConfigurationLocalServiceUtil.

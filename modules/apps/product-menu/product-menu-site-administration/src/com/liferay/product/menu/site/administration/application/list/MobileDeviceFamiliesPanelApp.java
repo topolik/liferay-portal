@@ -44,7 +44,7 @@ public class MobileDeviceFamiliesPanelApp
 
 	@Override
 	public String getPortletId() {
-		return PortletKeys.MOBILE_DEVICE_SITE_ADMIN;
+		return PortletKeys.MOBILE_DEVICE_RULES;
 	}
 
 	@Reference(unbind = "-")

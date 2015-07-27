@@ -10,8 +10,9 @@
 		<dirset dir="apps/blogs" includes="*" />
 		<dirset dir="apps/bookmarks" includes="*" />
 		<dirset dir="apps/calendar" includes="*" />
-		<dirset dir="apps/comments" includes="*" />
+		<dirset dir="apps/comment" includes="*" />
 		<dirset dir="apps/configuration-admin" includes="*" />
+		<dirset dir="apps/control-menu" includes="*" />
 		<dirset dir="apps/control-panel" includes="*" />
 		<dirset dir="apps/currency-converter" includes="*" />
 		<dirset dir="apps/dictionary" includes="*" />
@@ -45,10 +46,11 @@
 		<dirset dir="apps/portlet-display-template" includes="*" />
 		<dirset dir="apps/product-menu" includes="*" />
 		<dirset dir="apps/quick-note" includes="*" />
+		<dirset dir="apps/ratings" includes="*" />
 		<dirset dir="apps/roles" includes="*" />
 		<dirset dir="apps/rss" includes="*" />
 		<dirset dir="apps/search" includes="*" />
-		<dirset dir="apps/service-access-control-profile" includes="*" />
+		<dirset dir="apps/service-access-policy" includes="*" />
 		<dirset dir="apps/site" includes="*" />
 		<dirset dir="apps/site-navigation" includes="*" />
 		<dirset dir="apps/social" excludes="social-networking-*" includes="*" />
@@ -57,6 +59,7 @@
 		<dirset dir="apps/translator" includes="*" />
 		<dirset dir="apps/trash" includes="*" />
 		<dirset dir="apps/unit-converter" includes="*" />
+		<dirset dir="apps/user-groups-admin" includes="*" />
 		<dirset dir="apps/user-personal-bar" includes="*" />
 		<dirset dir="apps/web-proxy" includes="*" />
 		<dirset dir="apps/wiki" includes="*" />

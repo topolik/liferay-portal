@@ -3887,6 +3887,25 @@ public class StringUtil {
 		return s;
 	}
 
+	public static String stripParentheticalSuffix(String s) {
+		int x = s.lastIndexOf(StringPool.OPEN_PARENTHESIS);
+		int y = s.lastIndexOf(StringPool.CLOSE_PARENTHESIS);
+
+		if ((x == -1) || (y == -1)) {
+			return s;
+		}
+
+		if ((x > y) || !s.endsWith(StringPool.CLOSE_PARENTHESIS)) {
+			return s;
+		}
+
+		if (s.charAt(x - 1) != CharPool.SPACE) {
+			return s;
+		}
+
+		return s.substring(0, x - 1).concat(s.substring(y + 1, s.length()));
+	}
+
 	/**
 	 * Returns a string representing the Unicode character codes of the
 	 * characters comprising the string <code>s</code>.

@@ -157,6 +157,11 @@
 	<bean id="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManagerUtil" class="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManagerUtil">
 		<property name="JSONWebServiceActionsManager" ref="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManager" />
 	</bean>
+	<bean id="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceRegistratorFactory" class="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceRegistratorFactory">
+		<property name="JSONWebServiceRegistratorBuilder">
+			<bean class="com.liferay.portal.jsonwebservice.DefaultJSONWebServiceRegistratorBuilder" />
+		</property>
+	</bean>
 	<bean id="com.liferay.portal.kernel.language.LanguageUtil" class="com.liferay.portal.kernel.language.LanguageUtil">
 		<property name="language">
 			<bean class="com.liferay.portal.language.LanguageImpl" />
@@ -285,11 +290,6 @@
 	</bean>
 	<bean id="com.liferay.portal.kernel.spring.util.SpringFactoryUtil" class="com.liferay.portal.kernel.spring.util.SpringFactoryUtil">
 		<property name="springFactory" ref="com.liferay.portal.kernel.spring.util.SpringFactory" />
-	</bean>
-	<bean id="com.liferay.portal.kernel.transaction.TransactionInvokerUtil" class="com.liferay.portal.kernel.transaction.TransactionInvokerUtil">
-		<property name="transactionInvoker">
-			<bean class="com.liferay.portal.spring.transaction.TransactionInvokerImpl" />
-		</property>
 	</bean>
 	<bean id="com.liferay.portal.kernel.upgrade.util.UpgradeTableFactoryUtil" class="com.liferay.portal.kernel.upgrade.util.UpgradeTableFactoryUtil">
 		<property name="upgradeTableFactory">
@@ -809,9 +809,6 @@
 	</bean>
 	<bean id="com.liferay.portlet.VirtualLayoutFriendlyURLResolver" class="com.liferay.portlet.VirtualLayoutFriendlyURLResolver" />
 	<bean id="com.liferay.portlet.admin.util.OmniadminImpl" class="com.liferay.portlet.admin.util.OmniadminImpl" />
-	<bean id="com.liferay.portlet.asset.lar.AssetCategoryStagedModelDataHandler" class="com.liferay.portlet.asset.lar.AssetCategoryStagedModelDataHandler" />
-	<bean id="com.liferay.portlet.asset.lar.AssetVocabularyStagedModelDataHandler" class="com.liferay.portlet.asset.lar.AssetVocabularyStagedModelDataHandler" />
-	<bean id="com.liferay.portlet.asset.lar.AssetTagStagedModelDataHandler" class="com.liferay.portlet.asset.lar.AssetTagStagedModelDataHandler" />
 	<bean id="com.liferay.portlet.asset.social.AssetEntrySocialActivityManager" class="com.liferay.portlet.asset.social.AssetEntrySocialActivityManager" />
 	<bean id="com.liferay.portlet.asset.util.AssetCategoryIndexer" class="com.liferay.portlet.asset.util.AssetCategoryIndexer" />
 	<bean id="com.liferay.portlet.asset.util.AssetEntryIndexer" class="com.liferay.portlet.asset.util.AssetEntryIndexer" />
@@ -1035,10 +1032,6 @@
 			<bean class="com.liferay.portlet.imagegallerydisplay.display.context.IGDisplayContextProviderImpl" />
 		</property>
 	</bean>
-	<bean id="com.liferay.portlet.journal.util.JournalConverter" class="com.liferay.portlet.journal.util.JournalConverterImpl" />
-	<bean id="com.liferay.portlet.journal.util.JournalConverterUtil" class="com.liferay.portlet.journal.util.JournalConverterUtil">
-		<property name="journalConverter" ref="com.liferay.portlet.journal.util.JournalConverter" />
-	</bean>
 	<bean id="com.liferay.portlet.layoutprototypes.lar.LayoutPrototypeStagedModelDataHandler" class="com.liferay.portlet.layoutprototypes.lar.LayoutPrototypeStagedModelDataHandler" />
 	<bean id="com.liferay.portlet.layoutsadmin.lar.LayoutFriendlyURLStagedModelDataHandler" class="com.liferay.portlet.layoutsadmin.lar.LayoutFriendlyURLStagedModelDataHandler" />
 	<bean id="com.liferay.portlet.layoutsadmin.lar.LayoutStagedModelDataHandler" class="com.liferay.portlet.layoutsadmin.lar.LayoutStagedModelDataHandler">
@@ -1079,7 +1072,6 @@
 			<bean class="com.liferay.portlet.mobiledevicerules.service.permission.MDRRuleGroupInstancePermissionImpl" />
 		</property>
 	</bean>
-	<bean id="com.liferay.portlet.passwordpoliciesadmin.lar.PasswordPolicyStagedModelDataHandler" class="com.liferay.portlet.passwordpoliciesadmin.lar.PasswordPolicyStagedModelDataHandler" />
 	<bean id="com.liferay.portlet.rolesadmin.util.RolesAdmin" class="com.liferay.portlet.rolesadmin.util.RolesAdminImpl" />
 	<bean id="com.liferay.portlet.rolesadmin.util.RolesAdminUtil" class="com.liferay.portlet.rolesadmin.util.RolesAdminUtil">
 		<property name="rolesAdmin" ref="com.liferay.portlet.rolesadmin.util.RolesAdmin" />
@@ -1118,7 +1110,6 @@
 	<bean id="com.liferay.portlet.trash.util.TrashUtil" class="com.liferay.portlet.trash.util.TrashUtil">
 		<property name="trash" ref="com.liferay.portlet.trash.util.Trash" />
 	</bean>
-	<bean id="com.liferay.portlet.usergroupsadmin.util.UserGroupIndexer" class="com.liferay.portlet.usergroupsadmin.util.UserGroupIndexer" />
 	<bean id="com.liferay.portlet.usersadmin.util.ContactIndexer" class="com.liferay.portlet.usersadmin.util.ContactIndexer" />
 	<bean id="com.liferay.portlet.usersadmin.util.OrganizationIndexer" class="com.liferay.portlet.usersadmin.util.OrganizationIndexer" />
 	<bean id="com.liferay.portlet.usersadmin.util.UserIndexer" class="com.liferay.portlet.usersadmin.util.UserIndexer" />

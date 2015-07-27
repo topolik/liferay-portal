@@ -15,6 +15,8 @@
 package com.liferay.document.library.service.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
+import com.liferay.dynamic.data.mapping.test.util.DDMFormValuesTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
@@ -44,8 +46,6 @@ import com.liferay.portlet.dynamicdatamapping.model.UnlocalizedValue;
 import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.storage.DDMFormFieldValue;
 import com.liferay.portlet.dynamicdatamapping.storage.DDMFormValues;
-import com.liferay.portlet.dynamicdatamapping.util.test.DDMFormTestUtil;
-import com.liferay.portlet.dynamicdatamapping.util.test.DDMFormValuesTestUtil;
 
 import java.io.ByteArrayInputStream;
 
@@ -98,9 +98,11 @@ public class DLFileEntryMetadataLocalServiceTest {
 			RandomTestUtil.randomString(), StringPool.BLANK, new long[0],
 			serviceContext);
 
-		List<DDMStructure> ddmStructures = _dlFileEntryType.getDDMStructures();
+		List<com.liferay.portlet.dynamicdatamapping.DDMStructure>
+			ddmStructures = _dlFileEntryType.getDDMStructures();
 
-		_ddmStructure = ddmStructures.get(0);
+		_ddmStructure = DDMStructureLocalServiceUtil.getStructure(
+			ddmStructures.get(0).getStructureId());
 
 		Map<String, DDMFormValues> ddmFormValuesMap = setUpDDMFormValuesMap(
 			_ddmStructure.getStructureKey(), user.getLocale());

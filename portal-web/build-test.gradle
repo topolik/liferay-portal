@@ -19,6 +19,12 @@ poshiRunner {
 		poshiProperty "component.names", project.properties["componentNames"]
 	}
 
+	poshiProperty "ignore.errors.file.name", "test-ignorable-error-lines.xml"
+
+	if (project.hasProperty("poshiTestName")) {
+		poshiProperty "test.name", project.properties["poshiTestName"]
+	}
+
 	if (project.hasProperty("productNames")) {
 		poshiProperty "product.names", project.properties["productNames"]
 	}
@@ -37,13 +43,17 @@ poshiRunner {
 		poshiProperty "test.case.available.property.names", project.properties["testCaseAvailablePropertyNames"]
 	}
 
+	if (project.hasProperty("testConsoleLogFileName")) {
+		poshiProperty "test.console.log.file.name", project.properties["testConsoleLogFileName"]
+	}
+
 	poshiProperty "test.dependencies.dir.name", "com/liferay/portalweb/dependencies"
 
 	if (project.hasProperty("testSkipTearDown")) {
 		poshiProperty "test.skip.tear.down", project.properties["testSkipTearDown"]
 	}
 
-	version = "1.0.6"
+	version = "1.0.9"
 }
 
 repositories {

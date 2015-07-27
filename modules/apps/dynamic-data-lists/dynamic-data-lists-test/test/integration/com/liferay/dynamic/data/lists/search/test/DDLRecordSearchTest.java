@@ -93,8 +93,6 @@ public class DDLRecordSearchTest {
 
 	@Test
 	public void testExactPhrase() throws Exception {
-		Assume.assumeTrue(isExactPhraseQueryImplementedForSearchEngine());
-
 		addRecord("Joe Bloggs", "Simple description");
 		addRecord("Bloggs", "Another description example");
 		addRecord(RandomTestUtil.randomString(), RandomTestUtil.randomString());
@@ -104,9 +102,26 @@ public class DDLRecordSearchTest {
 	}
 
 	@Test
-	public void testPunctuationInExactPhrase() throws Exception {
-		Assume.assumeTrue(isExactPhraseQueryImplementedForSearchEngine());
+	public void testExactPhraseMixedWithWords() throws Exception {
+		addRecord("One Two Three Four Five Six", RandomTestUtil.randomString());
+		addRecord(RandomTestUtil.randomString(), RandomTestUtil.randomString());
 
+		assertSearch("\"Two Three\" Five", 1);
+		assertSearch("\"Two Three\" Nine", 1);
+		assertSearch("\"Two  Four\" Five", 1);
+		assertSearch("\"Two  Four\" Nine", 0);
+		assertSearch("Three \"Five Six\"", 1);
+		assertSearch("Zero  \"Five Six\"", 1);
+		assertSearch("Three \"Four Six\"", 1);
+		assertSearch("Zero  \"Four Six\"", 0);
+		assertSearch("One  \"Three Four\" Six ", 1);
+		assertSearch("Zero \"Three Four\" Nine", 1);
+		assertSearch("One  \"Three Five\" Six ", 1);
+		assertSearch("Zero \"Three Five\" Nine", 0);
+	}
+
+	@Test
+	public void testPunctuationInExactPhrase() throws Exception {
 		addRecord("Joe? Bloggs!");
 		addRecord("Joe! Bloggs?");
 		addRecord("Joe Bloggs");
@@ -118,8 +133,6 @@ public class DDLRecordSearchTest {
 
 	@Test
 	public void testQuestionMarksVersusStopwords1() throws Exception {
-		Assume.assumeTrue(isExactPhraseQueryImplementedForSearchEngine());
-
 		addRecord(RandomTestUtil.randomString());
 		addRecord("how ? create ? coupon");
 
@@ -154,8 +167,6 @@ public class DDLRecordSearchTest {
 
 	@Test
 	public void testQuestionMarksVersusStopwords4() throws Exception {
-		Assume.assumeTrue(isExactPhraseQueryImplementedForSearchEngine());
-
 		addRecord(RandomTestUtil.randomString());
 		addRecord("how ! create ! coupon");
 
@@ -308,11 +319,11 @@ public class DDLRecordSearchTest {
 
 		String vendor = searchEngine.getVendor();
 
-		if (vendor.equals("Lucene") || vendor.equals("SOLR")) {
-			return true;
+		if (vendor.equals("Elasticsearch") || vendor.equals("SOLR")) {
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	@DeleteAfterTestRun

@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.tools.ToolsUtil;
 import com.liferay.source.formatter.util.FileUtil;
 
 import java.io.File;
@@ -194,32 +195,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		for (String exclusionPath : exclusionPaths) {
 			if (absolutePath.contains(exclusionPath)) {
 				return true;
-			}
-		}
-
-		return false;
-	}
-
-	protected static boolean isInsideQuotes(String s, int pos) {
-		boolean insideQuotes = false;
-
-		for (int i = 0; i < s.length(); i++) {
-			char c = s.charAt(i);
-
-			if (insideQuotes) {
-				if ((c == CharPool.QUOTE) &&
-					((c <= 1) || (s.charAt(i - 1) != CharPool.BACK_SLASH) ||
-					 (s.charAt(i - 2) == CharPool.BACK_SLASH))) {
-
-					insideQuotes = false;
-				}
-			}
-			else if (c == CharPool.QUOTE) {
-				insideQuotes = true;
-			}
-
-			if (pos == i) {
-				return insideQuotes;
 			}
 		}
 
@@ -420,7 +395,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			_portalLanguageProperties = new Properties();
 
 			File portalLanguagePropertiesFile = new File(
-				getFile("portal-impl", 5), "src/content/Language.properties");
+				getFile("portal-impl", PORTAL_MAX_DIR_LEVEL),
+				"src/content/Language.properties");
 
 			InputStream inputStream = new FileInputStream(
 				portalLanguagePropertiesFile);
@@ -567,7 +543,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 		if (_copyright == null) {
 			_copyright = getContent(
-				sourceFormatterArgs.getCopyrightFileName(), 4);
+				sourceFormatterArgs.getCopyrightFileName(),
+				PORTAL_MAX_DIR_LEVEL);
 		}
 
 		String copyright = _copyright;
@@ -577,7 +554,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		}
 
 		if (_oldCopyright == null) {
-			_oldCopyright = getContent("old-copyright.txt", 4);
+			_oldCopyright = getContent(
+				"old-copyright.txt", PORTAL_MAX_DIR_LEVEL);
 		}
 
 		if (Validator.isNotNull(_oldCopyright) &&
@@ -807,7 +785,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				return line;
 			}
 
-			if (!isInsideQuotes(line, x)) {
+			if (!ToolsUtil.isInsideQuotes(line, x)) {
 				line = StringUtil.replaceFirst(
 					line, incorrectSyntax, correctSyntax, x);
 			}
@@ -880,7 +858,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				break;
 			}
 
-			if (isInsideQuotes(line, x)) {
+			if (ToolsUtil.isInsideQuotes(line, x)) {
 				continue;
 			}
 
@@ -922,7 +900,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				break;
 			}
 
-			if (isInsideQuotes(trimmedLine, x)) {
+			if (ToolsUtil.isInsideQuotes(trimmedLine, x)) {
 				continue;
 			}
 
@@ -941,7 +919,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		int pos = line.indexOf(") ");
 
 		if ((pos != -1) && !line.contains(StringPool.AT) &&
-			!isInsideQuotes(line, pos)) {
+			!ToolsUtil.isInsideQuotes(line, pos)) {
 
 			String linePart = line.substring(pos + 2);
 
@@ -958,7 +936,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		pos = line.indexOf(" (");
 
 		if ((pos != -1) && !line.contains(StringPool.EQUAL) &&
-			!isInsideQuotes(line, pos) &&
+			!ToolsUtil.isInsideQuotes(line, pos) &&
 			(trimmedLine.startsWith("private ") ||
 			 trimmedLine.startsWith("protected ") ||
 			 trimmedLine.startsWith("public "))) {
@@ -980,7 +958,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				x = Math.max(posComma, posSemicolon);
 			}
 
-			if (isInsideQuotes(line, x)) {
+			if (ToolsUtil.isInsideQuotes(line, x)) {
 				continue;
 			}
 
@@ -1420,6 +1398,10 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		return matcher.matches();
 	}
 
+	protected boolean isModulesFile(String absolutePath) {
+		return absolutePath.contains("/modules/");
+	}
+
 	protected void processErrorMessage(String fileName, String message) {
 		List<String> errorMessages = _errorMessagesMap.get(fileName);
 
@@ -1516,7 +1498,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			}
 
 			if (Validator.isNotNull(previousAttribute) &&
-				(previousAttribute.compareTo(attribute) > 0)) {
+				(previousAttribute.compareToIgnoreCase(attribute) > 0)) {
 
 				wrongOrder = true;
 			}
@@ -1755,6 +1737,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 	protected static final String BASEDIR = "./";
 
+	protected static final int PORTAL_MAX_DIR_LEVEL = 5;
+
 	protected static Pattern attributeNamePattern = Pattern.compile(
 		"[a-z]+[-_a-zA-Z0-9]*");
 	protected static Pattern emptyCollectionPattern = Pattern.compile(
@@ -1799,7 +1783,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		int level = 2;
 
 		if (portalSource) {
-			level = 3;
+			level = PORTAL_MAX_DIR_LEVEL;
 		}
 
 		for (int i = 0; i <= level; i++) {
@@ -1891,7 +1875,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	}
 
 	private boolean _isPortalSource() {
-		if (getFile("portal-impl", 5) != null) {
+		if (getFile("portal-impl", PORTAL_MAX_DIR_LEVEL) != null) {
 			return true;
 		}
 		else {

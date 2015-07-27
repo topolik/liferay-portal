@@ -39,6 +39,10 @@ LPS-30525.
 	${theme.runtime("com.liferay.portal.kernel.servlet.taglib.ui.BreadcrumbEntry", portletProviderAction.VIEW)}
 </#macro>
 
+<#macro control_menu>
+	${theme.runtime("com.liferay.portlet.admin.util.PortalControlMenuApplicationType$ControlMenu", portletProviderAction.VIEW)}
+</#macro>
+
 <#macro css
 	file_name
 >
@@ -81,6 +85,10 @@ ${languageUtil.format(locale, key, arguments)}</#macro>
 
 <#macro languages>
 	${theme.runtime("com.liferay.portal.kernel.servlet.taglib.ui.LanguageEntry", portletProviderAction.VIEW)}
+</#macro>
+
+<#macro product_menu>
+	${theme.runtime("com.liferay.portlet.admin.util.PortalProductMenuApplicationType$ProductMenu", portletProviderAction.VIEW)}
 </#macro>
 
 <#macro quick_access

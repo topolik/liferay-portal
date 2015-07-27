@@ -172,10 +172,10 @@
 		<execute function="AssertTextEquals" locator1="Dockbar#ADMIN" value1="${localizedAdmin}" />
 	</command>
 
-	<command name="assertnodePortPG">
+	<command name="assertNodePortPG">
 		<var name="key_nodePort" value="${nodePort}" />
 
-		<execute function="AssertTextEquals#assertPartialText" locator1="Home#NODE_NAME" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="Home#NODE_NAME" value1="${nodePort}" />
 	</command>
 
 	<command name="changeLogoViaPageCP">
@@ -246,7 +246,17 @@
 	</command>
 
 	<command name="gotoChildPagePG">
-		<execute macro="Page#gotoPG" />
+		<execute macro="Page#gotoPG">
+			<var name="friendlyURL" value="${friendlyURL}" />
+			<var name="pageAccess" value="${pageAccess}" />
+			<var name="pageName" value="${pageName}" />
+			<var name="pageStaging" value="${pageStaging}" />
+			<var name="siteName" value="${siteName}" />
+			<var name="siteNameURL" value="${siteNameURL}" />
+			<var name="siteURL" value="${siteURL}" />
+			<var name="specificURL" value="${specificURL}" />
+			<var name="virtualHostsURL" value="${virtualHostsURL}" />
+		</execute>
 
 		<var name="key_pageName" value="${pageName}" />
 
@@ -867,7 +877,7 @@
 	</command>
 
 	<command name="viewFriendlyURLLanguageOptionsPG">
-		<execute function="Click" locator1="Dockbar#EDIT_SPANISH" />
+		<execute function="Click#clickAt" locator1="Dockbar#EDIT" />
 
 		<if>
 			<condition function="IsElementPresent" locator1="DockbarEditpanel#DETAILS_FRIENDLY_URL_TITLE" />
@@ -915,7 +925,7 @@
 			</then>
 		</if>
 
-		<execute function="Click#clickAtSidebarClickAt" locator1="Dockbar#EDIT_SPANISH" />
+		<execute function="Click#clickAt" locator1="Dockbar#EDIT" />
 
 		<var name="key_defaultSiteLanguageKey" value="${defaultSiteLanguageKey}" />
 

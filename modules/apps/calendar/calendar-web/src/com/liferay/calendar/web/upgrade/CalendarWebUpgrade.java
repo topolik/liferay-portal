@@ -14,7 +14,7 @@
 
 package com.liferay.calendar.web.upgrade;
 
-import com.liferay.calendar.web.upgrade.v1_0_0.UpgradeCalendarPortletId;
+import com.liferay.calendar.web.upgrade.v1_0_0.UpgradePortletId;
 import com.liferay.calendar.web.upgrade.v1_0_0.UpgradePortletPreferences;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
@@ -50,7 +50,8 @@ public class CalendarWebUpgrade {
 	protected void upgrade() throws PortalException {
 		List<UpgradeProcess> upgradeProcesses = new ArrayList<>();
 
-		upgradeProcesses.add(new UpgradeCalendarPortletId());
+		upgradeProcesses.add(new UpgradePortletId());
+
 		upgradeProcesses.add(new UpgradePortletPreferences());
 
 		_releaseLocalService.updateRelease(

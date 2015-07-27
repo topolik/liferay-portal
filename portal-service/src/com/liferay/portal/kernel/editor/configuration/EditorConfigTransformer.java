@@ -15,8 +15,8 @@
 package com.liferay.portal.kernel.editor.configuration;
 
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portlet.RequestBackedPortletURLFactory;
 
 import java.util.Map;
 
@@ -58,18 +58,14 @@ public interface EditorConfigTransformer {
 	 *        options set by {@link EditorOptionsContributor} modules
 	 * @param inputEditorTaglibAttributes the attributes specified to the input
 	 *        taglib tag that renders the editor
-	 * @param themeDisplay the theme display
-	 * @param liferayPortletResponse the Liferay portlet response (optionally
-	 *        <code>null</code>). Only use the response to generate portlet
-	 *        URLs.
 	 * @param configJSONObject the JSON object composed of the entire
 	 *        configuration set by {@link EditorConfigContributor} modules
+	 * @param themeDisplay the theme display
 	 */
 	public void transform(
 		EditorOptions editorOptions,
 		Map<String, Object> inputEditorTaglibAttributes,
-		ThemeDisplay themeDisplay,
-		LiferayPortletResponse liferayPortletResponse,
-		JSONObject configJSONObject);
+		JSONObject configJSONObject, ThemeDisplay themeDisplay,
+		RequestBackedPortletURLFactory requestBackedPortletURLFactory);
 
 }

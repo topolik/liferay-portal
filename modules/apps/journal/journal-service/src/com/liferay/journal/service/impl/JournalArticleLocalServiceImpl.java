@@ -51,6 +51,7 @@ import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.diff.DiffHtmlUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -123,6 +124,7 @@ import com.liferay.portal.model.User;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextUtil;
 import com.liferay.portal.servlet.filters.cache.CacheUtil;
+import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.GroupSubscriptionCheckSubscriptionSender;
 import com.liferay.portal.util.PortalUtil;
@@ -144,6 +146,10 @@ import com.liferay.portlet.dynamicdatamapping.model.DDMStorageLink;
 import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
 import com.liferay.portlet.dynamicdatamapping.model.DDMTemplate;
 import com.liferay.portlet.dynamicdatamapping.model.LocalizedValue;
+import com.liferay.portlet.dynamicdatamapping.service.DDMStorageLinkLocalService;
+import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalService;
+import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLinkLocalService;
+import com.liferay.portlet.dynamicdatamapping.service.DDMTemplateLocalService;
 import com.liferay.portlet.dynamicdatamapping.storage.Fields;
 import com.liferay.portlet.dynamicdatamapping.util.DDMUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMXMLUtil;
@@ -3893,9 +3899,10 @@ public class JournalArticleLocalServiceImpl
 	 * parameters without using the indexer, including a keywords parameter for
 	 * matching with the article's ID, title, description, and content, a DDM
 	 * structure key parameter, and a DDM template key parameter. It is
-	 * preferable to use the indexed version {@link #search(long, long, java.util.List,
-	 * long, String, String, String, java.util.LinkedHashMap, int, int, Sort)} instead of
-	 * this method wherever possible for performance reasons.
+	 * preferable to use the indexed version {@link #search(long, long,
+	 * java.util.List, long, String, String, String, java.util.LinkedHashMap,
+	 * int, int, Sort)} instead of this method wherever possible for performance
+	 * reasons.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end -
@@ -3964,10 +3971,10 @@ public class JournalArticleLocalServiceImpl
 	 * parameters without using the indexer, including keyword parameters for
 	 * article ID, title, description, and content, a DDM structure key
 	 * parameter, a DDM template key parameter, and an AND operator switch. It
-	 * is preferable to use the indexed version {@link #search(long, long, java.util.List,
-	 * long, String, String, String, String, int, String, String, java.util.LinkedHashMap,
-	 * boolean, int, int, Sort)} instead of this method wherever possible for
-	 * performance reasons.
+	 * is preferable to use the indexed version {@link #search(long, long,
+	 * java.util.List, long, String, String, String, String, int, String,
+	 * String, java.util.LinkedHashMap, boolean, int, int, Sort)} instead of
+	 * this method wherever possible for performance reasons.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end -
@@ -4281,9 +4288,10 @@ public class JournalArticleLocalServiceImpl
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by {@link #search(long, long, java.util.List,
-	 *             long, String, String, String, String, int, String, String,
-	 *             java.util.LinkedHashMap, boolean, int, int, Sort)}
+	 * @deprecated As of 7.0.0, replaced by {@link #search(long, long,
+	 *             java.util.List, long, String, String, String, String, int,
+	 *             String, String, java.util.LinkedHashMap, boolean, int, int,
+	 *             Sort)}
 	 */
 	@Deprecated
 	@Override
@@ -4786,6 +4794,10 @@ public class JournalArticleLocalServiceImpl
 			final long folderId, final String treePath, final boolean reindex)
 		throws PortalException {
 
+		if (treePath == null) {
+			throw new IllegalArgumentException("Tree path is null");
+		}
+
 		final ActionableDynamicQuery actionableDynamicQuery =
 			getActionableDynamicQuery();
 
@@ -4802,7 +4814,10 @@ public class JournalArticleLocalServiceImpl
 					Property treePathProperty = PropertyFactoryUtil.forName(
 						"treePath");
 
-					dynamicQuery.add(treePathProperty.ne(treePath));
+					dynamicQuery.add(
+						RestrictionsFactoryUtil.or(
+							treePathProperty.isNull(),
+							treePathProperty.ne(treePath)));
 				}
 
 			});
@@ -5377,8 +5392,9 @@ public class JournalArticleLocalServiceImpl
 
 	/**
 	 * @deprecated As of 6.2.0, replaced by {@link
-	 *             #updateArticleTranslation(long, String, double, java.util.Locale,
-	 *             String, String, String, Map, ServiceContext)}
+	 *             #updateArticleTranslation(long, String, double,
+	 *             java.util.Locale, String, String, String, Map,
+	 *             ServiceContext)}
 	 */
 	@Deprecated
 	@Override
@@ -6868,7 +6884,7 @@ public class JournalArticleLocalServiceImpl
 			}
 			catch (NoSuchTemplateException nste) {
 				if (!defaultDDMTemplateKey.equals(ddmTemplateKey)) {
-					ddmTemplate = ddmTemplatePersistence.findByG_C_T(
+					ddmTemplate = ddmTemplateLocalService.getTemplate(
 						PortalUtil.getSiteGroupId(article.getGroupId()),
 						classNameLocalService.getClassNameId(
 							DDMStructure.class),
@@ -7766,6 +7782,18 @@ public class JournalArticleLocalServiceImpl
 			"Invalid structure " + ddmStructure.getStructureId() +
 				" for folder " + folderId);
 	}
+
+	@ServiceReference(type = DDMStorageLinkLocalService.class)
+	protected DDMStorageLinkLocalService ddmStorageLinkLocalService;
+
+	@ServiceReference(type = DDMStructureLocalService.class)
+	protected DDMStructureLocalService ddmStructureLocalService;
+
+	@ServiceReference(type = DDMTemplateLinkLocalService.class)
+	protected DDMTemplateLinkLocalService ddmTemplateLinkLocalService;
+
+	@ServiceReference(type = DDMTemplateLocalService.class)
+	protected DDMTemplateLocalService ddmTemplateLocalService;
 
 	private static final long _JOURNAL_ARTICLE_CHECK_INTERVAL =
 		JournalServiceConfigurationValues.JOURNAL_ARTICLE_CHECK_INTERVAL

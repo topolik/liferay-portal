@@ -212,8 +212,7 @@ AUI.add(
 
 						var itemSelectorDialog = new A.LiferayItemSelectorDialog(
 							{
-								eventName: instance.ns('selectImage'),
-								on: {
+								after: {
 									selectedItemChange: function(event) {
 										var selectedItem = event.newVal;
 
@@ -224,6 +223,7 @@ AUI.add(
 										}
 									}
 								},
+								eventName: instance.ns('selectImage'),
 								url: instance.get('itemSelectorURL')
 							}
 						);

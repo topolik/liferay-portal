@@ -20,6 +20,7 @@ import com.liferay.journal.model.JournalArticleDisplay;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.service.permission.JournalArticlePermission;
 import com.liferay.journal.util.JournalContentUtil;
+import com.liferay.journal.util.JournalConverter;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
@@ -36,6 +37,7 @@ import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.DocumentImpl;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Indexer;
+import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.SearchEngineUtil;
@@ -44,6 +46,7 @@ import com.liferay.portal.kernel.search.Summary;
 import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.search.filter.QueryFilter;
 import com.liferay.portal.kernel.search.generic.BooleanQueryImpl;
+import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -67,7 +70,6 @@ import com.liferay.portlet.dynamicdatamapping.util.DDMIndexer;
 import com.liferay.portlet.dynamicdatamapping.util.DDMIndexerUtil;
 import com.liferay.portlet.dynamicdatamapping.util.DDMUtil;
 import com.liferay.portlet.dynamicdatamapping.util.FieldsToDDMFormValuesConverterUtil;
-import com.liferay.portlet.journal.util.JournalConverterUtil;
 import com.liferay.portlet.trash.util.TrashUtil;
 
 import java.io.Serializable;
@@ -191,7 +193,8 @@ public class JournalArticleIndexer
 				ddmStructureFieldName,
 				StringPool.QUOTE + ddmStructureFieldValue + StringPool.QUOTE);
 
-			contextBooleanFilter.add(new QueryFilter(booleanQuery));
+			contextBooleanFilter.add(
+				new QueryFilter(booleanQuery), BooleanClauseOccur.MUST);
 		}
 
 		String articleType = (String)searchContext.getAttribute("articleType");
@@ -276,6 +279,11 @@ public class JournalArticleIndexer
 				ddmStructureKeys[i] = ddmStructure.getStructureKey();
 			}
 
+			final Indexer<JournalArticle> indexer =
+				IndexerRegistryUtil.nullSafeGetIndexer(JournalArticle.class);
+
+			_indexAllVersions.set(false);
+
 			final ActionableDynamicQuery actionableDynamicQuery =
 				_journalArticleLocalService.getActionableDynamicQuery();
 
@@ -315,7 +323,7 @@ public class JournalArticleIndexer
 						JournalArticle article = (JournalArticle)object;
 
 						try {
-							doReindex(article, false);
+							indexer.reindex(article);
 						}
 						catch (Exception e) {
 							throw new PortalException(e);
@@ -349,7 +357,7 @@ public class JournalArticleIndexer
 		DDMFormValues ddmFormValues = null;
 
 		try {
-			Fields fields = JournalConverterUtil.getDDMFields(
+			Fields fields = _journalConverter.getDDMFields(
 				ddmStructure, article.getDocument());
 
 			ddmFormValues = FieldsToDDMFormValuesConverterUtil.convert(
@@ -587,7 +595,13 @@ public class JournalArticleIndexer
 
 	@Override
 	protected void doReindex(JournalArticle journalArticle) throws Exception {
-		doReindex(journalArticle, true);
+		Boolean indexAllVersions = _indexAllVersions.get();
+
+		if (indexAllVersions == null) {
+			indexAllVersions = true;
+		}
+
+		doReindex(journalArticle, indexAllVersions);
 	}
 
 	protected void doReindex(JournalArticle article, boolean allVersions)
@@ -659,7 +673,7 @@ public class JournalArticleIndexer
 		DDMFormValues ddmFormValues = null;
 
 		try {
-			Fields fields = JournalConverterUtil.getDDMFields(
+			Fields fields = _journalConverter.getDDMFields(
 				ddmStructure, article.getDocument());
 
 			ddmFormValues = FieldsToDDMFormValuesConverterUtil.convert(
@@ -758,7 +772,7 @@ public class JournalArticleIndexer
 					LocaleUtil.toLanguageId(snippetLocale), 1,
 					portletRequestModel, themeDisplay);
 
-			content = HtmlUtil.escape(articleDisplay.getDescription());
+			content = articleDisplay.getDescription();
 			content = HtmlUtil.replaceNewLine(content);
 
 			if (Validator.isNull(content)) {
@@ -864,10 +878,19 @@ public class JournalArticleIndexer
 		_journalArticleLocalService = journalArticleLocalService;
 	}
 
+	@Reference
+	protected void setJournalConverter(JournalConverter journalConverter) {
+		_journalConverter = journalConverter;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		JournalArticleIndexer.class);
 
 	private DDMStructureLocalService _ddmStructureLocalService;
+	private final ThreadLocal<Boolean> _indexAllVersions =
+		new AutoResetThreadLocal<>(
+			JournalArticleIndexer.class + "._indexAllVersions", true);
 	private JournalArticleLocalService _journalArticleLocalService;
+	private JournalConverter _journalConverter;
 
 }

@@ -366,9 +366,8 @@ public class LiferayLocalRepository
 
 	@Override
 	public List<Folder> getFolders(
-			long parentFolderId, boolean includeMountfolders, int start,
-			int end, OrderByComparator<Folder> obc)
-		throws PortalException {
+		long parentFolderId, boolean includeMountfolders, int start, int end,
+		OrderByComparator<Folder> obc) {
 
 		return getFolders(
 			parentFolderId, WorkflowConstants.STATUS_APPROVED,
@@ -377,9 +376,8 @@ public class LiferayLocalRepository
 
 	@Override
 	public List<Folder> getFolders(
-			long parentFolderId, int status, boolean includeMountfolders,
-			int start, int end, OrderByComparator<Folder> obc)
-		throws PortalException {
+		long parentFolderId, int status, boolean includeMountfolders, int start,
+		int end, OrderByComparator<Folder> obc) {
 
 		List<DLFolder> dlFolders = dlFolderLocalService.getFolders(
 			getGroupId(), toFolderId(parentFolderId), status,

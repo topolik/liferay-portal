@@ -160,6 +160,16 @@ public class LiferaySeleniumHelper {
 		}
 	}
 
+	public static void assertEditable(
+			LiferaySelenium liferaySelenium, String locator)
+		throws Exception {
+
+		if (liferaySelenium.isNotEditable(locator)) {
+			throw new Exception(
+				"Element is not editable at \"" + locator + "\"");
+		}
+	}
+
 	public static void assertElementNotPresent(
 			LiferaySelenium liferaySelenium, String locator)
 		throws Exception {
@@ -375,6 +385,15 @@ public class LiferaySeleniumHelper {
 
 		if (liferaySelenium.isChecked(locator)) {
 			throw new Exception("Element is checked at \"" + locator + "\"");
+		}
+	}
+
+	public static void assertNotEditable(
+			LiferaySelenium liferaySelenium, String locator)
+		throws Exception {
+
+		if (liferaySelenium.isEditable(locator)) {
+			throw new Exception("Element is editable at \"" + locator + "\"");
 		}
 	}
 
@@ -1286,12 +1305,28 @@ public class LiferaySeleniumHelper {
 
 		ImageTarget imageTarget = getImageTarget(liferaySelenium, image);
 
+		ScreenRegion imageTargetScreenRegion = screenRegion.find(imageTarget);
+
+		mouse.click(imageTargetScreenRegion.getCenter());
+	}
+
+	public static void sikuliClickByIndex(
+			LiferaySelenium liferaySelenium, String image, String index)
+		throws Exception {
+
+		Mouse mouse = new DesktopMouse();
+
+		ScreenRegion screenRegion = new DesktopScreenRegion();
+
+		ImageTarget imageTarget = getImageTarget(liferaySelenium, image);
+
 		List<ScreenRegion> imageTargetScreenRegions = screenRegion.findAll(
 			imageTarget);
 
-		for (ScreenRegion imageTargetScreenRegion : imageTargetScreenRegions) {
-			mouse.click(imageTargetScreenRegion.getCenter());
-		}
+		ScreenRegion imageTargetScreenRegion = imageTargetScreenRegions.get(
+			Integer.parseInt(index));
+
+		mouse.click(imageTargetScreenRegion.getCenter());
 	}
 
 	public static void sikuliDragAndDrop(
@@ -1518,22 +1553,21 @@ public class LiferaySeleniumHelper {
 		keyboard.type(line.trim());
 	}
 
-	public static void typeFrame(
+	public static void typeCKEditor(
 		LiferaySelenium liferaySelenium, String locator, String value) {
 
 		StringBundler sb = new StringBundler();
 
-		String titleAttribute = liferaySelenium.getAttribute(
-			locator + "@title");
+		String idAttribute = liferaySelenium.getAttribute(locator + "@id");
 
-		int x = titleAttribute.indexOf(",");
-		int y = titleAttribute.indexOf(",", x + 1);
+		int x = idAttribute.indexOf("cke__");
+		int y = idAttribute.indexOf("cke__", x + 1);
 
 		if (y == -1) {
-			y = titleAttribute.length();
+			y = idAttribute.length();
 		}
 
-		sb.append(titleAttribute.substring(x + 1, y));
+		sb.append(idAttribute.substring(x + 4, y));
 
 		sb.append(".setHTML(\"");
 		sb.append(HtmlUtil.escapeJS(value.replace("\\", "\\\\")));

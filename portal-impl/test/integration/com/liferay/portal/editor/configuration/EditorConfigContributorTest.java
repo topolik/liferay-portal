@@ -19,11 +19,11 @@ import com.liferay.portal.kernel.editor.configuration.EditorConfiguration;
 import com.liferay.portal.kernel.editor.configuration.EditorConfigurationFactoryUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.MainServletTestRule;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portlet.RequestBackedPortletURLFactory;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistration;
@@ -412,7 +412,8 @@ public class EditorConfigContributorTest {
 	}
 
 	@Test
-	public void testPortletNameAndEditorNameOverridesEditorConfigKeyEditorConfig()
+	public void
+			testPortletNameAndEditorNameOverridesEditorConfigKeyEditorConfig()
 		throws Exception {
 
 		Registry registry = RegistryUtil.getRegistry();
@@ -533,7 +534,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put(
 				"className", EmoticonsEditorConfigContributor.class.getName());
@@ -560,7 +561,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put(
 				"className", ImageEditorConfigContributor.class.getName());
@@ -583,7 +584,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put(
 				"className", TablesEditorConfigContributor.class.getName());
@@ -610,7 +611,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			jsonObject.put(
 				"className", TextFormatEditorConfigContributor.class.getName());
@@ -640,7 +641,7 @@ public class EditorConfigContributorTest {
 			JSONObject jsonObject,
 			Map<String, Object> inputEditorTaglibAttributes,
 			ThemeDisplay themeDisplay,
-			LiferayPortletResponse liferayPortletResponse) {
+			RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 			JSONObject toolbarsJSONObject = jsonObject.getJSONObject(
 				"toolbars");

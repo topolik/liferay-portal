@@ -54,8 +54,7 @@ public class PortletKeys {
 	public static final String DOCUMENT_LIBRARY_DISPLAY = "110";
 
 	public static final String DYNAMIC_DATA_MAPPING =
-		"com_liferay_dynamic_data_mapping_web_portlet_" +
-			"DynamicDataMappingPortlet";
+		"com_liferay_dynamic_data_mapping_web_portlet_DDMPortlet";
 
 	public static final String EXPANDO =
 		"com_liferay_expando_web_portlet_ExpandoPortlet";
@@ -75,9 +74,6 @@ public class PortletKeys {
 
 	public static final String ITEM_SELECTOR =
 		"com_liferay_item_selector_web_portlet_ItemSelectorPortlet";
-
-	public static final String JOURNAL =
-		"com_liferay_journal_web_portlet_JournalPortlet";
 
 	public static final String LAYOUTS_ADMIN =
 		"com_liferay_layout_admin_web_portlet_LayoutAdminPortlet";
@@ -101,7 +97,8 @@ public class PortletKeys {
 
 	public static final String MESSAGE_BOARDS_ADMIN = "162";
 
-	public static final String MOBILE_DEVICE_SITE_ADMIN = "178";
+	public static final String MOBILE_DEVICE_RULES =
+		"com_liferay_mobile_device_rules_web_portlet_MDRPortlet";
 
 	public static final String MONITORING = "131";
 
@@ -120,8 +117,6 @@ public class PortletKeys {
 
 	public static final String NESTED_PORTLETS =
 		"com_liferay_nested_portlets_web_portlet_NestedPortletsPortlet";
-
-	public static final String PAGE_RATINGS = "108";
 
 	public static final String PLUGINS_ADMIN = "132";
 
@@ -177,7 +172,8 @@ public class PortletKeys {
 
 	public static final String UNIT_CONVERTER = "27";
 
-	public static final String USER_GROUPS_ADMIN = "127";
+	public static final String USER_GROUPS_ADMIN =
+		"com_liferay_user_groups_admin_web_portlet_UserGroupsAdminPortlet";
 
 	public static final String USER_STATISTICS = "180";
 

@@ -47,7 +47,6 @@ import com.liferay.portlet.asset.service.AssetEntryLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetTagLocalServiceUtil;
 import com.liferay.portlet.asset.service.AssetVocabularyLocalServiceUtil;
 import com.liferay.portlet.asset.util.test.AssetTestUtil;
-import com.liferay.portlet.exportimport.lar.CurrentUserIdStrategy;
 import com.liferay.portlet.exportimport.lar.ExportImportClassedModelUtil;
 import com.liferay.portlet.exportimport.lar.ExportImportPathUtil;
 import com.liferay.portlet.exportimport.lar.PortletDataContext;
@@ -469,7 +468,8 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 	}
 
 	protected void initImport() throws Exception {
-		userIdStrategy = new CurrentUserIdStrategy(TestPropsValues.getUser());
+		userIdStrategy = new TestUserIdStrategy();
+
 		zipReader = ZipReaderFactoryUtil.getZipReader(zipWriter.getFile());
 
 		String xml = zipReader.getEntryAsString("/manifest.xml");
@@ -752,11 +752,9 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 		Assert.assertNotNull(importedStagedModel);
 
 		validateAssets(importedStagedModel, stagedModelAssets, group);
-
 		validateComments(stagedModel, importedStagedModel, group);
-
 		validateImport(dependentStagedModelsMap, group);
-
+		validateImportedStagedModel(stagedModel, importedStagedModel);
 		validateRatings(stagedModel, importedStagedModel);
 	}
 
@@ -870,6 +868,20 @@ public abstract class BaseStagedModelDataHandlerTestCase {
 		private AssetCategory _assetCategory;
 		private AssetTag _assetTag;
 		private AssetVocabulary _assetVocabulary;
+
+	}
+
+	protected class TestUserIdStrategy implements UserIdStrategy {
+
+		@Override
+		public long getUserId(String userUuid) {
+			try {
+				return TestPropsValues.getUserId();
+			}
+			catch (Exception e) {
+				return 0;
+			}
+		}
 
 	}
 

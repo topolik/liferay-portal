@@ -21410,8 +21410,9 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 
 			try {
 				wikiPage.setTitle(SanitizerUtil.sanitize(companyId, groupId,
-						userId, WikiPage.class.getName(), pageId,
-						ContentTypes.TEXT_PLAIN, Sanitizer.MODE_ALL,
+						userId,
+						com.liferay.wiki.model.WikiPage.class.getName(),
+						pageId, ContentTypes.TEXT_PLAIN, Sanitizer.MODE_ALL,
 						wikiPage.getTitle(), null));
 			}
 			catch (SanitizerException se) {
@@ -22108,6 +22109,7 @@ public class WikiPagePersistenceImpl extends BasePersistenceImpl<WikiPage>
 		wikiPageImpl.setHead(wikiPage.isHead());
 		wikiPageImpl.setParentTitle(wikiPage.getParentTitle());
 		wikiPageImpl.setRedirectTitle(wikiPage.getRedirectTitle());
+		wikiPageImpl.setLastPublishDate(wikiPage.getLastPublishDate());
 		wikiPageImpl.setStatus(wikiPage.getStatus());
 		wikiPageImpl.setStatusByUserId(wikiPage.getStatusByUserId());
 		wikiPageImpl.setStatusByUserName(wikiPage.getStatusByUserName());

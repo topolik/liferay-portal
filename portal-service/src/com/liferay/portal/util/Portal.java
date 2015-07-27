@@ -349,7 +349,8 @@ public interface Portal {
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
-	 * 		com.liferay.portal.kernel.security.auth.http.HttpAuthManagerUtil#getBasicUserId(HttpServletRequest)}
+	 *             com.liferay.portal.kernel.security.auth.http.HttpAuthManagerUtil#getBasicUserId(
+	 *             HttpServletRequest)}
 	 */
 	@Deprecated
 	public long getBasicAuthUserId(HttpServletRequest request)
@@ -357,7 +358,8 @@ public interface Portal {
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
-	 * 		com.liferay.portal.kernel.security.auth.http.HttpAuthManagerUtil#getBasicUserId(HttpServletRequest)}
+	 *             com.liferay.portal.kernel.security.auth.http.HttpAuthManagerUtil#getBasicUserId(
+	 *             HttpServletRequest)}
 	 */
 	@Deprecated
 	public long getBasicAuthUserId(HttpServletRequest request, long companyId)
@@ -650,7 +652,8 @@ public interface Portal {
 
 	/**
 	 * @deprecated As of 7.0.0, replaced by {@link
-	 * 		com.liferay.portal.kernel.security.auth.http.HttpAuthManagerUtil#getDigestUserId(HttpServletRequest)}
+	 *             com.liferay.portal.kernel.security.auth.http.HttpAuthManagerUtil#getDigestUserId(
+	 *             HttpServletRequest)}
 	 */
 	@Deprecated
 	public long getDigestAuthUserId(HttpServletRequest request)
@@ -1260,11 +1263,19 @@ public interface Portal {
 
 	public User initUser(HttpServletRequest request) throws Exception;
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public void invokeTaglibDiscussion(
 			PortletConfig portletConfig, ActionRequest actionRequest,
 			ActionResponse actionResponse)
 		throws Exception;
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public void invokeTaglibDiscussionPagination(
 			PortletConfig portletConfig, ResourceRequest resourceRequest,
 			ResourceResponse resourceResponse)

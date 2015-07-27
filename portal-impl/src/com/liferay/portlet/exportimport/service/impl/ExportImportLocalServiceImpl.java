@@ -17,10 +17,11 @@ package com.liferay.portlet.exportimport.service.impl;
 import com.liferay.portal.LocaleException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.model.BackgroundTask;
+import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.Portlet;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.documentlibrary.util.DLValidatorUtil;
 import com.liferay.portlet.dynamicdatamapping.StructureDuplicateStructureKeyException;
@@ -29,12 +30,11 @@ import com.liferay.portlet.exportimport.backgroundtask.LayoutExportBackgroundTas
 import com.liferay.portlet.exportimport.backgroundtask.LayoutImportBackgroundTaskExecutor;
 import com.liferay.portlet.exportimport.backgroundtask.PortletExportBackgroundTaskExecutor;
 import com.liferay.portlet.exportimport.backgroundtask.PortletImportBackgroundTaskExecutor;
-import com.liferay.portlet.exportimport.lar.LayoutExporter;
-import com.liferay.portlet.exportimport.lar.LayoutImporter;
+import com.liferay.portlet.exportimport.controller.ExportController;
+import com.liferay.portlet.exportimport.controller.ExportImportControllerRegistryUtil;
+import com.liferay.portlet.exportimport.controller.ImportController;
 import com.liferay.portlet.exportimport.lar.MissingReferences;
 import com.liferay.portlet.exportimport.lar.PortletDataException;
-import com.liferay.portlet.exportimport.lar.PortletExporter;
-import com.liferay.portlet.exportimport.lar.PortletImporter;
 import com.liferay.portlet.exportimport.model.ExportImportConfiguration;
 import com.liferay.portlet.exportimport.service.base.ExportImportLocalServiceBaseImpl;
 
@@ -58,10 +58,11 @@ public class ExportImportLocalServiceImpl
 		throws PortalException {
 
 		try {
-			LayoutExporter layoutExporter = LayoutExporter.getInstance();
+			ExportController layoutExportController =
+				ExportImportControllerRegistryUtil.getExportController(
+					Layout.class.getName());
 
-			return layoutExporter.exportLayoutsAsFile(
-				exportImportConfiguration);
+			return layoutExportController.export(exportImportConfiguration);
 		}
 		catch (PortalException pe) {
 			throw pe;
@@ -85,7 +86,6 @@ public class ExportImportLocalServiceImpl
 
 		Map<String, Serializable> taskContextMap = new HashMap<>();
 
-		taskContextMap.put(Constants.CMD, Constants.EXPORT);
 		taskContextMap.put(
 			"exportImportConfigurationId",
 			exportImportConfiguration.getExportImportConfigurationId());
@@ -119,10 +119,11 @@ public class ExportImportLocalServiceImpl
 		throws PortalException {
 
 		try {
-			PortletExporter portletExporter = PortletExporter.getInstance();
+			ExportController portletExportController =
+				ExportImportControllerRegistryUtil.getExportController(
+					Portlet.class.getName());
 
-			return portletExporter.exportPortletInfoAsFile(
-				exportImportConfiguration);
+			return portletExportController.export(exportImportConfiguration);
 		}
 		catch (PortalException pe) {
 			throw pe;
@@ -151,7 +152,6 @@ public class ExportImportLocalServiceImpl
 
 		Map<String, Serializable> taskContextMap = new HashMap<>();
 
-		taskContextMap.put(Constants.CMD, Constants.EXPORT);
 		taskContextMap.put(
 			"exportImportConfigurationId",
 			exportImportConfiguration.getExportImportConfigurationId());
@@ -185,9 +185,11 @@ public class ExportImportLocalServiceImpl
 		throws PortalException {
 
 		try {
-			LayoutImporter layoutImporter = LayoutImporter.getInstance();
+			ImportController layoutImportController =
+				ExportImportControllerRegistryUtil.getImportController(
+					Layout.class.getName());
 
-			layoutImporter.importLayouts(exportImportConfiguration, file);
+			layoutImportController.importFile(exportImportConfiguration, file);
 		}
 		catch (PortalException pe) {
 			Throwable cause = pe.getCause();
@@ -235,9 +237,11 @@ public class ExportImportLocalServiceImpl
 		throws PortalException {
 
 		try {
-			LayoutImporter layoutImporter = LayoutImporter.getInstance();
+			ImportController layoutImportController =
+				ExportImportControllerRegistryUtil.getImportController(
+					Layout.class.getName());
 
-			layoutImporter.importLayoutsDataDeletions(
+			layoutImportController.importDataDeletions(
 				exportImportConfiguration, file);
 		}
 		catch (PortalException pe) {
@@ -265,7 +269,6 @@ public class ExportImportLocalServiceImpl
 
 		Map<String, Serializable> taskContextMap = new HashMap<>();
 
-		taskContextMap.put(Constants.CMD, Constants.IMPORT);
 		taskContextMap.put(
 			"exportImportConfigurationId",
 			exportImportConfiguration.getExportImportConfigurationId());
@@ -340,9 +343,11 @@ public class ExportImportLocalServiceImpl
 		throws PortalException {
 
 		try {
-			PortletImporter portletImporter = PortletImporter.getInstance();
+			ImportController portletImportController =
+				ExportImportControllerRegistryUtil.getImportController(
+					Portlet.class.getName());
 
-			portletImporter.importPortletDataDeletions(
+			portletImportController.importDataDeletions(
 				exportImportConfiguration, file);
 		}
 		catch (PortalException pe) {
@@ -368,9 +373,11 @@ public class ExportImportLocalServiceImpl
 		throws PortalException {
 
 		try {
-			PortletImporter portletImporter = PortletImporter.getInstance();
+			ImportController portletImportController =
+				ExportImportControllerRegistryUtil.getImportController(
+					Portlet.class.getName());
 
-			portletImporter.importPortletInfo(exportImportConfiguration, file);
+			portletImportController.importFile(exportImportConfiguration, file);
 		}
 		catch (PortalException pe) {
 			Throwable cause = pe.getCause();
@@ -436,7 +443,6 @@ public class ExportImportLocalServiceImpl
 
 		Map<String, Serializable> taskContextMap = new HashMap<>();
 
-		taskContextMap.put(Constants.CMD, Constants.IMPORT);
 		taskContextMap.put(
 			"exportImportConfigurationId",
 			exportImportConfiguration.getExportImportConfigurationId());
@@ -511,9 +517,12 @@ public class ExportImportLocalServiceImpl
 		throws PortalException {
 
 		try {
-			LayoutImporter layoutImporter = LayoutImporter.getInstance();
+			ImportController layoutImportController =
+				ExportImportControllerRegistryUtil.getImportController(
+					Layout.class.getName());
 
-			return layoutImporter.validateFile(exportImportConfiguration, file);
+			return layoutImportController.validateFile(
+				exportImportConfiguration, file);
 		}
 		catch (PortalException pe) {
 			Throwable cause = pe.getCause();
@@ -561,9 +570,11 @@ public class ExportImportLocalServiceImpl
 		throws PortalException {
 
 		try {
-			PortletImporter portletImporter = PortletImporter.getInstance();
+			ImportController portletImportController =
+				ExportImportControllerRegistryUtil.getImportController(
+					Portlet.class.getName());
 
-			return portletImporter.validateFile(
+			return portletImportController.validateFile(
 				exportImportConfiguration, file);
 		}
 		catch (PortalException pe) {

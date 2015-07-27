@@ -73,16 +73,15 @@ page import="com.liferay.portlet.documentlibrary.util.ImageProcessorUtil" %><%@
 page import="com.liferay.portlet.documentlibrary.util.PDFProcessorUtil" %><%@
 page import="com.liferay.portlet.documentlibrary.util.RawMetadataProcessor" %><%@
 page import="com.liferay.portlet.documentlibrary.util.VideoProcessorUtil" %><%@
+page import="com.liferay.portlet.dynamicdatamapping.DDMStructure" %><%@
+page import="com.liferay.portlet.dynamicdatamapping.DDMStructureManager" %><%@
+page import="com.liferay.portlet.dynamicdatamapping.DDMStructureManagerUtil" %><%@
+page import="com.liferay.portlet.dynamicdatamapping.StorageEngineManagerUtil" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.StructureDefinitionException" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.StructureDuplicateElementException" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.StructureNameException" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.search.StructureSearch" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.search.StructureSearchTerms" %><%@
 page import="com.liferay.portlet.dynamicdatamapping.service.DDMStorageLinkLocalServiceUtil" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.storage.DDMFormValues" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.storage.StorageEngineUtil" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.util.DDMUtil" %><%@
-page import="com.liferay.portlet.dynamicdatamapping.util.comparator.StructureStructureKeyComparator" %>
+page import="com.liferay.portlet.dynamicdatamapping.storage.DDMFormValues" %>
 
 <%
 PortalPreferences portalPreferences = PortletPreferencesFactoryUtil.getPortalPreferences(liferayPortletRequest);

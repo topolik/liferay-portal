@@ -31,7 +31,6 @@ import com.liferay.portal.kernel.search.filter.QueryFilter;
 import com.liferay.portal.kernel.search.filter.TermsFilter;
 import com.liferay.portal.kernel.search.generic.BooleanQueryImpl;
 import com.liferay.portal.kernel.search.generic.MatchAllQuery;
-import com.liferay.portal.kernel.search.hits.HitsProcessor;
 import com.liferay.portal.kernel.search.hits.HitsProcessorRegistryUtil;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashRenderer;
@@ -439,8 +438,9 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by {@link #postProcessContextBooleanFilter(
-	 *             BooleanFilter, SearchContext)}
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #postProcessContextBooleanFilter(BooleanFilter,
+	 *             SearchContext)}
 	 */
 	@Deprecated
 	@Override
@@ -465,8 +465,9 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, replaced by {@link #postProcessSearchQuery(
-	 *             BooleanQuery, BooleanFilter, SearchContext)}
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #postProcessSearchQuery(BooleanQuery, BooleanFilter,
+	 *             SearchContext)}
 	 */
 	@Deprecated
 	@Override
@@ -489,35 +490,22 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 	}
 
 	@Override
-	public void reindex(Collection<T> collection) throws SearchException {
-		try {
-			if (SearchEngineUtil.isIndexReadOnly() || !isIndexerEnabled() ||
-				collection.isEmpty()) {
+	public void reindex(Collection<T> collection) {
+		if (SearchEngineUtil.isIndexReadOnly() || !isIndexerEnabled() ||
+			collection.isEmpty()) {
 
-				return;
-			}
-
-			List<Document> documents = new ArrayList<>();
-
-			for (T element : collection) {
-				Document document = getDocument(element);
-
-				documents.add(document);
-			}
-
-			Document document = documents.get(0);
-
-			long companyId = Long.parseLong(document.get(Field.COMPANY_ID));
-
-			SearchEngineUtil.updateDocuments(
-				getSearchEngineId(), companyId, documents,
-				isCommitImmediately());
+			return;
 		}
-		catch (SearchException se) {
-			throw se;
-		}
-		catch (Exception e) {
-			throw new SearchException(e);
+
+		for (T element : collection) {
+			try {
+				reindex(element);
+			}
+			catch (SearchException se) {
+				if (_log.isErrorEnabled()) {
+					_log.error("Unable to index object: " + element);
+				}
+			}
 		}
 	}
 
@@ -1424,8 +1412,8 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 
 	/**
 	 * @deprecated As of 7.0.0, added strictly to support backwards
-	 *             compatibility of {@link Indexer#postProcessSearchQuery(
-	 *             BooleanQuery, SearchContext)}
+	 *             compatibility of {@link
+	 *             Indexer#postProcessSearchQuery(BooleanQuery, SearchContext)}
 	 */
 	@Deprecated
 	protected void doPostProcessSearchQuery(
@@ -1824,12 +1812,7 @@ public abstract class BaseIndexer<T> implements Indexer<T> {
 	protected void processHits(SearchContext searchContext, Hits hits)
 		throws SearchException {
 
-		HitsProcessor hitsProcessor =
-			HitsProcessorRegistryUtil.getDefaultHitsProcessor();
-
-		if (hitsProcessor != null) {
-			hitsProcessor.process(searchContext, hits);
-		}
+		HitsProcessorRegistryUtil.process(searchContext, hits);
 	}
 
 	protected void resetFullQuery(SearchContext searchContext) {

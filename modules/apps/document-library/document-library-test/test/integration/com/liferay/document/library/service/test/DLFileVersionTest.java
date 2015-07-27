@@ -22,6 +22,8 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
+import com.liferay.portal.kernel.test.rule.Sync;
+import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.RoleTestUtil;
@@ -55,7 +57,8 @@ import com.liferay.portlet.documentlibrary.service.DLAppServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileEntryTypeLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.service.DLFileVersionLocalServiceUtil;
 import com.liferay.portlet.documentlibrary.store.BaseStore;
-import com.liferay.portlet.dynamicdatamapping.model.DDMStructure;
+import com.liferay.portlet.dynamicdatamapping.DDMStructure;
+import com.liferay.portlet.dynamicdatamapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.portlet.dynamicdatamapping.storage.DDMFormValues;
 import com.liferay.portlet.dynamicdatamapping.storage.Field;
 import com.liferay.portlet.dynamicdatamapping.storage.Fields;
@@ -91,12 +94,15 @@ import org.junit.runner.RunWith;
  * @author Preston Crary
  */
 @RunWith(Arquillian.class)
+@Sync
 public class DLFileVersionTest {
 
 	@ClassRule
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
-		new LiferayIntegrationTestRule();
+		new AggregateTestRule(
+			new LiferayIntegrationTestRule(),
+			SynchronousDestinationTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
@@ -415,7 +421,9 @@ public class DLFileVersionTest {
 
 			DDMFormValues ddmFormValues =
 				FieldsToDDMFormValuesConverterUtil.convert(
-					ddmStructure, fields);
+					DDMStructureLocalServiceUtil.getDDMStructure(
+						ddmStructure.getStructureId()),
+					fields);
 
 			serviceContext.setAttribute(
 				DDMFormValues.class.getName() + ddmStructure.getStructureId(),
@@ -529,8 +537,12 @@ public class DLFileVersionTest {
 					DDMFormValues.class.getName() +
 					ddmStructure.getStructureId());
 
+			com.liferay.portlet.dynamicdatamapping.model.DDMStructure
+				structure = DDMStructureLocalServiceUtil.getDDMStructure(
+					ddmStructure.getStructureId());
+
 			Fields fields = DDMFormValuesToFieldsConverterUtil.convert(
-				ddmStructure, ddmFormValues);
+				structure, ddmFormValues);
 
 			for (Field field : fields) {
 				String type = field.getType();
@@ -541,7 +553,7 @@ public class DLFileVersionTest {
 			}
 
 			ddmFormValues = FieldsToDDMFormValuesConverterUtil.convert(
-				ddmStructure, fields);
+				structure, fields);
 
 			_serviceContext.setAttribute(
 				DDMFormValues.class.getName() + ddmStructure.getStructureId(),

@@ -193,24 +193,18 @@ request.setAttribute("view_entry_content.jsp-assetEntry", assetEntry);
 	</c:if>
 </c:if>
 
-<c:if test="<%= blogsPortletInstanceSettings.isEnableComments() %>">
+<c:if test="<%= blogsPortletInstanceConfiguration.enableComments() %>">
 	<liferay-ui:panel-container extended="<%= false %>" id="blogsCommentsPanelContainer" persistState="<%= true %>">
 		<liferay-ui:panel collapsible="<%= true %>" id="blogsCommentsPanel" persistState="<%= true %>" title='<%= LanguageUtil.format(request, "x-comments", MBMessageLocalServiceUtil.getDiscussionMessagesCount(BlogsEntry.class.getName(), entry.getEntryId(), WorkflowConstants.STATUS_APPROVED)) %>'>
 			<c:if test="<%= PropsValues.BLOGS_TRACKBACK_ENABLED && entry.isAllowTrackbacks() && !portletId.equals(BlogsPortletKeys.BLOGS_ADMIN) %>">
 				<aui:input inlineLabel="left" name="trackbackURL" type="resource" value='<%= PortalUtil.getLayoutFullURL(themeDisplay) + Portal.FRIENDLY_URL_SEPARATOR + "blogs/trackback/" + entry.getUrlTitle() %>' />
 			</c:if>
 
-			<portlet:actionURL name="invokeTaglibDiscussion" var="discussionURL" />
-
-			<portlet:resourceURL id="invokeTaglibDiscussionPagination" var="discussionPaginationURL" />
-
 			<liferay-ui:discussion
 				className="<%= BlogsEntry.class.getName() %>"
 				classPK="<%= entry.getEntryId() %>"
-				formAction="<%= discussionURL %>"
 				formName="fm2"
-				paginationURL="<%= discussionPaginationURL %>"
-				ratingsEnabled="<%= blogsPortletInstanceSettings.isEnableCommentRatings() %>"
+				ratingsEnabled="<%= blogsPortletInstanceConfiguration.enableCommentRatings() %>"
 				redirect="<%= currentURL %>"
 				userId="<%= entry.getUserId() %>"
 			/>

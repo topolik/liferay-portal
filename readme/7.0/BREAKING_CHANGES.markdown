@@ -571,11 +571,16 @@ Old classes:
 
 New classes:
 
-    com.liferay.portal.kernel.portlet.bridges.mvc.ActionCommand
-    com.liferay.portal.kernel.portlet.bridges.mvc.BaseActionCommand
+    com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand
+    com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand
 
 In addition, `com.liferay.util.bridges.mvc.MVCPortlet` is deprecated, but was
 made to extend `com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet`.
+
+The classes in the `com.liferay.portal.kernel.portlet.bridges.mvc` package have
+been renamed to add the `MVC` prefix. These modifications were made after this
+breaking change, and can be referenced in
+[LPS-56372](https://issues.liferay.com/browse/LPS-56372).
 
 #### Who is affected?
 
@@ -902,38 +907,6 @@ Each new exception provides its context and has all the necessary information
 about why the exception was thrown. For example, the
 `UserEmailAddressException.MustNotBeReserved` exception contains the problematic
 email address and the list of reserved email addresses.
-
----------------------------------------
-
-### Added Required Attribute paginationURL to the Tag liferay-ui:discussion
-- **Date:** 2015-Feb-05
-- **JIRA Ticket:** LPS-53313
-
-#### What changed?
-
-The `liferay-ui:discussion` tag now contains a new required attribute
-`paginationURL`.
-
-#### Who is affected?
-
-This affects all developers who are using this tag in their plugins.
-
-#### How should I update my code?
-
-You should include the new attribute `paginationURL` in the tag. This attribute
-holds a URL that returns an HTML fragment containing the next comments for
-portlets such as Asset Publisher, Blogs, Document Library, etc.
-
-If you are using the Liferay `MVCPortlet` class, you can use the following URL:
-
-    <portlet:resourceURL var="discussionPaginationURL">
-        <portlet:param name="invokeTaglibDiscussion"
-            value="<%= Boolean.TRUE.toString() %>" />
-    </portlet:resourceURL>
-
-#### Why was this change made?
-
-This change was made to support comment pagination.
 
 ---------------------------------------
 

@@ -17,7 +17,6 @@ package com.liferay.taglib.ui;
 import com.liferay.portal.kernel.editor.Editor;
 import com.liferay.portal.kernel.editor.configuration.EditorConfiguration;
 import com.liferay.portal.kernel.editor.configuration.EditorConfigurationFactoryUtil;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.servlet.BrowserSnifferUtil;
 import com.liferay.portal.kernel.servlet.PortalWebResourceConstants;
 import com.liferay.portal.kernel.servlet.PortalWebResourcesUtil;
@@ -29,17 +28,23 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portlet.RequestBackedPortletURLFactory;
+import com.liferay.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceReference;
 import com.liferay.registry.collections.ServiceReferenceMapper;
 import com.liferay.registry.collections.ServiceTrackerCollections;
 import com.liferay.registry.collections.ServiceTrackerMap;
+import com.liferay.taglib.aui.AUIUtil;
 import com.liferay.taglib.util.IncludeTag;
 
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
@@ -232,9 +237,9 @@ public class InputEditorTag extends IncludeTag {
 	}
 
 	protected Map<String, Object> getData() {
-		Portlet portlet = (Portlet)request.getAttribute(WebKeys.RENDER_PORTLET);
+		String portletId = (String)request.getAttribute(WebKeys.PORTLET_ID);
 
-		if (portlet == null) {
+		if (portletId == null) {
 			return _data;
 		}
 
@@ -251,17 +256,15 @@ public class InputEditorTag extends IncludeTag {
 			}
 		}
 
+		attributes.put("liferay-ui:input-editor:namespace", getNamespace());
+
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		LiferayPortletResponse portletResponse =
-			(LiferayPortletResponse)request.getAttribute(
-				JavaConstants.JAVAX_PORTLET_RESPONSE);
-
 		EditorConfiguration editorConfiguration =
 			EditorConfigurationFactoryUtil.getEditorConfiguration(
-				portlet.getPortletId(), getConfigKey(), getEditorName(request),
-				attributes, themeDisplay, portletResponse);
+				portletId, getConfigKey(), getEditorName(request), attributes,
+				themeDisplay, getRequestBackedPortletURLFactory());
 
 		Map<String, Object> data = editorConfiguration.getData();
 
@@ -296,11 +299,37 @@ public class InputEditorTag extends IncludeTag {
 		return editor.getName();
 	}
 
+	protected String getNamespace() {
+		PortletRequest portletRequest = (PortletRequest)request.getAttribute(
+			JavaConstants.JAVAX_PORTLET_REQUEST);
+		PortletResponse portletResponse = (PortletResponse)request.getAttribute(
+			JavaConstants.JAVAX_PORTLET_RESPONSE);
+
+		if ((portletRequest == null) || (portletResponse == null)) {
+			return AUIUtil.getNamespace(request);
+		}
+
+		return AUIUtil.getNamespace(portletRequest, portletResponse);
+	}
+
 	@Override
 	protected String getPage() {
 		Editor editor = getEditor(request);
 
 		return editor.getJspPath(request);
+	}
+
+	protected RequestBackedPortletURLFactory
+		getRequestBackedPortletURLFactory() {
+
+		PortletRequest portletRequest = (PortletRequest)request.getAttribute(
+			JavaConstants.JAVAX_PORTLET_REQUEST);
+
+		if (portletRequest == null) {
+			return RequestBackedPortletURLFactoryUtil.create(request);
+		}
+
+		return RequestBackedPortletURLFactoryUtil.create(portletRequest);
 	}
 
 	@Override

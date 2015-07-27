@@ -211,6 +211,10 @@ public class MVCPortlet extends LiferayPortlet {
 			"ResourceCommand");
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public void invokeTaglibDiscussion(
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
@@ -221,6 +225,10 @@ public class MVCPortlet extends LiferayPortlet {
 			portletConfig, actionRequest, actionResponse);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public void invokeTaglibDiscussionPagination(
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws IOException, PortletException {
@@ -265,7 +273,9 @@ public class MVCPortlet extends LiferayPortlet {
 					renderRequest, renderResponse);
 			}
 
-			renderRequest.setAttribute(_MVC_PATH, mvcPath);
+			renderRequest.setAttribute(
+				getMVCPathAttributeName(renderResponse.getNamespace()),
+				mvcPath);
 		}
 
 		super.render(renderRequest, renderResponse);
@@ -276,7 +286,7 @@ public class MVCPortlet extends LiferayPortlet {
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws IOException, PortletException {
 
-		String path = getPath(resourceRequest);
+		String path = getPath(resourceRequest, resourceResponse);
 
 		if (path != null) {
 			include(
@@ -409,7 +419,7 @@ public class MVCPortlet extends LiferayPortlet {
 			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws IOException, PortletException {
 
-		String path = getPath(renderRequest);
+		String path = getPath(renderRequest, renderResponse);
 
 		if (path != null) {
 			if (!isProcessRenderRequest(renderRequest)) {
@@ -432,11 +442,18 @@ public class MVCPortlet extends LiferayPortlet {
 		}
 	}
 
-	protected String getPath(PortletRequest portletRequest) {
+	protected String getMVCPathAttributeName(String namespace) {
+		return namespace.concat(StringPool.PERIOD).concat(_MVC_PATH);
+	}
+
+	protected String getPath(
+		PortletRequest portletRequest, PortletResponse portletResponse) {
+
 		String mvcPath = portletRequest.getParameter("mvcPath");
 
 		if (mvcPath == null) {
-			mvcPath = (String)portletRequest.getAttribute(_MVC_PATH);
+			mvcPath = (String)portletRequest.getAttribute(
+				getMVCPathAttributeName(portletResponse.getNamespace()));
 		}
 
 		// Check deprecated parameter

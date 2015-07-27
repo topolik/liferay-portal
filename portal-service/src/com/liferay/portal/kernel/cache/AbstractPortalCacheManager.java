@@ -108,7 +108,7 @@ public abstract class AbstractPortalCacheManager<K extends Serializable, V>
 					getPortalCacheBootstrapLoaderConfiguration();
 
 			if (portalCacheBootstrapLoaderConfiguration != null) {
-				CallbackFactory callbackFactory =
+				CallbackFactory<?> callbackFactory =
 					portalCacheBootstrapLoaderConfiguration.
 						getCallbackFactory();
 
@@ -261,12 +261,13 @@ public abstract class AbstractPortalCacheManager<K extends Serializable, V>
 				_portalCacheManagerConfiguration.
 					getPortalCacheManagerListenerConfigurations()) {
 
-			CallbackFactory callbackFactory =
-				callbackConfiguration.getCallbackFactory();
+			CallbackFactory<PortalCacheManager<?, ?>> callbackFactory =
+				(CallbackFactory<PortalCacheManager<?, ?>>)
+					callbackConfiguration.getCallbackFactory();
 
 			PortalCacheManagerListener portalCacheManagerListener =
 				callbackFactory.createPortalCacheManagerListener(
-					callbackConfiguration.getProperties());
+					this, callbackConfiguration.getProperties());
 
 			if (portalCacheManagerListener != null) {
 				registerPortalCacheManagerListener(portalCacheManagerListener);
@@ -337,7 +338,7 @@ public abstract class AbstractPortalCacheManager<K extends Serializable, V>
 
 			CallbackConfiguration callbackConfiguration = entry.getKey();
 
-			CallbackFactory callbackFactory =
+			CallbackFactory<?> callbackFactory =
 				callbackConfiguration.getCallbackFactory();
 
 			PortalCacheListener<K, V> portalCacheListener =

@@ -23,6 +23,8 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.tools.JavaImportsFormatter;
+import com.liferay.portal.tools.ToolsUtil;
 import com.liferay.source.formatter.util.FileUtil;
 
 import com.thoughtworks.qdox.JavaDocBuilder;
@@ -63,7 +65,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 		while (true) {
 			y = annotation.indexOf(CharPool.CLOSE_CURLY_BRACE, y + 1);
 
-			if (!isInsideQuotes(annotation, y)) {
+			if (!ToolsUtil.isInsideQuotes(annotation, y)) {
 				break;
 			}
 		}
@@ -88,7 +90,9 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 			while (true) {
 				z = parameterProperty.indexOf(CharPool.QUOTE, z + 1);
 
-				if ((z == -1) || !isInsideQuotes(parameterProperty, z)) {
+				if ((z == -1) ||
+					!ToolsUtil.isInsideQuotes(parameterProperty, z)) {
+
 					break;
 				}
 			}
@@ -101,7 +105,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 			String propertyNameAndValue = parameterProperty.substring(x + 1, z);
 
 			if (Validator.isNotNull(previousPropertyName) &&
-				(previousPropertyName.compareTo(propertyName) > 0)) {
+				(previousPropertyName.compareToIgnoreCase(propertyName) > 0)) {
 
 				content = StringUtil.replaceFirst(
 					content, previousPropertyNameAndValue,
@@ -169,7 +173,8 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 				annotationParameters.substring(y + 1, x));
 
 			if (Validator.isNull(previousParameterName) ||
-				(previousParameterName.compareTo(parameterName) <= 0)) {
+				(previousParameterName.compareToIgnoreCase(parameterName) <=
+					0)) {
 
 				previousParameterName = parameterName;
 
@@ -534,34 +539,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 
 		className = className.substring(0, pos);
 
-		String packagePath = fileName;
-
-		int packagePathX = packagePath.indexOf("/src/");
-
-		if (packagePathX == -1) {
-			packagePathX = packagePath.indexOf("/integration/");
-		}
-
-		if (packagePathX == -1) {
-			packagePathX = packagePath.indexOf("/unit/");
-		}
-
-		if (packagePathX != -1) {
-			packagePathX = packagePath.indexOf(
-				CharPool.SLASH, packagePathX + 1);
-		}
-
-		int packagePathY = packagePath.lastIndexOf(CharPool.SLASH);
-
-		if (packagePathX >= packagePathY) {
-			packagePath = StringPool.BLANK;
-		}
-		else {
-			packagePath = packagePath.substring(packagePathX + 1, packagePathY);
-		}
-
-		packagePath = StringUtil.replace(
-			packagePath, StringPool.SLASH, StringPool.PERIOD);
+		String packagePath = ToolsUtil.getPackagePath(file);
 
 		if (packagePath.endsWith(".model")) {
 			if (content.contains("extends " + className + "Model")) {
@@ -877,7 +855,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 
 		// LPS-56706
 
-		if (portalSource && absolutePath.contains("/modules/") &&
+		if (portalSource && isModulesFile(absolutePath) &&
 			absolutePath.contains("/test/integration/") &&
 			newContent.contains("@RunWith(Arquillian.class)") &&
 			newContent.contains("import org.powermock.")) {
@@ -890,6 +868,17 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 		// LPS-48156
 
 		newContent = checkPrincipalException(newContent);
+
+		// LPS-57358
+
+		if (portalSource && isModulesFile(absolutePath) &&
+			newContent.contains("ProxyFactory.newServiceTrackedInstance(")) {
+
+			processErrorMessage(
+				fileName,
+				"Do not use ProxyFactory.newServiceTrackedInstance in " +
+					"modules: " + fileName);
+		}
 
 		newContent = getCombinedLinesContent(
 			newContent, _combinedLinesPattern1);
@@ -1186,7 +1175,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 				}
 
 				if (Validator.isNotNull(previousAnnotation) &&
-					(previousAnnotation.compareTo(annotation) > 0)) {
+					(previousAnnotation.compareToIgnoreCase(annotation) > 0)) {
 
 					content = StringUtil.replaceFirst(
 						content, previousAnnotation, annotation);
@@ -2698,7 +2687,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 				return x;
 			}
 
-			if (isInsideQuotes(line, x)) {
+			if (ToolsUtil.isInsideQuotes(line, x)) {
 				continue;
 			}
 
@@ -2843,6 +2832,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 			"**/com/liferay/portal/service/ServiceContext*.java",
 			"**/model/BaseModel.java", "**/model/impl/BaseModelImpl.java",
 			"**/portal-test/**/portal/service/**/*.java",
+			"**/portal-test-internal/**/portal/service/**/*.java",
 			"**/service/Base*.java",
 			"**/service/PersistedModelLocalService*.java",
 			"**/service/base/PrincipalBean.java",
