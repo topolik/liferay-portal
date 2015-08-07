@@ -20,8 +20,63 @@
 
 <h3><liferay-ui:message key="authentication" /></h3>
 
+<%
+String key = "portal.settings.authentication";
+
+List<DynamicInclude> dynamicIncludes = new ArrayList<DynamicInclude>();
+
+StringBundler tabNamesStringBundler = new StringBundler(2);
+
+tabNamesStringBundler.append(StringUtil.merge(
+	PropsValues.COMPANY_SETTINGS_FORM_AUTHENTICATION));
+
+ServiceTracker<DynamicInclude, DynamicInclude> serviceTracker = null;
+
+try {
+	Registry registry = RegistryUtil.getRegistry();
+
+	com.liferay.registry.Filter filter = registry.getFilter(
+		"(&(&(objectClass=" + DynamicInclude.class.getName() +
+			")(key=" + key + "))(label=*))");
+
+	serviceTracker = registry.trackServices(filter);
+
+	serviceTracker.open();
+
+	ServiceReference<DynamicInclude>[] serviceReferences =
+		serviceTracker.getServiceReferences();
+
+	StringBundler dynamicIncludesTabNames = new StringBundler(
+		serviceReferences.length * 2);
+
+	for (ServiceReference<DynamicInclude> serviceReference :
+		serviceReferences) {
+
+		Object label = serviceReference.getProperty("label");
+		if (label != null) {
+			dynamicIncludesTabNames.append(StringPool.COMMA);
+			dynamicIncludesTabNames.append(label);
+		}
+
+		dynamicIncludes.add(serviceTracker.getService(serviceReference));
+	}
+
+	tabNamesStringBundler.append(dynamicIncludesTabNames);
+}
+finally {
+	if (serviceTracker != null) {
+		serviceTracker.close();
+	}
+}
+
+String tabNames = tabNamesStringBundler.toString();
+if (tabNames.startsWith(StringPool.COMMA)) {
+	tabNames = tabNames.substring(1);
+}
+%>
+
 <liferay-ui:tabs
-	names="<%= StringUtil.merge(PropsValues.COMPANY_SETTINGS_FORM_AUTHENTICATION) %>"
+	names="<%= tabNames %>"
 	refresh="<%= false %>"
 >
 
@@ -31,6 +86,20 @@
 
 		<liferay-ui:section>
 			<liferay-util:include page='<%= "/html/portlet/portal_settings/authentication/" + _getSectionJsp(section) + ".jsp" %>' portletId="<%= portletDisplay.getRootPortletId() %>" />
+		</liferay-ui:section>
+
+	<%
+	}
+
+	for (DynamicInclude dynamicInclude : dynamicIncludes) {
+	%>
+
+		<liferay-ui:section>
+
+			<%
+				dynamicInclude.include(request, response, key);
+			%>
+
 		</liferay-ui:section>
 
 	<%
