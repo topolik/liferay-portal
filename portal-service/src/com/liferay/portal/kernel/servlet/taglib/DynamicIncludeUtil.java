@@ -83,33 +83,7 @@ public class DynamicIncludeUtil {
 
 	private DynamicIncludeUtil() {
 		_dynamicIncludes = ServiceTrackerCollections.multiValueMap(
-			DynamicInclude.class, null,
-			new ServiceReferenceMapper<String, DynamicInclude>() {
-
-				@Override
-				public void map(
-					ServiceReference<DynamicInclude> serviceReference,
-					final Emitter<String> emitter) {
-
-					Registry registry = RegistryUtil.getRegistry();
-
-					DynamicInclude dynamicInclude = registry.getService(
-						serviceReference);
-
-					dynamicInclude.register(
-						new DynamicInclude.DynamicIncludeRegistry() {
-
-							@Override
-							public void register(String key) {
-								emitter.emit(key);
-							}
-
-						});
-
-					registry.ungetService(serviceReference);
-				}
-
-			});
+			DynamicInclude.class, "key");
 
 		_dynamicIncludes.open();
 	}

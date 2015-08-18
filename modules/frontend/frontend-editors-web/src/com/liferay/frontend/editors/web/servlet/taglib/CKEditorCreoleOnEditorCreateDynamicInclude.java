@@ -32,7 +32,10 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Chema Balsas
  */
-@Component(immediate = true, service = DynamicInclude.class)
+@Component(
+	immediate = true, 
+	property="key=com.liferay.frontend.editors.web#ckeditor_creole#onEditorCreate",
+	service = DynamicInclude.class)
 public class CKEditorCreoleOnEditorCreateDynamicInclude
 	implements DynamicInclude {
 
@@ -60,14 +63,6 @@ public class CKEditorCreoleOnEditorCreateDynamicInclude
 			StreamUtil.transfer(
 				entryURL.openStream(), response.getOutputStream());
 		}
-	}
-
-	@Override
-	public void register(
-		DynamicInclude.DynamicIncludeRegistry dynamicIncludeRegistry) {
-
-		dynamicIncludeRegistry.register(
-			"com.liferay.frontend.editors.web#ckeditor_creole#onEditorCreate");
 	}
 
 	@Activate

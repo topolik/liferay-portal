@@ -37,7 +37,10 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author Michael C. Han
  */
-@Component(immediate = true, service = DynamicInclude.class)
+@Component(
+	immediate = true,
+	property="key=/html/portlet/login/navigation.jsp#pre",
+	service = DynamicInclude.class)
 public class OpenIdNavigationPreDynamicInclude extends BaseDynamicInclude {
 
 	@Override
@@ -70,14 +73,6 @@ public class OpenIdNavigationPreDynamicInclude extends BaseDynamicInclude {
 
 			throw new IOException("Unable to include JSP", se);
 		}
-	}
-
-	@Override
-	public void register(
-		DynamicInclude.DynamicIncludeRegistry dynamicIncludeRegistry) {
-
-		dynamicIncludeRegistry.register(
-			"/html/portlet/login/navigation.jsp#pre");
 	}
 
 	@Reference

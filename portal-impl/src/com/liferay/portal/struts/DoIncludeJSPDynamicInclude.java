@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Raymond Augé
  */
-@Component
+@Component(property = "key=com.liferay.taglib.util.ThemeUtil#doIncludeJS")
 public class DoIncludeJSPDynamicInclude extends BaseDynamicInclude {
 
 	@Override
@@ -60,12 +60,6 @@ public class DoIncludeJSPDynamicInclude extends BaseDynamicInclude {
 		String tilesTitle = (String)componentContext.getAttribute("title");
 
 		themeDisplay.setTilesTitle(tilesTitle);
-	}
-
-	@Override
-	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
-		dynamicIncludeRegistry.register(
-			"com.liferay.taglib.util.ThemeUtil#doIncludeJS");
 	}
 
 }

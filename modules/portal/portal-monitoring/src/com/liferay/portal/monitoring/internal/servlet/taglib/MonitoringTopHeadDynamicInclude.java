@@ -41,7 +41,9 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	configurationPid = "com.liferay.portal.monitoring.configuration.MonitoringConfiguration",
-	immediate = true, service = DynamicInclude.class
+	immediate = true, 
+	property="key=/html/common/themes/top_head.jsp#pre",
+	service = DynamicInclude.class
 )
 public class MonitoringTopHeadDynamicInclude extends BaseDynamicInclude {
 
@@ -70,11 +72,6 @@ public class MonitoringTopHeadDynamicInclude extends BaseDynamicInclude {
 
 		request.setAttribute(
 			MonitoringWebKeys.PORTAL_REQUEST_DATA_SAMPLE, dataSample);
-	}
-
-	@Override
-	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
-		dynamicIncludeRegistry.register("/html/common/themes/top_head.jsp#pre");
 	}
 
 	@Activate

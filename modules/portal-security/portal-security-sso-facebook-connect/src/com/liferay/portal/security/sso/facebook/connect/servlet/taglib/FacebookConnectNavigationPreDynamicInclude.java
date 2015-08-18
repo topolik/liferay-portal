@@ -38,7 +38,10 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author Michael C. Han
  */
-@Component(immediate = true, service = DynamicInclude.class)
+@Component(
+	immediate = true,
+	property="key=/html/portlet/login/navigation.jsp#pre",
+	service = DynamicInclude.class)
 public class FacebookConnectNavigationPreDynamicInclude
 	extends BaseDynamicInclude {
 
@@ -91,14 +94,6 @@ public class FacebookConnectNavigationPreDynamicInclude
 
 			throw new IOException("Unable to include " + _JSP_PATH, se);
 		}
-	}
-
-	@Override
-	public void register(
-		DynamicInclude.DynamicIncludeRegistry dynamicIncludeRegistry) {
-
-		dynamicIncludeRegistry.register(
-			"/html/portlet/login/navigation.jsp#pre");
 	}
 
 	@Reference

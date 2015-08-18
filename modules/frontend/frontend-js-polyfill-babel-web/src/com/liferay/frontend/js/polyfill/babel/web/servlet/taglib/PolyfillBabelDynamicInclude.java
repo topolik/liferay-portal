@@ -32,7 +32,10 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Chema Balsas
  */
-@Component(immediate = true, service = DynamicInclude.class)
+@Component(
+	immediate = true,
+	property="key=com.liferay.frontend.js.web#loader#configModules",
+	service = DynamicInclude.class)
 public class PolyfillBabelDynamicInclude implements DynamicInclude {
 
 	@Override
@@ -46,14 +49,6 @@ public class PolyfillBabelDynamicInclude implements DynamicInclude {
 		URL url = bundle.getEntry("/META-INF/resources/config.js");
 
 		StreamUtil.transfer(url.openStream(), response.getOutputStream());
-	}
-
-	@Override
-	public void register(
-		DynamicInclude.DynamicIncludeRegistry dynamicIncludeRegistry) {
-
-		dynamicIncludeRegistry.register(
-			"com.liferay.frontend.js.web#loader#configModules");
 	}
 
 	@Activate

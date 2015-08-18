@@ -33,7 +33,10 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author Eudaldo Alonso
  */
-@Component(immediate = true, service = DynamicInclude.class)
+@Component(
+	immediate = true, 
+	property="key=/html/common/themes/bottom.jsp#post",
+	service = DynamicInclude.class)
 public class PortletCSSBottomDynamicInclude extends BaseDynamicInclude {
 
 	@Override
@@ -55,11 +58,6 @@ public class PortletCSSBottomDynamicInclude extends BaseDynamicInclude {
 
 			throw new IOException("Unable to include " + _JSP_PATH, se);
 		}
-	}
-
-	@Override
-	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
-		dynamicIncludeRegistry.register("/html/common/themes/bottom.jsp#post");
 	}
 
 	@Reference(target = "(osgi.web.symbolicname=com.liferay.portlet.css.web)")

@@ -31,7 +31,10 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Sergio González
  */
-@Component(immediate = true, service = DynamicInclude.class)
+@Component(
+	immediate = true, 
+	property="key=/html/common/themes/top_head.jsp#pre",
+	service = DynamicInclude.class)
 public class MentionsTopHeadDynamicInclude extends BaseDynamicInclude {
 
 	@Override
@@ -54,11 +57,6 @@ public class MentionsTopHeadDynamicInclude extends BaseDynamicInclude {
 		sb.append("\" rel=\"stylesheet\" type = \"text/css\" />");
 
 		printWriter.println(sb.toString());
-	}
-
-	@Override
-	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
-		dynamicIncludeRegistry.register("/html/common/themes/top_head.jsp#pre");
 	}
 
 }
