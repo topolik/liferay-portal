@@ -45,7 +45,7 @@ if (Validator.isNotNull(themeDisplay.getPpid())) {
 		<span class="company-name"><%= company.getName() %></span>
 	</span>
 
-	<aui:icon cssClass="sidenav-close" image="remove" url="javascript:;" />
+	<aui:icon cssClass="sidenav-close visible-xs-block" image="remove" url="javascript:;" />
 </h4>
 
 <ul class="nav nav-tabs product-menu-tabs">
@@ -139,9 +139,9 @@ if (Validator.isNotNull(themeDisplay.getPpid())) {
 </div>
 
 <aui:script use="liferay-store">
-	$('#sidenavToggleId').sideNavigation();
+	AUI.$('#sidenavToggleId').sideNavigation();
 
-	var sidenavSlider = $('#sidenavSliderId');
+	var sidenavSlider = AUI.$('#sidenavSliderId');
 
 	sidenavSlider.on(
 		'closed.lexicon.sidenav',

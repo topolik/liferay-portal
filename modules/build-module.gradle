@@ -18,6 +18,7 @@ buildscript {
 
 apply plugin: "com.liferay.plugin"
 apply plugin: "eclipse"
+apply plugin: "findbugs"
 
 File appServerClassesPortalDir = new File(liferay.appServerPortalDir, "WEB-INF/classes")
 File appServerLibPortalDir = new File(liferay.appServerPortalDir, "WEB-INF/lib")
@@ -177,6 +178,10 @@ sourceSets {
 	}
 }
 
+tasks.eclipse {
+	dependsOn cleanEclipse
+}
+
 whip {
 	version = project.properties["com.liferay.whip.version"]
 }
@@ -222,6 +227,15 @@ pluginManager.withPlugin("com.moowork.node") {
 		if (it != npmSetup) {
 			dependsOn npmSetup
 		}
+	}
+}
+
+tasks.withType(FindBugs) {
+	maxHeapSize = "1g"
+
+	reports {
+		html.enabled = true
+		xml.enabled = false
 	}
 }
 
