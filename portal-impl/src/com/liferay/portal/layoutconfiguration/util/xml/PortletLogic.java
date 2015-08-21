@@ -36,6 +36,7 @@ import com.liferay.portlet.PortletPreferencesFactoryUtil;
 
 import java.util.Map;
 
+import javax.portlet.PortletPreferences;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -123,10 +124,14 @@ public class PortletLogic extends RuntimeLogic {
 		// non-instanceable portlets
 
 		if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
+				PortletKeys.PREFS_OWNER_TYPE_EMBEDDED, themeDisplay.getPlid(),
 				portletId) < 1) {
 
-			PortletPreferencesFactoryUtil.getPortletSetup(_request, portletId);
+			PortletPreferencesLocalServiceUtil.addPortletPreferences(
+				themeDisplay.getCompanyId(),
+				PortletKeys.PREFS_OWNER_ID_DEFAULT,
+				PortletKeys.PREFS_OWNER_TYPE_EMBEDDED,
+				themeDisplay.getPlid(), portletId, portlet, null);
 
 			PortletLayoutListener portletLayoutListener =
 				portlet.getPortletLayoutListenerInstance();

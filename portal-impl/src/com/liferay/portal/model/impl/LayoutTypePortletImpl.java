@@ -596,7 +596,7 @@ public class LayoutTypePortletImpl
 
 		if (!strict &&
 			((PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(),
+				PortletKeys.PREFS_OWNER_TYPE_EMBEDDED, layout.getPlid(),
 				portletId) > 0) ||
 			 (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
 				 PortletKeys.PREFS_OWNER_TYPE_USER, layout.getPlid(),
@@ -1454,7 +1454,7 @@ public class LayoutTypePortletImpl
 		List<PortletPreferences> portletPreferences =
 			PortletPreferencesLocalServiceUtil.getPortletPreferences(
 				PortletKeys.PREFS_OWNER_ID_DEFAULT,
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid());
+				PortletKeys.PREFS_OWNER_TYPE_EMBEDDED, layout.getPlid());
 
 		if (isCustomizable() && hasUserPreferences()) {
 			portletPreferences = ListUtil.copy(portletPreferences);

@@ -270,9 +270,15 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
 		}
 
-		List<PortletPreferences> portletPreferencesList =
+		List<PortletPreferences> portletPreferencesList = new ArrayList<>();
+
+		portletPreferencesList.addAll(
 			portletPreferencesLocalService.getPortletPreferences(
-				ownerType, plid, portletId);
+				ownerType, plid, portletId));
+
+		portletPreferencesList.addAll(
+			portletPreferencesLocalService.getPortletPreferences(
+				PortletKeys.PREFS_OWNER_TYPE_EMBEDDED, plid, portletId));
 
 		Portlet portlet = getPortletById(companyId, portletId);
 

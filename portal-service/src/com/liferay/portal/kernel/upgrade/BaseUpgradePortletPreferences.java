@@ -293,6 +293,13 @@ public abstract class BaseUpgradePortletPreferences extends UpgradeProcess {
 						"select companyId from User_ where userId = ?",
 						ownerId);
 				}
+				else if (ownerType == PortletKeys.PREFS_OWNER_TYPE_EMBEDDED) {
+					Object[] layout = getLayout(plid);
+
+					if (layout != null) {
+						companyId = (Long)layout[1];
+					}
+				}
 				else {
 					throw new UnsupportedOperationException(
 						"Unsupported owner type " + ownerType);

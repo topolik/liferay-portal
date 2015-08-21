@@ -42,6 +42,7 @@ import com.liferay.portal.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
+import com.liferay.portlet.PortletPreferencesFactory;
 import com.liferay.portlet.PortletPreferencesFactoryConstants;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.taglib.servlet.PipingServletResponse;
@@ -198,15 +199,17 @@ public class RuntimeTag extends TagSupport {
 
 			JSONObject jsonObject = null;
 
-			if ((PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
-					portletId) < 1) ||
-				layout.isTypeControlPanel() || layout.isTypePanel()) {
+			boolean populateJSONObject = false;
 
-				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
-					layout, portletId, defaultPreferences);
-				PortletPreferencesFactoryUtil.getPortletSetup(
-					request, portletId, defaultPreferences);
+			if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
+					PortletKeys.PREFS_OWNER_TYPE_EMBEDDED,
+					themeDisplay.getPlid(), portletId) < 1) {
+
+				PortletPreferencesLocalServiceUtil.addPortletPreferences(
+					themeDisplay.getCompanyId(),
+					PortletKeys.PREFS_OWNER_ID_DEFAULT,
+					PortletKeys.PREFS_OWNER_TYPE_EMBEDDED,
+					themeDisplay.getPlid(), portletId, portlet, null);
 
 				PortletLayoutListener portletLayoutListener =
 					portlet.getPortletLayoutListenerInstance();
@@ -216,13 +219,19 @@ public class RuntimeTag extends TagSupport {
 						portletId, themeDisplay.getPlid());
 				}
 
+				populateJSONObject = true;
+			}
+
+			if(layout.isTypeControlPanel() || layout.isTypePanel()) {
+				populateJSONObject = true;
+			}
+
+			if (populateJSONObject) {
 				jsonObject = JSONFactoryUtil.createJSONObject();
 
 				PortletJSONUtil.populatePortletJSONObject(
 					request, StringPool.BLANK, portlet, jsonObject);
-			}
 
-			if (jsonObject != null) {
 				PortletJSONUtil.writeHeaderPaths(response, jsonObject);
 			}
 
