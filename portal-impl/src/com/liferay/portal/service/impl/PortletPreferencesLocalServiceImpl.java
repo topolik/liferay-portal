@@ -380,12 +380,9 @@ public class PortletPreferencesLocalServiceImpl
 				ownerId, ownerType, plid, portletId);
 
 		if (portletPreferences == null) {
-			Portlet portlet = portletLocalService.getPortletById(
-				companyId, portletId);
-
-			if (strict &&
-				(Validator.isNull(defaultPreferences) ||
-				 ((portlet != null) && portlet.isUndeployedPortlet()))) {
+			if (Validator.isBlank(defaultPreferences)) {
+				Portlet portlet = portletLocalService.getPortletById(
+					companyId, portletId);
 
 				if (portlet == null) {
 					defaultPreferences = PortletConstants.DEFAULT_PREFERENCES;
@@ -393,16 +390,18 @@ public class PortletPreferencesLocalServiceImpl
 				else {
 					defaultPreferences = portlet.getDefaultPreferences();
 				}
+			}
 
+			if (strict) {
 				return PortletPreferencesFactoryUtil.strictFromXML(
 					companyId, ownerId, ownerType, plid, portletId,
 					defaultPreferences);
 			}
-
-			portletPreferences =
-				portletPreferencesLocalService.addPortletPreferences(
-					companyId, ownerId, ownerType, plid, portletId, portlet,
+			else {
+				return PortletPreferencesFactoryUtil.fromXML(
+					companyId, ownerId, ownerType, plid, portletId,
 					defaultPreferences);
+			}
 		}
 
 		PortletPreferencesImpl portletPreferencesImpl =
