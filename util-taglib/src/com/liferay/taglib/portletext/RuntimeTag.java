@@ -42,7 +42,6 @@ import com.liferay.portal.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
-import com.liferay.portlet.PortletPreferencesFactory;
 import com.liferay.portlet.PortletPreferencesFactoryConstants;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.taglib.servlet.PipingServletResponse;
@@ -222,7 +221,7 @@ public class RuntimeTag extends TagSupport {
 				populateJSONObject = true;
 			}
 
-			if(layout.isTypeControlPanel() || layout.isTypePanel()) {
+			if (layout.isTypeControlPanel() || layout.isTypePanel()) {
 				populateJSONObject = true;
 			}
 
