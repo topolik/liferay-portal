@@ -17,20 +17,16 @@ package com.liferay.dynamic.data.mapping.web.portlet.action;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.model.DDMTemplateConstants;
-import com.liferay.portal.PortletPreferencesException;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.model.Layout;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletURLImpl;
-import com.liferay.portlet.StrictPortletPreferencesImpl;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletPreferences;
@@ -135,38 +131,6 @@ public abstract class DDMBaseMVCActionCommand extends BaseMVCActionCommand {
 		return portletURL.toString();
 	}
 
-	protected PortletPreferences getStrictPortletSetup(
-			ActionRequest actionRequest)
-		throws PortalException {
-
-		String portletResource = ParamUtil.getString(
-			actionRequest, "portletResource");
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		return getStrictPortletSetup(themeDisplay.getLayout(), portletResource);
-	}
-
-	protected PortletPreferences getStrictPortletSetup(
-			Layout layout, String portletId)
-		throws PortalException {
-
-		if (Validator.isNull(portletId)) {
-			return null;
-		}
-
-		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
-				layout, portletId);
-
-		if (portletPreferences instanceof StrictPortletPreferencesImpl) {
-			throw new PortletPreferencesException.MustBeStrict(portletId);
-		}
-
-		return portletPreferences;
-	}
-
 	protected void setRedirectAttribute(ActionRequest actionRequest) {
 		String redirect = getRedirect(actionRequest);
 
@@ -211,8 +175,9 @@ public abstract class DDMBaseMVCActionCommand extends BaseMVCActionCommand {
 			ActionRequest actionRequest, DDMTemplate template)
 		throws Exception {
 
-		PortletPreferences portletPreferences = getStrictPortletSetup(
-			actionRequest);
+		PortletPreferences portletPreferences =
+			PortletPreferencesFactoryUtil.getExistingPortletSetup(
+				actionRequest);
 
 		if (portletPreferences == null) {
 			return;

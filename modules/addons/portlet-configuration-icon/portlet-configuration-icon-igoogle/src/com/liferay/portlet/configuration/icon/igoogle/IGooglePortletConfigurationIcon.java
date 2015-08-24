@@ -85,7 +85,7 @@ public class IGooglePortletConfigurationIcon
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
 		PortletPreferences portletSetup =
-			PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(
+			PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 				themeDisplay.getLayout(), portletDisplay.getId());
 
 		boolean lfrIgoogleShowAddAppLink = GetterUtil.getBoolean(

@@ -18,7 +18,6 @@ import com.liferay.dynamic.data.lists.constants.DDLPortletKeys;
 import com.liferay.dynamic.data.lists.model.DDLRecordSet;
 import com.liferay.dynamic.data.lists.model.DDLRecordSetConstants;
 import com.liferay.dynamic.data.lists.service.DDLRecordSetService;
-import com.liferay.portal.PortletPreferencesException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -32,7 +31,6 @@ import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
-import com.liferay.portlet.StrictPortletPreferencesImpl;
 
 import java.util.Locale;
 import java.util.Map;
@@ -90,7 +88,7 @@ public class AddRecordSetMVCActionCommand extends BaseMVCActionCommand {
 		updatePortletPreferences(actionRequest, recordSet);
 	}
 
-	protected PortletPreferences getStrictPortletSetup(
+	protected PortletPreferences getExistingPortletSetup(
 			ActionRequest actionRequest)
 		throws PortalException {
 
@@ -100,10 +98,11 @@ public class AddRecordSetMVCActionCommand extends BaseMVCActionCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		return getStrictPortletSetup(themeDisplay.getLayout(), portletResource);
+		return getExistingPortletSetup(
+			themeDisplay.getLayout(), portletResource);
 	}
 
-	protected PortletPreferences getStrictPortletSetup(
+	protected PortletPreferences getExistingPortletSetup(
 			Layout layout, String portletId)
 		throws PortalException {
 
@@ -112,12 +111,8 @@ public class AddRecordSetMVCActionCommand extends BaseMVCActionCommand {
 		}
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
+			PortletPreferencesFactoryUtil.getExistingPortletSetup(
 				layout, portletId);
-
-		if (portletPreferences instanceof StrictPortletPreferencesImpl) {
-			throw new PortletPreferencesException.MustBeStrict(portletId);
-		}
 
 		return portletPreferences;
 	}
@@ -141,7 +136,7 @@ public class AddRecordSetMVCActionCommand extends BaseMVCActionCommand {
 			ActionRequest actionRequest, DDLRecordSet recordSet)
 		throws Exception {
 
-		PortletPreferences portletPreferences = getStrictPortletSetup(
+		PortletPreferences portletPreferences = getExistingPortletSetup(
 			actionRequest);
 
 		if (portletPreferences == null) {

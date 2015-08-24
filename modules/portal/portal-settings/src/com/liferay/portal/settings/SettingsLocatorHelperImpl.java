@@ -64,7 +64,7 @@ public class SettingsLocatorHelperImpl implements SettingsLocatorHelper {
 	public PortletPreferences getCompanyPortletPreferences(
 		long companyId, String settingsId) {
 
-		return PortletPreferencesLocalServiceUtil.getStrictPreferences(
+		return PortletPreferencesLocalServiceUtil.getPreferences(
 			companyId, companyId, PortletKeys.PREFS_OWNER_TYPE_COMPANY, 0,
 			settingsId);
 	}
@@ -95,7 +95,7 @@ public class SettingsLocatorHelperImpl implements SettingsLocatorHelper {
 		try {
 			Group group = GroupLocalServiceUtil.getGroup(groupId);
 
-			return PortletPreferencesLocalServiceUtil.getStrictPreferences(
+			return PortletPreferencesLocalServiceUtil.getPreferences(
 				group.getCompanyId(), groupId,
 				PortletKeys.PREFS_OWNER_TYPE_GROUP, 0, settingsId);
 		}
@@ -150,7 +150,7 @@ public class SettingsLocatorHelperImpl implements SettingsLocatorHelper {
 			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
 		}
 
-		return PortletPreferencesLocalServiceUtil.getStrictPreferences(
+		return PortletPreferencesLocalServiceUtil.getPreferences(
 			layout.getCompanyId(), ownerId, ownerType, layout.getPlid(),
 			portletId);
 	}
