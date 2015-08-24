@@ -370,41 +370,35 @@ public class PortletPreferencesLocalServiceImpl
 		long companyId, long ownerId, int ownerType, long plid,
 		String portletId, String defaultPreferences, boolean strict) {
 
-		PortletPreferences portletPreferences =
-			portletPreferencesPersistence.fetchByO_O_P_P(
-				ownerId, ownerType, plid, portletId);
+		javax.portlet.PortletPreferences javaxPortletPreferences =
+			fetchPreferences(companyId, ownerId, ownerType, plid, portletId);
 
-		if (portletPreferences == null) {
-			if (Validator.isBlank(defaultPreferences)) {
-				Portlet portlet = portletLocalService.getPortletById(
-					companyId, portletId);
+		if (javaxPortletPreferences != null) {
+			return javaxPortletPreferences;
+		}
 
-				if (portlet == null) {
-					defaultPreferences = PortletConstants.DEFAULT_PREFERENCES;
-				}
-				else {
-					defaultPreferences = portlet.getDefaultPreferences();
-				}
-			}
+		if (Validator.isBlank(defaultPreferences)) {
+			Portlet portlet = portletLocalService.getPortletById(
+				companyId, portletId);
 
-			if (strict) {
-				return PortletPreferencesFactoryUtil.strictFromXML(
-					companyId, ownerId, ownerType, plid, portletId,
-					defaultPreferences);
+			if (portlet == null) {
+				defaultPreferences = PortletConstants.DEFAULT_PREFERENCES;
 			}
 			else {
-				return PortletPreferencesFactoryUtil.fromXML(
-					companyId, ownerId, ownerType, plid, portletId,
-					defaultPreferences);
+				defaultPreferences = portlet.getDefaultPreferences();
 			}
 		}
 
-		PortletPreferencesImpl portletPreferencesImpl =
-			(PortletPreferencesImpl)PortletPreferencesFactoryUtil.fromXML(
+		if (strict) {
+			return PortletPreferencesFactoryUtil.strictFromXML(
 				companyId, ownerId, ownerType, plid, portletId,
-				portletPreferences.getPreferences());
-
-		return portletPreferencesImpl;
+				defaultPreferences);
+		}
+		else {
+			return PortletPreferencesFactoryUtil.fromXML(
+				companyId, ownerId, ownerType, plid, portletId,
+				defaultPreferences);
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
