@@ -400,8 +400,8 @@ public class ExportImportDateUtil {
 				Layout layout = LayoutLocalServiceUtil.getLayout(plid);
 
 				PortletPreferences preferences =
-					PortletPreferencesFactoryUtil.getStrictPortletSetup(
-						layout, portletId);
+					PortletPreferencesFactoryUtil.getPortletSetup(
+						layout, portletId, null);
 
 				lastPublishDate = getLastPublishDate(preferences);
 			}

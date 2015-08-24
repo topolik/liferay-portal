@@ -761,7 +761,7 @@ public class JournalPortlet extends MVCPortlet {
 			WebKeys.THEME_DISPLAY);
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
+			PortletPreferencesFactoryUtil.getExistingPortletSetup(
 				themeDisplay.getLayout(), portletResource);
 
 		if (portletPreferences != null) {

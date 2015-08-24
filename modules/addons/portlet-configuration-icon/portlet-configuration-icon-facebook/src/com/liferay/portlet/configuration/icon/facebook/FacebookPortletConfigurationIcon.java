@@ -55,7 +55,7 @@ public class FacebookPortletConfigurationIcon
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
 		PortletPreferences portletSetup =
-			PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(
+			PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 				themeDisplay.getLayout(), portletDisplay.getId());
 
 		String lfrFacebookAPIKey = portletSetup.getValue(
@@ -75,7 +75,7 @@ public class FacebookPortletConfigurationIcon
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
 		PortletPreferences portletSetup =
-			PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(
+			PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 				themeDisplay.getLayout(), portletDisplay.getId());
 
 		String lfrFacebookAPIKey = portletSetup.getValue(

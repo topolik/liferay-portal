@@ -688,8 +688,8 @@ public class PortletExportController implements ExportController {
 
 		if (exportPortletData) {
 			javax.portlet.PortletPreferences jxPortletPreferences =
-				PortletPreferencesFactoryUtil.getStrictPortletSetup(
-					layout, portletDataContext.getPortletId());
+				PortletPreferencesFactoryUtil.getPortletSetup(
+					layout, portletDataContext.getPortletId(), null);
 
 			if (!portlet.isPreferencesUniquePerLayout()) {
 				StringBundler sb = new StringBundler(5);
@@ -1285,8 +1285,8 @@ public class PortletExportController implements ExportController {
 			}
 
 			javax.portlet.PortletPreferences jxPortletPreferences =
-				PortletPreferencesFactoryUtil.getStrictPortletSetup(
-					layout, _portletId);
+				PortletPreferencesFactoryUtil.getPortletSetup(
+					layout, _portletId, null);
 
 			ExportImportDateUtil.updateLastPublishDate(
 				_portletId, jxPortletPreferences, _dateRange, _endDate);

@@ -179,11 +179,8 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 		boolean rememberMe = ParamUtil.getBoolean(actionRequest, "rememberMe");
 
 		if (!themeDisplay.isSignedIn()) {
-			String portletId = PortalUtil.getPortletId(actionRequest);
-
 			PortletPreferences portletPreferences =
-				PortletPreferencesFactoryUtil.getStrictPortletSetup(
-					themeDisplay.getLayout(), portletId);
+				PortletPreferencesFactoryUtil.getPortletSetup(actionRequest);
 
 			String authType = portletPreferences.getValue("authType", null);
 
