@@ -1596,8 +1596,16 @@ public class PortletDataContextImpl implements PortletDataContext {
 				roleName = roleName.substring(
 					PermissionExporter.ROLE_TEAM_PREFIX.length());
 
+				long liveGroupId = _groupId;
+
+				Group group = GroupLocalServiceUtil.getGroup(liveGroupId);
+
+				if (group.isStagingGroup()) {
+					liveGroupId = group.getLiveGroupId();
+				}
+
 				try {
-					team = TeamLocalServiceUtil.getTeam(_groupId, roleName);
+					team = TeamLocalServiceUtil.getTeam(liveGroupId, roleName);
 				}
 				catch (NoSuchTeamException nste) {
 					if (_log.isWarnEnabled()) {
