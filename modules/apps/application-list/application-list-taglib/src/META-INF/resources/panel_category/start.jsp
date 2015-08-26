@@ -16,7 +16,7 @@
 
 <%@ include file="/panel_category/init.jsp" %>
 
-<c:if test="<%= showHeader || !panelApps.isEmpty() %>">
+<c:if test="<%= !panelApps.isEmpty() || showHeader %>">
 	<a aria-expanded="false" class="collapse-icon <%= active ? StringPool.BLANK : "collapsed" %> list-group-heading" data-toggle="collapse" href="#<%= id %>">
 		<%= panelCategory.getLabel(themeDisplay.getLocale()) %>
 	</a>
