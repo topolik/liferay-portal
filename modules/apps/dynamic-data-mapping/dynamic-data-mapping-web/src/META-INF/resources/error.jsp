@@ -19,6 +19,6 @@
 <liferay-ui:error-header />
 
 <liferay-ui:error exception="<%= NoSuchStructureException.class %>" message="the-structure-could-not-be-found" />
-<liferay-ui:error exception="<%= PortletPreferencesException.MustBeStrict.class %>" message="portlet-preferences-are-not-configured-properly" />
+<liferay-ui:error exception="<%= PortletPreferencesException.MustExist.class %>" message="portlet-preferences-are-not-configured-properly" />
 
 <liferay-ui:error-principal />
