@@ -232,7 +232,8 @@ public class PortletPreferencesFactoryImpl
 			!PortletLocalServiceUtil.hasPortlet(
 				layout.getPlid(), portletId, true)) {
 
-			throw new PortletPreferencesException.MustBeStrict(portletId);
+			throw new PortletPreferencesException.MustExist(
+				portletId, layout.getPlid());
 		}
 
 		return getPortletSetup(layout, portletId, null);
