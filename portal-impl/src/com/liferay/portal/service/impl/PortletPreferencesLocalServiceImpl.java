@@ -285,8 +285,7 @@ public class PortletPreferencesLocalServiceImpl
 		String portletId, String defaultPreferences) {
 
 		return getPreferences(
-			companyId, ownerId, ownerType, plid, portletId, defaultPreferences,
-			false);
+			companyId, ownerId, ownerType, plid, portletId, defaultPreferences);
 	}
 
 	@Override
@@ -372,7 +371,7 @@ public class PortletPreferencesLocalServiceImpl
 
 	protected javax.portlet.PortletPreferences getPreferences(
 		long companyId, long ownerId, int ownerType, long plid,
-		String portletId, String defaultPreferences, boolean strict) {
+		String portletId, String defaultPreferences) {
 
 		javax.portlet.PortletPreferences javaxPortletPreferences =
 			fetchPreferences(companyId, ownerId, ownerType, plid, portletId);
@@ -393,16 +392,9 @@ public class PortletPreferencesLocalServiceImpl
 			}
 		}
 
-		if (strict) {
-			return PortletPreferencesFactoryUtil.strictFromXML(
-				companyId, ownerId, ownerType, plid, portletId,
-				defaultPreferences);
-		}
-		else {
-			return PortletPreferencesFactoryUtil.fromXML(
-				companyId, ownerId, ownerType, plid, portletId,
-				defaultPreferences);
-		}
+		return PortletPreferencesFactoryUtil.fromXML(
+			companyId, ownerId, ownerType, plid, portletId,
+			defaultPreferences);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
