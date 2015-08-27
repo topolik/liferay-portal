@@ -23,7 +23,6 @@ import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.LayoutTypePortlet;
 import com.liferay.portal.model.Portlet;
-import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
@@ -119,10 +118,12 @@ public class UpgradePortletIdTest extends UpgradePortletId {
 	protected void addPortletPreferences(Layout layout, String portletId)
 		throws Exception {
 
-		PortletPreferencesLocalServiceUtil.getPreferences(
-			TestPropsValues.getCompanyId(), 0,
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(portletId);
+
+		PortletPreferencesLocalServiceUtil.updatePreferences(
+			PortletKeys.PREFS_OWNER_ID_DEFAULT,
 			PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(), portletId,
-			PortletConstants.DEFAULT_PREFERENCES);
+			portlet.getDefaultPreferences());
 	}
 
 	protected void doTestUpgrade() throws Exception {
