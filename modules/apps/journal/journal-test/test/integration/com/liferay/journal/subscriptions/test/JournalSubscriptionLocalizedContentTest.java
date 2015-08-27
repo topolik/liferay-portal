@@ -107,8 +107,8 @@ public class JournalSubscriptionLocalizedContentTest
 		throws Exception {
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
-				layout, getServiceName());
+			PortletPreferencesFactoryUtil.getPortletSetup(
+				layout, getServiceName(), null);
 
 		LocalizationUtil.setPreferencesValue(
 			portletPreferences, bodyPreferenceName,
