@@ -203,10 +203,10 @@ public class RuntimeTag extends TagSupport {
 					portletId) < 1) ||
 				layout.isTypeControlPanel() || layout.isTypePanel()) {
 
-				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
-					layout, portletId, defaultPreferences);
-				PortletPreferencesFactoryUtil.getPortletSetup(
-					request, portletId, defaultPreferences);
+				PortletPreferencesLocalServiceUtil.updatePreferences(
+					PortletKeys.PREFS_OWNER_ID_DEFAULT,
+					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
+					portletId, portlet.getDefaultPreferences());
 
 				PortletLayoutListener portletLayoutListener =
 					portlet.getPortletLayoutListenerInstance();

@@ -32,7 +32,6 @@ import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.WebKeys;
-import com.liferay.portlet.PortletPreferencesFactoryUtil;
 
 import java.util.Map;
 
@@ -126,7 +125,10 @@ public class PortletLogic extends RuntimeLogic {
 				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
 				portletId) < 1) {
 
-			PortletPreferencesFactoryUtil.getPortletSetup(_request, portletId);
+			PortletPreferencesLocalServiceUtil.updatePreferences(
+				PortletKeys.PREFS_OWNER_ID_DEFAULT,
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
+				portletId, PortletConstants.DEFAULT_PREFERENCES);
 
 			PortletLayoutListener portletLayoutListener =
 				portlet.getPortletLayoutListenerInstance();

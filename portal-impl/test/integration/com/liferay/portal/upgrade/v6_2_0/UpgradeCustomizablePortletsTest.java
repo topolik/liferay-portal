@@ -17,13 +17,14 @@ package com.liferay.portal.upgrade.v6_2_0;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
-import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
+import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.PortletConstants;
 import com.liferay.portal.model.PortletPreferences;
+import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.MainServletTestRule;
@@ -193,10 +194,12 @@ public class UpgradeCustomizablePortletsTest
 	protected void addPortletPreferences(Layout layout, String portletId)
 		throws Exception {
 
-		PortletPreferencesLocalServiceUtil.getPreferences(
-			TestPropsValues.getCompanyId(), 0,
+		Portlet portlet = PortletLocalServiceUtil.getPortletById(portletId);
+
+		PortletPreferencesLocalServiceUtil.updatePreferences(
+			PortletKeys.PREFS_OWNER_ID_DEFAULT,
 			PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(), portletId,
-			PortletConstants.DEFAULT_PREFERENCES);
+			portlet.getDefaultPreferences());
 	}
 
 	protected Layout getLayout() throws Exception {
