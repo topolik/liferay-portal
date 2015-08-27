@@ -301,25 +301,29 @@ public class PortletPreferencesLocalServiceImpl
 			portletPreferencesIds.getPortletId());
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPreferences(long, long, int, long, String)
+	 */
+	@Deprecated
 	@Override
 	public javax.portlet.PortletPreferences getStrictPreferences(
 		long companyId, long ownerId, int ownerType, long plid,
 		String portletId) {
 
-		return getPreferences(
-			companyId, ownerId, ownerType, plid, portletId, null, true);
+		return getPreferences(companyId, ownerId, ownerType, plid, portletId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPreferences(PortletPreferencesIds)
+	 */
+	@Deprecated
 	@Override
 	public javax.portlet.PortletPreferences getStrictPreferences(
 		PortletPreferencesIds portletPreferencesIds) {
 
-		return getStrictPreferences(
-			portletPreferencesIds.getCompanyId(),
-			portletPreferencesIds.getOwnerId(),
-			portletPreferencesIds.getOwnerType(),
-			portletPreferencesIds.getPlid(),
-			portletPreferencesIds.getPortletId());
+		return getPreferences(portletPreferencesIds);
 	}
 
 	@Override
