@@ -620,7 +620,7 @@ public class PortletPreferencesFactoryImpl
 		String defaultPreferences) {
 
 		return getPortletSetup(
-			siteGroupId, layout, portletId, defaultPreferences, false);
+			siteGroupId, layout, portletId, defaultPreferences);
 	}
 
 	@Override
@@ -819,7 +819,7 @@ public class PortletPreferencesFactoryImpl
 
 	protected PortletPreferences getPortletSetup(
 		long siteGroupId, Layout layout, String portletId,
-		String defaultPreferences, boolean strictMode) {
+		String defaultPreferences) {
 
 		String originalPortletId = portletId;
 
@@ -879,11 +879,6 @@ public class PortletPreferencesFactoryImpl
 				ownerId = layout.getCompanyId();
 				ownerType = PortletKeys.PREFS_OWNER_TYPE_COMPANY;
 			}
-		}
-
-		if (strictMode) {
-			return PortletPreferencesLocalServiceUtil.getStrictPreferences(
-				layout.getCompanyId(), ownerId, ownerType, plid, portletId);
 		}
 
 		return PortletPreferencesLocalServiceUtil.getPreferences(
