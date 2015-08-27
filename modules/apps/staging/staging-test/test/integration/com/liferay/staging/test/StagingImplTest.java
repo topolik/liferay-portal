@@ -125,17 +125,16 @@ public class StagingImplTest {
 		layout.setGroupId(_group.getGroupId());
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
-				layout, JournalPortletKeys.JOURNAL);
+			PortletPreferencesFactoryUtil.getPortletSetup(
+				layout, JournalPortletKeys.JOURNAL, null);
 
 		Assert.assertNull(
 			ExportImportDateUtil.getLastPublishDate(portletPreferences));
 
 		layout.setGroupId(stagingGroup.getGroupId());
 
-		portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
-				layout, JournalPortletKeys.JOURNAL);
+		portletPreferences = PortletPreferencesFactoryUtil.getPortletSetup(
+			layout, JournalPortletKeys.JOURNAL, null);
 
 		Assert.assertNotNull(
 			ExportImportDateUtil.getLastPublishDate(portletPreferences));
