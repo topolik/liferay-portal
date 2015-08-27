@@ -394,6 +394,11 @@ public class PortletPreferencesLocalServiceWrapper
 		return _portletPreferencesLocalService.getPreferences(portletPreferencesIds);
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link
+	#getPreferences(long, long, int, long, String)
+	*/
+	@Deprecated
 	@Override
 	public javax.portlet.PortletPreferences getStrictPreferences(
 		long companyId, long ownerId, int ownerType, long plid,
@@ -402,6 +407,11 @@ public class PortletPreferencesLocalServiceWrapper
 			ownerId, ownerType, plid, portletId);
 	}
 
+	/**
+	* @deprecated As of 7.0.0, replaced by {@link
+	#getPreferences(PortletPreferencesIds)
+	*/
+	@Deprecated
 	@Override
 	public javax.portlet.PortletPreferences getStrictPreferences(
 		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds) {

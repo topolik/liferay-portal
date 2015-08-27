@@ -29,7 +29,6 @@ import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
@@ -698,32 +697,34 @@ public class PortletPreferencesFactoryImpl
 		return PortalUtil.getPreferencesValidator(portlet);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getLayoutPortletSetup(Layout, String)}
+	 */
+	@Deprecated
 	@Override
 	public PortletPreferences getStrictLayoutPortletSetup(
 		Layout layout, String portletId) {
 
-		long ownerId = PortletKeys.PREFS_OWNER_ID_DEFAULT;
-		int ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
-
-		if (PortletConstants.hasUserId(portletId)) {
-			ownerId = PortletConstants.getUserId(portletId);
-			ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
-		}
-
-		return PortletPreferencesLocalServiceUtil.getStrictPreferences(
-			layout.getCompanyId(), ownerId, ownerType, layout.getPlid(),
-			portletId);
+		return getLayoutPortletSetup(layout, portletId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPortletSetup(Layout, String, String)}
+	 */
+	@Deprecated
 	@Override
 	public PortletPreferences getStrictPortletSetup(
 		Layout layout, String portletId) {
 
-		return getPortletSetup(
-			LayoutConstants.DEFAULT_PLID, layout, portletId, StringPool.BLANK,
-			true);
+		return getPortletSetup(layout, portletId, null);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0 with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public StrictPortletPreferencesImpl strictFromXML(
 		long companyId, long ownerId, int ownerType, long plid,

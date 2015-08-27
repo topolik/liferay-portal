@@ -18,6 +18,7 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
 import com.liferay.portal.kernel.util.ReferenceRegistry;
+import com.liferay.portal.model.PortletPreferencesIds;
 
 /**
  * Provides the local service utility for PortletPreferences. This utility wraps
@@ -364,6 +365,11 @@ public class PortletPreferencesLocalServiceUtil {
 		return getService().getPreferences(portletPreferencesIds);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPreferences(long, long, int, long, String)
+	 */
+	@Deprecated
 	public static javax.portlet.PortletPreferences getStrictPreferences(
 		long companyId, long ownerId, int ownerType, long plid,
 		java.lang.String portletId) {
@@ -372,6 +378,11 @@ public class PortletPreferencesLocalServiceUtil {
 			portletId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPreferences(PortletPreferencesIds)
+	 */
+	@Deprecated
 	public static javax.portlet.PortletPreferences getStrictPreferences(
 		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds) {
 		return getService().getStrictPreferences(portletPreferencesIds);

@@ -21,7 +21,9 @@ import java.util.Map;
 /**
  * @author Tomas Polesovsky
  * @author Shuyang Zhou
+ * @deprecated As of 7.0.0 with no direct replacement
  */
+@Deprecated
 public class StrictPortletPreferencesImpl
 	extends PortletPreferencesImpl
 	implements Cloneable, Serializable {
