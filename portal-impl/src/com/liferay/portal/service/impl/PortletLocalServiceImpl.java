@@ -52,6 +52,7 @@ import com.liferay.portal.kernel.xml.QName;
 import com.liferay.portal.kernel.xml.UnsecureSAXReaderUtil;
 import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.model.EventDefinition;
+import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.PortletApp;
 import com.liferay.portal.model.PortletCategory;
@@ -120,6 +121,41 @@ import javax.servlet.ServletContext;
  * @author Shuyang Zhou
  */
 public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
+
+	@Override
+	public void addPortlet(
+			long plid, String portletId, boolean isEmbeddedOrStaticPortlet)
+		throws PortalException {
+
+		if (hasPortlet(plid, portletId, isEmbeddedOrStaticPortlet)) {
+			return;
+		}
+
+		Layout layout = layoutLocalService.getLayout(plid);
+
+		Portlet portlet = getPortletById(layout.getCompanyId(), portletId);
+
+		long ownerId = PortletKeys.PREFS_OWNER_ID_DEFAULT;
+		int ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
+
+		if (isEmbeddedOrStaticPortlet) {
+			ownerType = PortletKeys.PREFS_OWNER_TYPE_EMBEDDED;
+		}
+
+		portletPreferencesLocalService.addPortletPreferences(
+			layout.getCompanyId(), ownerId, ownerType, plid, portletId, portlet,
+			null);
+
+		PortletLayoutListener portletLayoutListener =
+			portlet.getPortletLayoutListenerInstance();
+
+		if (portletLayoutListener != null) {
+			portletLayoutListener.onAddToLayout(portletId, plid);
+		}
+
+		PortalUtil.addPortletDefaultResource(
+			layout.getCompanyId(), layout, portlet);
+	}
 
 	@Override
 	@Skip
@@ -273,6 +309,10 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 		portletPreferencesList.addAll(
 			portletPreferencesLocalService.getPortletPreferences(
 				PortletKeys.PREFS_OWNER_TYPE_USER, plid, portletId));
+
+		portletPreferencesList.addAll(
+			portletPreferencesLocalService.getPortletPreferences(
+				PortletKeys.PREFS_OWNER_TYPE_EMBEDDED, plid, portletId));
 
 		Portlet portlet = getPortletById(companyId, portletId);
 
@@ -601,6 +641,75 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 	}
 
 	@Override
+	public List<Portlet> getPortlets(
+			long plid, boolean includeEmbeddedAndStaticPortlets)
+		throws PortalException {
+
+		Layout layout = layoutLocalService.getLayout(plid);
+
+		long companyId = layout.getCompanyId();
+
+		List<Portlet> portlets = new ArrayList<>();
+
+		List<PortletPreferences> layoutPortletPreferences =
+			portletPreferencesLocalService.getPortletPreferences(
+				PortletKeys.PREFS_OWNER_ID_DEFAULT,
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid);
+
+		for (PortletPreferences portletPreferences : layoutPortletPreferences) {
+			String portletId = portletPreferences.getPortletId();
+
+			Portlet portlet = getPortletById(companyId, portletId);
+
+			if (portlet != null) {
+				portlets.add(portlet);
+			}
+		}
+
+		if (!includeEmbeddedAndStaticPortlets) {
+			return portlets;
+		}
+
+		List<PortletPreferences> embeddedAndStaticPortletPreferences =
+			portletPreferencesLocalService.getPortletPreferences(
+				PortletKeys.PREFS_OWNER_ID_DEFAULT,
+				PortletKeys.PREFS_OWNER_TYPE_EMBEDDED, plid);
+
+		for (PortletPreferences portletPreferences
+			: embeddedAndStaticPortletPreferences) {
+
+			String portletId = portletPreferences.getPortletId();
+
+			Portlet portlet = getPortletById(companyId, portletId);
+
+			if (portlet == null) {
+				continue;
+			}
+
+			if (portlet.isInstanceable()) {
+
+				// Instanceable portlets do not need to be cloned because
+				// they are already cloned. See the method getPortletById in
+				// the class PortletLocalServiceImpl and how it references
+				// the method getClonedInstance in the class PortletImpl.
+
+			}
+			else {
+				portlet = (Portlet)portlet.clone();
+			}
+
+			// We set static and embedded portlets as static on order to avoid
+			// adding the close and/or move icons.
+
+			portlet.setStatic(true);
+
+			portlets.add(portlet);
+		}
+
+		return portlets;
+	}
+
+	@Override
 	@Skip
 	public List<Portlet> getPortlets(
 		long companyId, boolean showSystem, boolean showPortal) {
@@ -689,6 +798,33 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 		else {
 			return true;
 		}
+	}
+
+	@Override
+	public boolean hasPortlet(
+			long plid, String portletId, boolean isEmbeddedOrStaticPortlet)
+		throws PortalException {
+
+		Layout layout = layoutLocalService.getLayout(plid);
+
+		long companyId = layout.getCompanyId();
+
+		int ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
+
+		if (isEmbeddedOrStaticPortlet) {
+			ownerType = PortletKeys.PREFS_OWNER_TYPE_EMBEDDED;
+		}
+
+		javax.portlet.PortletPreferences portletPreferences =
+			portletPreferencesLocalService.fetchPreferences(
+				companyId, PortletKeys.PREFS_OWNER_ID_DEFAULT, ownerType, plid,
+				portletId);
+
+		if (portletPreferences != null) {
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
