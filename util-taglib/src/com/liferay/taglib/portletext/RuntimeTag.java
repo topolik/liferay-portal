@@ -20,7 +20,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletContainerUtil;
 import com.liferay.portal.kernel.portlet.PortletJSONUtil;
-import com.liferay.portal.kernel.portlet.PortletLayoutListener;
 import com.liferay.portal.kernel.portlet.PortletParameterUtil;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
@@ -41,7 +40,6 @@ import com.liferay.portal.service.PortletPreferencesLocalServiceUtil;
 import com.liferay.portal.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.PortletPreferencesFactoryConstants;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.taglib.servlet.PipingServletResponse;
@@ -198,24 +196,22 @@ public class RuntimeTag extends TagSupport {
 
 			JSONObject jsonObject = null;
 
-			if ((PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
-					portletId) < 1) ||
-				layout.isTypeControlPanel() || layout.isTypePanel()) {
+			boolean populateJSONObject = false;
 
-				PortletPreferencesLocalServiceUtil.updatePreferences(
-					PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, themeDisplay.getPlid(),
-					portletId, portlet.getDefaultPreferences());
+			if (!PortletLocalServiceUtil.hasPortlet(
+					themeDisplay.getPlid(), portletId, true)) {
 
-				PortletLayoutListener portletLayoutListener =
-					portlet.getPortletLayoutListenerInstance();
+				PortletLocalServiceUtil.addPortlet(
+					themeDisplay.getPlid(), portletId, true);
 
-				if (portletLayoutListener != null) {
-					portletLayoutListener.onAddToLayout(
-						portletId, themeDisplay.getPlid());
-				}
+				populateJSONObject = true;
+			}
 
+			if (layout.isTypeControlPanel() || layout.isTypePanel()) {
+				populateJSONObject = true;
+			}
+
+			if (populateJSONObject) {
 				jsonObject = JSONFactoryUtil.createJSONObject();
 
 				PortletJSONUtil.populatePortletJSONObject(
