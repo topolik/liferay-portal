@@ -40,6 +40,11 @@ public class PortletLocalServiceUtil {
 	 *
 	 * Never modify this class directly. Add custom service methods to {@link com.liferay.portal.service.impl.PortletLocalServiceImpl} and rerun ServiceBuilder to regenerate this class.
 	 */
+	public static void addPortlet(long plid, java.lang.String portletId,
+		boolean isEmbeddedOrStaticPortlet)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService().addPortlet(plid, portletId, isEmbeddedOrStaticPortlet);
+	}
 
 	/**
 	* Adds the portlet to the database. Also notifies the appropriate model listeners.
@@ -345,6 +350,12 @@ public class PortletLocalServiceUtil {
 		return getService().getPortlets(companyId, showSystem, showPortal);
 	}
 
+	public static java.util.List<com.liferay.portal.model.Portlet> getPortlets(
+		long plid, boolean includeEmbeddedAndStaticPortlets)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().getPortlets(plid, includeEmbeddedAndStaticPortlets);
+	}
+
 	/**
 	* Returns a range of all the portlets.
 	*
@@ -381,6 +392,13 @@ public class PortletLocalServiceUtil {
 
 	public static boolean hasPortlet(long companyId, java.lang.String portletId) {
 		return getService().hasPortlet(companyId, portletId);
+	}
+
+	public static boolean hasPortlet(long plid, java.lang.String portletId,
+		boolean isEmbeddedOrStaticPortlet)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .hasPortlet(plid, portletId, isEmbeddedOrStaticPortlet);
 	}
 
 	public static void initEAR(javax.servlet.ServletContext servletContext,
