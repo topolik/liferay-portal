@@ -399,7 +399,14 @@ public class PortletDataContextImpl implements PortletDataContext {
 			String roleName = role.getName();
 
 			if (role.isTeam()) {
-				roleName = PermissionExporter.ROLE_TEAM_PREFIX + roleName;
+				try {
+					roleName =
+						PermissionExporter.ROLE_TEAM_PREFIX +
+							role.getDescriptiveName();
+				}
+				catch (Exception e) {
+					_log.error(e, e);
+				}
 			}
 
 			KeyValuePair permission = new KeyValuePair(
@@ -1596,8 +1603,16 @@ public class PortletDataContextImpl implements PortletDataContext {
 				roleName = roleName.substring(
 					PermissionExporter.ROLE_TEAM_PREFIX.length());
 
+				long liveGroupId = _groupId;
+
+				Group group = GroupLocalServiceUtil.getGroup(liveGroupId);
+
+				if (group.isStagingGroup()) {
+					liveGroupId = group.getLiveGroupId();
+				}
+
 				try {
-					team = TeamLocalServiceUtil.getTeam(_groupId, roleName);
+					team = TeamLocalServiceUtil.getTeam(liveGroupId, roleName);
 				}
 				catch (NoSuchTeamException nste) {
 					if (_log.isWarnEnabled()) {

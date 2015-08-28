@@ -223,7 +223,13 @@ definePermissionsURL.setWindowState(LiferayWindowState.POP_UP);
 			modelResourceRoleId = GetterUtil.getLong(resourcePrimKey);
 		}
 
-		roles.addAll(RoleLocalServiceUtil.getTeamRoles(groupId, new long[] {modelResourceRoleId}));
+		long liveGroupId = groupId;
+
+		if (group.isStagingGroup()) {
+			liveGroupId = group.getLiveGroupId();
+		}
+
+		roles.addAll(RoleLocalServiceUtil.getTeamRoles(liveGroupId, new long[] {modelResourceRoleId}));
 
 		Iterator<Role> itr = roles.iterator();
 
