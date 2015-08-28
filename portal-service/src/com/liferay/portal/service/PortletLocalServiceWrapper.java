@@ -30,6 +30,14 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 		_portletLocalService = portletLocalService;
 	}
 
+	@Override
+	public void addPortlet(long plid, java.lang.String portletId,
+		boolean isEmbeddedOrStaticPortlet)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_portletLocalService.addPortlet(plid, portletId,
+			isEmbeddedOrStaticPortlet);
+	}
+
 	/**
 	* Adds the portlet to the database. Also notifies the appropriate model listeners.
 	*
@@ -373,6 +381,14 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 			showPortal);
 	}
 
+	@Override
+	public java.util.List<com.liferay.portal.model.Portlet> getPortlets(
+		long plid, boolean includeEmbeddedAndStaticPortlets)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _portletLocalService.getPortlets(plid,
+			includeEmbeddedAndStaticPortlets);
+	}
+
 	/**
 	* Returns a range of all the portlets.
 	*
@@ -414,6 +430,14 @@ public class PortletLocalServiceWrapper implements PortletLocalService,
 	@Override
 	public boolean hasPortlet(long companyId, java.lang.String portletId) {
 		return _portletLocalService.hasPortlet(companyId, portletId);
+	}
+
+	@Override
+	public boolean hasPortlet(long plid, java.lang.String portletId,
+		boolean isEmbeddedOrStaticPortlet)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _portletLocalService.hasPortlet(plid, portletId,
+			isEmbeddedOrStaticPortlet);
 	}
 
 	@Override

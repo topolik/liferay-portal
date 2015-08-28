@@ -271,6 +271,11 @@ public class PortletPreferencesFactoryUtil {
 		return getPortletPreferencesFactory().getPreferencesValidator(portlet);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getLayoutPortletSetup(Layout, String)}
+	 */
+	@Deprecated
 	public static PortletPreferences getStrictLayoutPortletSetup(
 		Layout layout, String portletId) {
 
@@ -278,6 +283,11 @@ public class PortletPreferencesFactoryUtil {
 			layout, portletId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPortletSetup(Layout, String, String)}
+	 */
+	@Deprecated
 	public static PortletPreferences getStrictPortletSetup(
 		Layout layout, String portletId) {
 
@@ -285,6 +295,10 @@ public class PortletPreferencesFactoryUtil {
 			layout, portletId);
 	}
 
+	/**
+	 * @deprecated As of 7.0.0 with no direct replacement
+	 */
+	@Deprecated
 	public static PortletPreferences strictFromXML(
 		long companyId, long ownerId, int ownerType, long plid,
 		String portletId, String xml) {

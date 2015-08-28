@@ -352,7 +352,7 @@ public class PortletContainerImpl implements PortletContainer {
 				request, portlet.getPortletId());
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesLocalServiceUtil.getStrictPreferences(
+			PortletPreferencesLocalServiceUtil.getPreferences(
 				portletPreferencesIds);
 
 		ServletContext servletContext = (ServletContext)request.getAttribute(
@@ -716,7 +716,7 @@ public class PortletContainerImpl implements PortletContainer {
 				request, portlet.getPortletId());
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesLocalServiceUtil.getStrictPreferences(
+			PortletPreferencesLocalServiceUtil.getPreferences(
 				portletPreferencesIds);
 
 		ServletContext servletContext = (ServletContext)request.getAttribute(

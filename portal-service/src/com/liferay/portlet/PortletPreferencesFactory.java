@@ -149,12 +149,26 @@ public interface PortletPreferencesFactory {
 
 	public PreferencesValidator getPreferencesValidator(Portlet portlet);
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getLayoutPortletSetup(Layout, String)}
+	 */
+	@Deprecated
 	public PortletPreferences getStrictLayoutPortletSetup(
 		Layout layout, String portletId);
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPortletSetup(Layout, String, String)}
+	 */
+	@Deprecated
 	public PortletPreferences getStrictPortletSetup(
 		Layout layout, String portletId);
 
+	/**
+	 * @deprecated As of 7.0.0 with no direct replacement
+	 */
+	@Deprecated
 	public PortletPreferences strictFromXML(
 		long companyId, long ownerId, int ownerType, long plid,
 		String portletId, String xml);

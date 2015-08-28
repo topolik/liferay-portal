@@ -14,7 +14,6 @@
 
 package com.liferay.quick.note.web.portlet.action;
 
-import com.liferay.portal.PortletPreferencesException;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -23,7 +22,6 @@ import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.WebKeys;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
-import com.liferay.portlet.StrictPortletPreferencesImpl;
 import com.liferay.quick.note.web.constants.QuickNotePortletKeys;
 
 import javax.portlet.ActionRequest;
@@ -56,18 +54,15 @@ public class SaveMVCActionCommand implements MVCActionCommand {
 			WebKeys.THEME_DISPLAY);
 
 		try {
+			String portletId = themeDisplay.getPpid();
+
 			PortletPermissionUtil.check(
 				themeDisplay.getPermissionChecker(), themeDisplay.getLayout(),
-				themeDisplay.getPpid(), ActionKeys.CONFIGURATION);
+				portletId, ActionKeys.CONFIGURATION);
 
 			PortletPreferences portletPreferences =
-				PortletPreferencesFactoryUtil.getStrictPortletSetup(
-					themeDisplay.getLayout(), themeDisplay.getPpid());
-
-			if (portletPreferences instanceof StrictPortletPreferencesImpl) {
-				throw new PortletPreferencesException.MustBeStrict(
-					themeDisplay.getPpid());
-			}
+				PortletPreferencesFactoryUtil.getPortletSetup(
+					actionRequest, portletId);
 
 			String color = ParamUtil.getString(actionRequest, "color");
 			String data = ParamUtil.getString(actionRequest, "data");

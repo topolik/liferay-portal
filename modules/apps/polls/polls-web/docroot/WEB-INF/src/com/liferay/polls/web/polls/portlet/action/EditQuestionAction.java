@@ -43,6 +43,7 @@ import com.liferay.portal.struts.PortletAction;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.WebKeys;
+import com.liferay.portlet.PortletPreferencesFactoryUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -183,8 +184,9 @@ public class EditQuestionAction extends PortletAction {
 		Layout layout = LayoutLocalServiceUtil.getLayout(
 			themeDisplay.getRefererPlid());
 
-		PortletPreferences portletPreferences = getStrictPortletSetup(
-			layout, referringPortletResource);
+		PortletPreferences portletPreferences =
+			PortletPreferencesFactoryUtil.getExistingPortletSetup(
+				layout, referringPortletResource);
 
 		portletPreferences.setValue(
 			"questionId", String.valueOf(question.getQuestionId()));

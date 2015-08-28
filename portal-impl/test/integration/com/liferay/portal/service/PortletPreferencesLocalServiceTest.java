@@ -14,15 +14,9 @@
 
 package com.liferay.portal.service;
 
-import com.liferay.portal.deploy.hot.ServiceBag;
-import com.liferay.portal.kernel.bean.ClassLoaderBeanHandler;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.test.ReflectionTestUtil;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
-import com.liferay.portal.kernel.util.ClassLoaderUtil;
-import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Layout;
 import com.liferay.portal.model.Portlet;
@@ -30,15 +24,12 @@ import com.liferay.portal.model.PortletPreferences;
 import com.liferay.portal.model.PortletPreferencesIds;
 import com.liferay.portal.service.util.test.PortletPreferencesImplTestUtil;
 import com.liferay.portal.service.util.test.PortletPreferencesTestUtil;
-import com.liferay.portal.spring.aop.ServiceBeanAopCacheManagerUtil;
-import com.liferay.portal.spring.aop.ServiceBeanAopProxy;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.MainServletTestRule;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.test.LayoutTestUtil;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.PortletPreferencesImpl;
-import com.liferay.portlet.StrictPortletPreferencesImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +40,6 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-
-import org.springframework.aop.TargetSource;
-import org.springframework.aop.framework.AdvisedSupport;
 
 /**
  * @author Cristina González
@@ -970,24 +958,6 @@ public class PortletPreferencesLocalServiceTest {
 	}
 
 	@Test
-	public void testGetNotStrictPortletPreferences() throws Exception {
-		replaceService(false);
-
-		try {
-			javax.portlet.PortletPreferences jxPortletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
-					_layout.getCompanyId(), PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, _layout.getPlid(),
-					_portlet.getPortletId());
-
-			assertEmptyPortletPreferencesMap(jxPortletPreferences);
-		}
-		finally {
-			resetService();
-		}
-	}
-
-	@Test
 	public void
 			testGetOriginalGroupPortletPreferencesByCompanyIdAndGroupIdAndPortletId()
 		throws Exception {
@@ -1257,48 +1227,6 @@ public class PortletPreferencesLocalServiceTest {
 	}
 
 	@Test
-	public void testGetStrictPreferences() throws Exception {
-		replaceService(true);
-
-		try {
-			javax.portlet.PortletPreferences jxPortletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
-					_layout.getCompanyId(), PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, _layout.getPlid(),
-					_portlet.getPortletId());
-
-			assertStrictPortletPreferences(jxPortletPreferences);
-		}
-		finally {
-			resetService();
-		}
-	}
-
-	@Test
-	public void testGetStrictPreferencesByPortletPreferencesIds()
-		throws Exception {
-
-		replaceService(true);
-
-		try {
-			PortletPreferencesIds portletPreferencesIds =
-				new PortletPreferencesIds(
-					_layout.getCompanyId(), PortletKeys.PREFS_OWNER_ID_DEFAULT,
-					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, _layout.getPlid(),
-					_portlet.getPortletId());
-
-			javax.portlet.PortletPreferences jxPortletPreferences =
-				PortletPreferencesLocalServiceUtil.getStrictPreferences(
-					portletPreferencesIds);
-
-			assertStrictPortletPreferences(jxPortletPreferences);
-		}
-		finally {
-			resetService();
-		}
-	}
-
-	@Test
 	public void testUpdatePortletPreferences() throws Exception {
 		String singleValuePortletPreferencesXML =
 			PortletPreferencesTestUtil.getPortletPreferencesXML(
@@ -1442,18 +1370,6 @@ public class PortletPreferencesLocalServiceTest {
 		Assert.assertEquals(layout.getPlid(), portletPreferencesImpl.getPlid());
 	}
 
-	protected void assertStrictPortletPreferences(
-		javax.portlet.PortletPreferences jxPortletPreferences) {
-
-		StrictPortletPreferencesImpl strictPortletPreferencesImpl =
-			(StrictPortletPreferencesImpl)jxPortletPreferences;
-
-		Map<String, String[]> strictPortletPreferencesMap =
-			strictPortletPreferencesImpl.getMap();
-
-		Assert.assertTrue(strictPortletPreferencesMap.isEmpty());
-	}
-
 	protected void assertValues(
 			javax.portlet.PortletPreferences jxPortletPreferences, String name,
 			String[] values)
@@ -1480,31 +1396,6 @@ public class PortletPreferencesLocalServiceTest {
 		assertValues(portletPreferencesImpl, name, values);
 	}
 
-	protected void replaceService(boolean strict) throws Exception {
-		AdvisedSupport advisedSupport = ServiceBeanAopProxy.getAdvisedSupport(
-			PortletPreferencesLocalServiceUtil.getService());
-
-		TargetSource targetSource = advisedSupport.getTargetSource();
-
-		Object previousService = targetSource.getTarget();
-
-		ServiceWrapper<PortletPreferencesLocalService> serviceWrapper =
-			new TestPortletPreferencesLocalServiceWrapper(
-				(PortletPreferencesLocalService)previousService, strict);
-
-		_serviceBag = new ServiceBag<PortletPreferencesLocalService>(
-			ClassLoaderUtil.getPortalClassLoader(), advisedSupport,
-			PortletPreferencesLocalService.class, serviceWrapper);
-
-		ServiceBeanAopCacheManagerUtil.reset();
-	}
-
-	protected void resetService() throws Exception {
-		_serviceBag.replace();
-
-		ServiceBeanAopCacheManagerUtil.reset();
-	}
-
 	private static final String[] _MULTIPLE_VALUES = {"value1", "value2"};
 
 	private static final String _NAME = "name";
@@ -1520,46 +1411,5 @@ public class PortletPreferencesLocalServiceTest {
 
 	private Layout _layout;
 	private Portlet _portlet;
-	private ServiceBag<PortletPreferencesLocalService> _serviceBag;
-
-	private class TestPortletPreferencesLocalServiceWrapper
-		extends PortletPreferencesLocalServiceWrapper {
-
-		public TestPortletPreferencesLocalServiceWrapper(
-			PortletPreferencesLocalService portletPreferencesLocalService,
-			boolean strict) {
-
-			super(portletPreferencesLocalService);
-
-			_strict = strict;
-		}
-
-		@Override
-		public javax.portlet.PortletPreferences getStrictPreferences(
-			long companyId, long ownerId, int ownerType, long plid,
-			String portletId) {
-
-			ClassLoaderBeanHandler classLoaderBeanHandler =
-				(ClassLoaderBeanHandler)ProxyUtil.getInvocationHandler(
-					getWrappedService());
-
-			try {
-				return ReflectionTestUtil.invoke(
-					classLoaderBeanHandler.getBean(), "getPreferences",
-					new Class[] {
-						long.class, long.class, int.class, long.class,
-						String.class, String.class, boolean.class
-					},
-					companyId, ownerId, ownerType, plid, portletId, null,
-					_strict);
-			}
-			catch (Exception e) {
-				throw new SystemException(e);
-			}
-		}
-
-		private final boolean _strict;
-
-	}
 
 }

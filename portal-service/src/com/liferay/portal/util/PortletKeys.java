@@ -120,6 +120,8 @@ public class PortletKeys {
 
 	public static final int PREFS_OWNER_TYPE_COMPANY = 1;
 
+	public static final int PREFS_OWNER_TYPE_EMBEDDED = 7;
+
 	public static final int PREFS_OWNER_TYPE_GROUP = 2;
 
 	public static final int PREFS_OWNER_TYPE_LAYOUT = 3;

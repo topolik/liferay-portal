@@ -21,14 +21,14 @@ import com.liferay.portal.kernel.exception.PortalException;
  */
 public class PortletPreferencesException extends PortalException {
 
-	public static class MustBeStrict extends PortletPreferencesException {
+	public static class MustExist extends PortletPreferencesException {
 
-		public MustBeStrict(String portletId) {
+		public MustExist(String portletId, long plid) {
 			super(
 				String.format(
-					"Portlet preferences for portlet %s must be an instance " +
-						"of StrictPortletPreferencesImpl",
-					portletId));
+					"Referenced portlet %s must be registered in page %s for " +
+						"preferences to be created",
+					portletId, plid));
 
 			this.portletId = portletId;
 		}
