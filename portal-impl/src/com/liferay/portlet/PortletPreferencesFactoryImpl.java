@@ -14,6 +14,7 @@
 
 package com.liferay.portlet;
 
+import com.liferay.portal.PortletPreferencesException;
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.SingleVMPoolUtil;
 import com.liferay.portal.kernel.cache.key.CacheKeyGenerator;
@@ -226,14 +227,15 @@ public class PortletPreferencesFactoryImpl
 			return null;
 		}
 
-		PortletPreferences portletPreferences = getStrictPortletSetup(
-			layout, portletId);
+		if (!PortletLocalServiceUtil.hasPortlet(
+				layout.getPlid(), portletId, false) &&
+			!PortletLocalServiceUtil.hasPortlet(
+				layout.getPlid(), portletId, true)) {
 
-		if (portletPreferences instanceof StrictPortletPreferencesImpl) {
-			throw new PrincipalException();
+			throw new PortletPreferencesException.MustBeStrict(portletId);
 		}
 
-		return portletPreferences;
+		return getPortletSetup(layout, portletId, null);
 	}
 
 	@Override
