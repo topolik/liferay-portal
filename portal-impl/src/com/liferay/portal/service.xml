@@ -1623,6 +1623,7 @@
 
 		<!-- References -->
 
+		<reference package-path="com.liferay.portal" entity="Layout" />
 		<reference package-path="com.liferay.portal" entity="PortletPreferences" />
 		<reference package-path="com.liferay.portal" entity="Resource" />
 		<reference package-path="com.liferay.portal" entity="ResourceAction" />
