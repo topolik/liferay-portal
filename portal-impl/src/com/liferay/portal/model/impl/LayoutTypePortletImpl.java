@@ -74,6 +74,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.portlet.ReadOnlyException;
+
 /**
  * @author Brian Wing Shun Chan
  * @author Berentey Zsolt
@@ -271,6 +273,8 @@ public class LayoutTypePortletImpl
 		List<Portlet> staticPortlets = getStaticPortlets(
 			PropsKeys.LAYOUT_STATIC_PORTLETS_ALL);
 
+		updateStaticPortletPreferences(staticPortlets);
+
 		List<Portlet> embeddedPortlets = getEmbeddedPortlets(
 			portlets, staticPortlets);
 
@@ -318,8 +322,12 @@ public class LayoutTypePortletImpl
 		List<Portlet> startPortlets = getStaticPortlets(
 			PropsKeys.LAYOUT_STATIC_PORTLETS_START + columnId);
 
+		updateStaticPortletPreferences(startPortlets);
+
 		List<Portlet> endPortlets = getStaticPortlets(
 			PropsKeys.LAYOUT_STATIC_PORTLETS_END + columnId);
+
+		updateStaticPortletPreferences(endPortlets);
 
 		return addStaticPortlets(portlets, startPortlets, endPortlets);
 	}
@@ -573,13 +581,13 @@ public class LayoutTypePortletImpl
 			if (hasNonstaticPortletId(columnId, portletId)) {
 				return true;
 			}
-
-			if (hasStaticPortletId(columnId, portletId)) {
-				return true;
-			}
 		}
 
 		Layout layout = getLayout();
+
+		if (hasStaticPortletId(layout, columns, portletId)) {
+			return true;
+		}
 
 		if (layout.isTypeControlPanel()) {
 			return false;
@@ -1738,6 +1746,71 @@ public class LayoutTypePortletImpl
 		return false;
 	}
 
+	protected boolean hasStaticPortletId(
+			Layout layout, List<String> columns, String portletId)
+		throws PortalException {
+
+		for (String columnId : columns) {
+			String[] staticPortletIdsStart = getStaticPortletIds(
+				PropsKeys.LAYOUT_STATIC_PORTLETS_START + columnId);
+
+			String[] staticPortletIdsEnd = getStaticPortletIds(
+				PropsKeys.LAYOUT_STATIC_PORTLETS_END + columnId);
+
+			for (String staticPortletId : staticPortletIdsStart) {
+				if (staticPortletId.equals(portletId) ||
+					PortletConstants.getRootPortletId(
+						staticPortletId).equals(portletId)) {
+
+					return true;
+				}
+			}
+
+			for (String staticPortletId : staticPortletIdsEnd) {
+				if (staticPortletId.equals(portletId) ||
+					PortletConstants.getRootPortletId(
+						staticPortletId).equals(portletId)) {
+
+					return true;
+				}
+			}
+		}
+
+		String[] staticPortletIdsAll = getStaticPortletIds(
+			PropsKeys.LAYOUT_STATIC_PORTLETS_ALL);
+
+		for (String staticPortletId : staticPortletIdsAll) {
+			if (staticPortletId.equals(portletId) ||
+				PortletConstants.getRootPortletId(
+					staticPortletId).equals(portletId)) {
+
+				return true;
+			}
+		}
+
+		if (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(),
+				portletId) > 0) {
+
+			javax.portlet.PortletPreferences portletPreferences =
+				PortletPreferencesLocalServiceUtil.getPreferences(
+					layout.getCompanyId(), 0,
+					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(),
+					portletId, StringPool.BLANK);
+
+			boolean isStatic = Boolean.parseBoolean(
+				portletPreferences.getValue("static", "false"));
+
+			if (isStatic) {
+				PortletPreferencesLocalServiceUtil.deletePortletPreferences(
+					0, PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(),
+					portletId);
+			}
+		}
+
+		return false;
+	}
+
 	protected boolean hasStaticPortletId(String columnId, String portletId)
 		throws PortalException {
 
@@ -1874,6 +1947,38 @@ public class LayoutTypePortletImpl
 		_portalPreferences.setValue(
 			CustomizedPages.namespacePlid(getPlid()), _MODIFIED_DATE,
 			_dateFormat.format(new Date()));
+	}
+
+	protected void updateStaticPortletPreferences(
+		List<Portlet> staticPortlets) {
+
+		Layout layout = getLayout();
+
+		for (Portlet portlet : staticPortlets) {
+			String portletId = portlet.getPortletId();
+
+			javax.portlet.PortletPreferences portletPreferences =
+				PortletPreferencesLocalServiceUtil.getPreferences(
+					layout.getCompanyId(), 0,
+					PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(),
+					portletId, StringPool.BLANK);
+
+			boolean isStatic = Boolean.parseBoolean(
+				portletPreferences.getValue("static", "false"));
+
+			if (!isStatic) {
+				try {
+					portletPreferences.setValue("static", "true");
+
+					PortletPreferencesLocalServiceUtil.updatePreferences(
+						0, PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
+						layout.getPlid(), portletId, portletPreferences);
+				}
+				catch (ReadOnlyException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	private static final String _MODIFIED_DATE = "modifiedDate";
