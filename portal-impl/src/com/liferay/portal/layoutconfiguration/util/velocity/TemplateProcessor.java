@@ -210,6 +210,9 @@ public class TemplateProcessor implements ColumnProcessor {
 			_request, StringPool.BLANK, portlet, jsonObject);
 
 		try {
+			PortletLocalServiceUtil.addPortlet(
+				themeDisplay.getPlid(), portletId, true);
+
 			PortletJSONUtil.writeHeaderPaths(_response, jsonObject);
 
 			PortletContainerUtil.render(

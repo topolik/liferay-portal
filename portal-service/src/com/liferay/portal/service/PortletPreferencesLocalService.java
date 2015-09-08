@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.model.PortletPreferencesIds;
 
 /**
  * Provides the local service interface for PortletPreferences. Methods of this
@@ -295,11 +296,21 @@ public interface PortletPreferencesLocalService extends BaseLocalService,
 	public javax.portlet.PortletPreferences getPreferences(
 		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds);
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPreferences(long, long, int, long, String)
+	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public javax.portlet.PortletPreferences getStrictPreferences(
 		long companyId, long ownerId, int ownerType, long plid,
 		java.lang.String portletId);
 
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #getPreferences(PortletPreferencesIds)
+	 */
+	@Deprecated
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public javax.portlet.PortletPreferences getStrictPreferences(
 		com.liferay.portal.model.PortletPreferencesIds portletPreferencesIds);

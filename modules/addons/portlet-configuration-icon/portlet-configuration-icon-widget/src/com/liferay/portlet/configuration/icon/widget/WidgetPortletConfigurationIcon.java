@@ -95,7 +95,7 @@ public class WidgetPortletConfigurationIcon
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
 		PortletPreferences portletSetup =
-			PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(
+			PortletPreferencesFactoryUtil.getLayoutPortletSetup(
 				themeDisplay.getLayout(), portletDisplay.getId());
 
 		boolean lfrWidgetShowAddAppLink = GetterUtil.getBoolean(

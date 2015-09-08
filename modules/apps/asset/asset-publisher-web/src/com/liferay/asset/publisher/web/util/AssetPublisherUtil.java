@@ -68,7 +68,6 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.SubscriptionSender;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
-import com.liferay.portlet.StrictPortletPreferencesImpl;
 import com.liferay.portlet.asset.AssetRendererFactoryRegistryUtil;
 import com.liferay.portlet.asset.model.AssetCategory;
 import com.liferay.portlet.asset.model.AssetEntry;
@@ -150,10 +149,10 @@ public class AssetPublisherUtil {
 			themeDisplay.getPlid());
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
+			PortletPreferencesFactoryUtil.getExistingPortletSetup(
 				layout, portletId);
 
-		if (portletPreferences instanceof StrictPortletPreferencesImpl) {
+		if (portletPreferences == null) {
 			return;
 		}
 

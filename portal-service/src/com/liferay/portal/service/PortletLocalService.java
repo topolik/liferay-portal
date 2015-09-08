@@ -45,6 +45,8 @@ public interface PortletLocalService extends BaseLocalService,
 	 *
 	 * Never modify or reference this interface directly. Always use {@link PortletLocalServiceUtil} to access the portlet local service. Add custom service methods to {@link com.liferay.portal.service.impl.PortletLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	public void addPortlet(long plid, java.lang.String portletId,
+		boolean isEmbeddedOrStaticPortlet) throws PortalException;
 
 	/**
 	* Adds the portlet to the database. Also notifies the appropriate model listeners.
@@ -298,6 +300,11 @@ public interface PortletLocalService extends BaseLocalService,
 	public java.util.List<com.liferay.portal.model.Portlet> getPortlets(
 		long companyId, boolean showSystem, boolean showPortal);
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.portal.model.Portlet> getPortlets(
+		long plid, boolean includeEmbeddedAndStaticPortlets)
+		throws PortalException;
+
 	/**
 	* Returns a range of all the portlets.
 	*
@@ -333,6 +340,10 @@ public interface PortletLocalService extends BaseLocalService,
 	@com.liferay.portal.kernel.spring.aop.Skip
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public boolean hasPortlet(long companyId, java.lang.String portletId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public boolean hasPortlet(long plid, java.lang.String portletId,
+		boolean isEmbeddedOrStaticPortlet) throws PortalException;
 
 	@com.liferay.portal.kernel.spring.aop.Skip
 	public void initEAR(javax.servlet.ServletContext servletContext,

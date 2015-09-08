@@ -58,8 +58,6 @@ public class DefaultLayoutTypeAccessPolicyImpl
 		throws PortalException {
 
 		if (isAccessAllowedToLayoutPortlet(request, layout, portlet)) {
-			PortalUtil.addPortletDefaultResource(request, portlet);
-
 			if (hasAccessPermission(request, layout, portlet)) {
 				return;
 			}

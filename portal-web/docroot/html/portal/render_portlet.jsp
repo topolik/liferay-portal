@@ -53,13 +53,13 @@ PortletPreferences portletPreferences = null;
 PortletPreferences renderPortletPreferences = (PortletPreferences)request.getAttribute(WebKeys.RENDER_PORTLET_PREFERENCES);
 
 if (renderPortletPreferences == null) {
-	portletPreferences = PortletPreferencesLocalServiceUtil.getStrictPreferences(portletPreferencesIds);
+	portletPreferences = PortletPreferencesLocalServiceUtil.getPreferences(portletPreferencesIds);
 }
 else {
 	portletPreferences = renderPortletPreferences;
 }
 
-PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getStrictLayoutPortletSetup(layout, portletId);
+PortletPreferences portletSetup = PortletPreferencesFactoryUtil.getLayoutPortletSetup(layout, portletId);
 
 Group group = null;
 boolean privateLayout = false;

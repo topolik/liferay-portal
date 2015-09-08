@@ -222,8 +222,8 @@ public abstract class BasePortletExportImportTestCase
 			new HashMap<String, String[]>());
 
 		PortletPreferences portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
-				layout, getPortletId());
+			PortletPreferencesFactoryUtil.getPortletSetup(
+				layout, getPortletId(), null);
 
 		portletPreferences.setValue(
 			"last-publish-date", String.valueOf(lastPublishDate.getTime()));
@@ -241,9 +241,8 @@ public abstract class BasePortletExportImportTestCase
 
 		Map<String, String[]> importParameterMap = new LinkedHashMap<>();
 
-		portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
-				layout, getPortletId());
+		portletPreferences = PortletPreferencesFactoryUtil.getPortletSetup(
+			layout, getPortletId(), null);
 
 		Date oldLastPublishDate = ExportImportDateUtil.getLastPublishDate(
 			portletPreferences);
@@ -251,9 +250,8 @@ public abstract class BasePortletExportImportTestCase
 		exportImportPortlet(
 			getPortletId(), exportParameterMap, importParameterMap);
 
-		portletPreferences =
-			PortletPreferencesFactoryUtil.getStrictPortletSetup(
-				layout, getPortletId());
+		portletPreferences = PortletPreferencesFactoryUtil.getPortletSetup(
+			layout, getPortletId(), null);
 
 		Date newLastPublishDate = ExportImportDateUtil.getLastPublishDate(
 			portletPreferences);
