@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.User;
 import com.liferay.portal.security.auth.CompanyThreadLocal;
 import com.liferay.portal.security.auth.PrincipalThreadLocal;
+import com.liferay.portal.security.jaas.JAASHelper;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
@@ -37,6 +38,7 @@ import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.servlet.filters.BasePortalFilter;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsUtil;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.WebKeys;
 
 import java.util.HashSet;
@@ -274,7 +276,22 @@ public class SecureFilter extends BasePortalFilter {
 				_log.debug("Not securing " + completeURL);
 			}
 
-			User user = PortalUtil.getUser(request);
+			String remoteUser = request.getRemoteUser();
+
+			User user = null;
+
+			if (PropsValues.PORTAL_JAAS_ENABLE && (remoteUser != null)) {
+					long companyId = PortalUtil.getCompanyId(request);
+
+					long userId = JAASHelper.getJaasUserId(
+						companyId, remoteUser);
+
+					user = UserLocalServiceUtil.getUser(userId);
+			}
+			else {
+				user = PortalUtil.getUser(request);
+
+			}
 
 			if (user == null) {
 				user = PortalUtil.initUser(request);
@@ -308,12 +325,19 @@ public class SecureFilter extends BasePortalFilter {
 
 		User user = UserLocalServiceUtil.getUser(userId);
 
-		String userIdString = String.valueOf(userId);
+		String remoteUser = null;
 
-		request = new ProtectedServletRequest(request, userIdString, authType);
+		if (PropsValues.PORTAL_JAAS_ENABLE) {
+			remoteUser = request.getRemoteUser();
+		}
+		else {
+			remoteUser = String.valueOf(userId);
+		}
+
+		request = new ProtectedServletRequest(request, remoteUser, authType);
 
 		session.setAttribute(WebKeys.USER, user);
-		session.setAttribute(_AUTHENTICATED_USER, userIdString);
+		session.setAttribute(_AUTHENTICATED_USER, remoteUser);
 
 		initThreadLocals(request);
 
