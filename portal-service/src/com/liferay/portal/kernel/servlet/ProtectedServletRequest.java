@@ -14,6 +14,10 @@
 
 package com.liferay.portal.kernel.servlet;
 
+import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
+
 import java.security.Principal;
 
 import javax.servlet.http.HttpServletRequest;
@@ -78,7 +82,7 @@ public class ProtectedServletRequest extends HttpServletRequestWrapper {
 
 	@Override
 	public String getRemoteUser() {
-		if (_remoteUser != null) {
+		if (!_PORTAL_JAAS_ENABLE && (_remoteUser != null)) {
 			return _remoteUser;
 		}
 		else {
@@ -95,6 +99,9 @@ public class ProtectedServletRequest extends HttpServletRequestWrapper {
 			return super.getUserPrincipal();
 		}
 	}
+
+	private static final boolean _PORTAL_JAAS_ENABLE = GetterUtil.getBoolean(
+		PropsUtil.get(PropsKeys.PORTAL_JAAS_ENABLE));
 
 	private String _authType;
 	private final String _remoteUser;

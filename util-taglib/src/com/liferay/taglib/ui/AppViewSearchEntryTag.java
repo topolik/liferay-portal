@@ -70,6 +70,10 @@ public class AppViewSearchEntryTag extends IncludeTag {
 		_description = description;
 	}
 
+	public void setEscape(boolean escape) {
+		_escape = escape;
+	}
+
 	public void setFileEntryRelatedSearchResults(
 		List<RelatedSearchResult<FileEntry>> fileEntryRelatedSearchResults) {
 
@@ -128,6 +132,7 @@ public class AppViewSearchEntryTag extends IncludeTag {
 		_containerType = null;
 		_cssClass = null;
 		_description = null;
+		_escape = false;
 		_fileEntryRelatedSearchResults = null;
 		_highlightEnabled = _HIGHLIGHT_ENABLED;
 		_locked = false;
@@ -219,6 +224,7 @@ public class AppViewSearchEntryTag extends IncludeTag {
 	private String _containerType;
 	private String _cssClass;
 	private String _description;
+	private boolean _escape;
 	private List<RelatedSearchResult<FileEntry>> _fileEntryRelatedSearchResults;
 	private boolean _highlightEnabled = _HIGHLIGHT_ENABLED;
 	private boolean _locked;

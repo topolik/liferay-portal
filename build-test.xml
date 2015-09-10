@@ -2227,7 +2227,9 @@ org.apache.catalina.startup.ClassLoaderFactory.level=INFO]]>
 						</then>
 					</if>
 
-					<antcall target="delete-liferay-home" />
+					<antcall target="delete-liferay-home">
+						<param name="keep.hsqldb" value="true" />
+					</antcall>
 
 					<if>
 						<equals arg1="${test.ant.launched.by.selenium}" arg2="true" />
@@ -3240,7 +3242,12 @@ go]]></replacevalue>
 					</then>
 				</if>
 
-				<delete dir="${test.app.server.liferay.home}/data" />
+				<delete failonerror="false" includeemptydirs="true">
+					<fileset dir="${test.app.server.liferay.home}/data">
+						<exclude name="hsql/lportal.properties" if:true="${keep.hsqldb}" />
+						<exclude name="hsql/lportal.script" if:true="${keep.hsqldb}" />
+					</fileset>
+				</delete>
 				<delete dir="${test.app.server.liferay.home}/logs" />
 				<delete dir="${test.app.server.liferay.home}/osgi/state" />
 
@@ -4501,6 +4508,21 @@ module.framework.properties.osgi.console=11312</echo>
 			test.dependencies.dir.name=dependencies
 			test.poshi.warnings.file.name=${project.dir}/poshi-warnings.xml
 		</echo>
+
+		<if>
+			<and>
+				<isset property="test.batch.max.group.size" />
+				<isset property="test.batch.property.name" />
+				<isset property="test.batch.property.value" />
+			</and>
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					test.batch.max.group.size=${test.batch.max.group.size}
+					test.batch.property.name=${test.batch.property.name}
+					test.batch.property.value=${test.batch.property.value}
+				</echo>
+			</then>
+		</if>
 
 		<if>
 			<isset property="test.class" />

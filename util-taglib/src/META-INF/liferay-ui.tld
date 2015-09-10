@@ -410,6 +410,12 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<name>escape</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
+		</attribute>
+		<attribute>
 			<name>fileEntryRelatedSearchResults</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -1388,6 +1394,16 @@
 		<attribute>
 			<name>showSubject</name>
 			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	<tag>
+		<name>empty-result-message</name>
+		<tag-class>com.liferay.taglib.ui.EmptyResultMessageTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>message</name>
+			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
