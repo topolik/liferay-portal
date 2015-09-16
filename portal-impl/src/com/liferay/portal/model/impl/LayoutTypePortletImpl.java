@@ -317,6 +317,21 @@ public class LayoutTypePortletImpl
 	}
 
 	@Override
+	public List<Portlet> getExplicitlyAddedPortlets() {
+		List<Portlet> portlets = new ArrayList<>();
+
+		List<String> columns = getColumns();
+
+		for (int i = 0; i < columns.size(); i++) {
+			String columnId = columns.get(i);
+
+			portlets.addAll(getAllPortlets(columnId));
+		}
+
+		return portlets;
+	}
+
+	@Override
 	public Layout getLayoutSetPrototypeLayout() {
 		return _layoutSetPrototypeLayout;
 	}
@@ -1526,20 +1541,6 @@ public class LayoutTypePortletImpl
 		_embeddedPortlets = portlets;
 
 		return _embeddedPortlets;
-	}
-
-	protected List<Portlet> getExplicitlyAddedPortlets() {
-		List<Portlet> portlets = new ArrayList<>();
-
-		List<String> columns = getColumns();
-
-		for (int i = 0; i < columns.size(); i++) {
-			String columnId = columns.get(i);
-
-			portlets.addAll(getAllPortlets(columnId));
-		}
-
-		return portlets;
 	}
 
 	protected List<String> getNestedColumns() {
