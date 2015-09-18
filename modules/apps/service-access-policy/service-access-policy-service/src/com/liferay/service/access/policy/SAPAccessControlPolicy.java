@@ -57,6 +57,10 @@ public class SAPAccessControlPolicy extends BaseAccessControlPolicy {
 			AccessControlled accessControlled)
 		throws SecurityException {
 
+		if (accessControlled.guestAccessEnabled()) {
+			return;
+		}
+
 		AccessControlContext accessControlContext =
 			AccessControlUtil.getAccessControlContext();
 

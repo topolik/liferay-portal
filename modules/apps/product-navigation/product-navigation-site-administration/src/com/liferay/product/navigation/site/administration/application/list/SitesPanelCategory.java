@@ -59,12 +59,12 @@ public class SitesPanelCategory extends BaseJSPPanelCategory {
 
 	@Override
 	public String getKey() {
-		return PanelCategoryKeys.SITES;
+		return PanelCategoryKeys.CONTROL_PANEL_SITES;
 	}
 
 	@Override
 	public String getLabel(Locale locale) {
-		return LanguageUtil.get(locale, "category.sites");
+		return LanguageUtil.get(locale, "category.control_panel.sites");
 	}
 
 	@Override

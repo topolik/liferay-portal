@@ -30,7 +30,7 @@ import org.osgi.service.component.annotations.Component;
 	immediate = true,
 	property = {
 		"panel.category.key=" + PanelCategoryKeys.CONTROL_PANEL,
-		"service.ranking:Integer=100"
+		"service.ranking:Integer=200"
 	},
 	service = PanelCategory.class
 )
@@ -48,7 +48,7 @@ public class UsersPanelCategory extends BasePanelCategory {
 
 	@Override
 	public String getLabel(Locale locale) {
-		return LanguageUtil.get(locale, "category.users");
+		return LanguageUtil.get(locale, "category.control_panel.users");
 	}
 
 }
