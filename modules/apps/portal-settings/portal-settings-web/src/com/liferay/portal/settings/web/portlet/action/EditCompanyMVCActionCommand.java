@@ -176,6 +176,7 @@ public class EditCompanyMVCActionCommand extends BaseMVCActionCommand {
 
 		for (String name : settingsDescriptor.getAllKeys()) {
 			String oldValue = settings.getValue(name, null);
+
 			String value = ParamUtil.get(
 				actionRequest, "cas--" + name + "--", oldValue);
 

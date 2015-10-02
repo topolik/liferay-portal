@@ -6,8 +6,8 @@ Import-Package:\
 	!junit.*,\
 	*
 Export-Package:\
-	com.liferay.portal.security.sso.cas.module.configuration,\
-	com.liferay.portal.security.sso.cas.constants
+	com.liferay.portal.security.sso.cas.constants,\
+	com.liferay.portal.security.sso.cas.module.configuration
 Include-Resource:\
 	classes,\
 	@lib/cas-client-core.jar,\

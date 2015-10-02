@@ -17,11 +17,7 @@
 <%@ include file="/init.jsp" %>
 
 <%
-CASConfiguration casConfiguration = ConfigurationFactoryUtil.getConfiguration(
-	CASConfiguration.class,
-	new ParameterMapSettingsLocator(
-		liferayPortletRequest.getParameterMap(),
-		new CompanyServiceSettingsLocator(company.getCompanyId(), CASConstants.SERVICE_NAME)));
+CASConfiguration casConfiguration = ConfigurationFactoryUtil.getConfiguration(CASConfiguration.class, new ParameterMapSettingsLocator(liferayPortletRequest.getParameterMap(), new CompanyServiceSettingsLocator(company.getCompanyId(), CASConstants.SERVICE_NAME)));
 
 boolean casAuthEnabled = casConfiguration.enabled();
 boolean casImportFromLdap = casConfiguration.importFromLDAP();
