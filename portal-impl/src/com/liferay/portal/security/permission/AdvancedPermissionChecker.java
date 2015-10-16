@@ -52,6 +52,7 @@ import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.permission.LayoutPrototypePermissionUtil;
 import com.liferay.portal.service.permission.LayoutSetPrototypePermissionUtil;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
+import com.liferay.portlet.exportimport.staging.permission.StagingPermissionCheckerWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -524,8 +525,11 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 	protected void addTeamRoles(long userId, Group group, Set<Role> roles)
 		throws Exception {
 
+		long groupId = StagingPermissionCheckerWrapper.getStagingGroupId(
+			group.getGroupId());
+
 		List<Team> userTeams = TeamLocalServiceUtil.getUserTeams(
-			userId, group.getGroupId());
+			userId, groupId);
 
 		for (Team team : userTeams) {
 			Role role = RoleLocalServiceUtil.getTeamRole(
@@ -539,7 +543,7 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 		teamParams.put("usersUserGroups", userId);
 
 		List<Team> userGroupTeams = TeamLocalServiceUtil.search(
-			group.getGroupId(), null, null, teamParams, QueryUtil.ALL_POS,
+			groupId, null, null, teamParams, QueryUtil.ALL_POS,
 			QueryUtil.ALL_POS, null);
 
 		for (Team team : userGroupTeams) {
