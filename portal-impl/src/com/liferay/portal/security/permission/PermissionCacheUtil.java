@@ -26,6 +26,7 @@ import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.exportimport.lar.ExportImportThreadLocal;
+import com.liferay.portlet.exportimport.staging.permission.StagingPermissionCheckerWrapper;
 
 import java.io.Serializable;
 
@@ -89,6 +90,8 @@ public class PermissionCacheUtil {
 	public static void clearResourceBlockCache(
 		long companyId, long groupId, String name) {
 
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
+
 		if (ExportImportThreadLocal.isImportInProcess() ||
 			!PermissionThreadLocal.isFlushResourceBlockEnabled(
 				companyId, groupId, name)) {
@@ -135,6 +138,8 @@ public class PermissionCacheUtil {
 		long userId, boolean signedIn, long groupId, String name,
 		String primKey, String actionId) {
 
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
+
 		PermissionKey permissionKey = new PermissionKey(
 			userId, signedIn, groupId, name, primKey, actionId);
 
@@ -143,6 +148,8 @@ public class PermissionCacheUtil {
 
 	public static ResourceBlockIdsBag getResourceBlockIdsBag(
 		long companyId, long groupId, long userId, String name) {
+
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
 
 		ResourceBlockIdsBagKey resourceBlockIdsBagKey =
 			new ResourceBlockIdsBagKey(companyId, groupId, userId, name);
@@ -155,6 +162,8 @@ public class PermissionCacheUtil {
 	}
 
 	public static long[] getUserGroupRoleIds(long userId, long groupId) {
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
+
 		UserGroupRoleIdsKey userGroupRoleIdsKey = new UserGroupRoleIdsKey(
 			userId, groupId);
 
@@ -196,6 +205,8 @@ public class PermissionCacheUtil {
 		long userId, boolean signedIn, long groupId, String name,
 		String primKey, String actionId, Boolean value) {
 
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
+
 		PermissionKey permissionKey = new PermissionKey(
 			userId, signedIn, groupId, name, primKey, actionId);
 
@@ -209,6 +220,8 @@ public class PermissionCacheUtil {
 		if (resourceBlockIdsBag == null) {
 			return;
 		}
+
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
 
 		ResourceBlockIdsBagKey resourceBlockIdsBagKey =
 			new ResourceBlockIdsBagKey(companyId, groupId, userId, name);
@@ -227,6 +240,8 @@ public class PermissionCacheUtil {
 		if (roleIds == null) {
 			return;
 		}
+
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
 
 		UserGroupRoleIdsKey userGroupRoleIdsKey = new UserGroupRoleIdsKey(
 			userId, groupId);
@@ -261,6 +276,8 @@ public class PermissionCacheUtil {
 		long userId, boolean signedIn, long groupId, String name,
 		String primKey, String actionId) {
 
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
+
 		PermissionKey permissionKey = new PermissionKey(
 			userId, signedIn, groupId, name, primKey, actionId);
 
@@ -269,6 +286,8 @@ public class PermissionCacheUtil {
 
 	public static void removeResourceBlockIdsBag(
 		long companyId, long groupId, long userId, String name) {
+
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
 
 		ResourceBlockIdsBagKey resourceBlockIdsBagKey =
 			new ResourceBlockIdsBagKey(companyId, groupId, userId, name);
@@ -281,6 +300,8 @@ public class PermissionCacheUtil {
 	}
 
 	public static void removeUserGroupRoleIds(long userId, long groupId) {
+		groupId = StagingPermissionCheckerWrapper.getStagingGroupId(groupId);
+
 		UserGroupRoleIdsKey userGroupRoleIdsKey = new UserGroupRoleIdsKey(
 			userId, groupId);
 

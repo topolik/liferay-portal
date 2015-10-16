@@ -16,9 +16,7 @@ package com.liferay.portal.security.permission;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.model.Group;
 import com.liferay.portal.model.ResourceConstants;
-import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.ResourceLocalServiceUtil;
 import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portlet.exportimport.staging.permission.StagingPermissionUtil;
@@ -33,11 +31,11 @@ public abstract class BaseResourcePermissionChecker
 		PermissionChecker permissionChecker, String name, long classPK,
 		String actionId) {
 
-		Group group = GroupLocalServiceUtil.fetchGroup(classPK);
-
-		if ((group != null) && group.isStagingGroup()) {
-			classPK = group.getLiveGroupId();
-		}
+//		Group group = GroupLocalServiceUtil.fetchGroup(classPK);
+//
+//		if ((group != null) && group.isStagingGroup()) {
+//			classPK = group.getLiveGroupId();
+//		}
 
 		try {
 			int count =
