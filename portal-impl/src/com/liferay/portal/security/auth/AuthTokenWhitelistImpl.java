@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.SetUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.PortletConstants;
@@ -35,6 +36,8 @@ import com.liferay.registry.collections.StringServiceRegistrationMapImpl;
 import com.liferay.registry.util.StringPlus;
 import com.liferay.util.Encryptor;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -130,7 +133,10 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 		if (Validator.isNotNull(strutsAction)) {
 			Set<String> whitelistActions = getPortletCSRFWhitelistActions();
 
-			if (whitelistActions.contains(strutsAction) &&
+			String prefixedActionName = prefixActionName(
+				rootPortletId, strutsAction);
+
+			if (whitelistActions.contains(prefixedActionName) &&
 				isValidStrutsAction(companyId, rootPortletId, strutsAction)) {
 
 				return true;
@@ -244,6 +250,10 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 		return false;
 	}
 
+	protected String prefixActionName(String prefix, String actionName) {
+		return prefix + StringPool.COLON + actionName;
+	}
+
 	protected void registerPortalProperty() {
 		Registry registry = RegistryUtil.getRegistry();
 
@@ -280,11 +290,20 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 
 		@Override
 		public Object addingService(ServiceReference<Object> serviceReference) {
+			String portletName = getPortletName(serviceReference);
+
+			if (Validator.isNull(portletName)) {
+				return null;
+			}
+
 			List<String> authTokenIgnoreActions = StringPlus.asList(
 				serviceReference.getProperty(
 					PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS));
 
-			_portletCSRFWhitelistActions.addAll(authTokenIgnoreActions);
+			Collection<String> prefixedActionNames = prefixActionNames(
+				portletName, authTokenIgnoreActions);
+
+			_portletCSRFWhitelistActions.addAll(prefixedActionNames);
 
 			Registry registry = RegistryUtil.getRegistry();
 
@@ -304,15 +323,41 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 		public void removedService(
 			ServiceReference<Object> serviceReference, Object object) {
 
+			String portletName = getPortletName(serviceReference);
+
+			if (Validator.isNull(portletName)) {
+				return;
+			}
+
 			List<String> authTokenIgnoreActions = StringPlus.asList(
 				serviceReference.getProperty(
 					PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS));
 
-			_portletCSRFWhitelistActions.removeAll(authTokenIgnoreActions);
+			Collection<String> prefixedActionNames = prefixActionNames(
+				portletName, authTokenIgnoreActions);
+
+			_portletCSRFWhitelistActions.removeAll(prefixedActionNames);
 
 			Registry registry = RegistryUtil.getRegistry();
 
 			registry.ungetService(serviceReference);
+		}
+
+		protected String getPortletName(ServiceReference<?> serviceReference) {
+			return (String)serviceReference.getProperty("javax.portlet.name");
+		}
+
+		protected Collection<String> prefixActionNames(
+			String prefix, Collection<String> actionNames) {
+
+			Collection<String> prefixedActionNames = new ArrayList<>(
+				actionNames.size());
+
+			for (String actionName : actionNames) {
+				prefixedActionNames.add(prefixActionName(prefix, actionName));
+			}
+
+			return prefixedActionNames;
 		}
 
 	}
