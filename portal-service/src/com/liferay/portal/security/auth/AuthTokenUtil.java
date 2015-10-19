@@ -57,10 +57,10 @@ public class AuthTokenUtil {
 
 	public static boolean isValidPortletInvocationToken(
 		HttpServletRequest request, long plid, String portletId,
-		String strutsAction, String tokenValue) {
+		String actionName, String tokenValue) {
 
 		return _instance._isValidPortletInvocationToken(
-			request, plid, portletId, strutsAction, tokenValue);
+			request, plid, portletId, actionName, tokenValue);
 	}
 
 	private AuthTokenUtil() {
@@ -118,7 +118,7 @@ public class AuthTokenUtil {
 
 	private boolean _isValidPortletInvocationToken(
 		HttpServletRequest request, long plid, String portletId,
-		String strutsAction, String tokenValue) {
+		String actionName, String tokenValue) {
 
 		if (_serviceTracker.isEmpty()) {
 			return false;
@@ -127,7 +127,7 @@ public class AuthTokenUtil {
 		AuthToken authToken = _serviceTracker.getService();
 
 		return authToken.isValidPortletInvocationToken(
-			request, plid, portletId, strutsAction, tokenValue);
+			request, plid, portletId, actionName, tokenValue);
 	}
 
 	private static final AuthTokenUtil _instance = new AuthTokenUtil();

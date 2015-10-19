@@ -113,12 +113,12 @@ public class SessionAuthToken implements AuthToken {
 	@Override
 	public boolean isValidPortletInvocationToken(
 		HttpServletRequest request, long plid, String portletId,
-		String strutsAction, String tokenValue) {
+		String actionName, String tokenValue) {
 
 		long companyId = PortalUtil.getCompanyId(request);
 
 		if (AuthTokenWhitelistUtil.isPortletInvocationWhitelisted(
-				companyId, portletId, strutsAction)) {
+				companyId, portletId, actionName)) {
 
 			return true;
 		}

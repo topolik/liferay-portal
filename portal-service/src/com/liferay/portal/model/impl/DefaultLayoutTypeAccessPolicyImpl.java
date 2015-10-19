@@ -194,10 +194,6 @@ public class DefaultLayoutTypeAccessPolicyImpl
 			return true;
 		}
 
-		String namespace = PortalUtil.getPortletNamespace(portletId);
-
-		String strutsAction = getActionName(request, namespace);
-
 		String requestPortletAuthenticationToken = ParamUtil.getString(
 			request, "p_p_auth");
 
@@ -209,8 +205,12 @@ public class DefaultLayoutTypeAccessPolicyImpl
 				originalRequest, "p_p_auth");
 		}
 
+		String namespace = PortalUtil.getPortletNamespace(portletId);
+
+		String actionName = getActionName(request, namespace);
+
 		if (AuthTokenUtil.isValidPortletInvocationToken(
-				request, layout.getPlid(), portletId, strutsAction,
+				request, layout.getPlid(), portletId, actionName,
 				requestPortletAuthenticationToken)) {
 
 			return true;

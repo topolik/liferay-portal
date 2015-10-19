@@ -61,10 +61,10 @@ public class AuthTokenWhitelistUtil {
 	}
 
 	public static boolean isPortletInvocationWhitelisted(
-		long companyId, String portletId, String strutsAction) {
+		long companyId, String portletId, String actionName) {
 
 		return getAuthTokenWhitelist().isPortletInvocationWhitelisted(
-			companyId, portletId, strutsAction);
+			companyId, portletId, actionName);
 	}
 
 	public static boolean isValidSharedSecret(String sharedSecret) {
