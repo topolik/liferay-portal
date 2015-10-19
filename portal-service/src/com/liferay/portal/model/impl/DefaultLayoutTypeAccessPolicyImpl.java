@@ -38,6 +38,7 @@ import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 
+import javax.portlet.ActionRequest;
 import javax.portlet.PortletMode;
 
 import javax.servlet.http.HttpServletRequest;
@@ -115,6 +116,26 @@ public class DefaultLayoutTypeAccessPolicyImpl
 			permissionChecker, layout, ActionKeys.VIEW);
 	}
 
+	protected String getActionName(
+		HttpServletRequest request, String portletNamespace) {
+
+		String strutsAction = ParamUtil.getString(
+			request, portletNamespace + "struts_action");
+
+		if (Validator.isNotNull(strutsAction)) {
+			return strutsAction;
+		}
+
+		strutsAction = ParamUtil.getString(request, "struts_action");
+
+		if (Validator.isNotNull(strutsAction)) {
+			return strutsAction;
+		}
+
+		return ParamUtil.getString(
+			request, portletNamespace + ActionRequest.ACTION_NAME);
+	}
+
 	protected boolean hasAccessPermission(
 			HttpServletRequest request, Layout layout, Portlet portlet)
 		throws PortalException {
@@ -175,12 +196,7 @@ public class DefaultLayoutTypeAccessPolicyImpl
 
 		String namespace = PortalUtil.getPortletNamespace(portletId);
 
-		String strutsAction = ParamUtil.getString(
-			request, namespace + "struts_action");
-
-		if (Validator.isNull(strutsAction)) {
-			strutsAction = ParamUtil.getString(request, "struts_action");
-		}
+		String strutsAction = getActionName(request, namespace);
 
 		String requestPortletAuthenticationToken = ParamUtil.getString(
 			request, "p_p_auth");

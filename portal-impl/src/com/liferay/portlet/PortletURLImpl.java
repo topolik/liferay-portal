@@ -825,7 +825,7 @@ public class PortletURLImpl
 			return;
 		}
 
-		String strutsAction = getParameter("struts_action");
+		String strutsAction = getActionName();
 
 		if (AuthTokenWhitelistUtil.isPortletInvocationWhitelisted(
 				portlet.getCompanyId(), _portletId, strutsAction)) {
