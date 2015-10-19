@@ -72,10 +72,10 @@ public class SessionAuthToken implements AuthToken {
 
 			String portletNamespace = PortalUtil.getPortletNamespace(ppid);
 
-			String strutsAction = getActionName(request, portletNamespace);
+			String actionName = getActionName(request, portletNamespace);
 
 			if (AuthTokenWhitelistUtil.isPortletCSRFWhitelisted(
-					companyId, ppid, strutsAction)) {
+					companyId, ppid, actionName)) {
 
 				return;
 			}

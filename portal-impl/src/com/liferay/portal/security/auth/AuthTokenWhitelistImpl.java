@@ -120,7 +120,7 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 
 	@Override
 	public boolean isPortletCSRFWhitelisted(
-		long companyId, String portletId, String strutsAction) {
+		long companyId, String portletId, String actionName) {
 
 		String rootPortletId = PortletConstants.getRootPortletId(portletId);
 
@@ -130,11 +130,11 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 			return true;
 		}
 
-		if (Validator.isNotNull(strutsAction)) {
+		if (Validator.isNotNull(actionName)) {
 			Set<String> whitelistActions = getPortletCSRFWhitelistActions();
 
 			String prefixedActionName = prefixActionName(
-				rootPortletId, strutsAction);
+				rootPortletId, actionName);
 
 			if (whitelistActions.contains(prefixedActionName)) {
 				return true;

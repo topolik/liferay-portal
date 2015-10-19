@@ -796,10 +796,10 @@ public class PortletURLImpl
 			return;
 		}
 
-		String strutsAction = getActionName();
+		String actionName = getActionName();
 
 		if (AuthTokenWhitelistUtil.isPortletCSRFWhitelisted(
-				portlet.getCompanyId(), _portletId, strutsAction)) {
+				portlet.getCompanyId(), _portletId, actionName)) {
 
 			return;
 		}
