@@ -75,6 +75,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.portlet.ActionRequest;
 import javax.portlet.PortletMode;
 import javax.portlet.PortletModeException;
 import javax.portlet.PortletRequest;
@@ -795,7 +796,7 @@ public class PortletURLImpl
 			return;
 		}
 
-		String strutsAction = getParameter("struts_action");
+		String strutsAction = getActionName();
 
 		if (AuthTokenWhitelistUtil.isPortletCSRFWhitelisted(
 				portlet.getCompanyId(), _portletId, strutsAction)) {
@@ -1317,6 +1318,16 @@ public class PortletURLImpl
 		sb.append("/wsrp_rewrite");
 
 		return sb.toString();
+	}
+
+	protected String getActionName() {
+		String strutsAction = getParameter("struts_action");
+
+		if (Validator.isNotNull(strutsAction)) {
+			return strutsAction;
+		}
+
+		return getParameter(ActionRequest.ACTION_NAME);
 	}
 
 	protected String getPublicRenderParameterName(String name) {

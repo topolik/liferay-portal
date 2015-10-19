@@ -136,9 +136,7 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 			String prefixedActionName = prefixActionName(
 				rootPortletId, strutsAction);
 
-			if (whitelistActions.contains(prefixedActionName) &&
-				isValidStrutsAction(companyId, rootPortletId, strutsAction)) {
-
+			if (whitelistActions.contains(prefixedActionName)) {
 				return true;
 			}
 		}

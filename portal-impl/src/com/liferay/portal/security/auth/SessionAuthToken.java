@@ -24,6 +24,8 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.SecurityPortletContainerWrapper;
 
+import javax.portlet.ActionRequest;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
@@ -70,8 +72,7 @@ public class SessionAuthToken implements AuthToken {
 
 			String portletNamespace = PortalUtil.getPortletNamespace(ppid);
 
-			String strutsAction = ParamUtil.getString(
-				request, portletNamespace + "struts_action");
+			String strutsAction = getActionName(request, portletNamespace);
 
 			if (AuthTokenWhitelistUtil.isPortletCSRFWhitelisted(
 					companyId, ppid, strutsAction)) {
@@ -136,6 +137,20 @@ public class SessionAuthToken implements AuthToken {
 		}
 
 		return false;
+	}
+
+	protected String getActionName(
+		HttpServletRequest request, String portletNamespace) {
+
+		String strutsAction = ParamUtil.getString(
+			request, portletNamespace + "struts_action");
+
+		if (Validator.isNotNull(strutsAction)) {
+			return strutsAction;
+		}
+
+		return ParamUtil.getString(
+			request, portletNamespace + ActionRequest.ACTION_NAME);
 	}
 
 	protected String getSessionAuthenticationToken(
