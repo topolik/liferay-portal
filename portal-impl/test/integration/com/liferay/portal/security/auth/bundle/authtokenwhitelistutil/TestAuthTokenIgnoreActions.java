@@ -25,14 +25,16 @@ import org.osgi.service.component.annotations.Component;
 	immediate = true,
 	property = {
 		PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS + "=" + TestAuthTokenIgnoreActions.TEST_AUTH_TOKEN_IGNORE_ACTION_URL,
+		"javax.portlet.name=" + TestAuthTokenIgnoreActions.TEST_PORTLET_NAME,
 		"service.ranking:Integer=" + Integer.MAX_VALUE
 	},
 	service = Object.class
-
 )
 public class TestAuthTokenIgnoreActions {
 
 	public static final String TEST_AUTH_TOKEN_IGNORE_ACTION_URL =
 		"TEST_AUTH_TOKEN_IGNORE_ACTION_URL";
+
+	public static final String TEST_PORTLET_NAME = "testPortletName";
 
 }

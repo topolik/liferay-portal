@@ -15,6 +15,7 @@
 package com.liferay.portal.security.auth;
 
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.security.auth.bundle.authtokenwhitelistutil.TestAuthTokenIgnoreActions;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.MainServletTestRule;
@@ -45,9 +46,15 @@ public class AuthTokenWhitelistUtilTest {
 		Set<String> portletCSRFWhitelistActions =
 			AuthTokenWhitelistUtil.getPortletCSRFWhitelistActions();
 
+		String prefixedAuthTokenIgnoreAction =
+			TestAuthTokenIgnoreActions.TEST_PORTLET_NAME +
+				StringPool.COLON +
+					TestAuthTokenIgnoreActions.
+						TEST_AUTH_TOKEN_IGNORE_ACTION_URL;
+
 		Assert.assertTrue(
 			portletCSRFWhitelistActions.contains(
-				TestAuthTokenIgnoreActions.TEST_AUTH_TOKEN_IGNORE_ACTION_URL));
+				prefixedAuthTokenIgnoreAction));
 	}
 
 	@Test
