@@ -290,10 +290,6 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 		public Object addingService(ServiceReference<Object> serviceReference) {
 			Collection<String> portletNames = getPortletNames(serviceReference);
 
-			if (portletNames.isEmpty()) {
-				return null;
-			}
-
 			List<String> authTokenIgnoreActions = StringPlus.asList(
 				serviceReference.getProperty(
 					PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS));
@@ -323,10 +319,6 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 
 			Collection<String> portletNames = getPortletNames(serviceReference);
 
-			if (portletNames.isEmpty()) {
-				return;
-			}
-
 			List<String> authTokenIgnoreActions = StringPlus.asList(
 				serviceReference.getProperty(
 					PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS));
@@ -349,7 +341,11 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 		}
 
 		protected Collection<String> prefixActionNames(
-			Iterable<String> prefixes, Collection<String> actionNames) {
+			Collection<String> prefixes, Collection<String> actionNames) {
+
+			if (prefixes.isEmpty()) {
+				return actionNames;
+			}
 
 			Collection<String> prefixedActionNames = new ArrayList<>(
 				actionNames.size());
