@@ -14,6 +14,8 @@
 
 package com.liferay.blogs.web.portlet.path;
 
+import com.liferay.blogs.web.constants.BlogsPortletKeys;
+
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -24,7 +26,9 @@ import org.osgi.service.component.annotations.Component;
 	property = {
 		"auth.public.path=/blogs/find_entry", "auth.public.path=/blogs/rss",
 		"auth.public.path=/blogs/trackback",
-		"auth.public.path=/blogs_aggregator/rss"
+		"auth.public.path=/blogs_aggregator/rss",
+		"auth.token.ignore.actions=/blogs/trackback",
+		"javax.portlet.name=" + BlogsPortletKeys.BLOGS
 	},
 	service = Object.class
 )
