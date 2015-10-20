@@ -288,9 +288,9 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 
 		@Override
 		public Object addingService(ServiceReference<Object> serviceReference) {
-			String portletName = getPortletName(serviceReference);
+			Collection<String> portletNames = getPortletNames(serviceReference);
 
-			if (Validator.isNull(portletName)) {
+			if (portletNames.isEmpty()) {
 				return null;
 			}
 
@@ -299,7 +299,7 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 					PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS));
 
 			Collection<String> prefixedActionNames = prefixActionNames(
-				portletName, authTokenIgnoreActions);
+				portletNames, authTokenIgnoreActions);
 
 			_portletCSRFWhitelistActions.addAll(prefixedActionNames);
 
@@ -321,9 +321,9 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 		public void removedService(
 			ServiceReference<Object> serviceReference, Object object) {
 
-			String portletName = getPortletName(serviceReference);
+			Collection<String> portletNames = getPortletNames(serviceReference);
 
-			if (Validator.isNull(portletName)) {
+			if (portletNames.isEmpty()) {
 				return;
 			}
 
@@ -332,7 +332,7 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 					PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS));
 
 			Collection<String> prefixedActionNames = prefixActionNames(
-				portletName, authTokenIgnoreActions);
+				portletNames, authTokenIgnoreActions);
 
 			_portletCSRFWhitelistActions.removeAll(prefixedActionNames);
 
@@ -341,18 +341,24 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 			registry.ungetService(serviceReference);
 		}
 
-		protected String getPortletName(ServiceReference<?> serviceReference) {
-			return (String)serviceReference.getProperty("javax.portlet.name");
+		protected Collection<String> getPortletNames(
+			ServiceReference<?> serviceReference) {
+
+			return StringPlus.asList(
+				serviceReference.getProperty("javax.portlet.name"));
 		}
 
 		protected Collection<String> prefixActionNames(
-			String prefix, Collection<String> actionNames) {
+			Iterable<String> prefixes, Collection<String> actionNames) {
 
 			Collection<String> prefixedActionNames = new ArrayList<>(
 				actionNames.size());
 
 			for (String actionName : actionNames) {
-				prefixedActionNames.add(prefixActionName(prefix, actionName));
+				for (String prefix : prefixes) {
+					prefixedActionNames.add(
+						prefixActionName(prefix, actionName));
+				}
 			}
 
 			return prefixedActionNames;
