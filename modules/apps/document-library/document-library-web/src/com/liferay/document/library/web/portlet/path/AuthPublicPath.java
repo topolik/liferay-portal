@@ -12,25 +12,24 @@
  * details.
  */
 
-package com.liferay.blogs.web.portlet.path;
+package com.liferay.document.library.web.portlet.path;
 
-import com.liferay.blogs.web.constants.BlogsPortletKeys;
+import com.liferay.document.library.web.constants.DLPortletKeys;
 
 import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Sergio González
+ * @author Adolfo Pérez
  */
 @Component(
 	immediate = true,
 	property = {
-		"auth.public.path=/blogs/find_entry", "auth.public.path=/blogs/rss",
-		"auth.public.path=/blogs/trackback",
-		"auth.public.path=/blogs_aggregator/rss",
-		"auth.token.ignore.actions=/blogs_aggregator/rss",
-		"auth.token.ignore.actions=/blogs/rss",
-		"auth.token.ignore.actions=/blogs/trackback",
-		"javax.portlet.name=" + BlogsPortletKeys.BLOGS
+		"auth.public.path=/document_library/find_file_entry",
+		"auth.public.path=/document_library/find_folder",
+		"auth.public.path=/document_library/get_file",
+		"auth.public.path=/image_gallery_display/find_folder",
+		"auth.public.path=/image_gallery_display/find_image",
+		"javax.portlet.name=" + DLPortletKeys.DOCUMENT_LIBRARY
 	},
 	service = Object.class
 )

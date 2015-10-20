@@ -12,25 +12,19 @@
  * details.
  */
 
-package com.liferay.blogs.web.portlet.path;
+package com.liferay.portlet.login.path;
 
-import com.liferay.blogs.web.constants.BlogsPortletKeys;
-
-import org.osgi.service.component.annotations.Component;
+import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
+import com.liferay.portal.util.PortletKeys;
 
 /**
- * @author Sergio González
+ * @author Adolfo Pérez
  */
-@Component(
-	immediate = true,
+@OSGiBeanProperties(
 	property = {
-		"auth.public.path=/blogs/find_entry", "auth.public.path=/blogs/rss",
-		"auth.public.path=/blogs/trackback",
-		"auth.public.path=/blogs_aggregator/rss",
-		"auth.token.ignore.actions=/blogs_aggregator/rss",
-		"auth.token.ignore.actions=/blogs/rss",
-		"auth.token.ignore.actions=/blogs/trackback",
-		"javax.portlet.name=" + BlogsPortletKeys.BLOGS
+		"auth.token.ignore.actions=/login/login",
+		"auth.token.ignore.actions=/login/create_account",
+		"javax.portlet.name=" + PortletKeys.LOGIN
 	},
 	service = Object.class
 )

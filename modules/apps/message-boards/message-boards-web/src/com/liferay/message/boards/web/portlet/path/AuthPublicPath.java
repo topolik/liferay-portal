@@ -12,25 +12,25 @@
  * details.
  */
 
-package com.liferay.blogs.web.portlet.path;
+package com.liferay.message.boards.web.portlet.path;
 
-import com.liferay.blogs.web.constants.BlogsPortletKeys;
+import com.liferay.message.boards.web.constants.MBPortletKeys;
 
 import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Sergio González
+ * @author Adolfo Pérez
  */
 @Component(
 	immediate = true,
 	property = {
-		"auth.public.path=/blogs/find_entry", "auth.public.path=/blogs/rss",
-		"auth.public.path=/blogs/trackback",
-		"auth.public.path=/blogs_aggregator/rss",
-		"auth.token.ignore.actions=/blogs_aggregator/rss",
-		"auth.token.ignore.actions=/blogs/rss",
-		"auth.token.ignore.actions=/blogs/trackback",
-		"javax.portlet.name=" + BlogsPortletKeys.BLOGS
+		"auth.public.path=/message_boards/find_category",
+		"auth.public.path=/message_boards/find_message",
+		"auth.public.path=/message_boards/find_thread",
+		"auth.public.path=/message_boards/get_message_attachment",
+		"auth.public.path=/message_boards/rss",
+		"auth.token.ignore.actions=/message_boards/rss",
+		"javax.portlet.name=" + MBPortletKeys.MESSAGE_BOARDS
 	},
 	service = Object.class
 )
