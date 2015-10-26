@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.SetUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.PortletConstants;
@@ -35,6 +36,8 @@ import com.liferay.registry.collections.StringServiceRegistrationMapImpl;
 import com.liferay.registry.util.StringPlus;
 import com.liferay.util.Encryptor;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -117,7 +120,7 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 
 	@Override
 	public boolean isPortletCSRFWhitelisted(
-		long companyId, String portletId, String strutsAction) {
+		long companyId, String portletId, String actionName) {
 
 		String rootPortletId = PortletConstants.getRootPortletId(portletId);
 
@@ -127,12 +130,13 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 			return true;
 		}
 
-		if (Validator.isNotNull(strutsAction)) {
+		if (Validator.isNotNull(actionName)) {
 			Set<String> whitelistActions = getPortletCSRFWhitelistActions();
 
-			if (whitelistActions.contains(strutsAction) &&
-				isValidStrutsAction(companyId, rootPortletId, strutsAction)) {
+			String prefixedActionName = prefixActionName(
+				rootPortletId, actionName);
 
+			if (whitelistActions.contains(prefixedActionName)) {
 				return true;
 			}
 		}
@@ -244,6 +248,10 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 		return false;
 	}
 
+	protected String prefixActionName(String prefix, String actionName) {
+		return prefix + StringPool.COLON + actionName;
+	}
+
 	protected void registerPortalProperty() {
 		Registry registry = RegistryUtil.getRegistry();
 
@@ -280,11 +288,16 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 
 		@Override
 		public Object addingService(ServiceReference<Object> serviceReference) {
+			Collection<String> portletNames = getPortletNames(serviceReference);
+
 			List<String> authTokenIgnoreActions = StringPlus.asList(
 				serviceReference.getProperty(
 					PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS));
 
-			_portletCSRFWhitelistActions.addAll(authTokenIgnoreActions);
+			Collection<String> prefixedActionNames = prefixActionNames(
+				portletNames, authTokenIgnoreActions);
+
+			_portletCSRFWhitelistActions.addAll(prefixedActionNames);
 
 			Registry registry = RegistryUtil.getRegistry();
 
@@ -304,15 +317,47 @@ public class AuthTokenWhitelistImpl implements AuthTokenWhitelist {
 		public void removedService(
 			ServiceReference<Object> serviceReference, Object object) {
 
+			Collection<String> portletNames = getPortletNames(serviceReference);
+
 			List<String> authTokenIgnoreActions = StringPlus.asList(
 				serviceReference.getProperty(
 					PropsKeys.AUTH_TOKEN_IGNORE_ACTIONS));
 
-			_portletCSRFWhitelistActions.removeAll(authTokenIgnoreActions);
+			Collection<String> prefixedActionNames = prefixActionNames(
+				portletNames, authTokenIgnoreActions);
+
+			_portletCSRFWhitelistActions.removeAll(prefixedActionNames);
 
 			Registry registry = RegistryUtil.getRegistry();
 
 			registry.ungetService(serviceReference);
+		}
+
+		protected Collection<String> getPortletNames(
+			ServiceReference<?> serviceReference) {
+
+			return StringPlus.asList(
+				serviceReference.getProperty("javax.portlet.name"));
+		}
+
+		protected Collection<String> prefixActionNames(
+			Collection<String> prefixes, Collection<String> actionNames) {
+
+			if (prefixes.isEmpty()) {
+				return actionNames;
+			}
+
+			Collection<String> prefixedActionNames = new ArrayList<>(
+				actionNames.size());
+
+			for (String actionName : actionNames) {
+				for (String prefix : prefixes) {
+					prefixedActionNames.add(
+						prefixActionName(prefix, actionName));
+				}
+			}
+
+			return prefixedActionNames;
 		}
 
 	}
