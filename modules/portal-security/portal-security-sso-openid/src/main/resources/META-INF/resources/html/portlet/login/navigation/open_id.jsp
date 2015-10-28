@@ -16,12 +16,12 @@
 
 <%@ include file="/html/portlet/login/navigation/init.jsp" %>
 
-<liferay-portlet:renderURL varImpl="openIdURL" portletName="<%= OpenIdWebKeys.OPEN_ID %>" windowState="<%= WindowState.MAXIMIZED.toString() %>">
+<portlet:renderURL var="openIdURL" windowState="<%= WindowState.MAXIMIZED.toString() %>">
 	<portlet:param name="mvcRenderCommandName" value="/login/openid" />
-</liferay-portlet:renderURL>
+</portlet:renderURL>
 
 <liferay-ui:icon
 	message="open-id"
 	src='<%= themeDisplay.getPathThemeImages() + "/common/openid.gif" %>'
-	url="<%= openIdURL.toString() %>"
+	url="<%= openIdURL %>"
 />

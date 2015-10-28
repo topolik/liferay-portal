@@ -20,6 +20,5 @@ package com.liferay.portal.security.sso.openid.constants;
 public interface OpenIdWebKeys {
 
 	public static final String OPEN_ID_DISCO = "openid-disco";
-	public static final String OPEN_ID = "com_liferay_portal_security_sso_openid_internal_portlet_openid";
 
 }
