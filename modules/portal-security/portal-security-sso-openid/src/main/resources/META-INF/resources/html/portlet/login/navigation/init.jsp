@@ -19,6 +19,9 @@
 <%@ taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %><%@
 taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
+<%@ taglib uri="http://liferay.com/tld/portlet" prefix="liferay-portlet" %>
+
+<%@page import="com.liferay.portal.security.sso.openid.constants.OpenIdWebKeys"%>
 <%@ page import="javax.portlet.WindowState" %>
 
 <liferay-theme:defineObjects />
