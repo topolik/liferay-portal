@@ -23,7 +23,6 @@ import com.liferay.portal.kernel.settings.Settings;
 import com.liferay.portal.kernel.settings.SettingsDescriptor;
 import com.liferay.portal.kernel.settings.SettingsFactoryUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.security.permission.PermissionThreadLocal;
@@ -82,7 +81,8 @@ public class PortalSettingsOpenIdAuthenticationFormMVCActionCommand
 				OpenIdConstants.SERVICE_NAME);
 
 		for (String name : settingsDescriptor.getAllKeys()) {
-			String value = ParamUtil.getString(actionRequest, "openid--" + name);
+			String value = ParamUtil.getString(
+				actionRequest, "openid--" + name);
 			String oldValue = settings.getValue(name, null);
 
 			if (!value.equals(oldValue)) {
