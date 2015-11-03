@@ -81,7 +81,7 @@ PortalUtil.addPortletBreadcrumbEntry(request, LanguageUtil.get(request, "assign-
 		if (tabs2.equals("current")) {
 			userParams.put("usersOrgs", Long.valueOf(organization.getOrganizationId()));
 		}
-		else if (PropsValues.ORGANIZATIONS_ASSIGNMENT_STRICT && !permissionChecker.isCompanyAdmin() && !permissionChecker.hasPermission(scopeGroupId, User.class.getName(), company.getCompanyId(), ActionKeys.VIEW)) {
+		else if (PropsValues.ORGANIZATIONS_ASSIGNMENT_STRICT && !permissionChecker.isCompanyAdmin() && !permissionChecker.hasPermission(scopeGroupId, User.class.getName(), ActionKeys.VIEW)) {
 			userParams.put("usersOrgsTree", user.getOrganizations(true));
 		}
 		%>

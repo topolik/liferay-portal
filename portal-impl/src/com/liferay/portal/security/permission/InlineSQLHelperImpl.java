@@ -532,7 +532,7 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 		}
 
 		if (permissionChecker.hasPermission(
-				checkGroupId, className, 0, ActionKeys.VIEW)) {
+				checkGroupId, className, ActionKeys.VIEW)) {
 
 			return sql;
 		}
