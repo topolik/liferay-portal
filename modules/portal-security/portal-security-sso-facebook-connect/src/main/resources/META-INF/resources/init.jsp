@@ -27,7 +27,6 @@ page import="com.liferay.portal.security.sso.facebook.connect.constants.Facebook
 page import="com.liferay.portal.security.sso.facebook.connect.module.configuration.FacebookConnectConfiguration" %><%@
 page import="com.liferay.portlet.PortletURLUtil" %><%@
 page import="com.liferay.portal.facebook.FacebookConnectUtil" %><%@
-page import="com.liferay.portal.kernel.util.PropsKeys" %><%@
 page import="com.liferay.portal.util.Portal" %><%@
 page import="com.liferay.portal.kernel.util.Validator" %>
 
