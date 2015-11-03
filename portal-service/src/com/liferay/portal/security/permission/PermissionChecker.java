@@ -132,6 +132,19 @@ public interface PermissionChecker extends Cloneable {
 	 * @param  groupId the primary key of the group containing the resource
 	 * @param  name the resource's name, which can be either a class name or a
 	 *         portlet ID
+	 * @param  actionId the action ID
+	 * @return <code>true</code> if the user has permission to perform the
+	 *         action on the resource; <code>false</code> otherwise
+	 */
+	public boolean hasPermission(long groupId, String name, String actionId);
+
+	/**
+	 * Returns <code>true</code> if the user has permission to perform the
+	 * action on the resource.
+	 *
+	 * @param  groupId the primary key of the group containing the resource
+	 * @param  name the resource's name, which can be either a class name or a
+	 *         portlet ID
 	 * @param  primKey the primary key of the resource
 	 * @param  actionId the action ID
 	 * @return <code>true</code> if the user has permission to perform the
