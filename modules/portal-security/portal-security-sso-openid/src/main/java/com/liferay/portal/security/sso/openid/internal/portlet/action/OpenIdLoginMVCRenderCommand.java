@@ -58,8 +58,8 @@ public class OpenIdLoginMVCRenderCommand implements MVCRenderCommand {
 
 		try {
 			getRequestDispatcher(path).include(servletReq, servletResp);
-
-		} catch (ServletException | IOException e) {
+		}
+		catch (ServletException | IOException e) {
 			e.printStackTrace();
 		}
 	}
