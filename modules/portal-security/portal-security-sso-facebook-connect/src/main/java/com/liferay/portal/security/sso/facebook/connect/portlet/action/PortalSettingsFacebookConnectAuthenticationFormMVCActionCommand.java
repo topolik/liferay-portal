@@ -73,7 +73,8 @@ public class PortalSettingsFacebookConnectAuthenticationFormMVCActionCommand
 
 		Settings settings = SettingsFactoryUtil.getSettings(
 			new CompanyServiceSettingsLocator(
-				themeDisplay.getCompanyId(), FacebookConnectConstants.SERVICE_NAME));
+				themeDisplay.getCompanyId(),
+				FacebookConnectConstants.SERVICE_NAME));
 
 		ModifiableSettings modifiableSettings =
 			settings.getModifiableSettings();
@@ -83,7 +84,8 @@ public class PortalSettingsFacebookConnectAuthenticationFormMVCActionCommand
 				FacebookConnectConstants.SERVICE_NAME);
 
 		for (String name : settingsDescriptor.getAllKeys()) {
-			String value = ParamUtil.getString(actionRequest, "facebook--" + name);
+			String value = ParamUtil.getString(
+				actionRequest, "facebook--" + name);
 			String oldValue = settings.getValue(name, null);
 
 			if (!value.equals(oldValue)) {
@@ -105,16 +107,15 @@ public class PortalSettingsFacebookConnectAuthenticationFormMVCActionCommand
 			return;
 		}
 
-		String fbAppId = ParamUtil.getString(
-				actionRequest, "facebook--appId");
+		String fbAppId = ParamUtil.getString(actionRequest, "facebook--appId");
 		String fbAppSecret = ParamUtil.getString(
-				actionRequest, "facebook--appSecret");
+			actionRequest, "facebook--appSecret");
 		String fbGraphURL = ParamUtil.getString(
 			actionRequest, "facebook--graphURL");
 		String fbOauthAuthURL = ParamUtil.getString(
 			actionRequest, "facebook--oauthAuthURL");
 		String fbOauthRedirectURL = ParamUtil.getString(
-				actionRequest, "facebook--oauthRedirectURL");
+			actionRequest, "facebook--oauthRedirectURL");
 		String fbOauthTokenURL = ParamUtil.getString(
 			actionRequest, "facebook--oauthTokenURL");
 		String fbVerifiedAccountRequired = ParamUtil.getString(
@@ -124,16 +125,25 @@ public class PortalSettingsFacebookConnectAuthenticationFormMVCActionCommand
 			SessionErrors.add(actionRequest, "facebookConnectGraphURLInvalid");
 		}
 
-		if (Validator.isNotNull(fbOauthAuthURL) && !Validator.isUrl(fbOauthAuthURL)) {
-			SessionErrors.add(actionRequest, "facebookConnectOauthAuthURLInvalid");
+		if (Validator.isNotNull(fbOauthAuthURL) &&
+			!Validator.isUrl(fbOauthAuthURL)) {
+
+			SessionErrors.add(
+				actionRequest, "facebookConnectOauthAuthURLInvalid");
 		}
 
-		if (Validator.isNotNull(fbOauthRedirectURL) && !Validator.isUrl(fbOauthRedirectURL)) {
-			SessionErrors.add(actionRequest, "facebookConnectOauthRedirectURLInvalid");
+		if (Validator.isNotNull(fbOauthRedirectURL) &&
+			!Validator.isUrl(fbOauthRedirectURL)) {
+
+			SessionErrors.add(
+				actionRequest, "facebookConnectOauthRedirectURLInvalid");
 		}
 
-		if (Validator.isNotNull(fbOauthTokenURL) && !Validator.isUrl(fbOauthTokenURL)) {
-			SessionErrors.add(actionRequest, "facebookConnectOauthTokenURLInvalid");
+		if (Validator.isNotNull(fbOauthTokenURL) &&
+			!Validator.isUrl(fbOauthTokenURL)) {
+
+			SessionErrors.add(
+				actionRequest, "facebookConnectOauthTokenURLInvalid");
 		}
 	}
 

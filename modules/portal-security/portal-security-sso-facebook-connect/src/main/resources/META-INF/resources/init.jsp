@@ -20,15 +20,10 @@
 taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %><%@
 taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
-<%@ page import="com.liferay.portal.kernel.module.configuration.ConfigurationFactoryUtil" %><%@
-page import="com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator" %><%@
-page import="com.liferay.portal.kernel.settings.ParameterMapSettingsLocator" %><%@
-page import="com.liferay.portal.security.sso.facebook.connect.constants.FacebookConnectConstants" %><%@
-page import="com.liferay.portal.security.sso.facebook.connect.module.configuration.FacebookConnectConfiguration" %><%@
-page import="com.liferay.portlet.PortletURLUtil" %><%@
-page import="com.liferay.portal.facebook.FacebookConnectUtil" %><%@
+<%@ page import="com.liferay.portal.facebook.FacebookConnectUtil" %><%@
+page import="com.liferay.portal.kernel.util.Validator" %><%@
 page import="com.liferay.portal.util.Portal" %><%@
-page import="com.liferay.portal.kernel.util.Validator" %>
+page import="com.liferay.portlet.PortletURLUtil" %>
 
 <%@ page import="javax.portlet.ActionRequest" %><%@
 page import="javax.portlet.PortletURL" %>
