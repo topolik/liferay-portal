@@ -55,5 +55,5 @@ String facebookConnectRedirectURL = FacebookConnectUtil.getRedirectURL(company.g
 
 	<aui:input cssClass="lfr-input-text-container" label="oauth-token-url" name="facebook--oauthTokenURL" type="text" value="<%= facebookConnectOauthTokenURL %>" />
 
-	<aui:input cssClass="lfr-input-text-container" label="redirect-url" name="facebook--oauthRedirectURL" type="text" value="<%= facebookConnectRedirectURL %>" />
+	<aui:input cssClass="lfr-input-text-container" label="oauth-redirect-url" name="facebook--oauthRedirectURL" type="text" value="<%= facebookConnectRedirectURL %>" />
 </aui:fieldset>
