@@ -18,15 +18,12 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 
-import java.io.IOException;
-
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,15 +45,28 @@ import org.osgi.service.component.annotations.Reference;
 public class OpenIdLoginMVCRenderCommand implements MVCRenderCommand {
 
 	@Override
-	public String render(RenderRequest renderReq, RenderResponse renderResp)
+	public String render(
+			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws PortletException {
 
-		includeLocalResource(
-			"/html/portlet/login/open_id.jsp",
-			PortalUtil.getHttpServletRequest(renderReq),
-			PortalUtil.getHttpServletResponse(renderResp));
+		HttpServletRequest httpServletRequest =
+			PortalUtil.getHttpServletRequest(renderRequest);
 
-		return "/html/portlet/login/navigation.jsp";
+		HttpServletResponse httpServletResponse =
+			PortalUtil.getHttpServletResponse(renderResponse);
+
+		RequestDispatcher requestDispatcher =
+			_servletContext.getRequestDispatcher(_JSP_OPENID_LOGIN_PATH);
+
+		try {
+			requestDispatcher.include(httpServletRequest, httpServletResponse);
+		}
+		catch (Exception e) {
+			throw new PortletException(
+				"Unable to include " + _JSP_OPENID_LOGIN_PATH, e);
+		}
+
+		return _JSP_OPENID_NAVIGATION_PATH;
 	}
 
 	@Reference(
@@ -66,21 +76,11 @@ public class OpenIdLoginMVCRenderCommand implements MVCRenderCommand {
 		_servletContext = servletContext;
 	}
 
-	private RequestDispatcher getRequestDispatcher(String path) {
-		return _servletContext.getRequestDispatcher(path);
-	}
+	private static final String _JSP_OPENID_LOGIN_PATH =
+		"/html/portlet/login/open_id.jsp";
 
-	private void includeLocalResource(
-		String path, HttpServletRequest servletReq,
-		HttpServletResponse servletResp) {
-
-		try {
-			getRequestDispatcher(path).include(servletReq, servletResp);
-		}
-		catch (ServletException | IOException e) {
-			e.printStackTrace();
-		}
-	}
+	private static final String _JSP_OPENID_NAVIGATION_PATH =
+		"/html/portlet/login/navigation.jsp";
 
 	private ServletContext _servletContext;
 
