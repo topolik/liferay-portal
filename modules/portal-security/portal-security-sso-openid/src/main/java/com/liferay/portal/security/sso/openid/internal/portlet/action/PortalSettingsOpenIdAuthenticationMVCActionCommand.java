@@ -15,6 +15,7 @@
 package com.liferay.portal.security.sso.openid.internal.portlet.action;
 
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseFormMVCActionCommand;
+import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator;
@@ -37,7 +38,6 @@ import javax.portlet.ActionResponse;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Tomas Polesovsky
  * @author Stian Sigvartsen
  */
 @Component(
@@ -48,8 +48,8 @@ import org.osgi.service.component.annotations.Component;
 	},
 	service = MVCActionCommand.class
 )
-public class PortalSettingsOpenIdAuthenticationFormMVCActionCommand
-	extends BaseFormMVCActionCommand {
+public class PortalSettingsOpenIdAuthenticationMVCActionCommand
+	extends BaseMVCActionCommand {
 
 	@Override
 	protected void doProcessAction(
@@ -92,11 +92,6 @@ public class PortalSettingsOpenIdAuthenticationFormMVCActionCommand
 		}
 
 		modifiableSettings.store();
-	}
-
-	@Override
-	protected void doValidateForm(
-		ActionRequest actionRequest, ActionResponse actionResponse) {
 	}
 
 }
