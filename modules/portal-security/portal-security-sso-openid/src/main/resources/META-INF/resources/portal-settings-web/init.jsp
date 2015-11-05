@@ -39,5 +39,3 @@ PortletURL currentURLObj = PortletURLUtil.getCurrent(liferayPortletRequest, life
 
 String currentURL = currentURLObj.toString();
 %>
-
-<%@ include file="/portal-settings-web/init-ext.jsp" %>
