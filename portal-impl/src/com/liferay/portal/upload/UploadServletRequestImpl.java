@@ -113,6 +113,13 @@ public class UploadServletRequestImpl
 						org.apache.commons.fileupload.FileItem fileItem1,
 						org.apache.commons.fileupload.FileItem fileItem2) {
 
+						String fileItem1FieldName = fileItem1.getFieldName();
+						String fileItem2FieldName = fileItem2.getFieldName();
+
+						if (fileItem1FieldName.equals(fileItem2FieldName)) {
+							return 0;
+						}
+
 						LiferayFileItem liferayFileItem1 =
 							(LiferayFileItem)fileItem1;
 
