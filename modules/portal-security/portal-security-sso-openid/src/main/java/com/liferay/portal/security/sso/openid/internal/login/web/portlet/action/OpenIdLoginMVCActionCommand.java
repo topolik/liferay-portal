@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.portal.security.sso.openid.internal.portlet.action;
+package com.liferay.portal.security.sso.openid.internal.login.web.portlet.action;
 
 import com.liferay.portal.UserEmailAddressException;
 import com.liferay.portal.kernel.log.Log;
