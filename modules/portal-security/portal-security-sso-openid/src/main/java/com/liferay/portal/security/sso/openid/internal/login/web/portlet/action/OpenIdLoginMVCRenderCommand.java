@@ -98,8 +98,7 @@ public class OpenIdLoginMVCRenderCommand implements MVCRenderCommand {
 		_servletContext = servletContext;
 	}
 
-	private static final String _JSP_PATH =
-		"/com.liferay.login.web/open_id.jsp";
+	private static final String _JSP_PATH = "/login-web/open_id.jsp";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		OpenIdLoginMVCRenderCommand.class);

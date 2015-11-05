@@ -14,7 +14,7 @@
  */
 --%>
 
-<%@ include file="/com.liferay.login.web/init.jsp" %>
+<%@ include file="/login-web/init.jsp" %>
 
 <%
 String openId = ParamUtil.getString(request, "openId");

@@ -91,8 +91,7 @@ public class OpenIdNavigationPreDynamicInclude extends BaseDynamicInclude {
 		_servletContext = servletContext;
 	}
 
-	private static final String _JSP_PATH =
-		"/com.liferay.login.web/navigation/open_id.jsp";
+	private static final String _JSP_PATH = "/login-web/navigation/open_id.jsp";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		OpenIdNavigationPreDynamicInclude.class);

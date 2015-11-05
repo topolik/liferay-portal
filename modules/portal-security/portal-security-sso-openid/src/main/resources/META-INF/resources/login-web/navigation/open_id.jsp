@@ -14,7 +14,7 @@
  */
 --%>
 
-<%@ include file="/com.liferay.login.web/navigation/init.jsp" %>
+<%@ include file="/login-web/navigation/init.jsp" %>
 
 <portlet:renderURL var="openIdURL" windowState="<%= WindowState.MAXIMIZED.toString() %>">
 	<portlet:param name="mvcRenderCommandName" value="/login/open_id" />
