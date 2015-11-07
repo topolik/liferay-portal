@@ -13,7 +13,3 @@
  * details.
  */
 --%>
-
-<aui:input cssClass="lfr-input-text-container" label="first-name-attribute" name='<%= "settings--" + PropsKeys.OPEN_SSO_FIRST_NAME_ATTR + "--" %>' type="text" value="<%= openSsoFirstNameAttr %>" />
-
-<aui:input cssClass="lfr-input-text-container" label="last-name-attribute" name='<%= "settings--" + PropsKeys.OPEN_SSO_LAST_NAME_ATTR + "--" %>' type="text" value="<%= openSsoLastNameAttr %>" />
