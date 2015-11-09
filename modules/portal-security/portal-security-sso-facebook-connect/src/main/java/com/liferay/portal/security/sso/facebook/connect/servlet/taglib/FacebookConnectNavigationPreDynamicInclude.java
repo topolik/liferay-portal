@@ -19,18 +19,23 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.taglib.BaseDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
+import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.sso.facebook.connect.constants.FacebookConnectWebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 
 import java.io.IOException;
 
+import javax.portlet.ActionRequest;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -48,36 +53,17 @@ public class FacebookConnectNavigationPreDynamicInclude
 			String key)
 		throws IOException {
 
-		String strutsAction = ParamUtil.getString(request, "struts_action");
-
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		if (strutsAction.startsWith("/login/facebook_connect") ||
-			!_facebookConnect.isEnabled(themeDisplay.getCompanyId())) {
-
+		if (!_facebookConnect.isEnabled(themeDisplay.getCompanyId())) {
 			return;
 		}
 
-		String facebookAuthRedirectURL = _facebookConnect.getRedirectURL(
-			themeDisplay.getCompanyId());
-
-		request.setAttribute(
-			FacebookConnectWebKeys.FACEBOOK_AUTH_REDIRECT_URL,
-			facebookAuthRedirectURL);
-
-		String facebookAuthURL = _facebookConnect.getAuthURL(
-			themeDisplay.getCompanyId());
-
-		request.setAttribute(
-			FacebookConnectWebKeys.FACEBOOK_AUTH_URL, facebookAuthURL);
-
-		String facebookAppId = _facebookConnect.getAppId(
-			themeDisplay.getCompanyId());
-
-		request.setAttribute(
-			FacebookConnectWebKeys.FACEBOOK_APP_ID, facebookAppId);
-
+		String cSRFToken = generateCSRFToken(request);
+		
+		request.setAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN, cSRFToken);
+		
 		RequestDispatcher requestDispatcher =
 			_servletContext.getRequestDispatcher(_JSP_PATH);
 
@@ -111,6 +97,17 @@ public class FacebookConnectNavigationPreDynamicInclude
 		_servletContext = servletContext;
 	}
 
+	private String generateCSRFToken(HttpServletRequest request) {
+		
+		HttpServletRequest httpServletRequest = PortalUtil.getOriginalServletRequest(request);
+		HttpSession httpSession = httpServletRequest.getSession();
+		
+		String cSRFToken = PwdGenerator.getPassword(8);
+		httpSession.setAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN, cSRFToken);
+		
+		return cSRFToken;
+	}
+	
 	private static final String _JSP_PATH =
 		"/html/portlet/login/navigation/facebook.jsp";
 

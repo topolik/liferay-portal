@@ -29,5 +29,9 @@ public interface FacebookConnectWebKeys {
 	public static final String FACEBOOK_AUTH_URL = "FACEBOOK_AUTH_URL";
 
 	public static final String FACEBOOK_USER_ID = "FACEBOOK_USER_ID";
+	
+	public static final String FACEBOOK_INCOMPLETE_MATCHED_USER_ID = "FACEBOOK_INCOMPLETE_MATCHED_USER_ID";
+	
+	public static final String FACEBOOK_CSRF_TOKEN = "FACEBOOK_CSRF_TOKEN";
 
 }

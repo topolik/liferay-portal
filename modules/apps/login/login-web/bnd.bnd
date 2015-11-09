@@ -5,3 +5,5 @@ Include-Resource:\
 	classes,\
 	META-INF/resources=src/META-INF/resources,\
 	@${app.server.lib.portal.dir}/util-java.jar!/com/liferay/util/ContentUtil.class
+Export-Package:\
+	com.liferay.login.web.constants

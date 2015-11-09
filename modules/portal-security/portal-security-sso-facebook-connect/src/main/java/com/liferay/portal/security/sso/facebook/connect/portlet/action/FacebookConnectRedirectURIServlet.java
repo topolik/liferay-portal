@@ -14,13 +14,32 @@
 
 package com.liferay.portal.security.sso.facebook.connect.portlet.action;
 
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+
+import javax.portlet.PortletMode;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletURL;
+import javax.portlet.ResourceRequest;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 import com.liferay.portal.kernel.facebook.FacebookConnect;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
-import com.liferay.portal.kernel.struts.BaseStrutsAction;
-import com.liferay.portal.kernel.struts.StrutsAction;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.CookieKeys;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -36,99 +55,23 @@ import com.liferay.portal.security.sso.facebook.connect.constants.FacebookConnec
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalService;
 import com.liferay.portal.theme.ThemeDisplay;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.PortletURLFactoryUtil;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.portlet.PortletMode;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletURL;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 /**
- * @author Wilson Man
- * @author Sergio González
- * @author Mika Koivisto
+ * @author Stian Sigvartsen
  */
 @Component(
 	immediate = true,
 	property = {
-		"/common/referer_jsp.jsp=/common/referer_jsp.jsp",
-		"path=/login/facebook_connect_oauth",
-		"portlet.login.login=portlet.login.login",
-		"portlet.login.update_account=portlet.login.update_account"
+		"osgi.http.whiteboard.context.path=/login/facebook_connect_oauth",
+		"osgi.http.whiteboard.servlet.name=Facebook Connect Servlet",
+		"osgi.http.whiteboard.servlet.pattern=/login/facebook_connect_oauth/*"
 	},
-	service = StrutsAction.class
+	service = Servlet.class
 )
-public class FacebookConnectAction extends BaseStrutsAction {
-
-	@Override
-	public String execute(
-			HttpServletRequest request, HttpServletResponse response)
-		throws Exception {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		if (!_facebookConnect.isEnabled(themeDisplay.getCompanyId())) {
-			throw new PrincipalException.MustBeEnabled(
-				themeDisplay.getCompanyId(), FacebookConnect.class.getName());
-		}
-
-		HttpSession session = request.getSession();
-
-		String redirect = ParamUtil.getString(request, "redirect");
-
-		String code = ParamUtil.getString(request, "code");
-
-		String token = _facebookConnect.getAccessToken(
-			themeDisplay.getCompanyId(), redirect, code);
-
-		if (Validator.isNotNull(token)) {
-			User user = setFacebookCredentials(
-				session, themeDisplay.getCompanyId(), token);
-
-			if ((user != null) &&
-				(user.getStatus() == WorkflowConstants.STATUS_INCOMPLETE)) {
-
-				redirectUpdateAccount(request, response, user);
-
-				return null;
-			}
-		}
-		else {
-			return _forwards.get("/common/referer_jsp.jsp");
-		}
-
-		response.sendRedirect(redirect);
-
-		return null;
-	}
-
-	@Activate
-	protected void activate(Map<String, Object> properties) {
-		_forwards.put(
-			"/common/referer_jsp.jsp",
-			GetterUtil.getString(properties, "/common/referer_jsp.jsp"));
-		_forwards.put(
-			"portlet.login.login",
-			GetterUtil.getString(properties, "portlet.login.login"));
-		_forwards.put(
-			"portlet.login.update_account",
-			GetterUtil.getString(properties, "portlet.login.update_account"));
-	}
+public class FacebookConnectRedirectURIServlet extends HttpServlet {
 
 	protected User addUser(
 			HttpSession session, long companyId, JSONObject jsonObject)
@@ -182,39 +125,60 @@ public class FacebookConnectAction extends BaseStrutsAction {
 		return user;
 	}
 
-	protected void redirectUpdateAccount(
-			HttpServletRequest request, HttpServletResponse response, User user)
-		throws Exception {
+	@Override
+	protected void doGet(
+			HttpServletRequest request, HttpServletResponse response)
+		throws IOException, ServletException {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		request = getOriginalServletRequest(request);
 
-		PortletURL portletURL = PortletURLFactoryUtil.create(
-			request, PortletKeys.LOGIN, themeDisplay.getPlid(),
-			PortletRequest.RENDER_PHASE);
+		long companyId = PortalUtil.getCompanyId(request);
 
-		portletURL.setParameter("saveLastPath", Boolean.FALSE.toString());
-		portletURL.setParameter("struts_action", "/login/update_account");
+		if (!_facebookConnect.isEnabled(companyId)) {
+			throw new ServletException(
+				new PrincipalException.MustBeEnabled(
+					companyId, FacebookConnect.class.getName()));
+		}
 
-		PortletURL redirectURL = PortletURLFactoryUtil.create(
-			request, PortletKeys.FAST_LOGIN, themeDisplay.getPlid(),
-			PortletRequest.RENDER_PHASE);
+		HttpSession session = request.getSession();
+		
+		String sessionCSRFToken = (String)getCurrentCSRFToken(request);
+		String requestCSRFToken = request.getParameter("state");
+		
+		// Consume the CSRF token so it cannot be used multiple times
+		request.getSession().removeAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
+		
+		if (Validator.isNull(sessionCSRFToken) || Validator.isNull(requestCSRFToken) || !sessionCSRFToken.equals(requestCSRFToken)) {	
+			return;
+		}
+		
 
-		redirectURL.setParameter("struts_action", "/login/login_redirect");
-		redirectURL.setParameter("emailAddress", user.getEmailAddress());
-		redirectURL.setParameter("anonymousUser", Boolean.FALSE.toString());
-		redirectURL.setPortletMode(PortletMode.VIEW);
-		redirectURL.setWindowState(LiferayWindowState.POP_UP);
+		String redirect = ParamUtil.getString(request, "postAuthRedirect");
 
-		portletURL.setParameter("redirect", redirectURL.toString());
-		portletURL.setParameter("userId", String.valueOf(user.getUserId()));
-		portletURL.setParameter("emailAddress", user.getEmailAddress());
-		portletURL.setParameter("firstName", user.getFirstName());
-		portletURL.setParameter("lastName", user.getLastName());
-		portletURL.setPortletMode(PortletMode.VIEW);
-		portletURL.setWindowState(LiferayWindowState.POP_UP);
+		String code = ParamUtil.getString(request, "code");
 
-		response.sendRedirect(portletURL.toString());
+		if (Validator.isNull(redirect) || Validator.isNull(code)) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+
+		String token = _facebookConnect.getAccessToken(
+			companyId, redirect, code);
+
+		if (Validator.isNotNull(token)) {
+			try {
+				User user = setFacebookCredentials(session, companyId, token);
+			}
+			catch (Exception e) {
+				throw new ServletException(e);
+			}
+		}
+		else {
+			response.sendRedirect(getRefererURL(request, null));
+			return;
+		}
+
+		response.sendRedirect(PortalUtil.escapeRedirect(redirect));
 	}
 
 	@Reference
@@ -280,6 +244,9 @@ public class FacebookConnectAction extends BaseStrutsAction {
 			if (user.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
 				session.setAttribute(
 					WebKeys.FACEBOOK_INCOMPLETE_USER_ID, facebookId);
+				
+				session.setAttribute(
+						FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID, user.getUserId());
 
 				user.setEmailAddress(jsonObject.getString("email"));
 				user.setFirstName(jsonObject.getString("first_name"));
@@ -300,46 +267,6 @@ public class FacebookConnectAction extends BaseStrutsAction {
 	@Reference(unbind = "-")
 	protected void setUserLocalService(UserLocalService userLocalService) {
 		_userLocalService = userLocalService;
-	}
-
-	protected String strutsExecute(
-			HttpServletRequest request, HttpServletResponse response,
-			ThemeDisplay themeDisplay)
-		throws Exception {
-
-		if (!_facebookConnect.isEnabled(themeDisplay.getCompanyId())) {
-			throw new PrincipalException.MustBeEnabled(
-				themeDisplay.getCompanyId(), FacebookConnect.class.getName());
-		}
-
-		HttpSession session = request.getSession();
-
-		String redirect = ParamUtil.getString(request, "redirect");
-
-		String code = ParamUtil.getString(request, "code");
-
-		String token = _facebookConnect.getAccessToken(
-			themeDisplay.getCompanyId(), redirect, code);
-
-		if (Validator.isNotNull(token)) {
-			User user = setFacebookCredentials(
-				session, themeDisplay.getCompanyId(), token);
-
-			if ((user != null) &&
-				(user.getStatus() == WorkflowConstants.STATUS_INCOMPLETE)) {
-
-				redirectUpdateAccount(request, response, user);
-
-				return null;
-			}
-		}
-		else {
-			return _forwards.get("/common/referer_jsp.jsp");
-		}
-
-		response.sendRedirect(redirect);
-
-		return null;
 	}
 
 	protected User updateUser(User user, JSONObject jsonObject)
@@ -400,8 +327,61 @@ public class FacebookConnectAction extends BaseStrutsAction {
 			userGroupRoles, userGroupIds, serviceContext);
 	}
 
+	private String getRefererURL(
+		HttpServletRequest request, ThemeDisplay themeDisplay) {
+
+		String referer = null;
+		String refererParam = PortalUtil.escapeRedirect(
+			request.getParameter(WebKeys.REFERER));
+		String refererRequest = (String)request.getAttribute(WebKeys.REFERER);
+
+		String refererSession = null;
+
+		HttpSession session = request.getSession(false);
+
+		if (session != null) {
+			refererSession = (String)session.getAttribute(WebKeys.REFERER);
+		}
+
+		if (Validator.isNotNull(refererParam)) {
+			referer = refererParam;
+		}
+		else if (Validator.isNotNull(refererRequest)) {
+			referer = refererRequest;
+		}
+		else if (Validator.isNotNull(refererSession)) {
+			referer = refererSession;
+		}
+		else if (themeDisplay != null) {
+			referer = themeDisplay.getPathMain();
+		}
+		else {
+			referer = PortalUtil.getPathMain();
+		}
+
+		if ((session != null) && !CookieKeys.hasSessionId(request) &&
+			Validator.isNotNull(referer)) {
+
+			referer = PortalUtil.getURLWithSessionId(referer, session.getId());
+		}
+
+		return referer;
+	}
+
+	private HttpServletRequest getOriginalServletRequest(HttpServletRequest request) {
+		return PortalUtil.getOriginalServletRequest(request);
+	}
+	
+	public String getCurrentCSRFToken(HttpServletRequest request) {
+		return (String)getOriginalServletRequest(request).getSession().getAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
+	}
+	
+	private static final Log _log = LogFactoryUtil.getLog(
+		FacebookConnectRedirectURIServlet.class);
+
+	private static final long serialVersionUID = 1L;
+
 	private FacebookConnect _facebookConnect;
-	private final Map<String, String> _forwards = new HashMap<>();
 	private UserLocalService _userLocalService;
 
 }
