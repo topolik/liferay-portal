@@ -56,7 +56,7 @@ public class FacebookConnectImpl implements FacebookConnect {
 			getFacebookConnectConfiguration(companyId);
 
 		String url = HttpUtil.addParameter(
-			facebookConnectConfiguration.oauthTokenURL(), "client_id",	
+			facebookConnectConfiguration.oauthTokenURL(), "client_id",
 			facebookConnectConfiguration.appId());
 
 		String facebookConnectRedirectURL =
@@ -66,7 +66,7 @@ public class FacebookConnectImpl implements FacebookConnect {
 			url, "redirect_uri", facebookConnectRedirectURL);
 
 		facebookConnectRedirectURL = HttpUtil.addParameter(
-			facebookConnectRedirectURL, "redirect", redirect);
+			facebookConnectRedirectURL, "postAuthRedirect", redirect);
 
 		url = HttpUtil.addParameter(
 			url, "redirect_uri", facebookConnectRedirectURL);
@@ -80,6 +80,7 @@ public class FacebookConnectImpl implements FacebookConnect {
 		options.setPost(true);
 
 		try {
+
 			String content = HttpUtil.URLtoString(options);
 
 			if (Validator.isNotNull(content)) {

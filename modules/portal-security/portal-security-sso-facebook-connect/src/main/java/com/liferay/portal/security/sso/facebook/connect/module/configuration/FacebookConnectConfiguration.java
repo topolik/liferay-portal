@@ -45,7 +45,7 @@ public interface FacebookConnectConfiguration {
 	public String oauthAuthURL();
 
 	@Meta.AD(
-		deflt = "http://localhost:8080/c/login/facebook_connect_oauth",
+		deflt = "http://localhost:8080/o/login/facebook_connect_oauth",
 		required = false
 	)
 	public String oauthRedirectURL();
