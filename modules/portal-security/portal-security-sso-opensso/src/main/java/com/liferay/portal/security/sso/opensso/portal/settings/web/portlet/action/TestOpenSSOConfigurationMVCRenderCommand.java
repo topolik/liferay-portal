@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.portal.settings.web.portlet.action;
+package com.liferay.portal.security.sso.opensso.portal.settings.web.portlet.action;
 
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.settings.web.constants.PortalSettingsPortletKeys;
