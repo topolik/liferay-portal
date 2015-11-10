@@ -83,6 +83,9 @@ public interface MVCRenderCommand extends MVCCommand {
 
 	};
 
+	public static final String DONT_DISPATCH_PATH =
+		MVCRenderCommand.class.getName() + "#DONT_DISPATCH_PATH";
+
 	/**
 	 * Invoked by {@link MVCPortlet} to handle the render phase of the portlet.
 	 *
