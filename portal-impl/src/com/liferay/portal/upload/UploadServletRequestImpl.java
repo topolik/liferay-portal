@@ -36,6 +36,7 @@ import java.io.InputStream;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -43,6 +44,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -92,10 +95,6 @@ public class UploadServletRequestImpl
 			ServletFileUpload servletFileUpload = new ServletFileUpload(
 				new LiferayFileItemFactory(getTempDir()));
 
-			servletFileUpload.setSizeMax(
-				PrefsPropsUtil.getLong(
-					PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_MAX_SIZE));
-
 			liferayServletRequest = new LiferayServletRequest(request);
 
 			List<org.apache.commons.fileupload.FileItem> fileItems =
@@ -103,8 +102,67 @@ public class UploadServletRequestImpl
 
 			liferayServletRequest.setFinishedReadingOriginalStream(true);
 
+			long uploadServletRequestImplMaxSize = PrefsPropsUtil.getLong(
+				PropsKeys.UPLOAD_SERVLET_REQUEST_IMPL_MAX_SIZE);
+			long uploadServletRequestImplSize = 0;
+
+			Map<String, GroupedFileItems> groupedFileItemsMap = new TreeMap<>();
+
+			for (org.apache.commons.fileupload.FileItem fileItem : fileItems) {
+				GroupedFileItems groupedFileItems = groupedFileItemsMap.get(
+					fileItem.getFieldName());
+
+				if (groupedFileItems == null) {
+					groupedFileItems = new GroupedFileItems();
+				}
+
+				groupedFileItems.addFileItem(fileItem);
+
+				groupedFileItemsMap.put(
+					fileItem.getFieldName(), groupedFileItems);
+			}
+
+			Set<Map.Entry<String, GroupedFileItems>> set = new TreeSet<>(
+				new GroupedFileItemsComparator());
+
+			set.addAll(groupedFileItemsMap.entrySet());
+
+			fileItems.clear();
+
+			for (Map.Entry<String, GroupedFileItems> entry : set) {
+				GroupedFileItems groupedFileItems = groupedFileItemsMap.get(
+					entry.getKey());
+
+				fileItems.addAll(groupedFileItems.getFileItems());
+			}
+
 			for (org.apache.commons.fileupload.FileItem fileItem : fileItems) {
 				LiferayFileItem liferayFileItem = (LiferayFileItem)fileItem;
+
+				long itemSize = liferayFileItem.getItemSize();
+
+				if ((uploadServletRequestImplSize + itemSize) >
+						uploadServletRequestImplMaxSize) {
+
+					StringBundler sb = new StringBundler(3);
+
+					sb.append("Request reached the maximum permitted size of ");
+					sb.append(uploadServletRequestImplMaxSize);
+					sb.append(" bytes");
+
+					UploadException uploadException = new UploadException(
+						sb.toString());
+
+					uploadException.setExceededLiferayFileItemSizeLimit(false);
+					uploadException.setExceededSizeLimit(true);
+
+					request.setAttribute(
+						WebKeys.UPLOAD_EXCEPTION, uploadException);
+
+					continue;
+				}
+
+				uploadServletRequestImplSize += itemSize;
 
 				if (liferayFileItem.isFormField()) {
 					liferayFileItem.setString(request.getCharacterEncoding());
@@ -550,5 +608,62 @@ public class UploadServletRequestImpl
 	private final Map<String, FileItem[]> _fileParameters;
 	private final LiferayServletRequest _liferayServletRequest;
 	private final Map<String, List<String>> _regularParameters;
+
+	private class GroupedFileItems {
+
+		public void addFileItem(
+			org.apache.commons.fileupload.FileItem fileItem) {
+
+			_fileItems.add(fileItem);
+			_fileItemsSize += fileItem.getSize();
+		}
+
+		public List<org.apache.commons.fileupload.FileItem> getFileItems() {
+			return _fileItems;
+		}
+
+		public int getFileItemsSize() {
+			return _fileItemsSize;
+		}
+
+		private final List<org.apache.commons.fileupload.FileItem> _fileItems =
+			new ArrayList<>();
+		private int _fileItemsSize = 0;
+
+	}
+
+	private class GroupedFileItemsComparator
+			implements Comparator<Map.Entry<String, GroupedFileItems>> {
+
+		@Override
+		public int compare(
+			Map.Entry<String, GroupedFileItems> entry1,
+			Map.Entry<String, GroupedFileItems> entry2) {
+
+			if (entry1.equals(entry2)) {
+				return 0;
+			}
+
+			String groupedFileItemsKey1 = entry1.getKey();
+			String groupedFileItemsKey2 = entry2.getKey();
+
+			if (groupedFileItemsKey1.equals(groupedFileItemsKey2)) {
+				return 1;
+			}
+
+			GroupedFileItems groupedFileItems1 = entry1.getValue();
+			GroupedFileItems groupedFileItems2 = entry2.getValue();
+
+			long itemSize1 = groupedFileItems1.getFileItemsSize();
+			long itemSize2 = groupedFileItems2.getFileItemsSize();
+
+			if (itemSize1 >= itemSize2) {
+				return 1;
+			}
+
+			return -1;
+		}
+
+	}
 
 }
