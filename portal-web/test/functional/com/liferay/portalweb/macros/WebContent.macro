@@ -376,13 +376,10 @@
 			</then>
 		</if>
 
-		<var name="key_categoryName" value="${categoryName}" />
-		<var name="key_vocabularyName" value="${vocabularyName}" />
-
-		<execute function="AssertClick" locator1="AssetCategorization#CATEGORY_SELECT" value1="Select" />
-		<execute function="Click" locator1="AssetCategorization#CATEGORIES_CATEGORY_CHECKBOX" />
-		<execute function="Click" locator1="AssetCategorization#CATEGORIES_CLOSE_BUTTON" />
-		<execute function="AssertTextEquals" locator1="AssetCategorization#CATEGORY" value1="${categoryName}" />
+		<execute macro="AssetCategorization#addCategory">
+			<var name="categoryName" value="${categoryName}" />
+			<var name="vocabularyName" value="${vocabularyName}" />
+		</execute>
 
 		<execute macro="WebContent#publish" />
 
@@ -442,17 +439,10 @@
 		<execute function="Type#typeAlloyEditor" locator1="AlloyEditor#CONTENT_FIELD" value1="${webContentContent}" />
 		<execute function="AssertClick" locator1="NavListItem#CATEGORIZATION" value1="Categorization" />
 
-		<var name="key_vocabularyName" value="${vocabularyName}" />
-
-		<execute function="AssertClick" locator1="AssetCategorization#CATEGORY_SELECT" value1="Select" />
-
-		<for list="${categoryNameList}" param="categoryName">
-			<var name="key_categoryName" value="${categoryName}" />
-
-			<execute function="Click" locator1="AssetCategorization#CATEGORIES_CATEGORY_CHECKBOX" />
-		</for>
-
-		<execute function="Click" locator1="AssetCategorization#CATEGORIES_CLOSE_BUTTON" />
+		<execute macro="AssetCategorization#addMultipleCategories">
+			<var name="categoryNameList" value="${categoryNameList}" />
+			<var name="vocabularyName" value="${vocabularyName}" />
+		</execute>
 
 		<execute macro="WebContent#publish" />
 	</command>
@@ -537,7 +527,7 @@
 		<if>
 			<isset var="webContentLinkToPage" />
 			<then>
-				<var name="key_linkedPageName" value="${linkedPageName}" />
+				<var name="key_fieldName" value="${webContentLinkToPage}" />
 
 				<execute function="Select" locator1="DDMField#LINK_TO_PAGE" value1="regexp:–\s+${linkedPageName}" />
 			</then>
@@ -709,7 +699,7 @@
 
 		<execute function="Check" locator1="WC#ENTRY_DESCRIPTIVE_CHECKBOX" />
 
-		<var name="key_assetEntry" value="${webContentTitle}" />
+		<var name="key_descriptiveEntry" value="${webContentTitle}" />
 
 		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
 		<execute function="AssertClick" locator1="MenuItem#COPY" value1="Copy" />
@@ -754,7 +744,7 @@
 	</command>
 
 	<command name="deleteWithDisabledRB">
-		<var name="key_assetEntry" value="${entryTitle}" />
+		<var name="key_descriptiveEntry" value="${entryTitle}" />
 
 		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
 
@@ -919,7 +909,7 @@
 	</command>
 
 	<command name="expireSpecificVersionCP">
-		<var name="key_assetEntry" value="${webContentTitle}" />
+		<var name="key_descriptiveEntry" value="${webContentTitle}" />
 
 		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
 
@@ -941,7 +931,7 @@
 			</else>
 		</if>
 
-		<execute function="AssertClickNoError" locator1="Button#EXPIRE" value1="Expire" />
+		<execute function="ClickNoError" locator1="Icon#EXPIRE" />
 		<execute function="Confirm" value1="Are you sure you want to expire the selected version?" />
 	</command>
 
@@ -954,6 +944,10 @@
 	</command>
 
 	<command name="gotoViewSpecificVersionHistoryCP">
+		<var name="key_assetEntry" value="${webContentTitle}" />
+
+		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
+
 		<execute function="AssertClick" locator1="MenuItem#VIEW_HISTORY" value1="View History" />
 	</command>
 
@@ -979,7 +973,7 @@
 
 		<execute function="Click" locator1="WC#ENTRY_DESCRIPTIVE_MENULIST_ICON" />
 		<execute function="AssertClick#assertPartialTextClickAt" locator1="MenuItem#MOVE_TO_THE_RECYCLE_BIN" value1="Move to the Recycle Bin" />
-		<execute function="AssertTextEquals#assertPartialText" locator1="Message#RECYCLE_BIN_SUCCESS" value1="The ${assetType} ${webContentTitle} was moved to the Recycle Bin. Undo" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="Message#SUCCESS" value1="The ${assetType} ${webContentTitle} was moved to the Recycle Bin. Undo" />
 	</command>
 
 	<command name="moveToRecycleBinViaDeleteIconCP">
@@ -991,9 +985,7 @@
 
 		<execute function="Click" locator1="Icon#DELETE" />
 
-		<var name="key_assetType" value="Web Content Article" />
-
-		<execute function="AssertTextEquals#assertPartialText" locator1="Message#RECYCLE_BIN_SUCCESS" value1="moved to the Recycle Bin. Undo" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="Message#SUCCESS" value1="moved to the Recycle Bin. Undo" />
 	</command>
 
 	<command name="paginateRelatedAssets">
@@ -1085,14 +1077,12 @@
 			<var name="displayStyle" value="Descriptive" />
 		</execute>
 
-		<var name="key_assetType" value="Web Content Article" />
-
 		<while>
 			<condition function="IsElementPresent#pauseIsElementPresent" locator1="WC#ENTRY_DESCRIPTIVE_THUMBNAIL_GENERIC" />
 			<then>
 				<execute function="Check#checkAll" locator1="Checkbox#SELECT_ALL" />
 				<execute function="Click" locator1="Icon#DELETE" />
-				<execute function="AssertTextEquals#assertPartialText" locator1="Message#RECYCLE_BIN_SUCCESS" value1="moved to the Recycle Bin. Undo" />
+				<execute function="AssertTextEquals#assertPartialText" locator1="Message#SUCCESS" value1="moved to the Recycle Bin. Undo" />
 			</then>
 		</while>
 
@@ -1596,7 +1586,7 @@
 		<var name="key_userFirstLast" value="${userFirstLast}" />
 		<var name="key_webContentTitle" value="${webContentTitle}" />
 
-		<execute function="AssertTextEquals" locator1="WC#ENTRY_DESCRIPTIVE_VERSION" value1="1.1" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="WC#ENTRY_DESCRIPTIVE_VERSION" value1="1.1" />
 		<execute function="AssertTextEquals#assertPartialText" locator1="WC#ENTRY_DESCRIPTIVE_LAST_UPDATED" value1="${userFirstLast}" />
 	</command>
 

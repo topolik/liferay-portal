@@ -24,7 +24,11 @@ String modelResourceName = ResourceActionsUtil.getModelResource(request, modelRe
 
 long columnId = ParamUtil.getLong(request, "columnId");
 
-ExpandoColumn column = ExpandoColumnServiceUtil.fetchExpandoColumn(columnId);
+ExpandoColumn column = null;
+
+if (columnId > 0) {
+	column = ExpandoColumnServiceUtil.fetchExpandoColumn(columnId);
+}
 
 int type = 0;
 

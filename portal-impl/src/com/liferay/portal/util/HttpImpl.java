@@ -1090,6 +1090,9 @@ public class HttpImpl implements Http {
 		else if (url.startsWith(Http.HTTPS_WITH_SLASH)) {
 			return url.substring(Http.HTTPS_WITH_SLASH.length());
 		}
+		else if (url.startsWith(StringPool.DOUBLE_SLASH)) {
+			return url.substring(StringPool.DOUBLE_SLASH.length());
+		}
 		else {
 			return url;
 		}

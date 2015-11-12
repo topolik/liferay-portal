@@ -81,6 +81,12 @@ public class UpdateRecordSetSettingsMVCActionCommand
 
 		settingsProperties.setProperty("redirectURL", redirectURL);
 
+		boolean requireCaptcha = ParamUtil.getBoolean(
+			actionRequest, "requireCaptcha");
+
+		settingsProperties.setProperty(
+			"requireCaptcha", String.valueOf(requireCaptcha));
+
 		_ddlRecordSetService.updateRecordSet(
 			recordSetId, settingsProperties.toString());
 	}

@@ -25,7 +25,7 @@ String redirect = ParamUtil.getString(request, "redirect");
 
 long passwordPolicyId = ParamUtil.getLong(request, "passwordPolicyId");
 
-PasswordPolicy passwordPolicy = PasswordPolicyServiceUtil.fetchPasswordPolicy(passwordPolicyId);
+PasswordPolicy passwordPolicy = PasswordPolicyLocalServiceUtil.fetchPasswordPolicy(passwordPolicyId);
 
 PortletURL portletURL = renderResponse.createRenderURL();
 

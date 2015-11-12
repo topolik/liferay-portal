@@ -81,13 +81,6 @@ public class AnnouncementsEntryServiceWrapper
 	}
 
 	@Override
-	public com.liferay.portlet.announcements.model.AnnouncementsEntry fetchAnnouncementsEntry(
-		long entryId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _announcementsEntryService.fetchAnnouncementsEntry(entryId);
-	}
-
-	@Override
 	public com.liferay.portlet.announcements.model.AnnouncementsEntry getEntry(
 		long entryId)
 		throws com.liferay.portal.kernel.exception.PortalException {

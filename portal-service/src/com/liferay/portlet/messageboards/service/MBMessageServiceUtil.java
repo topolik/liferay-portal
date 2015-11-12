@@ -161,12 +161,6 @@ public class MBMessageServiceUtil {
 		getService().emptyMessageAttachments(messageId);
 	}
 
-	public static com.liferay.portlet.messageboards.model.MBMessage fetchMBMessage(
-		long messageId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return getService().fetchMBMessage(messageId);
-	}
-
 	public static java.util.List<com.liferay.portlet.messageboards.model.MBMessage> getCategoryMessages(
 		long groupId, long categoryId, int status, int start, int end)
 		throws com.liferay.portal.kernel.exception.PortalException {

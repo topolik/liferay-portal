@@ -63,15 +63,10 @@ public class ExpandoColumnServiceImpl extends ExpandoColumnServiceBaseImpl {
 	public ExpandoColumn fetchExpandoColumn(long columnId)
 		throws PortalException {
 
-		ExpandoColumn column = expandoColumnLocalService.fetchExpandoColumn(
-			columnId);
+		ExpandoColumnPermissionUtil.check(
+			getPermissionChecker(), columnId, ActionKeys.VIEW);
 
-		if (column != null) {
-			ExpandoColumnPermissionUtil.check(
-				getPermissionChecker(), column, ActionKeys.VIEW);
-		}
-
-		return column;
+		return expandoColumnLocalService.fetchExpandoColumn(columnId);
 	}
 
 	@Override

@@ -21,7 +21,7 @@ String redirect = ParamUtil.getString(request, "redirect");
 
 long categoryId = ParamUtil.getLong(request, "categoryId");
 
-AssetCategory category = AssetCategoryServiceUtil.fetchCategory(categoryId);
+AssetCategory category = AssetCategoryLocalServiceUtil.fetchCategory(categoryId);
 
 long parentCategoryId = BeanParamUtil.getLong(category, request, "parentCategoryId");
 

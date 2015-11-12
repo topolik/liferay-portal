@@ -41,11 +41,8 @@ import com.liferay.gradle.plugins.tasks.StartAppServerTask;
 import com.liferay.gradle.plugins.tasks.StopAppServerTask;
 import com.liferay.gradle.plugins.tld.formatter.TLDFormatterPlugin;
 import com.liferay.gradle.plugins.upgrade.table.builder.BuildUpgradeTableTask;
-import com.liferay.gradle.plugins.upgrade.table.builder.UpgradeTableBuilderPlugin;
 import com.liferay.gradle.plugins.whip.WhipPlugin;
 import com.liferay.gradle.plugins.whip.WhipTaskExtension;
-import com.liferay.gradle.plugins.wsdd.builder.BuildWSDDTask;
-import com.liferay.gradle.plugins.wsdd.builder.WSDDBuilderPlugin;
 import com.liferay.gradle.plugins.wsdl.builder.BuildWSDLTask;
 import com.liferay.gradle.plugins.wsdl.builder.WSDLBuilderPlugin;
 import com.liferay.gradle.plugins.xml.formatter.FormatXMLTask;
@@ -186,12 +183,11 @@ public class LiferayJavaPlugin implements Plugin<Project> {
 		configureArtifacts(project);
 
 		configureTaskBuildService(project);
-		configureTaskBuildUpgradeTable(project);
-		configureTaskBuildWSDD(project);
 		configureTaskBuildWSDL(project);
 		configureTaskBuildXSD(project);
 		configureTaskConfigJSModules(project);
 		configureTaskTranspileJS(project);
+		configureTasksBuildUpgradeTable(project);
 		configureTasksTest(project);
 
 		project.afterEvaluate(
@@ -216,10 +212,7 @@ public class LiferayJavaPlugin implements Plugin<Project> {
 		Delete delete = (Delete)GradleUtil.getTask(
 			project, BasePlugin.CLEAN_TASK_NAME);
 
-		boolean cleanDeployed = GradleUtil.getProperty(
-			delete, CLEAN_DEPLOYED_PROPERTY_NAME, true);
-
-		if (!cleanDeployed) {
+		if (!isCleanDeployed(delete)) {
 			return;
 		}
 
@@ -899,8 +892,6 @@ public class LiferayJavaPlugin implements Plugin<Project> {
 		GradleUtil.applyPlugin(project, SourceFormatterPlugin.class);
 		GradleUtil.applyPlugin(project, SoyPlugin.class);
 		GradleUtil.applyPlugin(project, TLDFormatterPlugin.class);
-		GradleUtil.applyPlugin(project, UpgradeTableBuilderPlugin.class);
-		GradleUtil.applyPlugin(project, WSDDBuilderPlugin.class);
 		GradleUtil.applyPlugin(project, WSDLBuilderPlugin.class);
 		GradleUtil.applyPlugin(project, WhipPlugin.class);
 		GradleUtil.applyPlugin(project, XMLFormatterPlugin.class);
@@ -1364,54 +1355,14 @@ public class LiferayJavaPlugin implements Plugin<Project> {
 		buildServiceTask.setTestDirName("");
 	}
 
-	protected void configureTaskBuildUpgradeTable(Project project) {
-		BuildUpgradeTableTask buildUpgradeTableTask =
-			(BuildUpgradeTableTask)GradleUtil.getTask(
-				project,
-				UpgradeTableBuilderPlugin.BUILD_UPGRADE_TABLE_TASK_NAME);
-
-		configureTaskBuildUpgradeTableBaseDirName(buildUpgradeTableTask);
-		configureTaskBuildUpgradeTableDirName(buildUpgradeTableTask);
-	}
-
-	protected void configureTaskBuildUpgradeTableBaseDirName(
+	protected void configureTaskBuildUpgradeTableDir(
 		BuildUpgradeTableTask buildUpgradeTableTask) {
-
-		Project project = buildUpgradeTableTask.getProject();
-
-		buildUpgradeTableTask.setBaseDirName(
-			FileUtil.getAbsolutePath(project.getProjectDir()));
-	}
-
-	protected void configureTaskBuildUpgradeTableDirName(
-		BuildUpgradeTableTask buildUpgradeTableTask) {
-
-		Project project = buildUpgradeTableTask.getProject();
 
 		File file = GradleUtil.getProperty(
-			project, "upgrade.table.dir", (File)null);
+			buildUpgradeTableTask.getProject(), "upgrade.table.dir",
+			(File)null);
 
-		if (file != null) {
-			buildUpgradeTableTask.setUpgradeTableDirName(
-				FileUtil.getAbsolutePath(file));
-		}
-	}
-
-	protected void configureTaskBuildWSDD(Project project) {
-		BuildWSDDTask buildWSDDTask = (BuildWSDDTask)GradleUtil.getTask(
-			project, WSDDBuilderPlugin.BUILD_WSDD_TASK_NAME);
-
-		configureTaskBuildWSDDOutputDirName(buildWSDDTask);
-	}
-
-	protected void configureTaskBuildWSDDOutputDirName(
-		BuildWSDDTask buildWSDDTask) {
-
-		Project project = buildWSDDTask.getProject();
-
-		File outputDir = getJavaDir(project);
-
-		buildWSDDTask.setOutputDirName(project.relativePath(outputDir));
+		buildUpgradeTableTask.setUpgradeTableDir(file);
 	}
 
 	protected void configureTaskBuildWSDL(Project project) {
@@ -1925,6 +1876,23 @@ public class LiferayJavaPlugin implements Plugin<Project> {
 			});
 	}
 
+	protected void configureTasksBuildUpgradeTable(Project project) {
+		TaskContainer taskContainer = project.getTasks();
+
+		taskContainer.withType(
+			BuildUpgradeTableTask.class,
+			new Action<BuildUpgradeTableTask>() {
+
+				@Override
+				public void execute(
+					BuildUpgradeTableTask buildUpgradeTableTask) {
+
+					configureTaskBuildUpgradeTableDir(buildUpgradeTableTask);
+				}
+
+			});
+	}
+
 	protected void configureTasksDirectDeploy(Project project) {
 		TaskContainer taskContainer = project.getTasks();
 
@@ -2267,6 +2235,11 @@ public class LiferayJavaPlugin implements Plugin<Project> {
 	protected boolean isAddTestDefaultDependencies(Project project) {
 		return GradleUtil.getProperty(
 			project, _ADD_TEST_DEFAULT_DEPENDENCIES_PROPERTY_NAME, true);
+	}
+
+	protected boolean isCleanDeployed(Delete delete) {
+		return GradleUtil.getProperty(
+			delete, CLEAN_DEPLOYED_PROPERTY_NAME, true);
 	}
 
 	protected boolean isTestProject(Project project) {

@@ -45,12 +45,15 @@ if (Validator.isNull(ddmStructureKey) && (article != null)) {
 	ddmStructureKey = article.getDDMStructureKey();
 }
 
+DDMStructure ddmStructure = null;
+
 long ddmStructureId = ParamUtil.getLong(request, "ddmStructureId");
 
-DDMStructure ddmStructure = DDMStructureServiceUtil.fetchStructure(ddmStructureId);
-
-if ((ddmStructure == null) && Validator.isNotNull(ddmStructureKey)) {
-	ddmStructure = DDMStructureServiceUtil.fetchStructure(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(JournalArticle.class), ddmStructureKey, true);
+if (ddmStructureId > 0) {
+	ddmStructure = DDMStructureLocalServiceUtil.fetchStructure(ddmStructureId);
+}
+else if (Validator.isNotNull(ddmStructureKey)) {
+	ddmStructure = DDMStructureLocalServiceUtil.fetchStructure(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(JournalArticle.class), ddmStructureKey, true);
 }
 
 String ddmTemplateKey = ParamUtil.getString(request, "ddmTemplateKey");
@@ -86,13 +89,13 @@ if (article != null) {
 
 boolean showHeader = ParamUtil.getBoolean(request, "showHeader", true);
 
-String[] mainSections = JournalWebConfigurationValues.JOURNAL_ARTICLE_FORM_ADD;
+String[] mainSections = journalWebConfiguration.journalArticleFormAdd();
 
 if (classNameId > JournalArticleConstants.CLASSNAME_ID_DEFAULT) {
-	mainSections = JournalWebConfigurationValues.JOURNAL_ARTICLE_FORM_DEFAULT_VALUES;
+	mainSections = journalWebConfiguration.journalArticleFormDefaultValues();
 }
 else if ((article != null) && (article.getId() > 0)) {
-	mainSections = JournalWebConfigurationValues.JOURNAL_ARTICLE_FORM_UPDATE;
+	mainSections = journalWebConfiguration.journalArticleFormUpdate();
 }
 
 String[][] categorySections = {mainSections};

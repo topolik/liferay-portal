@@ -302,28 +302,6 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 	}
 
 	/**
-	 * Returns the structure with the ID.
-	 *
-	 * @param  structureId the primary key of the structure
-	 * @return the structure with the structure ID, or <code>null</code> if a
-	 *         matching structure could not be found
-	 */
-	@Override
-	public DDMStructure fetchStructure(long structureId)
-		throws PortalException {
-
-		DDMStructure ddmStructure = ddmStructureLocalService.fetchStructure(
-			structureId);
-
-		if (ddmStructure != null) {
-			DDMStructurePermission.check(
-				getPermissionChecker(), ddmStructure, ActionKeys.VIEW);
-		}
-
-		return ddmStructure;
-	}
-
-	/**
 	 * Returns the structure matching the class name ID, structure key, and
 	 * group.
 	 *
@@ -341,7 +319,7 @@ public class DDMStructureServiceImpl extends DDMStructureServiceBaseImpl {
 			long groupId, long classNameId, String structureKey)
 		throws PortalException {
 
-		DDMStructure ddmStructure = ddmStructureLocalService.fetchStructure(
+		DDMStructure ddmStructure = ddmStructurePersistence.fetchByG_C_S(
 			groupId, classNameId, structureKey);
 
 		if (ddmStructure != null) {

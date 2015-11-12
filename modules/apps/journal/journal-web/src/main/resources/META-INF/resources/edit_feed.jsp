@@ -32,12 +32,16 @@ if (Validator.isNull(ddmStructureKey) && (feed != null)) {
 	ddmStructureKey = feed.getDDMStructureKey();
 }
 
+DDMStructure ddmStructure = null;
+
 String ddmStructureName = StringPool.BLANK;
 
-DDMStructure ddmStructure = DDMStructureServiceUtil.fetchStructure(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(JournalArticle.class), ddmStructureKey, true);
+if (Validator.isNotNull(ddmStructureKey)) {
+	ddmStructure = DDMStructureLocalServiceUtil.fetchStructure(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(JournalArticle.class), ddmStructureKey, true);
 
-if (ddmStructure != null) {
-	ddmStructureName = ddmStructure.getName(locale);
+	if (ddmStructure != null) {
+		ddmStructureName = ddmStructure.getName(locale);
+	}
 }
 
 List<DDMTemplate> ddmTemplates = new ArrayList<DDMTemplate>();
@@ -52,16 +56,18 @@ if (Validator.isNull(ddmTemplateKey) && (feed != null)) {
 	ddmTemplateKey = feed.getDDMTemplateKey();
 }
 
-if (ddmStructure == null) {
-	DDMTemplate ddmTemplate = DDMTemplateServiceUtil.fetchTemplate(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(DDMStructure.class), ddmTemplateKey, true);
+if ((ddmStructure == null) && Validator.isNotNull(ddmTemplateKey)) {
+	DDMTemplate ddmTemplate = DDMTemplateLocalServiceUtil.fetchTemplate(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(DDMStructure.class), ddmTemplateKey, true);
 
-	ddmStructure = DDMStructureServiceUtil.fetchStructure(ddmTemplate.getClassPK());
+	if (ddmTemplate != null) {
+		ddmStructure = DDMStructureLocalServiceUtil.fetchStructure(ddmTemplate.getClassPK());
 
-	if (ddmStructure != null) {
-		ddmStructureKey = ddmStructure.getStructureKey();
-		ddmStructureName = ddmStructure.getName(locale);
+		if (ddmStructure != null) {
+			ddmStructureKey = ddmStructure.getStructureKey();
+			ddmStructureName = ddmStructure.getName(locale);
 
-		ddmTemplates = DDMTemplateLocalServiceUtil.getTemplates(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(DDMStructure.class), ddmTemplate.getClassPK());
+			ddmTemplates = DDMTemplateLocalServiceUtil.getTemplates(themeDisplay.getSiteGroupId(), PortalUtil.getClassNameId(DDMStructure.class), ddmTemplate.getClassPK());
+		}
 	}
 }
 
@@ -127,7 +133,7 @@ if (feed != null) {
 		<c:choose>
 			<c:when test="<%= feed == null %>">
 				<c:choose>
-					<c:when test="<%= JournalWebConfigurationValues.JOURNAL_FEED_FORCE_AUTOGENERATE_ID %>">
+					<c:when test="<%= journalWebConfiguration.journalFeedForceAutogenerateId() %>">
 						<aui:input name="newFeedId" type="hidden" />
 						<aui:input name="autoFeedId" type="hidden" value="<%= true %>" />
 					</c:when>
@@ -143,7 +149,7 @@ if (feed != null) {
 			</c:otherwise>
 		</c:choose>
 
-		<aui:input autoFocus="<%= ((feed != null) && !JournalWebConfigurationValues.JOURNAL_FEED_FORCE_AUTOGENERATE_ID && (windowState.equals(WindowState.MAXIMIZED)) || windowState.equals(LiferayWindowState.POP_UP)) %>" cssClass="lfr-input-text-container" name="name" />
+		<aui:input autoFocus="<%= ((feed != null) && !journalWebConfiguration.journalFeedForceAutogenerateId() && (windowState.equals(WindowState.MAXIMIZED)) || windowState.equals(LiferayWindowState.POP_UP)) %>" cssClass="lfr-input-text-container" name="name" />
 
 		<aui:input cssClass="lfr-textarea-container" name="description" />
 

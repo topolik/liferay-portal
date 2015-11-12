@@ -12,7 +12,7 @@ buildscript {
 	}
 
 	dependencies {
-		classpath group: "com.liferay", name: "com.liferay.gradle.plugins", version: "1.0.27"
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins", version: "1.0.29"
 		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.alloy.taglib", version: "1.0.1"
 		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.cache", version: "1.0.1"
 		classpath group: "com.liferay", name: "com.liferay.gradle.plugins.maven.plugin.builder", version: "1.0.2"
@@ -40,7 +40,7 @@ gradle.taskGraph.useFilter {
 		}
 	}
 	else if (task.name == "compileJSP") {
-		FileTree jspFileTree = fileTree(dir: task.project.projectDir, excludes: ["**/custom_jsps/**/*", "**/dependencies/**/*"], includes: ["docroot/**/*.jsp", "src/META-INF/resources/**/*.jsp"])
+		FileTree jspFileTree = fileTree(dir: task.project.projectDir, excludes: ["**/custom_jsps/**/*", "**/dependencies/**/*"], includes: ["docroot/**/*.jsp", "src/main/resources/META-INF/resources/**/*.jsp"])
 
 		if (jspFileTree.empty) {
 			return false

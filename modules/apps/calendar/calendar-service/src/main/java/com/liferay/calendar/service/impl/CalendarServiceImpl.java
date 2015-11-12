@@ -78,12 +78,14 @@ public class CalendarServiceImpl extends CalendarServiceBaseImpl {
 
 	@Override
 	public Calendar fetchCalendar(long calendarId) throws PortalException {
-		Calendar calendar = calendarLocalService.fetchCalendar(calendarId);
+		Calendar calendar = calendarPersistence.fetchByPrimaryKey(calendarId);
 
-		if (calendar != null) {
-			CalendarPermission.check(
-				getPermissionChecker(), calendar, ActionKeys.VIEW);
+		if (calendar == null) {
+			return null;
 		}
+
+		CalendarPermission.check(
+			getPermissionChecker(), calendar, ActionKeys.VIEW);
 
 		return calendar;
 	}

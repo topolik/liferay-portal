@@ -412,11 +412,11 @@
 			<var name="localizedLanguage" value="Catalan (Spain)" />
 		</execute>
 
-		<var name="ddlRecordFieldData" value="Contenido" />
-
-		<execute function="AssertElementPresent" locator1="xpath=(//div[@data-fieldname='Text'][1]/input[@value='${ddlRecordFieldData}'])" />
-		<execute function="AssertElementPresent" locator1="xpath=(//div[@data-fieldname='Text'][2]/input[@value='${ddlRecordFieldData} 2'])" />
-		<execute function="AssertElementPresent" locator1="xpath=(//div[@data-fieldname='Text'][3]/input[@value='${ddlRecordFieldData} 3'])" />
+		<execute macro="DDLRecord#viewTextFieldRepeated">
+			<var name="ddlRecordFieldData1" value="Contenido" />
+			<var name="ddlRecordFieldData2" value="Content 2" />
+			<var name="ddlRecordFieldData3" value="Contenido 2" />
+		</execute>
 	</command>
 
 	<command name="AddXSSToHTMLField" priority="4">
@@ -1100,7 +1100,7 @@
 		</execute>
 
 		<execute function="Click" locator1="DDL#LIST_TABLE_ELLIPSIS_1" />
-		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS" value1="Permissions" />
+		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS_LEXICON" value1="Permissions" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
 
@@ -1133,7 +1133,7 @@
 		</execute>
 
 		<execute function="Click" locator1="DDL#LIST_TABLE_ELLIPSIS_1" />
-		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS" value1="Permissions" />
+		<execute function="AssertClick" locator1="MenuItem#PERMISSIONS_LEXICON" value1="Permissions" />
 
 		<execute function="SelectFrame" locator1="Permissions#PERMISSIONS_IFRAME" />
 

@@ -186,21 +186,6 @@ public class AnnouncementsEntryServiceImpl
 	}
 
 	@Override
-	public AnnouncementsEntry fetchAnnouncementsEntry(long entryId)
-		throws PortalException {
-
-		AnnouncementsEntry entry =
-			announcementsEntryLocalService.fetchAnnouncementsEntry(entryId);
-
-		if (entry != null) {
-			AnnouncementsEntryPermission.check(
-				getPermissionChecker(), entry, ActionKeys.VIEW);
-		}
-
-		return entry;
-	}
-
-	@Override
 	public AnnouncementsEntry getEntry(long entryId) throws PortalException {
 		AnnouncementsEntry entry = announcementsEntryLocalService.getEntry(
 			entryId);

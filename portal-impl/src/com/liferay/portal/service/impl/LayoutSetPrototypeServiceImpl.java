@@ -90,16 +90,11 @@ public class LayoutSetPrototypeServiceImpl
 	public LayoutSetPrototype fetchLayoutSetPrototype(long layoutSetPrototypeId)
 		throws PortalException {
 
-		LayoutSetPrototype layoutSetPrototype =
-			layoutSetPrototypeLocalService.fetchLayoutSetPrototype(
-				layoutSetPrototypeId);
+		LayoutSetPrototypePermissionUtil.check(
+			getPermissionChecker(), layoutSetPrototypeId, ActionKeys.VIEW);
 
-		if (layoutSetPrototype != null) {
-			LayoutSetPrototypePermissionUtil.check(
-				getPermissionChecker(), layoutSetPrototypeId, ActionKeys.VIEW);
-		}
-
-		return layoutSetPrototype;
+		return layoutSetPrototypeLocalService.fetchLayoutSetPrototype(
+			layoutSetPrototypeId);
 	}
 
 	@Override
