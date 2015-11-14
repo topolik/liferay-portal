@@ -19,20 +19,34 @@
 <%
 String redirect = ParamUtil.getString(request, "redirect");
 
-User selUser = null;
+User selUser = (User)renderRequest.getAttribute("selUser");
 
 Contact selContact = null;
 
-long userId = ParamUtil.getLong(request, "userId");
+long userId;
 
-if (userId > 0) {
-	selUser = UserLocalServiceUtil.getUser(userId);
-
-	if (selUser.getStatus() != WorkflowConstants.STATUS_INCOMPLETE) {
-		throw new PrincipalException.MustBeAuthenticated(userId);
+if (selUser == null) {
+	
+	userId = ParamUtil.getLong(request, "userId");
+	
+	if (userId > 0) {
+		selUser = UserLocalServiceUtil.getUser(userId);
+	
+		if (selUser.getStatus() != WorkflowConstants.STATUS_INCOMPLETE) {
+			throw new PrincipalException.MustBeAuthenticated(userId);
+		}
+	
+		selContact = selUser.getContact();
 	}
 
+} else {
+	
+	userId = selUser.getUserId();
 	selContact = selUser.getContact();
+}
+
+if (selUser.getStatus() != WorkflowConstants.STATUS_INCOMPLETE) {
+	throw new PrincipalException.MustBeAuthenticated(userId);
 }
 
 String screenName = BeanParamUtil.getString(selUser, request, "screenName");
