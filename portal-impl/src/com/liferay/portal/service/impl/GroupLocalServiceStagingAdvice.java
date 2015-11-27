@@ -19,9 +19,6 @@ import com.liferay.portal.service.GroupLocalService;
 
 import java.lang.reflect.Method;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Tomas Polesovsky
  */
@@ -62,8 +59,5 @@ public class GroupLocalServiceStagingAdvice extends LiveGroupStagingAdvice {
 			"add$1Group", "add$1Groups", "delete$1Group", "delete$1Groups",
 			"has$1Group", "set$1Groups", "unset$1Groups"
 		};
-
-	private final List<Method> _serviceBuilderGeneratedMethods =
-		new ArrayList<>();
 
 }
