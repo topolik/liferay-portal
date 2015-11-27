@@ -27,9 +27,9 @@ import javax.portlet.PortletRequest;
 /**
  * @author Tomas Polesovsky
  */
-public class StagingPermissionCheckerWrapper implements PermissionChecker {
+public class StagingPermissionChecker implements PermissionChecker {
 
-	public StagingPermissionCheckerWrapper(
+	public StagingPermissionChecker(
 		PermissionChecker permissionChecker) {
 
 		_permissionChecker = permissionChecker;
@@ -37,7 +37,7 @@ public class StagingPermissionCheckerWrapper implements PermissionChecker {
 
 	@Override
 	public PermissionChecker clone() {
-		return new StagingPermissionCheckerWrapper(_permissionChecker.clone());
+		return new StagingPermissionChecker(_permissionChecker.clone());
 	}
 
 	@Override
