@@ -15,9 +15,12 @@
 package com.liferay.portal.security.sso.facebook.connect.portlet.action;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
@@ -38,6 +41,7 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.CookieKeys;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -190,6 +194,9 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 			HttpSession session, long companyId, String token)
 		throws Exception {
 
+		Set<String> errors = new HashSet<String>();
+		session.setAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS, errors);
+		
 		JSONObject jsonObject = _facebookConnect.getGraphResources(
 			companyId, "/me", token,
 			"id,email,first_name,last_name,gender");
@@ -227,6 +234,14 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 		}
 
 		String emailAddress = jsonObject.getString("email");
+		
+		if (!Validator.isContent(emailAddress)) {
+			
+			// The user has withheld their Facebook registered email address
+			errors.add("facebookEmailMissing");
+			
+			return null;
+		}
 
 		if ((user == null) && Validator.isNotNull(emailAddress)) {
 			user = _userLocalService.fetchUserByEmailAddress(

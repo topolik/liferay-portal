@@ -17,6 +17,7 @@ package com.liferay.portal.security.sso.facebook.connect.servlet.taglib;
 import com.liferay.portal.kernel.facebook.FacebookConnect;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.taglib.BaseDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.util.HttpUtil;
@@ -28,8 +29,10 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.portlet.ActionRequest;
+import javax.portlet.PortletRequest;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -63,6 +66,8 @@ public class FacebookConnectLoginMsgDynamicInclude
 		RequestDispatcher requestDispatcher =
 			_servletContext.getRequestDispatcher(_JSP_PATH);
 
+		prepareErrorMsgs(request);
+		
 		try {
 			requestDispatcher.include(request, response);
 		}
@@ -70,6 +75,22 @@ public class FacebookConnectLoginMsgDynamicInclude
 			_log.error("Unable to include JSP " + _JSP_PATH, se);
 
 			throw new IOException("Unable to include JSP " + _JSP_PATH, se);
+		}
+	}
+
+	private void prepareErrorMsgs(HttpServletRequest request) {
+		
+		HttpServletRequest httpServletRequest = PortalUtil.getOriginalServletRequest(request);		
+		HttpSession session = httpServletRequest.getSession(true);
+
+		PortletRequest renderRequest = (PortletRequest)request.getAttribute("javax.portlet.request");
+		
+		Set<String> errors = (Set<String>)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS);
+		if (errors != null) {
+	 		for (String error : errors) {
+				SessionErrors.add(renderRequest, error);
+			}
+			session.removeAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS);
 		}
 	}
 

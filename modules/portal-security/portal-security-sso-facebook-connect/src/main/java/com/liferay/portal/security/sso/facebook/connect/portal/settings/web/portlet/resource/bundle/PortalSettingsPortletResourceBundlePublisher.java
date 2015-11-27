@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.settings.web.constants.PortalSettingsPortletKeys;
+import com.liferay.portal.util.PortletKeys;
 
 import java.io.IOException;
 
@@ -47,9 +48,18 @@ public class PortalSettingsPortletResourceBundlePublisher {
 
 	@Activate
 	protected void activated(BundleContext bundleContext) throws IOException {
+		
 		registerResourceBundle(
 			bundleContext, "content.Language",
 			PortalSettingsPortletKeys.PORTAL_SETTINGS);
+		
+		registerResourceBundle(
+				bundleContext, "content.Language",
+				PortletKeys.LOGIN);
+		
+		registerResourceBundle(
+				bundleContext, "content.Language",
+				PortletKeys.FAST_LOGIN);
 	}
 
 	@Deactivate

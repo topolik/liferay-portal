@@ -74,7 +74,7 @@ public class FacebookConnectControllerMVCResourceCommand extends BaseMVCResource
 		
 		if (handleFacebookAuth(request, response)) return;
 		
-		throw new PortletException(new IllegalStateException());
+		handleError(request, response, themeDisplay);
 	}
 
 	private boolean handleFacebookAuth(ResourceRequest request,
@@ -139,6 +139,16 @@ public class FacebookConnectControllerMVCResourceCommand extends BaseMVCResource
 		return false;
 	}
 	
+	private boolean handleError(ResourceRequest request, ResourceResponse response, ThemeDisplay themeDisplay) {
+		
+		String redirect = PortalUtil.escapeRedirect(request.getParameter("redirect"));
+		
+		response.addProperty("Location", redirect);
+		response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "302");
+		
+		return true;
+	}
+
 	protected String getUpdateAccountURL(ResourceRequest request, ResourceResponse response)
 			throws PortletException {
 		
