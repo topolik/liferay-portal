@@ -241,16 +241,21 @@ public class FacebookConnectControllerMVCResourceCommand
 			Long matchedUserId = (Long)session.getAttribute(
 				FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID);
 
-			User user = _userLocalService.fetchUser(matchedUserId);
+			if (!Validator.isNull(matchedUserId)) {
+				User user = _userLocalService.fetchUser(
+					matchedUserId.longValue());
 
-			if (user != null) {
-				response.addProperty(
-					"Location", getUpdateAccountURL(request, response));
-				response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "302");
-				return true;
-			}
-			else {
-				session.removeAttribute(WebKeys.FACEBOOK_INCOMPLETE_USER_ID);
+				if (!Validator.isNull(user)) {
+					response.addProperty(
+						"Location", getUpdateAccountURL(request, response));
+					response.setProperty(
+						ResourceResponse.HTTP_STATUS_CODE, "302");
+					return true;
+				}
+				else {
+					session.removeAttribute(
+						WebKeys.FACEBOOK_INCOMPLETE_USER_ID);
+				}
 			}
 		}
 
