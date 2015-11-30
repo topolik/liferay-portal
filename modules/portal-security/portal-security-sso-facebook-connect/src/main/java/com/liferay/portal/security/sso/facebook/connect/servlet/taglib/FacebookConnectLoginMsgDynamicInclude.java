@@ -102,8 +102,8 @@ public class FacebookConnectLoginMsgDynamicInclude extends BaseDynamicInclude {
 		PortletRequest renderRequest = (PortletRequest)request.getAttribute(
 			"javax.portlet.request");
 
-		Set<String> errors =
-			(Set<String>)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS);
+		Set<String> errors = (Set<String>)session.getAttribute(
+			FacebookConnectWebKeys.FACEBOOK_ERRORS);
 
 		if (errors != null) {
 			for (String error : errors) {
