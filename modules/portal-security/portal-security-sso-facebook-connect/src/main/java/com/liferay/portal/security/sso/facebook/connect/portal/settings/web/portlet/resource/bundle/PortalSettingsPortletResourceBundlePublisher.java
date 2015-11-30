@@ -48,18 +48,15 @@ public class PortalSettingsPortletResourceBundlePublisher {
 
 	@Activate
 	protected void activated(BundleContext bundleContext) throws IOException {
-		
 		registerResourceBundle(
 			bundleContext, "content.Language",
 			PortalSettingsPortletKeys.PORTAL_SETTINGS);
-		
+
 		registerResourceBundle(
-				bundleContext, "content.Language",
-				PortletKeys.LOGIN);
-		
+			bundleContext, "content.Language", PortletKeys.LOGIN);
+
 		registerResourceBundle(
-				bundleContext, "content.Language",
-				PortletKeys.FAST_LOGIN);
+			bundleContext, "content.Language", PortletKeys.FAST_LOGIN);
 	}
 
 	@Deactivate

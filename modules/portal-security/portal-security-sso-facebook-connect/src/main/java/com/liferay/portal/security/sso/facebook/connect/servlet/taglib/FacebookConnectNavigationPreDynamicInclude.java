@@ -19,8 +19,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.taglib.BaseDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
-import com.liferay.portal.kernel.util.HttpUtil;
-import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.sso.facebook.connect.constants.FacebookConnectWebKeys;
@@ -29,7 +27,6 @@ import com.liferay.portal.util.PortalUtil;
 
 import java.io.IOException;
 
-import javax.portlet.ActionRequest;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -61,9 +58,10 @@ public class FacebookConnectNavigationPreDynamicInclude
 		}
 
 		String cSRFToken = generateCSRFToken(request);
-		
-		request.setAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN, cSRFToken);
-		
+
+		request.setAttribute(
+			FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN, cSRFToken);
+
 		RequestDispatcher requestDispatcher =
 			_servletContext.getRequestDispatcher(_JSP_PATH);
 
@@ -98,16 +96,17 @@ public class FacebookConnectNavigationPreDynamicInclude
 	}
 
 	private String generateCSRFToken(HttpServletRequest request) {
-		
-		HttpServletRequest httpServletRequest = PortalUtil.getOriginalServletRequest(request);
+		HttpServletRequest httpServletRequest =
+			PortalUtil.getOriginalServletRequest(request);
 		HttpSession httpSession = httpServletRequest.getSession();
-		
+
 		String cSRFToken = PwdGenerator.getPassword(8);
-		httpSession.setAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN, cSRFToken);
-		
+		httpSession.setAttribute(
+			FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN, cSRFToken);
+
 		return cSRFToken;
 	}
-	
+
 	private static final String _JSP_PATH =
 		"/html/portlet/login/navigation/facebook.jsp";
 
