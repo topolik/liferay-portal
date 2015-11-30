@@ -56,7 +56,9 @@ public class FacebookConnectControllerMVCResourceCommand
 	extends BaseMVCResourceCommand implements MVCResourceCommand {
 
 	public String getCurrentCSRFToken(ResourceRequest request) {
-		return (String)getOriginalServletRequest(request).getSession().getAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
+		return (String)getOriginalServletRequest(
+			request).getSession().getAttribute(
+				FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
 	}
 
 	public String getRedirectURI(
@@ -98,7 +100,7 @@ public class FacebookConnectControllerMVCResourceCommand
 
 		if (handleFacebookAuth(request, response))return;
 
-		handleError(request, response, themeDisplay);
+		handleError(request, response);
 	}
 
 	protected String getUpdateAccountURL(
@@ -187,8 +189,7 @@ public class FacebookConnectControllerMVCResourceCommand
 	}
 
 	private boolean handleError(
-		ResourceRequest request, ResourceResponse response,
-		ThemeDisplay themeDisplay) {
+		ResourceRequest request, ResourceResponse response) {
 
 		String redirect = PortalUtil.escapeRedirect(
 			request.getParameter("redirect"));
@@ -199,15 +200,16 @@ public class FacebookConnectControllerMVCResourceCommand
 		return true;
 	}
 
-	private boolean handleFacebookAuth(ResourceRequest request,
-			ResourceResponse response) throws MustBeEnabled {
+	private boolean handleFacebookAuth(
+			ResourceRequest request, ResourceResponse response)
+		throws MustBeEnabled {
 
 		HttpServletRequest httpServletRequest = getOriginalServletRequest(
 			request);
 		HttpSession session = httpServletRequest.getSession(true);
 
-		String sessionCSRFToken =
-			(String)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
+		String sessionCSRFToken = (String)session.getAttribute(
+			FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
 		String requestCSRFToken = request.getParameter("state");
 
 		if (!Validator.isNull(requestCSRFToken) &&
@@ -235,15 +237,18 @@ public class FacebookConnectControllerMVCResourceCommand
 			WebKeys.FACEBOOK_INCOMPLETE_USER_ID);
 
 		if (!Validator.isNull(facebookIncompleteUserId)) {
-			User user = _userLocalService.fetchUser(
-				(Long)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID));
+			Long matchedUserId = (Long)session.getAttribute(
+				FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID);
+
+			User user = _userLocalService.fetchUser(matchedUserId);
 
 			if (user != null) {
 				response.addProperty(
 					"Location", getUpdateAccountURL(request, response));
 				response.setProperty(ResourceResponse.HTTP_STATUS_CODE, "302");
 				return true;
-			} else {
+			}
+			else {
 				session.removeAttribute(WebKeys.FACEBOOK_INCOMPLETE_USER_ID);
 			}
 		}

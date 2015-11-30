@@ -70,7 +70,9 @@ import org.osgi.service.component.annotations.Reference;
 public class FacebookConnectRedirectURIServlet extends HttpServlet {
 
 	public String getCurrentCSRFToken(HttpServletRequest request) {
-		return (String)getOriginalServletRequest(request).getSession().getAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
+		return (String)getOriginalServletRequest(
+				request).getSession().getAttribute(
+					FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
 	}
 
 	protected User addUser(
@@ -147,7 +149,8 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 
 		// Consume the CSRF token so it cannot be used multiple times
 
-		request.getSession().removeAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
+		request.getSession().removeAttribute(
+			FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
 
 		if (Validator.isNull(sessionCSRFToken) ||
 			Validator.isNull(requestCSRFToken) ||
@@ -261,8 +264,8 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 					WebKeys.FACEBOOK_INCOMPLETE_USER_ID, facebookId);
 
 				session.setAttribute(
-						FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID,
-						user.getUserId());
+					FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID,
+					user.getUserId());
 
 				user.setEmailAddress(jsonObject.getString("email"));
 				user.setFirstName(jsonObject.getString("first_name"));

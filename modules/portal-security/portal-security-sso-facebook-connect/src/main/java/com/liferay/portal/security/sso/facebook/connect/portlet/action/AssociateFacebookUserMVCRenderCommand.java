@@ -74,8 +74,11 @@ public class AssociateFacebookUserMVCRenderCommand implements MVCRenderCommand {
 			WebKeys.FACEBOOK_INCOMPLETE_USER_ID);
 
 		if (!Validator.isNull(facebookIncompleteUserId)) {
-			User user = _userLocalService.fetchUser(
-				(Long)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID));
+			Long matchedUserId = (Long)session.getAttribute(
+				FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID);
+
+			User user = _userLocalService.fetchUser(matchedUserId);
+
 			return renderUpdateAccount(request, user);
 		}
 
