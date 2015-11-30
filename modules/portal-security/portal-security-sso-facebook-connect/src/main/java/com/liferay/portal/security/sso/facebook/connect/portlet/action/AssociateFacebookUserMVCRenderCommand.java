@@ -78,9 +78,11 @@ public class AssociateFacebookUserMVCRenderCommand implements MVCRenderCommand {
 			Long matchedUserId = (Long)session.getAttribute(
 				FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID);
 
-			User user = _userLocalService.fetchUser(matchedUserId);
-
-			return renderUpdateAccount(request, user);
+			if (!Validator.isNull(matchedUserId)) {
+				User user = _userLocalService.fetchUser(
+					matchedUserId.longValue());
+				return renderUpdateAccount(request, user);
+			}
 		}
 
 		// This situation might happen if the browser back button is used
