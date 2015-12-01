@@ -20,19 +20,17 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.taglib.BaseDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
-import com.liferay.portal.kernel.util.HttpUtil;
-import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.sso.facebook.connect.constants.FacebookConnectWebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 
 import java.io.IOException;
+
 import java.util.Set;
 
-import javax.portlet.ActionRequest;
 import javax.portlet.PortletRequest;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -47,8 +45,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Stian Sigvartsen
  */
 @Component(immediate = true, service = DynamicInclude.class)
-public class FacebookConnectLoginMsgDynamicInclude
-	extends BaseDynamicInclude {
+public class FacebookConnectLoginMsgDynamicInclude extends BaseDynamicInclude {
 
 	@Override
 	public void include(
@@ -67,7 +64,7 @@ public class FacebookConnectLoginMsgDynamicInclude
 			_servletContext.getRequestDispatcher(_JSP_PATH);
 
 		prepareErrorMsgs(request);
-		
+
 		try {
 			requestDispatcher.include(request, response);
 		}
@@ -78,49 +75,52 @@ public class FacebookConnectLoginMsgDynamicInclude
 		}
 	}
 
-	private void prepareErrorMsgs(HttpServletRequest request) {
-		
-		HttpServletRequest httpServletRequest = PortalUtil.getOriginalServletRequest(request);		
-		HttpSession session = httpServletRequest.getSession(true);
-
-		PortletRequest renderRequest = (PortletRequest)request.getAttribute("javax.portlet.request");
-		
-		Set<String> errors = (Set<String>)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS);
-		if (errors != null) {
-	 		for (String error : errors) {
-				SessionErrors.add(renderRequest, error);
-			}
-			session.removeAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS);
-		}
-	}
-
 	@Override
 	public void register(
 		DynamicInclude.DynamicIncludeRegistry dynamicIncludeRegistry) {
 
-		dynamicIncludeRegistry.register(
-			"/html/portlet/login.jsp#msg");
+		dynamicIncludeRegistry.register("/html/portlet/login.jsp#msg");
 	}
 
-	@Reference
+	@Reference(unbind = "-")
 	protected void setFacebookConnect(FacebookConnect facebookConnect) {
 		_facebookConnect = facebookConnect;
 	}
 
 	@Reference(
-		target = "(osgi.web.symbolicname=com.liferay.portal.security.sso.facebook.connect)"
+		target = "(osgi.web.symbolicname=com.liferay.portal.security.sso.facebook.connect)",
+		unbind = "-"
 	)
 	protected void setServletContext(ServletContext servletContext) {
 		_servletContext = servletContext;
 	}
 
-	private static final String _JSP_PATH =
-		"/html/portlet/login/login_msg.jsp";
+	private void prepareErrorMsgs(HttpServletRequest request) {
+		HttpServletRequest httpServletRequest =
+			PortalUtil.getOriginalServletRequest(request);
+		HttpSession session = httpServletRequest.getSession(true);
+
+		PortletRequest renderRequest = (PortletRequest)request.getAttribute(
+			"javax.portlet.request");
+
+		Set<String> errors =
+			(Set<String>)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS);
+
+		if (errors != null) {
+			for (String error : errors) {
+				SessionErrors.add(renderRequest, error);
+			}
+
+			session.removeAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS);
+		}
+	}
+
+	private static final String _JSP_PATH = "/html/portlet/login/login_msg.jsp";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		FacebookConnectLoginMsgDynamicInclude.class);
 
-	private FacebookConnect _facebookConnect;
-	private ServletContext _servletContext;
+	private volatile FacebookConnect _facebookConnect;
+	private volatile ServletContext _servletContext;
 
 }
