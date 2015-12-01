@@ -14,16 +14,6 @@
 
 package com.liferay.portal.security.sso.facebook.connect.portlet.action;
 
-import javax.portlet.PortletException;
-import javax.portlet.PortletRequest;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 import com.liferay.portal.kernel.facebook.FacebookConnect;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.util.Validator;
@@ -36,54 +26,74 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 
+import javax.portlet.PortletException;
+import javax.portlet.PortletRequest;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Stian Sigvartsen
  */
 @Component(
 	immediate = true,
 	property = {
-		"mvc.command.name=/login/associate_facebook_user",
-		"javax.portlet.name=" + PortletKeys.LOGIN,
-		"javax.portlet.name=" + PortletKeys.FAST_LOGIN,
+		"javax.portlet.name=", "javax.portlet.name=" + PortletKeys.LOGIN,
+		"mvc.command.name=/login/associate_facebook_user" + PortletKeys.FAST_LOGIN
 	},
 	service = MVCRenderCommand.class
 )
-public class AssociateFacebookUserMVCRenderCommand implements MVCRenderCommand { 
+public class AssociateFacebookUserMVCRenderCommand implements MVCRenderCommand {
 
 	@Override
 	public String render(RenderRequest request, RenderResponse response)
-			throws PortletException {
+		throws PortletException {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
 		if (!_facebookConnect.isEnabled(themeDisplay.getCompanyId())) {
-			
 			throw new PortletException(
-					new PrincipalException.MustBeEnabled(themeDisplay.getCompanyId(), FacebookConnect.class.getName()));
+					new PrincipalException.MustBeEnabled(
+						themeDisplay.getCompanyId(),
+						FacebookConnect.class.getName()));
 		}
-		
-		HttpServletRequest httpServletRequest = PortalUtil.getOriginalServletRequest(PortalUtil.getHttpServletRequest(request));
-		
+
+		HttpServletRequest httpServletRequest =
+			PortalUtil.getOriginalServletRequest(
+				PortalUtil.getHttpServletRequest(request));
+
 		HttpSession session = httpServletRequest.getSession(true);
 
-		Long facebookIncompleteUserId = (Long)session.getAttribute(WebKeys.FACEBOOK_INCOMPLETE_USER_ID);
+		Long facebookIncompleteUserId = (Long)session.getAttribute(
+			WebKeys.FACEBOOK_INCOMPLETE_USER_ID);
+
 		if (!Validator.isNull(facebookIncompleteUserId)) {
-			
-			User user = _userLocalService.fetchUser((Long)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID));			
+			User user = _userLocalService.fetchUser(
+				(Long)session.getAttribute(FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID));
 			return renderUpdateAccount(request, user);
 		}
 
 		// This situation might happen if the browser back button is used
+
 		return "/login.jsp";
 	}
 
-	protected String renderUpdateAccount(
-			PortletRequest request, User user)
+	protected String renderUpdateAccount(PortletRequest request, User user)
 		throws PortletException {
-		
-		request.setAttribute("selUser", user);		
+
+		request.setAttribute("selUser", user);
 		return "/update_account.jsp";
+	}
+
+	@Reference(unbind = "-")
+	protected void setFacebookConnect(FacebookConnect facebookConnect) {
+		_facebookConnect = facebookConnect;
 	}
 
 	@Reference(unbind = "-")
@@ -91,12 +101,7 @@ public class AssociateFacebookUserMVCRenderCommand implements MVCRenderCommand {
 		_userLocalService = userLocalService;
 	}
 
-	@Reference
-	protected void setFacebookConnect(FacebookConnect facebookConnect) {
-		_facebookConnect = facebookConnect;
-	}
-	
-	private FacebookConnect _facebookConnect;
-	private UserLocalService _userLocalService;
-	
+	private volatile FacebookConnect _facebookConnect;
+	private volatile UserLocalService _userLocalService;
+
 }

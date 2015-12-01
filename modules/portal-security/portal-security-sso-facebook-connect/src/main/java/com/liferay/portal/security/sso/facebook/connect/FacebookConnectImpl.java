@@ -80,7 +80,6 @@ public class FacebookConnectImpl implements FacebookConnect {
 		options.setPost(true);
 
 		try {
-
 			String content = HttpUtil.URLtoString(options);
 
 			if (Validator.isNotNull(content)) {

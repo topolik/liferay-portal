@@ -14,34 +14,10 @@
 
 package com.liferay.portal.security.sso.facebook.connect.portlet.action;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
-import javax.portlet.PortletMode;
-import javax.portlet.PortletRequest;
-import javax.portlet.PortletURL;
-import javax.portlet.ResourceRequest;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-
 import com.liferay.portal.kernel.facebook.FacebookConnect;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.portlet.LiferayWindowState;
-import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.CookieKeys;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -60,8 +36,24 @@ import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.UserLocalService;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
-import com.liferay.portal.util.PortletKeys;
-import com.liferay.portlet.PortletURLFactoryUtil;
+
+import java.io.IOException;
+
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Stian Sigvartsen
@@ -76,6 +68,10 @@ import com.liferay.portlet.PortletURLFactoryUtil;
 	service = Servlet.class
 )
 public class FacebookConnectRedirectURIServlet extends HttpServlet {
+
+	public String getCurrentCSRFToken(HttpServletRequest request) {
+		return (String)getOriginalServletRequest(request).getSession().getAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
+	}
 
 	protected User addUser(
 			HttpSession session, long companyId, JSONObject jsonObject)
@@ -145,17 +141,20 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 		}
 
 		HttpSession session = request.getSession();
-		
+
 		String sessionCSRFToken = (String)getCurrentCSRFToken(request);
 		String requestCSRFToken = request.getParameter("state");
-		
+
 		// Consume the CSRF token so it cannot be used multiple times
+
 		request.getSession().removeAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
-		
-		if (Validator.isNull(sessionCSRFToken) || Validator.isNull(requestCSRFToken) || !sessionCSRFToken.equals(requestCSRFToken)) {	
+
+		if (Validator.isNull(sessionCSRFToken) ||
+			Validator.isNull(requestCSRFToken) ||
+			!sessionCSRFToken.equals(requestCSRFToken)) {
+
 			return;
 		}
-		
 
 		String redirect = ParamUtil.getString(request, "postAuthRedirect");
 
@@ -194,9 +193,9 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 			HttpSession session, long companyId, String token)
 		throws Exception {
 
-		Set<String> errors = new HashSet<String>();
+		Set<String> errors = new HashSet<>();
 		session.setAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS, errors);
-		
+
 		JSONObject jsonObject = _facebookConnect.getGraphResources(
 			companyId, "/me", token,
 			"id,email,first_name,last_name,gender");
@@ -234,12 +233,13 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 		}
 
 		String emailAddress = jsonObject.getString("email");
-		
+
 		if (!Validator.isContent(emailAddress)) {
-			
+
 			// The user has withheld their Facebook registered email address
+
 			errors.add("facebookEmailMissing");
-			
+
 			return null;
 		}
 
@@ -259,9 +259,10 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 			if (user.getStatus() == WorkflowConstants.STATUS_INCOMPLETE) {
 				session.setAttribute(
 					WebKeys.FACEBOOK_INCOMPLETE_USER_ID, facebookId);
-				
+
 				session.setAttribute(
-						FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID, user.getUserId());
+						FacebookConnectWebKeys.FACEBOOK_INCOMPLETE_MATCHED_USER_ID,
+						user.getUserId());
 
 				user.setEmailAddress(jsonObject.getString("email"));
 				user.setFirstName(jsonObject.getString("first_name"));
@@ -342,6 +343,12 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 			userGroupRoles, userGroupIds, serviceContext);
 	}
 
+	private HttpServletRequest getOriginalServletRequest(
+		HttpServletRequest request) {
+
+		return PortalUtil.getOriginalServletRequest(request);
+	}
+
 	private String getRefererURL(
 		HttpServletRequest request, ThemeDisplay themeDisplay) {
 
@@ -383,20 +390,12 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 		return referer;
 	}
 
-	private HttpServletRequest getOriginalServletRequest(HttpServletRequest request) {
-		return PortalUtil.getOriginalServletRequest(request);
-	}
-	
-	public String getCurrentCSRFToken(HttpServletRequest request) {
-		return (String)getOriginalServletRequest(request).getSession().getAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN);
-	}
-	
 	private static final Log _log = LogFactoryUtil.getLog(
 		FacebookConnectRedirectURIServlet.class);
 
 	private static final long serialVersionUID = 1L;
 
-	private FacebookConnect _facebookConnect;
-	private UserLocalService _userLocalService;
+	private volatile FacebookConnect _facebookConnect;
+	private volatile UserLocalService _userLocalService;
 
 }
