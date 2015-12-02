@@ -26,21 +26,21 @@ Contact selContact = null;
 long userId;
 
 if (selUser == null) {
-	
+
 	userId = ParamUtil.getLong(request, "userId");
-	
+
 	if (userId > 0) {
 		selUser = UserLocalServiceUtil.getUser(userId);
-	
+
 		if (selUser.getStatus() != WorkflowConstants.STATUS_INCOMPLETE) {
 			throw new PrincipalException.MustBeAuthenticated(userId);
 		}
-	
+
 		selContact = selUser.getContact();
 	}
 
 } else {
-	
+
 	userId = selUser.getUserId();
 	selContact = selUser.getContact();
 }
