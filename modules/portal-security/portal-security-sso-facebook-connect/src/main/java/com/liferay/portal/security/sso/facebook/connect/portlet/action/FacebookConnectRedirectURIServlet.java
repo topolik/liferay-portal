@@ -173,7 +173,7 @@ public class FacebookConnectRedirectURIServlet extends HttpServlet {
 
 		if (Validator.isNotNull(token)) {
 			try {
-				User user = setFacebookCredentials(session, companyId, token);
+				setFacebookCredentials(session, companyId, token);
 			}
 			catch (Exception e) {
 				throw new ServletException(e);
