@@ -16,22 +16,17 @@
 
 <%@ include file="/html/portlet/login/navigation/init.jsp" %>
 
-<portlet:renderURL var="loginRedirectURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
-	<portlet:param name="struts_action" value="/login/login_redirect" />
-</portlet:renderURL>
+<liferay-portlet:renderURL portletName="<%= LoginPortletKeys.LOGIN %>" varImpl="loginRedirectURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+	<portlet:param name="mvcRenderCommandName" value="/login/login_redirect" />
+</liferay-portlet:renderURL>
+
+<liferay-portlet:resourceURL id="/login/facebook_connect_oauth" portletName="<%= LoginPortletKeys.LOGIN %>" varImpl="preAuthRedirect" windowState="<%= LiferayWindowState.POP_UP.toString() %>">
+	<portlet:param name="redirect" value="${loginRedirectURL}" />
+	<portlet:param name="state" value="<%= (String)request.getAttribute(FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN) %>" />
+</liferay-portlet:resourceURL>
 
 <%
-String facebookAuthRedirectURL = (String)request.getAttribute(FacebookConnectWebKeys.FACEBOOK_AUTH_REDIRECT_URL);
-String facebookAuthURL = (String)request.getAttribute(FacebookConnectWebKeys.FACEBOOK_AUTH_URL);
-String facebookAppId = (String)request.getAttribute(FacebookConnectWebKeys.FACEBOOK_APP_ID);
-
-facebookAuthRedirectURL = HttpUtil.addParameter(facebookAuthRedirectURL, "redirect", HttpUtil.encodeURL(loginRedirectURL));
-
-facebookAuthURL = HttpUtil.addParameter(facebookAuthURL, "client_id", facebookAppId);
-facebookAuthURL = HttpUtil.addParameter(facebookAuthURL, "redirect_uri", facebookAuthRedirectURL);
-facebookAuthURL = HttpUtil.addParameter(facebookAuthURL, "scope", "email");
-
-String taglibOpenFacebookConnectLoginWindow = "javascript:var facebookConnectLoginWindow = window.open('" + facebookAuthURL + "', 'facebook', 'align=center,directories=no,height=560,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no,width=1000'); void(''); facebookConnectLoginWindow.focus();";
+String taglibOpenFacebookConnectLoginWindow = "javascript:var facebookConnectLoginWindow = window.open('" + HttpUtil.encodeURL(preAuthRedirect.toString()) + "', 'facebook', 'align=center,directories=no,height=560,location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no,width=1000'); void(''); facebookConnectLoginWindow.focus();";
 %>
 
 <liferay-ui:icon

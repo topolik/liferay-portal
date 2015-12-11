@@ -17,15 +17,19 @@ package com.liferay.portal.security.sso.facebook.connect.servlet.taglib;
 import com.liferay.portal.kernel.facebook.FacebookConnect;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.taglib.BaseDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
-import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.sso.facebook.connect.constants.FacebookConnectWebKeys;
 import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 
 import java.io.IOException;
+
+import java.util.Set;
+
+import javax.portlet.PortletRequest;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
@@ -38,11 +42,10 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Michael C. Han
+ * @author Stian Sigvartsen
  */
 @Component(immediate = true, service = DynamicInclude.class)
-public class FacebookConnectNavigationPreDynamicInclude
-	extends BaseDynamicInclude {
+public class FacebookConnectLoginMsgDynamicInclude extends BaseDynamicInclude {
 
 	@Override
 	public void include(
@@ -57,13 +60,10 @@ public class FacebookConnectNavigationPreDynamicInclude
 			return;
 		}
 
-		String cSRFToken = generateCSRFToken(request);
-
-		request.setAttribute(
-			FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN, cSRFToken);
-
 		RequestDispatcher requestDispatcher =
 			_servletContext.getRequestDispatcher(_JSP_PATH);
+
+		prepareErrorMsgs(request);
 
 		try {
 			requestDispatcher.include(request, response);
@@ -79,8 +79,7 @@ public class FacebookConnectNavigationPreDynamicInclude
 	public void register(
 		DynamicInclude.DynamicIncludeRegistry dynamicIncludeRegistry) {
 
-		dynamicIncludeRegistry.register(
-			"/html/portlet/login/navigation.jsp#pre");
+		dynamicIncludeRegistry.register("/html/portlet/login.jsp#msg");
 	}
 
 	@Reference(unbind = "-")
@@ -96,23 +95,30 @@ public class FacebookConnectNavigationPreDynamicInclude
 		_servletContext = servletContext;
 	}
 
-	private String generateCSRFToken(HttpServletRequest request) {
+	private void prepareErrorMsgs(HttpServletRequest request) {
 		HttpServletRequest httpServletRequest =
 			PortalUtil.getOriginalServletRequest(request);
-		HttpSession httpSession = httpServletRequest.getSession();
+		HttpSession session = httpServletRequest.getSession(true);
 
-		String cSRFToken = PwdGenerator.getPassword(8);
-		httpSession.setAttribute(
-			FacebookConnectWebKeys.FACEBOOK_CSRF_TOKEN, cSRFToken);
+		PortletRequest renderRequest = (PortletRequest)request.getAttribute(
+			"javax.portlet.request");
 
-		return cSRFToken;
+		Set<String> errors = (Set<String>)session.getAttribute(
+			FacebookConnectWebKeys.FACEBOOK_ERRORS);
+
+		if (errors != null) {
+			for (String error : errors) {
+				SessionErrors.add(renderRequest, error);
+			}
+
+			session.removeAttribute(FacebookConnectWebKeys.FACEBOOK_ERRORS);
+		}
 	}
 
-	private static final String _JSP_PATH =
-		"/html/portlet/login/navigation/facebook.jsp";
+	private static final String _JSP_PATH = "/html/portlet/login/login_msg.jsp";
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		FacebookConnectNavigationPreDynamicInclude.class);
+		FacebookConnectLoginMsgDynamicInclude.class);
 
 	private volatile FacebookConnect _facebookConnect;
 	private volatile ServletContext _servletContext;
