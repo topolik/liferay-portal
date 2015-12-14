@@ -35,13 +35,13 @@ public class FastLoginPortletResourceBundlePublisher
 	extends BaseResourceBundlePublisher {
 
 	@Activate
-	protected void doActivate(BundleContext bundleContext) throws IOException {
-		super.doActivate(bundleContext);
+	protected void activate(BundleContext bundleContext) throws IOException {
+		super.activate(bundleContext);
 	}
 
 	@Deactivate
 	protected void doDeactivate() {
-		super.doDeactivate();
+		super.deactivate();
 	}
 
 	protected String getPortletName() {
@@ -50,7 +50,7 @@ public class FastLoginPortletResourceBundlePublisher
 
 	@Modified
 	protected void modified(BundleContext bundleContext) throws IOException {
-		super.doModified(bundleContext);
+		super.modified(bundleContext);
 	}
 
 	@Reference(unbind = "-")
