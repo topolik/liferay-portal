@@ -156,7 +156,10 @@
 	</command>
 
 	<command name="addJavaScript">
-		<execute function="AssertClick" locator1="SitePages#JAVASCRIPT_NAVIGATION" value1="JavaScript" />
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="JavaScript" />
+		</execute>
+
 		<execute function="AssertTextEquals" locator1="SitePages#JAVASCRIPT_LABEL" value1="Paste JavaScript code that is executed at the bottom of every page." />
 		<execute function="Type" locator1="SitePages#JAVASCRIPT_TEXTAREA" value1="${javaScript}" />
 		<execute function="AssertClick" locator1="Button#SAVE" value1="Save" />
@@ -202,6 +205,10 @@
 	</command>
 
 	<command name="changeColorSchemesCP">
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Look and Feel" />
+		</execute>
+
 		<if>
 			<equals arg1="${colorScheme}" arg2="Dark" />
 			<then>
@@ -253,8 +260,10 @@
 	<command name="changePageTypeLayoutPG">
 		<var name="key_columnName" value="${columnName}" />
 
-		<execute function="Click" locator1="DockbarEditpanel#EDIT" value1="Edit" />
+		<execute function="Click" locator1="ControlMenu#EDIT" value1="Edit" />
+
 		<execute function="Click" locator1="SitePagesEditPage#LAYOUT_RADIO" />
+
 		<execute function="Click" locator1="Button#SAVE" value1="Save" />
 	</command>
 
@@ -382,7 +391,8 @@
 	</command>
 
 	<command name="editPG">
-		<execute function="Click" locator1="DockbarEditpanel#EDIT" value1="Edit" />
+		<execute function="Click" locator1="ControlMenu#EDIT" value1="Edit" />
+
 		<execute function="Type" locator1="TextInput#NAME" value1="${sitePageNameEdit}" />
 		<execute function="AssertClick#pauseAssertTextClickAt" locator1="Button#SAVE" value1="Save" />
 	</command>
@@ -395,8 +405,10 @@
 	</command>
 
 	<command name="embeddedPageTypePG">
-		<execute function="Click" locator1="DockbarEditpanel#EDIT" value1="Edit" />
+		<execute function="Click" locator1="ControlMenu#EDIT" value1="Edit" />
+
 		<execute function="AssertClick" locator1="SitePagesEditPage#TYPE_PAGE_OPTIONS" value1="Embedded" />
+
 		<execute function="Type" locator1="SitePagesEditPage#PAGE_TYPE_EMBEDDED_URL_FIELD" value1="http://www.liferay.com" />
 		<execute function="AssertClick#pauseAssertTextClickAt" locator1="Button#SAVE" value1="Save" />
 	</command>
@@ -704,7 +716,6 @@
 	<command name="viewIncompletePageViaStagingPageVariationCP">
 		<var name="key_sitePageName" value="${pageName}" />
 
-		<execute function="AssertClick" locator1="SitePages#PAGE_TREE_PAGE_LINK" value1="${pageName}" />
 		<execute function="AssertTextEquals#assertPartialText" locator1="SitePages#INCOMPLETE_STAGING_PAGE_VARIATION_INFO_MESSAGE" value1="The page ${pageName} is not enabled in ${sitePagesVariationName}, but is available for other pages variations." />
 		<execute function="AssertTextEquals" locator1="SitePages#INCOMPLETE_STAGING_PAGE_VARIATION_ENABLE_BUTTON" value1="Enable in ${sitePagesVariationName}" />
 		<execute function="AssertTextEquals" locator1="SitePages#INCOMPLETE_STAGING_PAGE_VARIATION_DELETE_BUTTON" value1="Delete in All Pages Variations" />

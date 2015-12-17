@@ -10,7 +10,7 @@
 <tbody>
 <tr>
 	<td>TOGGLE</td>
-	<td>//*[@data-qa-id='controlMenu']//*[@data-qa-id='productMenu']</td>
+	<td>//*[@data-qa-id='productMenu']</td>
 	<td></td>
 </tr>
 <tr>
@@ -64,6 +64,11 @@
 	<td></td>
 </tr>
 <tr>
+<td>EDIT_PAGE</td>
+	<td>//div[@class='list-group-item']//a[contains(@title,'Edit ${key_page}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PORTLET</td>
 	<td>//div[a[@aria-expanded='true']]//a[contains(@id,'Portlet') and contains(@data-title,'${key_portlet}')]</td>
 	<td></td>
@@ -75,12 +80,12 @@
 </tr>
 <tr>
 	<td>PRIVATE_SITE_LINK</td>
-	<td>//div[contains(@id,'my_sites')]//a[contains(@id,'PrivateSiteLink') and contains(.,'${key_site}')]</td>
+	<td>//div[contains(@class,'list-group-item-content') and contains (.,'Private')]//h5[contains(.,'${key_site}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PUBLIC_SITE_LINK</td>
-	<td>//div[contains(@id,'my_sites')]//a[contains(@id,'PublicSiteLink') and contains(.,'${key_site}')]</td>
+	<td>//div[contains(@class,'list-group-item-content') and contains (.,'Public')]//h5[contains(.,'${key_site}')]</td>
 	<td></td>
 </tr>
 <tr>

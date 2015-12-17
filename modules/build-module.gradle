@@ -128,7 +128,7 @@ dependencies {
 	alloyTaglib group: "com.liferay", name: "com.liferay.alloy.taglib", version: "1.1.6"
 	alloyTaglib group: "com.liferay", name: "org.freemarker", version: "2.3.17.LIFERAY-PATCHED-1"
 
-	cssBuilder group: "com.liferay", name: "com.liferay.css.builder", version: "1.0.11"
+	cssBuilder group: "com.liferay", name: "com.liferay.css.builder", version: "1.0.12"
 	javadocFormatter group: "com.liferay", name: "com.liferay.javadoc.formatter", version: "1.0.8"
 	jspCTool group: "com.liferay", name: "com.liferay.jasper.jspc", version: "1.0.4"
 	jspCTool group: "org.apache.ant", name: "ant", version: "1.9.4"
@@ -146,12 +146,12 @@ dependencies {
 	portalTest group: "com.liferay.portal", name: "portal-test", version: liferay.portalVersion
 	portalTest group: "com.liferay.portal", name: "portal-test-internal", version: liferay.portalVersion
 
-	sourceFormatter group: "com.liferay", name: "com.liferay.source.formatter", version: "1.0.97"
+	sourceFormatter group: "com.liferay", name: "com.liferay.source.formatter", version: "1.0.98"
 
 	testCompile group: "org.powermock", name: "powermock-api-mockito", version: "1.6.1"
 	testCompile group: "org.powermock", name: "powermock-core", version: "1.6.1"
 	testCompile group: "org.powermock", name: "powermock-module-junit4", version: "1.6.1"
-	testCompile group: "org.springframework", name: "spring-test", version: "3.2.10.RELEASE"
+	testCompile group: "org.springframework", name: "spring-test", version: "3.2.15.RELEASE"
 
 	tldFormatter group: "com.liferay", name: "com.liferay.tld.formatter", version: "1.0.0"
 	whip group: "com.liferay", name: "com.liferay.whip", version: "1.0.0"

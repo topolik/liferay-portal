@@ -22,7 +22,8 @@
 taglib uri="http://liferay.com/tld/frontend" prefix="liferay-frontend" %><%@
 taglib uri="http://liferay.com/tld/portlet" prefix="liferay-portlet" %><%@
 taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %><%@
-taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
+taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %><%@
+taglib uri="http://liferay.com/tld/util" prefix="liferay-util" %>
 
 <%@ page import="com.liferay.marketplace.app.manager.web.constants.BundleConstants" %><%@
 page import="com.liferay.marketplace.app.manager.web.constants.BundleStateConstants" %><%@
@@ -56,12 +57,17 @@ page import="com.liferay.portal.service.CompanyLocalServiceUtil" %><%@
 page import="com.liferay.portal.util.PortalUtil" %><%@
 page import="com.liferay.taglib.search.ResultRow" %>
 
-<%@ page import="java.util.Dictionary" %><%@
+<%@ page import="java.util.ArrayList" %><%@
+page import="java.util.Collection" %><%@
+page import="java.util.Dictionary" %><%@
 page import="java.util.List" %>
 
-<%@ page import="javax.portlet.PortletURL" %>
+<%@ page import="javax.portlet.Portlet" %><%@
+page import="javax.portlet.PortletURL" %>
 
-<%@ page import="org.osgi.framework.Bundle" %>
+<%@ page import="org.osgi.framework.Bundle" %><%@
+page import="org.osgi.framework.BundleContext" %><%@
+page import="org.osgi.framework.ServiceReference" %>
 
 <portlet:defineObjects />
 

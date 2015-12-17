@@ -150,6 +150,10 @@ body {
 }
 
 .product-menu {
+	.impersonation-message {
+		font-size: 12px;
+	}
+
 	.manage-sites-link {
 		padding: 1em;
 	}
@@ -178,13 +182,18 @@ body {
 			padding: 2em;
 		}
 	}
+
+	.staging-links {
+		font-size: 12px;
+		padding: 4px 16px;
+	}
 }
 
 /* Icon Animation */
 
 .toast-animation {
 	height: 20px;
-	margin: 10px 4px 0 4px;
+	margin: 6px 4px 0 4px;
 	position: relative;
 	width: 20px;
 

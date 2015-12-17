@@ -1934,6 +1934,8 @@
 	</command>
 
 	<command name="DeleteCalendarEventRepeatingAllFollowing" priority="5">
+		<property name="portal.acceptance" value="true" />
+
 		<var name="eventTitle" value="Calendar Event Repeating Title" />
 		<var name="eventType" value="Repeating" />
 
@@ -3906,13 +3908,10 @@
 	<command name="ViewCalendarTimeZoneDefaults" priority="5">
 		<property name="portal.acceptance" value="true" />
 
-		<execute macro="Page#gotoCP">
-			<var name="portletName" value="Users and Organizations" />
-		</execute>
+		<execute macro="UserBar#gotoMyAccount" />
 
-		<execute macro="User#editUserDisplaySettingsCP">
+		<execute macro="User#editUserDisplaySettingsTimeZonePacific">
 			<var name="displaySettingsGreeting" value="Welcome Test Test!" />
-			<var name="userScreenName" value="test" />
 		</execute>
 
 		<execute macro="Page#gotoCP">

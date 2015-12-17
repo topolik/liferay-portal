@@ -138,6 +138,10 @@
 		<if>
 			<isset var="bookmarkViewableBy" />
 			<then>
+				<execute macro="Panel#expandPanel">
+					<var name="panelHeading" value="Permissions" />
+				</execute>
+
 				<execute function="Select" locator1="AssetPermissions#VIEWABLE_AS_SELECT" value1="${bookmarkViewableBy}" />
 			</then>
 		</if>
@@ -190,11 +194,15 @@
 	</command>
 
 	<command name="deletePG">
+		<var name="key_assetEntry" value="${bookmarkName}" />
 		<var name="key_bookmarkName" value="${bookmarkName}" />
 
 		<execute function="AssertTextEquals" locator1="Bookmarks#BOOKMARKS_TABLE_NAME" value1="${bookmarkName}" />
-		<execute function="Click" locator1="PGBookmarksFolder#BOOKMARKS_TABLE_ACTIONS_BUTTON" />
-		<execute function="AssertClick" locator1="PGBookmarksFolder#BOOKMARK_ACTION_MENULIST_MOVE_TO_THE_RECYCLE_BIN" value1="Move to the Recycle Bin" />
+
+		<execute function="Click" locator1="Icon#DESCRIPTIVE_VERTICAL_ELLIPSIS" />
+
+		<execute function="AssertClick" locator1="MenuItem#MOVE_TO_THE_RECYCLE_BIN" value1="Move to the Recycle Bin" />
+
 		<execute function="AssertTextEquals#assertPartialText" locator1="Message#SUCCESS" value1="The ${assetType} ${bookmarkName} was moved to the Recycle Bin. Undo" />
 
 		<execute macro="Navigator#openURL" />
@@ -486,12 +494,9 @@
 	<command name="viewNoCategoryCP">
 		<execute function="AssertClick" locator1="NavListItem#ADD_BOOKMARK" value1="Add Bookmark" />
 
-		<if>
-			<condition function="IsNotVisible" locator1="CPBookmarksAddbookmark#CATEGORIZATION_TAGS" />
-			<then>
-				<execute function="Click#clickAt" locator1="CPBookmarksAddbookmark#CATEGORIZATION_DROPDOWN" />
-			</then>
-		</if>
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Categorization" />
+		</execute>
 
 		<var name="key_vocabularyName" value="${vocabularyName}" />
 
