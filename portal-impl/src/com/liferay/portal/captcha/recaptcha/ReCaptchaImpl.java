@@ -158,7 +158,7 @@ public class ReCaptchaImpl extends SimpleCaptchaImpl {
 		HttpServletRequest request = PortalUtil.getHttpServletRequest(
 			portletRequest);
 
-		request = PortalUtil.getOriginalServletRequest(request);
+		request = PortalUtil.getUnwrappedDynamicServletRequest(request);
 
 		return validateChallenge(request);
 	}

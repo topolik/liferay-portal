@@ -1158,6 +1158,9 @@ public interface Portal {
 	public String getUniqueElementId(
 		PortletRequest request, String namespace, String id);
 
+	public HttpServletRequest getUnwrappedDynamicServletRequest(
+		HttpServletRequest request);
+
 	public UploadPortletRequest getUploadPortletRequest(
 		PortletRequest portletRequest);
 

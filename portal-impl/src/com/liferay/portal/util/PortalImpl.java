@@ -5348,6 +5348,62 @@ public class PortalImpl implements Portal {
 	}
 
 	@Override
+	public HttpServletRequest getUnwrappedDynamicServletRequest(
+		HttpServletRequest request) {
+
+		List<PersistentHttpServletRequestWrapper>
+			persistentHttpServletRequestWrappers = new ArrayList<>();
+
+		HttpServletRequestWrapper httpServletRequestWrapper = null;
+
+		HttpServletRequest currentRequest = request;
+
+		while (currentRequest instanceof HttpServletRequestWrapper) {
+			httpServletRequestWrapper =
+				(HttpServletRequestWrapper)currentRequest;
+
+			if (currentRequest instanceof DynamicServletRequest) {
+				return (HttpServletRequest)httpServletRequestWrapper.
+					getRequest();
+			}
+
+			if (currentRequest instanceof
+					PersistentHttpServletRequestWrapper) {
+
+				PersistentHttpServletRequestWrapper
+					persistentHttpServletRequestWrapper =
+						(PersistentHttpServletRequestWrapper)currentRequest;
+
+				persistentHttpServletRequestWrappers.add(
+					persistentHttpServletRequestWrapper.clone());
+			}
+
+			currentRequest =
+				(HttpServletRequest)httpServletRequestWrapper.getRequest();
+		}
+
+		if (ServerDetector.isWebLogic()) {
+			currentRequest = new NonSerializableObjectRequestWrapper(
+				currentRequest);
+		}
+
+		for (int i = persistentHttpServletRequestWrappers.size() - 1; i >= 0;
+			 i--) {
+
+			httpServletRequestWrapper =
+				persistentHttpServletRequestWrappers.get(i);
+
+			httpServletRequestWrapper.setRequest(currentRequest);
+
+			currentRequest = httpServletRequestWrapper;
+		}
+
+		httpServletRequestWrapper = (HttpServletRequestWrapper)currentRequest;
+
+		return (HttpServletRequest)httpServletRequestWrapper.getRequest();
+	}
+
+	@Override
 	public UploadPortletRequest getUploadPortletRequest(
 		PortletRequest portletRequest) {
 
