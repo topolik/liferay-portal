@@ -14,6 +14,7 @@
 
 package com.liferay.portal.security.permission;
 
+import com.liferay.portal.InvalidIndividualResourcePrimaryKeyException;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -23,6 +24,7 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.SetUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.GroupConstants;
@@ -336,88 +338,24 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 	}
 
 	@Override
+	public boolean hasPermission(long groupId, String name, String actionId) {
+		return doHasPermission(groupId, name, StringPool.BLANK, actionId);
+	}
+
+	@Override
 	public boolean hasPermission(
 		long groupId, String name, String primKey, String actionId) {
 
-		StopWatch stopWatch = new StopWatch();
-
-		stopWatch.start();
-
-		Group group = null;
-
 		try {
-			if (groupId > 0) {
-				group = GroupLocalServiceUtil.getGroup(groupId);
-
-				// If the group is a scope group for a layout, check the
-				// original group.
-
-				if (group.isLayout() &&
-					!ResourceBlockLocalServiceUtil.isSupported(name)) {
-
-					Layout layout = LayoutLocalServiceUtil.getLayout(
-						group.getClassPK());
-
-					groupId = layout.getGroupId();
-
-					group = GroupLocalServiceUtil.getGroup(groupId);
-				}
-
-				// If the group is a personal site, check the "User Personal
-				// Site" group.
-
-				if (group.isUser() && (group.getClassPK() == getUserId())) {
-					group = GroupLocalServiceUtil.getGroup(
-						getCompanyId(), GroupConstants.USER_PERSONAL_SITE);
-
-					groupId = group.getGroupId();
-				}
-
-				// If the group is a staging group, check the live group.
-
-				if (group.isStagingGroup()) {
-					if (primKey.equals(String.valueOf(groupId))) {
-						primKey = String.valueOf(group.getLiveGroupId());
-					}
-
-					groupId = group.getLiveGroupId();
-					group = group.getLiveGroup();
-				}
+			if (hasValidIndividualResourcePrimaryKey(primKey)) {
+				return doHasPermission(groupId, name, primKey, actionId);
 			}
 		}
-		catch (Exception e) {
-			_log.error(e, e);
+		catch (InvalidIndividualResourcePrimaryKeyException iirpke) {
+			_log.error(iirpke, iirpke);
 		}
 
-		Boolean value = PermissionCacheUtil.getPermission(
-			user.getUserId(), signedIn, groupId, name, primKey, actionId);
-
-		if (value != null) {
-			return value;
-		}
-
-		try {
-			value = hasPermissionImpl(groupId, name, primKey, actionId);
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					"Checking permission for " + groupId + " " + name +
-						" " + primKey + " " + actionId + " takes " +
-							stopWatch.getTime() + " ms");
-			}
-
-			PermissionCacheUtil.putPermission(
-				user.getUserId(), signedIn, groupId, name, primKey, actionId,
-				value);
-		}
-		catch (Exception e) {
-			PermissionCacheUtil.removePermission(
-				user.getUserId(), signedIn, groupId, name, primKey, actionId);
-
-			throw e;
-		}
-
-		return value;
+		return false;
 	}
 
 	@Override
@@ -1508,6 +1446,115 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 	 */
 	@Deprecated
 	protected static final String RESULTS_SEPARATOR = "_RESULTS_SEPARATOR_";
+
+	private boolean doHasPermission(
+		long groupId, String name, String primKey, String actionId) {
+
+		StopWatch stopWatch = new StopWatch();
+
+		stopWatch.start();
+
+		Group group = null;
+
+		try {
+			if (groupId > 0) {
+				group = GroupLocalServiceUtil.getGroup(groupId);
+
+				// If the group is a scope group for a layout, check the
+				// original group.
+
+				if (group.isLayout() &&
+					!ResourceBlockLocalServiceUtil.isSupported(name)) {
+
+					Layout layout = LayoutLocalServiceUtil.getLayout(
+						group.getClassPK());
+
+					groupId = layout.getGroupId();
+
+					group = GroupLocalServiceUtil.getGroup(groupId);
+				}
+
+				// If the group is a personal site, check the "User Personal
+				// Site" group.
+
+				if (group.isUser() && (group.getClassPK() == getUserId())) {
+					group = GroupLocalServiceUtil.getGroup(
+						getCompanyId(), GroupConstants.USER_PERSONAL_SITE);
+
+					groupId = group.getGroupId();
+				}
+
+				// If the group is a staging group, check the live group.
+
+				if (group.isStagingGroup()) {
+					if (primKey.equals(String.valueOf(groupId))) {
+						primKey = String.valueOf(group.getLiveGroupId());
+					}
+
+					groupId = group.getLiveGroupId();
+					group = group.getLiveGroup();
+				}
+			}
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+		}
+
+		Boolean value = PermissionCacheUtil.getPermission(
+			user.getUserId(), signedIn, groupId, name, primKey, actionId);
+
+		if (value != null) {
+			return value;
+		}
+
+		try {
+			value = hasPermissionImpl(groupId, name, primKey, actionId);
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(
+					"Checking permission for " + groupId + " " + name +
+						" " + primKey + " " + actionId + " takes " +
+							stopWatch.getTime() + " ms");
+			}
+
+			PermissionCacheUtil.putPermission(
+				user.getUserId(), signedIn, groupId, name, primKey, actionId,
+				value);
+		}
+		catch (Exception e) {
+			PermissionCacheUtil.removePermission(
+				user.getUserId(), signedIn, groupId, name, primKey, actionId);
+
+			throw e;
+		}
+
+		return value;
+	}
+
+	private boolean hasValidIndividualResourcePrimaryKey(String primKey)
+		throws InvalidIndividualResourcePrimaryKeyException {
+
+		String message = null;
+
+		if (Validator.isNull(primKey)) {
+			message = "The primKey must not be null.";
+		}
+		else if (primKey.equals("0")) {
+			message = "The primKey must not be 0.";
+		}
+		else if (primKey.equals(String.valueOf(user.getCompanyId()))) {
+			message = "The primKey must not be the companyId.";
+		}
+		else if (primKey.equals(StringPool.BLANK)) {
+			message = "The primKey must not be blank.";
+		}
+
+		if (Validator.isNotNull(message)) {
+			throw new InvalidIndividualResourcePrimaryKeyException(message);
+		}
+
+		return true;
+	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		AdvancedPermissionChecker.class);

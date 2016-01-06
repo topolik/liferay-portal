@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.model.Resource;
 import com.liferay.portal.model.ResourceAction;
@@ -683,12 +684,14 @@ public class ResourcePermissionLocalServiceImpl
 				"The last resource must be a company scope");
 		}
 
+		String individualResourcePrimKey = individualResource.getPrimKey();
+
 		// See LPS-47464
 
-		if (resourcePermissionPersistence.countByC_N_S_P(
+		if (!individualResourcePrimKey.equals(StringPool.BLANK) &&
+			resourcePermissionPersistence.countByC_N_S_P(
 				individualResource.getCompanyId(), individualResource.getName(),
-				individualResource.getScope(),
-				individualResource.getPrimKey()) < 1) {
+				individualResource.getScope(), individualResourcePrimKey) < 1) {
 
 			return false;
 		}

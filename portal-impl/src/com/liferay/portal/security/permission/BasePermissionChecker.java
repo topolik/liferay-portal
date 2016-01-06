@@ -94,6 +94,11 @@ public abstract class BasePermissionChecker implements PermissionChecker {
 	}
 
 	@Override
+	public boolean hasPermission(long groupId, String name, String actionId) {
+		return hasPermission(groupId, name, actionId);
+	}
+
+	@Override
 	public void init(User user) {
 		this.user = user;
 
