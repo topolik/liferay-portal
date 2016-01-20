@@ -102,6 +102,7 @@ import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.comparator.GroupIdComparator;
 import com.liferay.portal.util.comparator.GroupNameComparator;
+import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.exportimport.configuration.ExportImportConfigurationConstants;
 import com.liferay.portlet.exportimport.configuration.ExportImportConfigurationSettingsMapFactory;
 import com.liferay.portlet.exportimport.lar.PortletDataContext;
@@ -3379,8 +3380,15 @@ public class GroupLocalServiceImpl extends GroupLocalServiceBaseImpl {
 
 			String portletIds = PropsUtil.get(keyPrefix.concat(columnId));
 
+			String[] portletIdsArray = StringUtil.split(portletIds);
+
 			layoutTypePortlet.addPortletIds(
-				0, StringUtil.split(portletIds), columnId, false);
+				0, portletIdsArray, columnId, false);
+
+			for (String portletId : portletIdsArray) {
+				PortletPreferencesFactoryUtil.getLayoutPortletSetup(
+					layout, portletId);
+			}
 		}
 
 		layoutLocalService.updateLayout(
