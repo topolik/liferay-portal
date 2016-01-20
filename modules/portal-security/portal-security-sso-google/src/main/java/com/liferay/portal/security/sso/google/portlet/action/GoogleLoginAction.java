@@ -151,6 +151,7 @@ public class GoogleLoginAction extends BaseStrutsAction {
 		String screenName = StringPool.BLANK;
 		String emailAddress = userinfoplus.getEmail();
 		String openId = StringPool.BLANK;
+		String googleId = userinfoplus.getId();
 		Locale locale = LocaleUtil.getDefault();
 		String firstName = userinfoplus.getGivenName();
 		String middleName = StringPool.BLANK;
@@ -172,8 +173,8 @@ public class GoogleLoginAction extends BaseStrutsAction {
 
 		User user = _userLocalService.addUser(
 			creatorUserId, companyId, autoPassword, password1, password2,
-			autoScreenName, screenName, emailAddress, 0, openId, locale,
-			firstName, middleName, lastName, prefixId, suffixId, male,
+			autoScreenName, screenName, emailAddress, 0, openId, googleId,
+			locale, firstName, middleName, lastName, prefixId, suffixId, male,
 			birthdayMonth, birthdayDay, birthdayYear, jobTitle, groupIds,
 			organizationIds, roleIds, userGroupIds, sendEmail, serviceContext);
 
@@ -428,6 +429,7 @@ public class GoogleLoginAction extends BaseStrutsAction {
 		String firstName = userinfoplus.getGivenName();
 		String lastName = userinfoplus.getFamilyName();
 		boolean male = Validator.equals(userinfoplus.getGender(), "male");
+		String googleId = userinfoplus.getId();
 
 		if (emailAddress.equals(user.getEmailAddress()) &&
 			firstName.equals(user.getFirstName()) &&
@@ -467,7 +469,7 @@ public class GoogleLoginAction extends BaseStrutsAction {
 			user.getUserId(), StringPool.BLANK, StringPool.BLANK,
 			StringPool.BLANK, false, user.getReminderQueryQuestion(),
 			user.getReminderQueryAnswer(), user.getScreenName(), emailAddress,
-			0, user.getOpenId(), true, null, user.getLanguageId(),
+			0, user.getOpenId(), googleId, true, null, user.getLanguageId(),
 			user.getTimeZoneId(), user.getGreeting(), user.getComments(),
 			firstName, user.getMiddleName(), lastName, contact.getPrefixId(),
 			contact.getSuffixId(), male, birthdayMonth, birthdayDay,
