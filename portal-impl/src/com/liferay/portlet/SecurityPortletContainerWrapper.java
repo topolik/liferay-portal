@@ -76,7 +76,25 @@ public class SecurityPortletContainerWrapper implements PortletContainer {
 	public void preparePortlet(HttpServletRequest request, Portlet portlet)
 		throws PortletContainerException {
 
-		_portletContainer.preparePortlet(request, portlet);
+		try {
+			check(request, portlet);
+
+			_portletContainer.preparePortlet(request, portlet);
+		}
+		catch (PrincipalException pe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(pe);
+			}
+
+			return;
+		}
+		catch (Exception e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e);
+			}
+
+			throw new PortletContainerException(e);
+		}
 	}
 
 	@Override
