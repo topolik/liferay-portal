@@ -18,6 +18,7 @@ import com.liferay.mail.service.MailService;
 import com.liferay.portal.exception.CompanyMaxUsersException;
 import com.liferay.portal.exception.ContactBirthdayException;
 import com.liferay.portal.exception.ContactNameException;
+import com.liferay.portal.exception.DuplicateGoogleIdException;
 import com.liferay.portal.exception.DuplicateOpenIdException;
 import com.liferay.portal.exception.GroupFriendlyURLException;
 import com.liferay.portal.exception.ModelListenerException;
@@ -219,6 +220,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		long facebookId = 0;
 		String openId = StringPool.BLANK;
+		String googleId = StringPool.BLANK;
 		long prefixId = 0;
 		long suffixId = 0;
 		boolean male = true;
@@ -249,9 +251,10 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		User defaultAdminUser = addUser(
 			creatorUserId, companyId, autoPassword, password1, password2,
 			autoScreenName, screenName, emailAddress, facebookId, openId,
-			locale, firstName, middleName, lastName, prefixId, suffixId, male,
-			birthdayMonth, birthdayDay, birthdayYear, jobTitle, groupIds,
-			organizationIds, roleIds, userGroupIds, sendEmail, serviceContext);
+			googleId, locale, firstName, middleName, lastName, prefixId,
+			suffixId, male, birthdayMonth, birthdayDay, birthdayYear, jobTitle,
+			groupIds, organizationIds, roleIds, userGroupIds, sendEmail,
+			serviceContext);
 
 		updateEmailAddressVerified(defaultAdminUser.getUserId(), true);
 
@@ -556,6 +559,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  emailAddress the user's email address
 	 * @param  facebookId the user's facebook ID
 	 * @param  openId the user's OpenID
+	 * @param  googleId the user's Google ID
 	 * @param  locale the user's locale
 	 * @param  firstName the user's first name
 	 * @param  middleName the user's middle name
@@ -585,9 +589,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			long creatorUserId, long companyId, boolean autoPassword,
 			String password1, String password2, boolean autoScreenName,
 			String screenName, String emailAddress, long facebookId,
-			String openId, Locale locale, String firstName, String middleName,
-			String lastName, long prefixId, long suffixId, boolean male,
-			int birthdayMonth, int birthdayDay, int birthdayYear,
+			String openId, String googleId, Locale locale, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
 			String jobTitle, long[] groupIds, long[] organizationIds,
 			long[] roleIds, long[] userGroupIds, boolean sendEmail,
 			ServiceContext serviceContext)
@@ -612,10 +616,10 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			return addUserWithWorkflow(
 				creatorUserId, companyId, autoPassword, password1, password2,
 				autoScreenName, screenName, emailAddress, facebookId, openId,
-				locale, firstName, middleName, lastName, prefixId, suffixId,
-				male, birthdayMonth, birthdayDay, birthdayYear, jobTitle,
-				groupIds, organizationIds, roleIds, userGroupIds, sendEmail,
-				serviceContext);
+				googleId, locale, firstName, middleName, lastName, prefixId,
+				suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
+				jobTitle, groupIds, organizationIds, roleIds, userGroupIds,
+				sendEmail, serviceContext);
 		}
 		finally {
 			WorkflowThreadLocal.setEnabled(workflowEnabled);
@@ -666,6 +670,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  emailAddress the user's email address
 	 * @param  facebookId the user's facebook ID
 	 * @param  openId the user's OpenID
+	 * @param  googleId the user's Google ID
 	 * @param  locale the user's locale
 	 * @param  firstName the user's first name
 	 * @param  middleName the user's middle name
@@ -696,9 +701,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			long creatorUserId, long companyId, boolean autoPassword,
 			String password1, String password2, boolean autoScreenName,
 			String screenName, String emailAddress, long facebookId,
-			String openId, Locale locale, String firstName, String middleName,
-			String lastName, long prefixId, long suffixId, boolean male,
-			int birthdayMonth, int birthdayDay, int birthdayYear,
+			String openId, String googleId, Locale locale, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
 			String jobTitle, long[] groupIds, long[] organizationIds,
 			long[] roleIds, long[] userGroupIds, boolean sendEmail,
 			ServiceContext serviceContext)
@@ -825,6 +830,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 
 		user.setOpenId(openId);
+		user.setGoogleId(googleId);
 		user.setLanguageId(LocaleUtil.toLanguageId(locale));
 		user.setTimeZoneId(defaultUser.getTimeZoneId());
 		user.setGreeting(greeting);
@@ -1968,6 +1974,19 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Returns the user with the Google ID.
+	 *
+	 * @param  companyId the primary key of the user's company
+	 * @param  googleId the user's Google ID
+	 * @return the user with the Google ID, or <code>null</code> if a user with the
+	 *         Google ID could not be found
+	 */
+	@Override
+	public User fetchUserByGoogleId(long companyId, String googleId) {
+		return userPersistence.fetchByC_GID(companyId, googleId);
+	}
+
+	/**
 	 * Returns the user with the primary key.
 	 *
 	 * @param  userId the primary key of the user
@@ -2604,6 +2623,20 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		throws PortalException {
 
 		return userPersistence.findByC_FID(companyId, facebookId);
+	}
+
+	/**
+	 * Returns the user with the Google ID.
+	 *
+	 * @param  companyId the primary key of the user's company
+	 * @param  googleId the user's Google ID
+	 * @return the user with the Google ID
+	 */
+	@Override
+	public User getUserByGoogleId(long companyId, String googleId)
+		throws PortalException {
+
+		return userPersistence.findByC_GID(companyId, googleId);
 	}
 
 	/**
@@ -4275,6 +4308,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  emailAddress the user's email address
 	 * @param  facebookId the user's facebook ID
 	 * @param  openId the user's OpenID
+	 * @param  googleId the user's Google ID
 	 * @param  locale the user's locale
 	 * @param  firstName the user's first name
 	 * @param  middleName the user's middle name
@@ -4300,9 +4334,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			long creatorUserId, long companyId, boolean autoPassword,
 			String password1, String password2, boolean autoScreenName,
 			String screenName, String emailAddress, long facebookId,
-			String openId, Locale locale, String firstName, String middleName,
-			String lastName, long prefixId, long suffixId, boolean male,
-			int birthdayMonth, int birthdayDay, int birthdayYear,
+			String openId, String googleId, Locale locale, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
 			String jobTitle, boolean updateUserInformation, boolean sendEmail,
 			ServiceContext serviceContext)
 		throws PortalException {
@@ -4316,6 +4350,17 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		User defaultUser = getDefaultUser(companyId);
 
 		if (facebookId > 0) {
+			autoPassword = false;
+
+			if ((password1 == null) || (password2 == null)) {
+				password1 = PwdGenerator.getPassword();
+				password2 = password1;
+			}
+
+			sendEmail = false;
+		}
+
+		if (Validator.isNotNull(googleId)) {
 			autoPassword = false;
 
 			if ((password1 == null) || (password2 == null)) {
@@ -4393,6 +4438,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.setScreenName(screenName);
 			user.setFacebookId(facebookId);
 			user.setOpenId(openId);
+			user.setGoogleId(googleId);
 			user.setLanguageId(locale.toString());
 			user.setTimeZoneId(defaultUser.getTimeZoneId());
 			user.setGreeting(greeting);
@@ -4998,6 +5044,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  emailAddress the user's new email address
 	 * @param  facebookId the user's new Facebook ID
 	 * @param  openId the user's new OpenID
+	 * @param  googleId the user's new Google ID
 	 * @param  portrait whether to update the user's portrait image
 	 * @param  portraitBytes the new portrait image data
 	 * @param  languageId the user's new language ID
@@ -5038,12 +5085,12 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			String newPassword2, boolean passwordReset,
 			String reminderQueryQuestion, String reminderQueryAnswer,
 			String screenName, String emailAddress, long facebookId,
-			String openId, boolean portrait, byte[] portraitBytes,
-			String languageId, String timeZoneId, String greeting,
-			String comments, String firstName, String middleName,
-			String lastName, long prefixId, long suffixId, boolean male,
-			int birthdayMonth, int birthdayDay, int birthdayYear, String smsSn,
-			String facebookSn, String jabberSn, String skypeSn,
+			String openId, String googleId, boolean portrait,
+			byte[] portraitBytes, String languageId, String timeZoneId,
+			String greeting, String comments, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
+			String smsSn, String facebookSn, String jabberSn, String skypeSn,
 			String twitterSn, String jobTitle, long[] groupIds,
 			long[] organizationIds, long[] roleIds,
 			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
@@ -5149,6 +5196,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 
 		user.setOpenId(openId);
+
+		user.setGoogleId(googleId);
 
 		PortalUtil.updateImageId(
 			user, portrait, portraitBytes, "portraitId",
@@ -5369,12 +5418,12 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		return updateUser(
 			userId, oldPassword, newPassword1, newPassword2, passwordReset,
 			reminderQueryQuestion, reminderQueryAnswer, screenName,
-			emailAddress, facebookId, openId, true, null, languageId,
-			timeZoneId, greeting, comments, firstName, middleName, lastName,
-			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
-			smsSn, facebookSn, jabberSn, skypeSn, twitterSn, jobTitle, groupIds,
-			organizationIds, roleIds, userGroupRoles, userGroupIds,
-			serviceContext);
+			emailAddress, facebookId, openId, StringPool.BLANK, true, null,
+			languageId, timeZoneId, greeting, comments, firstName, middleName,
+			lastName, prefixId, suffixId, male, birthdayMonth, birthdayDay,
+			birthdayYear, smsSn, facebookSn, jabberSn, skypeSn, twitterSn,
+			jobTitle, groupIds, organizationIds, roleIds, userGroupRoles,
+			userGroupIds, serviceContext);
 	}
 
 	/**
@@ -6468,6 +6517,21 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 			throw new ContactNameException.MustHaveValidFullName(
 				fullNameValidator);
+		}
+	}
+
+	protected void validateGoogleId(
+			long companyId, long userId, String googleId)
+		throws PortalException {
+
+		if (Validator.isNull(googleId)) {
+			return;
+		}
+
+		User user = userPersistence.fetchByC_GID(companyId, googleId);
+
+		if ((user != null) && (user.getUserId() != userId)) {
+			throw new DuplicateGoogleIdException("{userId=" + userId + "}");
 		}
 	}
 
