@@ -156,7 +156,7 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 
 		if (resourcePermissionsCount == 0) {
 			resourceLocalService.addResources(
-				companyId, 0, 0, name, name, true, false, false);
+				companyId, 0, 0, name, name, true, false, true);
 		}
 
 		if (portlet.isSystem()) {
