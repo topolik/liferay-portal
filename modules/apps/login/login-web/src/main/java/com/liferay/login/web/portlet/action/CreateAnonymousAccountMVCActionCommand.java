@@ -284,6 +284,7 @@ public class CreateAnonymousAccountMVCActionCommand
 			actionRequest, "emailAddress");
 		long facebookId = 0;
 		String openId = null;
+		String googleId = null;
 		String firstName = null;
 		String middleName = null;
 		String lastName = null;
@@ -300,9 +301,9 @@ public class CreateAnonymousAccountMVCActionCommand
 		User user = _userService.updateIncompleteUser(
 			themeDisplay.getCompanyId(), autoPassword, password1, password2,
 			autoScreenName, screenName, emailAddress, facebookId, openId,
-			themeDisplay.getLocale(), firstName, middleName, lastName, prefixId,
-			suffixId, male, birthdayMonth, birthdayDay, birthdayYear, jobTitle,
-			updateUserInformation, sendEmail, serviceContext);
+			googleId, themeDisplay.getLocale(), firstName, middleName, lastName,
+			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
+			jobTitle, updateUserInformation, sendEmail, serviceContext);
 
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 

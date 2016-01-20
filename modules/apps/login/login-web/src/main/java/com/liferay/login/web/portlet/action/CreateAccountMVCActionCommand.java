@@ -422,6 +422,14 @@ public class CreateAccountMVCActionCommand extends BaseMVCActionCommand {
 			password2 = password1;
 		}
 
+		String googleId = GetterUtil.getString(
+			session.getAttribute(WebKeys.GOOGLE_INCOMPLETE_USER_ID));
+
+		if (Validator.isNotNull(googleId)) {
+			password1 = PwdGenerator.getPassword();
+			password2 = password1;
+		}
+
 		String openId = ParamUtil.getString(actionRequest, "openId");
 		String firstName = ParamUtil.getString(actionRequest, "firstName");
 		String middleName = ParamUtil.getString(actionRequest, "middleName");
@@ -443,9 +451,9 @@ public class CreateAccountMVCActionCommand extends BaseMVCActionCommand {
 		User user = _userService.updateIncompleteUser(
 			themeDisplay.getCompanyId(), autoPassword, password1, password2,
 			autoScreenName, screenName, emailAddress, facebookId, openId,
-			themeDisplay.getLocale(), firstName, middleName, lastName, prefixId,
-			suffixId, male, birthdayMonth, birthdayDay, birthdayYear, jobTitle,
-			sendEmail, updateUserInformation, serviceContext);
+			googleId, themeDisplay.getLocale(), firstName, middleName, lastName,
+			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
+			jobTitle, sendEmail, updateUserInformation, serviceContext);
 
 		if (facebookId > 0) {
 			_userLocalService.updateLastLogin(
@@ -457,6 +465,41 @@ public class CreateAccountMVCActionCommand extends BaseMVCActionCommand {
 				user.getUserId(), true);
 
 			session.removeAttribute(WebKeys.FACEBOOK_INCOMPLETE_USER_ID);
+
+			Company company = themeDisplay.getCompany();
+
+			// Send redirect
+
+			String login = null;
+
+			String authType = company.getAuthType();
+
+			if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
+				login = String.valueOf(user.getUserId());
+			}
+			else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
+				login = user.getScreenName();
+			}
+			else {
+				login = user.getEmailAddress();
+			}
+
+			sendRedirect(
+				actionRequest, actionResponse, themeDisplay, login, password1);
+
+			return;
+		}
+
+		if (Validator.isNotNull(googleId)) {
+			_userLocalService.updateLastLogin(
+				user.getUserId(), user.getLoginIP());
+
+			_userLocalService.updatePasswordReset(user.getUserId(), false);
+
+			_userLocalService.updateEmailAddressVerified(
+				user.getUserId(), true);
+
+			session.removeAttribute(WebKeys.GOOGLE_INCOMPLETE_USER_ID);
 
 			Company company = themeDisplay.getCompany();
 
