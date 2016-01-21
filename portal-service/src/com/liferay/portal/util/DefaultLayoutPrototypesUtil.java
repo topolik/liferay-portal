@@ -24,10 +24,8 @@ import com.liferay.portal.model.LayoutConstants;
 import com.liferay.portal.model.LayoutPrototype;
 import com.liferay.portal.model.LayoutSet;
 import com.liferay.portal.model.LayoutTypePortlet;
-import com.liferay.portal.model.Portlet;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.LayoutPrototypeLocalServiceUtil;
-import com.liferay.portal.service.PortletLocalServiceUtil;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 
@@ -167,12 +165,6 @@ public class DefaultLayoutPrototypesUtil {
 	protected static void addResourcePermissions(
 			Layout layout, String portletId)
 		throws Exception {
-
-		Portlet portlet = PortletLocalServiceUtil.getPortletById(
-			layout.getCompanyId(), portletId);
-
-		PortalUtil.addPortletDefaultResource(
-			layout.getCompanyId(), layout, portlet);
 	}
 
 	protected static void updateLayout(Layout layout) throws Exception {
