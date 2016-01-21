@@ -50,8 +50,6 @@ import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portlet.PortletURLFactoryUtil;
-import com.liferay.portlet.expando.model.ExpandoTableConstants;
-import com.liferay.portlet.expando.service.ExpandoValueLocalService;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -393,46 +391,12 @@ public class GoogleLoginAction extends BaseStrutsAction {
 			user = addUser(session, companyId, userinfoplus);
 		}
 
-		if (DeployManagerUtil.isDeployed(_GOOGLE_DRIVE_CONTEXT)) {
-			updateExpandoValues(
-				user, userinfoplus, credential.getAccessToken(),
-				credential.getRefreshToken());
-		}
-
 		return user;
-	}
-
-	@Reference(unbind = "-")
-	protected void setExpandoValueLocalService(
-		ExpandoValueLocalService expandoValueLocalService) {
-
-		_expandoValueLocalService = expandoValueLocalService;
 	}
 
 	@Reference(unbind = "-")
 	protected void setUserLocalService(UserLocalService userLocalService) {
 		_userLocalService = userLocalService;
-	}
-
-	protected void updateExpandoValues(
-			User user, Userinfoplus userinfoplus, String accessToken,
-			String refreshToken)
-		throws Exception {
-
-		_expandoValueLocalService.addValue(
-			user.getCompanyId(), User.class.getName(),
-			ExpandoTableConstants.DEFAULT_TABLE_NAME, "googleAccessToken",
-			user.getUserId(), accessToken);
-
-		_expandoValueLocalService.addValue(
-			user.getCompanyId(), User.class.getName(),
-			ExpandoTableConstants.DEFAULT_TABLE_NAME, "googleRefreshToken",
-			user.getUserId(), refreshToken);
-
-		_expandoValueLocalService.addValue(
-			user.getCompanyId(), User.class.getName(),
-			ExpandoTableConstants.DEFAULT_TABLE_NAME, "googleUserId",
-			user.getUserId(), userinfoplus.getId());
 	}
 
 	protected User updateUser(User user, Userinfoplus userinfoplus)
@@ -503,7 +467,6 @@ public class GoogleLoginAction extends BaseStrutsAction {
 	private static final List<String> _SCOPES_LOGIN = Arrays.asList(
 		"email", "profile");
 
-	private ExpandoValueLocalService _expandoValueLocalService;
 	private UserLocalService _userLocalService;
 
 }
