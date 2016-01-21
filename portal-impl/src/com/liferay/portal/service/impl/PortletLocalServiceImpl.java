@@ -153,6 +153,8 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 
 		_initPortletResourcePermissions(portlet);
 
+		_initPortletRootModelResourcePermissions(portlet);
+
 		if (portlet.isSystem()) {
 			return;
 		}
@@ -1150,6 +1152,54 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			companyId, RoleConstants.OWNER);
 		List<String> ownerActions =
 			ResourceActionsUtil.getPortletResourceActions(name);
+		resourcePermissionLocalService.setOwnerResourcePermissions(
+			companyId, name, ResourceConstants.SCOPE_INDIVIDUAL, name,
+			ownerRole.getRoleId(), 0, ownerActions.toArray(new String[0]));
+	}
+
+	private void _initPortletRootModelResourcePermissions(Portlet portlet)
+		throws PortalException {
+
+		long companyId = portlet.getCompanyId();
+		String name = ResourceActionsUtil.getPortletRootModelResource(
+			portlet.getRootPortletId());
+
+		if (Validator.isBlank(name)) {
+			return;
+		}
+
+		List<String> groupActions =
+			ResourceActionsUtil.getModelResourceGroupDefaultActions(name);
+
+		Role organizationUserRole = roleLocalService.getRole(
+			companyId, RoleConstants.ORGANIZATION_USER);
+		Role siteMemberRole = roleLocalService.getRole(
+			companyId, RoleConstants.SITE_MEMBER);
+
+		resourcePermissionLocalService.setResourcePermissions(
+			companyId, name, ResourceConstants.SCOPE_INDIVIDUAL, name,
+			organizationUserRole.getRoleId(),
+			groupActions.toArray(new String[0]));
+		resourcePermissionLocalService.setResourcePermissions(
+			companyId, name, ResourceConstants.SCOPE_INDIVIDUAL, name,
+			siteMemberRole.getRoleId(), groupActions.toArray(new String[0]));
+
+		Role guestRole = roleLocalService.getRole(
+			companyId, RoleConstants.GUEST);
+
+		List<String> guestActions =
+			ResourceActionsUtil.getModelResourceGuestDefaultActions(name);
+
+		resourcePermissionLocalService.setResourcePermissions(
+			companyId, name, ResourceConstants.SCOPE_INDIVIDUAL, name,
+			guestRole.getRoleId(), guestActions.toArray(new String[0]));
+
+		Role ownerRole = roleLocalService.getRole(
+			companyId, RoleConstants.OWNER);
+
+		List<String> ownerActions = ResourceActionsUtil.getModelResourceActions(
+			name);
+
 		resourcePermissionLocalService.setOwnerResourcePermissions(
 			companyId, name, ResourceConstants.SCOPE_INDIVIDUAL, name,
 			ownerRole.getRoleId(), 0, ownerActions.toArray(new String[0]));
