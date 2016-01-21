@@ -50,6 +50,7 @@
 						path: 'alert.js',
 						requires: [
 							'aui-alert',
+							'aui-component',
 							'event-mouseenter',
 							'liferay-portlet-base',
 							'timers'
@@ -762,7 +763,7 @@
 					'liferay-url-preview': {
 						path: 'url_preview.js',
 						requires: [
-							'aui-base',
+							'aui-component',
 							'liferay-util-window'
 						]
 					},

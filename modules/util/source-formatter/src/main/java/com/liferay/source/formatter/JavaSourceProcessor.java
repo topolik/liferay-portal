@@ -1700,6 +1700,8 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 							lineCount);
 				}
 
+				checkChaining(trimmedLine, fileName, lineCount);
+
 				checkStringBundler(trimmedLine, fileName, lineCount);
 
 				checkEmptyCollection(trimmedLine, fileName, lineCount);
@@ -2037,17 +2039,10 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 							"line break: " + fileName + " " + lineCount);
 					}
 
-					if (trimmedLine.startsWith(StringPool.CLOSE_CURLY_BRACE) &&
-						line.endsWith(StringPool.OPEN_CURLY_BRACE)) {
-
-						Matcher matcher = _lineBreakPattern.matcher(
-							trimmedLine);
-
-						if (!matcher.find()) {
-							processErrorMessage(
-								fileName,
-								"line break: " + fileName + " " + lineCount);
-						}
+					if (trimmedLine.matches("^\\} (catch|else|finally) .*")) {
+						processErrorMessage(
+							fileName,
+							"line break: " + fileName + " " + lineCount);
 					}
 				}
 
@@ -3311,15 +3306,17 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 
 		List<String> fileNames = new ArrayList<>();
 
-		String moduleRootDirLocation =
-			sourceFormatterArgs.getBaseDirName() + "modules/";
+		String moduleRootDirLocation = "modules/";
 
 		for (int i = 0; i < 6; i++) {
-			File file = new File(moduleRootDirLocation);
+			File file = new File(
+				sourceFormatterArgs.getBaseDirName() + moduleRootDirLocation);
 
 			if (file.exists()) {
 				fileNames = getFileNames(
-					moduleRootDirLocation, null, new String[0], getIncludes());
+					sourceFormatterArgs.getBaseDirName() +
+						moduleRootDirLocation,
+					null, new String[0], getIncludes());
 
 				break;
 			}
@@ -3856,7 +3853,6 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 	};
 	private List<String> _javaTermAccessLevelModifierExclusionFiles;
 	private List<String> _javaTermSortExclusionFiles;
-	private Pattern _lineBreakPattern = Pattern.compile("\\}(\\)+) \\{");
 	private List<String> _lineLengthExclusionFiles;
 	private Pattern _logLevelPattern = Pattern.compile(
 		"\n(\t+)_log.(debug|info|trace|warn)\\(");

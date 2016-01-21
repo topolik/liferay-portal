@@ -14,6 +14,7 @@
 
 package com.liferay.portal.service.impl;
 
+import com.liferay.admin.kernel.util.PortalMyAccountApplicationType;
 import com.liferay.portal.exception.DuplicateRoleException;
 import com.liferay.portal.exception.NoSuchRoleException;
 import com.liferay.portal.exception.RequiredRoleException;
@@ -63,7 +64,6 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.portal.util.PortletKeys;
 import com.liferay.portal.util.PropsUtil;
 import com.liferay.portal.util.PropsValues;
-import com.liferay.portlet.admin.util.PortalMyAccountApplicationType;
 import com.liferay.portlet.exportimport.lar.ExportImportThreadLocal;
 import com.liferay.users.admin.kernel.util.UsersAdminUtil;
 
@@ -86,66 +86,6 @@ import java.util.Set;
  * @author Marcellus Tavares
  */
 public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
-
-	/**
-	 * Adds a role. The user is reindexed after role is added.
-	 *
-	 * @param      userId the primary key of the user
-	 * @param      companyId the primary key of the company
-	 * @param      name the role's name
-	 * @param      titleMap the role's localized titles (optionally
-	 *             <code>null</code>)
-	 * @param      descriptionMap the role's localized descriptions (optionally
-	 *             <code>null</code>)
-	 * @param      type the role's type (optionally <code>0</code>)
-	 * @return     the role
-	 * @deprecated As of 6.2.0, replaced by {@link #addRole(long, String, long,
-	 *             String, Map, Map, int, String, ServiceContext)}
-	 */
-	@Deprecated
-	@Override
-	public Role addRole(
-			long userId, long companyId, String name,
-			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
-			int type)
-		throws PortalException {
-
-		return addRole(
-			userId, null, 0, name, titleMap, descriptionMap, type, null, null);
-	}
-
-	/**
-	 * Adds a role with additional parameters. The user is reindexed after role
-	 * is added.
-	 *
-	 * @param      userId the primary key of the user
-	 * @param      companyId the primary key of the company
-	 * @param      name the role's name
-	 * @param      titleMap the role's localized titles (optionally
-	 *             <code>null</code>)
-	 * @param      descriptionMap the role's localized descriptions (optionally
-	 *             <code>null</code>)
-	 * @param      type the role's type (optionally <code>0</code>)
-	 * @param      className the name of the class for which the role is created
-	 *             (optionally <code>null</code>)
-	 * @param      classPK the primary key of the class for which the role is
-	 *             created (optionally <code>0</code>)
-	 * @return     the role
-	 * @deprecated As of 6.2.0, replaced by {@link #addRole(long, String, long,
-	 *             String, Map, Map, int, String, ServiceContext)}
-	 */
-	@Deprecated
-	@Override
-	public Role addRole(
-			long userId, long companyId, String name,
-			Map<Locale, String> titleMap, Map<Locale, String> descriptionMap,
-			int type, String className, long classPK)
-		throws PortalException {
-
-		return addRole(
-			userId, className, classPK, name, titleMap, descriptionMap, type,
-			null, null);
-	}
 
 	/**
 	 * Adds a role with additional parameters. The user is reindexed after role

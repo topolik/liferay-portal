@@ -42,8 +42,8 @@ if (Validator.isNotNull(orderByCol) && Validator.isNotNull(orderByType)) {
 	portalPreferences.setValue(WikiPortletKeys.WIKI_ADMIN, "nodes-order-by-type", orderByType);
 }
 else {
-	orderByCol = portalPreferences.getValue(WikiPortletKeys.WIKI_ADMIN, "nodes-order-by-col", "name");
-	orderByType = portalPreferences.getValue(WikiPortletKeys.WIKI_ADMIN, "nodes-order-by-type", "asc");
+	orderByCol = portalPreferences.getValue(WikiPortletKeys.WIKI_ADMIN, "nodes-order-by-col", "modifiedDate");
+	orderByType = portalPreferences.getValue(WikiPortletKeys.WIKI_ADMIN, "nodes-order-by-type", "desc");
 }
 
 request.setAttribute("view.jsp-orderByCol", orderByCol);
@@ -103,6 +103,11 @@ int nodesCount = WikiNodeServiceUtil.getNodesCount(scopeGroupId);
 		resourceURL="<%= sidebarPanelURL %>"
 		searchContainerId="wikiNodes"
 	>
+
+		<%
+		request.removeAttribute(WikiWebKeys.WIKI_NODE);
+		%>
+
 		<liferay-util:include page="/wiki_admin/info_panel.jsp" servletContext="<%= application %>" />
 	</liferay-frontend:sidebar-panel>
 
@@ -155,7 +160,7 @@ int nodesCount = WikiNodeServiceUtil.getNodesCount(scopeGroupId);
 					<c:choose>
 						<c:when test='<%= displayStyle.equals("descriptive") %>'>
 							<liferay-ui:search-container-column-icon
-								icon="folder"
+								icon="wiki"
 								toggleRowChecker="<%= true %>"
 							/>
 

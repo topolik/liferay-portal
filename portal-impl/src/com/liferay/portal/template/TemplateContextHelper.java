@@ -279,24 +279,25 @@ public class TemplateContextHelper {
 			Layout layout = themeDisplay.getLayout();
 			List<Layout> layouts = themeDisplay.getLayouts();
 
-			contextObjects.put("themeDisplay", themeDisplay);
+			contextObjects.put("bodyCssClass", StringPool.BLANK);
+			contextObjects.put("colorScheme", themeDisplay.getColorScheme());
 			contextObjects.put("company", themeDisplay.getCompany());
-			contextObjects.put("user", themeDisplay.getUser());
-			contextObjects.put("realUser", themeDisplay.getRealUser());
 			contextObjects.put("layout", layout);
 			contextObjects.put("layouts", layouts);
-			contextObjects.put("plid", String.valueOf(themeDisplay.getPlid()));
 			contextObjects.put(
 				"layoutTypePortlet", themeDisplay.getLayoutTypePortlet());
-			contextObjects.put(
-				"scopeGroupId", Long.valueOf(themeDisplay.getScopeGroupId()));
+			contextObjects.put("locale", themeDisplay.getLocale());
 			contextObjects.put(
 				"permissionChecker", themeDisplay.getPermissionChecker());
-			contextObjects.put("locale", themeDisplay.getLocale());
-			contextObjects.put("timeZone", themeDisplay.getTimeZone());
-			contextObjects.put("colorScheme", themeDisplay.getColorScheme());
+			contextObjects.put("plid", String.valueOf(themeDisplay.getPlid()));
 			contextObjects.put(
 				"portletDisplay", themeDisplay.getPortletDisplay());
+			contextObjects.put("realUser", themeDisplay.getRealUser());
+			contextObjects.put(
+				"scopeGroupId", Long.valueOf(themeDisplay.getScopeGroupId()));
+			contextObjects.put("themeDisplay", themeDisplay);
+			contextObjects.put("timeZone", themeDisplay.getTimeZone());
+			contextObjects.put("user", themeDisplay.getUser());
 
 			// Navigation items
 

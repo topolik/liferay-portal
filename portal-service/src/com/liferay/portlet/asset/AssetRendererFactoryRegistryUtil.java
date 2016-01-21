@@ -145,10 +145,6 @@ public class AssetRendererFactoryRegistryUtil {
 		return filteredAssetRendererFactories;
 	}
 
-	private List<AssetRendererFactory<?>> _getAssetRendererFactories() {
-		return ListUtil.fromMapValues(_assetRenderFactoriesMapByClassName);
-	}
-
 	private List<AssetRendererFactory<?>> _getAssetRendererFactories(
 		long companyId) {
 

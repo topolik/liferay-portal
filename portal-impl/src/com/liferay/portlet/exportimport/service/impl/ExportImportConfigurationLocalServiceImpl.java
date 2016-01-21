@@ -241,10 +241,9 @@ public class ExportImportConfigurationLocalServiceImpl
 
 	@Override
 	public List<ExportImportConfiguration> getExportImportConfigurations(
-			long companyId, long groupId, String keywords, int type, int start,
-			int end,
-			OrderByComparator<ExportImportConfiguration> orderByComparator)
-		throws PortalException {
+		long companyId, long groupId, String keywords, int type, int start,
+		int end,
+		OrderByComparator<ExportImportConfiguration> orderByComparator) {
 
 		return exportImportConfigurationFinder.findByKeywords(
 			companyId, groupId, keywords, type,
@@ -253,10 +252,9 @@ public class ExportImportConfigurationLocalServiceImpl
 
 	@Override
 	public List<ExportImportConfiguration> getExportImportConfigurations(
-			long companyId, long groupId, String name, String description,
-			int type, boolean andSearch, int start, int end,
-			OrderByComparator<ExportImportConfiguration> orderByComparator)
-		throws PortalException {
+		long companyId, long groupId, String name, String description, int type,
+		boolean andSearch, int start, int end,
+		OrderByComparator<ExportImportConfiguration> orderByComparator) {
 
 		return exportImportConfigurationFinder.findByC_G_N_D_T(
 			companyId, groupId, name, description, type,
@@ -278,8 +276,7 @@ public class ExportImportConfigurationLocalServiceImpl
 
 	@Override
 	public int getExportImportConfigurationsCount(
-			long companyId, long groupId, String keywords, int type)
-		throws PortalException {
+		long companyId, long groupId, String keywords, int type) {
 
 		return exportImportConfigurationFinder.countByKeywords(
 			companyId, groupId, keywords, type,
@@ -288,9 +285,8 @@ public class ExportImportConfigurationLocalServiceImpl
 
 	@Override
 	public int getExportImportConfigurationsCount(
-			long companyId, long groupId, String name, String description,
-			int type, boolean andSearch)
-		throws PortalException {
+		long companyId, long groupId, String name, String description, int type,
+		boolean andSearch) {
 
 		return exportImportConfigurationFinder.countByC_G_N_D_T(
 			companyId, groupId, name, description, type,
