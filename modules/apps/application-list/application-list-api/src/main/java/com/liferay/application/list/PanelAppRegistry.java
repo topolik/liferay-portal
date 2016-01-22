@@ -14,6 +14,7 @@
 
 package com.liferay.application.list;
 
+import com.liferay.application.list.permissions.UserPersonalSitePermissions;
 import com.liferay.application.list.util.PanelCategoryServiceReferenceMapper;
 import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReferenceComparator;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
@@ -27,6 +28,7 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.PredicateFilter;
 import com.liferay.portal.model.Group;
 import com.liferay.portal.model.Portlet;
+import com.liferay.portal.service.CompanyLocalService;
 import com.liferay.portal.service.PortletLocalService;
 
 import java.util.Collections;
@@ -135,18 +137,34 @@ public class PanelAppRegistry {
 	}
 
 	@Reference(unbind = "-")
+	protected void setCompanyLocalService(
+		CompanyLocalService companyLocalService) {
+
+		this.companyLocalService = companyLocalService;
+	}
+
+	@Reference(unbind = "-")
 	protected void setPortletLocalService(
 		PortletLocalService portletLocalService) {
 
 		this.portletLocalService = portletLocalService;
 	}
 
+	@Reference(unbind = "-")
+	protected void setUserPersonalSitePermissions(
+		UserPersonalSitePermissions userPersonalSitePermissions) {
+
+		_userPersonalSitePermissions = userPersonalSitePermissions;
+	}
+
+	protected CompanyLocalService companyLocalService;
 	protected PortletLocalService portletLocalService;
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		PanelAppRegistry.class);
 
 	private ServiceTrackerMap<String, List<PanelApp>> _serviceTrackerMap;
+	private UserPersonalSitePermissions _userPersonalSitePermissions;
 
 	private static class ServiceRankingPropertyServiceReferenceComparator
 		extends PropertyServiceReferenceComparator<PanelApp> {
@@ -181,6 +199,9 @@ public class PanelAppRegistry {
 				portlet.setControlPanelEntryCategory(panelCategoryKey);
 
 				panelApp.setPortlet(portlet);
+
+				_userPersonalSitePermissions.initPermissions(
+					companyLocalService.getCompanies(), portlet);
 			}
 			else if (_log.isDebugEnabled()) {
 				_log.debug("Unable to get portlet " + panelApp.getPortletId());
