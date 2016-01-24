@@ -245,6 +245,7 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* @param emailAddress the user's email address
 	* @param facebookId the user's facebook ID
 	* @param openId the user's OpenID
+	* @param googleId the user's Google ID
 	* @param locale the user's locale
 	* @param firstName the user's first name
 	* @param middleName the user's middle name
@@ -268,6 +269,78 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	attribute), asset category IDs, asset tag names, and expando
 	bridge attributes for the user.
 	* @return the new user
+	*/
+	@Override
+	public com.liferay.portal.model.User addUser(long creatorUserId,
+		long companyId, boolean autoPassword, java.lang.String password1,
+		java.lang.String password2, boolean autoScreenName,
+		java.lang.String screenName, java.lang.String emailAddress,
+		long facebookId, java.lang.String openId, java.lang.String googleId,
+		java.util.Locale locale, java.lang.String firstName,
+		java.lang.String middleName, java.lang.String lastName, long prefixId,
+		long suffixId, boolean male, int birthdayMonth, int birthdayDay,
+		int birthdayYear, java.lang.String jobTitle, long[] groupIds,
+		long[] organizationIds, long[] roleIds, long[] userGroupIds,
+		boolean sendEmail,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userLocalService.addUser(creatorUserId, companyId,
+			autoPassword, password1, password2, autoScreenName, screenName,
+			emailAddress, facebookId, openId, googleId, locale, firstName,
+			middleName, lastName, prefixId, suffixId, male, birthdayMonth,
+			birthdayDay, birthdayYear, jobTitle, groupIds, organizationIds,
+			roleIds, userGroupIds, sendEmail, serviceContext);
+	}
+
+	/**
+	* Adds a user.
+	*
+	* <p>
+	* This method handles the creation and bookkeeping of the user including
+	* its resources, metadata, and internal data structures. It is not
+	* necessary to make subsequent calls to any methods to setup default
+	* groups, resources, etc.
+	* </p>
+	*
+	* @param creatorUserId the primary key of the creator
+	* @param companyId the primary key of the user's company
+	* @param autoPassword whether a password should be automatically generated
+	for the user
+	* @param password1 the user's password
+	* @param password2 the user's password confirmation
+	* @param autoScreenName whether a screen name should be automatically
+	generated for the user
+	* @param screenName the user's screen name
+	* @param emailAddress the user's email address
+	* @param facebookId the user's facebook ID
+	* @param openId the user's OpenID
+	* @param locale the user's locale
+	* @param firstName the user's first name
+	* @param middleName the user's middle name
+	* @param lastName the user's last name
+	* @param prefixId the user's name prefix ID
+	* @param suffixId the user's name suffix ID
+	* @param male whether the user is male
+	* @param birthdayMonth the user's birthday month (0-based, meaning 0 for
+	January)
+	* @param birthdayDay the user's birthday day
+	* @param birthdayYear the user's birthday year
+	* @param jobTitle the user's job title
+	* @param groupIds the primary keys of the user's groups
+	* @param organizationIds the primary keys of the user's organizations
+	* @param roleIds the primary keys of the roles this user possesses
+	* @param userGroupIds the primary keys of the user's user groups
+	* @param sendEmail whether to send the user an email notification about
+	their new account
+	* @param serviceContext the service context to be applied (optionally
+	<code>null</code>). Can set the UUID (with the <code>uuid</code>
+	attribute), asset category IDs, asset tag names, and expando
+	bridge attributes for the user.
+	* @return the new user
+	* @deprecated As of 7.0.0, replaced by {@link #addUser(long, long, boolean,
+	String, String, boolean, String, String, long, String, String, Locale,
+	String, String, String, long, long, boolean, int, int, int, String, long[],
+	long[], long[], long[], boolean, ServiceContext)}
 	*/
 	@Override
 	public com.liferay.portal.model.User addUser(long creatorUserId,
@@ -354,6 +427,7 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* @param emailAddress the user's email address
 	* @param facebookId the user's facebook ID
 	* @param openId the user's OpenID
+	* @param googleId the user's Google ID
 	* @param locale the user's locale
 	* @param firstName the user's first name
 	* @param middleName the user's middle name
@@ -377,6 +451,79 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	attribute), asset category IDs, asset tag names, and expando
 	bridge attributes for the user.
 	* @return the new user
+	*/
+	@Override
+	public com.liferay.portal.model.User addUserWithWorkflow(
+		long creatorUserId, long companyId, boolean autoPassword,
+		java.lang.String password1, java.lang.String password2,
+		boolean autoScreenName, java.lang.String screenName,
+		java.lang.String emailAddress, long facebookId,
+		java.lang.String openId, java.lang.String googleId,
+		java.util.Locale locale, java.lang.String firstName,
+		java.lang.String middleName, java.lang.String lastName, long prefixId,
+		long suffixId, boolean male, int birthdayMonth, int birthdayDay,
+		int birthdayYear, java.lang.String jobTitle, long[] groupIds,
+		long[] organizationIds, long[] roleIds, long[] userGroupIds,
+		boolean sendEmail,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userLocalService.addUserWithWorkflow(creatorUserId, companyId,
+			autoPassword, password1, password2, autoScreenName, screenName,
+			emailAddress, facebookId, openId, googleId, locale, firstName,
+			middleName, lastName, prefixId, suffixId, male, birthdayMonth,
+			birthdayDay, birthdayYear, jobTitle, groupIds, organizationIds,
+			roleIds, userGroupIds, sendEmail, serviceContext);
+	}
+
+	/**
+	* Adds a user with workflow.
+	*
+	* <p>
+	* This method handles the creation and bookkeeping of the user including
+	* its resources, metadata, and internal data structures. It is not
+	* necessary to make subsequent calls to any methods to setup default
+	* groups, resources, etc.
+	* </p>
+	*
+	* @param creatorUserId the primary key of the creator
+	* @param companyId the primary key of the user's company
+	* @param autoPassword whether a password should be automatically generated
+	for the user
+	* @param password1 the user's password
+	* @param password2 the user's password confirmation
+	* @param autoScreenName whether a screen name should be automatically
+	generated for the user
+	* @param screenName the user's screen name
+	* @param emailAddress the user's email address
+	* @param facebookId the user's facebook ID
+	* @param openId the user's OpenID
+	* @param locale the user's locale
+	* @param firstName the user's first name
+	* @param middleName the user's middle name
+	* @param lastName the user's last name
+	* @param prefixId the user's name prefix ID
+	* @param suffixId the user's name suffix ID
+	* @param male whether the user is male
+	* @param birthdayMonth the user's birthday month (0-based, meaning 0 for
+	January)
+	* @param birthdayDay the user's birthday day
+	* @param birthdayYear the user's birthday year
+	* @param jobTitle the user's job title
+	* @param groupIds the primary keys of the user's groups
+	* @param organizationIds the primary keys of the user's organizations
+	* @param roleIds the primary keys of the roles this user possesses
+	* @param userGroupIds the primary keys of the user's user groups
+	* @param sendEmail whether to send the user an email notification about
+	their new account
+	* @param serviceContext the service context to be applied (optionally
+	<code>null</code>). Can set the UUID (with the <code>uuid</code>
+	attribute), asset category IDs, asset tag names, and expando
+	bridge attributes for the user.
+	* @return the new user
+	* @deprecated As of 7.0.0, replaced by {@link #addUserWithWorkflow(long, long, boolean,
+	String, String, boolean, String, String, long, String, String, Locale,
+	String, String, String, long, long, boolean, int, int, int, String, long[],
+	long[], long[], long[], boolean, ServiceContext)}
 	*/
 	@Override
 	public com.liferay.portal.model.User addUserWithWorkflow(
@@ -1032,6 +1179,20 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	public com.liferay.portal.model.User fetchUserByFacebookId(long companyId,
 		long facebookId) {
 		return _userLocalService.fetchUserByFacebookId(companyId, facebookId);
+	}
+
+	/**
+	* Returns the user with the Google ID.
+	*
+	* @param companyId the primary key of the user's company
+	* @param googleId the user's Google ID
+	* @return the user with the Google ID, or <code>null</code> if a user with the
+	Google ID could not be found
+	*/
+	@Override
+	public com.liferay.portal.model.User fetchUserByGoogleId(long companyId,
+		java.lang.String googleId) {
+		return _userLocalService.fetchUserByGoogleId(companyId, googleId);
 	}
 
 	/**
@@ -1725,6 +1886,20 @@ public class UserLocalServiceWrapper implements UserLocalService,
 		long facebookId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userLocalService.getUserByFacebookId(companyId, facebookId);
+	}
+
+	/**
+	* Returns the user with the Google ID.
+	*
+	* @param companyId the primary key of the user's company
+	* @param googleId the user's Google ID
+	* @return the user with the Google ID
+	*/
+	@Override
+	public com.liferay.portal.model.User getUserByGoogleId(long companyId,
+		java.lang.String googleId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userLocalService.getUserByGoogleId(companyId, googleId);
 	}
 
 	/**
@@ -2769,6 +2944,7 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* @param emailAddress the user's email address
 	* @param facebookId the user's facebook ID
 	* @param openId the user's OpenID
+	* @param googleId the user's Google ID
 	* @param locale the user's locale
 	* @param firstName the user's first name
 	* @param middleName the user's middle name
@@ -2795,20 +2971,20 @@ public class UserLocalServiceWrapper implements UserLocalService,
 		java.lang.String password1, java.lang.String password2,
 		boolean autoScreenName, java.lang.String screenName,
 		java.lang.String emailAddress, long facebookId,
-		java.lang.String openId, java.util.Locale locale,
-		java.lang.String firstName, java.lang.String middleName,
-		java.lang.String lastName, long prefixId, long suffixId, boolean male,
-		int birthdayMonth, int birthdayDay, int birthdayYear,
-		java.lang.String jobTitle, boolean updateUserInformation,
-		boolean sendEmail,
+		java.lang.String openId, java.lang.String googleId,
+		java.util.Locale locale, java.lang.String firstName,
+		java.lang.String middleName, java.lang.String lastName, long prefixId,
+		long suffixId, boolean male, int birthdayMonth, int birthdayDay,
+		int birthdayYear, java.lang.String jobTitle,
+		boolean updateUserInformation, boolean sendEmail,
 		com.liferay.portal.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _userLocalService.updateIncompleteUser(creatorUserId, companyId,
 			autoPassword, password1, password2, autoScreenName, screenName,
-			emailAddress, facebookId, openId, locale, firstName, middleName,
-			lastName, prefixId, suffixId, male, birthdayMonth, birthdayDay,
-			birthdayYear, jobTitle, updateUserInformation, sendEmail,
-			serviceContext);
+			emailAddress, facebookId, openId, googleId, locale, firstName,
+			middleName, lastName, prefixId, suffixId, male, birthdayMonth,
+			birthdayDay, birthdayYear, jobTitle, updateUserInformation,
+			sendEmail, serviceContext);
 	}
 
 	/**
@@ -3127,6 +3303,89 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* @param emailAddress the user's new email address
 	* @param facebookId the user's new Facebook ID
 	* @param openId the user's new OpenID
+	* @param googleId the user's new Google ID
+	* @param portrait whether to update the user's portrait image
+	* @param portraitBytes the new portrait image data
+	* @param languageId the user's new language ID
+	* @param timeZoneId the user's new time zone ID
+	* @param greeting the user's new greeting
+	* @param comments the user's new comments
+	* @param firstName the user's new first name
+	* @param middleName the user's new middle name
+	* @param lastName the user's new last name
+	* @param prefixId the user's new name prefix ID
+	* @param suffixId the user's new name suffix ID
+	* @param male whether user is male
+	* @param birthdayMonth the user's new birthday month (0-based, meaning 0
+	for January)
+	* @param birthdayDay the user's new birthday day
+	* @param birthdayYear the user's birthday year
+	* @param smsSn the user's new SMS screen name
+	* @param facebookSn the user's new Facebook screen name
+	* @param jabberSn the user's new Jabber screen name
+	* @param skypeSn the user's new Skype screen name
+	* @param twitterSn the user's new Twitter screen name
+	* @param jobTitle the user's new job title
+	* @param groupIds the primary keys of the user's groups
+	* @param organizationIds the primary keys of the user's organizations
+	* @param roleIds the primary keys of the user's roles
+	* @param userGroupRoles the user user's group roles
+	* @param userGroupIds the primary keys of the user's user groups
+	* @param serviceContext the service context to be applied (optionally
+	<code>null</code>). Can set the UUID (with the <code>uuid</code>
+	attribute), asset category IDs, asset tag names, and expando
+	bridge attributes for the user.
+	* @return the user
+	*/
+	@Override
+	public com.liferay.portal.model.User updateUser(long userId,
+		java.lang.String oldPassword, java.lang.String newPassword1,
+		java.lang.String newPassword2, boolean passwordReset,
+		java.lang.String reminderQueryQuestion,
+		java.lang.String reminderQueryAnswer, java.lang.String screenName,
+		java.lang.String emailAddress, long facebookId,
+		java.lang.String openId, java.lang.String googleId, boolean portrait,
+		byte[] portraitBytes, java.lang.String languageId,
+		java.lang.String timeZoneId, java.lang.String greeting,
+		java.lang.String comments, java.lang.String firstName,
+		java.lang.String middleName, java.lang.String lastName, long prefixId,
+		long suffixId, boolean male, int birthdayMonth, int birthdayDay,
+		int birthdayYear, java.lang.String smsSn, java.lang.String facebookSn,
+		java.lang.String jabberSn, java.lang.String skypeSn,
+		java.lang.String twitterSn, java.lang.String jobTitle, long[] groupIds,
+		long[] organizationIds, long[] roleIds,
+		java.util.List<com.liferay.portal.model.UserGroupRole> userGroupRoles,
+		long[] userGroupIds,
+		com.liferay.portal.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _userLocalService.updateUser(userId, oldPassword, newPassword1,
+			newPassword2, passwordReset, reminderQueryQuestion,
+			reminderQueryAnswer, screenName, emailAddress, facebookId, openId,
+			googleId, portrait, portraitBytes, languageId, timeZoneId,
+			greeting, comments, firstName, middleName, lastName, prefixId,
+			suffixId, male, birthdayMonth, birthdayDay, birthdayYear, smsSn,
+			facebookSn, jabberSn, skypeSn, twitterSn, jobTitle, groupIds,
+			organizationIds, roleIds, userGroupRoles, userGroupIds,
+			serviceContext);
+	}
+
+	/**
+	* Updates the user.
+	*
+	* @param userId the primary key of the user
+	* @param oldPassword the user's old password
+	* @param newPassword1 the user's new password (optionally
+	<code>null</code>)
+	* @param newPassword2 the user's new password confirmation (optionally
+	<code>null</code>)
+	* @param passwordReset whether the user should be asked to reset their
+	password the next time they login
+	* @param reminderQueryQuestion the user's new password reset question
+	* @param reminderQueryAnswer the user's new password reset answer
+	* @param screenName the user's new screen name
+	* @param emailAddress the user's new email address
+	* @param facebookId the user's new Facebook ID
+	* @param openId the user's new OpenID
 	* @param languageId the user's new language ID
 	* @param timeZoneId the user's new time zone ID
 	* @param greeting the user's new greeting
@@ -3212,6 +3471,7 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	* @param emailAddress the user's new email address
 	* @param facebookId the user's new Facebook ID
 	* @param openId the user's new OpenID
+	* @param googleId the user's new Google ID
 	* @param portrait whether to update the user's portrait image
 	* @param portraitBytes the new portrait image data
 	* @param languageId the user's new language ID
@@ -3244,6 +3504,13 @@ public class UserLocalServiceWrapper implements UserLocalService,
 	attribute), asset category IDs, asset tag names, and expando
 	bridge attributes for the user.
 	* @return the user
+	* @deprecated As of 7.0.0, replaced by {@link #updateUser(long, String,
+	String, String, boolean, String, String, String, String,
+	long, String, String, boolean, byte[], String, String, String,
+	String, String, String, String, int, int, boolean, int, int,
+	int, String, String, String, String, String, String, String,
+	String, String, String, String, long[], long[], long[], List,
+	long[], ServiceContext)}
 	*/
 	@Override
 	public com.liferay.portal.model.User updateUser(long userId,
