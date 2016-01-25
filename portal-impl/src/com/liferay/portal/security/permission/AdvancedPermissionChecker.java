@@ -361,6 +361,8 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 
 		stopWatch.start();
 
+		primKey = fixLegacyDefaultResourcePrimaryKey(groupId, name, primKey);
+
 		Group group = null;
 
 		try {
@@ -431,6 +433,8 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 	public boolean hasUserPermission(
 		long groupId, String name, String primKey, String actionId,
 		boolean checkAdmin) {
+
+		primKey = fixLegacyDefaultResourcePrimaryKey(groupId, name, primKey);
 
 		try {
 			return hasUserPermissionImpl(
@@ -710,6 +714,18 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 
 			throw e;
 		}
+	}
+
+	protected String fixLegacyDefaultResourcePrimaryKey(
+		long groupId, String name, String primKey) {
+
+		if (Validator.isNumber(primKey) &&
+			(Long.parseLong(primKey) == groupId)) {
+
+			primKey = name;
+		}
+
+		return primKey;
 	}
 
 	/**
