@@ -14,6 +14,7 @@
 
 package com.liferay.application.list.user.personal.site.permissions;
 
+import com.liferay.application.list.PanelApp;
 import com.liferay.application.list.constants.PanelCategoryKeys;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -26,7 +27,9 @@ import com.liferay.portal.model.Portlet;
 import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
+import com.liferay.portal.service.CompanyLocalService;
 import com.liferay.portal.service.GroupLocalService;
+import com.liferay.portal.service.PortletLocalService;
 import com.liferay.portal.service.ResourcePermissionLocalService;
 import com.liferay.portal.service.RoleLocalService;
 
@@ -34,23 +37,17 @@ import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(immediate = true, service = UserPersonalSitePermissions.class)
+@Component(immediate = true)
 public class UserPersonalSitePermissions {
 
 	public void initPermissions(List<Company> companies, Portlet portlet) {
-		String controlPanelEntryCategory =
-			portlet.getControlPanelEntryCategory();
-
-		if (!controlPanelEntryCategory.startsWith(
-				PanelCategoryKeys.SITE_ADMINISTRATION)) {
-
-			return;
-		}
-
 		String rootPortletId = portlet.getRootPortletId();
 
 		for (Company company : companies) {
@@ -127,15 +124,6 @@ public class UserPersonalSitePermissions {
 		}
 
 		for (Portlet portlet : portlets) {
-			String controlPanelEntryCategory =
-				portlet.getControlPanelEntryCategory();
-
-			if (!controlPanelEntryCategory.equals(
-					PanelCategoryKeys.SITE_ADMINISTRATION_CONTENT)) {
-
-				continue;
-			}
-
 			try {
 				initPermissions(
 					companyId, powerUserRole.getRoleId(),
@@ -149,6 +137,20 @@ public class UserPersonalSitePermissions {
 					, e);
 			}
 		}
+	}
+
+	@Reference(
+		cardinality = ReferenceCardinality.MULTIPLE,
+		policy = ReferencePolicy.DYNAMIC,
+		policyOption = ReferencePolicyOption.GREEDY,
+		target = "(panel.category.key="+ PanelCategoryKeys.SITE_ADMINISTRATION_CONTENT +")",
+		unbind = "-"
+	)
+	protected synchronized void addPanelApp(PanelApp panelApp) {
+		Portlet portlet = portletLocalService.getPortletById(
+			panelApp.getPortletId());
+
+		initPermissions(companyLocalService.getCompanies(), portlet);
 	}
 
 	protected void initPermissions(
@@ -181,8 +183,22 @@ public class UserPersonalSitePermissions {
 	}
 
 	@Reference(unbind = "-")
+	protected void setCompanyLocalService(
+		CompanyLocalService companyLocalService) {
+
+		this.companyLocalService = companyLocalService;
+	}
+
+	@Reference(unbind = "-")
 	protected void setGroupLocalService(GroupLocalService groupLocalService) {
 		this.groupLocalService = groupLocalService;
+	}
+
+	@Reference(unbind = "-")
+	protected void setPortletLocalService(
+		PortletLocalService portletLocalService) {
+
+		this.portletLocalService = portletLocalService;
 	}
 
 	@Reference(unbind = "-")
@@ -197,7 +213,9 @@ public class UserPersonalSitePermissions {
 		this.roleLocalService = roleLocalService;
 	}
 
+	protected CompanyLocalService companyLocalService;
 	protected GroupLocalService groupLocalService;
+	protected PortletLocalService portletLocalService;
 	protected ResourcePermissionLocalService resourcePermissionLocalService;
 	protected RoleLocalService roleLocalService;
 
