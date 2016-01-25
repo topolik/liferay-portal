@@ -20,6 +20,7 @@ import com.liferay.application.list.constants.PanelCategoryKeys;
 import com.liferay.portal.instance.lifecycle.PortalInstanceLifecycleListener;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Portlet;
+import com.liferay.portal.service.PortletLocalService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,10 @@ public class PanelAppPermissionsStartupListener
 		List<Portlet> portlets = new ArrayList<>(panelApps.size());
 
 		for (PanelApp panelApp : panelApps) {
-			portlets.add(panelApp.getPortlet());
+			Portlet portlet = portletLocalService.getPortletById(
+				panelApp.getPortletId());
+
+			portlets.add(portlet);
 		}
 
 		_userPersonalSitePermissions.initPermissions(
@@ -55,11 +59,20 @@ public class PanelAppPermissionsStartupListener
 	}
 
 	@Reference(unbind = "-")
+	protected void setPortletLocalService(
+		PortletLocalService portletLocalService) {
+
+		this.portletLocalService = portletLocalService;
+	}
+
+	@Reference(unbind = "-")
 	protected void setUserPersonalSitePermissions(
 		UserPersonalSitePermissions userPersonalSitePermissions) {
 
 		_userPersonalSitePermissions = userPersonalSitePermissions;
 	}
+
+	protected PortletLocalService portletLocalService;
 
 	private PanelAppRegistry _panelAppRegistry;
 	private UserPersonalSitePermissions _userPersonalSitePermissions;
