@@ -15,7 +15,10 @@
 package com.liferay.application.list.user.personal.site.permissions;
 
 import com.liferay.application.list.PanelApp;
+import com.liferay.application.list.PanelAppRegistry;
+import com.liferay.application.list.PanelCategoryRegistry;
 import com.liferay.application.list.constants.PanelCategoryKeys;
+import com.liferay.application.list.display.context.logic.PanelCategoryHelper;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -113,10 +116,19 @@ public class UserPersonalSitePermissions {
 		cardinality = ReferenceCardinality.MULTIPLE,
 		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY,
-		target = "(panel.category.key="+ PanelCategoryKeys.SITE_ADMINISTRATION_CONTENT +")",
-		unbind = "-"
+		target = "(panel.category.key=*)", unbind = "-"
 	)
 	protected synchronized void addPanelApp(PanelApp panelApp) {
+		PanelCategoryHelper panelCategoryHelper = new PanelCategoryHelper(
+			_panelAppRegistry, _panelCategoryRegistry);
+
+		if (!panelCategoryHelper.containsPortlet(
+				panelApp.getPortletId(),
+				PanelCategoryKeys.SITE_ADMINISTRATION)) {
+
+			return;
+		}
+
 		Portlet portlet = portletLocalService.getPortletById(
 			panelApp.getPortletId());
 
@@ -190,6 +202,13 @@ public class UserPersonalSitePermissions {
 	}
 
 	@Reference(unbind = "-")
+	protected void setPanelCategoryRegistry(
+		PanelCategoryRegistry panelCategoryRegistry) {
+
+		_panelCategoryRegistry = panelCategoryRegistry;
+	}
+
+	@Reference(unbind = "-")
 	protected void setPortletLocalService(
 		PortletLocalService portletLocalService) {
 
@@ -216,5 +235,8 @@ public class UserPersonalSitePermissions {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		UserPersonalSitePermissions.class);
+
+	private final PanelAppRegistry _panelAppRegistry;
+	private PanelCategoryRegistry _panelCategoryRegistry;
 
 }
