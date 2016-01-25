@@ -16,7 +16,9 @@ package com.liferay.application.list.user.personal.site.permissions;
 
 import com.liferay.application.list.PanelApp;
 import com.liferay.application.list.PanelAppRegistry;
+import com.liferay.application.list.PanelCategoryRegistry;
 import com.liferay.application.list.constants.PanelCategoryKeys;
+import com.liferay.application.list.display.context.logic.PanelCategoryHelper;
 import com.liferay.portal.instance.lifecycle.PortalInstanceLifecycleListener;
 import com.liferay.portal.model.Company;
 import com.liferay.portal.model.Portlet;
@@ -37,8 +39,11 @@ public class PanelAppPermissionsStartupListener
 
 	@Override
 	public void portalInstanceRegistered(Company company) throws Exception {
-		List<PanelApp> panelApps = _panelAppRegistry.getPanelApps(
-			PanelCategoryKeys.SITE_ADMINISTRATION_CONTENT);
+		PanelCategoryHelper panelCategoryHelper = new PanelCategoryHelper(
+			_panelAppRegistry, _panelCategoryRegistry);
+
+		List<PanelApp> panelApps = panelCategoryHelper.getAllPanelApps(
+			PanelCategoryKeys.SITE_ADMINISTRATION);
 
 		List<Portlet> portlets = new ArrayList<>(panelApps.size());
 
@@ -59,6 +64,13 @@ public class PanelAppPermissionsStartupListener
 	}
 
 	@Reference(unbind = "-")
+	protected void setPanelCategoryRegistry(
+		PanelCategoryRegistry panelCategoryRegistry) {
+
+		_panelCategoryRegistry = panelCategoryRegistry;
+	}
+
+	@Reference(unbind = "-")
 	protected void setPortletLocalService(
 		PortletLocalService portletLocalService) {
 
@@ -75,6 +87,7 @@ public class PanelAppPermissionsStartupListener
 	protected PortletLocalService portletLocalService;
 
 	private PanelAppRegistry _panelAppRegistry;
+	private PanelCategoryRegistry _panelCategoryRegistry;
 	private UserPersonalSitePermissions _userPersonalSitePermissions;
 
 }
