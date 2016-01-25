@@ -53,31 +53,15 @@ public class UserPersonalSitePermissions {
 		for (Company company : companies) {
 			long companyId = company.getCompanyId();
 
-			Role powerUserRole = null;
+			Role powerUserRole = getPowerUserRole(companyId);
 
-			try {
-				powerUserRole = roleLocalService.getRole(
-					companyId, RoleConstants.POWER_USER);
-			}
-			catch (PortalException e) {
-				_log.error(
-					"Unable to obtain power user role in company " + companyId,
-					e);
-
+			if (powerUserRole == null) {
 				continue;
 			}
 
-			Group userPersonalSite = null;
+			Group userPersonalSite = getPersonalSiteGroup(companyId);
 
-			try {
-				userPersonalSite = groupLocalService.getUserPersonalSiteGroup(
-					companyId);
-			}
-			catch (PortalException e) {
-				_log.error(
-					"Unable to obtain personal site in company " + companyId,
-					e);
-
+			if (userPersonalSite == null) {
 				continue;
 			}
 
@@ -97,29 +81,15 @@ public class UserPersonalSitePermissions {
 	}
 
 	public void initPermissions(long companyId, List<Portlet> portlets) {
-		Role powerUserRole = null;
+		Role powerUserRole = getPowerUserRole(companyId);
 
-		try {
-			powerUserRole = roleLocalService.getRole(
-				companyId, RoleConstants.POWER_USER);
-		}
-		catch (PortalException e) {
-			_log.error(
-				"Unable to obtain power user role in company " + companyId, e);
-
+		if (powerUserRole == null) {
 			return;
 		}
 
-		Group userPersonalSite = null;
+		Group userPersonalSite = getPersonalSiteGroup(companyId);
 
-		try {
-			userPersonalSite = groupLocalService.getUserPersonalSiteGroup(
-				companyId);
-		}
-		catch (PortalException e) {
-			_log.error(
-				"Unable to obtain personal site in company " + companyId, e);
-
+		if (userPersonalSite != null) {
 			return;
 		}
 
@@ -151,6 +121,31 @@ public class UserPersonalSitePermissions {
 			panelApp.getPortletId());
 
 		initPermissions(companyLocalService.getCompanies(), portlet);
+	}
+
+	protected Group getPersonalSiteGroup(long companyId) {
+		try {
+			return groupLocalService.getUserPersonalSiteGroup(companyId);
+		}
+		catch (PortalException e) {
+			_log.error(
+				"Unable to obtain personal site in company " + companyId, e);
+		}
+
+		return null;
+	}
+
+	protected Role getPowerUserRole(long companyId) {
+		try {
+			return roleLocalService.getRole(
+				companyId, RoleConstants.POWER_USER);
+		}
+		catch (PortalException e) {
+			_log.error(
+				"Unable to obtain power user role in company " + companyId, e);
+		}
+
+		return null;
 	}
 
 	protected void initPermissions(
