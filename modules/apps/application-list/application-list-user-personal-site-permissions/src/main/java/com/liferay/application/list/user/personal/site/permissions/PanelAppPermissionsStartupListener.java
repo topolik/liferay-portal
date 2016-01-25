@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.application.list.permissions;
+package com.liferay.application.list.user.personal.site.permissions;
 
 import com.liferay.application.list.PanelApp;
 import com.liferay.application.list.PanelAppRegistry;
