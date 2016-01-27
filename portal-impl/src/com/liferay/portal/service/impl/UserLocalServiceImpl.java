@@ -18,6 +18,7 @@ import com.liferay.mail.service.MailService;
 import com.liferay.portal.exception.CompanyMaxUsersException;
 import com.liferay.portal.exception.ContactBirthdayException;
 import com.liferay.portal.exception.ContactNameException;
+import com.liferay.portal.exception.DuplicateGoogleIdException;
 import com.liferay.portal.exception.DuplicateOpenIdException;
 import com.liferay.portal.exception.GroupFriendlyURLException;
 import com.liferay.portal.exception.ModelListenerException;
@@ -218,6 +219,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		long facebookId = 0;
 		String openId = StringPool.BLANK;
+		String googleId = StringPool.BLANK;
 		long prefixId = 0;
 		long suffixId = 0;
 		boolean male = true;
@@ -248,9 +250,10 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		User defaultAdminUser = addUser(
 			creatorUserId, companyId, autoPassword, password1, password2,
 			autoScreenName, screenName, emailAddress, facebookId, openId,
-			locale, firstName, middleName, lastName, prefixId, suffixId, male,
-			birthdayMonth, birthdayDay, birthdayYear, jobTitle, groupIds,
-			organizationIds, roleIds, userGroupIds, sendEmail, serviceContext);
+			googleId, locale, firstName, middleName, lastName, prefixId,
+			suffixId, male, birthdayMonth, birthdayDay, birthdayYear, jobTitle,
+			groupIds, organizationIds, roleIds, userGroupIds, sendEmail,
+			serviceContext);
 
 		updateEmailAddressVerified(defaultAdminUser.getUserId(), true);
 
@@ -541,6 +544,11 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 *         attribute), asset category IDs, asset tag names, and expando
 	 *         bridge attributes for the user.
 	 * @return the new user
+	 * @deprecated As of 7.0.0, replaced by {@link #addUser(long, long, boolean,
+	 *         String, String, boolean, String, String, long, String, String, Locale,
+	 *         String, String, String, long, long, boolean, int, int, int, String, long[],
+	 *         long[], long[], long[], boolean, ServiceContext)}
+
 	 */
 	@Override
 	public User addUser(
@@ -550,6 +558,75 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			String openId, Locale locale, String firstName, String middleName,
 			String lastName, long prefixId, long suffixId, boolean male,
 			int birthdayMonth, int birthdayDay, int birthdayYear,
+			String jobTitle, long[] groupIds, long[] organizationIds,
+			long[] roleIds, long[] userGroupIds, boolean sendEmail,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return addUser(
+			creatorUserId, companyId, autoPassword, password1, password2,
+			autoScreenName, screenName, emailAddress, facebookId, openId,
+			StringPool.BLANK, locale, firstName, middleName, lastName, prefixId,
+			suffixId, male, birthdayMonth, birthdayDay, birthdayYear, jobTitle,
+			groupIds, organizationIds, roleIds, userGroupIds, sendEmail,
+			serviceContext);
+	}
+
+	/**
+	 * Adds a user.
+	 *
+	 * <p>
+	 * This method handles the creation and bookkeeping of the user including
+	 * its resources, metadata, and internal data structures. It is not
+	 * necessary to make subsequent calls to any methods to setup default
+	 * groups, resources, etc.
+	 * </p>
+	 *
+	 * @param  creatorUserId the primary key of the creator
+	 * @param  companyId the primary key of the user's company
+	 * @param  autoPassword whether a password should be automatically generated
+	 *         for the user
+	 * @param  password1 the user's password
+	 * @param  password2 the user's password confirmation
+	 * @param  autoScreenName whether a screen name should be automatically
+	 *         generated for the user
+	 * @param  screenName the user's screen name
+	 * @param  emailAddress the user's email address
+	 * @param  facebookId the user's facebook ID
+	 * @param  openId the user's OpenID
+	 * @param  googleId the user's Google ID
+	 * @param  locale the user's locale
+	 * @param  firstName the user's first name
+	 * @param  middleName the user's middle name
+	 * @param  lastName the user's last name
+	 * @param  prefixId the user's name prefix ID
+	 * @param  suffixId the user's name suffix ID
+	 * @param  male whether the user is male
+	 * @param  birthdayMonth the user's birthday month (0-based, meaning 0 for
+	 *         January)
+	 * @param  birthdayDay the user's birthday day
+	 * @param  birthdayYear the user's birthday year
+	 * @param  jobTitle the user's job title
+	 * @param  groupIds the primary keys of the user's groups
+	 * @param  organizationIds the primary keys of the user's organizations
+	 * @param  roleIds the primary keys of the roles this user possesses
+	 * @param  userGroupIds the primary keys of the user's user groups
+	 * @param  sendEmail whether to send the user an email notification about
+	 *         their new account
+	 * @param  serviceContext the service context to be applied (optionally
+	 *         <code>null</code>). Can set the UUID (with the <code>uuid</code>
+	 *         attribute), asset category IDs, asset tag names, and expando
+	 *         bridge attributes for the user.
+	 * @return the new user
+	 */
+	@Override
+	public User addUser(
+			long creatorUserId, long companyId, boolean autoPassword,
+			String password1, String password2, boolean autoScreenName,
+			String screenName, String emailAddress, long facebookId,
+			String openId, String googleId, Locale locale, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
 			String jobTitle, long[] groupIds, long[] organizationIds,
 			long[] roleIds, long[] userGroupIds, boolean sendEmail,
 			ServiceContext serviceContext)
@@ -574,10 +651,10 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			return addUserWithWorkflow(
 				creatorUserId, companyId, autoPassword, password1, password2,
 				autoScreenName, screenName, emailAddress, facebookId, openId,
-				locale, firstName, middleName, lastName, prefixId, suffixId,
-				male, birthdayMonth, birthdayDay, birthdayYear, jobTitle,
-				groupIds, organizationIds, roleIds, userGroupIds, sendEmail,
-				serviceContext);
+				googleId, locale, firstName, middleName, lastName, prefixId,
+				suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
+				jobTitle, groupIds, organizationIds, roleIds, userGroupIds,
+				sendEmail, serviceContext);
 		}
 		finally {
 			WorkflowThreadLocal.setEnabled(workflowEnabled);
@@ -651,6 +728,10 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 *         attribute), asset category IDs, asset tag names, and expando
 	 *         bridge attributes for the user.
 	 * @return the new user
+	 * @deprecated As of 7.0.0, replaced by {@link #addUserWithWorkflow(long, long, boolean,
+	 *         String, String, boolean, String, String, long, String, String, Locale,
+	 *         String, String, String, long, long, boolean, int, int, int, String, long[],
+	 *         long[], long[], long[], boolean, ServiceContext)}
 	 */
 	@Override
 	@SuppressWarnings("deprecation")
@@ -661,6 +742,76 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			String openId, Locale locale, String firstName, String middleName,
 			String lastName, long prefixId, long suffixId, boolean male,
 			int birthdayMonth, int birthdayDay, int birthdayYear,
+			String jobTitle, long[] groupIds, long[] organizationIds,
+			long[] roleIds, long[] userGroupIds, boolean sendEmail,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return addUserWithWorkflow(
+			creatorUserId, companyId, autoPassword, password1, password2,
+			autoScreenName, screenName, emailAddress, facebookId, openId,
+			StringPool.BLANK, locale, firstName, middleName, lastName, prefixId,
+			suffixId, male, birthdayMonth, birthdayDay, birthdayYear, jobTitle,
+			groupIds, organizationIds, roleIds, userGroupIds, sendEmail,
+			serviceContext);
+	}
+
+	/**
+	 * Adds a user with workflow.
+	 *
+	 * <p>
+	 * This method handles the creation and bookkeeping of the user including
+	 * its resources, metadata, and internal data structures. It is not
+	 * necessary to make subsequent calls to any methods to setup default
+	 * groups, resources, etc.
+	 * </p>
+	 *
+	 * @param  creatorUserId the primary key of the creator
+	 * @param  companyId the primary key of the user's company
+	 * @param  autoPassword whether a password should be automatically generated
+	 *         for the user
+	 * @param  password1 the user's password
+	 * @param  password2 the user's password confirmation
+	 * @param  autoScreenName whether a screen name should be automatically
+	 *         generated for the user
+	 * @param  screenName the user's screen name
+	 * @param  emailAddress the user's email address
+	 * @param  facebookId the user's facebook ID
+	 * @param  openId the user's OpenID
+	 * @param  googleId the user's Google ID
+	 * @param  locale the user's locale
+	 * @param  firstName the user's first name
+	 * @param  middleName the user's middle name
+	 * @param  lastName the user's last name
+	 * @param  prefixId the user's name prefix ID
+	 * @param  suffixId the user's name suffix ID
+	 * @param  male whether the user is male
+	 * @param  birthdayMonth the user's birthday month (0-based, meaning 0 for
+	 *         January)
+	 * @param  birthdayDay the user's birthday day
+	 * @param  birthdayYear the user's birthday year
+	 * @param  jobTitle the user's job title
+	 * @param  groupIds the primary keys of the user's groups
+	 * @param  organizationIds the primary keys of the user's organizations
+	 * @param  roleIds the primary keys of the roles this user possesses
+	 * @param  userGroupIds the primary keys of the user's user groups
+	 * @param  sendEmail whether to send the user an email notification about
+	 *         their new account
+	 * @param  serviceContext the service context to be applied (optionally
+	 *         <code>null</code>). Can set the UUID (with the <code>uuid</code>
+	 *         attribute), asset category IDs, asset tag names, and expando
+	 *         bridge attributes for the user.
+	 * @return the new user
+	 */
+	@Override
+	@SuppressWarnings("deprecation")
+	public User addUserWithWorkflow(
+			long creatorUserId, long companyId, boolean autoPassword,
+			String password1, String password2, boolean autoScreenName,
+			String screenName, String emailAddress, long facebookId,
+			String openId, String googleId, Locale locale, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
 			String jobTitle, long[] groupIds, long[] organizationIds,
 			long[] roleIds, long[] userGroupIds, boolean sendEmail,
 			ServiceContext serviceContext)
@@ -787,6 +938,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 
 		user.setOpenId(openId);
+		user.setGoogleId(googleId);
 		user.setLanguageId(LocaleUtil.toLanguageId(locale));
 		user.setTimeZoneId(defaultUser.getTimeZoneId());
 		user.setGreeting(greeting);
@@ -1930,6 +2082,19 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	}
 
 	/**
+	 * Returns the user with the Google ID.
+	 *
+	 * @param  companyId the primary key of the user's company
+	 * @param  googleId the user's Google ID
+	 * @return the user with the Google ID, or <code>null</code> if a user with the
+	 *         Google ID could not be found
+	 */
+	@Override
+	public User fetchUserByGoogleId(long companyId, String googleId) {
+		return userPersistence.fetchByC_GID(companyId, googleId);
+	}
+
+	/**
 	 * Returns the user with the primary key.
 	 *
 	 * @param  userId the primary key of the user
@@ -2566,6 +2731,20 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		throws PortalException {
 
 		return userPersistence.findByC_FID(companyId, facebookId);
+	}
+
+	/**
+	 * Returns the user with the Google ID.
+	 *
+	 * @param  companyId the primary key of the user's company
+	 * @param  googleId the user's Google ID
+	 * @return the user with the Google ID
+	 */
+	@Override
+	public User getUserByGoogleId(long companyId, String googleId)
+		throws PortalException {
+
+		return userPersistence.findByC_GID(companyId, googleId);
 	}
 
 	/**
@@ -4237,6 +4416,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  emailAddress the user's email address
 	 * @param  facebookId the user's facebook ID
 	 * @param  openId the user's OpenID
+	 * @param  googleId the user's Google ID
 	 * @param  locale the user's locale
 	 * @param  firstName the user's first name
 	 * @param  middleName the user's middle name
@@ -4262,9 +4442,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			long creatorUserId, long companyId, boolean autoPassword,
 			String password1, String password2, boolean autoScreenName,
 			String screenName, String emailAddress, long facebookId,
-			String openId, Locale locale, String firstName, String middleName,
-			String lastName, long prefixId, long suffixId, boolean male,
-			int birthdayMonth, int birthdayDay, int birthdayYear,
+			String openId, String googleId, Locale locale, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
 			String jobTitle, boolean updateUserInformation, boolean sendEmail,
 			ServiceContext serviceContext)
 		throws PortalException {
@@ -4278,6 +4458,17 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		User defaultUser = getDefaultUser(companyId);
 
 		if (facebookId > 0) {
+			autoPassword = false;
+
+			if ((password1 == null) || (password2 == null)) {
+				password1 = PwdGenerator.getPassword();
+				password2 = password1;
+			}
+
+			sendEmail = false;
+		}
+
+		if (Validator.isNotNull(googleId)) {
 			autoPassword = false;
 
 			if ((password1 == null) || (password2 == null)) {
@@ -4355,6 +4546,7 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.setScreenName(screenName);
 			user.setFacebookId(facebookId);
 			user.setOpenId(openId);
+			user.setGoogleId(googleId);
 			user.setLanguageId(locale.toString());
 			user.setTimeZoneId(defaultUser.getTimeZoneId());
 			user.setGreeting(greeting);
@@ -4965,6 +5157,95 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 	 * @param  emailAddress the user's new email address
 	 * @param  facebookId the user's new Facebook ID
 	 * @param  openId the user's new OpenID
+	 * @param  googleId the user's new Google ID
+	 * @param  portrait whether to update the user's portrait image
+	 * @param  portraitBytes the new portrait image data
+	 * @param  languageId the user's new language ID
+	 * @param  timeZoneId the user's new time zone ID
+	 * @param  greeting the user's new greeting
+	 * @param  comments the user's new comments
+	 * @param  firstName the user's new first name
+	 * @param  middleName the user's new middle name
+	 * @param  lastName the user's new last name
+	 * @param  prefixId the user's new name prefix ID
+	 * @param  suffixId the user's new name suffix ID
+	 * @param  male whether user is male
+	 * @param  birthdayMonth the user's new birthday month (0-based, meaning 0
+	 *         for January)
+	 * @param  birthdayDay the user's new birthday day
+	 * @param  birthdayYear the user's birthday year
+	 * @param  smsSn the user's new SMS screen name
+	 * @param  facebookSn the user's new Facebook screen name
+	 * @param  jabberSn the user's new Jabber screen name
+	 * @param  skypeSn the user's new Skype screen name
+	 * @param  twitterSn the user's new Twitter screen name
+	 * @param  jobTitle the user's new job title
+	 * @param  groupIds the primary keys of the user's groups
+	 * @param  organizationIds the primary keys of the user's organizations
+	 * @param  roleIds the primary keys of the user's roles
+	 * @param  userGroupRoles the user user's group roles
+	 * @param  userGroupIds the primary keys of the user's user groups
+	 * @param  serviceContext the service context to be applied (optionally
+	 *         <code>null</code>). Can set the UUID (with the <code>uuid</code>
+	 *         attribute), asset category IDs, asset tag names, and expando
+	 *         bridge attributes for the user.
+	 * @return the user
+	 * @deprecated As of 7.0.0, replaced by {@link #updateUser(long, String,
+	 *             String, String, boolean, String, String, String, String,
+	 *             long, String, String, boolean, byte[], String, String, String,
+	 *             String, String, String, String, int, int, boolean, int, int,
+	 *             int, String, String, String, String, String, String, String,
+	 *             String, String, String, String, long[], long[], long[], List,
+	 *             long[], ServiceContext)}
+	 */
+	@Override
+	@SuppressWarnings("deprecation")
+	public User updateUser(
+			long userId, String oldPassword, String newPassword1,
+			String newPassword2, boolean passwordReset,
+			String reminderQueryQuestion, String reminderQueryAnswer,
+			String screenName, String emailAddress, long facebookId,
+			String openId, boolean portrait, byte[] portraitBytes,
+			String languageId, String timeZoneId, String greeting,
+			String comments, String firstName, String middleName,
+			String lastName, long prefixId, long suffixId, boolean male,
+			int birthdayMonth, int birthdayDay, int birthdayYear, String smsSn,
+			String facebookSn, String jabberSn, String skypeSn,
+			String twitterSn, String jobTitle, long[] groupIds,
+			long[] organizationIds, long[] roleIds,
+			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return updateUser(
+			userId, oldPassword, newPassword1, newPassword2, passwordReset,
+			reminderQueryQuestion, reminderQueryAnswer, screenName,
+			emailAddress, facebookId, openId, StringPool.BLANK, portrait,
+			portraitBytes, languageId, timeZoneId, greeting, comments,
+			firstName, middleName, lastName, prefixId, suffixId, male,
+			birthdayMonth, birthdayDay, birthdayYear, smsSn, facebookSn,
+			jabberSn, skypeSn, twitterSn, jobTitle, groupIds, organizationIds,
+			roleIds, userGroupRoles, userGroupIds, serviceContext);
+	}
+
+	/**
+	 * Updates the user.
+	 *
+	 * @param  userId the primary key of the user
+	 * @param  oldPassword the user's old password
+	 * @param  newPassword1 the user's new password (optionally
+	 *         <code>null</code>)
+	 * @param  newPassword2 the user's new password confirmation (optionally
+	 *         <code>null</code>)
+	 * @param  passwordReset whether the user should be asked to reset their
+	 *         password the next time they login
+	 * @param  reminderQueryQuestion the user's new password reset question
+	 * @param  reminderQueryAnswer the user's new password reset answer
+	 * @param  screenName the user's new screen name
+	 * @param  emailAddress the user's new email address
+	 * @param  facebookId the user's new Facebook ID
+	 * @param  openId the user's new OpenID
+	 * @param  googleId the user's new Google ID
 	 * @param  portrait whether to update the user's portrait image
 	 * @param  portraitBytes the new portrait image data
 	 * @param  languageId the user's new language ID
@@ -5005,12 +5286,12 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			String newPassword2, boolean passwordReset,
 			String reminderQueryQuestion, String reminderQueryAnswer,
 			String screenName, String emailAddress, long facebookId,
-			String openId, boolean portrait, byte[] portraitBytes,
-			String languageId, String timeZoneId, String greeting,
-			String comments, String firstName, String middleName,
-			String lastName, long prefixId, long suffixId, boolean male,
-			int birthdayMonth, int birthdayDay, int birthdayYear, String smsSn,
-			String facebookSn, String jabberSn, String skypeSn,
+			String openId, String googleId, boolean portrait,
+			byte[] portraitBytes, String languageId, String timeZoneId,
+			String greeting, String comments, String firstName,
+			String middleName, String lastName, long prefixId, long suffixId,
+			boolean male, int birthdayMonth, int birthdayDay, int birthdayYear,
+			String smsSn, String facebookSn, String jabberSn, String skypeSn,
 			String twitterSn, String jobTitle, long[] groupIds,
 			long[] organizationIds, long[] roleIds,
 			List<UserGroupRole> userGroupRoles, long[] userGroupIds,
@@ -5116,6 +5397,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		}
 
 		user.setOpenId(openId);
+
+		user.setGoogleId(googleId);
 
 		PortalUtil.updateImageId(
 			user, portrait, portraitBytes, "portraitId",
@@ -5336,12 +5619,12 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		return updateUser(
 			userId, oldPassword, newPassword1, newPassword2, passwordReset,
 			reminderQueryQuestion, reminderQueryAnswer, screenName,
-			emailAddress, facebookId, openId, true, null, languageId,
-			timeZoneId, greeting, comments, firstName, middleName, lastName,
-			prefixId, suffixId, male, birthdayMonth, birthdayDay, birthdayYear,
-			smsSn, facebookSn, jabberSn, skypeSn, twitterSn, jobTitle, groupIds,
-			organizationIds, roleIds, userGroupRoles, userGroupIds,
-			serviceContext);
+			emailAddress, facebookId, openId, StringPool.BLANK, true, null,
+			languageId, timeZoneId, greeting, comments, firstName, middleName,
+			lastName, prefixId, suffixId, male, birthdayMonth, birthdayDay,
+			birthdayYear, smsSn, facebookSn, jabberSn, skypeSn, twitterSn,
+			jobTitle, groupIds, organizationIds, roleIds, userGroupRoles,
+			userGroupIds, serviceContext);
 	}
 
 	/**
@@ -6435,6 +6718,21 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 			throw new ContactNameException.MustHaveValidFullName(
 				fullNameValidator);
+		}
+	}
+
+	protected void validateGoogleId(
+			long companyId, long userId, String googleId)
+		throws PortalException {
+
+		if (Validator.isNull(googleId)) {
+			return;
+		}
+
+		User user = userPersistence.fetchByC_GID(companyId, googleId);
+
+		if ((user != null) && (user.getUserId() != userId)) {
+			throw new DuplicateGoogleIdException("{userId=" + userId + "}");
 		}
 	}
 
