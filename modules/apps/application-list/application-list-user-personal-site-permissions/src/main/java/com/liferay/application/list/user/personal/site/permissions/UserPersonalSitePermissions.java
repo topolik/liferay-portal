@@ -202,6 +202,11 @@ public class UserPersonalSitePermissions {
 	}
 
 	@Reference(unbind = "-")
+	protected void setPanelAppRegistry(PanelAppRegistry panelAppRegistry) {
+		_panelAppRegistry = panelAppRegistry;
+	}
+
+	@Reference(unbind = "-")
 	protected void setPanelCategoryRegistry(
 		PanelCategoryRegistry panelCategoryRegistry) {
 
@@ -236,7 +241,7 @@ public class UserPersonalSitePermissions {
 	private static final Log _log = LogFactoryUtil.getLog(
 		UserPersonalSitePermissions.class);
 
-	private final PanelAppRegistry _panelAppRegistry;
+	private PanelAppRegistry _panelAppRegistry;
 	private PanelCategoryRegistry _panelCategoryRegistry;
 
 }
