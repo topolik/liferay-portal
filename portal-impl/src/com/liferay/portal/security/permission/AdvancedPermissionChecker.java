@@ -882,14 +882,6 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 
 			companyId = group.getCompanyId();
 		}
-		else if (name.equals(User.class.getName())) {
-			User user = UserLocalServiceUtil.fetchUser(
-				GetterUtil.getLong(primKey));
-
-			if (user != null) {
-				companyId = user.getCompanyId();
-			}
-		}
 
 		try {
 			boolean hasPermission = doCheckPermission(
