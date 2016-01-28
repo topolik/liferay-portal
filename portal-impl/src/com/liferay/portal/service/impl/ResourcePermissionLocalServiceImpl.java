@@ -14,6 +14,7 @@
 
 package com.liferay.portal.service.impl;
 
+import com.liferay.portal.exception.MissingIndividualScopeResourcePermissionException;
 import com.liferay.portal.exception.NoSuchResourcePermissionException;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.SQLQuery;
@@ -690,7 +691,10 @@ public class ResourcePermissionLocalServiceImpl
 				individualResource.getScope(),
 				individualResource.getPrimKey()) < 1) {
 
-			return false;
+			throw new MissingIndividualScopeResourcePermissionException(
+				"There is no " + individualResource.getName() +
+					" with primary key " + individualResource.getPrimKey() +
+						" and companyId " + individualResource.getCompanyId());
 		}
 
 		// Iterate the list of resources in reverse order to test permissions

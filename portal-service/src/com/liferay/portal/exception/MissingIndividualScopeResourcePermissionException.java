@@ -22,7 +22,8 @@ import com.liferay.portal.kernel.exception.PortalException;
  * @author Brian Wing Shun Chan
  */
 @ProviderType
-public class MissingIndividualScopeResourcePermissionException extends PortalException {
+public class MissingIndividualScopeResourcePermissionException
+	extends PortalException {
 
 	public MissingIndividualScopeResourcePermissionException() {
 	}
@@ -31,7 +32,9 @@ public class MissingIndividualScopeResourcePermissionException extends PortalExc
 		super(msg);
 	}
 
-	public MissingIndividualScopeResourcePermissionException(String msg, Throwable cause) {
+	public MissingIndividualScopeResourcePermissionException(
+		String msg, Throwable cause) {
+
 		super(msg, cause);
 	}
 

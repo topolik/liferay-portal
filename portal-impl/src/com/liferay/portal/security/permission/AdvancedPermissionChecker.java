@@ -14,6 +14,7 @@
 
 package com.liferay.portal.security.permission;
 
+import com.liferay.portal.exception.MissingIndividualScopeResourcePermissionException;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -829,6 +830,13 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 				defaultUserId, groupId, resources, actionId,
 				getGuestUserRoleIds());
 		}
+		catch (MissingIndividualScopeResourcePermissionException e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e);
+			}
+
+			return false;
+		}
 		catch (Exception e) {
 			_log.error(e, e);
 
@@ -883,6 +891,22 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 			}
 		}
 
+		try {
+			boolean hasPermission = doCheckPermission(
+				companyId, groupId, name, primKey, actionId, stopWatch);
+
+			if (hasPermission) {
+				return true;
+			}
+		}
+		catch (MissingIndividualScopeResourcePermissionException e) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(e);
+			}
+
+			return false;
+		}
+
 		boolean hasLayoutManagerPermission = true;
 
 		// Check if the layout manager has permission to do this action for the
@@ -911,8 +935,7 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 			}
 		}
 
-		return doCheckPermission(
-			companyId, groupId, name, primKey, actionId, stopWatch);
+		return false;
 	}
 
 	protected boolean isCompanyAdminImpl(long companyId) throws Exception {
