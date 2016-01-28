@@ -45,7 +45,6 @@ import com.liferay.portal.model.ResourceConstants;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.RoleConstants;
 import com.liferay.portal.model.Team;
-import com.liferay.portal.model.User;
 import com.liferay.portal.service.GroupLocalServiceUtil;
 import com.liferay.portal.service.LayoutLocalServiceUtil;
 import com.liferay.portal.service.OrganizationLocalServiceUtil;
@@ -55,7 +54,6 @@ import com.liferay.portal.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.service.RoleLocalServiceUtil;
 import com.liferay.portal.service.TeamLocalServiceUtil;
 import com.liferay.portal.service.UserGroupRoleLocalServiceUtil;
-import com.liferay.portal.service.UserLocalServiceUtil;
 import com.liferay.portal.service.permission.LayoutPrototypePermissionUtil;
 import com.liferay.portal.service.permission.LayoutSetPrototypePermissionUtil;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
@@ -831,8 +829,11 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 				getGuestUserRoleIds());
 		}
 		catch (MissingIndividualScopeResourcePermissionException e) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(e);
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Somebody is trying to circumvent permission framework " +
+						"or there is a bug in permission framework caller",
+					e);
 			}
 
 			return false;
@@ -892,8 +893,11 @@ public class AdvancedPermissionChecker extends BasePermissionChecker {
 			}
 		}
 		catch (MissingIndividualScopeResourcePermissionException e) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(e);
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Somebody is trying to circumvent permission framework " +
+						"or there is a bug in permission framework caller",
+					e);
 			}
 
 			return false;
