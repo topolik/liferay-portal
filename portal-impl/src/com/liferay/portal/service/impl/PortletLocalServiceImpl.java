@@ -159,6 +159,29 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 				companyId, 0, 0, name, name, true, false, false);
 		}
 
+		List<String> modelResources = new ArrayList<>();
+		modelResources.add(
+			ResourceActionsUtil.getPortletRootModelResource(name));
+		modelResources.addAll(
+			ResourceActionsUtil.getPortletModelResources(name));
+
+		for (String modelResource : modelResources) {
+			if (!Validator.isBlank(modelResource) &&
+				!resourceBlockLocalService.isSupported(modelResource)) {
+
+				resourcePermissionsCount =
+					resourcePermissionLocalService.getResourcePermissionsCount(
+						companyId, modelResource,
+						ResourceConstants.SCOPE_INDIVIDUAL, modelResource);
+
+				if (resourcePermissionsCount == 0) {
+					resourceLocalService.addResources(
+						companyId, 0, 0, modelResource, modelResource, false,
+						false, true);
+				}
+			}
+		}
+
 		if (portlet.isSystem()) {
 			return;
 		}
