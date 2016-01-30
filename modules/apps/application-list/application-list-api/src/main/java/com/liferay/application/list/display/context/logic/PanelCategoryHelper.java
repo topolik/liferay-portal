@@ -82,6 +82,20 @@ public class PanelCategoryHelper {
 			portletId, panelCategoryKey, permissionChecker, group);
 	}
 
+	public List<PanelApp> getAllPanelApps(String panelCategoryKey) {
+		List<PanelApp> panelApps = _panelAppRegistry.getPanelApps(
+			panelCategoryKey);
+
+		for (PanelCategory curPanelCategory :
+				_panelCategoryRegistry.getChildPanelCategories(
+					panelCategoryKey)) {
+
+			panelApps.addAll(getAllPanelApps(curPanelCategory.getKey()));
+		}
+
+		return panelApps;
+	}
+
 	public String getFirstPortletId(
 		String panelCategoryKey, PermissionChecker permissionChecker,
 		Group group) {
