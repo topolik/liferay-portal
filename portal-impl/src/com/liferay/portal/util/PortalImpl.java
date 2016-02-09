@@ -5679,6 +5679,7 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public String getUserPassword(HttpServletRequest request) {
+		request = getOriginalServletRequest(request);
 		HttpSession session = request.getSession();
 
 		return getUserPassword(session);
