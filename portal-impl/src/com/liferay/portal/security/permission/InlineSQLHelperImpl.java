@@ -71,21 +71,6 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 	}
 
 	@Override
-	public boolean isEnabled(long[] groupIds) {
-		if (!PropsValues.PERMISSIONS_INLINE_SQL_CHECK_ENABLED) {
-			return false;
-		}
-
-		for (long groupId : groupIds) {
-			if (isEnabled(groupId)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	@Override
 	public boolean isEnabled(long companyId, long groupId) {
 		if (!PropsValues.PERMISSIONS_INLINE_SQL_CHECK_ENABLED) {
 			return false;
@@ -119,6 +104,21 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 		}
 
 		return true;
+	}
+
+	@Override
+	public boolean isEnabled(long[] groupIds) {
+		if (!PropsValues.PERMISSIONS_INLINE_SQL_CHECK_ENABLED) {
+			return false;
+		}
+
+		for (long groupId : groupIds) {
+			if (isEnabled(groupId)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override

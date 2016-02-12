@@ -41,16 +41,6 @@ public interface InlineSQLHelper {
 
 	/**
 	 * Returns <code>true</code> if the inline SQL helper is enabled for the
-	 * groups.
-	 *
-	 * @param  groupIds the primary keys of the groups
-	 * @return <code>true</code> if the inline SQL helper is enabled for the
-	 *         groups; <code>false</code> otherwise
-	 */
-	public boolean isEnabled(long[] groupIds);
-
-	/**
-	 * Returns <code>true</code> if the inline SQL helper is enabled for the
 	 * company or group.
 	 *
 	 * @param  companyId the primary key of the company
@@ -59,6 +49,16 @@ public interface InlineSQLHelper {
 	 *         group or company; <code>false</code> otherwise
 	 */
 	public boolean isEnabled(long companyId, long groupId);
+
+	/**
+	 * Returns <code>true</code> if the inline SQL helper is enabled for the
+	 * groups.
+	 *
+	 * @param  groupIds the primary keys of the groups
+	 * @return <code>true</code> if the inline SQL helper is enabled for the
+	 *         groups; <code>false</code> otherwise
+	 */
+	public boolean isEnabled(long[] groupIds);
 
 	/**
 	 * Modifies the SQL query to only match resources that the user has
