@@ -40,6 +40,10 @@ public class InlineSQLHelperUtil {
 		return getInlineSQLHelper().isEnabled(groupIds);
 	}
 
+	public static boolean isEnabled(long companyId, long groupId) {
+		return getInlineSQLHelper().isEnabled(companyId, groupId);
+	}
+
 	public static String replacePermissionCheck(
 		String sql, String className, String classPKField) {
 

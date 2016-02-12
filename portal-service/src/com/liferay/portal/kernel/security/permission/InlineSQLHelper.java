@@ -50,6 +50,17 @@ public interface InlineSQLHelper {
 	public boolean isEnabled(long[] groupIds);
 
 	/**
+	 * Returns <code>true</code> if the inline SQL helper is enabled for the
+	 * company or group.
+	 *
+	 * @param  companyId the primary key of the company
+	 * @param  groupId the primary key of the group
+	 * @return <code>true</code> if the inline SQL helper is enabled for the
+	 *         group or company; <code>false</code> otherwise
+	 */
+	public boolean isEnabled(long companyId, long groupId);
+
+	/**
 	 * Modifies the SQL query to only match resources that the user has
 	 * permission to view.
 	 *
