@@ -14,12 +14,14 @@
 
 package com.liferay.portal.security.permission;
 
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.security.pacl.DoPrivileged;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.InlineSQLHelper;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ResourceBlockLocalServiceUtil;
 import com.liferay.portal.kernel.service.ResourceTypePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -55,11 +57,31 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 
 	@Override
 	public boolean isEnabled() {
-		return isEnabled(0);
+		return isEnabled(0, 0);
 	}
 
 	@Override
 	public boolean isEnabled(long groupId) {
+		return isEnabled(0, groupId);
+	}
+
+	@Override
+	public boolean isEnabled(long[] groupIds) {
+		if (!PropsValues.PERMISSIONS_INLINE_SQL_CHECK_ENABLED) {
+			return false;
+		}
+
+		for (long groupId : groupIds) {
+			if (isEnabled(groupId)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean isEnabled(long companyId, long groupId) {
 		if (!PropsValues.PERMISSIONS_INLINE_SQL_CHECK_ENABLED) {
 			return false;
 		}
@@ -85,21 +107,6 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 		}
 
 		return true;
-	}
-
-	@Override
-	public boolean isEnabled(long[] groupIds) {
-		if (!PropsValues.PERMISSIONS_INLINE_SQL_CHECK_ENABLED) {
-			return false;
-		}
-
-		for (long groupId : groupIds) {
-			if (isEnabled(groupId)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	@Override
