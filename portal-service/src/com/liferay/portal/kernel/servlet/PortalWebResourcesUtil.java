@@ -14,7 +14,6 @@
 
 package com.liferay.portal.kernel.servlet;
 
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceReference;
@@ -36,8 +35,10 @@ import javax.servlet.ServletContext;
 public class PortalWebResourcesUtil {
 
 	public static String getContextPath(String resourceType) {
-		return PortalUtil.getPathContext().concat(
-			getModuleContextPath(resourceType));
+		PortalWebResources portalWebResources = getPortalWebResources(
+			resourceType);
+
+		return portalWebResources.getContextPath();
 	}
 
 	public static long getLastModified(String resourceType) {
@@ -45,13 +46,6 @@ public class PortalWebResourcesUtil {
 			resourceType);
 
 		return portalWebResources.getLastModified();
-	}
-
-	public static String getModuleContextPath(String resourceType) {
-		PortalWebResources portalWebResources = getPortalWebResources(
-			resourceType);
-
-		return portalWebResources.getContextPath();
 	}
 
 	public static String getPathResourceType(String path) {
