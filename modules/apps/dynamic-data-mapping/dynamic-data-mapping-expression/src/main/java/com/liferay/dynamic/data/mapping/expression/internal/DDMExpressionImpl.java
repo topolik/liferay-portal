@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.util.Validator;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 import java.util.HashMap;
 import java.util.List;
@@ -178,7 +179,7 @@ public class DDMExpressionImpl<T> implements DDMExpression<T> {
 			return StringPool.BLANK;
 		}
 
-		BigInteger bigInteger = new BigInteger(bigDecimal.toPlainString());
+		BigInteger bigInteger = new BigInteger(bigDecimal.toString());
 
 		return new String(bigInteger.toByteArray());
 	}
@@ -448,6 +449,64 @@ public class DDMExpressionImpl<T> implements DDMExpression<T> {
 				}
 
 			});
+
+		expression.addFunction(
+			expression.new Function("SQRT", 1) {
+
+				@Override
+				public BigDecimal eval(List<BigDecimal> parameters) {
+					BigDecimal parameter = parameters.get(0);
+
+					double sqrt = Math.sqrt(parameter.doubleValue());
+
+					return new BigDecimal(sqrt);
+				}
+
+			});
+
+		expression.addFunction(
+			expression.new Function("CEILING", 1) {
+
+				@Override
+				public BigDecimal eval(List<BigDecimal> parameters) {
+					throw new UnsupportedOperationException();
+				}
+
+			});
+
+		expression.addFunction(
+			expression.new Function("FLOOR", 1) {
+
+				@Override
+				public BigDecimal eval(List<BigDecimal> parameters) {
+					throw new UnsupportedOperationException();
+				}
+
+			});
+
+		expression.addFunction(
+			expression.new Function("ROUND", 2) {
+
+				@Override
+				public BigDecimal eval(List<BigDecimal> parameters) {
+					throw new UnsupportedOperationException();
+				}
+
+			});
+
+		expression.addOperator(
+				expression.new Operator("^", 40, false) {
+
+					@Override
+					public BigDecimal eval(
+						BigDecimal parameter1, BigDecimal parameter2) {
+						double pow = Math.pow(
+							parameter1.doubleValue(), parameter2.doubleValue());
+
+						return new BigDecimal(pow);
+					}
+
+				});
 	}
 
 	protected void setExpressionMathContext(
