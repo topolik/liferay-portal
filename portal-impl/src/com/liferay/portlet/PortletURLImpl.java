@@ -1313,7 +1313,7 @@ public class PortletURLImpl
 			else {
 				newValues = ArrayUtil.append(newValues, oldValues);
 
-				_params.put(name, newValues);
+				_params.put(name, ArrayUtil.distinct(newValues));
 			}
 		}
 	}
