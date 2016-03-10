@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.service.base.TicketLocalServiceBaseImpl;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Mika Koivisto
@@ -69,6 +70,12 @@ public class TicketLocalServiceImpl extends TicketLocalServiceBaseImpl {
 	@Override
 	public Ticket fetchTicket(String key) {
 		return ticketPersistence.fetchByKey(key);
+	}
+
+	@Override
+	public List<Ticket> findTickets(String className, long classPK, int type) {
+		long classNameId = classNameLocalService.getClassNameId(className);
+		return ticketPersistence.findByC_C_T(classNameId, classPK, type);
 	}
 
 	@Override
