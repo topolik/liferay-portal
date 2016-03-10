@@ -272,8 +272,9 @@ public class DBUpgrader {
 		}
 
 		release = ReleaseLocalServiceUtil.updateRelease(
-			release.getReleaseId(), ReleaseInfo.getParentBuildNumber(),
-			ReleaseInfo.getBuildDate(), verified);
+			release.getReleaseId(), ReleaseInfo.getVersion(),
+			ReleaseInfo.getParentBuildNumber(), ReleaseInfo.getBuildDate(),
+			verified);
 
 		// Enable database caching after verify
 
