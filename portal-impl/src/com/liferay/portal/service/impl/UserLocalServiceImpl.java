@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.exception.NoSuchTicketException;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.exception.PasswordExpiredException;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.RateLimitExceededException;
 import com.liferay.portal.kernel.exception.RequiredUserException;
 import com.liferay.portal.kernel.exception.SendPasswordException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -3570,6 +3571,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		User user = userPersistence.findByC_EA(companyId, emailAddress);
 
+		checkSendPasswordRateLimiting(companyId, serviceContext, user);
+
 		PasswordPolicy passwordPolicy = user.getPasswordPolicy();
 
 		String newPassword = StringPool.BLANK;
@@ -4792,6 +4795,8 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 				null, ServiceContextThreadLocal.getServiceContext());
 		}
 
+		resetSendPasswordRateLimiting(user);
+
 		return user;
 	}
 
@@ -5780,6 +5785,32 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		return searchContext;
 	}
 
+	protected void checkSendPasswordRateLimiting(
+			long companyId, ServiceContext serviceContext, User user)
+		throws RateLimitExceededException {
+
+		Ticket throttleTicket = ticketLocalService.fetchTicket(
+			User.class.getName(), user.getUserId(),
+			TicketConstants.TYPE_SEND_PASSWORD);
+
+		if (Validator.isNotNull(throttleTicket) &&
+			!throttleTicket.isExpired()) {
+
+			throw new RateLimitExceededException(
+				"{className=\"" + User.class.getName() + "\"," +
+					user.getUserId() + "," +
+						TicketConstants.TYPE_SEND_PASSWORD + "}");
+		}
+		else {
+			Date expirationDate = new Date(System.currentTimeMillis() + 60000);
+
+			throttleTicket = ticketLocalService.addDistinctTicket(
+				companyId, User.class.getName(), user.getUserId(),
+				TicketConstants.TYPE_SEND_PASSWORD, null, expirationDate,
+				serviceContext);
+		}
+	}
+
 	protected Date getBirthday(
 			int birthdayMonth, int birthdayDay, int birthdayYear)
 		throws PortalException {
@@ -6040,6 +6071,16 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			user.setFailedLoginAttempts(0);
 
 			userPersistence.update(user);
+		}
+	}
+
+	protected void resetSendPasswordRateLimiting(User user) {
+		Ticket throttleTicket = ticketLocalService.fetchTicket(
+			User.class.getName(), user.getUserId(),
+			TicketConstants.TYPE_SEND_PASSWORD);
+
+		if (Validator.isNotNull(throttleTicket)) {
+			ticketLocalService.deleteTicket(throttleTicket);
 		}
 	}
 
