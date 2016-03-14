@@ -62,44 +62,39 @@
 
 			<div class="inline-alert-container lfr-alert-container"></div>
 
-			<c:choose>
-				<c:when test='<%= SessionMessages.contains(request, "userAdded") %>'>
+			<liferay-ui:success key="userAdded">
 
-					<%
-					String userEmailAddress = (String)SessionMessages.get(request, "userAdded");
-					String userPassword = (String)SessionMessages.get(request, "userAddedPassword");
-					%>
+				<%
+				String userEmailAddress = (String)SessionMessages.get(request, "userAdded");
+				String userPassword = (String)SessionMessages.get(request, "userAddedPassword");
+				%>
 
-					<div class="alert alert-success">
-						<c:choose>
-							<c:when test="<%= company.isStrangersVerify() || Validator.isNull(userPassword) %>">
-								<liferay-ui:message key="thank-you-for-creating-an-account" />
+				<c:choose>
+					<c:when test="<%= company.isStrangersVerify() || Validator.isNull(userPassword) %>">
+						<liferay-ui:message key="thank-you-for-creating-an-account" />
 
-								<c:if test="<%= company.isStrangersVerify() %>">
-									<liferay-ui:message arguments="<%= userEmailAddress %>" key="your-email-verification-code-has-been-sent-to-x" translateArguments="<%= false %>" />
-								</c:if>
-							</c:when>
-							<c:otherwise>
-								<liferay-ui:message arguments="<%= userPassword %>" key="thank-you-for-creating-an-account.-your-password-is-x" translateArguments="<%= false %>" />
-							</c:otherwise>
-						</c:choose>
-
-						<c:if test="<%= PrefsPropsUtil.getBoolean(company.getCompanyId(), PropsKeys.ADMIN_EMAIL_USER_ADDED_ENABLED) %>">
-							<liferay-ui:message arguments="<%= userEmailAddress %>" key="your-password-has-been-sent-to-x" translateArguments="<%= false %>" />
+						<c:if test="<%= company.isStrangersVerify() %>">
+							<liferay-ui:message arguments="<%= userEmailAddress %>" key="your-email-verification-code-has-been-sent-to-x" translateArguments="<%= false %>" />
 						</c:if>
-					</div>
-				</c:when>
-				<c:when test='<%= SessionMessages.contains(request, "userPending") %>'>
+					</c:when>
+					<c:otherwise>
+						<liferay-ui:message arguments="<%= userPassword %>" key="thank-you-for-creating-an-account.-your-password-is-x" translateArguments="<%= false %>" />
+					</c:otherwise>
+				</c:choose>
 
-					<%
-					String userEmailAddress = (String)SessionMessages.get(request, "userPending");
-					%>
+				<c:if test="<%= PrefsPropsUtil.getBoolean(company.getCompanyId(), PropsKeys.ADMIN_EMAIL_USER_ADDED_ENABLED) %>">
+					<liferay-ui:message arguments="<%= userEmailAddress %>" key="your-password-has-been-sent-to-x" translateArguments="<%= false %>" />
+				</c:if>
+			</liferay-ui:success>
 
-					<div class="alert alert-success">
-						<liferay-ui:message arguments="<%= userEmailAddress %>" key="thank-you-for-creating-an-account.-you-will-be-notified-via-email-at-x-when-your-account-has-been-approved" translateArguments="<%= false %>" />
-					</div>
-				</c:when>
-			</c:choose>
+			<liferay-ui:success key="userPending">
+
+				<%
+				String userEmailAddress = (String)SessionMessages.get(request, "userPending");
+				%>
+
+				<liferay-ui:message arguments="<%= userEmailAddress %>" key="thank-you-for-creating-an-account.-you-will-be-notified-via-email-at-x-when-your-account-has-been-approved" translateArguments="<%= false %>" />
+			</liferay-ui:success>
 
 			<liferay-ui:error exception="<%= AuthException.class %>" message="authentication-failed" />
 			<liferay-ui:error exception="<%= CompanyMaxUsersException.class %>" message="unable-to-log-in-because-the-maximum-number-of-users-has-been-reached" />
