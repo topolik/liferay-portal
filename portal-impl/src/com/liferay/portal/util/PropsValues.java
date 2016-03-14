@@ -331,6 +331,8 @@ public class PropsValues {
 	public static final boolean COMPANY_SECURITY_PASSWORD_REMINDER_QUERY_FORM_AUTOCOMPLETE = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.COMPANY_SECURITY_PASSWORD_REMINDER_QUERY_FORM_AUTOCOMPLETE));
 
 	public static final boolean COMPANY_SECURITY_SEND_PASSWORD = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.COMPANY_SECURITY_SEND_PASSWORD));
+	
+	public static final long COMPANY_SECURITY_SEND_PASSWORD_RATE_LIMIT = GetterUtil.getLong(PropsUtil.get(PropsKeys.COMPANY_SECURITY_SEND_PASSWORD_RATE_LIMIT));
 
 	public static final boolean COMPANY_SECURITY_SEND_PASSWORD_RESET_LINK = GetterUtil.getBoolean(PropsUtil.get(PropsKeys.COMPANY_SECURITY_SEND_PASSWORD_RESET_LINK));
 

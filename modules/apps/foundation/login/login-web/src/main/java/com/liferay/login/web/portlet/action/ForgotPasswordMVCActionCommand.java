@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.captcha.CaptchaException;
 import com.liferay.portal.kernel.captcha.CaptchaTextException;
 import com.liferay.portal.kernel.captcha.CaptchaUtil;
 import com.liferay.portal.kernel.exception.NoSuchUserException;
+import com.liferay.portal.kernel.exception.RateLimitExceededException;
 import com.liferay.portal.kernel.exception.RequiredReminderQueryException;
 import com.liferay.portal.kernel.exception.SendPasswordException;
 import com.liferay.portal.kernel.exception.UserActiveException;
@@ -149,7 +150,8 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 		catch (Exception e) {
 			if (e instanceof CaptchaConfigurationException ||
 				e instanceof CaptchaTextException ||
-				e instanceof UserEmailAddressException) {
+				e instanceof UserEmailAddressException ||
+				e instanceof RateLimitExceededException) {
 
 				SessionErrors.add(actionRequest, e.getClass());
 			}
