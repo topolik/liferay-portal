@@ -2208,6 +2208,12 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		return searchCount(role.getCompanyId(), null, status, params);
 	}
 
+	private long getSendPasswordRateLimit(long companyId) {
+		return PrefsPropsUtil.getLong(
+			companyId, PropsKeys.COMPANY_SECURITY_SEND_PASSWORD_RATE_LIMIT,
+			PropsValues.COMPANY_SECURITY_SEND_PASSWORD_RATE_LIMIT);
+	}
+
 	/**
 	 * Returns an ordered range of all the users with a social relation of the
 	 * type with the user.
@@ -5802,7 +5808,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 						TicketConstants.TYPE_SEND_PASSWORD + "}");
 		}
 		else {
-			Date expirationDate = new Date(System.currentTimeMillis() + 60000);
+			Date expirationDate = new Date(
+				System.currentTimeMillis() +
+					getSendPasswordRateLimit(companyId));
 
 			throttleTicket = ticketLocalService.addDistinctTicket(
 				companyId, User.class.getName(), user.getUserId(),
