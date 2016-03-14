@@ -62,7 +62,7 @@
 
 			<div class="inline-alert-container lfr-alert-container"></div>
 
-			<liferay-ui:success key="userAdded">
+			<liferay-ui:success key="userAdded" timeOut="<%= 0 %>">
 
 				<%
 				String userEmailAddress = (String)SessionMessages.get(request, "userAdded");
@@ -87,7 +87,7 @@
 				</c:if>
 			</liferay-ui:success>
 
-			<liferay-ui:success key="userPending">
+			<liferay-ui:success key="userPending" timeOut="<%= 0 %>">
 
 				<%
 				String userEmailAddress = (String)SessionMessages.get(request, "userPending");
