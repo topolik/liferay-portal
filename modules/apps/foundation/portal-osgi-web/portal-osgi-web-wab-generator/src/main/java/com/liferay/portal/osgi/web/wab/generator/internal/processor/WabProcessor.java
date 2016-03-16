@@ -14,7 +14,13 @@
 
 package com.liferay.portal.osgi.web.wab.generator.internal.processor;
 
+import aQute.bnd.component.DSAnnotations;
+import aQute.bnd.make.metatype.MetatypePlugin;
+import aQute.bnd.metatype.MetatypeAnnotations;
 import aQute.bnd.osgi.Analyzer;
+import aQute.bnd.osgi.Jar;
+import aQute.bnd.osgi.JarResource;
+import aQute.bnd.osgi.Resource;
 import aQute.bnd.version.Version;
 
 import com.liferay.portal.events.GlobalStartupAction;
@@ -79,6 +85,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.jar.Attributes;
@@ -151,6 +158,86 @@ public class WabProcessor {
 		childElement.addText(GetterUtil.getString(text));
 	}
 
+	protected void addWabLib(Analyzer analyzer, Jar wab, File file)
+		throws IOException {
+
+		if (!file.exists() || file.isDirectory()) {
+			return;
+		}
+
+		Jar jar = new Jar(file);
+
+		jar.setDoNotTouchManifest();
+
+		analyzer.addClose(jar);
+
+		String wabLibPath = "WEB-INF/lib/" + file.getName();
+
+		wab.putResource(wabLibPath, new JarResource(jar));
+
+		Manifest manifest = null;
+
+		try {
+			manifest = jar.getManifest();
+
+			if (manifest == null) {
+				if (_log.isDebugEnabled()) {
+					_log.debug("No manifest found for " + jar.getName());
+				}
+
+				return;
+			}
+
+			Attributes attributes = manifest.getMainAttributes();
+
+			String classPathHeader = attributes.getValue("Class-Path");
+
+			if (Validator.isNull(classPathHeader)) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(
+						"No Class-Path header found for " + jar.getName());
+				}
+
+				return;
+			}
+
+			Collection<String> classPathHeaderParts = Analyzer.split(
+				classPathHeader, ",");
+
+			for (String classPathHeaderPart : classPathHeaderParts) {
+				File childFile = Analyzer.getFile(
+					file.getParentFile(), classPathHeaderPart);
+
+				if (!childFile.exists() ||
+					!childFile.getParentFile().equals(file.getParentFile())) {
+
+					analyzer.warning(
+						"Invalid Class-Path entry %s in %s must exist and " +
+							"reside in same directory",
+						childFile, file);
+				}
+				else {
+					wabLibPath = "WEB-INF/lib/" + childFile.getName();
+
+					appendProperty(
+						analyzer, Constants.BUNDLE_CLASSPATH, wabLibPath);
+
+					addWabLib(analyzer, wab, childFile);
+				}
+			}
+		}
+		catch (Exception e) {
+			_log.error("Unable to load manifest for " + jar.getName(), e);
+		}
+	}
+
+	protected void appendProperty(
+		Analyzer analyzer, String property, String string) {
+
+		analyzer.setProperty(
+			property, Analyzer.append(analyzer.getProperty(property), string));
+	}
+
 	protected File autoDeploy() {
 		String webContextpath = getWebContextPath();
 
@@ -219,6 +306,30 @@ public class WabProcessor {
 		autoDeploymentContext.setFile(_file);
 
 		return autoDeploymentContext;
+	}
+
+	protected void copyOSGI_INFToWab(Analyzer analyzer) {
+		Jar jar = analyzer.getJar();
+
+		Map<String, Resource> resources = jar.getResources();
+
+		for (Entry<String, Resource> entry : resources.entrySet()) {
+			String path = entry.getKey();
+
+			if (!path.startsWith("OSGI-INF/")) {
+				continue;
+			}
+
+			Resource resource = entry.getValue();
+
+			try {
+				FileUtil.write(
+					new File(_pluginDir, path), resource.openInputStream());
+			}
+			catch (Exception e) {
+				_log.error(e, e);
+			}
+		}
 	}
 
 	protected void executeAutoDeployers(
@@ -444,8 +555,14 @@ public class WabProcessor {
 		processFiles(
 			_pluginDir, _pluginDir.toURI(), classPath, portalDependencyJars);
 
-		analyzer.setProperty(
-			Constants.BUNDLE_CLASSPATH, StringUtil.merge(classPath.keySet()));
+		Jar wab = analyzer.getJar();
+
+		for (Entry<String, File> entry : classPath.entrySet()) {
+			appendProperty(
+				analyzer, Constants.BUNDLE_CLASSPATH, entry.getKey());
+
+			addWabLib(analyzer, wab, entry.getValue());
+		}
 
 		Collection<File> files = classPath.values();
 
@@ -508,7 +625,7 @@ public class WabProcessor {
 				_bundleVersion = sb.toString();
 			}
 			else {
-				_bundleVersion = "0.0.0." + _bundleVersion;
+				_bundleVersion = "0.0.0." + _bundleVersion.replace(".", "_");
 			}
 		}
 
@@ -676,10 +793,15 @@ public class WabProcessor {
 					Collections.addAll(
 						_importPackageNames, StringUtil.split(value));
 				}
-			}
 
-			analyzer.setProperty(processedKey, value);
+				analyzer.setProperty(processedKey, value);
+			}
 		}
+	}
+
+	protected void processExtraRequirements() {
+		_importPackageNames.add(
+			"org.eclipse.core.runtime;x-liferay-compatibility:=spring");
 	}
 
 	protected void processFiles(
@@ -751,6 +873,22 @@ public class WabProcessor {
 					continue;
 				}
 
+				boolean containedInClasspath = false;
+
+				for (Jar jar : analyzer.getClasspath()) {
+					List<String> packages = jar.getPackages();
+
+					if (packages.contains(importPackageName)) {
+						containedInClasspath = true;
+
+						break;
+					}
+				}
+
+				if (containedInClasspath) {
+					continue;
+				}
+
 				sb.append(importPackageName);
 				sb.append(";resolution:=\"optional\"");
 				sb.append(StringPool.COMMA);
@@ -791,18 +929,6 @@ public class WabProcessor {
 		}
 
 		formatDocument(file, document);
-	}
-
-	protected void processManifestVersion(Manifest manifest) {
-		Attributes attributes = manifest.getMainAttributes();
-
-		Object manifestVersion = attributes.get(
-			Attributes.Name.MANIFEST_VERSION.toString());
-
-		if (manifestVersion == null) {
-			attributes.putValue(
-				Attributes.Name.MANIFEST_VERSION.toString(), "1.0");
-		}
 	}
 
 	protected void processPackageNames(Analyzer analyzer) {
@@ -886,49 +1012,6 @@ public class WabProcessor {
 		analyzer.setProperty(Constants.REQUIRE_BUNDLE, sb.toString());
 	}
 
-	protected void processServiceBeanPostProcessor(Element rootElement) {
-		boolean exists = false;
-
-		for (Element contextParamElement :
-				rootElement.elements("context-param")) {
-
-			Element paramNameElement = contextParamElement.element(
-				"param-name");
-
-			String paramName = paramNameElement.getTextTrim();
-
-			if (!paramName.equals("portalContextConfigLocation")) {
-				continue;
-			}
-
-			exists = true;
-
-			Element paramValueElement = contextParamElement.element(
-				"param-value");
-
-			String paramValue = paramValueElement.getTextTrim();
-
-			paramValueElement.setText(
-				paramValue + StringPool.COMMA +
-					_SERVICE_BEAN_POST_PROCESSOR_SPRING_XML);
-		}
-
-		if (exists) {
-			return;
-		}
-
-		Element contextParamElement = rootElement.addElement("context-param");
-
-		Element paramNameElement = contextParamElement.addElement("param-name");
-
-		paramNameElement.setText("portalContextConfigLocation");
-
-		Element paramValueElement = contextParamElement.addElement(
-			"param-value");
-
-		paramValueElement.setText(_SERVICE_BEAN_POST_PROCESSOR_SPRING_XML);
-	}
-
 	protected void processServicePackageName(URI uri, File file) {
 		try {
 			Document document = UnsecureSAXReaderUtil.read(file);
@@ -952,18 +1035,6 @@ public class WabProcessor {
 
 			_importPackageNames.add(
 				"com.liferay.portal.osgi.web.wab.generator");
-
-			File metaInfDir = new File(uri.resolve("WEB-INF/classes/META-INF"));
-
-			metaInfDir.mkdirs();
-
-			Class<?> clazz = getClass();
-
-			FileUtil.write(
-				new File(metaInfDir, "service-bean-post-processor-spring.xml"),
-				clazz.getResourceAsStream(
-					"/com/liferay/portal/osgi/web/wab/generator/internal/" +
-						"dependencies/service-bean-post-processor-spring.xml"));
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -1052,8 +1123,6 @@ public class WabProcessor {
 
 		Element rootElement = document.getRootElement();
 
-		processServiceBeanPostProcessor(rootElement);
-
 		for (Element element : rootElement.elements("filter")) {
 			Element filterClassElement = element.element("filter-class");
 
@@ -1132,11 +1201,19 @@ public class WabProcessor {
 		analyzer.setProperty("-jsp", "*.jsp,*.jspf");
 		analyzer.setProperty(
 			"-plugin", "com.liferay.ant.bnd.jsp.JspAnalyzerPlugin");
+		analyzer.setProperty("Web-ContextPath", getWebContextPath());
 
-		processBundleVersion(analyzer);
+		Set<Object> plugins = analyzer.getPlugins();
+
+		plugins.add(_dsAnnotations);
+
+		plugins.add(_metatypePlugin);
+
+		plugins.add(_metatypeAnnotations);
 
 		Properties pluginPackageProperties = getPluginPackageProperties();
 
+		processBundleVersion(analyzer);
 		processBundleClasspath(analyzer, pluginPackageProperties);
 		processBundleSymbolicName(analyzer);
 		processExtraHeaders(analyzer);
@@ -1151,16 +1228,20 @@ public class WabProcessor {
 
 		processDeclarativeReferences();
 
+		processExtraRequirements();
+
 		processPackageNames(analyzer);
 
 		processRequiredDeploymentContexts(analyzer);
 
 		processExcludedJSPs(analyzer);
 
-		Manifest manifest = null;
+		analyzer.setProperties(pluginPackageProperties);
 
 		try {
-			manifest = analyzer.calcManifest();
+			writeManifest(analyzer.calcManifest());
+
+			copyOSGI_INFToWab(analyzer);
 		}
 		catch (Exception e) {
 			throw new IOException("Unable to calculate the manifest", e);
@@ -1168,11 +1249,6 @@ public class WabProcessor {
 		finally {
 			analyzer.close();
 		}
-
-		processManifestVersion(manifest);
-		processWebContextPath(manifest);
-
-		writeManifest(manifest);
 	}
 
 	protected void writeGeneratedWab(File file) throws IOException {
@@ -1290,16 +1366,22 @@ public class WabProcessor {
 		for (Node node : nodes) {
 			String text = node.getText();
 
-			value = "!" + text +"," + value;
+			if (text.startsWith("/")) {
+				text = text.substring(1);
+			}
+
+			value = "!" + text + "/*," + value;
 		}
 
 		analyzer.setProperty("-jsp", value);
 	}
 
-	private static final String _SERVICE_BEAN_POST_PROCESSOR_SPRING_XML =
-		"/WEB-INF/classes/META-INF/service-bean-post-processor-spring.xml";
-
 	private static final Log _log = LogFactoryUtil.getLog(WabProcessor.class);
+
+	private static final DSAnnotations _dsAnnotations = new DSAnnotations();
+	private static final MetatypeAnnotations _metatypeAnnotations =
+		new MetatypeAnnotations();
+	private static final MetatypePlugin _metatypePlugin = new MetatypePlugin();
 
 	private String _bundleVersion;
 	private final ClassLoader _classLoader;

@@ -407,11 +407,19 @@
 	.tree-node-content {
 		color: $product-menu-tree-color;
 		display: inline;
-		padding-bottom: 10px;
 		padding-left: 3px;
 		padding-right: 25px;
-		padding-top: 11px;
 		position: relative;
+
+		&.tree-node-over, &.tree-node-selected {
+			background: $product-menu-tree-active-bg;
+		}
+
+		.layout-tree {
+			display: block;
+			padding-bottom: 12px;
+			padding-top: 12px;
+		}
 
 		.tree-hitarea {
 			color: $product-menu-tree-hitarea-color;
@@ -435,7 +443,7 @@
 	}
 
 	.tree-root-container {
-		margin-left: 0;
+		margin-left: -10px;
 	}
 
 	.tree-view {
