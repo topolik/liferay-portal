@@ -454,6 +454,7 @@ public class PortalSecurityManagerImpl
 		initClass(PortletURLImpl.class);
 		initClass(Profile.class);
 		initClass(Reflection.class);
+		initClass(ReflectPermission.class);
 		initClass(SchemeAwareContextWrapper.class);
 		initClass(TemplateContextHelper.class);
 		initClass(URLWrapper.class);
