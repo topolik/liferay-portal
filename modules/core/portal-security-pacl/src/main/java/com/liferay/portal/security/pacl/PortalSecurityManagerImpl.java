@@ -64,6 +64,8 @@ import com.liferay.portal.security.pacl.jndi.PACLContext;
 import com.liferay.portal.security.pacl.jndi.PACLInitialContextFactory;
 import com.liferay.portal.security.pacl.jndi.PACLInitialContextFactoryBuilder;
 import com.liferay.portal.security.pacl.jndi.SchemeAwareContextWrapper;
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
+import com.liferay.portal.security.pacl.manager.PACLPolicyManager;
 import com.liferay.portal.security.pacl.servlet.PACLRequestDispatcherWrapper;
 import com.liferay.portal.service.impl.ServiceComponentLocalServiceImpl;
 import com.liferay.portal.service.impl.ServiceComponentLocalServiceImpl.DoUpgradeDBPrivilegedExceptionAction;

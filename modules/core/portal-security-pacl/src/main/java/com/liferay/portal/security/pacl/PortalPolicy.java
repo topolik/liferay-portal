@@ -21,6 +21,8 @@ import com.liferay.portal.kernel.security.pacl.permission.PortalMessageBusPermis
 import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermission;
 import com.liferay.portal.kernel.security.pacl.permission.PortalServicePermission;
 import com.liferay.portal.kernel.util.JavaDetector;
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
+import com.liferay.portal.security.pacl.manager.PACLPolicyManager;
 
 import java.lang.reflect.Field;
 

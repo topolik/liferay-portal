@@ -15,7 +15,8 @@
 package com.liferay.portal.security.pacl.jndi;
 
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.pacl.PACLPolicy;
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
+
 
 import java.util.Hashtable;
 

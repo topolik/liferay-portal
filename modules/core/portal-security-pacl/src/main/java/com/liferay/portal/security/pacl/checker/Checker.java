@@ -14,7 +14,7 @@
 
 package com.liferay.portal.security.pacl.checker;
 
-import com.liferay.portal.security.pacl.PACLPolicy;
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
 
 import java.security.Permission;
 

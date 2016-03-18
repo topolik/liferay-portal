@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.security.pacl.checker.Checker;
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
 
 import java.net.MalformedURLException;
 import java.net.URL;

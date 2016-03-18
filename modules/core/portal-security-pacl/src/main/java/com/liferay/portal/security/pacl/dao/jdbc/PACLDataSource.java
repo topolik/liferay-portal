@@ -17,8 +17,8 @@ package com.liferay.portal.security.pacl.dao.jdbc;
 import com.liferay.portal.dao.jdbc.util.DataSourceWrapper;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.security.lang.DoPrivilegedFactory;
-import com.liferay.portal.security.pacl.PACLPolicy;
 import com.liferay.portal.security.pacl.PACLUtil;
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;

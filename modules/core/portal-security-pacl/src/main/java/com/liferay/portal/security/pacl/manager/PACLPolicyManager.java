@@ -12,13 +12,17 @@
  * details.
  */
 
-package com.liferay.portal.security.pacl;
+package com.liferay.portal.security.pacl.manager;
 
 import com.liferay.portal.kernel.url.URLContainer;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.security.lang.PortalSecurityManager;
 import com.liferay.portal.security.lang.SecurityManagerUtil;
+import com.liferay.portal.security.pacl.ActivePACLPolicy;
+import com.liferay.portal.security.pacl.GeneratingPACLPolicy;
+import com.liferay.portal.security.pacl.InactivePACLPolicy;
+import com.liferay.portal.security.pacl.URLWrapper;
 import com.liferay.portal.util.PropsValues;
 
 import java.net.MalformedURLException;
@@ -255,7 +259,7 @@ public class PACLPolicyManager {
 
 				return paclPolicy;
 			}
-
+// PortalPolicy.getPermissions(CodeSource codeSource): "/opt/liferay.git/bundles/tomcat-8.0.32/bundleentry:/107.fwk1872436629"
 			return _urlPACLPolicies.get(new URLWrapper(_locationURL));
 		}
 

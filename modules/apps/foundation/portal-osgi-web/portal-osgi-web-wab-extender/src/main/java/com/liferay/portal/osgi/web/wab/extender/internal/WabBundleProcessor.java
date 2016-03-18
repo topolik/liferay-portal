@@ -31,8 +31,8 @@ import com.liferay.portal.osgi.web.wab.extender.internal.definition.ServletDefin
 import com.liferay.portal.osgi.web.wab.extender.internal.definition.WebXMLDefinition;
 import com.liferay.portal.osgi.web.wab.extender.internal.definition.WebXMLDefinitionLoader;
 import com.liferay.portal.security.lang.SecurityManagerUtil;
-import com.liferay.portal.security.pacl.PACLPolicy;
-import com.liferay.portal.security.pacl.PACLPolicyManager;
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
+import com.liferay.portal.security.pacl.manager.PACLPolicyManager;
 
 import java.io.IOException;
 import java.io.InputStream;

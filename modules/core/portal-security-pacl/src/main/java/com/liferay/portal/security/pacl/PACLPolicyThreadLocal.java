@@ -14,6 +14,8 @@
 
 package com.liferay.portal.security.pacl;
 
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
+
 /**
  * @author Raymond Augé
  */

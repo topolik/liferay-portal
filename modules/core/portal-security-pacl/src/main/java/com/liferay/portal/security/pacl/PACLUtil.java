@@ -18,6 +18,8 @@ import com.liferay.portal.kernel.cache.CacheRegistryItem;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.security.lang.PortalSecurityManager;
 import com.liferay.portal.security.lang.SecurityManagerUtil;
+import com.liferay.portal.security.pacl.manager.PACLPolicy;
+import com.liferay.portal.security.pacl.manager.PACLPolicyManager;
 
 import java.security.AccessController;
 import java.security.BasicPermission;

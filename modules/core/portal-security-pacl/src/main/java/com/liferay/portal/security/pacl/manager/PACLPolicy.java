@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.portal.security.pacl;
+package com.liferay.portal.security.pacl.manager;
 
 import com.liferay.portal.kernel.url.URLContainer;
 
