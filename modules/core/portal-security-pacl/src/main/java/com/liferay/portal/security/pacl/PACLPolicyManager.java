@@ -161,7 +161,7 @@ public class PACLPolicyManager {
 		PACLPolicy paclPolicy = _classLoaderPACLPolicies.remove(classLoader);
 
 		for (URL url : paclPolicy.getURLs()) {
-			_urlPACLPolicies.remove(url);
+			_urlPACLPolicies.remove(new URLWrapper(url));
 		}
 
 		refresh();
