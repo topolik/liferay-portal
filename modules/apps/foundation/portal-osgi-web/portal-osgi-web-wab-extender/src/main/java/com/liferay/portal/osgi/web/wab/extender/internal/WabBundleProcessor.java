@@ -14,8 +14,11 @@
 
 package com.liferay.portal.osgi.web.wab.extender.internal;
 
+import com.liferay.portal.kernel.url.ServletContextURLContainer;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
+import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.osgi.web.servlet.context.helper.ServletContextHelperRegistration;
 import com.liferay.portal.osgi.web.servlet.jsp.compiler.JspServlet;
@@ -27,6 +30,9 @@ import com.liferay.portal.osgi.web.wab.extender.internal.definition.ListenerDefi
 import com.liferay.portal.osgi.web.wab.extender.internal.definition.ServletDefinition;
 import com.liferay.portal.osgi.web.wab.extender.internal.definition.WebXMLDefinition;
 import com.liferay.portal.osgi.web.wab.extender.internal.definition.WebXMLDefinitionLoader;
+import com.liferay.portal.security.lang.SecurityManagerUtil;
+import com.liferay.portal.security.pacl.PACLPolicy;
+import com.liferay.portal.security.pacl.PACLPolicyManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +53,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -145,6 +152,8 @@ public class WabBundleProcessor {
 			ServletContext servletContext =
 				ModifiableServletContext.createInstance(
 					servletContextHelperRegistration.getServletContext(), this);
+
+			initPACL(servletContext);
 
 			initServletContainerInitializers(_bundle, servletContext);
 
@@ -570,6 +579,36 @@ public class WabBundleProcessor {
 
 			_listenerRegistrations.add(serviceRegistration);
 		}
+	}
+
+	protected void initPACL(ServletContext servletContext) throws IOException {
+		if (!SecurityManagerUtil.ENABLED) {
+			return;
+		}
+
+		if (!SecurityManagerUtil.isLiferay()) {
+			return;
+		}
+
+		Properties properties = null;
+
+		String propertiesString = HttpUtil.URLtoString(
+			servletContext.getResource(
+				"/WEB-INF/liferay-plugin-package.properties"));
+
+		if (propertiesString != null) {
+			properties = PropertiesUtil.load(propertiesString);
+		}
+		else {
+			properties = new Properties();
+		}
+
+		PACLPolicy paclPolicy = PACLPolicyManager.buildPACLPolicy(
+			servletContext.getServletContextName(),
+			new ServletContextURLContainer(servletContext),
+			servletContext.getClassLoader(), properties);
+
+		PACLPolicyManager.register(servletContext.getClassLoader(), paclPolicy);
 	}
 
 	protected void initServletContainerInitializers(

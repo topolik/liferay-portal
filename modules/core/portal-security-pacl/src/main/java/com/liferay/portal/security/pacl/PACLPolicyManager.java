@@ -99,6 +99,10 @@ public class PACLPolicyManager {
 	public static void register(
 		ClassLoader classLoader, PACLPolicy paclPolicy) {
 
+		if (_classLoaderPACLPolicies.containsKey(classLoader)) {
+			return;
+		}
+
 		List<URL> urLs = paclPolicy.getURLs();
 
 		if (classLoader instanceof URLClassLoader) {
@@ -130,23 +134,44 @@ public class PACLPolicyManager {
 		}
 
 		try {
-			URL url = new URL("file", "", -1, path);
+			if (rootURL.getProtocol().equals("bundleentry")) {
+				URL url = new URL(rootURL, path);
 
-			urLs.add(url);
+				urLs.add(url);
 
-			_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
+				_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
 
-			url = new URL("file", "", -1, path + StringPool.SLASH);
+				url = new URL(rootURL, path + StringPool.SLASH);
 
-			urLs.add(url);
+				urLs.add(url);
 
-			_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
+				_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
 
-			url = new URL("file", "", -1, path + "/WEB-INF/classes/*");
+				url = new URL(rootURL, path + "/WEB-INF/classes/*");
 
-			urLs.add(url);
+				urLs.add(url);
 
-			_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
+				_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
+			}
+			else {
+				URL url = new URL("file", "", -1, path);
+
+				urLs.add(url);
+
+				_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
+
+				url = new URL("file", "", -1, path + StringPool.SLASH);
+
+				urLs.add(url);
+
+				_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
+
+				url = new URL("file", "", -1, path + "/WEB-INF/classes/*");
+
+				urLs.add(url);
+
+				_urlPACLPolicies.put(new URLWrapper(url), paclPolicy);
+			}
 		}
 		catch (MalformedURLException murle) {
 			throw new RuntimeException(murle);
