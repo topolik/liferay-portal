@@ -203,6 +203,7 @@ Include-Resource:\
 	@com.liferay.osgi.service.tracker.collections-*.jar,\
 	@com.liferay.portal.app.license.api-*.jar,\
 	@com.liferay.registry.api-*.jar,\
+	@com.liferay.portal.security.pacl.jar,\
 	@../../../lib/development/jms.jar,\
 	@../../../lib/development/mail.jar,\
 	@../../../lib/development/servlet-api.jar,\

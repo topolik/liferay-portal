@@ -260,7 +260,7 @@ public class ServletContextHelperRegistrationImpl
 		properties.put(
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_SERVLET_PATTERN,
 			new String[] {"*.jsp", "*.jspx"});
-
+// no PACLPolicy registered yet - returns LenientPermissionCollection => all allowed
 		return bundleContext.registerService(
 			Servlet.class, new JspServletWrapper(), properties);
 	}

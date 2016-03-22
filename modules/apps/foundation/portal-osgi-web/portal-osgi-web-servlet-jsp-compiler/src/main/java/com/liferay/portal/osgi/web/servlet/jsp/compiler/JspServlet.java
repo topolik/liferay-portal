@@ -529,6 +529,9 @@ public class JspServlet extends HttpServlet {
 			else if (method.getName().equals("getResourcePaths")) {
 				return getResourcePaths((String)args[0]);
 			}
+			else if (method.getName().equals("getRealPath")) {
+				return null;
+			}
 
 			return method.invoke(_servletContext, args);
 		}
