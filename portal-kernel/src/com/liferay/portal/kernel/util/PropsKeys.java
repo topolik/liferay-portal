@@ -415,6 +415,8 @@ public interface PropsKeys {
 
 	public static final String COMPANY_SECURITY_SEND_PASSWORD = "company.security.send.password";
 
+	public static final String COMPANY_SECURITY_SEND_PASSWORD_RATE_LIMIT = "company.security.send.password.rate.limit";
+
 	public static final String COMPANY_SECURITY_SEND_PASSWORD_RESET_LINK = "company.security.send.password.reset.link";
 
 	public static final String COMPANY_SECURITY_SITE_LOGO = "company.security.site.logo";
