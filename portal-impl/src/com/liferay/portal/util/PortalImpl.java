@@ -76,7 +76,6 @@ import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.model.Theme;
 import com.liferay.portal.kernel.model.Ticket;
-import com.liferay.portal.kernel.model.TicketConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserGroup;
 import com.liferay.portal.kernel.model.VirtualHost;
@@ -217,26 +216,22 @@ import com.liferay.registry.ServiceTrackerCustomizer;
 import com.liferay.sites.kernel.util.Sites;
 import com.liferay.sites.kernel.util.SitesUtil;
 import com.liferay.social.kernel.model.SocialRelationConstants;
+import com.liferay.ticket.kernel.model.TicketConstants;
 import com.liferay.util.Encryptor;
 import com.liferay.util.JS;
 
 import java.awt.image.RenderedImage;
-
 import java.io.IOException;
 import java.io.Serializable;
-
 import java.lang.reflect.Method;
-
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -279,7 +274,6 @@ import javax.portlet.ResourceResponse;
 import javax.portlet.StateAwareResponse;
 import javax.portlet.ValidatorException;
 import javax.portlet.WindowState;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
