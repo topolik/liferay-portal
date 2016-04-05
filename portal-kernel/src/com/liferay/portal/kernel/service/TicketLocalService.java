@@ -176,6 +176,9 @@ public interface TicketLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public Ticket fetchTicket(long ticketId);
 
+	public List<Ticket> findTickets(java.lang.String className, long classPK,
+		int type);
+
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ActionableDynamicQuery getActionableDynamicQuery();
 
