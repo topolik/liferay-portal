@@ -12,19 +12,23 @@
  * details.
  */
 
-package com.liferay.portal.kernel.model;
+package com.liferay.portal.security.service.access.quota.metric;
+
+import aQute.bnd.annotation.ProviderType;
+
+import com.liferay.portal.kernel.security.auth.AccessControlContext;
+
+import java.lang.reflect.Method;
 
 /**
- * @author Mika Koivisto
- * @author Brian Wing Shun Chan
+ * @author Stian Sigvartsen
  */
-@Deprecated
-public class TicketConstants {
+@ProviderType
+public interface SAQMetricProvider {
 
-	public static final int TYPE_EMAIL_ADDRESS = 1;
+	public String getMetricName();
 
-	public static final int TYPE_IMPERSONATE = 2;
-
-	public static final int TYPE_PASSWORD = 3;
+	public String getMetricValue(
+		AccessControlContext accessControlContext, Method method);
 
 }
