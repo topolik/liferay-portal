@@ -201,6 +201,11 @@ public class TicketLocalServiceUtil {
 		return getService().fetchTicket(ticketId);
 	}
 
+	public static java.util.List<com.liferay.portal.kernel.model.Ticket> findTickets(
+		java.lang.String className, long classPK, int type) {
+		return getService().findTickets(className, classPK, type);
+	}
+
 	public static com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
 		return getService().getActionableDynamicQuery();
 	}

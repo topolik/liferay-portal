@@ -12,19 +12,23 @@
  * details.
  */
 
-package com.liferay.portal.kernel.model;
+package com.liferay.portal.security.service.access.quota.internal.configuration.definition;
+
+import com.liferay.portal.kernel.settings.definition.ConfigurationBeanDeclaration;
+import com.liferay.portal.security.service.access.quota.configuration.SAQConfiguration;
+
+import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Mika Koivisto
- * @author Brian Wing Shun Chan
+ * @author Stian Sigvartsen
  */
-@Deprecated
-public class TicketConstants {
+@Component
+public class SAQCompanyServiceConfigurationBeanDeclaration
+	implements ConfigurationBeanDeclaration {
 
-	public static final int TYPE_EMAIL_ADDRESS = 1;
-
-	public static final int TYPE_IMPERSONATE = 2;
-
-	public static final int TYPE_PASSWORD = 3;
+	@Override
+	public Class<?> getConfigurationBeanClass() {
+		return SAQConfiguration.class;
+	}
 
 }
