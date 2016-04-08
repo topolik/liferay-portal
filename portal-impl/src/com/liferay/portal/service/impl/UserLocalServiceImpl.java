@@ -148,6 +148,7 @@ import com.liferay.util.Encryptor;
 import com.liferay.util.EncryptorException;
 
 import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
