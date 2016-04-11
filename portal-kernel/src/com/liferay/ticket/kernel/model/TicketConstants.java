@@ -12,13 +12,12 @@
  * details.
  */
 
-package com.liferay.portal.kernel.model;
+package com.liferay.ticket.kernel.model;
 
 /**
  * @author Mika Koivisto
  * @author Brian Wing Shun Chan
  */
-@Deprecated
 public class TicketConstants {
 
 	public static final int TYPE_EMAIL_ADDRESS = 1;
@@ -26,5 +25,7 @@ public class TicketConstants {
 	public static final int TYPE_IMPERSONATE = 2;
 
 	public static final int TYPE_PASSWORD = 3;
+
+	public static final int TYPE_RATE_LIMITING = 4;
 
 }

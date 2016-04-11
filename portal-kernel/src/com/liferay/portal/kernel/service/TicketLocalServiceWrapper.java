@@ -202,6 +202,12 @@ public class TicketLocalServiceWrapper implements TicketLocalService,
 	}
 
 	@Override
+	public java.util.List<com.liferay.portal.kernel.model.Ticket> findTickets(
+		java.lang.String className, long classPK, int type) {
+		return _ticketLocalService.findTickets(className, classPK, type);
+	}
+
+	@Override
 	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
 		return _ticketLocalService.getActionableDynamicQuery();
 	}
