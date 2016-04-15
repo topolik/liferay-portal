@@ -34,31 +34,26 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 public interface SAQConfiguration {
 
 	@Meta.AD(
-		deflt = "",
-		description =
-			"Service class[#method] to which this quota configuration " +
-				"applies. Supports astrisk character for wildcard matching",
+		deflt = "", description = "saq.configuration.service.signature",
 		required = false
 	)
 	public String[] serviceSignature();
 
 	@Meta.AD(
-		deflt = "60", description = "The number of allowed accesses", min = "1",
+		deflt = "60", description = "saq.configuration.service.max", min = "1",
 		required = false
 	)
 	public int max();
 
 	@Meta.AD(
-		deflt = "60000", description = "The period to check max over",
+		deflt = "60000",
+		description = "saq.configuration.service.interval.millis",
 		required = false
 	)
 	public long intervalMillis();
 
 	@Meta.AD(
-		deflt = "",
-		description =
-			"Metric(s) that must be matched. For example use " +
-				"\"method\" to rate limit each matched method individually",
+		deflt = "", description = "saq.configuration.service.metric",
 		required = false
 	)
 	public String[] metric();
