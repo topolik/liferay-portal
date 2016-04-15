@@ -23,7 +23,6 @@ import com.liferay.portal.kernel.security.access.control.AccessControlUtil;
 import com.liferay.portal.kernel.security.access.control.AccessControlled;
 import com.liferay.portal.kernel.security.access.control.BaseAccessControlPolicy;
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
-import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.TicketLocalService;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
@@ -56,7 +55,7 @@ import org.osgi.service.component.annotations.Reference;
 public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 	public void checkServiceRateLimiting(
-			long companyId, String serviceClassName, String serviceMethodName,
+			String serviceClassName, String serviceMethodName,
 			Map<String, String> requestMetrics, ServiceAccessQuota quota)
 		throws SecurityException {
 
@@ -173,7 +172,6 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 					try {
 						checkServiceRateLimiting(
-							CompanyThreadLocal.getCompanyId().longValue(),
 							clazz.getName(), method.getName(), requestMetrics,
 							quota);
 					}
@@ -314,7 +312,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		}
 
 		_ticketService.addTicket(
-			CompanyThreadLocal.getCompanyId().longValue(), clazz.getName(), 0l,
+			0, clazz.getName(), 0l,
 			TicketConstants.TYPE_RATE_LIMITING, sw.toString(), expirationDate,
 			null);
 	}
