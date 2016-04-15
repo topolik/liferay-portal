@@ -150,6 +150,10 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		Method method, Object[] arguments,
 		AccessControlled accessControlled) throws SecurityException {
 
+		if (isChecked()) {
+			return;
+		}
+
 		Class<?> clazz = method.getDeclaringClass();
 
 		Map<String, String> requestMetrics = _getRequestMetrics(method);
@@ -197,6 +201,24 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 					clazz, requestMetrics, largestQuotaIntervalMillis);
 			}
 		}
+	}
+
+	protected boolean isChecked() {
+		AccessControlContext accessControlContext =
+			AccessControlUtil.getAccessControlContext();
+
+		if (accessControlContext != null) {
+			Map<String, Object> settings = accessControlContext.getSettings();
+
+			int serviceDepth = (Integer)settings.get(
+				AccessControlContext.Settings.SERVICE_DEPTH.toString());
+
+			if (serviceDepth > 1) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	protected boolean matches(
