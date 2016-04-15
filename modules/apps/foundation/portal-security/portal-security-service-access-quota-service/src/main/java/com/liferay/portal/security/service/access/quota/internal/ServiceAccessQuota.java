@@ -30,9 +30,9 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.portal.security.service.access.quota.configuration.SAQConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	service = SAQAccessControlPolicy.class
+	service = ServiceAccessQuota.class
 )
-public class SAQAccessControlPolicy {
+public class ServiceAccessQuota {
 
 	public long getIntervalMillis() {
 		return _configuration.intervalMillis();
@@ -42,7 +42,7 @@ public class SAQAccessControlPolicy {
 		return _configuration.max();
 	}
 
-	public String[] getPolicyMetric() {
+	public String[] getMetric() {
 		return _configuration.metric();
 	}
 

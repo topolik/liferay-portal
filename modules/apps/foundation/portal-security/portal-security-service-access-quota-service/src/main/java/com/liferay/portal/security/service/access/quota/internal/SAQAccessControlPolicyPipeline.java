@@ -57,7 +57,7 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 
 	public void checkServiceRateLimiting(
 			long companyId, String serviceClassName, String serviceMethodName,
-			Map<String, String> requestMetrics, SAQAccessControlPolicy policy)
+			Map<String, String> requestMetrics, ServiceAccessQuota quota)
 		throws SecurityException {
 
 		List<Ticket> tickets = _ticketService.findTickets(
@@ -65,7 +65,7 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 
 		int count = 0;
 
-		String[] policyMetrics = policy.getPolicyMetric();
+		String[] quotaMetrics = quota.getMetric();
 
 		Properties extraInfoFilter = new Properties();
 
@@ -75,7 +75,7 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 					_ticketService.deleteTicket(ticket);
 				}
 				else if ((ticket.getCreateDate().getTime() +
-							policy.getIntervalMillis())
+							quota.getIntervalMillis())
 								> System.currentTimeMillis()) {
 
 					String extraInfo = ticket.getExtraInfo();
@@ -91,28 +91,28 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 						}
 					}
 
-					if ((policyMetrics == null) ||
-						(policyMetrics.length == 0) ||
-						Validator.isNull(policyMetrics[0])) {
+					if ((quotaMetrics == null) ||
+						(quotaMetrics.length == 0) ||
+						Validator.isNull(quotaMetrics[0])) {
 
 						count++;
 					}
 					else {
 						boolean allMetricsMatch = true;
 
-						for (String policyMetric : policyMetrics) {
+						for (String quotaMetric : quotaMetrics) {
 
 							// Work around issue with System Settings changing
 							// the character casing!
 
-							policyMetric = StringUtil.toLowerCase(policyMetric);
+							quotaMetric = StringUtil.toLowerCase(quotaMetric);
 
 							String ticketMetricValue =
-								extraInfoFilter.getProperty(policyMetric);
+								extraInfoFilter.getProperty(quotaMetric);
 
 							if ((ticketMetricValue == null) ||
 								!ticketMetricValue.equals(
-									requestMetrics.get(policyMetric))) {
+									requestMetrics.get(quotaMetric))) {
 
 								allMetricsMatch = false;
 							}
@@ -127,15 +127,15 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 				}
 			}
 
-			if (count >= policy.getMax()) {
+			if (count >= quota.getMax()) {
 				StringBuffer sb = new StringBuffer();
 
 				sb.append(
-					"Breached limit ").append(policy.getMax()).append(
-						'/').append(policy.getIntervalMillis());
+					"Breached limit ").append(quota.getMax()).append(
+						'/').append(quota.getIntervalMillis());
 
-				for (String policyMetric : policyMetrics) {
-					sb.append('/') .append(policyMetric);
+				for (String quotaMetric : quotaMetrics) {
+					sb.append('/') .append(quotaMetric);
 				}
 
 				sb.append(" for ").append(serviceClassName).append('#').append(
@@ -155,27 +155,27 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 
 		Map<String, String> requestMetrics = _getRequestMetrics(method);
 
-		boolean atLeastOnePolicyApplies = false;
+		boolean atLeastOneQuotaApplies = false;
 
-		long largestPolicyIntervalMillis = 0;
+		long largestQuotaIntervalMillis = 0;
 		Set<SecurityException> breaches = new HashSet<>();
 
-		for (SAQAccessControlPolicy policy : _policies) {
-			for (String serviceSignature : policy.getServiceSignature()) {
+		for (ServiceAccessQuota quota : _quotas) {
+			for (String serviceSignature : quota.getServiceSignature()) {
 				if (matches(
 						clazz.getName(), method.getName(), serviceSignature)) {
 
-					atLeastOnePolicyApplies = true;
+					atLeastOneQuotaApplies = true;
 
-					largestPolicyIntervalMillis = Math.max(
-						policy.getIntervalMillis(),
-						largestPolicyIntervalMillis);
+					largestQuotaIntervalMillis = Math.max(
+						quota.getIntervalMillis(),
+						largestQuotaIntervalMillis);
 
 					try {
 						checkServiceRateLimiting(
 							CompanyThreadLocal.getCompanyId().longValue(),
 							clazz.getName(), method.getName(), requestMetrics,
-							policy);
+							quota);
 					}
 					catch (SecurityException se) {
 						breaches.add(se);
@@ -184,7 +184,7 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 			}
 		}
 
-		if (atLeastOnePolicyApplies) {
+		if (atLeastOneQuotaApplies) {
 			if (breaches.size() > 0) {
 				if (_log.isDebugEnabled()) {
 					for (SecurityException e : breaches) {
@@ -192,11 +192,11 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 					}
 				}
 
-				throw new SecurityException("Breached rate limit policy");
+				throw new SecurityException("Breached rate limit quota");
 			}
 			else {
 				_createTicket(
-					clazz, requestMetrics, largestPolicyIntervalMillis);
+					clazz, requestMetrics, largestQuotaIntervalMillis);
 			}
 		}
 	}
@@ -346,7 +346,7 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 	private volatile List<SAQMetricProvider> _metricProviders;
 
 	@Reference
-	private volatile List<SAQAccessControlPolicy> _policies;
+	private volatile List<ServiceAccessQuota> _quotas;
 
 	@Reference
 	private volatile TicketLocalService _ticketService;
