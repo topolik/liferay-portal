@@ -65,7 +65,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 		int count = 0;
 
-		String[] quotaMetrics = quota.getMetric();
+		List<String> quotaMetrics = quota.getMetric();
 
 		Properties extraInfoFilter = new Properties();
 
@@ -92,8 +92,8 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 					}
 
 					if ((quotaMetrics == null) ||
-						(quotaMetrics.length == 0) ||
-						Validator.isNull(quotaMetrics[0])) {
+						(quotaMetrics.size() == 0) ||
+						Validator.isNull(quotaMetrics.get(0))) {
 
 						count++;
 					}
@@ -163,7 +163,8 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 		Class<?> clazz = method.getDeclaringClass();
 
-		Map<String, String> requestMetrics = _getRequestMetrics(method);
+		Map<String, String> callMetrics = getCallMetrics(
+			method, matchedQuotas);
 
 		long largestQuotaIntervalMillis = 0;
 
@@ -174,7 +175,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 			try {
 				checkServiceRateLimiting(
-					clazz.getName(), method.getName(), requestMetrics,
+					clazz.getName(), method.getName(), callMetrics,
 					quota);
 			}
 			catch (SecurityException se) {
@@ -187,7 +188,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		}
 
 		_createTicket(
-			clazz, requestMetrics, largestQuotaIntervalMillis);
+			clazz, callMetrics, largestQuotaIntervalMillis);
 	}
 
 	protected boolean isChecked() {
@@ -344,24 +345,36 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 			null);
 	}
 
-	private Map<String, String> _getRequestMetrics(Method method) {
-		Map<String, String> requestMetrics = new HashMap<>();
+	protected Map<String, String> getCallMetrics(
+		Method method, List<ServiceAccessQuota> quotas) {
+
+		Map<String, String> callMetrics = new HashMap<>();
+
+		Set<String> requiredMetrics = new HashSet<>();
+		for (ServiceAccessQuota quota : quotas) {
+			requiredMetrics.addAll(quota.getMetric());
+		}
 
 		AccessControlContext accessControlContext =
 			AccessControlUtil.getAccessControlContext();
 
 		for (SAQMetricProvider metricProvider : _metricProviders) {
-			String metricName = metricProvider.getMetricName();
+			String metricName = StringUtil.toLowerCase(
+				metricProvider.getMetricName());
 
-			if (Validator.isNotNull(metricName)) {
-				requestMetrics.put(
-					StringUtil.toLowerCase(metricName),
-					metricProvider.getMetricValue(
-						accessControlContext, method));
+			if (Validator.isBlank(metricName) ||
+				!requiredMetrics.contains(metricName)) {
+
+				continue;
 			}
+
+			String metricValue = metricProvider.getMetricValue(
+				accessControlContext, method);
+
+			callMetrics.put(metricName, metricValue);
 		}
 
-		return requestMetrics;
+		return callMetrics;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

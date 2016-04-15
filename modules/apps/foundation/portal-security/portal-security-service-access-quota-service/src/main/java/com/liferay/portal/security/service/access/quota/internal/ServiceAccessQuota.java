@@ -17,6 +17,8 @@ package com.liferay.portal.security.service.access.quota.internal;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.security.service.access.quota.configuration.SAQConfiguration;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
@@ -42,8 +44,8 @@ public class ServiceAccessQuota {
 		return _configuration.max();
 	}
 
-	public String[] getMetric() {
-		return _configuration.metric();
+	public List<String> getMetric() {
+		return Arrays.asList(_configuration.metric());
 	}
 
 	public String[] getServiceSignature() {
