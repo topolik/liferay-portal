@@ -63,86 +63,88 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		List<Ticket> tickets = _ticketService.findTickets(
 			serviceClassName, 0l, TicketConstants.TYPE_RATE_LIMITING);
 
+		if (tickets == null) {
+			return;
+		}
+
 		int count = 0;
 
 		List<String> quotaMetrics = quota.getMetric();
 
 		Properties extraInfoFilter = new Properties();
 
-		if (tickets != null) {
-			for (Ticket ticket : tickets) {
-				if (ticket.isExpired()) {
-					_ticketService.deleteTicket(ticket);
-				}
-				else if ((ticket.getCreateDate().getTime() +
-							quota.getIntervalMillis())
-								> System.currentTimeMillis()) {
+		for (Ticket ticket : tickets) {
+			if (ticket.isExpired()) {
+				_ticketService.deleteTicket(ticket);
+				continue;
+			}
 
-					String extraInfo = ticket.getExtraInfo();
+			if ((ticket.getCreateDate().getTime() +
+				 quota.getIntervalMillis())
+				< System.currentTimeMillis()) {
 
-					if (extraInfo != null) {
-						try {
-							extraInfoFilter.load(new StringReader(extraInfo));
-						}
-						catch (IOException ioe) {
-							throw new SystemException(
-								"Failed to parse extra info of ticket " +
-									ticket.getKey());
-						}
-					}
+				continue;
+			}
 
-					if ((quotaMetrics == null) ||
-						(quotaMetrics.size() == 0) ||
-						Validator.isNull(quotaMetrics.get(0))) {
+			if ((quotaMetrics == null) ||
+				(quotaMetrics.size() == 0) ||
+				Validator.isNull(quotaMetrics.get(0))) {
 
-						count++;
-					}
-					else {
-						boolean allMetricsMatch = true;
+				count++;
+				continue;
+			}
 
-						for (String quotaMetric : quotaMetrics) {
+			String extraInfo = ticket.getExtraInfo();
 
-							// Work around issue with System Settings changing
-							// the character casing!
-
-							quotaMetric = StringUtil.toLowerCase(quotaMetric);
-
-							String ticketMetricValue =
-								extraInfoFilter.getProperty(quotaMetric);
-
-							if ((ticketMetricValue == null) ||
-								!ticketMetricValue.equals(
-									requestMetrics.get(quotaMetric))) {
-
-								allMetricsMatch = false;
-							}
-						}
-
-						if (allMetricsMatch) {
-							count++;
-						}
-					}
-
+			if (extraInfo != null) {
+				try {
 					extraInfoFilter.clear();
+
+					extraInfoFilter.load(new StringReader(extraInfo));
+				}
+				catch (IOException ioe) {
+					throw new SystemException(
+						"Failed to parse extra info of ticket " +
+							ticket.getKey());
 				}
 			}
 
-			if (count >= quota.getMax()) {
-				StringBuffer sb = new StringBuffer();
+			for (String quotaMetric : quotaMetrics) {
 
-				sb.append(
-					"Breached limit ").append(quota.getMax()).append(
-						'/').append(quota.getIntervalMillis());
+				// Work around issue with System Settings changing
+				// the character casing!
 
-				for (String quotaMetric : quotaMetrics) {
-					sb.append('/') .append(quotaMetric);
+				quotaMetric = StringUtil.toLowerCase(quotaMetric);
+
+				String ticketMetricValue =
+					extraInfoFilter.getProperty(quotaMetric);
+
+				if ((ticketMetricValue == null) ||
+					!ticketMetricValue.equals(
+						requestMetrics.get(quotaMetric))) {
+
+					continue;
 				}
-
-				sb.append(" for ").append(serviceClassName).append('#').append(
-					serviceMethodName);
-
-				throw new SecurityException(sb.toString());
 			}
+
+			count++;
+		}
+
+		if (count >= quota.getMax()) {
+			StringBuffer sb = new StringBuffer();
+
+			sb.append(
+				"Breached limit ").append(quota.getMax()).append(
+					'/').append(quota.getIntervalMillis());
+
+			for (String quotaMetric : quotaMetrics) {
+				sb.append('/') .append(quotaMetric);
+			}
+
+			sb.append(" for ").append(serviceClassName).append('#').append(
+				serviceMethodName);
+
+			throw new SecurityException(sb.toString());
 		}
 	}
 
