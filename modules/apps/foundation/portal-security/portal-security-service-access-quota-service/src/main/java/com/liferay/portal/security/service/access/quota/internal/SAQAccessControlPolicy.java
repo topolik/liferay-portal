@@ -53,7 +53,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Stian Sigvartsen
  */
 @Component(service = AccessControlPolicy.class)
-public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
+public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 	public void checkServiceRateLimiting(
 			long companyId, String serviceClassName, String serviceMethodName,
@@ -340,7 +340,7 @@ public class SAQAccessControlPolicyPipeline extends BaseAccessControlPolicy {
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SAQAccessControlPolicyPipeline.class);
+		SAQAccessControlPolicy.class);
 
 	@Reference
 	private volatile List<SAQMetricProvider> _metricProviders;
