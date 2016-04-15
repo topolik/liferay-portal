@@ -155,7 +155,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 			return;
 		}
 
-		List<ServiceAccessQuota> matchedQuotas = matches(method);
+		Set<ServiceAccessQuota> matchedQuotas = matches(method);
 
 		if (matchedQuotas.size() == 0) {
 			return;
@@ -209,22 +209,50 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		return false;
 	}
 
-	protected List<ServiceAccessQuota> matches(Method method) {
-		List<ServiceAccessQuota> result = new ArrayList<>(_quotas.size());
+	protected Set<ServiceAccessQuota> matches(Method method) {
+		Set<ServiceAccessQuota> result = new HashSet<>(_quotas.size());
 
 		Class<?> clazz = method.getDeclaringClass();
 
-		for (ServiceAccessQuota quota : _quotas) {
-			for (String serviceSignature : quota.getServiceSignature()) {
-				if (matches(
-					clazz.getName(), method.getName(), serviceSignature)) {
+		String className = clazz.getName();
+		String methodName = method.getName();
 
-					result.add(quota);
-				}
+		for (ServiceAccessQuota quota : _quotas) {
+			Set<String> serviceSignatures = quota.getServiceSignature();
+
+			if (matches(className, methodName, serviceSignatures)) {
+				result.add(quota);
 			}
 		}
 
 		return result;
+	}
+
+	protected boolean matches(
+		String className, String methodName, Set<String> serviceSignatures) {
+
+		if (serviceSignatures.contains(StringPool.STAR)) {
+			return true;
+		}
+
+		if (serviceSignatures.contains(className)) {
+			return true;
+		}
+
+		String classNameAndMethodName = className.concat(
+			StringPool.POUND).concat(methodName);
+
+		if (serviceSignatures.contains(classNameAndMethodName)) {
+			return true;
+		}
+
+		for (String serviceSignature : serviceSignatures) {
+			if (matches(className, methodName, serviceSignature)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	protected boolean matches(
@@ -346,7 +374,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 	}
 
 	protected Map<String, String> getCallMetrics(
-		Method method, List<ServiceAccessQuota> quotas) {
+		Method method, Set<ServiceAccessQuota> quotas) {
 
 		Map<String, String> callMetrics = new HashMap<>();
 

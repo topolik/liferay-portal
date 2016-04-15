@@ -18,8 +18,10 @@ import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.security.service.access.quota.configuration.SAQConfiguration;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -48,8 +50,16 @@ public class ServiceAccessQuota {
 		return Arrays.asList(_configuration.metric());
 	}
 
-	public String[] getServiceSignature() {
-		return _configuration.serviceSignature();
+	public Set<String> getServiceSignature() {
+		String[] signatureArray = _configuration.serviceSignature();
+		HashSet<String> serviceSignature = new HashSet<>(
+			signatureArray.length);
+
+		for (String signature : signatureArray) {
+			serviceSignature.add(signature);
+		}
+
+		return serviceSignature;
 	}
 
 	@Activate
