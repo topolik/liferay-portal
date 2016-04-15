@@ -37,6 +37,7 @@ import java.io.StringWriter;
 
 import java.lang.reflect.Method;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -154,53 +155,39 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 			return;
 		}
 
+		List<ServiceAccessQuota> matchedQuotas = matches(method);
+
+		if (matchedQuotas.size() == 0) {
+			return;
+		}
+
 		Class<?> clazz = method.getDeclaringClass();
 
 		Map<String, String> requestMetrics = _getRequestMetrics(method);
 
-		boolean atLeastOneQuotaApplies = false;
-
 		long largestQuotaIntervalMillis = 0;
-		Set<SecurityException> breaches = new HashSet<>();
 
-		for (ServiceAccessQuota quota : _quotas) {
-			for (String serviceSignature : quota.getServiceSignature()) {
-				if (matches(
-						clazz.getName(), method.getName(), serviceSignature)) {
+		for (ServiceAccessQuota quota : matchedQuotas) {
+			largestQuotaIntervalMillis = Math.max(
+				quota.getIntervalMillis(),
+				largestQuotaIntervalMillis);
 
-					atLeastOneQuotaApplies = true;
-
-					largestQuotaIntervalMillis = Math.max(
-						quota.getIntervalMillis(),
-						largestQuotaIntervalMillis);
-
-					try {
-						checkServiceRateLimiting(
-							clazz.getName(), method.getName(), requestMetrics,
-							quota);
-					}
-					catch (SecurityException se) {
-						breaches.add(se);
-					}
-				}
+			try {
+				checkServiceRateLimiting(
+					clazz.getName(), method.getName(), requestMetrics,
+					quota);
 			}
-		}
-
-		if (atLeastOneQuotaApplies) {
-			if (breaches.size() > 0) {
+			catch (SecurityException se) {
 				if (_log.isDebugEnabled()) {
-					for (SecurityException e : breaches) {
-						_log.debug(e.getMessage());
-					}
+					_log.debug(se.getMessage());
 				}
 
 				throw new SecurityException("Breached rate limit quota");
 			}
-			else {
-				_createTicket(
-					clazz, requestMetrics, largestQuotaIntervalMillis);
-			}
 		}
+
+		_createTicket(
+			clazz, requestMetrics, largestQuotaIntervalMillis);
 	}
 
 	protected boolean isChecked() {
@@ -219,6 +206,24 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		}
 
 		return false;
+	}
+
+	protected List<ServiceAccessQuota> matches(Method method) {
+		List<ServiceAccessQuota> result = new ArrayList<>(_quotas.size());
+
+		Class<?> clazz = method.getDeclaringClass();
+
+		for (ServiceAccessQuota quota : _quotas) {
+			for (String serviceSignature : quota.getServiceSignature()) {
+				if (matches(
+					clazz.getName(), method.getName(), serviceSignature)) {
+
+					result.add(quota);
+				}
+			}
+		}
+
+		return result;
 	}
 
 	protected boolean matches(
