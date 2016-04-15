@@ -61,7 +61,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		throws SecurityException {
 
 		List<Ticket> tickets = _ticketService.findTickets(
-			serviceClassName, 0l, TicketConstants.TYPE_RATE_LIMITING);
+			serviceClassName, 0, TicketConstants.TYPE_RATE_LIMITING);
 
 		if (tickets == null) {
 			return;
@@ -370,7 +370,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		}
 
 		_ticketService.addTicket(
-			0, clazz.getName(), 0l,
+			0, clazz.getName(), 0,
 			TicketConstants.TYPE_RATE_LIMITING, sw.toString(), expirationDate,
 			null);
 	}
