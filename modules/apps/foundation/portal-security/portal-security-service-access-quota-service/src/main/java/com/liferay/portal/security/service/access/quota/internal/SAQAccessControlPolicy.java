@@ -77,8 +77,6 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 			quotasCount.put(it.next(), 0);
 		}
 
-		Properties extraInfoFilter = new Properties();
-
 		for (Ticket ticket : tickets) {
 			if (ticket.isExpired()) {
 				_ticketService.deleteTicket(ticket);
@@ -98,67 +96,37 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 					continue;
 				}
 
-				List<String> quotaMetrics = quota.getMetric();
-
-				if ((count - 1) >= quota.getMax()) {
-					StringBuffer sb = new StringBuffer();
-
-					sb.append(
-						"Breached limit ").append(quota.getMax()).append(
-						'/').append(quota.getIntervalMillis());
-
-					for (String quotaMetric : quotaMetrics) {
-						sb.append('/').append(quotaMetric);
-					}
-
-					sb.append(" for ").append(serviceClassName).append('#').
-						append(serviceMethodName);
-
-					throw new SecurityException(sb.toString());
-				}
-
-				if ((quotaMetrics == null) ||
-					(quotaMetrics.size() == 0) ||
-					Validator.isNull(quotaMetrics.get(0))) {
-
-					entry.setValue(count + 1);
+				if (!_isTicketMatchedToCall(requestMetrics, ticket, quota)) {
 					continue;
 				}
+					
+				count++;
+				
+				if (count < quota.getMax()) {
+					entry.setValue(count);
+					continue;
+				}
+				
+				// If through ticket matching a quota max is hit,
+				// then adding one more ticket later will breach it,
+				// so fail fast now
+				
+				StringBuffer sb = new StringBuffer();
 
-				String extraInfo = ticket.getExtraInfo();
+				sb.append(
+					"Breached limit ").append(quota.getMax()).append(
+					'/').append(quota.getIntervalMillis());
 
-				if (extraInfo != null) {
-					try {
-						extraInfoFilter.clear();
-
-						extraInfoFilter.load(new StringReader(extraInfo));
-					}
-					catch (IOException ioe) {
-						throw new SystemException(
-							"Failed to parse extra info of ticket " +
-							ticket.getKey());
+				for (String quotaMetric : quota.getMetric()) {
+					if (Validator.isNotNull(quotaMetric)) {
+						sb.append('/').append(quotaMetric);
 					}
 				}
 
-				for (String quotaMetric : quotaMetrics) {
+				sb.append(" for ").append(serviceClassName).append('#').
+					append(serviceMethodName);
 
-					// Work around issue with System Settings changing
-					// the character casing!
-
-					quotaMetric = StringUtil.toLowerCase(quotaMetric);
-
-					String ticketMetricValue =
-						extraInfoFilter.getProperty(quotaMetric);
-
-					if ((ticketMetricValue == null) ||
-						!ticketMetricValue.equals(
-							requestMetrics.get(quotaMetric))) {
-
-						continue;
-					}
-				}
-
-				entry.setValue(count + 1);
+				throw new SecurityException(sb.toString());
 			}
 		}
 	}
@@ -390,6 +358,55 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 			TicketConstants.TYPE_RATE_LIMITING, sw.toString(), expirationDate,
 			null);
 	}
+	
+	private boolean _isTicketMatchedToCall(Map<String, String> requestMetrics,
+			Ticket ticket, ServiceAccessQuota quota) {
+		
+		List<String> quotaMetrics = quota.getMetric();
+		
+		if ((quotaMetrics == null) ||
+			(quotaMetrics.size() == 0) ||
+			Validator.isNull(quotaMetrics.get(0))) { // When no metric is specified
+
+			return true;
+		}
+
+		String extraInfo = ticket.getExtraInfo();
+		Properties extraInfoFilter = new Properties();
+		
+		if (extraInfo != null) {
+			try {
+				extraInfoFilter.load(new StringReader(extraInfo));
+			}
+			catch (IOException ioe) {
+				throw new SystemException(
+					"Failed to parse extra info of ticket " +
+					ticket.getKey());
+			}
+		}
+
+		boolean allMetricsMatch = true;
+		
+		for (String quotaMetric : quotaMetrics) {
+
+			// Work around issue with System Settings changing
+			// the character casing!
+
+			quotaMetric = StringUtil.toLowerCase(quotaMetric);
+
+			String ticketMetricValue =
+				extraInfoFilter.getProperty(quotaMetric);
+
+			if ((ticketMetricValue == null) ||
+				!ticketMetricValue.equals(
+					requestMetrics.get(quotaMetric))) {
+
+				allMetricsMatch = false;
+			}
+		}
+
+		return allMetricsMatch;
+	}	
 
 	protected Map<String, String> getCallMetrics(
 		Method method, Set<ServiceAccessQuota> quotas) {
