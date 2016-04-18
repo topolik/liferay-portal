@@ -37,7 +37,6 @@ import java.io.StringWriter;
 
 import java.lang.reflect.Method;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,7 +57,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 	public void checkServiceRateLimiting(
 			String serviceClassName, String serviceMethodName,
-			Map<String, String> requestMetrics, Set<ServiceAccessQuota> quotas)
+			Properties callMetrics, Set<ServiceAccessQuota> quotas)
 		throws SecurityException {
 
 		List<Ticket> tickets = _ticketService.findTickets(
@@ -77,45 +76,54 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 			quotasCount.put(it.next(), 0);
 		}
 
+		Properties ticketMetrics = new Properties();
+		List<String> quotaMetrics;
+
 		for (Ticket ticket : tickets) {
 			if (ticket.isExpired()) {
 				_ticketService.deleteTicket(ticket);
 				continue;
 			}
 
+			_loadTicketMetrics(ticket, ticketMetrics);
+
 			for (Map.Entry<ServiceAccessQuota, Integer> entry :
 					quotasCount.entrySet()) {
 
 				ServiceAccessQuota quota = entry.getKey();
+
+				quotaMetrics = quota.getMetric();
 				int count = entry.getValue();
 
 				if ((ticket.getCreateDate().getTime() +
-					 quota.getIntervalMillis())
-					< System.currentTimeMillis()) {
+						quota.getIntervalMillis())
+							< System.currentTimeMillis()) {
 
 					continue;
 				}
 
-				if (!_isTicketMatchedToCall(requestMetrics, ticket, quota)) {
+				if (!_isTicketMatchedToCall(
+						callMetrics, ticketMetrics, quotaMetrics)) {
+
 					continue;
 				}
-					
+
 				count++;
-				
+
 				if (count < quota.getMax()) {
 					entry.setValue(count);
 					continue;
 				}
-				
+
 				// If through ticket matching a quota max is hit,
 				// then adding one more ticket later will breach it,
 				// so fail fast now
-				
+
 				StringBuffer sb = new StringBuffer();
 
 				sb.append(
 					"Breached limit ").append(quota.getMax()).append(
-					'/').append(quota.getIntervalMillis());
+						'/').append(quota.getIntervalMillis());
 
 				for (String quotaMetric : quota.getMetric()) {
 					if (Validator.isNotNull(quotaMetric)) {
@@ -123,8 +131,8 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 					}
 				}
 
-				sb.append(" for ").append(serviceClassName).append('#').
-					append(serviceMethodName);
+				sb.append(" for ").append(serviceClassName).append('#').append(
+					serviceMethodName);
 
 				throw new SecurityException(sb.toString());
 			}
@@ -148,13 +156,11 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 		Class<?> clazz = method.getDeclaringClass();
 
-		Map<String, String> callMetrics = getCallMetrics(
-			method, matchedQuotas);
+		Properties callMetrics = getCallMetrics(method, matchedQuotas);
 
 		try {
 			checkServiceRateLimiting(
-				clazz.getName(), method.getName(), callMetrics,
-				matchedQuotas);
+				clazz.getName(), method.getName(), callMetrics, matchedQuotas);
 		}
 		catch (SecurityException se) {
 			if (_log.isDebugEnabled()) {
@@ -168,13 +174,43 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 		for (ServiceAccessQuota quota : matchedQuotas) {
 			largestQuotaIntervalMillis = Math.max(
-				quota.getIntervalMillis(),
-				largestQuotaIntervalMillis);
-
+				quota.getIntervalMillis(), largestQuotaIntervalMillis);
 		}
 
-		_createTicket(
-			clazz, callMetrics, largestQuotaIntervalMillis);
+		_createTicket(clazz, callMetrics, largestQuotaIntervalMillis);
+	}
+
+	protected Properties getCallMetrics(
+		Method method, Set<ServiceAccessQuota> quotas) {
+
+		Properties callMetrics = new Properties();
+
+		Set<String> requiredMetrics = new HashSet<>();
+
+		for (ServiceAccessQuota quota : quotas) {
+			requiredMetrics.addAll(quota.getMetric());
+		}
+
+		AccessControlContext accessControlContext =
+			AccessControlUtil.getAccessControlContext();
+
+		for (SAQMetricProvider metricProvider : _metricProviders) {
+			String metricName = StringUtil.toLowerCase(
+				metricProvider.getMetricName());
+
+			if (Validator.isBlank(metricName) ||
+				!requiredMetrics.contains(metricName)) {
+
+				continue;
+			}
+
+			String metricValue = metricProvider.getMetricValue(
+				accessControlContext, method);
+
+			callMetrics.setProperty(metricName, metricValue);
+		}
+
+		return callMetrics;
 	}
 
 	protected boolean isChecked() {
@@ -336,57 +372,37 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 	}
 
 	private void _createTicket(
-		Class<?> clazz, Map<String, String> requestMetrics, long expiryMillis) {
+		Class<?> clazz, Properties callMetrics, long expiryMillis) {
 
 		Date expirationDate = new Date(
 			System.currentTimeMillis() + expiryMillis);
 
 		StringWriter sw = new StringWriter();
-		Properties extraInfoFilter = new Properties();
-
-		extraInfoFilter.putAll(requestMetrics);
 
 		try {
-			extraInfoFilter.store(sw, null);
+			callMetrics.store(sw, null);
 		}
 		catch (IOException ioe) {
 			throw new SystemException(ioe);
 		}
 
 		_ticketService.addTicket(
-			0, clazz.getName(), 0,
-			TicketConstants.TYPE_RATE_LIMITING, sw.toString(), expirationDate,
-			null);
+			0, clazz.getName(), 0, TicketConstants.TYPE_RATE_LIMITING,
+			sw.toString(), expirationDate, null);
 	}
-	
-	private boolean _isTicketMatchedToCall(Map<String, String> requestMetrics,
-			Ticket ticket, ServiceAccessQuota quota) {
-		
-		List<String> quotaMetrics = quota.getMetric();
-		
-		if ((quotaMetrics == null) ||
-			(quotaMetrics.size() == 0) ||
-			Validator.isNull(quotaMetrics.get(0))) { // When no metric is specified
+
+	private boolean _isTicketMatchedToCall(
+		Properties callMetrics, Properties ticketMetrics,
+		List<String> quotaMetrics) {
+
+		if ((quotaMetrics == null) || (quotaMetrics.size() == 0) ||
+			Validator.isNull(quotaMetrics.get(0))) {
 
 			return true;
 		}
 
-		String extraInfo = ticket.getExtraInfo();
-		Properties extraInfoFilter = new Properties();
-		
-		if (extraInfo != null) {
-			try {
-				extraInfoFilter.load(new StringReader(extraInfo));
-			}
-			catch (IOException ioe) {
-				throw new SystemException(
-					"Failed to parse extra info of ticket " +
-					ticket.getKey());
-			}
-		}
-
 		boolean allMetricsMatch = true;
-		
+
 		for (String quotaMetric : quotaMetrics) {
 
 			// Work around issue with System Settings changing
@@ -394,50 +410,34 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 			quotaMetric = StringUtil.toLowerCase(quotaMetric);
 
-			String ticketMetricValue =
-				extraInfoFilter.getProperty(quotaMetric);
+			String ticketMetricValue = ticketMetrics.getProperty(quotaMetric);
 
 			if ((ticketMetricValue == null) ||
 				!ticketMetricValue.equals(
-					requestMetrics.get(quotaMetric))) {
+					callMetrics.get(quotaMetric))) {
 
 				allMetricsMatch = false;
 			}
 		}
 
 		return allMetricsMatch;
-	}	
+	}
 
-	protected Map<String, String> getCallMetrics(
-		Method method, Set<ServiceAccessQuota> quotas) {
+	private Properties _loadTicketMetrics(Ticket ticket, Properties props) {
+		String extraInfo = ticket.getExtraInfo();
+		props.clear();
 
-		Map<String, String> callMetrics = new HashMap<>();
-
-		Set<String> requiredMetrics = new HashSet<>();
-		for (ServiceAccessQuota quota : quotas) {
-			requiredMetrics.addAll(quota.getMetric());
-		}
-
-		AccessControlContext accessControlContext =
-			AccessControlUtil.getAccessControlContext();
-
-		for (SAQMetricProvider metricProvider : _metricProviders) {
-			String metricName = StringUtil.toLowerCase(
-				metricProvider.getMetricName());
-
-			if (Validator.isBlank(metricName) ||
-				!requiredMetrics.contains(metricName)) {
-
-				continue;
+		if (extraInfo != null) {
+			try {
+				props.load(new StringReader(extraInfo));
 			}
-
-			String metricValue = metricProvider.getMetricValue(
-				accessControlContext, method);
-
-			callMetrics.put(metricName, metricValue);
+			catch (IOException ioe) {
+				throw new SystemException(
+					"Failed to parse extra info of ticket " + ticket.getKey());
+			}
 		}
 
-		return callMetrics;
+		return props;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
