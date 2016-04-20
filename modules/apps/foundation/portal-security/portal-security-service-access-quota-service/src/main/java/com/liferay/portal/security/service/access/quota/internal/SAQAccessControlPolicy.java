@@ -14,30 +14,23 @@
 
 package com.liferay.portal.security.service.access.quota.internal;
 
-import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Ticket;
 import com.liferay.portal.kernel.security.access.control.AccessControlPolicy;
 import com.liferay.portal.kernel.security.access.control.AccessControlUtil;
 import com.liferay.portal.kernel.security.access.control.AccessControlled;
 import com.liferay.portal.kernel.security.access.control.BaseAccessControlPolicy;
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
-import com.liferay.portal.kernel.service.TicketLocalService;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.service.access.quota.metric.SAQMetricProvider;
-import com.liferay.ticket.kernel.model.TicketConstants;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import com.liferay.portal.security.service.access.quota.persistence.SAQImpression;
+import com.liferay.portal.security.service.access.quota.persistence.SAQImpressionPersistence;
 
 import java.lang.reflect.Method;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,14 +49,14 @@ import org.osgi.service.component.annotations.Reference;
 public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 	public void checkServiceRateLimiting(
-			String serviceClassName, String serviceMethodName,
+			Class<?> serviceClazz, String serviceMethodName,
 			Properties callMetrics, Set<ServiceAccessQuota> quotas)
 		throws SecurityException {
 
-		List<Ticket> tickets = _ticketService.findTickets(
-			serviceClassName, 0, TicketConstants.TYPE_RATE_LIMITING);
+		Iterator<SAQImpression> impressions =
+			_impressionPersistence.findImpressions(serviceClazz, callMetrics);
 
-		if (tickets == null) {
+		if (!impressions.hasNext()) {
 			return;
 		}
 
@@ -79,13 +72,10 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		Properties ticketMetrics = new Properties();
 		List<String> quotaMetrics;
 
-		for (Ticket ticket : tickets) {
-			if (ticket.isExpired()) {
-				_ticketService.deleteTicket(ticket);
-				continue;
-			}
+		while (impressions.hasNext()) {
+			SAQImpression impression = impressions.next();
 
-			_loadTicketMetrics(ticket, ticketMetrics);
+			impression.loadMetrics(ticketMetrics);
 
 			for (Map.Entry<ServiceAccessQuota, Integer> entry :
 					quotasCount.entrySet()) {
@@ -95,7 +85,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 				quotaMetrics = quota.getMetric();
 				int count = entry.getValue();
 
-				if ((ticket.getCreateDate().getTime() +
+				if ((impression.getCreatedMillis() +
 						quota.getIntervalMillis())
 							< System.currentTimeMillis()) {
 
@@ -108,7 +98,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 					continue;
 				}
 
-				count++;
+				count = count + impression.getWeight();
 
 				if (count < quota.getMax()) {
 					entry.setValue(count);
@@ -131,7 +121,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 					}
 				}
 
-				sb.append(" for ").append(serviceClassName).append('#').append(
+				sb.append(" for ").append(serviceClazz).append('#').append(
 					serviceMethodName);
 
 				throw new SecurityException(sb.toString());
@@ -160,7 +150,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 		try {
 			checkServiceRateLimiting(
-				clazz.getName(), method.getName(), callMetrics, matchedQuotas);
+				clazz, method.getName(), callMetrics, matchedQuotas);
 		}
 		catch (SecurityException se) {
 			if (_log.isDebugEnabled()) {
@@ -177,7 +167,8 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 				quota.getIntervalMillis(), largestQuotaIntervalMillis);
 		}
 
-		_createTicket(clazz, callMetrics, largestQuotaIntervalMillis);
+		_impressionPersistence.createImpression(
+			clazz, callMetrics, largestQuotaIntervalMillis);
 	}
 
 	protected Properties getCallMetrics(
@@ -371,26 +362,6 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		return false;
 	}
 
-	private void _createTicket(
-		Class<?> clazz, Properties callMetrics, long expiryMillis) {
-
-		Date expirationDate = new Date(
-			System.currentTimeMillis() + expiryMillis);
-
-		StringWriter sw = new StringWriter();
-
-		try {
-			callMetrics.store(sw, null);
-		}
-		catch (IOException ioe) {
-			throw new SystemException(ioe);
-		}
-
-		_ticketService.addTicket(
-			0, clazz.getName(), 0, TicketConstants.TYPE_RATE_LIMITING,
-			sw.toString(), expirationDate, null);
-	}
-
 	private boolean _isTicketMatchedToCall(
 		Properties callMetrics, Properties ticketMetrics,
 		List<String> quotaMetrics) {
@@ -423,33 +394,16 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		return allMetricsMatch;
 	}
 
-	private Properties _loadTicketMetrics(Ticket ticket, Properties props) {
-		String extraInfo = ticket.getExtraInfo();
-		props.clear();
-
-		if (extraInfo != null) {
-			try {
-				props.load(new StringReader(extraInfo));
-			}
-			catch (IOException ioe) {
-				throw new SystemException(
-					"Failed to parse extra info of ticket " + ticket.getKey());
-			}
-		}
-
-		return props;
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		SAQAccessControlPolicy.class);
+
+	@Reference
+	private volatile SAQImpressionPersistence _impressionPersistence;
 
 	@Reference
 	private volatile List<SAQMetricProvider> _metricProviders;
 
 	@Reference
 	private volatile List<ServiceAccessQuota> _quotas;
-
-	@Reference
-	private volatile TicketLocalService _ticketService;
 
 }
