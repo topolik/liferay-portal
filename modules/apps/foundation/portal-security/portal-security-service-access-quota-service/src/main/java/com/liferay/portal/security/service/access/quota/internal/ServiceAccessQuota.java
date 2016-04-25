@@ -52,8 +52,7 @@ public class ServiceAccessQuota {
 
 	public Set<String> getServiceSignature() {
 		String[] signatureArray = _configuration.serviceSignature();
-		HashSet<String> serviceSignature = new HashSet<>(
-			signatureArray.length);
+		HashSet<String> serviceSignature = new HashSet<>(signatureArray.length);
 
 		for (String signature : signatureArray) {
 			serviceSignature.add(signature);
