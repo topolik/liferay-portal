@@ -181,6 +181,13 @@ public class TicketLocalServiceWrapper implements TicketLocalService,
 		return _ticketLocalService.getTicketsCount();
 	}
 
+	@Override
+	public int getTicketsCount(long companyId, java.lang.String className,
+		long classPK, int type) {
+		return _ticketLocalService.getTicketsCount(companyId, className,
+			classPK, type);
+	}
+
 	/**
 	* Returns the OSGi service identifier.
 	*
@@ -259,6 +266,14 @@ public class TicketLocalServiceWrapper implements TicketLocalService,
 	public java.util.List<com.liferay.portal.kernel.model.Ticket> getTickets(
 		int start, int end) {
 		return _ticketLocalService.getTickets(start, end);
+	}
+
+	@Override
+	public java.util.List<com.liferay.portal.kernel.model.Ticket> getTickets(
+		long companyId, java.lang.String className, long classPK, int type,
+		int start, int end) {
+		return _ticketLocalService.getTickets(companyId, className, classPK,
+			type, start, end);
 	}
 
 	/**

@@ -180,6 +180,11 @@ public class TicketLocalServiceUtil {
 		return getService().getTicketsCount();
 	}
 
+	public static int getTicketsCount(long companyId,
+		java.lang.String className, long classPK, int type) {
+		return getService().getTicketsCount(companyId, className, classPK, type);
+	}
+
 	/**
 	* Returns the OSGi service identifier.
 	*
@@ -253,6 +258,13 @@ public class TicketLocalServiceUtil {
 	public static java.util.List<com.liferay.portal.kernel.model.Ticket> getTickets(
 		int start, int end) {
 		return getService().getTickets(start, end);
+	}
+
+	public static java.util.List<com.liferay.portal.kernel.model.Ticket> getTickets(
+		long companyId, java.lang.String className, long classPK, int type,
+		int start, int end) {
+		return getService()
+				   .getTickets(companyId, className, classPK, type, start, end);
 	}
 
 	/**

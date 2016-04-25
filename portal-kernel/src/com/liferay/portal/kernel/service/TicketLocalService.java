@@ -158,6 +158,10 @@ public interface TicketLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getTicketsCount();
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getTicketsCount(long companyId, java.lang.String className,
+		long classPK, int type);
+
 	/**
 	* Returns the OSGi service identifier.
 	*
@@ -217,6 +221,10 @@ public interface TicketLocalService extends BaseLocalService,
 	*/
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<Ticket> getTickets(int start, int end);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<Ticket> getTickets(long companyId, java.lang.String className,
+		long classPK, int type, int start, int end);
 
 	/**
 	* Returns the number of rows matching the dynamic query.
