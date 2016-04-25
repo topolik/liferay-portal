@@ -244,6 +244,12 @@ public class TicketLocalServiceWrapper implements TicketLocalService,
 			orderByComparator);
 	}
 
+	@Override
+	public java.util.List<com.liferay.portal.kernel.model.Ticket> findTickets(
+		java.lang.String className, long classPK, int type) {
+		return _ticketLocalService.findTickets(className, classPK, type);
+	}
+
 	/**
 	* Returns a range of all the tickets.
 	*
