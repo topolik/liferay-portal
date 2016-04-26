@@ -204,6 +204,9 @@ public interface TicketLocalService extends BaseLocalService,
 	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
 		int end, OrderByComparator<T> orderByComparator);
 
+	public List<Ticket> findTickets(java.lang.String className, long classPK,
+		int type);
+
 	/**
 	* Returns a range of all the tickets.
 	*

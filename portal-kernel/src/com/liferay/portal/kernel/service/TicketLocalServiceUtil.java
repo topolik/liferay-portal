@@ -239,6 +239,11 @@ public class TicketLocalServiceUtil {
 				   .dynamicQuery(dynamicQuery, start, end, orderByComparator);
 	}
 
+	public static java.util.List<com.liferay.portal.kernel.model.Ticket> findTickets(
+		java.lang.String className, long classPK, int type) {
+		return getService().findTickets(className, classPK, type);
+	}
+
 	/**
 	* Returns a range of all the tickets.
 	*
