@@ -672,8 +672,8 @@ public class AssetEntryLocalServiceUtil {
 	}
 
 	public static void addAssetCategoryAssetEntries(long categoryId,
-		java.util.List<com.liferay.asset.kernel.model.AssetEntry> AssetEntries) {
-		getService().addAssetCategoryAssetEntries(categoryId, AssetEntries);
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries) {
+		getService().addAssetCategoryAssetEntries(categoryId, assetEntries);
 	}
 
 	public static void addAssetCategoryAssetEntries(long categoryId,
@@ -691,8 +691,8 @@ public class AssetEntryLocalServiceUtil {
 	}
 
 	public static void addAssetTagAssetEntries(long tagId,
-		java.util.List<com.liferay.asset.kernel.model.AssetEntry> AssetEntries) {
-		getService().addAssetTagAssetEntries(tagId, AssetEntries);
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries) {
+		getService().addAssetTagAssetEntries(tagId, assetEntries);
 	}
 
 	public static void addAssetTagAssetEntries(long tagId, long[] entryIds) {
@@ -717,8 +717,8 @@ public class AssetEntryLocalServiceUtil {
 	}
 
 	public static void deleteAssetCategoryAssetEntries(long categoryId,
-		java.util.List<com.liferay.asset.kernel.model.AssetEntry> AssetEntries) {
-		getService().deleteAssetCategoryAssetEntries(categoryId, AssetEntries);
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries) {
+		getService().deleteAssetCategoryAssetEntries(categoryId, assetEntries);
 	}
 
 	public static void deleteAssetCategoryAssetEntries(long categoryId,
@@ -737,8 +737,8 @@ public class AssetEntryLocalServiceUtil {
 	}
 
 	public static void deleteAssetTagAssetEntries(long tagId,
-		java.util.List<com.liferay.asset.kernel.model.AssetEntry> AssetEntries) {
-		getService().deleteAssetTagAssetEntries(tagId, AssetEntries);
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries) {
+		getService().deleteAssetTagAssetEntries(tagId, assetEntries);
 	}
 
 	public static void deleteAssetTagAssetEntries(long tagId, long[] entryIds) {

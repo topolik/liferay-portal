@@ -731,9 +731,9 @@ public class AssetEntryLocalServiceWrapper implements AssetEntryLocalService,
 
 	@Override
 	public void addAssetCategoryAssetEntries(long categoryId,
-		java.util.List<com.liferay.asset.kernel.model.AssetEntry> AssetEntries) {
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries) {
 		_assetEntryLocalService.addAssetCategoryAssetEntries(categoryId,
-			AssetEntries);
+			assetEntries);
 	}
 
 	@Override
@@ -756,8 +756,8 @@ public class AssetEntryLocalServiceWrapper implements AssetEntryLocalService,
 
 	@Override
 	public void addAssetTagAssetEntries(long tagId,
-		java.util.List<com.liferay.asset.kernel.model.AssetEntry> AssetEntries) {
-		_assetEntryLocalService.addAssetTagAssetEntries(tagId, AssetEntries);
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries) {
+		_assetEntryLocalService.addAssetTagAssetEntries(tagId, assetEntries);
 	}
 
 	@Override
@@ -788,9 +788,9 @@ public class AssetEntryLocalServiceWrapper implements AssetEntryLocalService,
 
 	@Override
 	public void deleteAssetCategoryAssetEntries(long categoryId,
-		java.util.List<com.liferay.asset.kernel.model.AssetEntry> AssetEntries) {
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries) {
 		_assetEntryLocalService.deleteAssetCategoryAssetEntries(categoryId,
-			AssetEntries);
+			assetEntries);
 	}
 
 	@Override
@@ -814,8 +814,8 @@ public class AssetEntryLocalServiceWrapper implements AssetEntryLocalService,
 
 	@Override
 	public void deleteAssetTagAssetEntries(long tagId,
-		java.util.List<com.liferay.asset.kernel.model.AssetEntry> AssetEntries) {
-		_assetEntryLocalService.deleteAssetTagAssetEntries(tagId, AssetEntries);
+		java.util.List<com.liferay.asset.kernel.model.AssetEntry> assetEntries) {
+		_assetEntryLocalService.deleteAssetTagAssetEntries(tagId, assetEntries);
 	}
 
 	@Override

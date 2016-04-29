@@ -497,7 +497,7 @@ public interface AssetEntryLocalService extends BaseLocalService,
 	public long[] getAssetTagPrimaryKeys(long entryId);
 
 	public void addAssetCategoryAssetEntries(long categoryId,
-		List<AssetEntry> AssetEntries);
+		List<AssetEntry> assetEntries);
 
 	public void addAssetCategoryAssetEntries(long categoryId, long[] entryIds);
 
@@ -507,7 +507,7 @@ public interface AssetEntryLocalService extends BaseLocalService,
 	public void addAssetCategoryAssetEntry(long categoryId, long entryId);
 
 	public void addAssetTagAssetEntries(long tagId,
-		List<AssetEntry> AssetEntries);
+		List<AssetEntry> assetEntries);
 
 	public void addAssetTagAssetEntries(long tagId, long[] entryIds);
 
@@ -520,7 +520,7 @@ public interface AssetEntryLocalService extends BaseLocalService,
 	public void clearAssetTagAssetEntries(long tagId);
 
 	public void deleteAssetCategoryAssetEntries(long categoryId,
-		List<AssetEntry> AssetEntries);
+		List<AssetEntry> assetEntries);
 
 	public void deleteAssetCategoryAssetEntries(long categoryId, long[] entryIds);
 
@@ -530,7 +530,7 @@ public interface AssetEntryLocalService extends BaseLocalService,
 	public void deleteAssetCategoryAssetEntry(long categoryId, long entryId);
 
 	public void deleteAssetTagAssetEntries(long tagId,
-		List<AssetEntry> AssetEntries);
+		List<AssetEntry> assetEntries);
 
 	public void deleteAssetTagAssetEntries(long tagId, long[] entryIds);
 
