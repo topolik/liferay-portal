@@ -367,7 +367,7 @@ public class JournalArticleLocalServiceImpl
 
 		validateReferences(
 			groupId, ddmStructureKey, ddmTemplateKey, layoutUuid, smallImage,
-			smallImageURL, smallImageBytes, content);
+			smallImageURL, smallImageBytes, 0, content);
 
 		serviceContext.setAttribute("articleId", articleId);
 
@@ -5218,7 +5218,8 @@ public class JournalArticleLocalServiceImpl
 
 		validateReferences(
 			groupId, ddmStructureKey, ddmTemplateKey, layoutUuid, smallImage,
-			smallImageURL, smallImageBytes, content);
+			smallImageURL, smallImageBytes, latestArticle.getSmallImageId(),
+			content);
 
 		if (addNewVersion) {
 			long id = counterLocalService.increment();
@@ -5612,7 +5613,7 @@ public class JournalArticleLocalServiceImpl
 				article.getModifiedDate(), JournalArticle.class.getName(),
 				article.getPrimaryKey(), article.getUuid(),
 				getClassTypeId(article), assetCategoryIds, assetTagNames,
-				isListable(article), false, null, null, null,
+				isListable(article), false, null, null, null, null,
 				ContentTypes.TEXT_HTML, article.getTitle(),
 				article.getDescription(), article.getDescription(), null,
 				article.getLayoutUuid(), 0, 0, priority);
@@ -5628,9 +5629,10 @@ public class JournalArticleLocalServiceImpl
 				journalArticleResource.getResourcePrimKey(),
 				journalArticleResource.getUuid(), getClassTypeId(article),
 				assetCategoryIds, assetTagNames, isListable(article), visible,
-				null, null, null, ContentTypes.TEXT_HTML, article.getTitle(),
-				article.getDescription(), article.getDescription(), null,
-				article.getLayoutUuid(), 0, 0, priority);
+				null, null, null, null, ContentTypes.TEXT_HTML,
+				article.getTitle(), article.getDescription(),
+				article.getDescription(), null, article.getLayoutUuid(), 0, 0,
+				priority);
 		}
 
 		assetLinkLocalService.updateLinks(
@@ -5815,7 +5817,7 @@ public class JournalArticleLocalServiceImpl
 								article.getResourcePrimKey(), article.getUuid(),
 								getClassTypeId(article), assetCategoryIds,
 								assetTagNames, isListable(article), false, null,
-								null, null, ContentTypes.TEXT_HTML,
+								null, null, null, ContentTypes.TEXT_HTML,
 								article.getTitle(), article.getDescription(),
 								article.getDescription(), null,
 								article.getLayoutUuid(), 0, 0,
@@ -7898,7 +7900,7 @@ public class JournalArticleLocalServiceImpl
 	protected void validateReferences(
 			long groupId, String ddmStructureKey, String ddmTemplateKey,
 			String layoutUuid, boolean smallImage, String smallImageURL,
-			byte[] smallImageBytes, String content)
+			byte[] smallImageBytes, long smallImageId, String content)
 		throws PortalException {
 
 		long classNameId = classNameLocalService.getClassNameId(
@@ -7937,7 +7939,11 @@ public class JournalArticleLocalServiceImpl
 		if (smallImage && Validator.isNull(smallImageURL) &&
 			ArrayUtil.isEmpty(smallImageBytes)) {
 
-			throw new NoSuchImageException();
+			Image image = imageLocalService.fetchImage(smallImageId);
+
+			if (image == null) {
+				throw new NoSuchImageException();
+			}
 		}
 
 		ExportImportContentProcessor exportImportContentProcessor =
@@ -7946,6 +7952,23 @@ public class JournalArticleLocalServiceImpl
 
 		exportImportContentProcessor.validateContentReferences(
 			groupId, content);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link #validateReferences(long,
+	 *             String, String, String, boolean, String, byte[], long,
+	 *             String)}
+	 */
+	@Deprecated
+	protected void validateReferences(
+			long groupId, String ddmStructureKey, String ddmTemplateKey,
+			String layoutUuid, boolean smallImage, String smallImageURL,
+			byte[] smallImageBytes, String content)
+		throws PortalException {
+
+		validateReferences(
+			groupId, ddmStructureKey, ddmTemplateKey, layoutUuid, smallImage,
+			smallImageURL, smallImageBytes, 0, content);
 	}
 
 	@ServiceReference(type = ConfigurationProvider.class)

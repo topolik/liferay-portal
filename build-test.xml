@@ -597,15 +597,6 @@ counter.jdbc.prefix=jdbc.counter.]]></echo>
 		<sequential>
 			<fail message="Please set the property ${test.class}." unless="test.class" />
 
-			<var name="test.batch.run.type" unset="true" />
-			<var name="test.portal.instance" unset="true" />
-
-			<property name="test.batch.run.type" value="sequential" />
-			<property name="test.portal.instance" value="true" />
-
-			<propertycopy from="test.batch.run.property.names[${test.batch.name}]" name="test.batch.run.property.names" override="true" />
-			<propertycopy from="test.batch.run.property.values[${test.batch.name}]" name="test.batch.run.property.values" override="true" />
-
 			<if>
 				<and>
 					<matches pattern="[0-9]+_[0-9]+" string="${test.class}" />
@@ -614,19 +605,6 @@ counter.jdbc.prefix=jdbc.counter.]]></echo>
 					</not>
 				</and>
 				<then>
-					<if>
-						<not>
-							<available file="${project.dir}/test.case.method.names.properties" />
-						</not>
-						<then>
-							<antcall target="record-test-case-method-names">
-								<param name="test.batch.max.group.size" value="25" />
-								<param name="test.batch.property.names" value="${test.batch.run.property.names}" />
-								<param name="test.batch.property.values" value="${test.batch.run.property.values}" />
-							</antcall>
-						</then>
-					</if>
-
 					<loadproperties srcFile="${project.dir}/test.case.method.names.properties">
 						<filterchain>
 							<linecontains>
@@ -753,6 +731,13 @@ counter.jdbc.prefix=jdbc.counter.]]></echo>
 
 	<macrodef name="get-test-url">
 		<sequential>
+			<if>
+				<matches pattern="[0-9]+_[0-9]+" string="${test.class}" />
+				<then>
+					<get-test-class />
+				</then>
+			</if>
+
 			<get-testcase-property property.name="testcase.url" />
 
 			<if>
@@ -779,7 +764,7 @@ counter.jdbc.prefix=jdbc.counter.]]></echo>
 					</then>
 				</elseif>
 				<elseif>
-					<equals arg1="${test.portal.instance}" arg2="true" />
+					<contains string="${test.class}" substring="," />
 					<then>
 						<if>
 							<os family="unix" />
@@ -3040,6 +3025,21 @@ org.apache.catalina.startup.ClassLoaderFactory.level=INFO]]>
 									<execute>
 										jstack ${bootstrap.pid}
 									</execute>
+
+									<if>
+										<and>
+											<equals arg1="${app.server.type}" arg2="weblogic" />
+											<isset property="env.HOSTNAME" />
+										</and>
+										<then>
+											<replaceregexp
+												file="${app.server.weblogic.bin.dir}/stopWebLogic.sh"
+												flags="g"
+												match="(t3:\/\/)[^:]*(:\d+)"
+												replace="\1${env.HOSTNAME}\2"
+											/>
+										</then>
+									</if>
 
 									<stop-app-server app.server.bundle.index="@{app.server.bundle.index}" />
 								</then>
@@ -5365,29 +5365,26 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 		</if>
 
 		<if>
-			<isset property="test.portal.instance" />
+			<contains string="${test.class}" substring="," />
 			<then>
-				<if>
-					<contains string="${test.class}" substring="," />
-					<then>
-						<propertyregex
-							input="${test.class}"
-							override="false"
-							property="test.name.skip.portal.instance"
-							regexp="(.*?),.*"
-							replace="\1"
-						/>
+				<propertyregex
+					input="${test.class}"
+					override="false"
+					property="test.name.skip.portal.instance"
+					regexp="(.*?),.*"
+					replace="\1"
+				/>
 
-						<echo append="true" file="${test.ext.properties.file}">
-							test.name.skip.portal.instance=${test.name.skip.portal.instance}
-						</echo>
-					</then>
-				</if>
-
+				<echo append="true" file="${test.ext.properties.file}">
+					test.portal.instance=true
+					test.name.skip.portal.instance=${test.name.skip.portal.instance}
+				</echo>
+			</then>
+			<else>
 				<echo append="true" file="${test.ext.properties.file}">
 					test.portal.instance=${test.portal.instance}
 				</echo>
-			</then>
+			</else>
 		</if>
 	</target>
 
@@ -6441,7 +6438,7 @@ ANT_OPTS=${env.ANT_OPTS}</echo>
 					src="${tstamp.value}.zip"
 				>
 					<patternset
-						includes="liferay*portal-*/${app.server.type}-*/**"
+						includes="liferay-*/${app.server.type}-*/**"
 					/>
 					<mapper
 						from="[^/]+/(.*)"
@@ -6455,7 +6452,7 @@ ANT_OPTS=${env.ANT_OPTS}</echo>
 					src="${tstamp.value}.zip"
 				>
 					<patternset
-						includes="liferay*portal-*/deploy/**"
+						includes="liferay-*/deploy/**"
 					/>
 					<mapper
 						from="[^/]+/(.*)"
@@ -6469,7 +6466,7 @@ ANT_OPTS=${env.ANT_OPTS}</echo>
 					src="${tstamp.value}.zip"
 				>
 					<patternset
-						includes="liferay*portal-*/osgi/**"
+						includes="liferay-*/osgi/**"
 					/>
 					<mapper
 						from="[^/]+/(.*)"
@@ -6483,7 +6480,7 @@ ANT_OPTS=${env.ANT_OPTS}</echo>
 					src="${tstamp.value}.zip"
 				>
 					<patternset
-						includes="liferay*portal-*/patching-tool/patches/**"
+						includes="liferay-*/patching-tool/patches/**"
 					/>
 					<mapper
 						from="[^/]+/(.*)"
@@ -7445,30 +7442,35 @@ jdbc.default.password=${database.mysql.password}</echo>
 
 				<antcall target="run-poshi-evaluate-console" />
 
-				<antcall target="build-test-results-xml" />
-
-				<first id="first">
-					<fileset dir="portal-web/test-results/" includes="**/TEST-com.liferay.portalweb.*.xml,**/TEST-com.liferay.portalweb2.*.xml,**/TEST-com.liferay.poshi.runner.*.xml" />
-				</first>
-
-				<property name="jenkins.results.xml.file" value="${toString:first}" />
-
 				<if>
-					<and>
-						<available file="${jenkins.results.xml.file}" />
-						<not>
-							<isset property="env.JENKINS_GITHUB_PULL_REQUEST_USERNAME" />
-						</not>
-					</and>
+					<istrue value="${build.test.results.xml}" />
 					<then>
-						<copy
-							file="${jenkins.results.xml.file}"
-							tofile="${jenkins.shared.results.dir}/${env.BUILD_FLOW_JOB_NAME}/builds/${env.BUILD_FLOW_BUILD_NUMBER}/test-results/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${test.class}.xml"
-						/>
+						<antcall target="build-test-results-xml" />
+
+						<first id="first">
+							<fileset dir="portal-web/test-results/" includes="**/TEST-com.liferay.portalweb.*.xml,**/TEST-com.liferay.portalweb2.*.xml,**/TEST-com.liferay.poshi.runner.*.xml" />
+						</first>
+
+						<property name="jenkins.results.xml.file" value="${toString:first}" />
+
+						<if>
+							<and>
+								<available file="${jenkins.results.xml.file}" />
+								<not>
+									<isset property="env.JENKINS_GITHUB_PULL_REQUEST_USERNAME" />
+								</not>
+							</and>
+							<then>
+								<copy
+									file="${jenkins.results.xml.file}"
+									tofile="${jenkins.shared.results.dir}/${env.BUILD_FLOW_JOB_NAME}/builds/${env.BUILD_FLOW_BUILD_NUMBER}/test-results/TEST-${env.BUILD_FLOW_JOB_NAME}_${env.BUILD_FLOW_BUILD_NUMBER}_${test.class}.xml"
+								/>
+							</then>
+						</if>
+
+						<move file="${jenkins.results.xml.file}" todir="${project.dir}/portal-web/test-results/functional" />
 					</then>
 				</if>
-
-				<move file="${jenkins.results.xml.file}" todir="${project.dir}/portal-web/test-results/functional" />
 			</then>
 		</if>
 
@@ -8021,7 +8023,7 @@ jdbc.default.password=${database.mysql.password}</echo>
 		<delete file="${liferay.home}/build-db-upgrade.xml" />
 		<delete file="${liferay.home}/db_upgrade_log" />
 		<delete file="${liferay.home}/portal-ext.properties" />
-		<delete file="${liferay.home}/osgi/configs/com.liferay.portal.search.configuration.IndexWriterHelperConfiguration.cfg" />
+		<delete file="${liferay.home}/osgi/configs/com.liferay.portal.search.configuration.IndexStatusManagerConfiguration.cfg" />
 
 		<copy
 			file="tools/db-upgrade/build.xml"
@@ -8048,7 +8050,7 @@ jdbc.default.password=${database.mysql.password}</echo>
 			tofile="${liferay.home}/portal-ext.properties"
 		/>
 
-		<echo file="${liferay.home}/osgi/configs/com.liferay.portal.search.configuration.IndexWriterHelperConfiguration.cfg">index.read.only=true</echo>
+		<echo file="${liferay.home}/osgi/configs/com.liferay.portal.search.configuration.IndexStatusManagerConfiguration.cfg">indexReadOnly=true</echo>
 
 		<record action="start" name="${liferay.home}/db_upgrade_log" />
 
@@ -8119,7 +8121,8 @@ jdbc.default.password=${database.mysql.password}</echo>
 		<delete file="${liferay.home}/build-db-upgrade.xml" />
 		<delete file="${liferay.home}/db_upgrade_log" />
 		<delete file="${liferay.home}/portal-ext.properties" />
-		<delete file="${liferay.home}/osgi/configs/com.liferay.portal.search.configuration.IndexWriterHelperConfiguration.cfg" />
+
+		<echo file="${liferay.home}/osgi/configs/com.liferay.portal.search.configuration.IndexStatusManagerConfiguration.cfg">indexReadOnly=false</echo>
 	</target>
 
 	<target name="wait-for-plugins-deployment">
