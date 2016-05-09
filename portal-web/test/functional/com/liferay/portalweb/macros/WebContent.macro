@@ -596,7 +596,12 @@
 			<then>
 				<var name="key_fieldName" value="Image" />
 
-				<execute function="UploadCommonFile" locator1="DDMField#IMAGE" value1="${webContentImage}" />
+				<execute function="Click" locator1="Button#SELECT" />
+
+				<execute macro="ItemSelector#uploadFile">
+					<var name="navTab" value="Web Content Images" />
+					<var name="uploadFileName" value="${webContentImage}" />
+				</execute>
 			</then>
 		</if>
 

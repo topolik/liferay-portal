@@ -8,10 +8,6 @@
 
 		<execute macro="User#firstLoginPG" />
 
-		<execute macro="Portlet#shutdownServer" />
-
-		<execute macro="Portlet#startServer" />
-
 		<execute macro="ProductMenu#gotoControlPanelSites">
 			<var name="portlet" value="Sites" />
 		</execute>
@@ -97,14 +93,14 @@
 		<execute macro="WebContentNavigator#gotoAddCP" />
 
 		<execute macro="WebContent#addCP">
-			<var name="webContentContent" value="Web Content Content" />
-			<var name="webContentTitle" value="Web Content Title" />
+			<var name="webContentContent" value="Web Content Content Low Priority" />
+			<var name="webContentTitle" value="Low Priority Web Content Title" />
 		</execute>
 
 		<execute macro="PortletEntry#publish" />
 
 		<execute macro="WebContent#viewTitle">
-			<var name="webContentTitle" value="Web Content Title" />
+			<var name="webContentTitle" value="Low Priority Web Content Title" />
 		</execute>
 
 		<execute macro="ProductMenu#gotoSite">
@@ -119,13 +115,13 @@
 
 		<execute macro="WebContent#addCP">
 			<var name="webContentContent" value="Web Content Content Higher Priority" />
-			<var name="webContentTitle" value="Web Content Title Higher Priority" />
+			<var name="webContentTitle" value="Higher Priority Web Content Title" />
 		</execute>
 
 		<execute macro="PortletEntry#publish" />
 
 		<execute macro="WebContent#viewTitle">
-			<var name="webContentTitle" value="Web Content Title Higher Priority" />
+			<var name="webContentTitle" value="Higher Priority Web Content Title" />
 		</execute>
 
 		<execute macro="ProductMenu#gotoSite">
@@ -140,11 +136,30 @@
 			<var name="campaignDescription" value="Campaign Description" />
 			<var name="campaignEndDate" value="1/1/2099" />
 			<var name="campaignEndTime" value="12:00 PM" />
-			<var name="campaignName" value="Campaign Name" />
+			<var name="campaignName" value="Low Priority Campaign Name" />
 			<var name="campaignPriorityField" value="3" />
 			<var name="campaignStartDate" value="1/1/2015" />
 			<var name="campaignStartTime" value="12:00 AM" />
 			<var name="userSegmentSelect" value="User Segment Name Gender" />
+		</execute>
+
+		<execute macro="PortletEntry#save" />
+
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="Site Name" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Audience Targeting" />
+		</execute>
+
+		<execute macro="ContentTargetingCampaign#gotoAddReport">
+			<var name="campaignName" value="Low Priority Campaign Name" />
+		</execute>
+
+		<execute macro="ContentTargetingCampaign#addReportName">
+			<var name="reportDescription" value="Content Report Description" />
+			<var name="reportName" value="Content Report Name" />
 		</execute>
 
 		<execute macro="ContentTargetingCampaign#addTrackingActionPageCP">
@@ -152,7 +167,7 @@
 			<var name="pageFriendlyURL" value="/test-page-name" />
 		</execute>
 
-		<execute macro="ContentTargetingCampaign#saveCP" />
+		<execute macro="PortletEntry#save" />
 
 		<execute macro="ProductMenu#gotoSite">
 			<var name="site" value="Site Name" />
@@ -166,11 +181,30 @@
 			<var name="campaignDescription" value="Campaign Description High Priority" />
 			<var name="campaignEndDate" value="1/1/2099" />
 			<var name="campaignEndTime" value="12:00 PM" />
-			<var name="campaignName" value="Campaign Name Higher Priority" />
+			<var name="campaignName" value="Higher Priority Campaign Name" />
 			<var name="campaignPriorityField" value="2" />
 			<var name="campaignStartDate" value="1/1/2015" />
 			<var name="campaignStartTime" value="12:00 AM" />
 			<var name="userSegmentSelect" value="User Segment Name Signed In" />
+		</execute>
+
+		<execute macro="PortletEntry#save" />
+
+		<execute macro="ProductMenu#gotoSite">
+			<var name="site" value="Site Name" />
+		</execute>
+
+		<execute macro="ProductMenu#gotoSitesConfiguration">
+			<var name="portlet" value="Audience Targeting" />
+		</execute>
+
+		<execute macro="ContentTargetingCampaign#gotoAddReport">
+			<var name="campaignName" value="Higher Priority Campaign Name" />
+		</execute>
+
+		<execute macro="ContentTargetingCampaign#addReportName">
+			<var name="reportDescription" value="Content Report Description" />
+			<var name="reportName" value="Content Report Name" />
 		</execute>
 
 		<execute macro="ContentTargetingCampaign#addTrackingActionPageCP">
@@ -178,7 +212,7 @@
 			<var name="pageFriendlyURL" value="/test-page-name" />
 		</execute>
 
-		<execute macro="ContentTargetingCampaign#saveCP" />
+		<execute macro="PortletEntry#save" />
 
 		<execute macro="Navigator#gotoSitePage">
 			<var name="pageName" value="Test Page Name" />
@@ -194,15 +228,15 @@
 		</execute>
 
 		<execute macro="CampaignDisplayPortlet#configureCampaignRule">
-			<var name="campaignName" value="Campaign Name" />
-			<var name="contentTitle" value="Web Content Title" />
+			<var name="campaignName" value="Low Priority Campaign Name" />
+			<var name="contentTitle" value="Low Priority Web Content Title" />
 			<var name="contentType" value="Web Content Article" />
 			<var name="rowNumber" value="1" />
 		</execute>
 
 		<execute macro="CampaignDisplayPortlet#configureCampaignRule">
-			<var name="campaignName" value="Campaign Name Higher Priority" />
-			<var name="contentTitle" value="Web Content Title Higher Priority" />
+			<var name="campaignName" value="Higher Priority Campaign Name" />
+			<var name="contentTitle" value="Higher Priority Web Content Title" />
 			<var name="contentType" value="Web Content Article" />
 			<var name="rowNumber" value="2" />
 		</execute>
@@ -216,10 +250,8 @@
 
 		<execute macro="CampaignDisplayPortlet#viewPG">
 			<var name="entryContentText" value="Web Content Content Higher Priority" />
-			<var name="preview1Text" value="Campaign Name Higher Priority" />
-			<var name="preview2Text" value="Campaign Name" />
-			<var name="preview3Text" value="Default" />
-			<var name="viewUserSegmentSelected" value="Campaign Name Higher Priority" />
+			<var name="previewCampaignList" value="Higher Priority Campaign Name,Low Priority Campaign Name,default" />
+			<var name="viewCampaignSelected" value="Higher Priority Campaign Name" />
 		</execute>
 	</command>
 
@@ -319,8 +351,7 @@
 
 		<execute macro="CampaignDisplayPortlet#viewPG">
 			<var name="entryContentText" value="Web Content Content" />
-			<var name="preview1Text" value="Campaign Name" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewCampaignList" value="Cammpaign Name,default" />
 			<var name="viewUserSegmentSelected" value="Campaign Name" />
 		</execute>
 	</command>
@@ -759,9 +790,8 @@
 
 		<execute macro="CampaignDisplayPortlet#viewPG">
 			<var name="entryContentText" value="Web Content Content Otherwise" />
-			<var name="preview1Text" value="Campaign Name" />
-			<var name="preview2Text" value="Default" />
-			<var name="viewUserSegmentSelected" value="Default" />
+			<var name="previewCampaignList" value="Campaign Name,default" />
+			<var name="viewUserSegmentSelected" value="default" />
 		</execute>
 	</command>
 
@@ -860,10 +890,9 @@
 		</execute>
 
 		<execute macro="CampaignDisplayPortlet#viewPG">
-			<var name="preview1Text" value="Campaign Name" />
-			<var name="preview2Text" value="Default" />
-			<var name="viewDontDisplay" value="PREVIEW_2" />
-			<var name="viewUserSegmentSelected" value="Default" />
+			<var name="previewCampaignList" value="Campaign Name,default" />
+			<var name="viewDontDisplay" value="true" />
+			<var name="viewUserSegmentSelected" value="default" />
 		</execute>
 	</command>
 
@@ -1405,15 +1434,13 @@
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
 			<var name="entryContentText" value="Web Content Content" />
-			<var name="preview1Text" value="User Segment Name" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewUserSegmentList" value="User Segment Name,default" />
 			<var name="viewUserSegmentSelected" value="User Segment Name" />
 		</execute>
 
 		<execute macro="CampaignDisplayPortlet#viewPG">
 			<var name="entryContentText" value="Web Content Content" />
-			<var name="preview1Text" value="Campaign Name" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewCampaignList" value="Campaign Name,default" />
 			<var name="viewCampaignSelected" value="Campaign Name" />
 		</execute>
 	</command>
@@ -2159,15 +2186,13 @@
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
 			<var name="entryContentText" value="Web Content Content" />
-			<var name="preview1Text" value="Male Users" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewUserSegmentList" value="Male Users,default" />
 			<var name="viewUserSegmentSelected" value="Male Users" />
 		</execute>
 
 		<execute macro="CampaignDisplayPortlet#viewPG">
 			<var name="entryContentText" value="Web Content Content" />
-			<var name="preview1Text" value="Campaign Name" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewCampaignList" value="Campaign Name,default" />
 			<var name="viewCampaignSelected" value="Campaign Name" />
 		</execute>
 
@@ -2186,15 +2211,13 @@
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
 			<var name="entryContentText" value="Web Content Content" />
-			<var name="preview1Text" value="Male Users" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewUserSegmentList" value="Male Users,default" />
 			<var name="viewUserSegmentSelected" value="Male Users" />
 		</execute>
 
 		<execute macro="CampaignDisplayPortlet#viewPG">
 			<var name="entryContentText" value="Web Content Content" />
-			<var name="preview1Text" value="Campaign Name" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewCampaignList" value="Campaign Name,default" />
 			<var name="viewCampaignSelected" value="Campaign Name" />
 		</execute>
 	</command>
@@ -2947,7 +2970,7 @@
 			<var name="campaignPriorityField" value="2" />
 			<var name="campaignStartDate" value="1/1/2015" />
 			<var name="campaignStartTime" value="12:00 AM" />
-			<var name="userSegmentSelect" value="User Segment Name (Site Name)" />
+			<var name="userSegmentSelect" value="User Segment Name" />
 		</execute>
 
 		<execute macro="ContentTargetingCampaign#saveCP" />
@@ -2965,7 +2988,7 @@
 			<var name="campaignName" value="Campaign Name" />
 			<var name="campaignPriority" value="2" />
 			<var name="campaignStatus" value="Started" />
-			<var name="userSegmentSelect" value="User Segment Name (Site Name)" />
+			<var name="userSegmentSelect" value="User Segment Name" />
 		</execute>
 	</command>
 
@@ -3009,12 +3032,16 @@
 	</command>
 
 	<command name="UserSegmentAddMultipleViaUserContentDisplayPortletPG" priority="4">
+		<execute macro="ProductMenu#gotoControlPanelSites">
+			<var name="portlet" value="Sites" />
+		</execute>
+
 		<execute macro="Page#add">
 			<var name="pageName" value="Site Page Name" />
 			<var name="siteName" value="Site Name" />
 		</execute>
 
-		<for list="Admin,Page Visited,Male,Person" param="ruleName">
+		<for list="Admin,Page Visited,Male,Female" param="ruleName">
 			<execute macro="ProductMenu#gotoSite">
 				<var name="site" value="Site Name" />
 			</execute>
@@ -3084,10 +3111,10 @@
 		</execute>
 
 		<execute macro="User#addMultipleCP">
-			<var name="usersEmailsList" value="male@liferay.com,person@liferay.com,wcmuser@liferay.com" />
+			<var name="usersEmailsList" value="male@liferay.com,female@liferay.com,wcmuser@liferay.com" />
 		</execute>
 
-		<for list="male,person,wcmuser" param="userScreenName">
+		<for list="male,female,wcmuser" param="userScreenName">
 			<execute macro="ProductMenu#gotoControlPanelUsers">
 				<var name="portlet" value="Users and Organizations" />
 			</execute>
@@ -3117,8 +3144,8 @@
 		</execute>
 
 		<execute macro="User#editUserGenderCP">
+			<var name="userFirstName" value="female" />
 			<var name="userGender" value="Female" />
-			<var name="userScreenName" value="person" />
 		</execute>
 
 		<execute macro="Navigator#openSiteURL">
@@ -3161,7 +3188,7 @@
 		</execute>
 
 		<execute macro="UserSegmentContentDisplayPortlet#configureOtherwiseContenDisplayRule">
-			<var name="otherwiseContentTitle" value="WC Title Person" />
+			<var name="otherwiseContentTitle" value="WC Title Female" />
 			<var name="otherwiseContentType" value="Web Content Article" />
 		</execute>
 
@@ -3169,7 +3196,7 @@
 
 		<execute macro="User#logoutAndLoginPG">
 			<var name="userLoginEmailAddress" value="male@liferay.com" />
-			<var name="userLoginFullName" value="male male" />
+			<var name="userLoginFullName" value="male" />
 		</execute>
 
 		<execute macro="Navigator#openSiteURL">
@@ -3200,8 +3227,8 @@
 		</execute>
 
 		<execute macro="User#logoutAndLoginPG">
-			<var name="userLoginEmailAddress" value="person@liferay.com" />
-			<var name="userLoginFullName" value="person person" />
+			<var name="userLoginEmailAddress" value="female@liferay.com" />
+			<var name="userLoginFullName" value="female" />
 		</execute>
 
 		<execute macro="Navigator#gotoSitePage">
@@ -3210,7 +3237,7 @@
 		</execute>
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
-			<var name="entryContentText" value="WC Content Person" />
+			<var name="entryContentText" value="WC Content Female" />
 		</execute>
 	</command>
 
@@ -3380,9 +3407,8 @@
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
 			<var name="entryContentText" value="Web Content Content Otherwise" />
-			<var name="preview1Text" value="User Segment Name Age and User Segment Name Reg Role" />
-			<var name="preview2Text" value="Default" />
-			<var name="viewUserSegmentSelected" value="Default" />
+			<var name="previewUserSegmentList" value="User Segment Name Age and User Segment Name Reg Role,default" />
+			<var name="viewUserSegmentSelected" value="default" />
 		</execute>
 	</command>
 
@@ -3504,8 +3530,7 @@
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
 			<var name="entryContentText" value="Web Content Content Any" />
-			<var name="preview1Text" value="User Segment Name Age or User Segment Name Reg Role" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewUserSegmentList" value="User Segment Name Age or User Segment Name Reg Role,default" />
 		</execute>
 	</command>
 
@@ -3592,8 +3617,7 @@
 		</execute>
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
-			<var name="preview1Text" value="User Segment Name" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewUserSegmentList" value="User Segment Name,default" />
 		</execute>
 
 		<execute macro="ProductMenu#gotoControlPanelUsers">
@@ -3743,8 +3767,7 @@
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
 			<var name="entryContentText" value="Web Content Content Male" />
-			<var name="preview1Text" value="not User Segment Name" />
-			<var name="preview2Text" value="Default" />
+			<var name="previewUserSegmentList" value="not User Segment Name,default" />
 		</execute>
 
 		<execute macro="ProductMenu#gotoControlPanelUsers">
@@ -3869,10 +3892,9 @@
 		</execute>
 
 		<execute macro="UserSegmentContentDisplayPortlet#viewEntryPG">
-			<var name="preview1Text" value="User Segment Name" />
-			<var name="preview2Text" value="Default" />
-			<var name="viewDontDisplay" value="PREVIEW_2" />
-			<var name="viewUserSegmentSelected" value="Default" />
+			<var name="previewUserSegmentList" value="User Segment Name,default" />
+			<var name="viewDontDisplay" value="true" />
+			<var name="viewUserSegmentSelected" value="default" />
 		</execute>
 	</command>
 

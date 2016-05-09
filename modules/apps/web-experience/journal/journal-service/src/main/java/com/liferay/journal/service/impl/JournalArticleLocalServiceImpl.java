@@ -5171,7 +5171,7 @@ public class JournalArticleLocalServiceImpl
 
 				addNewVersion = true;
 
-				version = MathUtil.format(latestVersion + 0.1, 1, 1);
+				version = getNextVersion(article);
 			}
 		}
 
@@ -5461,7 +5461,7 @@ public class JournalArticleLocalServiceImpl
 		Locale defaultLocale = getArticleDefaultLocale(content);
 
 		if (incrementVersion) {
-			double newVersion = MathUtil.format(oldVersion + 0.1, 1, 1);
+			double newVersion = getNextVersion(oldArticle);
 
 			long id = counterLocalService.increment();
 
@@ -6441,6 +6441,31 @@ public class JournalArticleLocalServiceImpl
 		}
 	}
 
+	protected JournalArticle fetchLatestLiveArticle(JournalArticle article)
+		throws PortalException {
+
+		Group group = groupLocalService.getGroup(article.getGroupId());
+
+		long liveGroupId = group.getLiveGroupId();
+
+		if (liveGroupId == 0) {
+			return null;
+		}
+
+		JournalArticleResource articleResource =
+			journalArticleResourceLocalService.
+				fetchJournalArticleResourceByUuidAndGroupId(
+					article.getArticleResourceUuid(), liveGroupId);
+
+		if (articleResource == null) {
+			return null;
+		}
+
+		return journalArticleLocalService.fetchLatestArticle(
+			articleResource.getResourcePrimKey(), WorkflowConstants.STATUS_ANY,
+			false);
+	}
+
 	protected void format(
 			User user, long groupId, String articleId, double version,
 			boolean incrementVersion, Element root, Map<String, byte[]> images)
@@ -6666,11 +6691,11 @@ public class JournalArticleLocalServiceImpl
 			if ((version > JournalArticleConstants.VERSION_DEFAULT) &&
 				incrementVersion) {
 
-				double oldVersion = MathUtil.format(version - 0.1, 1, 1);
-
 				long oldImageId = 0;
 
-				if ((oldVersion >= 1) && incrementVersion) {
+				if (incrementVersion) {
+					double oldVersion = getLatestVersion(groupId, articleId);
+
 					oldImageId =
 						journalArticleImageLocalService.getArticleImageId(
 							groupId, articleId, oldVersion, elInstanceId,
@@ -7053,6 +7078,25 @@ public class JournalArticleLocalServiceImpl
 			JournalGroupServiceConfiguration.class,
 			new GroupServiceSettingsLocator(
 				groupId, JournalConstants.SERVICE_NAME));
+	}
+
+	protected double getNextVersion(JournalArticle article)
+		throws PortalException {
+
+		double nextVersion = article.getVersion();
+
+		// The next version must be greater than the version of the latest live
+		// article
+
+		JournalArticle latestLiveArticle = fetchLatestLiveArticle(article);
+
+		if ((latestLiveArticle != null) &&
+			(latestLiveArticle.getVersion() > nextVersion)) {
+
+			nextVersion = latestLiveArticle.getVersion();
+		}
+
+		return MathUtil.format(nextVersion + 0.1, 1, 1);
 	}
 
 	protected String getUniqueUrlTitle(

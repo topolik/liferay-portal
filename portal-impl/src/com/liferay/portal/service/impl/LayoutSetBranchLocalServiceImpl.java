@@ -144,7 +144,7 @@ public class LayoutSetBranchLocalServiceImpl
 
 		// Layout revisions
 
-		serviceContext.setAttribute("updateMajor", Boolean.TRUE.toString());
+		serviceContext.setAttribute("major", Boolean.TRUE.toString());
 
 		if (layoutSetBranch.isMaster() ||
 			(copyLayoutSetBranchId == LayoutSetBranchConstants.ALL_BRANCHES)) {

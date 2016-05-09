@@ -32,6 +32,8 @@
 	</command>
 
 	<command name="gotoTimelineTab">
+		<execute function="AssertElementPresent#assertVisible" locator1="NavTab#TIMELINE" value1="Timeline" />
+
 		<execute function="AssertClick" locator1="NavTab#TIMELINE" value1="Timeline" />
 
 		<execute function="AssertTextEquals" locator1="Microblogs#ACTIVE_TAB" value1="Timeline" />

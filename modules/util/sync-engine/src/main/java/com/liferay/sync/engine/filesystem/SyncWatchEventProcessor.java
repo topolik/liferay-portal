@@ -131,14 +131,14 @@ public class SyncWatchEventProcessor implements Runnable {
 
 	@Override
 	public void run() {
-		SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
-			_syncAccountId);
-
-		if (syncAccount.getState() != SyncAccount.STATE_CONNECTED) {
-			return;
-		}
-
 		try {
+			SyncAccount syncAccount = SyncAccountService.fetchSyncAccount(
+				_syncAccountId);
+
+			if (syncAccount.getState() != SyncAccount.STATE_CONNECTED) {
+				return;
+			}
+
 			doRun();
 		}
 		catch (Exception e) {

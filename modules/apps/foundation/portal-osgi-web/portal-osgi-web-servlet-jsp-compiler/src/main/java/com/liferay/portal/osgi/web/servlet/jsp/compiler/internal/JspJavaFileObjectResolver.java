@@ -163,7 +163,7 @@ public class JspJavaFileObjectResolver implements JavaFileObjectResolver {
 
 			fileName = url.getFile();
 
-			String protocol = "file:/";
+			String protocol = "file:";
 
 			int index = fileName.indexOf(protocol);
 
@@ -188,6 +188,12 @@ public class JspJavaFileObjectResolver implements JavaFileObjectResolver {
 			if (index > 0) {
 				fileName = fileName.substring(0, index);
 			}
+		}
+		else {
+
+			// Ignore files that we do not know how to handle
+
+			return null;
 		}
 
 		return new File(URLCodec.decodeURL(fileName, StringPool.UTF8));
@@ -266,6 +272,14 @@ public class JspJavaFileObjectResolver implements JavaFileObjectResolver {
 		for (URL url : urls) {
 			try {
 				File file = getFile(url);
+
+				if (file == null) {
+					_logger.log(
+						Logger.LOG_WARNING,
+						"Ignoring " + url + " while handling system bundle");
+
+					continue;
+				}
 
 				try (FileSystem fileSystem = FileSystems.newFileSystem(
 						file.toPath(), null)) {

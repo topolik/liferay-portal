@@ -18,7 +18,7 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.storage.Fields;
-import com.liferay.frontend.taglib.web.servlet.taglib.ManagementBarFilterItem;
+import com.liferay.frontend.taglib.servlet.taglib.ManagementBarFilterItem;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.constants.JournalWebKeys;
 import com.liferay.journal.model.JournalArticle;
@@ -470,6 +470,23 @@ public class JournalDisplayContext {
 		}
 
 		return portletURL;
+	}
+
+	public int getRestrictionType() throws PortalException {
+		if (_restrictionType != null) {
+			return _restrictionType;
+		}
+
+		JournalFolder folder = getFolder();
+
+		if (folder != null) {
+			_restrictionType = folder.getRestrictionType();
+		}
+		else {
+			_restrictionType = JournalFolderConstants.RESTRICTION_TYPE_INHERIT;
+		}
+
+		return _restrictionType;
 	}
 
 	public ArticleSearch getSearchContainer() throws PortalException {
@@ -1045,6 +1062,7 @@ public class JournalDisplayContext {
 	private final PortalPreferences _portalPreferences;
 	private final PortletPreferences _portletPreferences;
 	private final HttpServletRequest _request;
+	private Integer _restrictionType;
 	private Boolean _showEditActions;
 	private Integer _status;
 
