@@ -45,14 +45,21 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 
 		Role defaultGroupRole = RoleLocalServiceUtil.getDefaultGroupRole(siteGroup.getGroupId());
 
-		boolean hasViewDefaultGroupRolePermission = RolePermissionUtil.contains(themeDisplay.getPermissionChecker(), siteGroup.getGroupId(), defaultGroupRole.getRoleId(), ActionKeys.VIEW);
+		String defaultGroupRoleName = StringPool.BLANK;
+
+		boolean hasViewDefaultGroupRolePermission = false;
+
+		if (defaultGroupRole != null) {
+			defaultGroupRoleName = defaultGroupRole.getName();
+			hasViewDefaultGroupRolePermission = RolePermissionUtil.contains(themeDisplay.getPermissionChecker(), siteGroup.getGroupId(), defaultGroupRole.getRoleId(), ActionKeys.VIEW);
+		}
 
 		Role guestRole = RoleLocalServiceUtil.getRole(themeDisplay.getCompanyId(), RoleConstants.GUEST);
 
 		String[] roleNames = new String[] {RoleConstants.GUEST};
 
 		if (hasViewDefaultGroupRolePermission) {
-			roleNames = ArrayUtil.append(roleNames, defaultGroupRole.getName());
+			roleNames = ArrayUtil.append(roleNames, defaultGroupRoleName);
 		}
 
 		String guestPermissionsName = "guestPermissions";
@@ -99,15 +106,15 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 					<option <%= (inputPermissionsViewRole.equals(RoleConstants.GUEST)) ? "selected=\"selected\"" : "" %> value="<%= RoleConstants.GUEST %>"><%= guestRoleLabel %></option>
 
 					<c:if test="<%= hasViewDefaultGroupRolePermission %>">
-						<option <%= (inputPermissionsViewRole.equals(defaultGroupRole.getName())) ? "selected=\"selected\"" : "" %> value="<%= defaultGroupRole.getName() %>">
+						<option <%= (inputPermissionsViewRole.equals(defaultGroupRoleName)) ? "selected=\"selected\"" : "" %> value="<%= defaultGroupRoleName %>">
 							<c:choose>
-								<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.ORGANIZATION_USER) %>">
+								<c:when test="<%= defaultGroupRoleName.equals(RoleConstants.ORGANIZATION_USER) %>">
 									<liferay-ui:message key="organization-members" />
 								</c:when>
-								<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.POWER_USER) %>">
+								<c:when test="<%= defaultGroupRoleName.equals(RoleConstants.POWER_USER) %>">
 									<liferay-ui:message key="power-users" />
 								</c:when>
-								<c:when test="<%= defaultGroupRole.getName().equals(RoleConstants.SITE_MEMBER) %>">
+								<c:when test="<%= defaultGroupRoleName.equals(RoleConstants.SITE_MEMBER) %>">
 									<liferay-ui:message key="site-members" />
 								</c:when>
 								<c:otherwise>
@@ -182,7 +189,7 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 									checked = guestDefaultActions.contains(action) && (inputPermissionsViewRole.equals(RoleConstants.GUEST));
 								}
 							}
-							else if (roleName.equals(defaultGroupRole.getName())) {
+							else if (roleName.equals(defaultGroupRoleName)) {
 								if (submitted) {
 									checked = groupPermissions.contains(action);
 								}
@@ -255,7 +262,7 @@ String modelName = (String)request.getAttribute("liferay-ui:input-permissions:mo
 				if (viewableBy == '<%= RoleConstants.GUEST %>') {
 					checkGuestViewPermissions = true;
 				}
-				else if (viewableBy == '<%= defaultGroupRole.getName() %>') {
+				else if (viewableBy == '<%= defaultGroupRoleName %>') {
 					checkGroupViewPermissions = true;
 				}
 

@@ -155,7 +155,15 @@ public class ServiceContext implements Cloneable, Serializable {
 		List<String> groupPermissionsList = new ArrayList<>();
 		List<String> guestPermissionsList = new ArrayList<>();
 
-		String[] roleNames = {RoleConstants.GUEST, defaultGroupRole.getName()};
+		String[] roleNames = null;
+
+		if (defaultGroupRole != null) {
+			roleNames =
+				new String[] {RoleConstants.GUEST, defaultGroupRole.getName()};
+		}
+		else {
+			roleNames = new String[] {RoleConstants.GUEST};
+		}
 
 		List<String> supportedActions =
 			ResourceActionsUtil.getModelResourceActions(modelName);
@@ -176,7 +184,8 @@ public class ServiceContext implements Cloneable, Serializable {
 
 					guestPermissionsList.add(action);
 				}
-				else if (roleName.equals(defaultGroupRole.getName()) &&
+				else if ((defaultGroupRole != null) &&
+						 roleName.equals(defaultGroupRole.getName()) &&
 						 groupDefaultActions.contains(action)) {
 
 					groupPermissionsList.add(action);
