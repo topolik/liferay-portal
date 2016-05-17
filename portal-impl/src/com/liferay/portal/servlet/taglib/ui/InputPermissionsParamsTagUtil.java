@@ -176,7 +176,9 @@ public class InputPermissionsParamsTagUtil {
 			Role defaultGroupRole = RoleLocalServiceUtil.getDefaultGroupRole(
 				siteGroup.getGroupId());
 
-			return defaultGroupRole.getName();
+			if (defaultGroupRole != null) {
+				return defaultGroupRole.getName();
+			}
 		}
 
 		return RoleConstants.OWNER;
