@@ -605,11 +605,12 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 	 * default role is {@link RoleConstants#ORGANIZATION_USER}. If the group is
 	 * a user or user group, then the default role is {@link
 	 * RoleConstants#POWER_USER}. For all other group types, the default role is
-	 * {@link RoleConstants#USER}.
+	 * not defined and {@code null} is returned.
 	 * </p>
 	 *
 	 * @param  groupId the primary key of the group
-	 * @return the default role for the group with the primary key
+	 * @return the default role for the group with the primary key or
+	 *         {@code null}
 	 */
 	@Override
 	public Role getDefaultGroupRole(long groupId) throws PortalException {
@@ -628,7 +629,10 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 		Role role = null;
 
 		if (group.isCompany()) {
-			role = getRole(group.getCompanyId(), RoleConstants.USER);
+
+			// LPS-65007
+
+			role = null;
 		}
 		else if (group.isLayoutPrototype() || group.isLayoutSetPrototype() ||
 				 group.isRegularSite() || group.isSite()) {
@@ -640,7 +644,10 @@ public class RoleLocalServiceImpl extends RoleLocalServiceBaseImpl {
 				group.getCompanyId(), RoleConstants.ORGANIZATION_USER);
 		}
 		else {
-			role = getRole(group.getCompanyId(), RoleConstants.USER);
+
+			// LPS-65007
+
+			role = null;
 		}
 
 		return role;
