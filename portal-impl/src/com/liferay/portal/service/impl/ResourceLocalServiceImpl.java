@@ -630,6 +630,10 @@ public class ResourceLocalServiceImpl extends ResourceLocalServiceBaseImpl {
 
 		Role role = roleLocalService.getDefaultGroupRole(groupId);
 
+		if (role == null) {
+			return;
+		}
+
 		resourcePermissionLocalService.setResourcePermissions(
 			resource.getCompanyId(), resource.getName(), resource.getScope(),
 			resource.getPrimKey(), role.getRoleId(), actionIds);
@@ -647,6 +651,10 @@ public class ResourceLocalServiceImpl extends ResourceLocalServiceBaseImpl {
 		// Scope is assumed to always be individual
 
 		Role role = roleLocalService.getDefaultGroupRole(groupId);
+
+		if (role == null) {
+			return;
+		}
 
 		resourceBlockLocalService.setIndividualScopePermissions(
 			resource.getCompanyId(), groupId, resource.getName(),
@@ -1096,9 +1104,11 @@ public class ResourceLocalServiceImpl extends ResourceLocalServiceBaseImpl {
 
 		Role role = roleLocalService.getDefaultGroupRole(groupId);
 
-		resourceBlockLocalService.setIndividualScopePermissions(
-			companyId, groupId, resource.getName(), permissionedModel,
-			role.getRoleId(), Arrays.asList(groupPermissions));
+		if (role != null) {
+			resourceBlockLocalService.setIndividualScopePermissions(
+				companyId, groupId, resource.getName(), permissionedModel,
+				role.getRoleId(), Arrays.asList(groupPermissions));
+		}
 
 		role = roleLocalService.getRole(companyId, RoleConstants.GUEST);
 
@@ -1135,9 +1145,12 @@ public class ResourceLocalServiceImpl extends ResourceLocalServiceBaseImpl {
 
 		Role role = roleLocalService.getDefaultGroupRole(groupId);
 
-		resourcePermissionLocalService.setResourcePermissions(
-			resource.getCompanyId(), resource.getName(), resource.getScope(),
-			resource.getPrimKey(), role.getRoleId(), groupPermissions);
+		if (role != null) {
+			resourcePermissionLocalService.setResourcePermissions(
+				resource.getCompanyId(), resource.getName(),
+				resource.getScope(), resource.getPrimKey(), role.getRoleId(),
+				groupPermissions);
+		}
 
 		role = roleLocalService.getRole(companyId, RoleConstants.GUEST);
 
