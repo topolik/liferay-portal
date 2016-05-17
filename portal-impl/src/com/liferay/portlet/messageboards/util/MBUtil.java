@@ -890,8 +890,12 @@ public class MBUtil {
 					ResourceConstants.SCOPE_INDIVIDUAL,
 					String.valueOf(parentMessage.getMessageId()), actionIds);
 
-		Set<String> defaultGroupActionIds = roleIdsToActionIds.get(
-			defaultGroupRole.getRoleId());
+		Set<String> defaultGroupActionIds = null;
+
+		if (defaultGroupRole != null) {
+			defaultGroupActionIds = roleIdsToActionIds.get(
+				defaultGroupRole.getRoleId());
+		}
 
 		if (defaultGroupActionIds == null) {
 			serviceContext.setGroupPermissions(new String[0]);

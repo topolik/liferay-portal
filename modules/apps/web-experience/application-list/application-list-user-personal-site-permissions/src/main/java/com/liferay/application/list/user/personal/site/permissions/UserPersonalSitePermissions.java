@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.GroupLocalService;
@@ -56,7 +57,7 @@ public class UserPersonalSitePermissions {
 		for (Company company : companies) {
 			long companyId = company.getCompanyId();
 
-			Role powerUserRole = getPowerUserRole(companyId);
+			Role powerUserRole = getRole(companyId, RoleConstants.POWER_USER);
 
 			if (powerUserRole == null) {
 				continue;
@@ -68,10 +69,16 @@ public class UserPersonalSitePermissions {
 				continue;
 			}
 
+			Role userRole = getRole(companyId, RoleConstants.USER);
+
+			if (userRole == null) {
+				continue;
+			}
+
 			try {
 				initPermissions(
 					companyId, powerUserRole.getRoleId(), rootPortletId,
-					userPersonalSiteGroup.getGroupId());
+					userPersonalSiteGroup.getGroupId(), userRole.getRoleId());
 			}
 			catch (PortalException pe) {
 				_log.error(
@@ -84,7 +91,7 @@ public class UserPersonalSitePermissions {
 	}
 
 	public void initPermissions(long companyId, List<Portlet> portlets) {
-		Role powerUserRole = getPowerUserRole(companyId);
+		Role powerUserRole = getRole(companyId, RoleConstants.POWER_USER);
 
 		if (powerUserRole == null) {
 			return;
@@ -96,12 +103,18 @@ public class UserPersonalSitePermissions {
 			return;
 		}
 
+		Role userRole = getRole(companyId, RoleConstants.USER);
+
+		if (userRole == null) {
+			return;
+		}
+
 		for (Portlet portlet : portlets) {
 			try {
 				initPermissions(
 					companyId, powerUserRole.getRoleId(),
 					portlet.getRootPortletId(),
-					userPersonalSiteGroup.getGroupId());
+					userPersonalSiteGroup.getGroupId(), userRole.getRoleId());
 			}
 			catch (PortalException pe) {
 				_log.error(
@@ -130,14 +143,14 @@ public class UserPersonalSitePermissions {
 		_serviceTracker.close();
 	}
 
-	protected Role getPowerUserRole(long companyId) {
+	protected Role getRole(long companyId, String roleName) {
 		try {
-			return _roleLocalService.getRole(
-				companyId, RoleConstants.POWER_USER);
+			return _roleLocalService.getRole(companyId, roleName);
 		}
 		catch (PortalException pe) {
 			_log.error(
-				"Unable to get power user role in company " + companyId, pe);
+				"Unable to get " + roleName + " role in company " + companyId,
+				pe);
 		}
 
 		return null;
@@ -159,7 +172,7 @@ public class UserPersonalSitePermissions {
 
 	protected void initPermissions(
 			long companyId, long powerUserRoleId, String rootPortletId,
-			long userPersonalSiteGroupId)
+			long userPersonalSiteGroupId, long userRoleId)
 		throws PortalException {
 
 		String primaryKey = String.valueOf(userPersonalSiteGroupId);
@@ -168,12 +181,16 @@ public class UserPersonalSitePermissions {
 				companyId, rootPortletId, ResourceConstants.SCOPE_GROUP,
 				primaryKey) == 0) {
 
+			_resourcePermissionLocalService.setResourcePermissions(
+				companyId, rootPortletId, ResourceConstants.SCOPE_GROUP,
+				primaryKey, userRoleId, new String[] {ActionKeys.VIEW});
+
 			List<String> portletActionIds =
 				ResourceActionsUtil.getPortletResourceActions(rootPortletId);
 
 			_resourcePermissionLocalService.setResourcePermissions(
 				companyId, rootPortletId, ResourceConstants.SCOPE_GROUP,
-				String.valueOf(userPersonalSiteGroupId), powerUserRoleId,
+				primaryKey, powerUserRoleId,
 				portletActionIds.toArray(new String[0]));
 		}
 
@@ -192,9 +209,8 @@ public class UserPersonalSitePermissions {
 				ResourceActionsUtil.getModelResourceActions(modelName);
 
 			_resourcePermissionLocalService.setResourcePermissions(
-				companyId, modelName, ResourceConstants.SCOPE_GROUP,
-				String.valueOf(userPersonalSiteGroupId), powerUserRoleId,
-				modelActionIds.toArray(new String[0]));
+				companyId, modelName, ResourceConstants.SCOPE_GROUP, primaryKey,
+				powerUserRoleId, modelActionIds.toArray(new String[0]));
 		}
 	}
 

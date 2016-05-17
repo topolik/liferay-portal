@@ -243,11 +243,12 @@ public interface RoleLocalService extends BaseLocalService,
 	* default role is {@link RoleConstants#ORGANIZATION_USER}. If the group is
 	* a user or user group, then the default role is {@link
 	* RoleConstants#POWER_USER}. For all other group types, the default role is
-	* {@link RoleConstants#USER}.
+	* not defined and {@code null} is returned.
 	* </p>
 	*
-	* @param groupId the primary key of the group
-	* @return the default role for the group with the primary key
+	* @param  groupId the primary key of the group
+	* @return the default role for the group with the primary key or
+	*         {@code null}
 	*/
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public Role getDefaultGroupRole(long groupId) throws PortalException;
