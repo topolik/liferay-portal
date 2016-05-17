@@ -183,15 +183,14 @@ public class UserPersonalSitePermissions {
 
 			_resourcePermissionLocalService.setResourcePermissions(
 				companyId, rootPortletId, ResourceConstants.SCOPE_GROUP,
-				String.valueOf(userPersonalSiteGroupId), userRoleId,
-				new String[] {ActionKeys.VIEW});
+				primaryKey, userRoleId, new String[] {ActionKeys.VIEW});
 
 			List<String> portletActionIds =
 				ResourceActionsUtil.getPortletResourceActions(rootPortletId);
 
 			_resourcePermissionLocalService.setResourcePermissions(
 				companyId, rootPortletId, ResourceConstants.SCOPE_GROUP,
-				String.valueOf(userPersonalSiteGroupId), powerUserRoleId,
+				primaryKey, powerUserRoleId,
 				portletActionIds.toArray(new String[0]));
 		}
 
@@ -210,9 +209,8 @@ public class UserPersonalSitePermissions {
 				ResourceActionsUtil.getModelResourceActions(modelName);
 
 			_resourcePermissionLocalService.setResourcePermissions(
-				companyId, modelName, ResourceConstants.SCOPE_GROUP,
-				String.valueOf(userPersonalSiteGroupId), powerUserRoleId,
-				modelActionIds.toArray(new String[0]));
+				companyId, modelName, ResourceConstants.SCOPE_GROUP, primaryKey,
+				powerUserRoleId, modelActionIds.toArray(new String[0]));
 		}
 	}
 
