@@ -1,0 +1,67 @@
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
+package com.liferay.portal.security.service.access.quota;
+
+import com.liferay.portal.security.service.access.quota.persistence.SAQImpression;
+
+import java.util.Properties;
+
+/**
+ * @author Stian Sigvartsen
+ */
+public class TestSAQImpression implements SAQImpression {
+
+	public TestSAQImpression(String key, Properties metrics) {
+		this(key, metrics, 1);
+	}
+
+	public TestSAQImpression(String key, Properties metrics, int weight) {
+		_key = key;
+		_metrics = metrics;
+		_weight = weight;
+	}
+
+	@Override
+	public long getCreatedMillis() {
+		return 0;
+	}
+
+	@Override
+	public String getKey() {
+		return _key;
+	}
+
+	@Override
+	public int getWeight() {
+		return _weight;
+	}
+
+	@Override
+	public void loadMetrics(Properties props) {
+		props.clear();
+		props.putAll(_metrics);
+	}
+
+	@Override
+	public String toString() {
+		return "{key=" + _key +
+			",metrics=" + _metrics.toString() + "}";
+	}
+
+	private final String _key;
+	private final Properties _metrics;
+	private final int _weight;
+
+}
