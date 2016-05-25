@@ -67,6 +67,7 @@ import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.ResourcePermission;
 import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -1426,13 +1427,15 @@ public class UpgradeDynamicDataMapping extends UpgradeProcess {
 	static {
 		_structureModelResourceNames.put(
 			"com.liferay.document.library.kernel.model.DLFileEntry",
-			"com.liferay.document.library.kernel.model.DLFileEntry-" +
-				_CLASS_NAME_DDM_STRUCTURE);
+			ResourceActionsUtil.getCompositeModelName(
+				"com.liferay.document.library.kernel.model.DLFileEntry",
+				_CLASS_NAME_DDM_STRUCTURE));
 
 		_structureModelResourceNames.put(
 			"com.liferay.document.library.kernel.model.DLFileEntryMetadata",
-			"com.liferay.document.library.kernel.model.DLFileEntryMetadata-" +
-				_CLASS_NAME_DDM_STRUCTURE);
+			ResourceActionsUtil.getCompositeModelName(
+				"com.liferay.document.library.kernel.model.DLFileEntryMetadata",
+				_CLASS_NAME_DDM_STRUCTURE));
 
 		_structureModelResourceNames.put(
 			"com.liferay.document.library.kernel.util.RawMetadataProcessor",
@@ -1440,13 +1443,15 @@ public class UpgradeDynamicDataMapping extends UpgradeProcess {
 
 		_structureModelResourceNames.put(
 			"com.liferay.portlet.dynamicdatalists.model.DDLRecordSet",
-			"com.liferay.dynamic.data.lists.model.DDLRecordSet-" +
-				_CLASS_NAME_DDM_STRUCTURE);
+			ResourceActionsUtil.getCompositeModelName(
+				"com.liferay.dynamic.data.lists.model.DDLRecordSet",
+				_CLASS_NAME_DDM_STRUCTURE));
 
 		_structureModelResourceNames.put(
 			"com.liferay.portlet.journal.model.JournalArticle",
-			"com.liferay.journal.model.JournalArticle-" +
-				_CLASS_NAME_DDM_STRUCTURE);
+			ResourceActionsUtil.getCompositeModelName(
+				"com.liferay.journal.model.JournalArticle",
+				_CLASS_NAME_DDM_STRUCTURE));
 
 		_templateModelResourceNames.put(
 			"com.liferay.portlet.display.template.PortletDisplayTemplate",
@@ -1454,13 +1459,15 @@ public class UpgradeDynamicDataMapping extends UpgradeProcess {
 
 		_templateModelResourceNames.put(
 			"com.liferay.portlet.dynamicdatalists.model.DDLRecordSet",
-			"com.liferay.dynamic.data.lists.model.DDLRecordSet-" +
-				_CLASS_NAME_DDM_TEMPLATE);
+			ResourceActionsUtil.getCompositeModelName(
+				"com.liferay.dynamic.data.lists.model.DDLRecordSet",
+				_CLASS_NAME_DDM_TEMPLATE));
 
 		_templateModelResourceNames.put(
 			"com.liferay.portlet.journal.model.JournalArticle",
-			"com.liferay.journal.model.JournalArticle-" +
-				_CLASS_NAME_DDM_TEMPLATE);
+			ResourceActionsUtil.getCompositeModelName(
+				"com.liferay.journal.model.JournalArticle",
+				_CLASS_NAME_DDM_TEMPLATE));
 	}
 
 	private final AssetEntryLocalService _assetEntryLocalService;
