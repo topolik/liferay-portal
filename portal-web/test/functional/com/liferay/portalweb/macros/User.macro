@@ -1032,10 +1032,14 @@
 
 		<execute function="AssertClick" locator1="Link#CREATE_ACCOUNT" value1="Create Account" />
 
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
+
 		<execute function="Type" locator1="TextInput#FIRST_NAME" value1="${userFirstName}" />
 		<execute function="Type" locator1="TextInput#LAST_NAME" value1="${userLastName}" />
 		<execute function="Type" locator1="TextInput#SCREEN_NAME" value1="${userScreenName}" />
 		<execute function="Type" locator1="TextInput#EMAIL_ADDRESS" value1="${userEmailAddress}" />
+
+		<execute function="SelectFrame" value1="relative=top" />
 
 		<execute macro="Button#clickSave" />
 	</command>
