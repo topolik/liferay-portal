@@ -254,6 +254,15 @@ public class ResourceActionsUtil {
 		getResourceActions().read(servletContextName, classLoader, source);
 	}
 
+	public static void read(
+			String servletContextName, ClassLoader classLoader, String source,
+			ResourceActionListener resourceActionListener)
+		throws Exception {
+
+		getResourceActions().read(
+			servletContextName, classLoader, source, resourceActionListener);
+	}
+
 	/**
 	 * @deprecated As of 7.0.0
 	 */
@@ -268,6 +277,14 @@ public class ResourceActionsUtil {
 		PortalRuntimePermission.checkSetBeanProperty(getClass());
 
 		_resourceActions = resourceActions;
+	}
+
+	public interface ResourceActionListener {
+
+		public void readModelResources(String modelName);
+
+		public void readPortletModelResources(String portletModelName);
+
 	}
 
 	private static ResourceActions _resourceActions;

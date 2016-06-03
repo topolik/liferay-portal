@@ -135,6 +135,11 @@ public interface ResourceActions {
 			String servletContextName, ClassLoader classLoader, String source)
 		throws Exception;
 
+	public void read(
+			String servletContextName, ClassLoader classLoader, String source,
+			ResourceActionsUtil.ResourceActionListener resourceActionListener)
+		throws Exception;
+
 	/**
 	 * @deprecated As of 7.0.0
 	 */

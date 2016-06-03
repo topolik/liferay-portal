@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.configuration.ConfigurationFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil.ResourceActionListener;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -35,8 +36,10 @@ import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistrar;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -175,10 +178,22 @@ public class ServiceConfiguratorImpl implements ServiceConfigurator {
 		String[] resourceActionsConfigs = StringUtil.split(
 			configuration.get(PropsKeys.RESOURCE_ACTIONS_CONFIGS));
 
+		final Collection<String> modelNames = new HashSet<>();
+
 		for (String resourceActionsConfig : resourceActionsConfigs) {
 			try {
 				ResourceActionsUtil.read(
-					null, classLoader, resourceActionsConfig);
+					null, classLoader, resourceActionsConfig,
+					new ResourceActionListener() {
+						public void readModelResources(String modelName) {
+							modelNames.add(modelName);
+						}
+
+						public void readPortletModelResources(
+							String portletModelName) {
+
+						}
+					});
 			}
 			catch (Exception e) {
 				_log.error(
@@ -188,20 +203,12 @@ public class ServiceConfiguratorImpl implements ServiceConfigurator {
 			}
 		}
 
-		String[] portletIds = StringUtil.split(
-			configuration.get("service.configurator.portlet.ids"));
+		for (String modelName : modelNames) {
+			List<String> modelActions =
+				ResourceActionsUtil.getModelResourceActions(modelName);
 
-		for (String portletId : portletIds) {
-			List<String> modelNames =
-				ResourceActionsUtil.getPortletModelResources(portletId);
-
-			for (String modelName : modelNames) {
-				List<String> modelActions =
-					ResourceActionsUtil.getModelResourceActions(modelName);
-
-				ResourceActionLocalServiceUtil.checkResourceActions(
-					modelName, modelActions);
-			}
+			ResourceActionLocalServiceUtil.checkResourceActions(
+				modelName, modelActions);
 		}
 	}
 
