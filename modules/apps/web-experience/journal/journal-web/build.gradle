@@ -30,3 +30,56 @@ dependencies {
 	provided project(":apps:web-experience:asset:asset-taglib")
 	provided project(":apps:web-experience:journal:journal-api")
 }
+
+dependencies {
+	findbugs 'com.google.code.findbugs:findbugs:3.0.1'
+	findbugs configurations.findbugsPlugins.dependencies
+	findbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.4.7-SNAPSHOT'
+}
+
+apply plugin: 'findbugs'
+
+
+task copyFindbugSources(type: Copy, dependsOn: [generateJSPJava]) {
+	from 'src/main/java'
+	from "$project.buildDir/jspc"
+
+	into "$project.buildDir/findbugs-src"
+}
+
+task copyFindbugClasses(type: Copy, dependsOn: [classes, compileJSP]) {
+	from "$project.buildDir/unzipped-jar/"
+	from "$project.buildDir/tmp/compileJSP/"
+
+	into "$project.buildDir/findbugs-classes/"
+}
+
+task findSecurityBugs(type: FindBugs, dependsOn: [classes, compileJSP, copyFindbugSources, copyFindbugClasses]) {
+	classes = fileTree("$project.buildDir/findbugs-classes/").include("**/*.class");
+	source = files("$project.buildDir/findbugs-src/");
+	classpath = files(sourceSets.main.compileClasspath)
+	pluginClasspath = project.configurations.findbugsPlugins
+
+	jvmArgs = [
+			"-Dfindsecbugs.taint.customconfigfile=liferay.txt:find-security-bugs-false-positives.txt:derived-summaries.txt",
+//			"-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005",
+			"-Dfindsecbugs.taint.outputsummaries=true"]
+
+	maxHeapSize = "3g"
+
+	findbugs {
+		toolVersion = "3.0.1"
+		ignoreFailures = true
+		reportsDir = file("$project.buildDir/findbugsReports")
+		effort = "max"
+		reportLevel = "low"
+		includeFilter = file("$project.rootDir/fsb-include.xml")
+		excludeFilter = file("$project.rootDir/fsb-exclude.xml")
+		reports {
+			// Only one of HTML or XML can be turned on at the same time
+			html.enabled = true
+			xml.enabled = !html.enabled
+			xml.withMessages = false
+		}
+	}
+}

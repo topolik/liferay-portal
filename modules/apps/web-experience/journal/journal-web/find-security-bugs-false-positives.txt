@@ -1,0 +1,18 @@
+javax/servlet/jsp/JspContext.findAttribute("editTemplateURL")@org/apache/jsp/article/content_jsp:SAFE
+javax/servlet/jsp/JspContext.findAttribute("editStructureURL")@org/apache/jsp/article/content_jsp:SAFE
+
+javax/servlet/jsp/JspContext.findAttribute("editArticleURL")@org/apache/jsp/edit_005farticle_jsp:SAFE
+
+javax/servlet/jsp/JspContext.findAttribute("selectFolderURL")@org/apache/jsp/edit_005ffolder_jsp:SAFE
+javax/servlet/jsp/JspContext.findAttribute("removeDDMStructureIcon")@org/apache/jsp/edit_005ffolder_jsp:SAFE
+
+javax/servlet/jsp/JspContext.findAttribute("selectFolderURL")@org/apache/jsp/move_005fentries_jsp:SAFE
+
+javax/servlet/jsp/JspContext.findAttribute("viewDDMStructureArticlesURL")@org/apache/jsp/toolbar_jsp:SAFE
+
+
+javax/servlet/jsp/JspContext.findAttribute("compareVersionURL")@org/apache/jsp/view_005farticle_005fhistory_jsp:SAFE
+
+-- content is sanitized using SanitizerUtil
+com/liferay/journal/model/JournalArticleDisplay.getContent()Ljava/lang/String;:SAFE
+com/liferay/journal/service/JournalArticleLocalServiceUtil.getArticleContent(*)*:SAFE
