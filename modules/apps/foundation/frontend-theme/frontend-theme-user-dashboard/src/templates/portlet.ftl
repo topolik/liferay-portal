@@ -1,5 +1,5 @@
 <#assign portlet_display = portletDisplay>
-<#assign portlet_back_url = htmlUtil.escapeHREF(portlet_display.getURLBack())>
+<#assign portlet_back_url = htmlUtil.escapeHREF(portalUtil.escapeRedirect(portlet_display.getURLBack()))!>
 <#assign portlet_content_css_class = "portlet-content">
 <#assign portlet_display_name = htmlUtil.escape(portlet_display.getPortletDisplayName())>
 <#assign portlet_display_root_portlet_id = htmlUtil.escapeAttribute(portlet_display.getRootPortletId())>

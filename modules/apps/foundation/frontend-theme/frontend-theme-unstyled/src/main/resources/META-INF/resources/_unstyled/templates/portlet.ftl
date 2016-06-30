@@ -1,6 +1,6 @@
 <#assign portlet_display = portletDisplay />
 
-<#assign portlet_back_url = htmlUtil.escapeHREF(portlet_display.getURLBack()) />
+<#assign portlet_back_url = htmlUtil.escapeHREF(portalUtil.escapeRedirect(portlet_display.getURLBack()))!>
 <#assign portlet_content_css_class = "portlet-content" />
 <#assign portlet_display_name = htmlUtil.escape(portlet_display.getPortletDisplayName()) />
 <#assign portlet_display_root_portlet_id = htmlUtil.escapeAttribute(portlet_display.getRootPortletId()) />
@@ -39,7 +39,7 @@
 	</#if>
 
 	<div class="${portlet_content_css_class}">
-		<#if portlet_display.isShowBackIcon()>
+		<#if portlet_display.isShowBackIcon() && validator.isNotNull(portlet_back_url)>
 			<a class="icon-monospaced portlet-icon-back text-default" href="${portlet_back_url}" title="<@liferay.language key="return-to-full-page" />">
 				<span class="icon-angle-left"></span>
 			</a>

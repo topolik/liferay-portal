@@ -1,6 +1,6 @@
 #set ($portlet_display = $portletDisplay)
 
-#set ($portlet_back_url = $htmlUtil.escapeHREF($portlet_display.getURLBack()))
+#set ($portlet_back_url = $htmlUtil.escapeHREF($portalUtil.escapeRedirect($portlet_display.getURLBack())))
 #set ($portlet_display_name = $htmlUtil.escape($portlet_display.getPortletDisplayName()))
 #set ($portlet_display_root_portlet_id = $htmlUtil.escapeAttribute($portlet_display.getRootPortletId()))
 #set ($portlet_id = $htmlUtil.escapeAttribute($portlet_display.getId()))
@@ -21,7 +21,7 @@
 	#end
 
 	<div class="portlet-content">
-		#if ($portlet_display.isShowBackIcon())
+		#if ($portlet_display.isShowBackIcon() && $validator.isNotNull($portlet_back_url))
 			<a class="icon-monospaced portlet-icon-back text-default" href="$portlet_back_url" title="#language ("return-to-full-page")">
 				<span class="icon-angle-left"></span>
 			</a>
