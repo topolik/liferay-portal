@@ -1,3 +1,4 @@
+
 apply plugin: "com.liferay.lang.merger"
 
 dependencies {
@@ -62,6 +63,7 @@ task findSecurityBugs(type: FindBugs, dependsOn: [classes, compileJSP, copyFindb
 
 	jvmArgs = [
 			"-Dfindsecbugs.taint.customconfigfile=liferay.txt:find-security-bugs-false-positives.txt:derived-summaries.txt",
+			"-Dfindsecbugs.injection.customconfigfile.UnvalidatedRedirectDetector=UnvalidatedRedirectDetector.txt|UNVALIDATED_REDIRECT",
 //			"-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005",
 			"-Dfindsecbugs.taint.outputsummaries=true"]
 

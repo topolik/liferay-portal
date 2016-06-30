@@ -1,0 +1,2 @@
+- Open redirect
+com/liferay/portal/kernel/theme/PortletDisplay.setURLBack(Ljava/lang/String;)V:0
