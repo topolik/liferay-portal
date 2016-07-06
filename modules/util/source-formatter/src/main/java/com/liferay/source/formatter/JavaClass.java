@@ -123,6 +123,7 @@ public class JavaClass {
 				checkChaining(javaTerm);
 				checkLineBreak(javaTerm);
 				checkParameterNames(javaTerm);
+				checkValidatorIsNull(javaTerm);
 				checkVariableNames(javaTerm);
 			}
 
@@ -509,8 +510,8 @@ public class JavaClass {
 		}
 
 		Pattern pattern = Pattern.compile(
-			"\t(private |protected |public )" +
-				"(((final|static|transient)( |\n))*)([\\s\\S]*?)" +
+			"\t(private|protected|public)\\s+" +
+				"(((final|static|transient|volatile)( |\n))*)([\\s\\S]*?)" +
 					javaTermName);
 
 		String javaTermContent = javaTerm.getContent();
@@ -611,7 +612,7 @@ public class JavaClass {
 				}
 			}
 		}
-		else {
+		else if (!modifierDefinition.contains("volatile")) {
 			checkFinalableFieldType(
 				javaTerm, annotationsExclusions, modifierDefinition);
 		}
@@ -771,6 +772,33 @@ public class JavaClass {
 					_fileName,
 					"Unused parameter " + parameterName + ": " + _fileName +
 						" " + javaTerm.getLineCount());
+			}
+		}
+	}
+
+	protected void checkValidatorIsNull(JavaTerm javaTerm) {
+		String javaTermContent = javaTerm.getContent();
+
+		Matcher matcher = _validatorIsNullPattern.matcher(javaTermContent);
+
+		while (matcher.find()) {
+			String variableName = matcher.group(2);
+
+			Pattern pattern2 = Pattern.compile(
+				"[\t,]long " + variableName + "( =|,[ \n]|\\))");
+
+			Matcher matcher2 = pattern2.matcher(javaTermContent);
+
+			if (matcher2.find()) {
+				int lineCount =
+					javaTerm.getLineCount() +
+						_javaSourceProcessor.getLineCount(
+							javaTerm.getContent(), matcher.start()) - 1;
+
+				_javaSourceProcessor.processErrorMessage(
+					_fileName,
+					"avoid using Validator.IsNull(long): " + _fileName + " " +
+						lineCount);
 			}
 		}
 	}
@@ -1960,6 +1988,8 @@ public class JavaClass {
 		".* (==|!=|<|>|>=|<=)[ \n].*");
 	private final Pattern _returnPattern = Pattern.compile(
 		"\n(\t+)return (.*?);\n", Pattern.DOTALL);
+	private final Pattern _validatorIsNullPattern = Pattern.compile(
+		"Validator\\.is(Not)?Null\\((\\w+)\\)");
 	private final Pattern _variableNameStartingWithUpperCasePattern =
 		Pattern.compile("\t[\\w\\s<>,]+ ([A-Z]\\w+) =");
 

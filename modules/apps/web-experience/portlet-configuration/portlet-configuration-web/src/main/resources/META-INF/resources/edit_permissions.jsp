@@ -39,7 +39,7 @@ String selResourceDescription = modelResourceDescription;
 String selResourceName = modelResourceName;
 
 if (Validator.isNull(modelResource)) {
-	PortletURL portletURL = new PortletURLImpl(request, portletResource, plid, PortletRequest.ACTION_PHASE);
+	PortletURL portletURL = PortletURLFactoryUtil.create(request, portletResource, plid, PortletRequest.ACTION_PHASE);
 
 	portletURL.setPortletMode(PortletMode.VIEW);
 	portletURL.setWindowState(WindowState.NORMAL);
@@ -85,6 +85,7 @@ try {
 			throw new NoSuchResourceException();
 		}
 	}
+
 	resource = ResourceLocalServiceUtil.getResource(company.getCompanyId(), selResource, ResourceConstants.SCOPE_INDIVIDUAL, resourcePrimKey);
 }
 catch (NoSuchResourceException nsre) {

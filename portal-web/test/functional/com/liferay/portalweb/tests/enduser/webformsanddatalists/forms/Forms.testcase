@@ -308,6 +308,10 @@
 			<var name="fieldValue" value="ParagraphName" />
 		</execute>
 
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="ParagraphName" />
+		</execute>
+
 		<execute macro="FormFields#editParagraphBody">
 			<var name="fieldValue" value="Paragraph body text." />
 		</execute>
@@ -331,6 +335,10 @@
 			<var name="fieldValue" value="TextName" />
 		</execute>
 
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="TextName" />
+		</execute>
+
 		<execute macro="FormFields#save" />
 
 		<execute macro="Form#gotoAddAdditionalField">
@@ -348,6 +356,10 @@
 
 		<execute macro="FormFields#editFieldName">
 			<var name="fieldValue" value="SelectName" />
+		</execute>
+
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="SelectName" />
 		</execute>
 
 		<execute macro="FormFields#editOptionsRow">
@@ -398,6 +410,10 @@
 			<var name="fieldValue" value="RadioName" />
 		</execute>
 
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="RadioName" />
+		</execute>
+
 		<execute macro="FormFields#editOptionsRow">
 			<var name="optionName" value="Option1" />
 			<var name="optionValue" value="Option 1" />
@@ -446,6 +462,10 @@
 			<var name="fieldValue" value="DateName" />
 		</execute>
 
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="DateName" />
+		</execute>
+
 		<execute macro="FormFields#save" />
 
 		<execute macro="Form#gotoAddAdditionalField">
@@ -463,6 +483,10 @@
 
 		<execute macro="FormFields#editFieldName">
 			<var name="fieldValue" value="CheckboxName" />
+		</execute>
+
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="CheckboxName" />
 		</execute>
 
 		<execute macro="FormFields#save" />
@@ -1280,8 +1304,9 @@
 		</for>
 	</command>
 
-	<command name="SubmitFormContainingCaptchaAndViewTextFieldValue" priority="3">
+	<command name="SubmitFormContainingCaptchaAndViewTextFieldValue" priority="5">
 		<description message="This is a use case for LPS-60818." />
+		<property name="portal.acceptance" value="true" />
 		<property name="custom.properties" value="captcha.max.challenges=0" />
 
 		<execute macro="Navigator#openURL" />
@@ -2904,7 +2929,9 @@
 			<var name="fieldName" value="CheckboxField" />
 		</execute>
 
-		<execute macro="FormPortlet#submit" />
+		<execute macro="FormPortlet#clickSubmit" />
+
+		<execute macro="Alert#viewSuccessMessage" />
 
 		<execute macro="Navigator#openURL" />
 
@@ -3176,6 +3203,197 @@
 			<var name="fieldLabel" value="Checkbox" />
 			<var name="fieldValue" value="Yes" />
 		</execute>
+	</command>
+
+	<command name="ViewDefaultFieldNamesWithPunctuationCharacters" priority="4">
+		<description message="This is a use case for LPS-64305." />
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Forms" />
+		</execute>
+
+		<execute macro="FormsAdminNavigator#gotoAddForm" />
+
+		<execute macro="Form#editName" />
+
+		<execute macro="Form#editDescription" />
+
+		<execute macro="Form#gotoAddFirstField">
+			<var name="fieldType" value="Text Field" />
+		</execute>
+
+		<execute macro="FormFields#editText">
+			<var name="fieldName" value="label" />
+			<var name="fieldValue" value=",.?/;:{}[]\|-+!@#$%^*()=_" />
+		</execute>
+
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="text" />
+		</execute>
+
+		<execute macro="FormFields#editFieldName">
+			<var name="fieldValue" value=",.?/;:{}[]\|-+!@#$%^*()=_" />
+		</execute>
+
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="text" />
+		</execute>
+
+		<execute macro="FormFields#save" />
+
+		<execute macro="Form#gotoAddAdditionalField">
+			<var name="fieldType" value="Text Field" />
+			<var name="previousFieldLabel" value=",.?/;:{}[]\|-+!@#$%^*()=_" />
+		</execute>
+
+		<execute macro="FormFields#editText">
+			<var name="fieldName" value="label" />
+			<var name="fieldValue" value="Jump, She exclaimed!" />
+		</execute>
+
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="JumpSheExclaimed" />
+		</execute>
+
+		<execute macro="FormFields#editFieldName">
+			<var name="fieldValue" value="Jump, She exclaimed!" />
+		</execute>
+
+		<execute macro="FormFields#viewFieldName">
+			<var name="fieldName" value="JumpSheExclaimed" />
+		</execute>
+
+		<execute macro="FormFields#save" />
+
+		<execute macro="Form#save" />
+
+		<execute macro="Page#add">
+			<var name="pageName" value="Form Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Form Page" />
+		</execute>
+
+		<execute macro="Portlet#addPG">
+			<var name="pageName" value="Form Page" />
+			<var name="portletName" value="Form" />
+		</execute>
+
+		<execute macro="FormPortletNavigator#gotoSelectForm" />
+
+		<execute macro="FormPortletConfiguration#selectForm" />
+
+		<execute macro="PortletEntry#save" />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Form Page" />
+		</execute>
+
+		<execute macro="FormFields#viewTextField">
+			<var name="fieldLabel" value=",.?/;:{}[]\|-+!@#$%^*()=_" />
+			<var name="fieldName" value="text" />
+		</execute>
+
+		<execute macro="FormFields#viewTextField">
+			<var name="fieldLabel" value="Jump, She exclaimed!" />
+			<var name="fieldName" value="JumpSheExclaimed" />
+		</execute>
+
+		<execute macro="FormFields#editText">
+			<var name="fieldName" value="text" />
+			<var name="fieldValue" value="1,2,3." />
+		</execute>
+
+		<execute macro="FormFields#editText">
+			<var name="fieldName" value="JumpSheExclaimed" />
+			<var name="fieldValue" value=",.?/;:{}[]\|-+!@#$%^*()=_" />
+		</execute>
+
+		<execute macro="FormPortlet#submitSuccessfully" />
+	</command>
+
+	<command name="ViewFormWithMultipleSelectionFieldAsASwitcherAndHideLabel" priority="3">
+		<description message="This is a use case for LPS-66513." />
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="ProductMenu#gotoSitesContent">
+			<var name="portlet" value="Forms" />
+		</execute>
+
+		<execute macro="FormsAdminNavigator#gotoAddForm" />
+
+		<execute macro="Form#editName" />
+
+		<execute macro="Form#editDescription" />
+
+		<execute macro="Form#gotoAddFirstField">
+			<var name="fieldType" value="Multiple Selection" />
+		</execute>
+
+		<execute macro="Form#editFieldLabel">
+			<var name="fieldValue" value="Multiple Selection" />
+		</execute>
+
+		<execute macro="FormFields#enableSwitcher">
+			<var name="fieldName" value="showAsSwitcher" />
+		</execute>
+
+		<execute macro="FormFields#enableAdvancedOptions" />
+
+		<execute macro="FormFields#enableSwitcher">
+			<var name="fieldName" value="showLabel" />
+		</execute>
+
+		<execute macro="FormFields#save" />
+
+		<execute macro="FormFields#viewSwitcher">
+			<var name="fieldName" value="MultipleSelection" />
+		</execute>
+
+		<execute macro="FormFields#viewSwitcherLabelNotPresent">
+			<var name="fieldLabel" value="Multiple Selection" />
+			<var name="fieldName" value="MultipleSelection" />
+		</execute>
+
+		<execute macro="Form#save" />
+
+		<execute macro="Page#add">
+			<var name="pageName" value="Form Page" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Form Page" />
+		</execute>
+
+		<execute macro="Portlet#addPG">
+			<var name="pageName" value="Form Page" />
+			<var name="portletName" value="Form" />
+		</execute>
+
+		<execute macro="FormPortletNavigator#gotoSelectForm" />
+
+		<execute macro="FormPortletConfiguration#selectForm" />
+
+		<execute macro="PortletEntry#save" />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Form Page" />
+		</execute>
+
+		<execute macro="FormFields#viewSwitcher">
+			<var name="fieldName" value="MultipleSelection" />
+		</execute>
+
+		<execute macro="FormFields#viewSwitcherLabelNotPresent">
+			<var name="fieldLabel" value="Multiple Selection" />
+			<var name="fieldName" value="MultipleSelection" />
+		</execute>
+
+		<execute macro="FormPortlet#submitSuccessfully" />
 	</command>
 
 	<command name="ViewRepeatableTextFieldLabel" priority="4">

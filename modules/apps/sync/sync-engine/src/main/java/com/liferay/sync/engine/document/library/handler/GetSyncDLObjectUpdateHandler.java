@@ -377,12 +377,17 @@ public class GetSyncDLObjectUpdateHandler extends BaseSyncDLObjectHandler {
 
 		sourceSyncFile.setModifiedTime(targetSyncFile.getModifiedTime());
 
-		if (targetSyncFile.getEvent() == SyncFile.EVENT_TRASH) {
+		String event = targetSyncFile.getEvent();
+
+		if (event.equals(SyncFile.EVENT_TRASH)) {
 			sourceSyncFile.setUiEvent(SyncFile.UI_EVENT_TRASHED_REMOTE);
 		}
 		else {
 			sourceSyncFile.setUiEvent(SyncFile.UI_EVENT_DELETED_REMOTE);
 		}
+
+		sourceSyncFile.setUserId(targetSyncFile.getUserId());
+		sourceSyncFile.setUserName(targetSyncFile.getUserName());
 
 		if (!sourceSyncFile.isUnsynced()) {
 			SyncFileService.deleteSyncFile(sourceSyncFile);

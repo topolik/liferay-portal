@@ -157,13 +157,22 @@ if (portletTitleBasedNavigation) {
 		<aui:fieldset-group markupView="lexicon">
 			<aui:fieldset>
 				<h1 class="kb-title">
-					<liferay-ui:input-editor contents="<%= title %>" editorName="alloyeditor" name="titleEditor" onChangeMethod='<%= (kbArticle == null) ? "OnChangeEditor" : StringPool.BLANK %>' placeholder="title" showSource="<%= false %>" />
+					<liferay-ui:input-editor contents="<%= HtmlUtil.escape(title) %>" editorName="alloyeditor" name="titleEditor" onChangeMethod='<%= (kbArticle == null) ? "OnChangeEditor" : StringPool.BLANK %>' placeholder="title" showSource="<%= false %>" />
 				</h1>
 
 				<aui:input name="title" type="hidden" />
 
 				<div class="kb-entity-body">
-					<liferay-ui:input-editor contents="<%= content %>" editorName="<%= kbGroupServiceConfiguration.getEditorName() %>" name="contentEditor" placeholder="content" />
+
+					<%
+					Map<String, String> fileBrowserParams = new HashMap();
+
+					if (kbArticle != null) {
+						fileBrowserParams.put("resourcePrimKey", String.valueOf(kbArticle.getResourcePrimKey()));
+					}
+					%>
+
+					<liferay-ui:input-editor contents="<%= content %>" editorName="<%= kbGroupServiceConfiguration.getEditorName() %>" fileBrowserParams="<%= fileBrowserParams %>" name="contentEditor" placeholder="content" />
 
 					<aui:input name="content" type="hidden" />
 				</div>

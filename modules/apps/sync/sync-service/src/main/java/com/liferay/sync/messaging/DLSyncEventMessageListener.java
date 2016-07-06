@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.sync.constants.SyncDLObjectConstants;
 import com.liferay.sync.model.SyncDLObject;
 import com.liferay.sync.model.impl.SyncDLObjectImpl;
@@ -152,23 +151,10 @@ public class DLSyncEventMessageListener extends BaseMessageListener {
 		SyncDLObject syncDLObject = null;
 
 		if (event.equals(SyncDLObjectConstants.EVENT_DELETE)) {
-			long userId = 0;
-			String userName = StringPool.BLANK;
-
-			PermissionChecker permissionChecker =
-				PermissionThreadLocal.getPermissionChecker();
-
-			if (permissionChecker != null) {
-				User user = permissionChecker.getUser();
-
-				userId = user.getUserId();
-				userName = user.getFullName();
-			}
-
 			syncDLObject = new SyncDLObjectImpl();
 
-			syncDLObject.setUserId(userId);
-			syncDLObject.setUserName(userName);
+			setUser(syncDLObject);
+
 			syncDLObject.setEvent(event);
 			syncDLObject.setType(type);
 			syncDLObject.setTypePK(typePK);
@@ -183,6 +169,10 @@ public class DLSyncEventMessageListener extends BaseMessageListener {
 
 			syncDLObject = SyncUtil.toSyncDLObject(
 				dlFileEntry, event, !dlFileEntry.isInTrash());
+
+			if (event.equals(SyncDLObjectConstants.EVENT_TRASH)) {
+				setUser(syncDLObject);
+			}
 		}
 		else {
 			DLFolder dlFolder = _dlFolderLocalService.fetchDLFolder(typePK);
@@ -228,6 +218,18 @@ public class DLSyncEventMessageListener extends BaseMessageListener {
 	@Reference(unbind = "-")
 	protected void setSyncDLObjectLocalService(
 		SyncDLObjectLocalService syncDLObjectLocalService) {
+	}
+
+	protected void setUser(SyncDLObject syncDLObject) {
+		PermissionChecker permissionChecker =
+			PermissionThreadLocal.getPermissionChecker();
+
+		if (permissionChecker != null) {
+			User user = permissionChecker.getUser();
+
+			syncDLObject.setUserId(user.getUserId());
+			syncDLObject.setUserName(user.getFullName());
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

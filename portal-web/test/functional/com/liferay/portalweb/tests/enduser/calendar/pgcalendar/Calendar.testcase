@@ -3144,6 +3144,10 @@
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
+		<execute macro="CalendarNavigator#gotoView">
+			<var name="viewType" value="Week" />
+		</execute>
+
 		<execute macro="Calendar#hideMyCalendarsCalendar" />
 
 		<execute macro="CalendarScheduler#selectSpecificEvent">
@@ -3160,6 +3164,10 @@
 
 		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
+		</execute>
+
+		<execute macro="CalendarNavigator#gotoView">
+			<var name="viewType" value="Week" />
 		</execute>
 
 		<execute macro="CalendarScheduler#selectSpecificEvent">
@@ -5546,7 +5554,8 @@
 		</execute>
 
 		<execute macro="Calendar#viewCurrentSiteCalendarName">
-			<var name="site" value="Site Name" />
+			<var name="calendarName" value="Site Name" />
+			<var name="siteName" value="Site Name" />
 		</execute>
 
 		<execute macro="ProductMenu#gotoSite">
@@ -5568,7 +5577,8 @@
 		</execute>
 
 		<execute macro="Calendar#viewCurrentSiteCalendarName">
-			<var name="site" value="Site Name Edit - Site Name" />
+			<var name="calendarName" value="Site Name" />
+			<var name="siteName" value="Site Name Edit" />
 		</execute>
 	</command>
 

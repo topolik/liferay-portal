@@ -724,8 +724,6 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 				}
 
 				String trimmedLine = StringUtil.trimLeading(line);
-				String trimmedPreviousLine = StringUtil.trimLeading(
-					previousLine);
 
 				if (line.matches(".*\\WgetClass\\(\\)\\..+")) {
 					processErrorMessage(
@@ -840,37 +838,6 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 					line = StringUtil.replace(line, "<%=", "<%= ");
 				}
 
-				if (trimmedPreviousLine.matches("(--)?%>") &&
-					Validator.isNotNull(line) && !trimmedLine.equals("-->")) {
-
-					sb.append("\n");
-				}
-				else if (Validator.isNotNull(previousLine) &&
-						 !trimmedPreviousLine.equals("<!--") &&
-						 trimmedLine.matches("<%(--)?")) {
-
-					sb.append("\n");
-				}
-				else if (trimmedPreviousLine.equals("<%") &&
-						 Validator.isNull(line)) {
-
-					continue;
-				}
-				else if (trimmedPreviousLine.equals("<%") &&
-						 trimmedLine.startsWith("//")) {
-
-					sb.append("\n");
-				}
-				else if (Validator.isNull(previousLine) &&
-						 trimmedLine.equals("%>") && (sb.index() > 2)) {
-
-					String lineBeforePreviousLine = sb.stringAt(sb.index() - 3);
-
-					if (!lineBeforePreviousLine.startsWith("//")) {
-						sb.setIndex(sb.index() - 1);
-					}
-				}
-
 				if (javaSource &&
 					(trimmedLine.startsWith("if (") ||
 					 trimmedLine.startsWith("else if (") ||
@@ -878,6 +845,14 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 					trimmedLine.endsWith(") {")) {
 
 					checkIfClauseParentheses(trimmedLine, fileName, lineCount);
+				}
+
+				if (javaSource &&
+					trimmedLine.matches("^\\} (catch|else|finally) .*")) {
+
+					processErrorMessage(
+						fileName,
+						"line break: " + fileName + " " + lineCount);
 				}
 
 				Matcher matcher = _ifTagPattern.matcher(trimmedLine);
@@ -978,14 +953,44 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 
 				line = replacePrimitiveWrapperInstantiation(line);
 
-				previousLine = line;
+				if (lineCount > 1) {
+					sb.append(previousLine);
+					sb.append("\n");
 
-				sb.append(line);
-				sb.append("\n");
+					if (addExtraEmptyLine(previousLine, line, javaSource)) {
+						sb.append("\n");
+					}
+				}
+
+				previousLine = line;
 			}
+
+			sb.append(previousLine);
 		}
 
 		content = sb.toString();
+
+		while (true) {
+			Matcher matcher = _incorrectEmptyLinePattern1.matcher(content);
+
+			if (matcher.find()) {
+				content = StringUtil.replaceFirst(
+					content, "\n\n", "\n", matcher.start());
+
+				continue;
+			}
+
+			matcher = _incorrectEmptyLinePattern2.matcher(content);
+
+			if (matcher.find()) {
+				content = StringUtil.replaceFirst(
+					content, "\n\n", "\n", matcher.start());
+
+				continue;
+			}
+
+			break;
+		}
 
 		if (content.endsWith("\n")) {
 			content = content.substring(0, content.length() - 1);
@@ -2172,6 +2177,10 @@ public class JSPSourceProcessor extends BaseSourceProcessor {
 		"\\s*@\\s*include\\s*file=['\"](.*)['\"]");
 	private final Pattern _incorrectClosingTagPattern = Pattern.compile(
 		"\n(\t*)\t((?!<\\w).)* />\n");
+	private final Pattern _incorrectEmptyLinePattern1 = Pattern.compile(
+		"[\n\t]<%\n\n(\t*)[^/\n\t]");
+	private final Pattern _incorrectEmptyLinePattern2 = Pattern.compile(
+		"([\n\t])([^/\n\t])(.*)\n\n\t*%>");
 	private Pattern _javaClassPattern = Pattern.compile(
 		"\n(private|protected|public).* class ([A-Za-z0-9]+) " +
 			"([\\s\\S]*?)\n\\}\n");

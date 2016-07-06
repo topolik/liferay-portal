@@ -14,7 +14,7 @@
 
 package com.liferay.sync.service.impl;
 
-import com.liferay.document.library.kernel.exception.DuplicateFileException;
+import com.liferay.document.library.kernel.exception.DuplicateFileEntryException;
 import com.liferay.document.library.kernel.exception.DuplicateFolderNameException;
 import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
 import com.liferay.document.library.kernel.exception.NoSuchFolderException;
@@ -133,7 +133,7 @@ public class SyncDLObjectServiceImpl extends SyncDLObjectServiceBaseImpl {
 			return toSyncDLObject(fileEntry, SyncDLObjectConstants.EVENT_ADD);
 		}
 		catch (PortalException pe) {
-			if (pe instanceof DuplicateFileException) {
+			if (pe instanceof DuplicateFileEntryException) {
 				if (GetterUtil.getBoolean(
 						serviceContext.getAttribute("overwrite"))) {
 

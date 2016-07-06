@@ -180,6 +180,7 @@
 	<command name="chooseSiteCalendarMenulistOption">
 		<execute macro="Calendar#_gotoSiteCalendarMenulist">
 			<var name="siteCalendarName" value="${siteCalendarName}" />
+			<var name="siteName" value="${siteName}" />
 		</execute>
 
 		<execute macro="Calendar#_gotoMenulistOption">
@@ -301,7 +302,7 @@
 				</execute>
 
 				<execute macro="Calendar#_viewEmailHeader">
-					<var name="header" value="${calendarName}" />
+					<var name="header" value="${user} - ${calendarName}" />
 				</execute>
 			</then>
 			<elseif>
@@ -318,7 +319,7 @@
 					</execute>
 
 					<execute macro="Calendar#_viewEmailHeader">
-						<var name="header" value="${calendarName}" />
+						<var name="header" value="${site} - ${calendarName}" />
 					</execute>
 				</then>
 			</elseif>
@@ -848,9 +849,13 @@
 	</command>
 
 	<command name="viewCurrentSiteCalendarName">
-		<var name="key_site" value="${site}" />
+		<var name="key_siteName" value="${siteName}" />
 
-		<execute function="AssertTextEquals" locator1="Calendar#CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY" value1="${site}" />
+		<execute function="AssertTextEquals" locator1="Calendar#CURRENT_SITE_CALENDARS_HEADER" value1="${siteName}'s Calendars" />
+
+		<var name="key_calendarName" value="${calendarName}" />
+
+		<execute function="AssertTextEquals" locator1="Calendar#CURRENT_SITE_CALENDARS_CALENDAR_PRIMARY" value1="${calendarName}" />
 	</command>
 
 	<command name="viewDefault">
@@ -1054,6 +1059,7 @@
 	<command name="viewSiteCalendarNoMenulistOption">
 		<execute macro="Calendar#_gotoSiteCalendarMenulist">
 			<var name="siteCalendarName" value="${siteCalendarName}" />
+			<var name="siteName" value="${siteName}" />
 		</execute>
 
 		<var name="key_menuListOption" value="${menuListOption}" />

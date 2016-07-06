@@ -54,6 +54,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ERROR_1_COLUMN_1</td>
+	<td>xpath=(//div[contains(@id,'column-1')]/div[contains(@class,'alert') and (contains(@class,'alert-error') or contains(@class,'alert-danger'))])[1]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ERROR_1_COLUMN_2</td>
+	<td>xpath=(//div[contains(@id,'column-2')]/div[contains(@class,'alert') and (contains(@class,'alert-error') or contains(@class,'alert-danger'))])[1]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>ERROR_2</td>
 	<td>xpath=(//div[contains(@class,'alert') and (contains(@class,'alert-error') or contains(@class,'alert-danger'))])[2]</td>
 	<td></td>
@@ -95,7 +105,7 @@
 </tr>
 <tr>
 	<td>ERROR_FORM_FIELD_REQUIRED</td>
-	<td>//div[contains(@class,'has-error')]//div[@class='help-block']</td>
+	<td>//div[contains(@class,'has-error')]//div[contains(@class,'error-message')]</td>
 	<td></td>
 </tr>
 <tr>

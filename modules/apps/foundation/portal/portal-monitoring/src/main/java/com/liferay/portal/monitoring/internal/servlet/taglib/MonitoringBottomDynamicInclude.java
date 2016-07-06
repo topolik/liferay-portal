@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.monitoring.DataSampleThreadLocal;
 import com.liferay.portal.kernel.monitoring.RequestStatus;
 import com.liferay.portal.kernel.servlet.taglib.BaseDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.monitoring.configuration.MonitoringConfiguration;
@@ -83,7 +84,7 @@ public class MonitoringBottomDynamicInclude extends BaseDynamicInclude {
 		sb.append("<!--\n");
 
 		for (DataSample curDataSample : dataSamples) {
-			sb.append(curDataSample.toString());
+			sb.append(HtmlUtil.escape(curDataSample.toString()));
 			sb.append("\n");
 		}
 

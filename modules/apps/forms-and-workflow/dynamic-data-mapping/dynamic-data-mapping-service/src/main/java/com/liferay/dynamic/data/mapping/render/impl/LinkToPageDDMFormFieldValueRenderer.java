@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.LayoutServiceUtil;
+import com.liferay.portal.kernel.util.StringPool;
 
 import java.util.Locale;
 
@@ -56,6 +57,10 @@ public class LinkToPageDDMFormFieldValueRenderer
 				long groupId = jsonObject.getLong("groupId");
 				boolean privateLayout = jsonObject.getBoolean("privateLayout");
 				long layoutId = jsonObject.getLong("layoutId");
+
+				if ((groupId == 0) && (layoutId == 0)) {
+					return StringPool.BLANK;
+				}
 
 				try {
 					return LayoutServiceUtil.getLayoutName(
