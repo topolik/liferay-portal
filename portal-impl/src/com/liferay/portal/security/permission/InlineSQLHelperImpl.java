@@ -54,11 +54,11 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 	public static final String FILTER_BY_RESOURCE_BLOCK_ID_OWNER =
 		InlineSQLHelper.class.getName() + ".filterByResourceBlockIdOwner";
 
+	public static final String FILTER_BY_RESOURCE_PERMISSION =
+		InlineSQLHelper.class.getName() + ".filterByResourcePermission";
+
 	public static final String FIND_BY_RESOURCE_BLOCK_ID =
 		InlineSQLHelper.class.getName() + ".findByResourceBlockId";
-
-	public static final String JOIN_RESOURCE_PERMISSION =
-		InlineSQLHelper.class.getName() + ".joinResourcePermission";
 
 	@Override
 	public boolean isEnabled() {
@@ -634,18 +634,20 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 			}
 		}
 
-		String permissionJoin = StringPool.BLANK;
+		String permissionWhere = StringPool.BLANK;
 
 		if (Validator.isNotNull(bridgeJoin)) {
-			permissionJoin = bridgeJoin;
+			permissionWhere = bridgeJoin;
 		}
 
-		permissionJoin += CustomSQLUtil.get(JOIN_RESOURCE_PERMISSION);
+		permissionWhere += CustomSQLUtil.get(FILTER_BY_RESOURCE_PERMISSION);
 
 		StringBundler sb = new StringBundler(8);
 
 		sb.append("((ResourcePermission.primKeyId = ");
 		sb.append(classPKField);
+
+		StringBundler groupIdSQL = new StringBundler(4 * groupIds.length);
 
 		if (Validator.isNotNull(groupIdField) && (groupIds.length > 0)) {
 			sb.append(") AND (");
@@ -661,6 +663,15 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 				sb.append(" = ");
 				sb.append(groupIds[0]);
 			}
+
+			for (int i = 0; i < groupIds.length; i++) {
+				if (!isEnabled(0, groupIds[i])) {
+					groupIdSQL.append(" OR ");
+					groupIdSQL.append(groupIdField);
+					groupIdSQL.append(" = ");
+					groupIdSQL.append(groupIds[i]);
+				}
+			}
 		}
 
 		sb.append("))");
@@ -670,39 +681,47 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 
 		int scope = ResourceConstants.SCOPE_INDIVIDUAL;
 
-		permissionJoin = StringUtil.replace(
-			permissionJoin,
+		permissionWhere = StringUtil.replace(
+			permissionWhere,
 			new String[] {
-				"[$CLASS_NAME$]", "[$COMPANY_ID$]", "[$PRIM_KEYS$]",
-				"[$RESOURCE_SCOPE_INDIVIDUAL$]", "[$ROLE_IDS_OR_OWNER_ID$]"
+				"[$CLASS_NAME$]", "[$COMPANY_ID$]", "[$CLASS_PK$]",
+				"[$PRIM_KEYS$]", "[$RESOURCE_SCOPE_INDIVIDUAL$]",
+				"[$ROLE_IDS_OR_OWNER_ID$]", "[$GROUP_ID$]"
 			},
 			new String[] {
-				className, String.valueOf(companyId), sb.toString(),
-				String.valueOf(scope), roleIdsOrOwnerIdSQL
+				className, String.valueOf(companyId), classPKField,
+				sb.toString(), String.valueOf(scope), roleIdsOrOwnerIdSQL,
+				groupIdSQL.toString()
 			});
 
 		int pos = sql.indexOf(_WHERE_CLAUSE);
 
 		if (pos != -1) {
-			return sql.substring(0, pos + 1).concat(permissionJoin).concat(
-				sql.substring(pos + 1));
+			sb = new StringBundler(4);
+
+			sb.append(sql.substring(0, pos));
+			sb.append(permissionWhere);
+			sb.append(" AND ");
+			sb.append(sql.substring(pos + 7));
+
+			return sb.toString();
 		}
 
 		pos = sql.indexOf(_GROUP_BY_CLAUSE);
 
 		if (pos != -1) {
-			return sql.substring(0, pos + 1).concat(permissionJoin).concat(
+			return sql.substring(0, pos + 1).concat(permissionWhere).concat(
 				sql.substring(pos + 1));
 		}
 
 		pos = sql.indexOf(_ORDER_BY_CLAUSE);
 
 		if (pos != -1) {
-			return sql.substring(0, pos + 1).concat(permissionJoin).concat(
+			return sql.substring(0, pos + 1).concat(permissionWhere).concat(
 				sql.substring(pos + 1));
 		}
 
-		return sql.concat(StringPool.SPACE).concat(permissionJoin);
+		return sql.concat(StringPool.SPACE).concat(permissionWhere);
 	}
 
 	private static final String _GROUP_BY_CLAUSE = " GROUP BY ";
