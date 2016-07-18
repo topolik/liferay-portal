@@ -204,7 +204,6 @@ import com.liferay.portlet.PortletPreferencesImpl;
 import com.liferay.portlet.PortletPreferencesWrapper;
 import com.liferay.portlet.PortletRequestImpl;
 import com.liferay.portlet.PortletResponseImpl;
-import com.liferay.portlet.PortletURLImpl;
 import com.liferay.portlet.RenderRequestImpl;
 import com.liferay.portlet.RenderResponseImpl;
 import com.liferay.portlet.StateAwareResponseImpl;
@@ -1062,8 +1061,9 @@ public class PortalImpl implements Portal {
 
 			long companyId = PortalInstances.getCompanyId(request);
 
-			List<FriendlyURLResolver> friendlyURLResolvers =
-				FriendlyURLResolverRegistryUtil.getFriendlyURLResolvers();
+			Collection<FriendlyURLResolver> friendlyURLResolvers =
+				FriendlyURLResolverRegistryUtil.
+					getFriendlyURLResolversAsCollection();
 
 			for (FriendlyURLResolver friendlyURLResolver :
 					friendlyURLResolvers) {
@@ -1756,8 +1756,7 @@ public class PortalImpl implements Portal {
 
 		if (Validator.isNull(PropsValues.COMPANY_SECURITY_STRANGERS_URL)) {
 			PortletURL createAccountURL = PortletURLFactoryUtil.create(
-				request, PortletKeys.LOGIN, themeDisplay.getPlid(),
-				PortletRequest.RENDER_PHASE);
+				request, PortletKeys.LOGIN, PortletRequest.RENDER_PHASE);
 
 			createAccountURL.setParameter(
 				"saveLastPath", Boolean.FALSE.toString());
@@ -2835,8 +2834,9 @@ public class PortalImpl implements Portal {
 
 			long companyId = PortalInstances.getCompanyId(request);
 
-			List<FriendlyURLResolver> friendlyURLResolvers =
-				FriendlyURLResolverRegistryUtil.getFriendlyURLResolvers();
+			Collection<FriendlyURLResolver> friendlyURLResolvers =
+				FriendlyURLResolverRegistryUtil.
+					getFriendlyURLResolversAsCollection();
 
 			for (FriendlyURLResolver friendlyURLResolver :
 					friendlyURLResolvers) {
@@ -5759,8 +5759,8 @@ public class PortalImpl implements Portal {
 			if (request != null) {
 				Layout layout = (Layout)request.getAttribute(WebKeys.LAYOUT);
 
-				PortletURL portletURL = new PortletURLImpl(
-					request, PortletKeys.DIRECTORY, layout.getPlid(),
+				PortletURL portletURL = PortletURLFactoryUtil.create(
+					request, PortletKeys.DIRECTORY, layout,
 					PortletRequest.RENDER_PHASE);
 
 				portletURL.setParameter(

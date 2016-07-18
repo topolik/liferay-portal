@@ -95,12 +95,12 @@
 
 	<property name="doc.dir" value="${project.dir}/api" />
 
-	<loadproperties srcfile="${project.dir}/app.server.properties">
-		<filterchain>
-			<linecontains>
-				<contains value="app.server.${app.server.type}" />
-			</linecontains>
+	<tempfile deleteonexit="true" destdir="${project.dir}" property="app.server.tmp.properties" suffix=".properties" />
 
+	<echoproperties destfile="${app.server.tmp.properties}" regex="app\.server\.${app.server.type}\..*" />
+
+	<loadproperties srcfile="${app.server.tmp.properties}">
+		<filterchain>
 			<tokenfilter>
 				<replacestring from="app.server.${app.server.type}." to="app.server." />
 			</tokenfilter>
@@ -1253,6 +1253,7 @@ rerun your task.
 					<propertyref name="app.server.type" />
 					<propertyref name="baseline.jar.report.level" />
 					<propertyref name="baseline.jar.report.only.dirty.packages" />
+					<propertyref name="git.working.branch.name" />
 					<propertyref name="jsp.precompile.enabled" />
 					<propertyref name="junit.java.integration.gc" />
 					<propertyref name="junit.java.unit.gc" />

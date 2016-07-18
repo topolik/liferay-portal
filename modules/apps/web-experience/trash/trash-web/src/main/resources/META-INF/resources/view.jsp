@@ -198,7 +198,8 @@ request.setAttribute("view.jsp-recycleBinEntrySearch", entrySearch);
 					}
 					else if(trashEntry.getRootEntry() == null) {
 						actionPath = "/entry_action.jsp";
-					} else {
+					}
+					else {
 						request.setAttribute(TrashWebKeys.TRASH_RENDERER, trashRenderer);
 					}
 					%>
@@ -275,8 +276,8 @@ request.setAttribute("view.jsp-recycleBinEntrySearch", entrySearch);
 						</c:when>
 						<c:when test="<%= trashDisplayContext.isListView() %>">
 							<liferay-ui:search-container-column-text
+								cssClass="table-cell-content"
 								name="name"
-								truncate="<%= true %>"
 							>
 								<c:choose>
 									<c:when test="<%= !trashHandler.isContainerModel() %>">

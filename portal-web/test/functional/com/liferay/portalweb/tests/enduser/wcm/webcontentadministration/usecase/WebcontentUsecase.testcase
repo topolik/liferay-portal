@@ -621,7 +621,7 @@
 	</command>
 
 	<command name="AddWebContentRemoveGuestViewPermission" priority="4">
-		<property name="custom.properties" value="journal.article.view.permission.check.enabled=true" />
+		<property name="portlet.properties.com.liferay.journal.service" value="journal.article.view.permission.check.enabled=true" />
 
 		<var name="portletOption" value="Configuration" />
 		<var name="roleName" value="Guest" />
@@ -1387,8 +1387,8 @@
 		</execute>
 
 		<execute macro="WebContent#selectTemplateCP">
+			<var name="structureName" value="WC Structure Name" />
 			<var name="templateName" value="WC Template1 Name" />
-			<var name="webContentTitle" value="WC WebContent Title" />
 		</execute>
 
 		<execute macro="PortletEntry#publish" />

@@ -210,45 +210,6 @@
 		<execute function="AssertTextEquals#assertPartialText" locator1="AP#ASSET_ABSTRACT_DESCRIPTION" value1="${webContentContent}" />
 	</command>
 
-	<command name="addPGViaPanel">
-		<execute function="SelectFrame" locator1="IFrame#EDIT_ASSET" />
-
-		<if>
-			<isset var="templateName" />
-			<then>
-				<execute macro="Panel#expandPanel">
-					<var name="panelHeading" value="Structure and Template" />
-				</execute>
-
-				<execute function="AssertClick" locator1="WCEditWebContent#SELECT_TEMPLATE" value1="Select" />
-
-				<execute function="SelectFrame" value1="relative=top" />
-				<execute function="SelectFrame" locator1="IFrame#TEMPLATES" />
-
-				<var name="key_rowEntry" value="${templateName}" />
-
-				<execute function="AssertClickNoError" locator1="ContentRow#ENTRY_CONTENT_ENTRY_NAME_LINK" value1="${templateName}" />
-
-				<execute function="Confirm#assertConfirmationNoWait" value1="Selecting a new template deletes all unsaved content. Do you want to proceed?" />
-
-				<execute function="SelectFrame" value1="relative=top" />
-
-				<execute function="SelectFrame" locator1="IFrame#EDIT_ASSET" />
-			</then>
-		</if>
-
-		<execute macro="WebContent#addCP">
-			<var name="webContentContent" value="${webContentContent}" />
-			<var name="webContentTitle" value="${webContentTitle}" />
-		</execute>
-
-		<execute function="AssertClick" locator1="Button#PUBLISH" value1="Publish" />
-
-		<execute function="SelectFrameTop" />
-
-		<execute function="AssertVisible" locator1="WCD#WEB_CONTENT_CONTENT" />
-	</command>
-
 	<command name="addPGViaWCD">
 		<execute macro="WebContentNavigator#gotoAddPGViaWCD" />
 
@@ -891,7 +852,8 @@
 			<var name="panelHeading" value="Display Page" />
 		</execute>
 
-		<execute function="AssertClick" locator1="WCEditWebContent#DISPLAY_PAGE_CHOOSE" value1="Choose" />
+		<execute function="AssertClick" locator1="Button#CHOOSE" value1="Choose" />
+
 		<execute function="Pause" locator1="5000" />
 
 		<var name="key_pageName" value="${pageName}" />
@@ -900,9 +862,9 @@
 
 		<execute function="AssertClick" locator1="WCSelectDisplayPage#PUBLIC_PAGES_SELECTION" value1="${pageName}" />
 
-		<execute function="AssertTextEquals" locator1="WCSelectDisplayPage#SELECTED_PAGE_INFO_MESSAGE" value1="Public Pages > ${pageName}" />
+		<execute function="SelectFrame" value1="relative=top" />
 
-		<execute function="AssertClick" locator1="Button#CHOOSE" value1="Choose" />
+		<execute macro="Button#clickDone" />
 
 		<execute function="SelectFrame" value1="relative=top" />
 
@@ -924,7 +886,7 @@
 			<var name="panelHeading" value="Display Page" />
 		</execute>
 
-		<var name="key_displayPageSelection" value="${displayPageSelection}" />
+		<var name="key_displayPageName" value="${displayPageName}" />
 
 		<execute function="Click" locator1="Button#CHOOSE" />
 
@@ -932,7 +894,7 @@
 
 		<execute function="SelectFrame" locator1="WCSelectDisplayPage#DISPLAY_PAGE_CONFIGURATION_IFRAME" />
 
-		<execute function="AssertClick" locator1="WCSelectDisplayPage#PUBLIC_DISPLAY_PAGE_SELECTION" value1="${displayPageSelection}" />
+		<execute function="AssertClick" locator1="WCSelectDisplayPage#PUBLIC_DISPLAY_PAGE_SELECTION" value1="${displayPageName}" />
 
 		<execute function="SelectFrame" value1="relative=top" />
 
@@ -1169,6 +1131,14 @@
 		<execute function="AssertTextEquals" locator1="WCPreview#BODY_FIELD" value1="${webContentText}" />
 	</command>
 
+	<command name="publishViaWCD">
+		<execute macro="Button#clickPublish" />
+
+		<execute function="SelectFrameTop" />
+
+		<execute function="AssertVisible" locator1="WCD#WEB_CONTENT_CONTENT" />
+	</command>
+
 	<command name="saveAsDraftViaAP">
 		<execute macro="Button#clickSaveAsDraft" />
 
@@ -1255,7 +1225,11 @@
 			<var name="panelHeading" value="Structure and Template" />
 		</execute>
 
+		<execute function="AssertTextEquals" locator1="WCEditWebContent#SELECTED_STRUCTURE" value1="${structureName}" />
+
 		<execute function="AssertClick" locator1="WCEditWebContent#SELECT_TEMPLATE" value1="Select" />
+
+		<execute macro="IFrame#selectTopFrame" />
 
 		<execute function="SelectFrame" locator1="IFrame#TEMPLATES" />
 
@@ -1266,6 +1240,14 @@
 		<execute function="Confirm#assertConfirmationNoWait" value1="Selecting a new template deletes all unsaved content. Do you want to proceed?" />
 
 		<execute macro="IFrame#selectTopFrame" />
+
+		<execute macro="IFrame#selectEditAssetFrame" />
+
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Structure and Template" />
+		</execute>
+
+		<execute function="AssertTextEquals" locator1="WCEditWebContent#SELECTED_TEMPLATE" value1="${templateName}" />
 	</command>
 
 	<command name="subscribeCP">
@@ -1863,7 +1845,7 @@
 
 		<var name="key_localizedLanguage" value="Spanish (Spain)" />
 
-		<execute function="Click" locator1="Translation#CURRENT_LOCALE" />
+		<execute function="Click" locator1="Translation#AVAILABLE_TRANSLATION" />
 
 		<execute function="AssertTextEquals" locator1="TextInput#TITLE" value1="${localizedTitle}" />
 
@@ -1890,7 +1872,9 @@
 	</command>
 
 	<command name="viewWCViewableByPermissions">
-		<execute function="AssertClick" locator1="WCEditWebContent#PERMISSIONS_HEADER" value1="Permissions" />
+		<execute macro="Panel#expandPanel">
+			<var name="panelHeading" value="Permissions" />
+		</execute>
 
 		<execute function="AssertSelectedLabel" locator1="WCEditWebContent#PERMISSIONS_VIEWABLE_BY_SELECT" value1="Site Members" />
 	</command>

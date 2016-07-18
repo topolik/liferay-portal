@@ -29,6 +29,7 @@ import com.liferay.knowledge.base.model.KBFolder;
 import com.liferay.knowledge.base.model.KBTemplate;
 import com.liferay.knowledge.base.service.util.AdminUtil;
 import com.liferay.knowledge.base.web.internal.constants.KBWebKeys;
+import com.liferay.knowledge.base.web.internal.upload.KBArticleAttachmentKBUploadHandler;
 import com.liferay.portal.kernel.exception.NoSuchSubscriptionException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Release;
@@ -40,6 +41,7 @@ import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.upload.UploadHandler;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -523,6 +525,19 @@ public class AdminPortlet extends BaseKBPortlet {
 		}
 	}
 
+	public void uploadKBArticleAttachments(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws PortalException {
+
+		long resourcePrimKey = ParamUtil.getLong(
+			actionRequest, "resourcePrimKey");
+
+		UploadHandler uploadHandler = new KBArticleAttachmentKBUploadHandler(
+			resourcePrimKey);
+
+		uploadHandler.upload(actionRequest, actionResponse);
+	}
+
 	@Override
 	protected String buildEditURL(
 			ActionRequest actionRequest, ActionResponse actionResponse,
@@ -530,12 +545,9 @@ public class AdminPortlet extends BaseKBPortlet {
 		throws PortalException {
 
 		try {
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
-
 			PortletURL portletURL = PortletURLFactoryUtil.create(
 				actionRequest, KBPortletKeys.KNOWLEDGE_BASE_ADMIN,
-				themeDisplay.getPlid(), PortletRequest.RENDER_PHASE);
+				PortletRequest.RENDER_PHASE);
 
 			portletURL.setParameter(
 				"mvcPath", templatePath + "edit_article.jsp");

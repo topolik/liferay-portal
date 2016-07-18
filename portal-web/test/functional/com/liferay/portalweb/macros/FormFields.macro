@@ -43,8 +43,6 @@
 		<execute function="Type" locator1="FormFields#FIELD_NAME_EDIT" value1="${fieldValue}" />
 
 		<execute function="Click" locator1="FormFields#FIELD_NAME_EDIT_DONE" />
-
-		<execute function="AssertTextEquals" locator1="FormFields#FIELD_NAME" value1="Field Name:${fieldValue}" />
 	</command>
 
 	<command name="editOptionsRow">
@@ -229,6 +227,13 @@
 	<command name="viewFieldValidationErrorMessage">
 		<var name="key_fieldName" value="${fieldName}" />
 
+		<if>
+			<condition function="IsElementNotPresent" locator1="Message#ERROR_SPECIFIC_FORM_FIELD_REQUIRED" />
+			<then>
+				<execute function="Click" locator1="FormPortlet#FORM_CONTAINER" />
+			</then>
+		</if>
+
 		<execute function="AssertTextEquals" locator1="Message#ERROR_SPECIFIC_FORM_FIELD_REQUIRED" value1="${fieldValidationErrorMessage}" />
 	</command>
 
@@ -354,10 +359,22 @@
 		<execute function="AssertElementPresent" locator1="FormFields#SELECT_FIELD" />
 	</command>
 
+	<command name="viewSwitcher">
+		<var name="key_fieldName" value="${fieldName}" />
+
+		<execute function="AssertElementPresent" locator1="FormFields#SWITCHER" />
+	</command>
+
 	<command name="viewSwitcherLabel">
 		<var name="key_fieldName" value="${fieldName}" />
 
 		<execute function="AssertTextEquals#assertText" locator1="FormFields#SWITCHER_LABEL" value1="${fieldLabel}" />
+	</command>
+
+	<command name="viewSwitcherLabelNotPresent">
+		<var name="key_fieldName" value="${fieldName}" />
+
+		<execute function="AssertTextNotPresent" locator1="FormFields#SWITCHER_LABEL" value1="${fieldLabel}" />
 	</command>
 
 	<command name="viewTextField">

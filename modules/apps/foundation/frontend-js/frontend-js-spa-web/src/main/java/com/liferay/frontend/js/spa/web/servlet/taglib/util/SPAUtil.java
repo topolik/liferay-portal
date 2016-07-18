@@ -107,20 +107,20 @@ public class SPAUtil {
 		return jsonObject.toString();
 	}
 
+	public int getRequestTimeout() {
+		int requestTimeout = 0;
+
+		SPAConfiguration spaConfiguration =
+			_spaConfigurationActivator.getSPAConfiguration();
+
+		requestTimeout = GetterUtil.getInteger(
+			spaConfiguration.requestTimeout(), requestTimeout);
+
+		return requestTimeout;
+	}
+
 	public String getValidStatusCodes() {
-		Class<?> clazz = ServletResponseConstants.class;
-
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		for (Field field : clazz.getDeclaredFields()) {
-			try {
-				jsonArray.put(field.getInt(null));
-			}
-			catch (Exception e) {
-			}
-		}
-
-		return jsonArray.toJSONString();
+		return _VALID_STATUS_CODES;
 	}
 
 	public boolean isClearScreensCache(
@@ -171,6 +171,24 @@ public class SPAUtil {
 		SPAConfigurationActivator spaConfigurationActivator) {
 
 		_spaConfigurationActivator = null;
+	}
+
+	private static final String _VALID_STATUS_CODES;
+
+	static {
+		Class<?> clazz = ServletResponseConstants.class;
+
+		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
+
+		for (Field field : clazz.getDeclaredFields()) {
+			try {
+				jsonArray.put(field.getInt(null));
+			}
+			catch (Exception e) {
+			}
+		}
+
+		_VALID_STATUS_CODES = jsonArray.toJSONString();
 	}
 
 	private PortletLocalService _portletLocalService;

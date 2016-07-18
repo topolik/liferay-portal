@@ -159,9 +159,9 @@
 
 		<execute function="Paste" locator1="AlloyEditor#TRACKBACKS_TO_SEND" />
 
-		<execute function="Pause" locator1="3000" />
-
 		<execute function="AssertClick" locator1="Button#PUBLISH" value1="Publish" />
+
+		<execute macro="Alert#viewSuccessMessage" />
 	</command>
 
 	<command name="addWithWorkflowPG">
@@ -993,6 +993,10 @@
 		<execute function="AssertTextEquals" locator1="Blogs#RSS_FEED_SUBTITLE" value1="${siteName}" />
 		<execute function="AssertTextEquals" locator1="Blogs#RSS_ENTRY_TITLE" value1="${entryTitle}" />
 		<execute function="AssertTextEquals" locator1="Blogs#RSS_ENTRY_CONTENT" value1="${entryContent}" />
+	</command>
+
+	<command name="viewStatus">
+		<execute function="AssertTextEquals" locator1="AssetWorkflow#WORKFLOW_STATUS" value1="${entryStatus}" />
 	</command>
 
 	<command name="viewSubtitle">

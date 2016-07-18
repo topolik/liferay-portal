@@ -81,9 +81,11 @@ import org.dom4j.io.SAXReader;
  */
 public abstract class BaseSourceProcessor implements SourceProcessor {
 
-	public static final int PLUGINS_MAX_DIR_LEVEL = 3;
+	public static final int PLUGINS_MAX_DIR_LEVEL =
+		ToolsUtil.PLUGINS_MAX_DIR_LEVEL;
 
-	public static final int PORTAL_MAX_DIR_LEVEL = 7;
+	public static final int PORTAL_MAX_DIR_LEVEL =
+		ToolsUtil.PORTAL_MAX_DIR_LEVEL;
 
 	@Override
 	public final void format() throws Exception {
@@ -129,19 +131,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		_sourceFormatterHelper.close();
 	}
 
-	@Override
-	public List<String> getErrorMessages() {
-		List<String> errorMessages = new ArrayList<>();
-
-		for (Map.Entry<String, List<String>> entry :
-				_errorMessagesMap.entrySet()) {
-
-			errorMessages.addAll(entry.getValue());
-		}
-
-		return errorMessages;
-	}
-
 	public final List<String> getFileNames() throws Exception {
 		List<String> fileNames = sourceFormatterArgs.getFileNames();
 
@@ -163,16 +152,37 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	}
 
 	@Override
-	public void processErrorMessage(String fileName, String message) {
-		List<String> errorMessages = _errorMessagesMap.get(fileName);
+	public List<SourceFormatterMessage> getSourceFormatterMessages() {
+		List<SourceFormatterMessage> sourceFormatterMessages =
+			new ArrayList<>();
 
-		if (errorMessages == null) {
-			errorMessages = new ArrayList<>();
+		for (Map.Entry<String, List<SourceFormatterMessage>> entry :
+				_sourceFormatterMessagesMap.entrySet()) {
+
+			sourceFormatterMessages.addAll(entry.getValue());
 		}
 
-		errorMessages.add(message);
+		return sourceFormatterMessages;
+	}
 
-		_errorMessagesMap.put(fileName, errorMessages);
+	@Override
+	public void processMessage(String fileName, String message) {
+		processMessage(fileName, message, -1);
+	}
+
+	@Override
+	public void processMessage(String fileName, String message, int lineCount) {
+		List<SourceFormatterMessage> sourceFormatterMessages =
+			_sourceFormatterMessagesMap.get(fileName);
+
+		if (sourceFormatterMessages == null) {
+			sourceFormatterMessages = new ArrayList<>();
+		}
+
+		sourceFormatterMessages.add(
+			new SourceFormatterMessage(fileName, message, lineCount));
+
+		_sourceFormatterMessagesMap.put(fileName, sourceFormatterMessages);
 	}
 
 	@Override
@@ -182,6 +192,82 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		this.sourceFormatterArgs = sourceFormatterArgs;
 
 		_init();
+	}
+
+	protected boolean addExtraEmptyLine(
+		String previousLine, String line, boolean javaSource) {
+
+		String trimmedLine = StringUtil.trimLeading(line);
+		String trimmedPreviousLine = StringUtil.trimLeading(previousLine);
+
+		if (this instanceof JSPSourceProcessor) {
+			if (trimmedPreviousLine.matches("(--)?%>") &&
+				Validator.isNotNull(line) && !trimmedLine.equals("-->")) {
+
+				return true;
+			}
+
+			if (Validator.isNotNull(previousLine) &&
+				!trimmedPreviousLine.equals("<!--") &&
+				trimmedLine.matches("<%(--)?")) {
+
+				return true;
+			}
+
+			if (trimmedPreviousLine.equals("<%") &&
+				trimmedLine.startsWith("//")) {
+
+				return true;
+			}
+
+			if (trimmedPreviousLine.startsWith("//") &&
+				trimmedLine.equals("%>")) {
+
+				return true;
+			}
+		}
+
+		if (!javaSource) {
+			return false;
+		}
+
+		if (Validator.isNull(previousLine) || Validator.isNull(line) ||
+			previousLine.contains("/*") || previousLine.endsWith("*/")) {
+
+			return false;
+		}
+
+		if ((trimmedPreviousLine.startsWith("// ") &&
+			 !trimmedLine.startsWith("// ")) ||
+			(!trimmedPreviousLine.startsWith("// ") &&
+			 trimmedLine.startsWith("// "))) {
+
+			return true;
+		}
+
+		if (!trimmedPreviousLine.endsWith(StringPool.OPEN_CURLY_BRACE) &&
+			!trimmedPreviousLine.endsWith(StringPool.COLON) &&
+			(trimmedLine.startsWith("for (") ||
+			 trimmedLine.startsWith("if (") ||
+			 trimmedLine.startsWith("try {"))) {
+
+			return true;
+		}
+
+		if (previousLine.endsWith(
+				StringPool.TAB + StringPool.CLOSE_CURLY_BRACE) &&
+			!trimmedLine.startsWith(StringPool.CLOSE_CURLY_BRACE) &&
+			!trimmedLine.startsWith(StringPool.CLOSE_PARENTHESIS) &&
+			!trimmedLine.startsWith(StringPool.DOUBLE_SLASH) &&
+			!trimmedLine.equals("*/") && !trimmedLine.startsWith("catch ") &&
+			!trimmedLine.startsWith("else ") &&
+			!trimmedLine.startsWith("finally ") &&
+			!trimmedLine.startsWith("while ")) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	protected int adjustLevel(int level, String text, String s, int diff) {
@@ -224,10 +310,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			String collectionType = TextFormatter.format(
 				matcher.group(1), TextFormatter.J);
 
-			processErrorMessage(
-				fileName,
-				"Use Collections.empty" + collectionType + "(): " + fileName +
-					" " + lineCount);
+			processMessage(
+				fileName, "Use Collections.empty" + collectionType + "()",
+				lineCount);
 		}
 	}
 
@@ -258,10 +343,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			}
 
 			if (Objects.equals(value, defaultValue)) {
-				processErrorMessage(
-					fileName,
-					"No need to pass default value: " + fileName + " " +
-						getLineCount(content, matcher.start()));
+				processMessage(
+					fileName, "No need to pass default value",
+					getLineCount(content, matcher.start()));
 			}
 		}
 	}
@@ -286,9 +370,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		if (hasRedundantParentheses(ifClause, "||", "&&") ||
 			hasRedundantParentheses(ifClause, "&&", "||")) {
 
-			processErrorMessage(
-				fileName,
-				"redundant parentheses: " + fileName + " " + lineCount);
+			processMessage(fileName, "redundant parentheses", lineCount);
 
 			return;
 		}
@@ -312,10 +394,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 						previousParenthesisPos + 1, i);
 
 					if (hasMissingParentheses(s)) {
-						processErrorMessage(
-							fileName,
-							"missing parentheses: " + fileName + " " +
-								lineCount);
+						processMessage(
+							fileName, "missing parentheses", lineCount);
 
 						return;
 					}
@@ -344,10 +424,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 								posOpenParenthesis + 1, i);
 
 							if (hasRedundantParentheses(s)) {
-								processErrorMessage(
-									fileName,
-									"redundant parentheses: " + fileName + " " +
-										lineCount);
+								processMessage(
+									fileName, "redundant parentheses",
+									lineCount);
 
 								return;
 							}
@@ -356,10 +435,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 						if ((previousChar == CharPool.OPEN_PARENTHESIS) &&
 							(nextChar == CharPool.CLOSE_PARENTHESIS)) {
 
-							processErrorMessage(
-								fileName,
-								"redundant parentheses: " + fileName + " " +
-									lineCount);
+							processMessage(
+								fileName, "redundant parentheses", lineCount);
 
 							return;
 						}
@@ -391,10 +468,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		}
 
 		if (pos != -1) {
-			processErrorMessage(
-				fileName,
-				"Use StringUtil." + methodName + ": " + fileName + " " +
-					lineCount);
+			processMessage(fileName, "Use StringUtil." + methodName, lineCount);
 		}
 	}
 
@@ -491,10 +565,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				if ((bndFileLanguageProperties == null) ||
 					!bndFileLanguageProperties.containsKey(languageKey)) {
 
-					processErrorMessage(
-						fileName,
-						"missing language key: " + languageKey +
-							StringPool.SPACE + fileName);
+					processMessage(
+						fileName, "missing language key: " + languageKey);
 				}
 			}
 		}
@@ -516,22 +588,21 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			if ((previousElement != null) &&
 				(elementComparator.compare(previousElement, element) > 0)) {
 
-				StringBundler sb = new StringBundler(8);
+				StringBundler sb = new StringBundler(7);
 
 				sb.append("order ");
 				sb.append(elementName);
-				sb.append(": ");
-				sb.append(fileName);
-				sb.append(StringPool.SPACE);
+				sb.append(StringPool.COLON);
 
 				if (Validator.isNotNull(parentElementName)) {
-					sb.append(parentElementName);
 					sb.append(StringPool.SPACE);
+					sb.append(parentElementName);
 				}
 
+				sb.append(StringPool.SPACE);
 				sb.append(elementComparator.getElementName(element));
 
-				processErrorMessage(fileName, sb.toString());
+				processMessage(fileName, sb.toString());
 			}
 
 			previousElement = element;
@@ -561,10 +632,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		}
 
 		if (content.contains("org.apache.commons.beanutils.PropertyUtils")) {
-			processErrorMessage(
+			processMessage(
 				fileName,
-				"Do not use org.apache.commons.beanutils.PropertyUtils: " +
-					fileName);
+				"Do not use org.apache.commons.beanutils.PropertyUtils");
 		}
 	}
 
@@ -576,17 +646,19 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		}
 
 		if (line.contains("ResourceBundle.getBundle(")) {
-			processErrorMessage(
+			processMessage(
 				fileName,
 				"Use ResourceBundleUtil.getBundle instead of " +
-					"ResourceBundle.getBundle: " + fileName + " " + lineCount);
+					"ResourceBundle.getBundle",
+				lineCount);
 		}
 
 		if (line.contains("resourceBundle.getString(")) {
-			processErrorMessage(
+			processMessage(
 				fileName,
 				"Use ResourceBundleUtil.getString instead of " +
-					"resourceBundle.getString: " + fileName + " " + lineCount);
+					"resourceBundle.getString",
+				lineCount);
 		}
 	}
 
@@ -625,18 +697,17 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 			String method = matcher.group(1);
 
-			StringBundler sb = new StringBundler(8);
+			StringBundler sb = new StringBundler(5);
 
 			sb.append("Use StringUtil.");
 			sb.append(method);
 			sb.append("(String, char, char) or StringUtil.");
 			sb.append(method);
-			sb.append("(String, char, String) instead: ");
-			sb.append(fileName);
-			sb.append(StringPool.SPACE);
-			sb.append(getLineCount(content, matcher.start()));
+			sb.append("(String, char, String) instead");
 
-			processErrorMessage(fileName, sb.toString());
+			processMessage(
+				fileName, sb.toString(),
+				getLineCount(content, matcher.start()));
 		}
 	}
 
@@ -651,7 +722,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			charsetDecoder.decode(ByteBuffer.wrap(bytes));
 		}
 		catch (Exception e) {
-			processErrorMessage(fileName, "UTF-8: " + fileName);
+			processMessage(fileName, "UTF-8");
 		}
 	}
 
@@ -724,7 +795,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 			content = StringUtil.replace(content, _oldCopyright, copyright);
 
-			processErrorMessage(fileName, "old (c): " + fileName);
+			processMessage(fileName, "old (c)");
 		}
 
 		if (!content.contains(copyright)) {
@@ -735,20 +806,18 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			}
 
 			if (!content.contains(copyright)) {
-				processErrorMessage(fileName, "(c): " + fileName);
+				processMessage(fileName, "(c)");
 			}
 			else if (!content.startsWith(copyright) &&
 					 !content.startsWith("<%--\n" + copyright)) {
 
-				processErrorMessage(
-					fileName, "File must start with copyright: " + fileName);
+				processMessage(fileName, "File must start with copyright");
 			}
 		}
 		else if (!content.startsWith(copyright) &&
 				 !content.startsWith("<%--\n" + copyright)) {
 
-			processErrorMessage(
-				fileName, "File must start with copyright: " + fileName);
+			processMessage(fileName, "File must start with copyright");
 		}
 
 		if (fileName.endsWith(".jsp") || fileName.endsWith(".jspf")) {
@@ -813,11 +882,11 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				});
 		}
 		else {
-			processErrorMessage(
+			processMessage(
 				fileName,
 				"(Unicode)LanguageUtil.format/get methods require " +
 					expectedParameter + " parameter instead of " +
-						incorrectParameter + " " + fileName);
+						incorrectParameter);
 		}
 
 		return content;
@@ -915,9 +984,16 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			File file, String fileName, String absolutePath, String content)
 		throws Exception {
 
-		_errorMessagesMap.remove(fileName);
+		_sourceFormatterMessagesMap.remove(fileName);
 
 		checkUTF8(file, fileName);
+
+		if (!(this instanceof JavaSourceProcessor) &&
+			absolutePath.matches(".*\\/modules\\/.*\\/src\\/.*\\/java\\/.*")) {
+
+			processMessage(
+				fileName, "Only *.java files are allowed in /src/*/java/");
+		}
 
 		String newContent = doFormat(file, fileName, absolutePath, content);
 
@@ -1011,8 +1087,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				}
 
 				if (delimeter != CharPool.AMPERSAND) {
-					processErrorMessage(
-						fileName, "delimeter: " + fileName + " " + lineCount);
+					processMessage(fileName, "delimeter", lineCount);
 				}
 
 				return line;
@@ -1130,6 +1205,12 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			previousAttribute = attribute;
 			previousAttributeAndValue = currentAttributeAndValue;
 		}
+	}
+
+	protected String formatDefinitionKey(
+		String fileName, String content, String definitionKey) {
+
+		return content;
 	}
 
 	protected String formatEmptyArray(String line) {
@@ -1256,10 +1337,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				}
 			}
 
-			processErrorMessage(
-				fileName,
-				"plus: " + fileName + " " +
-					getLineCount(content, matcher.start(1)));
+			processMessage(
+				fileName, "plus", getLineCount(content, matcher.start(1)));
 		}
 
 		matcher = sbAppendWithStartingSpacePattern.matcher(content);
@@ -1274,10 +1353,9 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			if ((maxLineLength != -1) &&
 				(getLineLength(firstLine) >= maxLineLength)) {
 
-				processErrorMessage(
-					fileName,
-					"leading space in sb: " + fileName + " " +
-						getLineCount(content, matcher.start(3)));
+				processMessage(
+					fileName, "leading space in sb",
+					getLineCount(content, matcher.start(3)));
 			}
 			else {
 				content = StringUtil.replaceFirst(
@@ -2195,14 +2273,23 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			return true;
 		}
 
-		boolean containsCompareOperator =
-			(s.contains(" == ") || s.contains(" != ") || s.contains(" < ") ||
+		boolean containsCompareOperator = false;
+
+		if ((s.contains(" == ") || s.contains(" != ") || s.contains(" < ") ||
 			 s.contains(" > ") || s.contains(" =< ") || s.contains(" => ") ||
-			 s.contains(" <= ") || s.contains(" >= "));
-		boolean containsMathOperator =
-			(s.contains(" = ") || s.contains(" - ") || s.contains(" + ") ||
+			 s.contains(" <= ") || s.contains(" >= "))) {
+
+			containsCompareOperator = true;
+		}
+
+		boolean containsMathOperator = false;
+
+		if ((s.contains(" = ") || s.contains(" - ") || s.contains(" + ") ||
 			 s.contains(" & ") || s.contains(" % ") || s.contains(" * ") ||
-			 s.contains(" / "));
+			 s.contains(" / "))) {
+
+			containsMathOperator = true;
+		}
 
 		if (containsCompareOperator &&
 			(containsAndOperator || containsOrOperator ||
@@ -2412,11 +2499,15 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		}
 
 		if (sourceFormatterArgs.isPrintErrors()) {
-			List<String> errorMessages = _errorMessagesMap.get(fileName);
+			List<SourceFormatterMessage> sourceFormatterMessages =
+				_sourceFormatterMessagesMap.get(fileName);
 
-			if (errorMessages != null) {
-				for (String errorMessage : errorMessages) {
-					_sourceFormatterHelper.printError(fileName, errorMessage);
+			if (sourceFormatterMessages != null) {
+				for (SourceFormatterMessage sourceFormatterMessage :
+						sourceFormatterMessages) {
+
+					_sourceFormatterHelper.printError(
+						fileName, sourceFormatterMessage.toString());
 				}
 			}
 		}
@@ -2445,13 +2536,20 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	}
 
 	protected String sortDefinitions(
-		String content, Comparator<String> comparator) {
+		String fileName, String content, Comparator<String> comparator) {
 
 		String previousDefinition = null;
 
 		Matcher matcher = _definitionPattern.matcher(content);
 
 		while (matcher.find()) {
+			String newContent = formatDefinitionKey(
+				fileName, content, matcher.group(1));
+
+			if (!newContent.equals(content)) {
+				return newContent;
+			}
+
 			String definition = matcher.group();
 
 			if (Validator.isNotNull(matcher.group(1))) {
@@ -2839,7 +2937,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	private void _init() {
 		portalSource = _isPortalSource();
 
-		_errorMessagesMap = new HashMap<>();
+		_sourceFormatterMessagesMap = new HashMap<>();
 
 		try {
 			_properties = _getProperties();
@@ -2899,9 +2997,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	private Map<String, String> _compatClassNamesMap;
 	private String _copyright;
 	private final Pattern _definitionPattern = Pattern.compile(
-		"^[A-Za-z-][\\s\\S]*?([^\\\\]\n|\\Z)", Pattern.MULTILINE);
-	private Map<String, List<String>> _errorMessagesMap =
-		new ConcurrentHashMap<>();
+		"^([A-Za-z-]+?)[:=][\\s\\S]*?([^\\\\]\n|\\Z)", Pattern.MULTILINE);
 	private String[] _excludes;
 	private SourceMismatchException _firstSourceMismatchException;
 	private Set<String> _immutableFieldTypes;
@@ -2918,6 +3014,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	private Properties _properties;
 	private List<String> _runOutsidePortalExcludes;
 	private SourceFormatterHelper _sourceFormatterHelper;
+	private Map<String, List<SourceFormatterMessage>>
+		_sourceFormatterMessagesMap = new ConcurrentHashMap<>();
 	private boolean _usePortalCompatImport;
 
 	private class PutOrSetParameterNameComparator

@@ -153,6 +153,7 @@ if (editorOptions != null) {
 					</div>
 				</div>
 			</div>
+
 			<div class="alloy-editor-switch hide">
 				<button class="btn btn-default btn-xs hide" id="<%= name %>Fullscreen" type="button">
 					<aui:icon cssClass="icon-monospaced" image="expand" markupView="lexicon" />
@@ -356,7 +357,7 @@ if (showSource) {
 			var data = '';
 
 			if (alloyEditor && alloyEditor.instanceReady) {
-				data = A.Lang.String.escapeHTML(alloyEditor.getText());
+				data = alloyEditor.getText();
 			}
 			else {
 				data = getInitialContent();

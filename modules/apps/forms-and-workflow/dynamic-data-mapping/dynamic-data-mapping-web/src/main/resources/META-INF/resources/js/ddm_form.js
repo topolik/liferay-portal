@@ -1005,14 +1005,14 @@ AUI.add(
 						portletURL.setParameter('itemSelectedEventName', portletNamespace + 'selectDocumentLibrary');
 
 						var criterionJSON = {
-							desiredItemSelectorReturnTypes: 'com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType,com.liferay.item.selector.criteria.UploadableFileReturnType'
+							desiredItemSelectorReturnTypes: 'com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType,com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType'
 						};
 
 						portletURL.setParameter('0_json', JSON.stringify(criterionJSON));
 						portletURL.setParameter('1_json', JSON.stringify(criterionJSON));
 
 						var uploadCriterionJSON = {
-							desiredItemSelectorReturnTypes: 'com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType,com.liferay.item.selector.criteria.UploadableFileReturnType',
+							desiredItemSelectorReturnTypes: 'com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType,com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType',
 							URL: instance.getUploadURL()
 						};
 
@@ -2220,6 +2220,8 @@ AUI.add(
 						else {
 							repeatableInstance.add(field.get('container'));
 						}
+
+						A.DD.DDM.getDrag(field.get('container')).addInvalid('.alloy-editor');
 					},
 
 					toJSON: function() {

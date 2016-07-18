@@ -152,6 +152,40 @@
 		</execute>
 	</command>
 
+	<command name="AddEventAfterClosingModal" priority="3">
+		<description message="This is a use case for LPS-64945." />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="${pageName}" />
+		</execute>
+
+		<execute macro="CalendarNavigator#gotoAddEvent" />
+
+		<execute macro="CalendarEvent#editTitle">
+			<var name="eventTitle" value="Calendar Event Title" />
+		</execute>
+
+		<execute macro="CalendarNavigator#closeModal">
+			<var name="modalTitle" value="New Event" />
+		</execute>
+
+		<execute macro="CalendarNavigator#gotoAddEvent" />
+
+		<execute macro="CalendarEvent#editTitle">
+			<var name="eventTitle" value="Calendar Event Title" />
+		</execute>
+
+		<execute macro="CalendarEvent#publish" />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="${pageName}" />
+		</execute>
+
+		<execute macro="CalendarEvent#view">
+			<var name="eventTitle" value="Calendar Event Title" />
+		</execute>
+	</command>
+
 	<command name="AddEventAllDay" priority="5">
 		<property name="portal.acceptance" value="true" />
 
@@ -1408,8 +1442,8 @@
 		</execute>
 
 		<execute macro="CalendarEvent#setDates">
-			<var name="endDate" value="02/15/2015" />
-			<var name="startDate" value="02/15/2015" />
+			<var name="endDate" value="02/21/2016" />
+			<var name="startDate" value="02/21/2016" />
 		</execute>
 
 		<execute macro="CalendarEvent#setTimes">
@@ -1501,6 +1535,8 @@
 		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
 		</execute>
+
+		<execute macro="Alert#viewSuccessMessage" />
 
 		<execute macro="CalendarNavigator#gotoView">
 			<var name="viewType" value="Month" />
@@ -2550,8 +2586,8 @@
 		</execute>
 
 		<execute macro="CalendarEvent#setDates">
-			<var name="endDate" value="02/2/2015" />
-			<var name="startDate" value="02/2/2015" />
+			<var name="endDate" value="02/2/2016" />
+			<var name="startDate" value="02/2/2016" />
 		</execute>
 
 		<execute macro="CalendarEvent#setTimes">
@@ -2571,7 +2607,7 @@
 		</execute>
 
 		<execute macro="CalendarNavigator#gotoMonthViaSmallCalendar">
-			<var name="dateMonth" value="February 2015" />
+			<var name="dateMonth" value="February 2016" />
 		</execute>
 
 		<execute macro="CalendarNavigator#gotoSpecificBusyDayViaSmallCalendar">
@@ -2594,7 +2630,7 @@
 		</execute>
 
 		<execute macro="CalendarNavigator#gotoMonthViaSmallCalendar">
-			<var name="dateMonth" value="February 2015" />
+			<var name="dateMonth" value="February 2016" />
 		</execute>
 
 		<execute macro="CalendarNavigator#gotoSpecificBusyDayViaSmallCalendar">
@@ -2667,6 +2703,7 @@
 		<execute macro="Calendar#viewSiteCalendarNoMenulistOption">
 			<var name="menuListOption" value="RSS" />
 			<var name="siteCalendarName" value="${siteName}" />
+			<var name="siteName" value="${siteName}" />
 		</execute>
 
 		<execute macro="Calendar#viewNoRSS">
@@ -3012,8 +3049,8 @@
 		</execute>
 
 		<execute macro="CalendarEvent#setDates">
-			<var name="endDate" value="12/29/2015" />
-			<var name="startDate" value="12/29/2015" />
+			<var name="endDate" value="3/29/2016" />
+			<var name="startDate" value="3/29/2016" />
 		</execute>
 
 		<execute macro="CalendarEvent#publishWithUserNotification" />
@@ -3023,7 +3060,7 @@
 		</execute>
 
 		<execute macro="CalendarNavigator#gotoMonthViaSmallCalendar">
-			<var name="dateMonth" value="December 2015" />
+			<var name="dateMonth" value="March 2016" />
 		</execute>
 
 		<execute macro="CalendarNavigator#gotoSpecificBusyDayViaSmallCalendar">
@@ -3144,6 +3181,10 @@
 			<var name="pageName" value="${pageName}" />
 		</execute>
 
+		<execute macro="CalendarNavigator#gotoView">
+			<var name="viewType" value="Week" />
+		</execute>
+
 		<execute macro="Calendar#hideMyCalendarsCalendar" />
 
 		<execute macro="CalendarScheduler#selectSpecificEvent">
@@ -3160,6 +3201,10 @@
 
 		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="${pageName}" />
+		</execute>
+
+		<execute macro="CalendarNavigator#gotoView">
+			<var name="viewType" value="Week" />
 		</execute>
 
 		<execute macro="CalendarScheduler#selectSpecificEvent">
@@ -3616,6 +3661,12 @@
 			<var name="saveButton" value="Guardar" />
 			<var name="viewType" value="Week" />
 		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="${pageName}" />
+		</execute>
+
+		<execute macro="Alert#viewSuccessMessage" />
 
 		<execute macro="CalendarScheduler#viewLocalizedEvent">
 			<var name="eventTitle" value="Calendar Event Title" />
@@ -4270,6 +4321,10 @@
 			<var name="rsvp" value="Yes" />
 		</execute>
 
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Calendar Page" />
+		</execute>
+
 		<execute macro="CalendarEvent#view">
 			<var name="eventTitle" value="Calendar Event Title" />
 		</execute>
@@ -4874,19 +4929,19 @@
 		</execute>
 
 		<execute macro="Calendar#viewMonth">
-			<var name="dateMonth" value="February 2015" />
-		</execute>
-
-		<execute macro="Calendar#viewWeekCountViaMonthView">
-			<var name="weekNumber" value="4" />
-		</execute>
-
-		<execute macro="Calendar#viewMonth">
-			<var name="dateMonth" value="October 2015" />
+			<var name="dateMonth" value="April 2016" />
 		</execute>
 
 		<execute macro="Calendar#viewWeekCountViaMonthView">
 			<var name="weekNumber" value="5" />
+		</execute>
+
+		<execute macro="Calendar#viewMonth">
+			<var name="dateMonth" value="July 2016" />
+		</execute>
+
+		<execute macro="Calendar#viewWeekCountViaMonthView">
+			<var name="weekNumber" value="6" />
 		</execute>
 	</command>
 
@@ -5546,7 +5601,8 @@
 		</execute>
 
 		<execute macro="Calendar#viewCurrentSiteCalendarName">
-			<var name="site" value="Site Name" />
+			<var name="calendarName" value="Site Name" />
+			<var name="siteName" value="Site Name" />
 		</execute>
 
 		<execute macro="ProductMenu#gotoSite">
@@ -5568,7 +5624,8 @@
 		</execute>
 
 		<execute macro="Calendar#viewCurrentSiteCalendarName">
-			<var name="site" value="Site Name Edit - Site Name" />
+			<var name="calendarName" value="Site Name" />
+			<var name="siteName" value="Site Name Edit" />
 		</execute>
 	</command>
 

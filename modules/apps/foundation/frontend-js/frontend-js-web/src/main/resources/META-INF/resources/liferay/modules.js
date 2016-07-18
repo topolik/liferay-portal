@@ -592,6 +592,7 @@
 							'dd-drag',
 							'dd-drop',
 							'dd-proxy',
+							'liferay-store',
 							'plugin'
 						]
 					},
@@ -645,6 +646,12 @@
 						requires: [
 							'aui-component',
 							'aui-node'
+						]
+					},
+					'liferay-sortable': {
+						path: 'sortable.js',
+						requires: [
+							'sortable'
 						]
 					},
 					'liferay-source-editor': {

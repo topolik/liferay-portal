@@ -280,13 +280,13 @@
 			</then>
 		</if>
 
-		<execute function="Check#checkToggleSwitch" locator1="Checkbox#ENABLE_PRINT" />
-		<execute function="Check#checkToggleSwitch" locator1="Checkbox#ENABLE_FLAGS" />
-		<execute function="Check#checkToggleSwitch" locator1="Checkbox#ENABLE_RELATED_ASSETS" />
-		<execute function="Check#checkToggleSwitch" locator1="Checkbox#ENABLE_RATINGS" />
-		<execute function="Check#checkToggleSwitch" locator1="Checkbox#ENABLE_COMMENTS" />
-		<execute function="Check#checkToggleSwitch" locator1="Checkbox#ENABLE_COMMENT_RATINGS" />
-		<execute function="Check#checkToggleSwitch" locator1="Checkbox#ENABLE_SOCIAL_BOOKMARKS" />
+		<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#ENABLE_PRINT" />
+		<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#ENABLE_FLAGS" />
+		<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#ENABLE_RELATED_ASSETS" />
+		<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#ENABLE_RATINGS" />
+		<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#ENABLE_COMMENTS" />
+		<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#ENABLE_COMMENT_RATINGS" />
+		<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#ENABLE_SOCIAL_BOOKMARKS" />
 
 		<execute macro="PortletEntry#save" />
 
@@ -301,14 +301,14 @@
 		<if>
 			<equals arg1="${enableRatings}" arg2="true" />
 			<then>
-				<execute function="Check#checkToggleSwitch" locator1="Checkbox#ENABLE_RATINGS" value1="Enable Ratings" />
+				<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#ENABLE_RATINGS" value1="Enable Ratings" />
 			</then>
 		</if>
 
 		<if>
 			<equals arg1="${setAsDefaultPage}" arg2="true" />
 			<then>
-				<execute function="Check#checkToggleSwitch" locator1="Checkbox#SET_AS_THE_DEFAULT_ASSET_PUBLISHER_FOR_THIS_PAGE" value1="Set as the Default Asset Publisher for This Page" />
+				<execute function="Check#checkHiddenToggleSwitch" locator1="Checkbox#SET_AS_THE_DEFAULT_ASSET_PUBLISHER_FOR_THIS_PAGE" value1="Set as the Default Asset Publisher for This Page" />
 			</then>
 		</if>
 
@@ -706,14 +706,14 @@
 		<if>
 			<equals arg1="${enableRatings}" arg2="true" />
 			<then>
-				<execute function="AssertChecked#assertCheckedToggleSwitch" locator1="Checkbox#ENABLE_RATINGS" value1="Enable Ratings" />
+				<execute function="AssertChecked#assertCheckedHiddenToggleSwitch" locator1="Checkbox#ENABLE_RATINGS" value1="Enable Ratings" />
 			</then>
 		</if>
 
 		<if>
 			<equals arg1="${setAsDefaultPage}" arg2="true" />
 			<then>
-				<execute function="AssertChecked#assertCheckedToggleSwitch" locator1="Checkbox#SET_AS_THE_DEFAULT_ASSET_PUBLISHER_FOR_THIS_PAGE" value1="Set as the Default Asset Publisher for This Page" />
+				<execute function="AssertChecked#assertCheckedHiddenToggleSwitch" locator1="Checkbox#SET_AS_THE_DEFAULT_ASSET_PUBLISHER_FOR_THIS_PAGE" value1="Set as the Default Asset Publisher for This Page" />
 			</then>
 		</if>
 
@@ -731,20 +731,16 @@
 
 		<execute function="AssertClick" locator1="Configuration#SOURCE_SCOPE_SELECT" value1="Select" />
 
-		<execute function="AssertClick" locator1="MenuItem#OTHER_SITE" value1="Other Site..." />
-
-		<execute function="SelectFrame" value1="relative=top" />
-
-		<execute function="SelectFrame" locator1="IFrame#SELECT_SITES" />
-
 		<if>
 			<equals arg1="${contentSharingAcrossSitesEnabled}" arg2="true" />
 			<then>
-				<var name="key_siteName" value="${globalSiteName}" />
+				<execute function="AssertTextEquals" locator1="MenuItem#GLOBAL" value1="Global" />
 
-				<execute function="AssertTextEquals" locator1="APConfigurationSites#SITES_TABLE_NAME" value1="${globalSiteName}" />
-				<execute function="AssertTextEquals" locator1="APConfigurationSites#SITES_TABLE_TYPE" value1="${globalSiteType}" />
-				<execute function="AssertElementPresent" locator1="SitesSelectSite#SITES_TABLE_CHOOSE_SITE_LINK" />
+				<execute function="AssertClick" locator1="MenuItem#OTHER_SITE" value1="Other Site..." />
+
+				<execute function="SelectFrame" value1="relative=top" />
+
+				<execute function="SelectFrame" locator1="IFrame#SELECT_SITES" />
 
 				<var name="key_siteName" value="${liferaySiteName}" />
 
@@ -764,19 +760,8 @@
 			<elseif>
 				<equals arg1="${contentSharingAcrossSitesEnabled}" arg2="false" />
 				<then>
-					<var name="key_siteName" value="${globalSiteName}" />
-
-					<execute function="AssertTextNotPresent" value1="${globalSiteName}" />
-					<execute function="AssertElementNotPresent" locator1="APConfigurationSites#SITES_TABLE_NAME" value1="${globalSiteName}" />
-					<execute function="AssertElementNotPresent" locator1="APConfigurationSites#SITES_TABLE_TYPE" value1="${globalSiteType}" />
-					<execute function="AssertElementNotPresent" locator1="SitesSelectSite#SITES_TABLE_CHOOSE_SITE_LINK" />
-
-					<var name="key_siteName" value="${liferaySiteName}" />
-
-					<execute function="AssertTextNotPresent" value1="${liferaySiteName}" />
-					<execute function="AssertElementNotPresent" locator1="APConfigurationSites#SITES_TABLE_NAME" value1="${liferaySiteName}" />
-					<execute function="AssertElementNotPresent" locator1="APConfigurationSites#SITES_TABLE_TYPE" value1="${liferaySiteType}" />
-					<execute function="AssertElementNotPresent" locator1="SitesSelectSite#SITES_TABLE_CHOOSE_SITE_LINK" />
+					<execute function="AssertElementNotPresent" locator1="MenuItem#GLOBAL" />
+					<execute function="AssertElementNotPresent" locator1="MenuItem#OTHER_SITE" />
 				</then>
 			</elseif>
 		</if>

@@ -36,6 +36,13 @@
 
 		<execute function="Type" locator1="AssetCategorization#TAGS_FIELD" value1="${tagName}" />
 
+		<if>
+			<condition function="IsElementPresent" locator1="AssetCategorization#TAG_AUTOCOMPLETE_CONTAINER" />
+			<then>
+				<execute function="Click" locator1="AssetCategorization#TAG_AUTOCOMPLETE" />
+			</then>
+		</if>
+
 		<execute function="AssertClick" locator1="Button#ADD_TAGS" value1="Add" />
 
 		<execute function="AssertTextEquals" locator1="AssetCategorization#TAG" value1="${tagName}" />

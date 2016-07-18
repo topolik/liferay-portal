@@ -97,6 +97,14 @@
 			</execute>
 		</for>
 
+		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+			<var name="portlet" value="Server Administration" />
+		</execute>
+
+		<execute macro="ServerAdministration#executeServerResourcesActions">
+			<var name="actionsDescription" value="Reindex all search indexes." />
+		</execute>
+
 		<execute macro="ProductMenu#gotoControlPanelUsers">
 			<var name="portlet" value="Users and Organizations" />
 		</execute>
@@ -229,7 +237,7 @@
 
 		<execute function="Click#mouseOverClick" locator1="Icon#EDIT" />
 
-		<execute function="AssertElementNotPresent" locator1="PGSignin#PORTLET_TITLE" value1="Sign" />
+		<execute function="AssertElementNotPresent" locator1="SignIn#PORTLET_TITLE" value1="Sign" />
 
 		<execute macro="Navigator#gotoSpecificURLPage">
 			<var name="pageName" value="Web Content Page" />
@@ -1988,7 +1996,7 @@
 
 		<execute macro="WebContent#editDisplayPagePGViaAP">
 			<var name="assetTitle" value="WC WebContent Title" />
-			<var name="displayPageSelection" value="Asset Publisher Page 2" />
+			<var name="displayPageName" value="Asset Publisher Page 2" />
 		</execute>
 
 		<execute macro="Navigator#gotoPage">

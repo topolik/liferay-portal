@@ -8,6 +8,13 @@
 			<condition function="IsElementNotPresent#isNotVisible" locator1="DDMEditTemplate#DETAILS_LANGUAGE_SELECT" />
 			<then>
 				<execute function="Click" locator1="DDMEditTemplate#DETAILS_TOGGLE" />
+
+				<if>
+					<condition function="IsElementNotPresent#isNotVisible" locator1="DDMEditTemplate#DETAILS_LANGUAGE_SELECT" />
+					<then>
+						<execute function="Click" locator1="DDMEditTemplate#DETAILS_TOGGLE" />
+					</then>
+				</if>
 			</then>
 		</if>
 
@@ -28,9 +35,7 @@
 
 		<execute function="AssertElementPresent#assertVisible" locator1="NavBar#ASSET_TITLE" value1="Templates" />
 
-		<execute function="Click" locator1="Button#PLUS" />
-
-		<execute function="AssertClick" locator1="MenuItem#ADD_DISPLAY_TEMPLATE" value1="Add Display Template" />
+		<execute macro="DDLNavigator#gotoAddDisplayTemplate" />
 
 		<execute function="Type" locator1="TextInput#NAME" value1="${ddlDisplayTemplateName}" />
 
@@ -249,15 +254,6 @@
 		<execute function="Type" locator1="TextInput#NAME" value1="${ddlFormTemplateNameEdit}" />
 	</command>
 
-	<command name="gotoManageTemplatesCmd">
-		<execute macro="DDLNavigator#gotoManageDataDefinitions" />
-
-		<var name="key_ddlDataDefinitionName" value="${ddlDataDefinitionName}" />
-
-		<execute function="Click#waitForMenuToggleJSClick" locator1="DDMSelectStructure#DDM_STRUCTURE_ELLIPSIS" />
-		<execute function="AssertClick" locator1="MenuItem#MANAGE_TEMPLATES" value1="Manage Templates" />
-	</command>
-
 	<command name="saveAndContinueFormTemplateCP">
 		<execute function="AssertClick" locator1="Button#SAVE_AND_CONTINUE" value1="Save and Continue" />
 
@@ -345,7 +341,7 @@
 	</command>
 
 	<command name="viewDefaultNoTemplatesCP">
-		<execute macro="DDLTemplate#gotoManageTemplatesCmd">
+		<execute macro="DDLNavigator#gotoManageTemplates">
 			<var name="ddlDataDefinitionName" value="${ddlDataDefinitionName}" />
 		</execute>
 
@@ -353,7 +349,7 @@
 	</command>
 
 	<command name="viewDisplayTemplateCP">
-		<execute macro="DDLTemplate#gotoManageTemplatesCmd">
+		<execute macro="DDLNavigator#gotoManageTemplates">
 			<var name="ddlDataDefinitionName" value="${ddlDataDefinitionName}" />
 		</execute>
 
@@ -370,7 +366,7 @@
 	</command>
 
 	<command name="viewFormTemplateCP">
-		<execute macro="DDLTemplate#gotoManageTemplatesCmd">
+		<execute macro="DDLNavigator#gotoManageTemplates">
 			<var name="ddlDataDefinitionName" value="${ddlDataDefinitionName}" />
 		</execute>
 
@@ -384,7 +380,7 @@
 	</command>
 
 	<command name="viewNoDuplicateTemplateCP">
-		<execute macro="DDLTemplate#gotoManageTemplatesCmd">
+		<execute macro="DDLNavigator#gotoManageTemplates">
 			<var name="ddlDataDefinitionName" value="${ddlDataDefinitionName}" />
 		</execute>
 
@@ -395,7 +391,7 @@
 	</command>
 
 	<command name="viewNoTemplateCP">
-		<execute macro="DDLTemplate#gotoManageTemplatesCmd">
+		<execute macro="DDLNavigator#gotoManageTemplates">
 			<var name="ddlDataDefinitionName" value="${ddlDataDefinitionName}" />
 		</execute>
 

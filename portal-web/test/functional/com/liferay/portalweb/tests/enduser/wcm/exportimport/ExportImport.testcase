@@ -372,6 +372,8 @@
 			<var name="portlet" value="Documents and Media" />
 		</execute>
 
+		<execute macro="Navigator#openURL" />
+
 		<execute macro="DMFolder#addCP">
 			<var name="dmFolderDescription" value="DM Folder Description" />
 			<var name="dmFolderName" value="DM Folder Name" />
@@ -783,6 +785,7 @@
 
 	<command name="ExportImportSiteWithChangedSiteDefaultLanguage" priority="5">
 		<property name="portal.acceptance" value="true" />
+		<property name="test.name.skip.portal.instance" value="ExportImport#ExportImportSiteWithChangedSiteDefaultLanguage" />
 
 		<execute macro="Navigator#openSiteURL">
 			<var name="siteName" value="Site Name" />
