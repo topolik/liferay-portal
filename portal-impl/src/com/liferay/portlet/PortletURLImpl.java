@@ -1311,7 +1311,11 @@ public class PortletURLImpl
 				_params.remove(name);
 			}
 			else {
-				newValues = ArrayUtil.append(newValues, oldValues);
+				for (String oldValue : oldValues) {
+					if (!ArrayUtil.contains(newValues, oldValue)) {
+						newValues = ArrayUtil.append(newValues, oldValue);
+					}
+				}
 
 				_params.put(name, newValues);
 			}
