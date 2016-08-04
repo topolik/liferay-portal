@@ -1151,9 +1151,10 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 					newContent, matcher.start() + 1);
 
 				newContent = formatJavaTerms(
-					className, packagePath, file, fileName, absolutePath,
-					newContent, javaClassContent, javaClassLineCount,
-					matcher.group(1), _checkJavaFieldTypesExcludes,
+					StringPool.BLANK, StringPool.BLANK, file, fileName,
+					absolutePath, newContent, javaClassContent,
+					javaClassLineCount, matcher.group(1),
+					_checkJavaFieldTypesExcludes,
 					_javaTermAccessLevelModifierExcludes, _javaTermSortExcludes,
 					_testAnnotationsExcludes);
 
@@ -4340,7 +4341,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 			else {
 				x = line.lastIndexOf(StringPool.SPACE);
 
-				if (x != -1) {
+				if ((x != -1) && !ToolsUtil.isInsideQuotes(line, x)) {
 					String firstLine = line.substring(0, x);
 					String secondLine =
 						indent + StringPool.TAB + line.substring(x + 1);

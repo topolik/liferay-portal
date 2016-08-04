@@ -10,6 +10,17 @@
 		<module name="AvoidStarImport" />
 		<module name="DefaultComesLast" />
 		<module name="GenericWhitespace" />
+		<module name="MethodParamPad" />
+		<module name="ModifierOrder" />
+		<module name="MultipleVariableDeclarations" />
+		<module name="NoLineWrap" />
+		<module name="NoWhitespaceAfter" />
+		<module name="NoWhitespaceBefore" />
+		<module name="OneStatementPerLine" />
+		<module name="PackageName" />
+		<module name="ParameterName" />
+		<module name="RequireThis" />
+		<module name="StringLiteralEquality" />
 		<module name="UpperEll" />
 	</module>
 </module>
