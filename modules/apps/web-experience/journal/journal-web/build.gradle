@@ -1,3 +1,4 @@
+
 apply plugin: "com.liferay.lang.merger"
 
 dependencies {
@@ -34,11 +35,14 @@ dependencies {
 dependencies {
 	findbugs 'com.google.code.findbugs:findbugs:3.0.1'
 	findbugs configurations.findbugsPlugins.dependencies
-	findbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.4.7-SNAPSHOT'
+	findbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.5.0-SNAPSHOT'
 }
 
 apply plugin: 'findbugs'
 
+task cleanReports(type: Delete) {
+	delete file("$project.buildDir/findbugsReports")
+}
 
 task copyFindbugSources(type: Copy, dependsOn: [generateJSPJava]) {
 	from 'src/main/java'
@@ -54,16 +58,20 @@ task copyFindbugClasses(type: Copy, dependsOn: [classes, compileJSP]) {
 	into "$project.buildDir/findbugs-classes/"
 }
 
-task findSecurityBugs(type: FindBugs, dependsOn: [classes, compileJSP, copyFindbugSources, copyFindbugClasses]) {
+task findSecurityBugs(type: FindBugs, dependsOn: [classes, compileJSP, copyFindbugSources, copyFindbugClasses, cleanReports]) {
 	classes = fileTree("$project.buildDir/findbugs-classes/").include("**/*.class");
 	source = files("$project.buildDir/findbugs-src/");
 	classpath = files(sourceSets.main.compileClasspath)
 	pluginClasspath = project.configurations.findbugsPlugins
 
 	jvmArgs = [
-			"-Dfindsecbugs.taint.customconfigfile=find-security-bugs-false-positives.txt",
+			"-Dfindsecbugs.taint.customconfigfile=find-security-bugs-false-positives.txt:liferay-config/liferay.txt:derived-summaries.txt",
+			"-Dfindsecbugs.injection.customconfigfile.SqlInjectionDetector=liferay-config/liferay-SqlInjectionDetector.txt|SQL_INJECTION_HIBERNATE",
+//			"-Dfindsecbugs.taint.customconfigfile=find-security-bugs-false-positives.txt",
 //			"-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005",
-			"-Dfindsecbugs.taint.outputsummaries=true"]
+			"-Dfindsecbugs.taint.outputsummaries=true",
+			"-Dprofiler.report=true"
+	]
 
 	maxHeapSize = "3g"
 
@@ -73,13 +81,13 @@ task findSecurityBugs(type: FindBugs, dependsOn: [classes, compileJSP, copyFindb
 		reportsDir = file("$project.buildDir/findbugsReports")
 		effort = "max"
 		reportLevel = "low"
-		includeFilter = file("$project.rootDir/fsb-include.xml")
-		excludeFilter = file("$project.rootDir/fsb-exclude.xml")
+		includeFilter = file("../fsb-include.xml")
+		excludeFilter = file("../fsb-exclude.xml")
 		reports {
 			// Only one of HTML or XML can be turned on at the same time
 			html.enabled = true
 			xml.enabled = !html.enabled
-			xml.withMessages = false
+			xml.withMessages = true
 		}
 	}
 }

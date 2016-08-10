@@ -1,18 +1,25 @@
-javax/servlet/jsp/JspContext.findAttribute("editTemplateURL")@org/apache/jsp/article/content_jsp:SAFE
-javax/servlet/jsp/JspContext.findAttribute("editStructureURL")@org/apache/jsp/article/content_jsp:SAFE
+javax/servlet/jsp/PageContext.findAttribute("editTemplateURL"):SAFE@org/apache/jsp/article/content_jsp
+javax/servlet/jsp/PageContext.findAttribute("editStructureURL"):SAFE@org/apache/jsp/article/content_jsp
 
-javax/servlet/jsp/JspContext.findAttribute("editArticleURL")@org/apache/jsp/edit_005farticle_jsp:SAFE
+javax/servlet/jsp/PageContext.findAttribute("addArticleURL"):SAFE@org/apache/jsp/add_005fbutton_jsp
 
-javax/servlet/jsp/JspContext.findAttribute("selectFolderURL")@org/apache/jsp/edit_005ffolder_jsp:SAFE
-javax/servlet/jsp/JspContext.findAttribute("removeDDMStructureIcon")@org/apache/jsp/edit_005ffolder_jsp:SAFE
+javax/servlet/jsp/PageContext.findAttribute("editArticleURL"):SAFE@org/apache/jsp/edit_005farticle_jsp
 
-javax/servlet/jsp/JspContext.findAttribute("selectFolderURL")@org/apache/jsp/move_005fentries_jsp:SAFE
+javax/servlet/jsp/PageContext.findAttribute("selectFolderURL"):SAFE@org/apache/jsp/edit_005ffolder_jsp
+javax/servlet/jsp/PageContext.findAttribute("removeDDMStructureIcon"):SAFE@org/apache/jsp/edit_005ffolder_jsp
 
-javax/servlet/jsp/JspContext.findAttribute("viewDDMStructureArticlesURL")@org/apache/jsp/toolbar_jsp:SAFE
+javax/servlet/jsp/PageContext.findAttribute("selectFolderURL"):SAFE@org/apache/jsp/move_005fentries_jsp
 
+javax/servlet/jsp/PageContext.findAttribute("viewDDMStructureArticlesURL"):SAFE@org/apache/jsp/toolbar_jsp
 
-javax/servlet/jsp/JspContext.findAttribute("compareVersionURL")@org/apache/jsp/view_005farticle_005fhistory_jsp:SAFE
+javax/servlet/jsp/PageContext.findAttribute("compareVersionURL"):SAFE@org/apache/jsp/view_005farticle_005fhistory_jsp
+javax/servlet/jsp/PageContext.findAttribute("feed"):SAFE@org/apache/jsp/view_005ffeeds_jsp
+
+com/liferay/journal/model/JournalFeed.getName():SAFE@org/apache/jsp/view_005ffeeds_jsp
+com/liferay/journal/model/JournalFeed.getDescription():SAFE@org/apache/jsp/view_005ffeeds_jsp
+
+--todo: com/liferay/dynamic/data/mapping/model/DDMStructure.getUnambiguousName(UNKNOWN,SAFE,UNKNOWN):SAFE@org/apache/jsp/view_005fmore_005fmenu_005fitems_jsp
 
 -- content is sanitized using SanitizerUtil
 com/liferay/journal/model/JournalArticleDisplay.getContent()Ljava/lang/String;:SAFE
-com/liferay/journal/service/JournalArticleLocalServiceUtil.getArticleContent(*)*:SAFE
+com/liferay/journal/service/JournalArticleLocalServiceUtil.getArticleContent(Lcom/liferay/journal/model/JournalArticle;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/liferay/portal/kernel/portlet/PortletRequestModel;Lcom/liferay/portal/kernel/theme/ThemeDisplay;)Ljava/lang/String;:SAFE
