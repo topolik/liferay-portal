@@ -97,9 +97,9 @@ public class ReleaseInfo {
 
 	public static final int RELEASE_7_0_1_BUILD_NUMBER = 7001;
 
-	public static final int RELEASE_7_0_2_BUILD_NUMBER = 7002;
-
 	public static final int RELEASE_7_0_10_BUILD_NUMBER = 7010;
+
+	public static final int RELEASE_7_0_2_BUILD_NUMBER = 7002;
 
 	public static final Date getBuildDate() {
 		DateFormat df = DateFormat.getDateInstance(DateFormat.LONG);
@@ -154,9 +154,9 @@ public class ReleaseInfo {
 
 	private static final int _BUILD_NUMBER = GetterUtil.getInteger(_BUILD);
 
-	private static final String _CODE_NAME = "Wilberforce";
+	private static final String _CODE_NAME = "blablabla";
 
-	private static final String _DATE = "August 5, 2016";
+	private static final String _DATE = "July 10, 2016";
 
 	private static final String _NAME = "Liferay Community Edition Portal";
 
