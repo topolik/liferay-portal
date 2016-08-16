@@ -231,10 +231,11 @@ public class PermissionServiceImpl extends PermissionServiceBaseImpl {
 				List<String> resourceActions =
 					ResourceActionsUtil.getResourceActions(name);
 
-				if (!resourceActions.contains(ActionKeys.DEFINE_PERMISSIONS) ||
-					!permissionChecker.hasPermission(
-						groupId, name, primKey,
-						ActionKeys.DEFINE_PERMISSIONS)) {
+				if (!permissionChecker.isOmniadmin() &&
+					(!resourceActions.contains(ActionKeys.DEFINE_PERMISSIONS) ||
+					 !permissionChecker.hasPermission(
+						 groupId, name, primKey,
+						 ActionKeys.DEFINE_PERMISSIONS))) {
 
 					throw new PrincipalException.MustHavePermission(
 						permissionChecker, name, Long.valueOf(primKey),
