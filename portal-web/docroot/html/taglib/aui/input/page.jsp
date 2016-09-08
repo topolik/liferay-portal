@@ -1,4 +1,4 @@
-<%--
+<%@ page import="com.liferay.portal.kernel.security.xss.XSS" %><%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -41,7 +41,7 @@
 		</c:if>
 
 		<c:if test='<%= Validator.isNotNull(helpMessage) && !type.equals("toggle-switch") %>'>
-			<%= helpMessageContent %>
+			<%= XSS.html(helpMessageContent) %>
 		</c:if>
 
 		<c:if test="<%= changesContext %>">
@@ -93,17 +93,17 @@
 			<div class="toggle-card-container">
 				<div class="toggle-card-cell">
 					<div class="toggle-card-icon">
-						<span class="toggle-card-off <%= iconOff %>"></span>
-						<span class="toggle-card-on <%= iconOn %>"></span>
+						<span class="toggle-card-off <%= XSS.attribute(iconOff) %>"></span>
+						<span class="toggle-card-on <%= XSS.attribute(iconOn) %>"></span>
 					</div>
 
 					<div class="toggle-card-label">
 						<c:if test="<%= Validator.isNotNull(labelOff) %>">
-							<span class="toggle-card-off"><%= labelOff %></span>
+							<span class="toggle-card-off"><%= XSS.html(labelOff) %></span>
 						</c:if>
 
 						<c:if test="<%= Validator.isNotNull(labelOn) %>">
-							<span class="toggle-card-on"><%= labelOn %></span>
+							<span class="toggle-card-on"><%= XSS.html(labelOn) %></span>
 						</c:if>
 					</div>
 				</div>
@@ -112,34 +112,34 @@
 
 		<c:if test='<%= type.equals("toggle-switch") %>'>
 			<span aria-hidden="true" class="toggle-switch-bar">
-				<span class="toggle-switch-handle" data-label-off="<%= (Validator.isNotNull(labelOff) ? HtmlUtil.escapeAttribute(labelOff) : LanguageUtil.get(resourceBundle, "no")) %>" data-label-on="<%= (Validator.isNotNull(labelOn) ? HtmlUtil.escapeAttribute(labelOn) : LanguageUtil.get(resourceBundle, "yes")) %>">
+				<span class="toggle-switch-handle" data-label-off="<%= (Validator.isNotNull(labelOff) ? XSS.attribute(labelOff) : LanguageUtil.get(resourceBundle, "no")) %>" data-label-on="<%= (Validator.isNotNull(labelOn) ? XSS.attribute(labelOn) : LanguageUtil.get(resourceBundle, "yes")) %>">
 					<c:if test="<%= Validator.isNotNull(buttonIconOn) %>">
-						<span class="button-icon <%= Validator.isNotNull(buttonIconOff) ? "button-icon-on" : StringPool.BLANK %> toggle-switch-icon <%= buttonIconOn %>"></span>
+						<span class="button-icon <%= Validator.isNotNull(buttonIconOff) ? "button-icon-on" : StringPool.BLANK %> toggle-switch-icon <%= XSS.attribute(buttonIconOn) %>"></span>
 					</c:if>
 
 					<c:if test="<%= Validator.isNotNull(buttonIconOff) %>">
-						<span class="button-icon button-icon-off toggle-switch-icon <%= buttonIconOff %>"></span>
+						<span class="button-icon button-icon-off toggle-switch-icon <%= XSS.attribute(buttonIconOff) %>"></span>
 					</c:if>
 
 					<c:if test="<%= Validator.isNotNull(iconOn) %>">
-						<span class="toggle-switch-icon toggle-switch-icon-on <%= iconOn %>"></span>
+						<span class="toggle-switch-icon toggle-switch-icon-on <%= XSS.attribute(iconOn) %>"></span>
 					</c:if>
 
 					<c:if test="<%= Validator.isNotNull(iconOff) %>">
-						<span class="toggle-switch-icon toggle-switch-icon-off <%= iconOff %>"></span>
+						<span class="toggle-switch-icon toggle-switch-icon-off <%= XSS.attribute(iconOff) %>"></span>
 					</c:if>
 				</span>
 			</span>
 
 			<c:if test="<%= Validator.isNotNull(helpMessage) %>">
-				<span class="toggle-switch-text toggle-switch-text-right"><%= helpMessageContent %></span>
+				<span class="toggle-switch-text toggle-switch-text-right"><%= XSS.htmlBody(helpMessageContent) %></span>
 			</c:if>
 		</c:if>
 	</c:if>
 </liferay-util:buffer>
 
 <c:if test='<%= !type.equals("hidden") && !wrappedField && useInputWrapper %>'>
-	<div class="<%= inputWrapperClass %>">
+	<div class="<%= XSS.attribute(inputWrapperClass) %>">
 </c:if>
 
 <%
@@ -147,17 +147,17 @@ boolean choiceField = checkboxField || radioField;
 %>
 
 <c:if test='<%= !type.equals("assetCategories") && !type.equals("hidden") && Validator.isNotNull(labelContent) %>'>
-	<label <%= labelTag %>>
+	<label <%= XSS.safeOnly(labelTag) %>>
 		<c:if test='<%= !choiceField && !inlineLabel.equals("right") %>'>
-				<%= labelContent %>
+				<%= XSS.html(labelContent) %>
 			</label>
 		</c:if>
 </c:if>
 
 <c:if test="<%= Validator.isNotNull(prefix) || Validator.isNotNull(suffix) %>">
-	<div class="<%= addOnCssClass %>">
+	<div class="<%= XSS.attribute(addOnCssClass) %>">
 		<c:if test="<%= Validator.isNotNull(prefix) %>">
-			<span class="<%= helpTextCssClass %>"><liferay-ui:message key="<%= prefix %>" /></span>
+			<span class="<%= XSS.attribute(helpTextCssClass) %>"><liferay-ui:message key="<%= prefix %>" /></span>
 		</c:if>
 </c:if>
 
@@ -229,7 +229,7 @@ boolean choiceField = checkboxField || radioField;
 		}
 		%>
 
-		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= fieldCssClass %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= namespace + id %>" name="<%= namespace + name %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + onChange + "\"" : StringPool.BLANK %> onClick="<%= onClick %>" <%= Validator.isNotNull(title) ? "title=\"" + LanguageUtil.get(resourceBundle, title) + "\"" : StringPool.BLANK %> type="checkbox" <%= Validator.isNotNull(valueString) ? ("value=\"" + HtmlUtil.escapeAttribute(valueString)) + "\"" : StringPool.BLANK %> <%= AUIUtil.buildData(data) %> <%= InlineUtil.buildDynamicAttributes(dynamicAttributes) %> />
+		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.escapeAttribute(XSS.safeOnly(onChange)) + "\"" : StringPool.BLANK %> onClick="<%= XSS.escapeAttribute(XSS.safeOnly(onClick)) %>" <%= Validator.isNotNull(title) ? "title=\"" + LanguageUtil.get(resourceBundle, title) + "\"" : StringPool.BLANK %> type="checkbox" <%= Validator.isNotNull(valueString) ? ("value=\"" + XSS.attribute(valueString)) + "\"" : StringPool.BLANK %> <%= AUIUtil.buildData(data) %> <%= InlineUtil.buildDynamicAttributes(dynamicAttributes) %> />
 	</c:when>
 	<c:when test='<%= type.equals("radio") %>'>
 

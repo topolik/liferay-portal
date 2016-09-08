@@ -12,44 +12,23 @@
  * details.
  */
 
-package com.liferay.taglib.util;
+package com.liferay.portal.kernel.security.xss;
 
-import com.liferay.portal.kernel.security.xss.XSS;
 import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.StringUtil;
-
-import javax.servlet.jsp.tagext.BodyTagSupport;
 
 /**
- * @author Brian Wing Shun Chan
+ * @author Tomas Polesovsky
  */
-public class BufferTag extends BodyTagSupport {
+public class XSSCssImpl extends XSSEscapedStringImpl
+	implements XSS.CSS {
 
-	@Override
-	public int doEndTag() {
-		try {
-			CharSequence bodyContent = StringUtil.trim(getBodyContent().getString());
-
-			bodyContent = HtmlUtil.safe(bodyContent);
-
-			pageContext.setAttribute(_var, bodyContent);
-
-			return EVAL_PAGE;
-		}
-		finally {
-			_var = null;
-		}
+	public XSSCssImpl(CharSequence string) {
+		super(string);
 	}
 
 	@Override
-	public int doStartTag() {
-		return EVAL_BODY_BUFFERED;
+	public String escape() {
+		return HtmlUtil.escapeCSS(getRawString());
 	}
-
-	public void setVar(String var) {
-		_var = var;
-	}
-
-	private String _var;
 
 }

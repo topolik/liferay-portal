@@ -15,6 +15,9 @@
 package com.liferay.portal.kernel.util;
 
 import com.liferay.portal.kernel.security.pacl.permission.PortalRuntimePermission;
+import com.liferay.portal.kernel.security.xss.XSSHtmlAttributeImpl;
+import com.liferay.portal.kernel.security.xss.XSSHtmlBodyImpl;
+import com.liferay.portal.kernel.security.xss.XSSSafeContentImpl;
 
 import java.util.Map;
 
@@ -35,6 +38,10 @@ public class HtmlUtil {
 		return getHtml().buildData(data);
 	}
 
+	public static CharSequence safeContent(CharSequence text) {
+		return new XSSSafeContentImpl(text);
+	}
+
 	/**
 	 * Escapes the text so that it is safe to use in an HTML context.
 	 *
@@ -42,8 +49,8 @@ public class HtmlUtil {
 	 * @return the escaped HTML text, or <code>null</code> if the text is
 	 *         <code>null</code>
 	 */
-	public static String escape(String text) {
-		return getHtml().escape(text);
+	public static CharSequence escape(CharSequence text) {
+		return new XSSHtmlBodyImpl(text);
 	}
 
 	/**
@@ -67,8 +74,8 @@ public class HtmlUtil {
 	 * @return the escaped attribute value, or <code>null</code> if the
 	 *         attribute value is <code>null</code>
 	 */
-	public static String escapeAttribute(String attribute) {
-		return getHtml().escapeAttribute(attribute);
+	public static CharSequence escapeAttribute(CharSequence attribute) {
+		return new XSSHtmlAttributeImpl(attribute);
 	}
 
 	/**

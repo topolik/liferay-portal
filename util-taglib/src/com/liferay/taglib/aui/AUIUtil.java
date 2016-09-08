@@ -14,6 +14,7 @@
 
 package com.liferay.taglib.aui;
 
+import com.liferay.portal.kernel.security.xss.XSS;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -105,7 +106,7 @@ public class AUIUtil {
 		return HtmlUtil.buildData(data);
 	}
 
-	public static String buildLabel(
+	public static CharSequence buildLabel(
 		String baseType, boolean inlineField, boolean showForLabel,
 		String forLabel) {
 
@@ -118,7 +119,7 @@ public class AUIUtil {
 		if (baseType.equals("checkbox") || baseType.equals("radio")) {
 			if (inlineField) {
 				sb.append("class=\"");
-				sb.append(baseType);
+				sb.append(XSS.attribute(baseType));
 				sb.append("-inline\" ");
 			}
 		}
@@ -128,11 +129,11 @@ public class AUIUtil {
 
 		if (showForLabel) {
 			sb.append("for=\"");
-			sb.append(HtmlUtil.escapeAttribute(forLabel));
+			sb.append(XSS.attribute(forLabel));
 			sb.append("\"");
 		}
 
-		return sb.toString();
+		return HtmlUtil.safeContent(sb.toString());
 	}
 
 	public static Object getAttribute(

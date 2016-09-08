@@ -92,7 +92,7 @@ if (groupThreadsUserId > 0) {
 		>
 			<liferay-ui:search-container-row
 				className="Object"
-				escapedModel="<%= true %>"
+
 				keyProperty="categoryId"
 				modelVar="result"
 			>
@@ -118,7 +118,7 @@ if (groupThreadsUserId > 0) {
 						<liferay-ui:search-container-column-text colspan="<%= 2 %>">
 							<h4>
 								<aui:a href="<%= rowURL.toString() %>">
-									<%= curCategory.getName() %>
+									<%= HtmlUtil.escape(curCategory.getName()) %>
 								</aui:a>
 							</h4>
 
