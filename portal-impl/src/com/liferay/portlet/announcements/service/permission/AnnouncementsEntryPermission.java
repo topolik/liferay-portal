@@ -103,6 +103,12 @@ public class AnnouncementsEntryPermission {
 			layout = virtualLayout.getSourceLayout();
 		}
 
+		if (permissionChecker.isGroupAdmin(layout.getGroupId()) ||
+			permissionChecker.isGroupOwner(layout.getGroupId())) {
+
+			return true;
+		}
+
 		String primKey = PortletPermissionUtil.getPrimaryKey(
 			layout.getPlid(), portletId);
 
