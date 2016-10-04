@@ -21,29 +21,41 @@ import static com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleCon
 
 import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
-import com.liferay.exportimport.kernel.lar.MissingReferences;
 import com.liferay.exportimport.kernel.lifecycle.ExportImportLifecycleManagerUtil;
 import com.liferay.exportimport.kernel.model.ExportImportConfiguration;
 import com.liferay.exportimport.kernel.service.ExportImportLocalServiceUtil;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManagerUtil;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
 import com.liferay.portal.kernel.exception.NoSuchLayoutException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.security.auth.HttpPrincipal;
+import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.util.ClassLoaderUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.service.http.LayoutServiceHttp;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.exportimport.service.http.StagingServiceHttp;
+import com.liferay.staging.remote.api.MissingReferenceEntry;
+import com.liferay.staging.remote.api.MissingReferenceRepr;
+import com.liferay.staging.remote.api.MissingReferencesRepr;
+import com.liferay.staging.remote.api.StagingRemoteClient;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,6 +63,7 @@ import java.io.Serializable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -92,7 +105,7 @@ public class LayoutRemoteStagingBackgroundTaskExecutor
 
 		File file = null;
 		HttpPrincipal httpPrincipal = null;
-		MissingReferences missingReferences = null;
+		MissingReferencesRepr missingReferences = null;
 		long stagingRequestId = 0L;
 
 		try {
@@ -130,7 +143,7 @@ public class LayoutRemoteStagingBackgroundTaskExecutor
 
 			String checksum = FileUtil.getMD5Checksum(file);
 
-			stagingRequestId = StagingServiceHttp.createStagingRequest(
+			stagingRequestId = StagingRemoteClient.createStagingRequest(
 				httpPrincipal, targetGroupId, checksum);
 
 			transferFileToRemoteLive(file, stagingRequestId, httpPrincipal);
@@ -138,7 +151,7 @@ public class LayoutRemoteStagingBackgroundTaskExecutor
 			markBackgroundTask(
 				backgroundTask.getBackgroundTaskId(), "exported");
 
-			missingReferences = StagingServiceHttp.publishStagingRequest(
+			missingReferences = StagingRemoteClient.publishStagingRequest(
 				httpPrincipal, stagingRequestId, exportImportConfiguration);
 
 			ExportImportThreadLocal.setLayoutStagingInProcess(false);
@@ -172,10 +185,10 @@ public class LayoutRemoteStagingBackgroundTaskExecutor
 
 			if ((stagingRequestId > 0) && (httpPrincipal != null)) {
 				try {
-					StagingServiceHttp.cleanUpStagingRequest(
+					StagingRemoteClient.cleanUpStagingRequest(
 						httpPrincipal, stagingRequestId);
 				}
-				catch (PortalException pe) {
+				catch (Exception pe) {
 					_log.warn("Unable to clean up the remote live site");
 				}
 			}
@@ -273,6 +286,32 @@ public class LayoutRemoteStagingBackgroundTaskExecutor
 		return missingRemoteParentLayouts;
 	}
 
+	protected BackgroundTaskResult processMissingReferences(
+		long backgroundTaskId, MissingReferencesRepr missingReferences) {
+
+		BackgroundTaskResult backgroundTaskResult = new BackgroundTaskResult(
+			BackgroundTaskConstants.STATUS_SUCCESSFUL);
+
+		if (missingReferences == null) {
+			return backgroundTaskResult;
+		}
+
+		List<MissingReferenceEntry> weakMissingReferences =
+			missingReferences.getWeakMissingReferences();
+
+		if (ListUtil.isNotEmpty(weakMissingReferences)) {
+			BackgroundTask backgroundTask =
+				BackgroundTaskManagerUtil.fetchBackgroundTask(backgroundTaskId);
+
+			JSONArray jsonArray = _getWarningMessagesJSONArray(
+				getLocale(backgroundTask), weakMissingReferences);
+
+			backgroundTaskResult.setStatusMessage(jsonArray.toString());
+		}
+
+		return backgroundTaskResult;
+	}
+
 	protected void transferFileToRemoteLive(
 			File file, long stagingRequestId, HttpPrincipal httpPrincipal)
 		throws Exception {
@@ -316,6 +355,47 @@ public class LayoutRemoteStagingBackgroundTaskExecutor
 		finally {
 			StreamUtil.cleanUp(fileInputStream);
 		}
+	}
+
+	private JSONArray _getWarningMessagesJSONArray(
+		Locale locale, List<MissingReferenceEntry> missingReferences) {
+
+		JSONArray warningMessagesJSONArray = JSONFactoryUtil.createJSONArray();
+
+		for (MissingReferenceEntry missingReferenceEntry : missingReferences) {
+			String missingReferenceReferrerClassName =
+				missingReferenceEntry.getKey();
+
+			MissingReferenceRepr missingReference =
+				missingReferenceEntry.getMissingReferenceRepr();
+
+			Map<String, String> referrers = missingReference.getReferrers();
+
+			JSONObject errorMessageJSONObject =
+				JSONFactoryUtil.createJSONObject();
+
+			if (Validator.isNotNull(missingReference.getClassName())) {
+				errorMessageJSONObject.put(
+					"info",
+					LanguageUtil.format(
+						locale,
+						"the-original-x-does-not-exist-in-the-current-" +
+						"environment",
+						ResourceActionsUtil.getModelResource(
+							locale, missingReference.getClassName()),
+						false));
+			}
+
+			errorMessageJSONObject.put("size", referrers.size());
+			errorMessageJSONObject.put(
+				"type",
+				ResourceActionsUtil.getModelResource(
+					locale, missingReferenceReferrerClassName));
+
+			warningMessagesJSONArray.put(errorMessageJSONObject);
+		}
+
+		return warningMessagesJSONArray;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

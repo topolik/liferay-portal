@@ -1,0 +1,2 @@
+contextPaths=/staging-remote
+jaxRsApplicationFilterStrings=(staging.remote=true)
