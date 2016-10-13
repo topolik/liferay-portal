@@ -133,9 +133,17 @@ public class ExportArticleUtil {
 			return;
 		}
 
-		String id = DLUtil.getTempFileId(
+		String tempFileId = DLUtil.getTempFileId(
 			articleDisplay.getId(), String.valueOf(articleDisplay.getVersion()),
 			languageId);
+
+		StringBundler stringBundler = new StringBundler(3);
+
+		stringBundler.append(PrincipalThreadLocal.getUserId());
+		stringBundler.append(StringPool.UNDERLINE);
+		stringBundler.append(tempFileId);
+
+		String id = stringBundler.toString();
 
 		File convertedFile = DocumentConversionUtil.convert(
 			id, is, sourceExtension, targetExtension);
