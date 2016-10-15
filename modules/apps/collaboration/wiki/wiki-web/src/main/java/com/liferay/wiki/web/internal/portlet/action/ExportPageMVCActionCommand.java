@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.servlet.ServletResponseUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ContentTypes;
@@ -201,7 +202,9 @@ public class ExportPageMVCActionCommand extends BaseMVCActionCommand {
 			sourceExtension);
 
 		if (Validator.isNotNull(targetExtension)) {
-			String id = page.getUuid();
+			String id =
+				PrincipalThreadLocal.getUserId() + StringPool.UNDERLINE +
+					page.getUuid();
 
 			File convertedFile = DocumentConversionUtil.convert(
 				id, is, sourceExtension, targetExtension);
