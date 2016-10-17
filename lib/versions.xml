@@ -1668,6 +1668,18 @@
 				</licenses>
 			</library>
 			<library>
+				<file-name>lib/portal/guava.jar</file-name>
+				<version>19.0</version>
+				<project-name>Guava</project-name>
+				<project-url>http://code.google.com/p/guava</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License 2.0</license-name>
+						<license-url>http://www.apache.org/licenses/LICENSE-2.0</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
 				<file-name>lib/portal/hessian.jar</file-name>
 				<version>4.0.3</version>
 				<project-name>Hessian</project-name>
@@ -2105,6 +2117,18 @@
 				</licenses>
 			</library>
 			<library>
+				<file-name>lib/portal/joda-time.jar</file-name>
+				<version>2.3</version>
+				<project-name>Joda Time</project-name>
+				<project-url>http://www.joda.org/joda-time/</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License 2.0</license-name>
+						<license-url>http://www.apache.org/licenses/LICENSE-2.0</license-url>
+					</license>
+				</licenses>
+			</library>
+			<library>
 				<file-name>lib/portal/jodconverter.jar</file-name>
 				<version>2.2.2</version>
 				<project-name>JODConverter</project-name>
@@ -2190,6 +2214,18 @@
 					Removed org.json.* because it conflicts with jabsorb.jar. This JAR
 					is still necessary until JSPWiki upgrades to jabsorb.jar.
 				</comments>
+			</library>
+			<library>
+				<file-name>lib/portal/jsontoken.jar</file-name>
+				<version>1.1</version>
+				<project-name>Jsontoken</project-name>
+				<project-url>http://code.google.com/p/jsontoken</project-url>
+				<licenses>
+					<license>
+						<license-name>Apache License 2.0</license-name>
+						<license-url>http://www.apache.org/licenses/LICENSE-2.0</license-url>
+					</license>
+				</licenses>
 			</library>
 			<library>
 				<file-name>lib/portal/jspwiki.jar</file-name>

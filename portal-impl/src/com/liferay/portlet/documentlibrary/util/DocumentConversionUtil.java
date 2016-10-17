@@ -208,6 +208,13 @@ public class DocumentConversionUtil {
 						outputDocumentFormat.getName());
 		}
 
+		if ("html".equals(inputDocumentFormat.getFileExtension())) {
+			DocumentHTMLProcessor documentHTMLProcessor =
+				new DocumentHTMLProcessor();
+
+			inputStream = documentHTMLProcessor.process(inputStream);
+		}
+
 		UnsyncByteArrayOutputStream unsyncByteArrayOutputStream =
 			new UnsyncByteArrayOutputStream();
 
