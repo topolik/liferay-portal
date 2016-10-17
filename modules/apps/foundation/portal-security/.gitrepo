@@ -6,4 +6,4 @@
 	commit = 2b7af6f1248a1fd2a8fd1d52ab527387dc1c808c
 	mode = push
 	parent = 51d3142ceb9b00948d7d9e719704f0684f91a5ea
-	remote = git@github.com:liferay/com-liferay-portal-security.git
+	remote = git@github.com:topolik/com-liferay-portal-security.git
