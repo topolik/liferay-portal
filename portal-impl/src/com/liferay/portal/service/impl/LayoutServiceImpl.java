@@ -47,6 +47,7 @@ import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.TempFileEntryUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
@@ -57,6 +58,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -134,10 +136,14 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 				ActionKeys.ADD_LAYOUT);
 		}
 
-		return layoutLocalService.addLayout(
+		Layout layout = layoutLocalService.addLayout(
 			getUserId(), groupId, privateLayout, parentLayoutId, localeNamesMap,
 			localeTitlesMap, descriptionMap, keywordsMap, robotsMap, type,
 			typeSettings, hidden, friendlyURLMap, serviceContext);
+
+		checkLayoutTypeSettings(layout, StringPool.BLANK, typeSettings);
+
+		return layout;
 	}
 
 	/**
@@ -1667,9 +1673,13 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 			String typeSettings)
 		throws PortalException {
 
+		Layout layout = layoutLocalService.getLayout(
+			groupId, privateLayout, layoutId);
+
 		LayoutPermissionUtil.check(
-			getPermissionChecker(), groupId, privateLayout, layoutId,
-			ActionKeys.UPDATE);
+			getPermissionChecker(), layout, ActionKeys.UPDATE);
+
+		checkLayoutTypeSettings(layout, layout.getTypeSettings(), typeSettings);
 
 		return layoutLocalService.updateLayout(
 			groupId, privateLayout, layoutId, typeSettings);
@@ -2049,6 +2059,29 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 			getUserId(), plid, groupId, portletId, parameterMap, inputStream);
 	}
 
+	protected void checkLayoutTypeSettings(
+			Layout layout, String originalTypeSettings, String newTypeSettings)
+		throws PortalException {
+
+		if (!(layout.getLayoutType() instanceof LayoutTypePortlet)) {
+			return;
+		}
+
+		List<String> originalPortletIds = _getPortletIds(
+			layout, originalTypeSettings);
+		List<String> newPortletIds = _getPortletIds(layout, newTypeSettings);
+
+		for (String portletId : newPortletIds) {
+			if (originalPortletIds.contains(portletId)) {
+				continue;
+			}
+
+			PortletPermissionUtil.check(
+				getPermissionChecker(), layout.getPlid(), portletId,
+				ActionKeys.ADD_TO_PAGE);
+		}
+	}
+
 	protected List<Layout> filterLayouts(List<Layout> layouts)
 		throws PortalException {
 
@@ -2063,6 +2096,25 @@ public class LayoutServiceImpl extends LayoutServiceBaseImpl {
 		}
 
 		return filteredLayouts;
+	}
+
+	private List<String> _getPortletIds(
+		Layout originalLayout, String typeSettings) {
+
+		if (Validator.isBlank(typeSettings)) {
+			return Collections.emptyList();
+		}
+
+		Layout container = (Layout)originalLayout.clone();
+
+		container.setType(LayoutConstants.TYPE_PORTLET);
+
+		container.setTypeSettings(typeSettings);
+
+		LayoutTypePortlet layotTypePortlet =
+			(LayoutTypePortlet)container.getLayoutType();
+
+		return layotTypePortlet.getPortletIds();
 	}
 
 }
