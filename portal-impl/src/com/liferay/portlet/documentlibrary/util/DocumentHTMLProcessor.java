@@ -62,15 +62,18 @@ public class DocumentHTMLProcessor {
 					token += ">";
 
 					replacement = token.replaceAll(
-						_documentsRegex, "$1&auth_token=" +
+						_documentsRegex,
+						"$1&" + ImageRequestToken.PARAMETER_NAME + "=" +
 						imageRequestToken + "$3");
 
 					replacement = replacement.replaceAll(
-						_imageRegex, "$1&auth_token=" +
+						_imageRegex,
+						"$1&" + ImageRequestToken.PARAMETER_NAME + "=" +
 						imageRequestToken + "$3");
 
 					replacement = replacement.replaceAll(
-						_wikiPageAttachmentRegex, "$1$3&auth_token=" +
+						_wikiPageAttachmentRegex,
+						"$1$3&" + ImageRequestToken.PARAMETER_NAME + "=" +
 						imageRequestToken + "$6");
 
 					FileUtil.write(tempFile, replacement, true, true);

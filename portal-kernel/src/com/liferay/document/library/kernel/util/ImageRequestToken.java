@@ -19,6 +19,8 @@ package com.liferay.document.library.kernel.util;
  */
 public interface ImageRequestToken {
 
+	public static final String PARAMETER_NAME = "auth_token";
+
 	public String createToken(long userId);
 
 	public long getUserId(String tokenString);
