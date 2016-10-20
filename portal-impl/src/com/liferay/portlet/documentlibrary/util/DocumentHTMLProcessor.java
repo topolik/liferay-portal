@@ -14,12 +14,15 @@
 
 package com.liferay.portlet.documentlibrary.util;
 
+import com.liferay.document.library.kernel.util.ImageRequestToken;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.auth.verifier.image.request.ImageRequestTokenUtil;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,8 +53,7 @@ public class DocumentHTMLProcessor {
 
 			long userId = PrincipalThreadLocal.getUserId();
 
-			String imageRequestToken = ImageRequestTokenUtil.createToken(
-				userId);
+			String imageRequestToken = createToken(userId);
 
 			while (scanner.hasNext()) {
 				String token = scanner.next();
@@ -87,6 +89,19 @@ public class DocumentHTMLProcessor {
 		}
 
 		return processedInputStream;
+	}
+
+	protected String createToken(long userId) {
+		Registry registry = RegistryUtil.getRegistry();
+
+		ImageRequestToken imageRequestToken = registry.getService(
+			ImageRequestToken.class);
+
+		if (imageRequestToken == null) {
+			return StringPool.BLANK;
+		}
+
+		return imageRequestToken.createToken(userId);
 	}
 
 	private static Log _log = LogFactoryUtil.getLog(

@@ -14,6 +14,7 @@
 
 package com.liferay.portal.security.auth.verifier.image.request;
 
+import com.liferay.document.library.kernel.util.ImageRequestToken;
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.security.auth.AuthException;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifier;
@@ -24,6 +25,8 @@ import com.liferay.portal.kernel.util.Validator;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Daniel Sanz
@@ -55,7 +58,7 @@ public class ImageRequestAuthVerifier implements AuthVerifier {
 				return authVerifierResult;
 			}
 
-			long userId = ImageRequestTokenUtil.getUserId(token);
+			long userId = _imageRequestToken.getUserId(token);
 
 			if (userId != 0) {
 				authVerifierResult.setState(AuthVerifierResult.State.SUCCESS);
@@ -72,5 +75,8 @@ public class ImageRequestAuthVerifier implements AuthVerifier {
 			throw new AuthException(e);
 		}
 	}
+
+	@Reference
+	private ImageRequestToken _imageRequestToken;
 
 }
