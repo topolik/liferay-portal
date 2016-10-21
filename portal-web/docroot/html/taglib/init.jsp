@@ -22,7 +22,8 @@ page import="com.liferay.portal.kernel.util.DateFormatFactoryUtil" %><%@
 page import="com.liferay.taglib.aui.AUIUtil" %><%@
 page import="com.liferay.taglib.util.InlineUtil" %><%@
 page import="com.liferay.taglib.util.PortalIncludeUtil" %><%@
-page import="com.liferay.taglib.util.TagResourceBundleUtil" %>
+page import="com.liferay.taglib.util.TagResourceBundleUtil" %><%@
+page import="com.liferay.portal.kernel.security.xss.XSS" %>
 
 <%@ page import="java.io.IOException" %>
 
