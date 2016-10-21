@@ -205,6 +205,12 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 	public static final String DEPLOY_TOOL_TASK_NAME = "deployTool";
 
+	public static final String FIND_SECURITY_BUGS_CONFIGURATION_NAME =
+		"findSecurityBugs";
+
+	public static final String FIND_SECURITY_BUGS_TASK_NAME =
+		"findSecurityBugs";
+
 	public static final String INSTALL_CACHE_TASK_NAME = "installCache";
 
 	public static final String JAR_JAVADOC_TASK_NAME = "jarJavadoc";
@@ -303,6 +309,11 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 			configureSourceSetTestIntegration(
 				project, portalConfiguration, portalTestConfiguration);
 		}
+
+		Configuration findSecurityBugsConfiguration =
+			_addConfigurationFindSecurityBugs(project);
+
+		_addTaskFindSecurityBugs(project, findSecurityBugsConfiguration);
 
 		Configuration baselineConfiguration = null;
 
@@ -2389,6 +2400,85 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 		return false;
 	}
 
+	private Configuration _addConfigurationFindSecurityBugs(
+		final Project project) {
+
+		Configuration configuration = GradleUtil.addConfiguration(
+			project, FIND_SECURITY_BUGS_CONFIGURATION_NAME);
+
+		configuration.defaultDependencies(
+			new Action<DependencySet>() {
+
+				@Override
+				public void execute(DependencySet dependencySet) {
+					_addDependenciesFindSecurityBugs(project);
+				}
+
+			});
+
+		configuration.setDescription("Configures FindSecurityBugs.");
+		configuration.setVisible(false);
+
+		return configuration;
+	}
+
+	private void _addDependenciesFindSecurityBugs(Project project) {
+		GradleUtil.addDependency(
+			project, FIND_SECURITY_BUGS_CONFIGURATION_NAME,
+			"com.h3xstream.findsecbugs", "findsecbugs-plugin", "1.5.0");
+	}
+
+	private FindBugs _addTaskFindSecurityBugs(
+		Project project, FileCollection pluginClasspath) {
+
+		FindBugs findBugs = GradleUtil.addTask(
+			project, FIND_SECURITY_BUGS_TASK_NAME, FindBugs.class);
+
+		Task compileJSPTask = GradleUtil.getTask(
+			project, JspCPlugin.COMPILE_JSP_TASK_NAME);
+		Task unzipJARTaskName = GradleUtil.getTask(
+			project, _UNZIP_JAR_TASK_NAME);
+
+		findBugs.setClasses(project.files(compileJSPTask, unzipJARTaskName));
+
+		SourceSet sourceSet = GradleUtil.getSourceSet(
+			project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+		findBugs.setClasspath(sourceSet.getCompileClasspath());
+
+		findBugs.setDescription("Runs FindSecurityBugs analysis.");
+		findBugs.setEffort("max");
+
+		File excludeDir = GradleUtil.getRootDir(
+			project, _FIND_SECURITY_BUGS_EXCLUDE_FILE_NAME);
+
+		if (excludeDir != null) {
+			findBugs.setExcludeFilter(
+				new File(excludeDir, _FIND_SECURITY_BUGS_EXCLUDE_FILE_NAME));
+		}
+
+		findBugs.setIgnoreFailures(true);
+
+		File includeDir = GradleUtil.getRootDir(
+			project, _FIND_SECURITY_BUGS_INCLUDE_FILE_NAME);
+
+		if (includeDir != null) {
+			findBugs.setIncludeFilter(
+				new File(includeDir, _FIND_SECURITY_BUGS_INCLUDE_FILE_NAME));
+		}
+
+		findBugs.setPluginClasspath(pluginClasspath);
+		findBugs.setReportLevel("low");
+
+		Task generateJSPJavaTask = GradleUtil.getTask(
+			project, JspCPlugin.GENERATE_JSP_JAVA_TASK_NAME);
+
+		findBugs.setSource(
+			project.files(generateJSPJavaTask, sourceSet.getAllJava()));
+
+		return findBugs;
+	}
+
 	private ReplaceRegexTask _addTaskSyncVersions(final Project project) {
 		ReplaceRegexTask replaceRegexTask = GradleUtil.addTask(
 			project, SYNC_VERSIONS_TASK_NAME, ReplaceRegexTask.class);
@@ -3242,6 +3332,12 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 	private static final char _DEPENDENCY_KEY_SEPARATOR = '/';
 
+	private static final String _FIND_SECURITY_BUGS_EXCLUDE_FILE_NAME =
+		"fsb-exclude.xml";
+
+	private static final String _FIND_SECURITY_BUGS_INCLUDE_FILE_NAME =
+		"fsb-include.xml";
+
 	private static final String _GROUP = "com.liferay";
 
 	private static final JavaVersion _JAVA_VERSION = JavaVersion.VERSION_1_7;
@@ -3271,6 +3367,11 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 	private static final String _SERVICE_BUILDER_PORTAL_TOOL_NAME =
 		"com.liferay.portal.tools.service.builder";
+
+	/**
+	 * Copied from <code>com.liferay.gradle.plugins.internal.JspCDefaultsPlugin</code>.
+	 */
+	private static final String _UNZIP_JAR_TASK_NAME = "unzipJar";
 
 	private static final BackupFilesBuildAdapter _backupFilesBuildAdapter =
 		new BackupFilesBuildAdapter();
