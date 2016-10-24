@@ -15,6 +15,7 @@
 package com.liferay.taglib.aui;
 
 import com.liferay.portal.kernel.util.CharPool;
+import com.liferay.portal.kernel.security.xss.XSS;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -100,13 +101,34 @@ public class AUIUtil {
 		return sb.toString();
 	}
 
+	/**
+	 * @deprecated As of 7.1 use {@link #buildSafeData(Map)}
+	 */
+	@Deprecated
 	public static String buildData(Map<String, Object> data) {
-		return HtmlUtil.buildData(data);
+		return buildSafeData(data).toString();
 	}
 
+	public static XSS.SafeHTML buildSafeData(Map<String, Object> data) {
+		return XSS.safeHTML(HtmlUtil.buildData(data));
+	}
+
+	/**
+	 * @deprecated As of 7.1 use {@link
+	 * #buildSafeLabel(String, boolean, boolean, CharSequence)}
+	 */
+	@Deprecated
 	public static String buildLabel(
 		String baseType, boolean inlineField, boolean showForLabel,
 		String forLabel) {
+
+		return buildSafeLabel(baseType, inlineField, showForLabel, forLabel)
+			.toString();
+	}
+
+	public static XSS.SafeHTML buildSafeLabel(
+		String baseType, boolean inlineField, boolean showForLabel,
+		CharSequence forLabel) {
 
 		StringBundler sb = new StringBundler(7);
 
@@ -127,11 +149,11 @@ public class AUIUtil {
 
 		if (showForLabel) {
 			sb.append("for=\"");
-			sb.append(HtmlUtil.escapeAttribute(forLabel));
+			sb.append(XSS.attribute(forLabel));
 			sb.append("\"");
 		}
 
-		return sb.toString();
+		return XSS.safeHTML(sb.toString());
 	}
 
 	public static Object getAttribute(
