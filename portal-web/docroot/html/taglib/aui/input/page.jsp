@@ -229,7 +229,7 @@ boolean choiceField = checkboxField || radioField;
 		}
 		%>
 
-		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJSOnly(onChange)) + "\"" : StringPool.BLANK %> onClick="<%= XSS.attribute(XSS.verifiedJSOnly(onClick)) %>" <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="checkbox" <%= Validator.isNotNull(valueString) ? ("value=\"" + XSS.attribute(valueString)) + "\"" : StringPool.BLANK %> <%= XSS.safeHTMLOnly(AUIUtil.buildSafeData(data)) %> <%= XSS.safeHTMLOnly(InlineUtil.buildSafeDynamicAttributes(dynamicAttributes)) %> />
+		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace).concat(id) %>" name="<%= XSS.attribute(namespace).concat(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJSOnly(onChange)) + "\"" : StringPool.BLANK %> onClick="<%= XSS.attribute(XSS.verifiedJSOnly(onClick)) %>" <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="checkbox" <%= Validator.isNotNull(valueString) ? ("value=\"" + XSS.attribute(valueString)) + "\"" : StringPool.BLANK %> <%= XSS.safeHTMLOnly(AUIUtil.buildSafeData(data)) %> <%= XSS.safeHTMLOnly(InlineUtil.buildSafeDynamicAttributes(dynamicAttributes)) %> />
 	</c:when>
 	<c:when test='<%= type.equals("radio") %>'>
 
@@ -249,7 +249,7 @@ boolean choiceField = checkboxField || radioField;
 		}
 		%>
 
-		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJSOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJSOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="radio" value="<%= XSS.attribute(valueString) %>" <%= XSS.safeHTMLOnly(AUIUtil.buildSafeData(data)) %> <%= XSS.safeHTMLOnly(InlineUtil.buildSafeDynamicAttributes(dynamicAttributes)) %> />
+		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace).concat(id) %>" name="<%= XSS.attribute(namespace).concat(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJSOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJSOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="radio" value="<%= XSS.attribute(valueString) %>" <%= XSS.safeHTMLOnly(AUIUtil.buildSafeData(data)) %> <%= XSS.safeHTMLOnly(InlineUtil.buildSafeDynamicAttributes(dynamicAttributes)) %> />
 	</c:when>
 	<c:when test='<%= type.equals("resource") %>'>
 		<liferay-ui:input-resource id="<%= id %>" title="<%= title %>" url="<%= String.valueOf(value) %>" />
@@ -337,23 +337,23 @@ boolean choiceField = checkboxField || radioField;
 				String[] storedDimensions = resizable ? StringUtil.split(SessionClicks.get(request, _TEXTAREA_WIDTH_HEIGHT_PREFIX + namespace + id, StringPool.BLANK)) : StringPool.EMPTY_ARRAY;
 				%>
 
-				<textarea class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" <%= multiple ? "multiple" : StringPool.BLANK %> name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJSOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJSOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(placeholder) ? "placeholder=\"" + XSS.attribute(XSS.get(resourceBundle, placeholder)) + "\"" : StringPool.BLANK %> <%= (storedDimensions.length > 1) ? "style=\"height: " + XSS.attribute(storedDimensions[0]) + "; width: " + XSS.attribute(storedDimensions[1]) + ";" + XSS.attribute(title) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> <%= XSS.safeHTMLOnly(AUIUtil.buildSafeData(data)) %> <%= XSS.safeHTMLOnly(InlineUtil.buildSafeDynamicAttributes(dynamicAttributes)) %>><%= XSS.htmlBody(valueString) %></textarea>
+				<textarea class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace).concat(id) %>" <%= multiple ? "multiple" : StringPool.BLANK %> name="<%= XSS.attribute(namespace).concat(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJSOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJSOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(placeholder) ? "placeholder=\"" + XSS.attribute(XSS.get(resourceBundle, placeholder)) + "\"" : StringPool.BLANK %> <%= (storedDimensions.length > 1) ? "style=\"height: " + XSS.attribute(storedDimensions[0]) + "; width: " + XSS.attribute(storedDimensions[1]) + ";" + XSS.attribute(title) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> <%= XSS.safeHTMLOnly(AUIUtil.buildSafeData(data)) %> <%= XSS.safeHTMLOnly(InlineUtil.buildSafeDynamicAttributes(dynamicAttributes)) %>><%= XSS.htmlBody(valueString) %></textarea>
 
 				<c:if test="<%= autoSize %>">
 					<aui:script use="aui-autosize-deprecated">
-						A.one('#<%= XSS.js(namespace) + XSS.js(id) %>').plug(A.Plugin.Autosize);
+						A.one('#<%= XSS.js(namespace).concat(id) %>').plug(A.Plugin.Autosize);
 					</aui:script>
 				</c:if>
 
 				<c:if test="<%= resizable %>">
 					<aui:script use="liferay-store,resize-base">
-						var textareaNode = A.one('#<%= XSS.js(namespace) + XSS.js(id) %>');
+						var textareaNode = A.one('#<%= XSS.js(namespace).concat(id) %>');
 
 						var resizeInstance = new A.Resize(
 							{
 								after: {
 									'end': function(event) {
-										Liferay.Store('<%= _TEXTAREA_WIDTH_HEIGHT_PREFIX %><%= XSS.js(namespace) + XSS.js(id) %>', textareaNode.getStyle('height') + ',' + textareaNode.getStyle('width'));
+										Liferay.Store('<%= _TEXTAREA_WIDTH_HEIGHT_PREFIX %><%= XSS.js(namespace).concat(id) %>', textareaNode.getStyle('height') + ',' + textareaNode.getStyle('width'));
 									}
 								},
 								autoHide: true,
@@ -367,13 +367,13 @@ boolean choiceField = checkboxField || radioField;
 				</c:if>
 			</c:when>
 			<c:otherwise>
-				<input <%= type.equals("image") ? "alt=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" <%= (max != null) ? "max=\"" + XSS.attribute(max) + "\"": StringPool.BLANK %> <%= (min != null) ? "min=\"" + XSS.attribute(min) + "\"": StringPool.BLANK %> <%= multiple ? "multiple" : StringPool.BLANK %> name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJSOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJSOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(placeholder) ? "placeholder=\"" + XSS.attribute(XSS.get(resourceBundle, placeholder)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="<%= Validator.isNull(type) ? "text" : XSS.attribute(type) %>" <%= !type.equals("image") ? "value=\"" + XSS.attribute(valueString) + "\"" : StringPool.BLANK %> <%= XSS.safeHTMLOnly(AUIUtil.buildSafeData(data)) %> <%= XSS.safeHTMLOnly(InlineUtil.buildSafeDynamicAttributes(dynamicAttributes)) %> />
+				<input <%= type.equals("image") ? "alt=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace).concat(id) %>" <%= (max != null) ? "max=\"" + XSS.attribute(max) + "\"": StringPool.BLANK %> <%= (min != null) ? "min=\"" + XSS.attribute(min) + "\"": StringPool.BLANK %> <%= multiple ? "multiple" : StringPool.BLANK %> name="<%= XSS.attribute(namespace).concat(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJSOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJSOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(placeholder) ? "placeholder=\"" + XSS.attribute(XSS.get(resourceBundle, placeholder)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSS.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="<%= Validator.isNull(type) ? "text" : XSS.attribute(type) %>" <%= !type.equals("image") ? "value=\"" + XSS.attribute(valueString) + "\"" : StringPool.BLANK %> <%= XSS.safeHTMLOnly(AUIUtil.buildSafeData(data)) %> <%= XSS.safeHTMLOnly(InlineUtil.buildSafeDynamicAttributes(dynamicAttributes)) %> />
 			</c:otherwise>
 		</c:choose>
 
 		<c:if test="<%= autoFocus %>">
 			<aui:script>
-				Liferay.Util.focusFormField('#<%= XSS.js(namespace) + XSS.js(id) %>');
+				Liferay.Util.focusFormField('#<%= XSS.js(namespace).concat(id) %>');
 			</aui:script>
 		</c:if>
 	</c:otherwise>

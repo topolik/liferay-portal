@@ -20,9 +20,11 @@ import com.liferay.portal.kernel.security.xss.XSS;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * @author Carlos Sierra Andrés
+ * @author Tomas Polesovsky
  */
 public class EscapedStringImpl implements XSS.EscapedString {
 
@@ -42,6 +44,35 @@ public class EscapedStringImpl implements XSS.EscapedString {
 	@Override
 	public char charAt(int index) {
 		return _escaped.charAt(index);
+	}
+
+	@Override
+	public XSS.EscapedString concat(String input) {
+		map(
+			a -> {
+				XSS.EscapedString newEscapedString = new EscapedStringImpl(
+					input);
+
+				newEscapedString.chain(getOperationsArray());
+
+			return a + newEscapedString.toString();
+		});
+
+		return this;
+	}
+
+	@Override
+	public XSS.EscapedString concat(XSS.EscapedString escapedString) {
+		map(
+			a -> {
+				escapedString.reset();
+
+				escapedString.chain(getOperationsArray());
+
+				return a + escapedString.toString();
+			});
+
+		return this;
 	}
 
 	@Override
@@ -73,17 +104,29 @@ public class EscapedStringImpl implements XSS.EscapedString {
 		return _escaped.toString();
 	}
 
+	protected EscapeOperation[] getOperationsArray() {
+		return _escapeOperations.toArray(
+			new EscapeOperation[_escapeOperations.size()]);
+	}
+
+	protected void map(Function<String, String> function) {
+		_function = _function.andThen(function);
+	}
+
 	protected void recalculate() {
 		_escaped = _original;
 
 		for (EscapeOperation escapeOperation : _escapeOperations) {
 			_escaped = escapeOperation.escape(_escaped);
 		}
+
+		_escaped = _function.apply(_escaped);
 	}
 
 	private String _escaped;
 	private final Set<EscapeOperation> _escapeOperations =
 		new LinkedHashSet<>();
+	private Function<String, String> _function;
 	private final String _original;
 
 }

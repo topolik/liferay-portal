@@ -97,6 +97,24 @@ public class XSS {
 		EscapedString chain(EscapeOperation... escapeOperation);
 
 		/**
+		 * Joins this escaped string with a new String that will be escaped
+		 * using the same escape operations.
+		 *
+		 * @param input to be escaped
+		 * @return this object
+		 */
+		EscapedString concat(String input);
+
+		/**
+		 * Joins this escaped string with another EscapedString instance that
+		 * will be escaped using the same escape operations.
+		 *
+		 * @param escapedString to be escaped
+		 * @return this object
+		 */
+		EscapedString concat(EscapedString escapedString);
+
+		/**
 		 * Resets chain of escape operations.
 		 *
 		 * @return this object
