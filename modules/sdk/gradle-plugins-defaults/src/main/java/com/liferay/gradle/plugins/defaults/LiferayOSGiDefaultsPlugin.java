@@ -149,9 +149,11 @@ import org.gradle.api.plugins.quality.FindBugsReports;
 import org.gradle.api.plugins.quality.Pmd;
 import org.gradle.api.plugins.quality.PmdExtension;
 import org.gradle.api.plugins.quality.PmdPlugin;
+import org.gradle.api.reporting.ReportingExtension;
 import org.gradle.api.reporting.SingleFileReport;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.Copy;
+import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetOutput;
 import org.gradle.api.tasks.StopActionException;
@@ -207,6 +209,9 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 	public static final String FIND_SECURITY_BUGS_CONFIGURATION_NAME =
 		"findSecurityBugs";
+
+	public static final String FIND_SECURITY_BUGS_PLUGINS_CONFIGURATION_NAME =
+		"findSecurityBugsPlugins";
 
 	public static final String FIND_SECURITY_BUGS_TASK_NAME =
 		"findSecurityBugs";
@@ -312,8 +317,12 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 		Configuration findSecurityBugsConfiguration =
 			_addConfigurationFindSecurityBugs(project);
+		Configuration findSecurityBugsPluginsConfiguration =
+			_addConfigurationFindSecurityBugsPlugins(project);
 
-		_addTaskFindSecurityBugs(project, findSecurityBugsConfiguration);
+		_addTaskFindSecurityBugs(
+			project, findSecurityBugsConfiguration,
+			findSecurityBugsPluginsConfiguration);
 
 		Configuration baselineConfiguration = null;
 
@@ -2416,6 +2425,30 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 			});
 
+		configuration.setDescription(
+			"Configures FindBugs for the '" + FIND_SECURITY_BUGS_TASK_NAME +
+				"' task.");
+		configuration.setVisible(false);
+
+		return configuration;
+	}
+
+	private Configuration _addConfigurationFindSecurityBugsPlugins(
+		final Project project) {
+
+		Configuration configuration = GradleUtil.addConfiguration(
+			project, FIND_SECURITY_BUGS_PLUGINS_CONFIGURATION_NAME);
+
+		configuration.defaultDependencies(
+			new Action<DependencySet>() {
+
+				@Override
+				public void execute(DependencySet dependencySet) {
+					_addDependenciesFindSecurityBugsPlugins(project);
+				}
+
+			});
+
 		configuration.setDescription("Configures FindSecurityBugs.");
 		configuration.setVisible(false);
 
@@ -2425,58 +2458,121 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 	private void _addDependenciesFindSecurityBugs(Project project) {
 		GradleUtil.addDependency(
 			project, FIND_SECURITY_BUGS_CONFIGURATION_NAME,
+			"com.google.code.findbugs", "findbugs", "3.0.1");
+	}
+
+	private void _addDependenciesFindSecurityBugsPlugins(Project project) {
+		GradleUtil.addDependency(
+			project, FIND_SECURITY_BUGS_PLUGINS_CONFIGURATION_NAME,
 			"com.h3xstream.findsecbugs", "findsecbugs-plugin", "1.5.0");
 	}
 
-	private FindBugs _addTaskFindSecurityBugs(
-		Project project, FileCollection pluginClasspath) {
+	private JavaExec _addTaskFindSecurityBugs(
+		Project project, FileCollection classpath,
+		final FileCollection pluginClasspath) {
 
-		FindBugs findBugs = GradleUtil.addTask(
-			project, FIND_SECURITY_BUGS_TASK_NAME, FindBugs.class);
+		JavaExec javaExec = GradleUtil.addTask(
+			project, FIND_SECURITY_BUGS_TASK_NAME, JavaExec.class);
 
-		Task compileJSPTask = GradleUtil.getTask(
+		javaExec.args(
+			"-effort:max", "-html", "-low", "-progress", "-sortByClass",
+			"-timestampNow");
+
+		final Task compileJSPTask = GradleUtil.getTask(
 			project, JspCPlugin.COMPILE_JSP_TASK_NAME);
-		Task unzipJARTaskName = GradleUtil.getTask(
+		final Task generateJSPJavaTask = GradleUtil.getTask(
+			project, JspCPlugin.GENERATE_JSP_JAVA_TASK_NAME);
+		final Task unzipJARTaskName = GradleUtil.getTask(
 			project, _UNZIP_JAR_TASK_NAME);
 
-		findBugs.setClasses(project.files(compileJSPTask, unzipJARTaskName));
+		javaExec.dependsOn(compileJSPTask);
 
-		SourceSet sourceSet = GradleUtil.getSourceSet(
-			project, SourceSet.MAIN_SOURCE_SET_NAME);
+		javaExec.doFirst(
+			new Action<Task>() {
 
-		findBugs.setClasspath(sourceSet.getCompileClasspath());
+				@Override
+				public void execute(Task task) {
+					JavaExec javaExec = (JavaExec)task;
 
-		findBugs.setDescription("Runs FindSecurityBugs analysis.");
-		findBugs.setEffort("max");
+					Project project = javaExec.getProject();
+
+					SourceSet sourceSet = GradleUtil.getSourceSet(
+						project, SourceSet.MAIN_SOURCE_SET_NAME);
+
+					FileCollection auxClasspath =
+						sourceSet.getCompileClasspath();
+
+					javaExec.args("-auxclasspath", auxClasspath.getAsPath());
+
+					ReportingExtension reportingExtension =
+						GradleUtil.getExtension(
+							project, ReportingExtension.class);
+
+					File outputDir = new File(
+						reportingExtension.getBaseDir(), javaExec.getName());
+
+					outputDir.mkdirs();
+
+					File outputFile = new File(outputDir, "reports.html");
+
+					javaExec.args(
+						"-outputFile", FileUtil.getAbsolutePath(outputFile));
+
+					javaExec.args("-pluginList", pluginClasspath.getAsPath());
+
+					FileCollection sourcePath = project.files(
+						generateJSPJavaTask, sourceSet.getAllJava());
+
+					javaExec.args("-sourcepath", sourcePath.getAsPath());
+
+					javaExec.args(
+						project.files(compileJSPTask, unzipJARTaskName));
+				}
+
+			});
+
+		javaExec.setClasspath(classpath);
+		javaExec.setMain("edu.umd.cs.findbugs.FindBugs2");
+
+		javaExec.systemProperty(
+			"findsecbugs.injection.customconfigfile.SqlInjectionDetector",
+			"liferay-config/liferay-SqlInjectionDetector.txt|" +
+				"SQL_INJECTION_HIBERNATE");
+		javaExec.systemProperty(
+			"findsecbugs.injection.customconfigfile.XssJspDetector",
+			"liferay-config/liferay-XssJspDetector.txt|XSS_JSP_PRINT");
+
+		File falsePositivesTxtFile = project.file(
+			"find-security-bugs-false-positives.txt");
+
+		if (falsePositivesTxtFile.exists()) {
+			javaExec.systemProperty(
+				"findsecbugs.taint.customconfigfile",
+				FileUtil.getAbsolutePath(falsePositivesTxtFile) +
+					":liferay-config/liferay.txt");
+		}
 
 		File excludeDir = GradleUtil.getRootDir(
 			project, _FIND_SECURITY_BUGS_EXCLUDE_FILE_NAME);
 
 		if (excludeDir != null) {
-			findBugs.setExcludeFilter(
-				new File(excludeDir, _FIND_SECURITY_BUGS_EXCLUDE_FILE_NAME));
-		}
+			File excludeFile = new File(
+				excludeDir, _FIND_SECURITY_BUGS_EXCLUDE_FILE_NAME);
 
-		findBugs.setIgnoreFailures(true);
+			javaExec.args("-exclude", FileUtil.getAbsolutePath(excludeFile));
+		}
 
 		File includeDir = GradleUtil.getRootDir(
 			project, _FIND_SECURITY_BUGS_INCLUDE_FILE_NAME);
 
 		if (includeDir != null) {
-			findBugs.setIncludeFilter(
-				new File(includeDir, _FIND_SECURITY_BUGS_INCLUDE_FILE_NAME));
+			File includeFile = new File(
+				includeDir, _FIND_SECURITY_BUGS_INCLUDE_FILE_NAME);
+
+			javaExec.args("-include", FileUtil.getAbsolutePath(includeFile));
 		}
 
-		findBugs.setPluginClasspath(pluginClasspath);
-		findBugs.setReportLevel("low");
-
-		Task generateJSPJavaTask = GradleUtil.getTask(
-			project, JspCPlugin.GENERATE_JSP_JAVA_TASK_NAME);
-
-		findBugs.setSource(
-			project.files(generateJSPJavaTask, sourceSet.getAllJava()));
-
-		return findBugs;
+		return javaExec;
 	}
 
 	private ReplaceRegexTask _addTaskSyncVersions(final Project project) {
