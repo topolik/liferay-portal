@@ -2464,7 +2464,8 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 	private void _addDependenciesFindSecurityBugsPlugins(Project project) {
 		GradleUtil.addDependency(
 			project, FIND_SECURITY_BUGS_PLUGINS_CONFIGURATION_NAME,
-			"com.h3xstream.findsecbugs", "findsecbugs-plugin", "1.5.0");
+			"com.liferay", "com.h3xstream.findsecbugs",
+			"1.5.0.LIFERAY-PATCHED-1");
 	}
 
 	private JavaExec _addTaskFindSecurityBugs(
