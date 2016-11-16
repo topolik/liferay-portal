@@ -234,8 +234,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 						ldapServerId, companyId, binding));
 
 				return importUser(
-					ldapServerId, companyId, ldapContext, attributes,
-					StringPool.BLANK);
+					ldapServerId, companyId, ldapContext, attributes, null);
 			}
 			else {
 				return null;
@@ -341,7 +340,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 			ldapServerId, companyId, ldapContext, fullUserDN);
 
 		User user = importUser(
-			ldapServerId, companyId, ldapContext, attributes, StringPool.BLANK);
+			ldapServerId, companyId, ldapContext, attributes, null);
 
 		ldapContext.close();
 
@@ -792,8 +791,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 					User user = importUser(
 						ldapServerId, companyId, userAttributes, userMappings,
 						userExpandoMappings, contactMappings,
-						contactExpandoMappings, StringPool.BLANK,
-						ldapUserIgnoreAttributes);
+						contactExpandoMappings, null, ldapUserIgnoreAttributes);
 
 					importGroups(
 						ldapServerId, companyId, ldapContext, userAttributes,
@@ -1168,8 +1166,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 				User user = importUser(
 					ldapServerId, companyId, userAttributes, userMappings,
 					userExpandoMappings, contactMappings,
-					contactExpandoMappings, StringPool.BLANK,
-					ldapUserIgnoreAttributes);
+					contactExpandoMappings, null, ldapUserIgnoreAttributes);
 
 				if (user != null) {
 					if (_log.isDebugEnabled()) {
@@ -1454,9 +1451,13 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 				modifiedDate = LDAPUtil.parseDate(modifyTimestamp);
 
 				if (modifiedDate.equals(user.getModifiedDate())) {
-					updateUserPassword(
-						ldapImportConfiguration, user.getUserId(),
-						ldapUser.getScreenName(), password, passwordReset);
+					if (ldapUser.isUpdatePassword() ||
+						!ldapImportConfiguration.importUserPasswordEnabled()) {
+
+						updateUserPassword(
+							ldapImportConfiguration, user.getUserId(),
+							user.getScreenName(), password, passwordReset);
+					}
 
 					if (_log.isDebugEnabled()) {
 						_log.debug(
@@ -1502,7 +1503,9 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 			ldapUser.setScreenName(user.getScreenName());
 		}
 
-		if (ldapUser.isUpdatePassword()) {
+		if (ldapUser.isUpdatePassword() ||
+			!ldapImportConfiguration.importUserPasswordEnabled()) {
+
 			password = updateUserPassword(
 				ldapImportConfiguration, user.getUserId(),
 				ldapUser.getScreenName(), password, passwordReset);

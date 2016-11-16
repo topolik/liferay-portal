@@ -11,12 +11,6 @@
 		<execute function="Click" locator1="Button#PLUS" />
 	</command>
 
-	<command name="gotoRules">
-		<var name="key_assetTitle" value="Rules" />
-
-		<execute function="AssertClick" locator1="NavBar#ASSET_TITLE" value1="Rules" />
-	</command>
-
 	<command name="gotoDataProviders">
 		<execute function="Click" locator1="Icon#HEADER_VERTICAL_ELLIPSIS" />
 
@@ -75,6 +69,12 @@
 		<execute function="Click" locator1="Icon#HEADER_VERTICAL_ELLIPSIS" />
 
 		<execute function="AssertClick" locator1="MenuItem#PUBLISH" value1="Publish" />
+	</command>
+
+	<command name="gotoRules">
+		<var name="key_assetTitle" value="Rules" />
+
+		<execute function="AssertClick" locator1="NavBar#ASSET_TITLE" value1="Rules" />
 	</command>
 
 	<command name="gotoSettings">

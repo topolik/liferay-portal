@@ -694,10 +694,39 @@ public class AssetPublisherExportImportPortletPreferencesProcessor
 			PortletPreferences portletPreferences)
 		throws Exception {
 
+		String anyAssetTypeString = portletPreferences.getValue(
+			"anyAssetType", null);
+
+		String selectionStyle = portletPreferences.getValue(
+			"selectionStyle", null);
+
+		if (Validator.isNotNull(selectionStyle) &&
+			selectionStyle.equals("manual")) {
+
+			portletPreferences.reset("anyAssetType");
+
+			anyAssetTypeString = portletPreferences.getValue(
+				"anyAssetType", null);
+		}
+		else if (Validator.isNotNull(anyAssetTypeString) &&
+				 anyAssetTypeString.equals("false")) {
+
+			String[] classNameIds = portletPreferences.getValues(
+				"classNameIds", StringPool.EMPTY_ARRAY);
+
+			if (classNameIds.length == 1) {
+				portletPreferences.setValue("anyAssetType", classNameIds[0]);
+
+				anyAssetTypeString = portletPreferences.getValue(
+					"anyAssetType", null);
+
+				portletPreferences.reset("classNameIds");
+			}
+		}
+
 		String anyAssetTypeClassName = StringPool.BLANK;
 
-		long anyAssetType = GetterUtil.getLong(
-			portletPreferences.getValue("anyAssetType", null));
+		long anyAssetType = GetterUtil.getLong(anyAssetTypeString);
 
 		if (anyAssetType > 0) {
 			anyAssetTypeClassName = PortalUtil.getClassName(anyAssetType);
@@ -715,7 +744,15 @@ public class AssetPublisherExportImportPortletPreferencesProcessor
 				portletPreferences.getValue(name, null));
 
 			if (name.equals("anyAssetType") || name.equals("classNameIds")) {
-				updateExportClassNameIds(portletPreferences, name);
+				if (name.equals("classNameIds") &&
+					Validator.isNotNull(anyAssetTypeString) &&
+					!anyAssetTypeString.equals("false")) {
+
+					portletPreferences.reset(name);
+				}
+				else {
+					updateExportClassNameIds(portletPreferences, name);
+				}
 			}
 			else if (name.equals(
 						"anyClassTypeDLFileEntryAssetRendererFactory") ||
@@ -725,9 +762,50 @@ public class AssetPublisherExportImportPortletPreferencesProcessor
 					 name.equals(
 						 "classTypeIdsDLFileEntryAssetRendererFactory")) {
 
-				updateExportPortletPreferencesClassPKs(
-					portletDataContext, portlet, portletPreferences, name,
-					DLFileEntryType.class.getName());
+				String anyClassTypeDLFileEntryAssetRendererFactory =
+					portletPreferences.getValue(
+						"anyClassTypeDLFileEntryAssetRendererFactory", null);
+
+				String[] classTypeIdsDLFileEntryAssetRendererFactory =
+					portletPreferences.getValues(
+						"classTypeIdsDLFileEntryAssetRendererFactory",
+						StringPool.EMPTY_ARRAY);
+
+				if (Validator.isNotNull(
+						anyClassTypeDLFileEntryAssetRendererFactory) &&
+					anyClassTypeDLFileEntryAssetRendererFactory.equals(
+						"false") &&
+					(classTypeIdsDLFileEntryAssetRendererFactory.length == 1)) {
+
+					portletPreferences.setValue(
+						"anyClassTypeDLFileEntryAssetRendererFactory",
+						classTypeIdsDLFileEntryAssetRendererFactory[0]);
+
+					portletPreferences.reset(
+						"classTypeIdsDLFileEntryAssetRendererFactory");
+
+					anyClassTypeDLFileEntryAssetRendererFactory =
+						portletPreferences.getValue(
+							"anyClassTypeDLFileEntryAssetRendererFactory",
+							null);
+				}
+
+				if (!anyAssetTypeClassName.equals(
+						DLFileEntry.class.getName()) ||
+					(name.equals(
+						"classTypeIdsDLFileEntryAssetRendererFactory") &&
+					 Validator.isNotNull(
+						 anyClassTypeDLFileEntryAssetRendererFactory) &&
+					 !anyClassTypeDLFileEntryAssetRendererFactory.equals(
+						 "false"))) {
+
+					portletPreferences.reset(name);
+				}
+				else {
+					updateExportPortletPreferencesClassPKs(
+						portletDataContext, portlet, portletPreferences, name,
+						DLFileEntryType.class.getName());
+				}
 			}
 			else if (name.equals(
 						"anyClassTypeJournalArticleAssetRendererFactory") ||
@@ -737,9 +815,51 @@ public class AssetPublisherExportImportPortletPreferencesProcessor
 					 name.equals(
 						 "classTypeIdsJournalArticleAssetRendererFactory")) {
 
-				updateExportPortletPreferencesClassPKs(
-					portletDataContext, portlet, portletPreferences, name,
-					DDMStructure.class.getName());
+				String anyClassTypeJournalArticleAssetRendererFactory =
+					portletPreferences.getValue(
+						"anyClassTypeJournalArticleAssetRendererFactory", null);
+
+				String[] classTypeIdsJournalArticleAssetRendererFactory =
+					portletPreferences.getValues(
+						"classTypeIdsJournalArticleAssetRendererFactory",
+						StringPool.EMPTY_ARRAY);
+
+				if (Validator.isNotNull(
+						anyClassTypeJournalArticleAssetRendererFactory) &&
+					anyClassTypeJournalArticleAssetRendererFactory.equals(
+						"false") &&
+					(classTypeIdsJournalArticleAssetRendererFactory.length ==
+						1)) {
+
+					portletPreferences.setValue(
+						"anyClassTypeJournalArticleAssetRendererFactory",
+						classTypeIdsJournalArticleAssetRendererFactory[0]);
+
+					portletPreferences.reset(
+						"classTypeIdsJournalArticleAssetRendererFactory");
+
+					anyClassTypeJournalArticleAssetRendererFactory =
+						portletPreferences.getValue(
+							"anyClassTypeJournalArticleAssetRendererFactory",
+							null);
+				}
+
+				if (!anyAssetTypeClassName.equals(
+						JournalArticle.class.getName()) ||
+					(name.equals(
+						"classTypeIdsJournalArticleAssetRendererFactory") &&
+					 Validator.isNotNull(
+						 anyClassTypeJournalArticleAssetRendererFactory) &&
+					 !anyClassTypeJournalArticleAssetRendererFactory.equals(
+						 "false"))) {
+
+					portletPreferences.reset(name);
+				}
+				else {
+					updateExportPortletPreferencesClassPKs(
+						portletDataContext, portlet, portletPreferences, name,
+						DDMStructure.class.getName());
+				}
 			}
 			else if (name.equals("assetVocabularyId")) {
 				long assetVocabularyId = GetterUtil.getLong(value);

@@ -75,10 +75,7 @@
 
 					<mkdir dir="${tstamp.value}" />
 
-					<unzip
-						dest="${tstamp.value}"
-						src="${test.build.liferay.portal.zip.file.name}"
-					/>
+					<unzip dest="${tstamp.value}" src="${test.build.liferay.portal.zip.file.name}" />
 
 					<copy
 						file="portal-impl/src/portal-ext.properties"
@@ -92,13 +89,13 @@ module.framework.properties.osgi.console=11312</echo>
 
 					<print-file file.name="${tstamp.value}/WEB-INF/classes/portal-ext.properties" />
 
-					<zip
-						basedir="${tstamp.value}"
-						destfile="${test.build.liferay.portal.zip.file.name}"
-						update="yes"
-					/>
+					<delete file="${test.build.liferay.portal.zip.file.name}" />
+
+					<zip basedir="${tstamp.value}" destfile="${test.build.liferay.portal.zip.file.name}" />
 
 					<delete dir="${tstamp.value}" />
+
+					<var name="tstamp.value" unset="true" />
 				</then>
 				<else>
 					<copy
@@ -234,6 +231,16 @@ jdbc.counter.maxIdle=0
 jdbc.counter.minIdle=0
 
 counter.jdbc.prefix=jdbc.counter.]]></echo>
+
+			<if>
+				<equals arg1="${database.type}" arg2="oracle" />
+				<then>
+					<echo append="true" file="@{properties.file}"><![CDATA[
+jdbc.default.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_TIMEOUT=0
+
+jdbc.counter.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_TIMEOUT=0]]></echo>
+				</then>
+			</if>
 
 			<post-action />
 		</sequential>
@@ -5630,6 +5637,14 @@ axis.servlet.hosts.allowed=
 
 tunnel.servlet.hosts.allowed=</echo>
 
+		<if>
+			<equals arg1="${database.type}" arg2="oracle" />
+			<then>
+				<echo append="true" file="portal-impl/src/portal-ext.properties"><![CDATA[
+jdbc.default.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_TIMEOUT=0]]></echo>
+			</then>
+		</if>
+
 		<get-testcase-property property.name="captcha.max.challenges" />
 
 		<if>
@@ -5752,6 +5767,21 @@ portal.security.manager.strategy=liferay</echo>
 javascript.fast.load=false</echo>
 			</then>
 		</if>
+
+		<get-testcase-property property.name="blacklist.portal.profile.names" />
+
+		<if>
+			<not>
+				<isset property="blacklist.portal.profile.names" />
+			</not>
+			<then>
+				<property name="blacklist.portal.profile.names" value="com.liferay.chat.service,com.liferay.chat.web" />
+			</then>
+		</if>
+
+		<echo append="true" file="portal-impl/src/portal-ext.properties">
+
+module.framework.properties.blacklist.portal.profile.names=${blacklist.portal.profile.names}</echo>
 
 		<get-testcase-property property.name="portal.version" />
 
@@ -6187,7 +6217,9 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 		<antcall target="prepare-selenium-browser" />
 		<antcall target="prepare-selenium-database-properties" />
 		<antcall target="prepare-selenium-email-properties" />
+		<antcall target="prepare-selenium-facebook-properties" />
 		<antcall target="prepare-selenium-google-properties" />
+		<antcall target="prepare-selenium-openid-properties" />
 		<antcall target="prepare-selenium-required-properties" />
 		<antcall target="prepare-selenium-testcase-properties" />
 
@@ -6959,6 +6991,44 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 		</if>
 	</target>
 
+	<target name="prepare-selenium-facebook-properties">
+		<if>
+			<isset property="facebook.application.id" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					facebook.application.id=${facebook.application.id}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="facebook.application.secret" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					facebook.application.secret=${facebook.application.secret}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="facebook.email" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					facebook.email=${facebook.email}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="facebook.password" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					facebook.password=${facebook.password}
+				</echo>
+			</then>
+		</if>
+	</target>
+
 	<target name="prepare-selenium-google-properties">
 		<if>
 			<isset property="google.api.key" />
@@ -6983,6 +7053,26 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 			<then>
 				<echo append="true" file="${test.ext.properties.file}">
 					google.client.secret=${google.client.secret}
+				</echo>
+			</then>
+		</if>
+	</target>
+
+	<target name="prepare-selenium-openid-properties">
+		<if>
+			<isset property="openid.password" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					openid.password=${openid.password}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="openid.username" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					openid.username=${openid.username}
 				</echo>
 			</then>
 		</if>
