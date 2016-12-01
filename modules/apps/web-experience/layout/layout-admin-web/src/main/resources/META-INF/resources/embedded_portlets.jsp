@@ -23,17 +23,17 @@ String orderByType = ParamUtil.getString(request, "orderByType", "asc");
 
 Layout selLayout = layoutsAdminDisplayContext.getSelLayout();
 
-List<Portlet> embeddedPortlets = Collections.emptyList();
+List<Portlet> orphanPortlets = Collections.emptyList();
 
 if (selLayout.isSupportsEmbeddedPortlets()) {
 	LayoutTypePortlet selLayoutTypePortlet = (LayoutTypePortlet)selLayout.getLayoutType();
 
-	embeddedPortlets = selLayoutTypePortlet.getEmbeddedPortlets();
+	orphanPortlets = selLayoutTypePortlet.getOrphanPortlets(false);
 }
 
 PortletTitleComparator portletTitleComparator = new PortletTitleComparator(application, locale);
 
-embeddedPortlets = ListUtil.sort(embeddedPortlets, portletTitleComparator);
+orphanPortlets = ListUtil.sort(orphanPortlets, portletTitleComparator);
 
 RowChecker rowChecker = new EmptyOnClickRowChecker(liferayPortletResponse);
 
@@ -108,7 +108,7 @@ portletURL.setParameter("mvcPath", "/embedded_portlets.jsp");
 			rowChecker="<%= rowChecker %>"
 		>
 			<liferay-ui:search-container-results
-				results="<%= embeddedPortlets %>"
+				results="<%= orphanPortlets %>"
 			/>
 
 			<liferay-ui:search-container-row

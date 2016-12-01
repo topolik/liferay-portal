@@ -110,10 +110,10 @@ public class EmbeddedPortletsPortletConfigurationIcon
 			LayoutTypePortlet layoutTypePortlet =
 				(LayoutTypePortlet)layout.getLayoutType();
 
-			List<Portlet> embeddedPortlets =
-				layoutTypePortlet.getEmbeddedPortlets();
+			List<Portlet> orphanPortlets =
+				layoutTypePortlet.getOrphanPortlets(false);
 
-			if (!embeddedPortlets.isEmpty()) {
+			if (!orphanPortlets.isEmpty()) {
 				return true;
 			}
 		}
