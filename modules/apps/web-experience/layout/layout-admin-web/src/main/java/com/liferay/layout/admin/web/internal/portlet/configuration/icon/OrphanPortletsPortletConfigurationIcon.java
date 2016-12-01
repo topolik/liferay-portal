@@ -96,28 +96,24 @@ public class OrphanPortletsPortletConfigurationIcon
 
 	@Override
 	public boolean isShow(PortletRequest portletRequest) {
-		try {
-			Layout layout = getLayout(portletRequest);
+		Layout layout = getLayout(portletRequest);
 
-			if (layout == null) {
-				return false;
-			}
-
-			if (!layout.isSupportsEmbeddedPortlets()) {
-				return false;
-			}
-
-			LayoutTypePortlet layoutTypePortlet =
-				(LayoutTypePortlet)layout.getLayoutType();
-
-			List<Portlet> orphanPortlets =
-				layoutTypePortlet.getOrphanPortlets(false);
-
-			if (!orphanPortlets.isEmpty()) {
-				return true;
-			}
+		if (layout == null) {
+			return false;
 		}
-		catch (Exception e) {
+
+		if (!layout.isSupportsEmbeddedPortlets()) {
+			return false;
+		}
+
+		LayoutTypePortlet layoutTypePortlet =
+			(LayoutTypePortlet)layout.getLayoutType();
+
+		List<Portlet> orphanPortlets = layoutTypePortlet.getOrphanPortlets(
+			false);
+
+		if (!orphanPortlets.isEmpty()) {
+			return true;
 		}
 
 		return false;
@@ -128,7 +124,7 @@ public class OrphanPortletsPortletConfigurationIcon
 		return true;
 	}
 
-	protected Layout getLayout(PortletRequest portletRequest) throws Exception {
+	protected Layout getLayout(PortletRequest portletRequest) {
 		long selPlid = getSelPlid(portletRequest);
 
 		return _layoutLocalService.fetchLayout(selPlid);
