@@ -26,11 +26,11 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.service.access.quota.SAQMetricProvider;
+import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.internal.QuotaBreachException;
 import com.liferay.portal.security.service.access.quota.internal.SAQContext;
 import com.liferay.portal.security.service.access.quota.internal.SAQContext.ProcessingResult;
 import com.liferay.portal.security.service.access.quota.internal.SAQMetricConfig;
-import com.liferay.portal.security.service.access.quota.internal.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.internal.impl.SAQContextImpl;
 import com.liferay.portal.security.service.access.quota.persistence.SAQImpressionProvider;
 

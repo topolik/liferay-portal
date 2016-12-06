@@ -14,6 +14,7 @@
 
 package com.liferay.portal.security.service.access.quota.internal;
 
+import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.metric.SAQContextMatcher;
 import com.liferay.portal.security.service.access.quota.persistence.SAQImpressionProvider;
 

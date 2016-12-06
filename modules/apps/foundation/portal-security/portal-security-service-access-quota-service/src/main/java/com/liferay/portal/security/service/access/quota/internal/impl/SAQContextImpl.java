@@ -16,9 +16,9 @@ package com.liferay.portal.security.service.access.quota.internal.impl;
 
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.security.service.access.quota.SAQMetricProvider;
+import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.internal.SAQContext;
 import com.liferay.portal.security.service.access.quota.internal.SAQMetricConfig;
-import com.liferay.portal.security.service.access.quota.internal.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.metric.SAQContextMatcher;
 import com.liferay.portal.security.service.access.quota.persistence.SAQImpression;
 import com.liferay.portal.security.service.access.quota.persistence.SAQImpressionConsumer;

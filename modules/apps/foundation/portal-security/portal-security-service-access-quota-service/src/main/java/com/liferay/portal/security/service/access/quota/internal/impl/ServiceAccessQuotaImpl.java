@@ -17,9 +17,9 @@ package com.liferay.portal.security.service.access.quota.internal.impl;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.configuration.SAQConfiguration;
 import com.liferay.portal.security.service.access.quota.internal.SAQMetricConfig;
-import com.liferay.portal.security.service.access.quota.internal.ServiceAccessQuota;
 
 import java.util.LinkedList;
 import java.util.List;

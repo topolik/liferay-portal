@@ -12,7 +12,9 @@
  * details.
  */
 
-package com.liferay.portal.security.service.access.quota.internal;
+package com.liferay.portal.security.service.access.quota;
+
+import com.liferay.portal.security.service.access.quota.internal.SAQMetricConfig;
 
 import java.util.List;
 
