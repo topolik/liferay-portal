@@ -77,14 +77,14 @@ public class ServiceAccessQuotaImpl implements ServiceAccessQuota {
 						}
 
 						saqMetricConfigs.add(
-							new SAQMetricConfigImpl(metricName, metricPattern));
+							new SAQMetricConfig(metricName, metricPattern));
 					}
 
 					if (Validator.isNotNull(
 							_configuration.serviceSignature())) {
 
 						saqMetricConfigs.add(
-							new SAQMetricConfigImpl(
+							new SAQMetricConfig(
 								"service", _configuration.serviceSignature()));
 					}
 
