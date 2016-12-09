@@ -42,7 +42,7 @@ public class AccessControlPolicySAQContextFactory
 
 		};
 
-		return super.buildContext(valueProvider);
+		return super.buildSaqContext(valueProvider);
 	}
 
 }

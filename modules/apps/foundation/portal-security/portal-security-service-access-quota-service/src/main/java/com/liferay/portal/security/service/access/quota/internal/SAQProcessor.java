@@ -42,7 +42,7 @@ public class SAQProcessor<T extends SAQMetricProvider>
 		_saqContext = saqContext;
 
 		List<ServiceAccessQuota> relevantServiceAccessQuotas =
-			saqContext.getQuotas();
+			saqContext.getServiceAccessQuotas();
 
 		_serviceAccessQuotasCount = new HashMap<>(
 			relevantServiceAccessQuotas.size());
@@ -65,7 +65,7 @@ public class SAQProcessor<T extends SAQMetricProvider>
 				relevantServiceAccessQuotas) {
 
 			List<SAQMetricConfig> quotaSaqMetricConfigs =
-				serviceAccessQuota.getMetricConfigs();
+				serviceAccessQuota.getSaqMetricConfigs();
 
 			if (quotaSaqMetricConfigs.isEmpty()) {
 				_relevantServiceAccessQuotasWithoutMetrics.add(
@@ -116,7 +116,9 @@ public class SAQProcessor<T extends SAQMetricProvider>
 	public Set<ServiceAccessQuota> matches(SAQImpression saqImpression) {
 		_matchedServiceAccessQuotas.clear();
 
-		for (ServiceAccessQuota serviceAccessQuota : _saqContext.getQuotas()) {
+		for (ServiceAccessQuota serviceAccessQuota :
+				_saqContext.getServiceAccessQuotas()) {
+
 			if ((
 					saqImpression.getCreatedMillis() +
 						serviceAccessQuota.getIntervalMillis()) <
@@ -131,7 +133,7 @@ public class SAQProcessor<T extends SAQMetricProvider>
 			boolean allMetricsMatch = true;
 
 			for (SAQMetricConfig saqMetricConfig :
-					serviceAccessQuota.getMetricConfigs()) {
+					serviceAccessQuota.getSaqMetricConfigs()) {
 
 				String saqImpressionMetricValue = saqImpressionMetrics.get(
 					saqMetricConfig.getMetricName());
@@ -145,7 +147,7 @@ public class SAQProcessor<T extends SAQMetricProvider>
 				else {
 					if (saqMetricConfig.getPattern() != null) {
 						SAQMetricProvider saqMetricProvider =
-							_saqContext.getMetricProviders().get(
+							_saqContext.getSaqMetricProviders().get(
 								saqMetricConfig.getMetricName());
 
 						if (!saqMetricProvider.matches(
@@ -187,7 +189,7 @@ public class SAQProcessor<T extends SAQMetricProvider>
 		}
 
 		SAQMetricProvider saqMetricProvider =
-			_saqContext.getMetricProviders().get(metricName);
+			_saqContext.getSaqMetricProviders().get(metricName);
 		List<SAQMetricConfig> saqMetricConfigs = _saqMetricConfigs.get(
 			metricName);
 

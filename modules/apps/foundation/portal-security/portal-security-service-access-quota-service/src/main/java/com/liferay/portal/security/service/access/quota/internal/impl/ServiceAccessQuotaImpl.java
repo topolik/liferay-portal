@@ -51,7 +51,7 @@ public class ServiceAccessQuotaImpl implements ServiceAccessQuota {
 	}
 
 	@Override
-	public List<SAQMetricConfig> getMetricConfigs() {
+	public List<SAQMetricConfig> getSaqMetricConfigs() {
 		if (_saqMetricConfigs == null) {
 			synchronized (this) {
 				if (_saqMetricConfigs == null) {

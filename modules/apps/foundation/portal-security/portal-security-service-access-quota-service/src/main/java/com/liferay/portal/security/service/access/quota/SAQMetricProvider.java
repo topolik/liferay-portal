@@ -24,6 +24,6 @@ public interface SAQMetricProvider {
 
 	public String getMetricName();
 
-	public boolean matches(String metricValue, String metricFilter);
+	public boolean matches(String metricValue, String metricPattern);
 
 }

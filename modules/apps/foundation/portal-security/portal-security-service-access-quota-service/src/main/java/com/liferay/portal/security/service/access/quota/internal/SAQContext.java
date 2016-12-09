@@ -36,10 +36,6 @@ public class SAQContext {
 		_nowMillis = nowMillis;
 	}
 
-	public Map<String, SAQMetricProvider> getMetricProviders() {
-		return _saqMetricProviders;
-	}
-
 	public Map<String, String> getMetricsMap() {
 		return _saqMetrics;
 	}
@@ -48,7 +44,11 @@ public class SAQContext {
 		return _nowMillis;
 	}
 
-	public List<ServiceAccessQuota> getQuotas() {
+	public Map<String, SAQMetricProvider> getSaqMetricProviders() {
+		return _saqMetricProviders;
+	}
+
+	public List<ServiceAccessQuota> getServiceAccessQuotas() {
 		return _relevantServiceAccessQuotas;
 	}
 

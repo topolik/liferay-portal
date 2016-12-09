@@ -47,14 +47,16 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 		_saqMetricProviders = saqMetricProviders;
 	}
 
-	public SAQContext buildContext(SAQMetricProviderAdapter<T> valueProvider) {
+	public SAQContext buildSaqContext(
+		SAQMetricProviderAdapter<T> saqMetricProviderAdapter) {
+
 		List<ServiceAccessQuota> relevantServiceAccessQuotas =
 			new LinkedList<>();
 
-		Map<String, String> saqMetrics = new HashMap<>(
+		Map<String, String> metricsMap = new HashMap<>(
 			_saqMetricProviders.size());
 
-		Set<String> requiredSaqMetrics = new HashSet<>();
+		Set<String> requiredMetricNames = new HashSet<>();
 
 		Map<String, SAQMetricProvider> relevantSaqMetricProviders =
 			new HashMap<>(_saqMetricProviders.size());
@@ -66,7 +68,7 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 			boolean missingSaqMetricProvider = false;
 
 			for (SAQMetricConfig saqMetricConfig :
-					serviceAccessQuota.getMetricConfigs()) {
+					serviceAccessQuota.getSaqMetricConfigs()) {
 
 				T saqMetricProvider = _saqMetricProviders.get(
 					saqMetricConfig.getMetricName());
@@ -85,15 +87,15 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 
 				String metricValue;
 
-				if (saqMetrics.containsKey(saqMetricConfig.getMetricName())) {
-					metricValue = saqMetrics.get(
+				if (metricsMap.containsKey(saqMetricConfig.getMetricName())) {
+					metricValue = metricsMap.get(
 						saqMetricConfig.getMetricName());
 				}
 				else {
-					metricValue = valueProvider.getMetricValue(
+					metricValue = saqMetricProviderAdapter.getMetricValue(
 						saqMetricProvider);
 
-					saqMetrics.put(
+					metricsMap.put(
 						saqMetricConfig.getMetricName(), metricValue);
 				}
 
@@ -115,9 +117,9 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 				relevantServiceAccessQuotas.add(serviceAccessQuota);
 
 				for (SAQMetricConfig saqMetricConfig :
-						serviceAccessQuota.getMetricConfigs()) {
+						serviceAccessQuota.getSaqMetricConfigs()) {
 
-					requiredSaqMetrics.add(saqMetricConfig.getMetricName());
+					requiredMetricNames.add(saqMetricConfig.getMetricName());
 				}
 			}
 		}
@@ -140,9 +142,9 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 		// Remove metrics that are not relevant
 		// because of failed pattern matching
 
-		Set<String> keySet = saqMetrics.keySet();
+		Set<String> keySet = metricsMap.keySet();
 
-		keySet.retainAll(requiredSaqMetrics);
+		keySet.retainAll(requiredMetricNames);
 
 		for (String metricName : keySet) {
 			relevantSaqMetricProviders.put(
@@ -152,11 +154,11 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 		long nowMillis = System.currentTimeMillis();
 
 		return new SAQContext(
-			saqMetrics, relevantServiceAccessQuotas, relevantSaqMetricProviders,
+			metricsMap, relevantServiceAccessQuotas, relevantSaqMetricProviders,
 			nowMillis);
 	}
 
-	public Map<String, T> getMetricProviders() {
+	public Map<String, T> getSaqMetricProviders() {
 		return _saqMetricProviders;
 	}
 
@@ -164,7 +166,7 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 		return _serviceAccessQuotas;
 	}
 
-	public void setMetricProviders(Map<String, T> saqMetricProviders) {
+	public void setSaqMetricProviders(Map<String, T> saqMetricProviders) {
 		_saqMetricProviders = saqMetricProviders;
 	}
 

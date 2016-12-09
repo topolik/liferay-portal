@@ -71,7 +71,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 			_accessControlPolicySaqContextFactory.buildContext(
 				accessControlContext, method);
 
-		if (saqContext.getQuotas().size() == 0) {
+		if (saqContext.getServiceAccessQuotas().size() == 0) {
 			return;
 		}
 
@@ -96,7 +96,9 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 		long largestQuotaIntervalMillis = 0;
 
-		for (ServiceAccessQuota serviceAccessQuota : saqContext.getQuotas()) {
+		for (ServiceAccessQuota serviceAccessQuota :
+				saqContext.getServiceAccessQuotas()) {
+
 			largestQuotaIntervalMillis = Math.max(
 				serviceAccessQuota.getIntervalMillis(),
 				largestQuotaIntervalMillis);
@@ -123,7 +125,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		AccessControlPolicySAQMetricProvider saqMetricProvider) {
 
 		Map<String, AccessControlPolicySAQMetricProvider> saqMetricProviders =
-			_accessControlPolicySaqContextFactory.getMetricProviders();
+			_accessControlPolicySaqContextFactory.getSaqMetricProviders();
 
 		saqMetricProviders.put(
 			StringUtil.toLowerCase(saqMetricProvider.getMetricName()),
@@ -147,7 +149,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		AccessControlPolicySAQMetricProvider saqMetricProvider) {
 
 		Map<String, AccessControlPolicySAQMetricProvider> saqMetricProviders =
-			_accessControlPolicySaqContextFactory.getMetricProviders();
+			_accessControlPolicySaqContextFactory.getSaqMetricProviders();
 
 		saqMetricProviders.remove(saqMetricProvider.getMetricName());
 	}
@@ -179,7 +181,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 	private String _getQuotaBreachedMsg(ServiceAccessQuota serviceAccessQuota) {
 		List<SAQMetricConfig> saqMetricConfigs =
-			serviceAccessQuota.getMetricConfigs();
+			serviceAccessQuota.getSaqMetricConfigs();
 
 		StringBundler sb = new StringBundler(saqMetricConfigs.size() + 4);
 
