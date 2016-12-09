@@ -17,17 +17,16 @@ package com.liferay.portal.security.service.access.quota;
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifierResult;
 import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.security.service.access.quota.ServiceAccessQuota.SAQMetricConfig;
 import com.liferay.portal.security.service.access.quota.impl.TestIndexedSAQImpressionProviderImpl;
 import com.liferay.portal.security.service.access.quota.impl.TestServiceAccessQuotaImpl;
-import com.liferay.portal.security.service.access.quota.impl.TestServiceAccessQuotaMetricConfigImpl;
 import com.liferay.portal.security.service.access.quota.internal.QuotaBreachException;
 import com.liferay.portal.security.service.access.quota.internal.SAQContext;
-import com.liferay.portal.security.service.access.quota.internal.SAQContext.ProcessingResult;
-import com.liferay.portal.security.service.access.quota.internal.SAQMetricConfig;
-import com.liferay.portal.security.service.access.quota.internal.ServiceAccessQuota;
-import com.liferay.portal.security.service.access.quota.internal.impl.SAQContextImpl;
-import com.liferay.portal.security.service.access.quota.internal.impl.ServiceSAQMetricProvider;
-import com.liferay.portal.security.service.access.quota.internal.impl.UserIdSAQMetricProvider;
+import com.liferay.portal.security.service.access.quota.internal.SAQProcessor;
+import com.liferay.portal.security.service.access.quota.internal.SAQProcessor.ProcessingResult;
+import com.liferay.portal.security.service.access.quota.internal.access.control.AccessControlPolicySAQContextFactory;
+import com.liferay.portal.security.service.access.quota.internal.access.control.ServiceSAQMetricProvider;
+import com.liferay.portal.security.service.access.quota.internal.access.control.UserIdSAQMetricProvider;
 import com.liferay.portal.security.service.access.quota.persistence.SAQImpressionProvider;
 import com.liferay.portal.security.service.access.quota.sim.TestService;
 
@@ -54,7 +53,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @PrepareForTest(AccessControlContext.class)
 @RunWith(PowerMockRunner.class)
-public class SAQContextImplTest extends PowerMockito {
+public class SAQContextTest extends PowerMockito {
 
 	@Before
 	public void setUp() throws Exception {
@@ -83,12 +82,11 @@ public class SAQContextImplTest extends PowerMockito {
 		Method testMethod;
 		testMethod = TestService.class.getMethod("getMethod1");
 
-		SAQContext context = SAQContextImpl.buildContext(
-			quotas, _metricProviders, _accessControlContext, testMethod);
+		SAQContext context = _getSAQContext(quotas, testMethod);
 
 		// Test for quota with no metrics + the *#get* one
 
-		Assert.assertTrue(context.getQuotas().size() == 2);
+		Assert.assertTrue(context.getServiceAccessQuotas().size() == 2);
 	}
 
 	@Test
@@ -104,11 +102,10 @@ public class SAQContextImplTest extends PowerMockito {
 		Method testMethod;
 		testMethod = TestService.class.getMethod("getMethod1");
 
-		SAQContext context = SAQContextImpl.buildContext(
-			quotas, _metricProviders, _accessControlContext, testMethod);
+		SAQContext context = _getSAQContext(quotas, testMethod);
 
-		Assert.assertEquals(1, context.getMetricNames().size());
-		Assert.assertFalse(context.getMetricNames().contains("user"));
+		Assert.assertEquals(1, context.getMetricsMap().keySet().size());
+		Assert.assertFalse(context.getMetricsMap().keySet().contains("user"));
 	}
 
 	@Test
@@ -136,14 +133,15 @@ public class SAQContextImplTest extends PowerMockito {
 		iR.createSAQImpression(
 			_companyId, _metricsGetMethod1User1, _TEST_EXPIRY_MILLIS);
 
-		SAQContext context = SAQContextImpl.buildContext(
-			quotas, _metricProviders, _accessControlContext, testMethod);
+		SAQContext context = _getSAQContext(quotas, testMethod);
 
-		Assert.assertEquals(2, context.getQuotas().size());
+		SAQProcessor processor = new SAQProcessor(context);
+
+		Assert.assertEquals(2, context.getServiceAccessQuotas().size());
 
 		Assert.assertEquals(
 			ProcessingResult.Status.BREACHED_QUOTA,
-			context.process(_companyId, iR).getStatus());
+			processor.process(_companyId, iR).getStatus());
 	}
 
 	@Test
@@ -170,12 +168,13 @@ public class SAQContextImplTest extends PowerMockito {
 		iR.createSAQImpression(
 			_companyId, _metricsSetMethod1User1, _TEST_EXPIRY_MILLIS);
 
-		SAQContext context = SAQContextImpl.buildContext(
-			quotas, _metricProviders, _accessControlContext, testMethod);
+		SAQContext context = _getSAQContext(quotas, testMethod);
+
+		SAQProcessor processor = new SAQProcessor(context);
 
 		Assert.assertEquals(
 			ProcessingResult.Status.BREACHED_QUOTA,
-			context.process(_companyId, iR).getStatus());
+			processor.process(_companyId, iR).getStatus());
 	}
 
 	@Test
@@ -196,12 +195,13 @@ public class SAQContextImplTest extends PowerMockito {
 		iR.createSAQImpression(
 			_companyId, _metricsGetMethod2User1, _TEST_EXPIRY_MILLIS);
 
-		SAQContext context = SAQContextImpl.buildContext(
-			quotas, _metricProviders, _accessControlContext, testMethod);
+		SAQContext context = _getSAQContext(quotas, testMethod);
+
+		SAQProcessor processor = new SAQProcessor(context);
 
 		Assert.assertEquals(
 			ProcessingResult.Status.BREACHED_QUOTA,
-			context.process(_companyId, iR).getStatus());
+			processor.process(_companyId, iR).getStatus());
 	}
 
 	private static Map<String, String> _stringArrayToMap(String[][] props) {
@@ -214,9 +214,26 @@ public class SAQContextImplTest extends PowerMockito {
 		return retMap;
 	}
 
+	private SAQContext _getSAQContext(
+		List<ServiceAccessQuota> quotas, Method testMethod) {
+
+		AccessControlPolicySAQContextFactory factory =
+			new AccessControlPolicySAQContextFactory();
+
+		factory.setSaqMetricProviders(_metricProviders);
+		factory.setServiceAccessQuotas(quotas);
+
+		SAQContext context = factory.buildContext(
+			_accessControlContext, testMethod);
+
+		return context;
+	}
+
 	// ----
 
-	private void _registerMetricProvider(SAQMetricProvider metricProvider) {
+	private void _registerMetricProvider(
+		AccessControlPolicySAQMetricProvider metricProvider) {
+
 		_metricProviders.put(metricProvider.getMetricName(), metricProvider);
 	}
 
@@ -225,16 +242,15 @@ public class SAQContextImplTest extends PowerMockito {
 			60000, 1,
 			ListUtil.fromArray(
 				new SAQMetricConfig[] {
-					new TestServiceAccessQuotaMetricConfigImpl(
-						"service", "*#getMethod2"),
-					new TestServiceAccessQuotaMetricConfigImpl("user", "123")
+					new SAQMetricConfig("service", "*#getMethod2"),
+					new SAQMetricConfig("user", "123")
 				}));
 
 	private static final ServiceAccessQuota _QUOTA_2_60000_GET =
 		new TestServiceAccessQuotaImpl(
 			60000, 2, ListUtil.fromArray(
 				new SAQMetricConfig[] {
-					new TestServiceAccessQuotaMetricConfigImpl(
+					new SAQMetricConfig(
 						"service", "*#get*")
 				}));
 
@@ -273,7 +289,7 @@ public class SAQContextImplTest extends PowerMockito {
 	private AuthVerifierResult _authVerifierResult;
 
 	private long _companyId;
-	private final Map<String, SAQMetricProvider> _metricProviders =
-		new HashMap<>();
+	private final Map<String, AccessControlPolicySAQMetricProvider>
+		_metricProviders = new HashMap<>();
 
 }

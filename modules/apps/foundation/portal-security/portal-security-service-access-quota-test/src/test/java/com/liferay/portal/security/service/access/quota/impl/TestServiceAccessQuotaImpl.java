@@ -14,8 +14,7 @@
 
 package com.liferay.portal.security.service.access.quota.impl;
 
-import com.liferay.portal.security.service.access.quota.internal.SAQMetricConfig;
-import com.liferay.portal.security.service.access.quota.internal.ServiceAccessQuota;
+import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class TestServiceAccessQuotaImpl implements ServiceAccessQuota {
 	}
 
 	@Override
-	public List<SAQMetricConfig> getMetricConfigs() {
+	public List<SAQMetricConfig> getSaqMetricConfigs() {
 		return _metrics;
 	}
 
