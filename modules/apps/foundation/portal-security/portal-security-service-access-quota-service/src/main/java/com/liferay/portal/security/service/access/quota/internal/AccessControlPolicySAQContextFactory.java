@@ -16,25 +16,14 @@ package com.liferay.portal.security.service.access.quota.internal;
 
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.security.service.access.quota.AccessControlPolicySAQMetricProvider;
-import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 
 import java.lang.reflect.Method;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Stian Sigvartsen
  */
 public class AccessControlPolicySAQContextFactory
 	extends SAQContextFactory<AccessControlPolicySAQMetricProvider> {
-
-	public AccessControlPolicySAQContextFactory(
-		List<ServiceAccessQuota> serviceAccessQuotas,
-		Map<String, AccessControlPolicySAQMetricProvider> saqMetricProviders) {
-
-		super(serviceAccessQuotas, saqMetricProviders);
-	}
 
 	public SAQContext buildContext(
 		final AccessControlContext accessControlContext, final Method method) {

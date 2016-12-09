@@ -18,6 +18,7 @@ import com.liferay.portal.security.service.access.quota.SAQMetricProvider;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota.SAQMetricConfig;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,6 +30,11 @@ import java.util.Set;
  * @author Stian Sigvartsen
  */
 public class SAQContextFactory<T extends SAQMetricProvider> {
+
+	public SAQContextFactory() {
+		_serviceAccessQuotas = new ArrayList<>();
+		_saqMetricProviders = new HashMap<>();
+	}
 
 	public SAQContextFactory(
 		List<ServiceAccessQuota> serviceAccessQuotas,

@@ -332,7 +332,6 @@ public class SAQProcessor
 		_relevantServiceAccessQuotasWithoutMetrics;
 	private final SAQContext _saqContext;
 	private final Map<String, List<SAQMetricConfig>> _saqMetricConfigs;
-
 	private final HashMap<ServiceAccessQuota, Integer>
 		_serviceAccessQuotasCount;
 
