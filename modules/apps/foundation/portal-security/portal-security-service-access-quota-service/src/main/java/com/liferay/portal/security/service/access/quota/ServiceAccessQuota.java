@@ -25,7 +25,7 @@ public interface ServiceAccessQuota {
 
 	public int getMax();
 
-	public List<SAQMetricConfig> getMetricConfigs();
+	public List<SAQMetricConfig> getSaqMetricConfigs();
 
 	public class SAQMetricConfig {
 
