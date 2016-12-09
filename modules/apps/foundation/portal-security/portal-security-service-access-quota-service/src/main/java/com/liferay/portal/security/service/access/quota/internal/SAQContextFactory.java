@@ -14,6 +14,9 @@
 
 package com.liferay.portal.security.service.access.quota.internal;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.security.service.access.quota.SAQMetricProvider;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota.SAQMetricConfig;
@@ -56,14 +59,29 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 		Map<String, SAQMetricProvider> relevantSaqMetricProviders =
 			new HashMap<>(_saqMetricProviders.size());
 
+		Set<String> missingSaqMetricProviders = null;
+
 		for (ServiceAccessQuota serviceAccessQuota : _serviceAccessQuotas) {
 			boolean metricPatternsMatched = true;
+			boolean missingSaqMetricProvider = false;
 
 			for (SAQMetricConfig saqMetricConfig :
 					serviceAccessQuota.getMetricConfigs()) {
 
 				T saqMetricProvider = _saqMetricProviders.get(
 					saqMetricConfig.getMetricName());
+
+				if (saqMetricProvider == null) {
+					if (missingSaqMetricProviders == null) {
+						missingSaqMetricProviders = new HashSet<>();
+					}
+
+					missingSaqMetricProviders.add(
+						saqMetricConfig.getMetricName());
+
+					missingSaqMetricProvider = true;
+					break;
+				}
 
 				String metricValue;
 
@@ -89,6 +107,10 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 				}
 			}
 
+			if (missingSaqMetricProvider) {
+				break;
+			}
+
 			if (metricPatternsMatched) {
 				relevantServiceAccessQuotas.add(serviceAccessQuota);
 
@@ -98,6 +120,21 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 					requiredSaqMetrics.add(saqMetricConfig.getMetricName());
 				}
 			}
+		}
+
+		if ((missingSaqMetricProviders != null) && _log.isWarnEnabled() &&
+			(_lastLog < System.currentTimeMillis() - 60000)) {
+
+			StringBundler sb = new StringBundler(4);
+
+			sb.append("No SAQMetricProvider available for the metric(s) ");
+			sb.append(missingSaqMetricProviders.toString());
+			sb.append(". Referencing Service Access Quotas are ");
+			sb.append("disabled, please review system configuration");
+
+			_log.warn(sb.toString());
+
+			_lastLog = System.currentTimeMillis();
 		}
 
 		// Remove metrics that are not relevant
@@ -142,6 +179,11 @@ public class SAQContextFactory<T extends SAQMetricProvider> {
 		public String getMetricValue(T saqMetricProvider);
 
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		SAQContextFactory.class);
+
+	private static long _lastLog;
 
 	private Map<String, T> _saqMetricProviders;
 	private List<ServiceAccessQuota> _serviceAccessQuotas;
