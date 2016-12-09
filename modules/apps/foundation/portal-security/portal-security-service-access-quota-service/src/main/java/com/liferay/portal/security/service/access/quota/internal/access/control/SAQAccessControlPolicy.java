@@ -36,8 +36,6 @@ import com.liferay.portal.security.service.access.quota.persistence.SAQImpressio
 
 import java.lang.reflect.Method;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -69,12 +67,9 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		final AccessControlContext accessControlContext =
 			AccessControlUtil.getAccessControlContext();
 
-		AccessControlPolicySAQContextFactory factory =
-			new AccessControlPolicySAQContextFactory(
-				_serviceAccessQuotas, _saqMetricProviders);
-
-		SAQContext saqContext = factory.buildContext(
-			accessControlContext, method);
+		SAQContext saqContext =
+			_accessControlPolicySaqContextFactory.buildContext(
+				accessControlContext, method);
 
 		if (saqContext.getQuotas().size() == 0) {
 			return;
@@ -127,7 +122,10 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 	public void setMetricProvider(
 		AccessControlPolicySAQMetricProvider saqMetricProvider) {
 
-		_saqMetricProviders.put(
+		Map<String, AccessControlPolicySAQMetricProvider> saqMetricProviders =
+			_accessControlPolicySaqContextFactory.getMetricProviders();
+
+		saqMetricProviders.put(
 			StringUtil.toLowerCase(saqMetricProvider.getMetricName()),
 			saqMetricProvider);
 	}
@@ -135,20 +133,30 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 	@Reference (
 		cardinality = ReferenceCardinality.MULTIPLE,
 		policy = ReferencePolicy.DYNAMIC,
-		policyOption = ReferencePolicyOption.GREEDY, unbind = "unsetQuota"
+		policyOption = ReferencePolicyOption.GREEDY,
+		unbind = "unsetServiceAccessQuota"
 	)
-	public void setQuota(ServiceAccessQuota serviceAccessQuota) {
-		_serviceAccessQuotas.add(serviceAccessQuota);
+	public void setServiecAccessQuota(ServiceAccessQuota serviceAccessQuota) {
+		List<ServiceAccessQuota> serviceAccessQuotas =
+			_accessControlPolicySaqContextFactory.getServiceAccessQuotas();
+
+		serviceAccessQuotas.add(serviceAccessQuota);
 	}
 
 	public void unsetMetricProvider(
 		AccessControlPolicySAQMetricProvider saqMetricProvider) {
 
-		_saqMetricProviders.remove(saqMetricProvider.getMetricName());
+		Map<String, AccessControlPolicySAQMetricProvider> saqMetricProviders =
+			_accessControlPolicySaqContextFactory.getMetricProviders();
+
+		saqMetricProviders.remove(saqMetricProvider.getMetricName());
 	}
 
-	public void unsetQuota(ServiceAccessQuota serviceAccessQuota) {
-		_serviceAccessQuotas.remove(serviceAccessQuota);
+	public void unsetServiceAccessQuota(ServiceAccessQuota serviceAccessQuota) {
+		List<ServiceAccessQuota> serviceAccessQuotas =
+			_accessControlPolicySaqContextFactory.getServiceAccessQuotas();
+
+		serviceAccessQuotas.remove(serviceAccessQuota);
 	}
 
 	protected boolean isChecked() {
@@ -195,10 +203,9 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 	private static final Log _log = LogFactoryUtil.getLog(
 		SAQAccessControlPolicy.class);
 
+	private final AccessControlPolicySAQContextFactory
+		_accessControlPolicySaqContextFactory =
+			new AccessControlPolicySAQContextFactory();
 	private SAQImpressionProvider _saqImpressionProvider;
-	private final Map<String, AccessControlPolicySAQMetricProvider>
-		_saqMetricProviders = new HashMap<>();
-	private final List<ServiceAccessQuota> _serviceAccessQuotas =
-		new LinkedList<>();
 
 }
