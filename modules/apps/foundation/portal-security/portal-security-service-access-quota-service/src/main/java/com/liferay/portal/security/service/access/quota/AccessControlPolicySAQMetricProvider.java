@@ -14,16 +14,17 @@
 
 package com.liferay.portal.security.service.access.quota;
 
-import aQute.bnd.annotation.ProviderType;
+import com.liferay.portal.kernel.security.auth.AccessControlContext;
+
+import java.lang.reflect.Method;
 
 /**
  * @author Stian Sigvartsen
  */
-@ProviderType
-public interface SAQMetricProvider {
+public interface AccessControlPolicySAQMetricProvider
+	extends SAQMetricProvider {
 
-	public String getMetricName();
-
-	public boolean matches(String metricValue, String metricFilter);
+	public String getMetricValue(
+		AccessControlContext accessControlContext, Method method);
 
 }
