@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.portal.security.service.access.quota.internal.impl;
+package com.liferay.portal.security.service.access.quota.internal;
 
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.util.StringUtil;

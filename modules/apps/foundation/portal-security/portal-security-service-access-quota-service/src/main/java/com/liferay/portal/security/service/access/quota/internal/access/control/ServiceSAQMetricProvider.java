@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.portal.security.service.access.quota.internal.impl;
+package com.liferay.portal.security.service.access.quota.internal.access.control;
 
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.util.CharPool;
