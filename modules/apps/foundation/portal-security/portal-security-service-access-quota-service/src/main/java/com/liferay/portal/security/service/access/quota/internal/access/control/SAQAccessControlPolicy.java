@@ -25,13 +25,13 @@ import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.service.access.quota.SAQMetricProvider;
+import com.liferay.portal.security.service.access.quota.AccessControlPolicySAQMetricProvider;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota.SAQMetricConfig;
+import com.liferay.portal.security.service.access.quota.internal.AccessControlPolicySAQContextFactory;
 import com.liferay.portal.security.service.access.quota.internal.QuotaBreachException;
 import com.liferay.portal.security.service.access.quota.internal.SAQContext;
-import com.liferay.portal.security.service.access.quota.internal.SAQContext.ProcessingResult;
-import com.liferay.portal.security.service.access.quota.internal.impl.SAQContextImpl;
+import com.liferay.portal.security.service.access.quota.internal.SAQProcessor;
 import com.liferay.portal.security.service.access.quota.persistence.SAQImpressionProvider;
 
 import java.lang.reflect.Method;
@@ -56,7 +56,7 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 
 	@Override
 	public void onServiceRemoteAccess(
-			Method method, Object[] arguments,
+			final Method method, Object[] arguments,
 			AccessControlled accessControlled)
 		throws SecurityException {
 
@@ -66,22 +66,28 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 			return;
 		}
 
-		AccessControlContext accessControlContext =
+		final AccessControlContext accessControlContext =
 			AccessControlUtil.getAccessControlContext();
 
-		SAQContext saqContext = SAQContextImpl.buildContext(
-			_serviceAccessQuotas, _saqMetricProviders, accessControlContext,
-			method);
+		AccessControlPolicySAQContextFactory factory =
+			new AccessControlPolicySAQContextFactory(
+				_serviceAccessQuotas, _saqMetricProviders);
+
+		SAQContext saqContext = factory.buildContext(
+			accessControlContext, method);
 
 		if (saqContext.getQuotas().size() == 0) {
 			return;
 		}
 
-		SAQContext.ProcessingResult processingResult = saqContext.process(
+		SAQProcessor<AccessControlPolicySAQMetricProvider> processor =
+			new SAQProcessor<>(saqContext);
+
+		SAQProcessor.ProcessingResult processingResult = processor.process(
 			companyId, _saqImpressionProvider);
 
 		if (processingResult.getStatus().equals(
-				SAQContext.ProcessingResult.Status.BREACHED_QUOTA)) {
+				SAQProcessor.ProcessingResult.Status.BREACHED_QUOTA)) {
 
 			String quotaBreachedMsg = _getQuotaBreachedMsg(
 				processingResult.getBreachedQuota());
@@ -118,7 +124,9 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		policyOption = ReferencePolicyOption.GREEDY,
 		unbind = "unsetMetricProvider"
 	)
-	public void setMetricProvider(SAQMetricProvider saqMetricProvider) {
+	public void setMetricProvider(
+		AccessControlPolicySAQMetricProvider saqMetricProvider) {
+
 		_saqMetricProviders.put(
 			StringUtil.toLowerCase(saqMetricProvider.getMetricName()),
 			saqMetricProvider);
@@ -133,7 +141,9 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		_serviceAccessQuotas.add(serviceAccessQuota);
 	}
 
-	public void unsetMetricProvider(SAQMetricProvider saqMetricProvider) {
+	public void unsetMetricProvider(
+		AccessControlPolicySAQMetricProvider saqMetricProvider) {
+
 		_saqMetricProviders.remove(saqMetricProvider.getMetricName());
 	}
 
@@ -186,8 +196,8 @@ public class SAQAccessControlPolicy extends BaseAccessControlPolicy {
 		SAQAccessControlPolicy.class);
 
 	private SAQImpressionProvider _saqImpressionProvider;
-	private final Map<String, SAQMetricProvider> _saqMetricProviders =
-		new HashMap<>();
+	private final Map<String, AccessControlPolicySAQMetricProvider>
+		_saqMetricProviders = new HashMap<>();
 	private final List<ServiceAccessQuota> _serviceAccessQuotas =
 		new LinkedList<>();
 

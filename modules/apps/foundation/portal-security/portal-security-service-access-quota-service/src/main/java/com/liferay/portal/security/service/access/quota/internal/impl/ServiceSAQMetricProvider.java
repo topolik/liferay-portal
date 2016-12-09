@@ -18,7 +18,7 @@ import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.security.service.access.quota.SAQMetricProvider;
+import com.liferay.portal.security.service.access.quota.AccessControlPolicySAQMetricProvider;
 
 import java.lang.reflect.Method;
 
@@ -27,8 +27,9 @@ import org.osgi.service.component.annotations.Component;
 /**
  * @author Stian Sigvartsen
  */
-@Component(service = SAQMetricProvider.class)
-public class ServiceSAQMetricProvider implements SAQMetricProvider {
+@Component(service = AccessControlPolicySAQMetricProvider.class)
+public class ServiceSAQMetricProvider
+	implements AccessControlPolicySAQMetricProvider {
 
 	@Override
 	public String getMetricName() {

@@ -14,38 +14,47 @@
 
 package com.liferay.portal.security.service.access.quota.internal;
 
+import com.liferay.portal.security.service.access.quota.SAQMetricProvider;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
-import com.liferay.portal.security.service.access.quota.metric.SAQContextMatcher;
-import com.liferay.portal.security.service.access.quota.persistence.SAQImpressionProvider;
 
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Stian Sigvartsen
- * @author Carlos Sierra Andrés
  */
-public interface SAQContext extends SAQContextMatcher {
+public class SAQContext {
 
-	public Map<String, String> getMetricsMap();
+	public SAQContext(
+		Map<String, String> metricsMap,
+		List<ServiceAccessQuota> relevantServiceAccessQuotas,
+		Map<String, SAQMetricProvider> saqMetricProviders, long nowMillis) {
 
-	public List<ServiceAccessQuota> getQuotas();
-
-	public SAQContext.ProcessingResult process(
-		long companyId, SAQImpressionProvider saqImpressionProvider);
-
-	public interface ProcessingResult {
-
-		public ServiceAccessQuota getBreachedQuota();
-
-		public Status getStatus();
-
-		public enum Status {
-
-			NO_BREACHED_QUOTA, BREACHED_QUOTA
-
-		}
-
+		_saqMetrics = metricsMap;
+		_relevantServiceAccessQuotas = relevantServiceAccessQuotas;
+		_saqMetricProviders = saqMetricProviders;
+		_nowMillis = nowMillis;
 	}
+
+	public Map<String, SAQMetricProvider> getMetricProviders() {
+		return _saqMetricProviders;
+	}
+
+	public Map<String, String> getMetricsMap() {
+		return _saqMetrics;
+	}
+
+	public long getNowMillis() {
+		return _nowMillis;
+	}
+
+	public List<ServiceAccessQuota> getQuotas() {
+		return _relevantServiceAccessQuotas;
+	}
+
+	private final long _nowMillis;
+	private final List<ServiceAccessQuota> _relevantServiceAccessQuotas;
+	private final Map<String, SAQMetricProvider> _saqMetricProviders;
+	private final Map<String, String> _saqMetrics;
 
 }
