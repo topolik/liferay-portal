@@ -28,7 +28,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.service.access.quota.AccessControlPolicySAQMetricProvider;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota;
 import com.liferay.portal.security.service.access.quota.ServiceAccessQuota.SAQMetricConfig;
-import com.liferay.portal.security.service.access.quota.internal.AccessControlPolicySAQContextFactory;
 import com.liferay.portal.security.service.access.quota.internal.QuotaBreachException;
 import com.liferay.portal.security.service.access.quota.internal.SAQContext;
 import com.liferay.portal.security.service.access.quota.internal.SAQProcessor;

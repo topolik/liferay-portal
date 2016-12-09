@@ -12,37 +12,38 @@
  * details.
  */
 
-package com.liferay.portal.security.service.access.quota.internal;
+package com.liferay.portal.security.service.access.quota.internal.access.control;
 
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.security.service.access.quota.AccessControlPolicySAQMetricProvider;
 
 import java.lang.reflect.Method;
 
+import org.osgi.service.component.annotations.Component;
+
 /**
  * @author Stian Sigvartsen
  */
-public class AccessControlPolicySAQContextFactory
-	extends SAQContextFactory<AccessControlPolicySAQMetricProvider> {
+@Component(service = AccessControlPolicySAQMetricProvider.class)
+public class UserIdSAQMetricProvider
+	implements AccessControlPolicySAQMetricProvider {
 
-	public SAQContext buildContext(
-		final AccessControlContext accessControlContext, final Method method) {
+	@Override
+	public String getMetricName() {
+		return "userId";
+	}
 
-		SAQMetricProviderAdapter<AccessControlPolicySAQMetricProvider>
-			valueProvider =
-				new SAQMetricProviderAdapter
-					<AccessControlPolicySAQMetricProvider>() {
+	@Override
+	public String getMetricValue(
+		AccessControlContext accessControlContext, Method method) {
 
-			@Override
-			public String getMetricValue(
-				AccessControlPolicySAQMetricProvider saqMetricProvider) {
-					return saqMetricProvider.getMetricValue(
-						accessControlContext, method);
-			}
+		return String.valueOf(
+			accessControlContext.getAuthVerifierResult().getUserId());
+	}
 
-		};
-
-		return super.buildSaqContext(valueProvider);
+	@Override
+	public boolean matches(String metricValue, String metricFilter) {
+		return metricValue.equals(metricFilter);
 	}
 
 }
