@@ -13,50 +13,50 @@
 			<attribute>
 				<description>A role for assistive technologies to interpret HTML elements that have been used for something other than their intended purpose. For example, the <![CDATA[<code>&lt;p&gt;</code>]]> tag could be used for something other than a paragraph.</description>
 				<name>ariaRole</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
 				<name>data</name>
-				<inputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></inputType>
-				<outputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></outputType>
+				<inputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></inputType>
+				<outputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></outputType>
 			</attribute>
 			<attribute>
 				<description>A URL to navigate to when the link is clicked.</description>
 				<name>href</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<required>true</required>
 			</attribute>
 			<attribute>
 				<name>iconCssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text for the anchor's label.</description>
 				<name>label</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A language to associate with the anchor component, to assist search engines and web browsers in finding and rendering the anchor appropriately.</description>
 				<name>lang</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to translate the label's text into the user's language. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -68,20 +68,20 @@
 			<attribute>
 				<description>A function to be called on a user clicking the anchor.</description>
 				<name>onClick</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A target window in which to open the URL. The default value is <![CDATA[<code>self</code>]]>. Possible values are <![CDATA[<code>blank</code>]]>, <![CDATA[<code>self</code>]]>, <![CDATA[<code>parent</code>]]>, <![CDATA[<code>top</code>]]>, and a unique frame's name.</description>
 				<name>target</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A title for the anchor.</description>
 				<name>title</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -101,8 +101,8 @@
 			</attribute>
 			<attribute>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>destroyOnHide</name>
@@ -118,13 +118,13 @@
 			</attribute>
 			<attribute>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>type</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<defaultValue>info</defaultValue>
 			</attribute>
 		</attributes>
@@ -135,8 +135,8 @@
 			<attribute>
 				<description>A CSS class for styling the component. These styles override the ones set by the <![CDATA[<code>primary</code>]]> attribute.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
@@ -153,39 +153,39 @@
 			<attribute>
 				<description>A URL to navigate to when the button is clicked.</description>
 				<name>href</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An icon to display on the button based on the icon CSS class value given. Possible CSS class values can be found at <![CDATA[<a href="http://marcoceppi.github.io/bootstrap-glyphicons/">here</a>]]>.</description>
 				<name>icon</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An alignment for the button's icon. The default value is <![CDATA[<code>left</code>]]>.</description>
 				<name>iconAlign</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<defaultValue>left</defaultValue>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A name for the button.</description>
 				<name>name</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A function to be called on a user clicking the button.</description>
 				<name>onClick</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to apply the <![CDATA[<code>btn btn-primary</code>]]> CSS styling to the button. If the <![CDATA[<code>type</code>]]> attribute is set to <![CDATA[<code>submit</code>]]>, this value is set to <![CDATA[<code>true</code>]]>. For all the other types, the value is set to <![CDATA[<code>false</code>]]> by default.</description>
@@ -197,8 +197,8 @@
 			<attribute>
 				<description>The button's type. Possible values are <![CDATA[<code>button</code>]]>, <![CDATA[<code>submit</code>]]>, <![CDATA[<code>cancel</code>]]> and <![CDATA[<code>reset</code>]]>. The default value is <![CDATA[<code>button</code>]]>.</description>
 				<name>type</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<defaultValue>button</defaultValue>
 			</attribute>
 			<attribute>
@@ -218,8 +218,8 @@
 			<attribute>
 				<description>Text to display on the button.</description>
 				<name>value</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -229,14 +229,14 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -246,29 +246,29 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>lg</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>md</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>sm</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>The width of the column in the containing row as a fraction of <![CDATA[<code>12</code>]]>. For example, a span of <![CDATA[<code>4</code>]]> would result in a column width <![CDATA[<code>4/12</code>]]> (or <![CDATA[<code>1/3</code>]]>) of the total width of the containing row.</description>
@@ -285,8 +285,8 @@
 			</attribute>
 			<attribute>
 				<name>xs</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -302,33 +302,33 @@
 			</attribute>
 			<attribute>
 				<name>excludeAttributes</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>javaScriptAttributes</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>module</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>name</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>options</name>
-				<inputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></inputType>
-				<outputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></outputType>
+				<inputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></inputType>
+				<outputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></outputType>
 			</attribute>
 			<attribute>
 				<name>scriptPosition</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>tagPageContext</name>
@@ -344,8 +344,8 @@
 			</attribute>
 			<attribute>
 				<name>var</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -355,8 +355,8 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to enable the container to span the entire width of the viewport. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -368,8 +368,8 @@
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -379,8 +379,8 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
@@ -397,8 +397,8 @@
 			<attribute>
 				<description>Text to display as a help tooltip on mouse over of the component's help icon.</description>
 				<name>helpMessage</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to make this field inline with the next element. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -409,14 +409,14 @@
 			<attribute>
 				<description>The alignment for the label's text. Possible values are <![CDATA[<code>right</code>]]> and <![CDATA[<code>left</code>]]>.</description>
 				<name>inlineLabel</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text for the wrapper's label.</description>
 				<name>label</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether the wrapper should be the last element of the form. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -434,8 +434,8 @@
 			<attribute>
 				<description>A name for the field wrapper.</description>
 				<name>name</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to mark the wrapped fields as required.</description>
@@ -467,26 +467,26 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text to display as a help tooltip on mouse over of the component's help icon.</description>
 				<name>helpMessage</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text for the field set's label and renders it as a legend, with a horizontal rule, above the fieldset.</description>
 				<name>label</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Sets whether to translate the label's text into the user's language. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -497,8 +497,8 @@
 			</attribute>
 			<attribute>
 				<name>markupView</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -507,8 +507,8 @@
 		<attributes>
 			<attribute>
 				<name>markupView</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -518,14 +518,14 @@
 			<attribute>
 				<description>Where to send the form data when the form is submitted.</description>
 				<name>action</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to escape the XML of the form's action URL. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -544,28 +544,28 @@
 			<attribute>
 				<description>The method to send the form data. The default value is <![CDATA[<code>post</code>]]>. Possible values are <![CDATA[<code>get</code>]]> and <![CDATA[<code>post</code>]]>.</description>
 				<name>method</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<defaultValue>post</defaultValue>
 			</attribute>
 			<attribute>
 				<description>A name for the form that is also used for the ID of the component instance. The default value is <![CDATA[<code>fm</code>]]>.</description>
 				<name>name</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<defaultValue>fm</defaultValue>
 			</attribute>
 			<attribute>
 				<description>A function to be called on submitting the form.</description>
 				<name>onSubmit</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A namespace for the form and its elements. This attribute lets you set a namespace value that differs from the default portlet namespace.</description>
 				<name>portletNamespace</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to use the default portlet namespace, to avoid name conflicts. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -582,54 +582,54 @@
 			<attribute>
 				<description>A class to give to the container of the icon, to provide an implementation for the icon. Note that the preferred method of setting the icon's image is via the <![CDATA[<code>image</code>]]> attribute.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
 				<name>data</name>
-				<inputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></inputType>
-				<outputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></outputType>
+				<inputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></inputType>
+				<outputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>The image to display for the icon. Values are taken from the suffix of the Bootstrap icon CSS classes. For example, to display the edit icon you would reference the <![CDATA[<code>icon-edit</code>]]> CSS class by setting the value <![CDATA[<code>edit</code>]]>. If an icon image is referenced for <![CDATA[<code>cssClass</code>]]> and <![CDATA[<code>image</code>]]>, both icons are shown in the component.</description>
 				<name>image</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text to display alongside the icon.</description>
 				<name>label</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>markupView</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>src</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>The target window in which the URL is opened. The default value is <![CDATA[<code>self</code>]]>. Possible values are <![CDATA[<code>blank</code>]]>, <![CDATA[<code>self</code>]]>, <![CDATA[<code>parent</code>]]>, <![CDATA[<code>top</code>]]>, and a unique frame's name.</description>
 				<name>target</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A URL navigated to when the icon is clicked.</description>
 				<name>url</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -682,8 +682,8 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
@@ -693,14 +693,14 @@
 			</attribute>
 			<attribute>
 				<name>dateTogglerCheckboxLabel</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>The default language ID for the component.</description>
 				<name>defaultLanguageId</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether the component is disabled. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -710,14 +710,14 @@
 			</attribute>
 			<attribute>
 				<name>field</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A variable name to refer to the <![CDATA[<code>field</code>]]> of the component.</description>
 				<name>fieldParam</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether the input component should be the first element of the form.</description>
@@ -728,27 +728,27 @@
 			<attribute>
 				<description>A name for the form.</description>
 				<name>formName</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text to display as a help tooltip on mouse over of the component's help icon.</description>
 				<name>helpMessage</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A CSS class for styling the help message text. The default value is <![CDATA[<code>input-group-addon</code>]]>.</description>
 				<name>helpTextCssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<defaultValue>input-group-addon</defaultValue>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to ignore the value saved from the request object. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -765,19 +765,19 @@
 			<attribute>
 				<description>The input label's text alignment. Possible values are <![CDATA[<code>right</code>]]> and <![CDATA[<code>left</code>]]>.</description>
 				<name>inlineLabel</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A label for the input component. If not assigned a value, the label is automatically taken from the <![CDATA[<code>name</code>]]> attribute's value.</description>
 				<name>label</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>languageId</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether the component should be the last element of the form.</description>
@@ -826,33 +826,33 @@
 			<attribute>
 				<description>A name for the component.</description>
 				<name>name</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<required>true</required>
 			</attribute>
 			<attribute>
 				<description>A function to be called when the input's value changes.</description>
 				<name>onChange</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A function to be called on a user clicking the input.</description>
 				<name>onClick</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Placeholder text for the input's field.</description>
 				<name>placeholder</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text to display before the input.</description>
 				<name>prefix</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to mark the input as required.</description>
@@ -876,20 +876,20 @@
 			<attribute>
 				<description>Text to display after the input.</description>
 				<name>suffix</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A title for the input.</description>
 				<name>title</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>The input's type. Possible values are <![CDATA[<code>text</code>]]>, <![CDATA[<code>hidden</code>]]>, <![CDATA[<code>assetCategories</code>]]>, <![CDATA[<code>assetTags</code>]]>, <![CDATA[<code>textarea</code>]]>, <![CDATA[<code>timeZone</code>]]>, <![CDATA[<code>password</code>]]>, <![CDATA[<code>checkbox</code>]]>, <![CDATA[<code>radio</code>]]>, <![CDATA[<code>submit</code>]]>, <![CDATA[<code>button</code>]]>, <![CDATA[<code>color</code>]]>, <![CDATA[<code>email</code>]]>, <![CDATA[<code>number</code>]]>, <![CDATA[<code>range</code>]]>, <![CDATA[<code>resource</code>]]>, <![CDATA[<code>url</code>]]>, and an empty value. If an empty value or no value is set, the input's type is obtained automatically from the input component's bean.</description>
 				<name>type</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to use the default portlet namespace, to avoid name conflicts. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -916,7 +916,7 @@
 				<name>wrapperCssClass</name>
 				<required>false</required>
 				<rtexprvalue>true</rtexprvalue>
-				<type>java.lang.String</type>
+				<type>java.lang.CharSequence</type>
 			</attribute>
 		</attributes>
 	</component>
@@ -932,8 +932,8 @@
 			<attribute>
 				<description>The default language ID for the component.</description>
 				<name>defaultLanguageId</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A class for the bean object.</description>
@@ -949,14 +949,14 @@
 			<attribute>
 				<description>A name for the navigation component for assistive technologies to interpret.</description>
 				<name>ariaLabel</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A role for assistive technologies to interpret HTML elements that have been used for something other than their intended purpose. For example, the <![CDATA[<code>&lt;p&gt;</code>]]> tag could be used for something other than a paragraph.</description>
 				<name>ariaRole</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>collapsible</name>
@@ -966,19 +966,19 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>icon</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A search container for the navigation component to use.</description>
@@ -1001,8 +1001,8 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
@@ -1013,13 +1013,13 @@
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>markupView</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -1029,13 +1029,13 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>file</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
@@ -1057,8 +1057,8 @@
 			<attribute>
 				<description>A CSS class for styling the link set in the <![CDATA[<code>href</code>]]> attribute.</description>
 				<name>anchorCssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
@@ -1069,26 +1069,26 @@
 			<attribute>
 				<description>An ID for the instance of the navigation item's link, set in the <![CDATA[<code>href</code>]]> attribute.</description>
 				<name>anchorId</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A name for the navigation item for assistive technologies to interpret.</description>
 				<name>ariaLabel</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A role for assistive technologies to interpret HTML elements that have been used for something other than their intended purpose. For example, the <![CDATA[<code>&lt;p&gt;</code>]]> tag could be used for something other than a paragraph.</description>
 				<name>ariaRole</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
@@ -1106,31 +1106,31 @@
 				<description>A URL navigated to when the navigation item is clicked.</description>
 				<name>href</name>
 				<inputType>java.lang.Object</inputType>
-				<outputType>java.lang.String</outputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<defaultValue>javascript:void(0);</defaultValue>
 			</attribute>
 			<attribute>
 				<description>A CSS class for styling the navigation item's icon.</description>
 				<name>iconCssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>iconSrc</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text to display for the navigation item.</description>
 				<name>label</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to translate the label's text into the user's language. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -1147,19 +1147,19 @@
 			</attribute>
 			<attribute>
 				<name>state</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>target</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Sets the navigation item's title.</description>
 				<name>title</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>toggle</name>
@@ -1194,14 +1194,14 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", foo&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = foo;</code>]]>.</description>
 				<name>data</name>
-				<inputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></inputType>
-				<outputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></outputType>
+				<inputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></inputType>
+				<outputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></outputType>
 			</attribute>
 			<attribute>
 				<description>Whether the component is disabled. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -1231,8 +1231,8 @@
 			<attribute>
 				<description>Styling for the option component. For example, to align the text to the right you would specify <![CDATA[<code>text-align:right;</code>]]>.</description>
 				<name>style</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>useModelValue</name>
@@ -1264,13 +1264,13 @@
 			</attribute>
 			<attribute>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>label</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>localizeLabel</name>
@@ -1286,14 +1286,14 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -1303,8 +1303,8 @@
 			<attribute>
 				<description>A position for the script.</description>
 				<name>position</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<gettable>false</gettable>
 				<settable>false</settable>
 			</attribute>
@@ -1322,8 +1322,8 @@
 			<attribute>
 				<description>AlloyUI modules to be used in the script. Names of multiple modules must be separated by commas.</description>
 				<name>use</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -1345,14 +1345,14 @@
 			<attribute>
 				<description>A CSS class for styling the component.</description>
 				<name>cssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Miscellaneous data to be stored via a map. For example, the <![CDATA[<code>HashMap&lt;"class-name", "foo"&gt;</code>]]> would render as the attribute <![CDATA[<code>data-class-name = "foo";</code>]]>.</description>
 				<name>data</name>
-				<inputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></inputType>
-				<outputType><![CDATA[java.util.Map<java.lang.String, java.lang.Object>]]></outputType>
+				<inputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></inputType>
+				<outputType><![CDATA[java.util.Map<java.lang.CharSequence, java.lang.Object>]]></outputType>
 			</attribute>
 			<attribute>
 				<description>Whether the component is disabled. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -1362,8 +1362,8 @@
 			</attribute>
 			<attribute>
 				<name>field</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether the component should be the first element of the form. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -1374,14 +1374,14 @@
 			<attribute>
 				<description>Text to display as a help tooltip on mouse over of the component's help icon.</description>
 				<name>helpMessage</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>ignoreRequestValue</name>
@@ -1397,14 +1397,14 @@
 			<attribute>
 				<description>An alignment for the label's text. Possible values are <![CDATA[<code>right</code>]]> and <![CDATA[<code>left</code>]]>.</description>
 				<name>inlineLabel</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A label for the select field that is displayed above the field.</description>
 				<name>label</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether the component should be the last element in the form. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -1415,13 +1415,13 @@
 			<attribute>
 				<description>A list type in which to automatically generate the options. Possible values can be found in <![CDATA[<code>ListTypeImpl.java</code>]]>.</description>
 				<name>listType</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>listTypeFieldName</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to translate the label's text into the user's language. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -1445,27 +1445,27 @@
 			<attribute>
 				<description>A name for the select field. Note that this value overrides the <![CDATA[<code>label</code>]]> attribute and takes the place of the label.</description>
 				<name>name</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<required>true</required>
 			</attribute>
 			<attribute>
 				<description>A function to be called when the select field's value changes.</description>
 				<name>onChange</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A function to be called on users clicking the select field.</description>
 				<name>onClick</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Text to display before the select field.</description>
 				<name>prefix</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to mark the select field as required. The default value is <![CDATA[<code>false</code>]]>.</description>
@@ -1489,14 +1489,14 @@
 			<attribute>
 				<description>Text to display after the select field.</description>
 				<name>suffix</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A title for the select field.</description>
 				<name>title</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to use the default portlet namespace, to avoid name conflicts. The default value is <![CDATA[<code>true</code>]]>.</description>
@@ -1513,8 +1513,8 @@
 			<attribute>
 				<description>A CSS class for styling the <![CDATA[<code>div</code>]]> that wraps the select field.</description>
 				<name>wrapperCssClass</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>
@@ -1540,19 +1540,19 @@
 			<attribute>
 				<description>The language ID to which the translation manager defaults when no other translations are available in the user's language.</description>
 				<name>defaultLanguageId</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>editingLanguageId</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>Whether to activate the translation manager. The default value is <![CDATA[<code>true</code>]]>. If this is set to <![CDATA[<code>false</code>]]>, the translation manager will not work entirely.</description>
@@ -1575,14 +1575,14 @@
 			<attribute>
 				<description>A custom error message to replace the default validation error message.</description>
 				<name>errorMessage</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>The type of validation for the input field. Possible values are <![CDATA[<code>acceptFiles</code>]]>, <![CDATA[<code>alpha</code>]]>, <![CDATA[<code>alphanum</code>]]>, <![CDATA[<code>date</code>]]>, <![CDATA[<code>digits</code>]]>, <![CDATA[<code>email</code>]]>, <![CDATA[<code>equalTo</code>]]>, <![CDATA[<code>iri</code>]]>, <![CDATA[<code>max</code>]]>, <![CDATA[<code>maxLength</code>]]>, <![CDATA[<code>min</code>]]>, <![CDATA[<code>minLength</code>]]>, <![CDATA[<code>number</code>]]>, <![CDATA[<code>required</code>]]>, and <![CDATA[<code>url</code>]]>.</description>
 				<name>name</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 				<required>true</required>
 			</attribute>
 		</attributes>
@@ -1599,19 +1599,19 @@
 			<attribute>
 				<description>Text to display as a help tooltip on mouse over of the component's help icon.</description>
 				<name>helpMessage</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>An ID for the component instance.</description>
 				<name>id</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<name>markupView</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A class for the bean object.</description>
@@ -1651,14 +1651,14 @@
 			<attribute>
 				<description>A workflow status message that overrides the existing one.</description>
 				<name>statusMessage</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 			<attribute>
 				<description>A version for the workflow status that is displayed in a label next to the workflow status.</description>
 				<name>version</name>
-				<inputType>java.lang.String</inputType>
-				<outputType>java.lang.String</outputType>
+				<inputType>java.lang.CharSequence</inputType>
+				<outputType>java.lang.CharSequence</outputType>
 			</attribute>
 		</attributes>
 	</component>

@@ -41,7 +41,7 @@
 		</c:if>
 
 		<c:if test='<%= Validator.isNotNull(helpMessage) && !type.equals("toggle-switch") %>'>
-			<%= helpMessageContent %>
+			<%= XSS.html(helpMessageContent) %>
 		</c:if>
 
 		<c:if test="<%= changesContext %>">
@@ -93,17 +93,17 @@
 			<div class="toggle-card-container">
 				<div class="toggle-card-cell">
 					<div class="toggle-card-icon">
-						<span class="toggle-card-off <%= iconOff %>"></span>
-						<span class="toggle-card-on <%= iconOn %>"></span>
+						<span class="toggle-card-off <%= XSS.attribute(iconOff) %>"></span>
+						<span class="toggle-card-on <%= XSS.attribute(iconOn) %>"></span>
 					</div>
 
 					<div class="toggle-card-label">
 						<c:if test="<%= Validator.isNotNull(labelOff) %>">
-							<span class="toggle-card-off"><%= labelOff %></span>
+							<span class="toggle-card-off"><%= XSS.htmlBody(labelOff) %></span>
 						</c:if>
 
 						<c:if test="<%= Validator.isNotNull(labelOn) %>">
-							<span class="toggle-card-on"><%= labelOn %></span>
+							<span class="toggle-card-on"><%= XSS.htmlBody(labelOn) %></span>
 						</c:if>
 					</div>
 				</div>
@@ -112,34 +112,34 @@
 
 		<c:if test='<%= type.equals("toggle-switch") %>'>
 			<span aria-hidden="true" class="toggle-switch-bar">
-				<span class="toggle-switch-handle" data-label-off="<%= (Validator.isNotNull(labelOff) ? HtmlUtil.escapeAttribute(labelOff) : LanguageUtil.get(resourceBundle, "no")) %>" data-label-on="<%= (Validator.isNotNull(labelOn) ? HtmlUtil.escapeAttribute(labelOn) : LanguageUtil.get(resourceBundle, "yes")) %>">
+				<span class="toggle-switch-handle" data-label-off="<%= (Validator.isNotNull(labelOff) ? XSS.attribute(labelOff) : LanguageUtil.get(resourceBundle, "no")) %>" data-label-on="<%= (Validator.isNotNull(labelOn) ? XSS.attribute(labelOn) : LanguageUtil.get(resourceBundle, "yes")) %>">
 					<c:if test="<%= Validator.isNotNull(buttonIconOn) %>">
-						<span class="button-icon <%= Validator.isNotNull(buttonIconOff) ? "button-icon-on" : StringPool.BLANK %> toggle-switch-icon <%= buttonIconOn %>"></span>
+						<span class="button-icon <%= Validator.isNotNull(buttonIconOff) ? "button-icon-on" : StringPool.BLANK %> toggle-switch-icon <%= XSS.attribute(buttonIconOn) %>"></span>
 					</c:if>
 
 					<c:if test="<%= Validator.isNotNull(buttonIconOff) %>">
-						<span class="button-icon button-icon-off toggle-switch-icon <%= buttonIconOff %>"></span>
+						<span class="button-icon button-icon-off toggle-switch-icon <%= XSS.attribute(buttonIconOff) %>"></span>
 					</c:if>
 
 					<c:if test="<%= Validator.isNotNull(iconOn) %>">
-						<span class="toggle-switch-icon toggle-switch-icon-on <%= iconOn %>"></span>
+						<span class="toggle-switch-icon toggle-switch-icon-on <%= XSS.attribute(iconOn) %>"></span>
 					</c:if>
 
 					<c:if test="<%= Validator.isNotNull(iconOff) %>">
-						<span class="toggle-switch-icon toggle-switch-icon-off <%= iconOff %>"></span>
+						<span class="toggle-switch-icon toggle-switch-icon-off <%= XSS.attribute(iconOff) %>"></span>
 					</c:if>
 				</span>
 			</span>
 
 			<c:if test="<%= Validator.isNotNull(helpMessage) %>">
-				<span class="toggle-switch-text toggle-switch-text-right"><%= helpMessageContent %></span>
+				<span class="toggle-switch-text toggle-switch-text-right"><%= XSS.htmlBody(helpMessageContent) %></span>
 			</c:if>
 		</c:if>
 	</c:if>
 </liferay-util:buffer>
 
 <c:if test='<%= !type.equals("hidden") && !wrappedField && useInputWrapper %>'>
-	<div class="<%= inputWrapperClass %>">
+	<div class="<%= XSS.attribute(inputWrapperClass) %>">
 </c:if>
 
 <%
@@ -147,17 +147,17 @@ boolean choiceField = checkboxField || radioField;
 %>
 
 <c:if test='<%= !type.equals("assetCategories") && !type.equals("hidden") && Validator.isNotNull(labelContent) %>'>
-	<label <%= labelTag %>>
+	<label <%= XSS.safeHtmlOnly(labelTag) %>>
 		<c:if test='<%= !choiceField && !inlineLabel.equals("right") %>'>
-				<%= labelContent %>
+				<%= XSS.htmlBody(labelContent) %>
 			</label>
 		</c:if>
 </c:if>
 
 <c:if test="<%= Validator.isNotNull(prefix) || Validator.isNotNull(suffix) %>">
-	<div class="<%= addOnCssClass %>">
+	<div class="<%= XSS.attribute(addOnCssClass) %>">
 		<c:if test="<%= Validator.isNotNull(prefix) %>">
-			<span class="<%= helpTextCssClass %>"><liferay-ui:message key="<%= prefix %>" /></span>
+			<span class="<%= XSS.attribute(helpTextCssClass) %>"><liferay-ui:message key="<%= prefix %>" /></span>
 		</c:if>
 </c:if>
 
@@ -229,7 +229,7 @@ boolean choiceField = checkboxField || radioField;
 		}
 		%>
 
-		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= fieldCssClass %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= namespace + id %>" name="<%= namespace + name %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + onChange + "\"" : StringPool.BLANK %> onClick="<%= onClick %>" <%= Validator.isNotNull(title) ? "title=\"" + LanguageUtil.get(resourceBundle, title) + "\"" : StringPool.BLANK %> type="checkbox" <%= Validator.isNotNull(valueString) ? ("value=\"" + HtmlUtil.escapeAttribute(valueString)) + "\"" : StringPool.BLANK %> <%= AUIUtil.buildData(data) %> <%= InlineUtil.buildDynamicAttributes(dynamicAttributes) %> />
+		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJavaScriptOnly(onChange)) + "\"" : StringPool.BLANK %> onClick="<%= XSS.attribute(XSS.verifiedJavaScriptOnly(onClick)) %>" <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSSLang.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="checkbox" <%= Validator.isNotNull(valueString) ? ("value=\"" + XSS.attribute(valueString)) + "\"" : StringPool.BLANK %> <%= XSS.safeHtmlOnly(AUIUtil.buildData(data)) %> <%= XSS.safeHtmlOnly(InlineUtil.buildDynamicAttributes(dynamicAttributes)) %> />
 	</c:when>
 	<c:when test='<%= type.equals("radio") %>'>
 
@@ -249,7 +249,7 @@ boolean choiceField = checkboxField || radioField;
 		}
 		%>
 
-		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= fieldCssClass %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= namespace + id %>" name="<%= namespace + name %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + onChange + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + onClick + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + LanguageUtil.get(resourceBundle, title) + "\"" : StringPool.BLANK %> type="radio" value="<%= HtmlUtil.escapeAttribute(valueString) %>" <%= AUIUtil.buildData(data) %> <%= InlineUtil.buildDynamicAttributes(dynamicAttributes) %> />
+		<input <%= checked ? "checked" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJavaScriptOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJavaScriptOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSSLang.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="radio" value="<%= XSS.attribute(valueString) %>" <%= XSS.safeHtmlOnly(AUIUtil.buildData(data)) %> <%= XSS.safeHtmlOnly(InlineUtil.buildDynamicAttributes(dynamicAttributes)) %> />
 	</c:when>
 	<c:when test='<%= type.equals("resource") %>'>
 		<liferay-ui:input-resource id="<%= id %>" title="<%= title %>" url="<%= String.valueOf(value) %>" />
@@ -337,23 +337,23 @@ boolean choiceField = checkboxField || radioField;
 				String[] storedDimensions = resizable ? StringUtil.split(SessionClicks.get(request, _TEXTAREA_WIDTH_HEIGHT_PREFIX + namespace + id, StringPool.BLANK)) : StringPool.EMPTY_ARRAY;
 				%>
 
-				<textarea class="<%= fieldCssClass %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= namespace + id %>" <%= multiple ? "multiple" : StringPool.BLANK %> name="<%= namespace + name %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + onChange + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + onClick + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(placeholder) ? "placeholder=\"" + LanguageUtil.get(resourceBundle, placeholder) + "\"" : StringPool.BLANK %> <%= (storedDimensions.length > 1) ? "style=\"height: " + storedDimensions[0] + "; width: " + storedDimensions[1] + ";" + title + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + LanguageUtil.get(resourceBundle, title) + "\"" : StringPool.BLANK %> <%= AUIUtil.buildData(data) %> <%= InlineUtil.buildDynamicAttributes(dynamicAttributes) %>><%= HtmlUtil.escape(valueString) %></textarea>
+				<textarea class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" <%= multiple ? "multiple" : StringPool.BLANK %> name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJavaScriptOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJavaScriptOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(placeholder) ? "placeholder=\"" + XSS.attribute(XSSLang.get(resourceBundle, placeholder)) + "\"" : StringPool.BLANK %> <%= (storedDimensions.length > 1) ? "style=\"height: " + XSS.attribute(storedDimensions[0]) + "; width: " + XSS.attribute(storedDimensions[1]) + ";" + XSS.attribute(title) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSSLang.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> <%= XSS.safeHtmlOnly(AUIUtil.buildData(data)) %> <%= XSS.safeHtmlOnly(InlineUtil.buildDynamicAttributes(dynamicAttributes)) %>><%= XSS.htmlBody(valueString) %></textarea>
 
 				<c:if test="<%= autoSize %>">
 					<aui:script use="aui-autosize-deprecated">
-						A.one('#<%= namespace + id %>').plug(A.Plugin.Autosize);
+						A.one('#<%= XSS.js(namespace) + XSS.js(id) %>').plug(A.Plugin.Autosize);
 					</aui:script>
 				</c:if>
 
 				<c:if test="<%= resizable %>">
 					<aui:script use="liferay-store,resize-base">
-						var textareaNode = A.one('#<%= namespace + id %>');
+						var textareaNode = A.one('#<%= XSS.js(namespace) + XSS.js(id) %>');
 
 						var resizeInstance = new A.Resize(
 							{
 								after: {
 									'end': function(event) {
-										Liferay.Store('<%= _TEXTAREA_WIDTH_HEIGHT_PREFIX %><%= namespace + id %>', textareaNode.getStyle('height') + ',' + textareaNode.getStyle('width'));
+										Liferay.Store('<%= _TEXTAREA_WIDTH_HEIGHT_PREFIX %><%= XSS.js(namespace) + XSS.js(id) %>', textareaNode.getStyle('height') + ',' + textareaNode.getStyle('width'));
 									}
 								},
 								autoHide: true,
@@ -367,13 +367,13 @@ boolean choiceField = checkboxField || radioField;
 				</c:if>
 			</c:when>
 			<c:otherwise>
-				<input <%= type.equals("image") ? "alt=\"" + LanguageUtil.get(resourceBundle, title) + "\"" : StringPool.BLANK %> class="<%= fieldCssClass %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= namespace + id %>" <%= (max != null) ? "max=\"" + max + "\"": StringPool.BLANK %> <%= (min != null) ? "min=\"" + min + "\"": StringPool.BLANK %> <%= multiple ? "multiple" : StringPool.BLANK %> name="<%= namespace + name %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + onChange + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + onClick + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(placeholder) ? "placeholder=\"" + LanguageUtil.get(resourceBundle, placeholder) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + LanguageUtil.get(resourceBundle, title) + "\"" : StringPool.BLANK %> type="<%= Validator.isNull(type) ? "text" : type %>" <%= !type.equals("image") ? "value=\"" + HtmlUtil.escapeAttribute(valueString) + "\"" : StringPool.BLANK %> <%= AUIUtil.buildData(data) %> <%= InlineUtil.buildDynamicAttributes(dynamicAttributes) %> />
+				<input <%= type.equals("image") ? "alt=\"" + XSS.attribute(XSSLang.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> class="<%= XSS.attribute(fieldCssClass) %>" <%= disabled ? "disabled" : StringPool.BLANK %> id="<%= XSS.attribute(namespace) + XSS.attribute(id) %>" <%= (max != null) ? "max=\"" + XSS.attribute(max) + "\"": StringPool.BLANK %> <%= (min != null) ? "min=\"" + XSS.attribute(min) + "\"": StringPool.BLANK %> <%= multiple ? "multiple" : StringPool.BLANK %> name="<%= XSS.attribute(namespace) + XSS.attribute(name) %>" <%= Validator.isNotNull(onChange) ? "onChange=\"" + XSS.attribute(XSS.verifiedJavaScriptOnly(onChange)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(onClick) ? "onClick=\"" + XSS.attribute(XSS.verifiedJavaScriptOnly(onClick)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(placeholder) ? "placeholder=\"" + XSS.attribute(XSSLang.get(resourceBundle, placeholder)) + "\"" : StringPool.BLANK %> <%= Validator.isNotNull(title) ? "title=\"" + XSS.attribute(XSSLang.get(resourceBundle, title)) + "\"" : StringPool.BLANK %> type="<%= Validator.isNull(type) ? "text" : XSS.attribute(type) %>" <%= !type.equals("image") ? "value=\"" + XSS.attribute(valueString) + "\"" : StringPool.BLANK %> <%= XSS.safeHtmlOnly(AUIUtil.buildData(data)) %> <%= XSS.safeHtmlOnly(InlineUtil.buildDynamicAttributes(dynamicAttributes)) %> />
 			</c:otherwise>
 		</c:choose>
 
 		<c:if test="<%= autoFocus %>">
 			<aui:script>
-				Liferay.Util.focusFormField('#<%= namespace + id %>');
+				Liferay.Util.focusFormField('#<%= XSS.js(namespace) + XSS.js(id) %>');
 			</aui:script>
 		</c:if>
 	</c:otherwise>
@@ -381,14 +381,14 @@ boolean choiceField = checkboxField || radioField;
 
 <c:if test="<%= Validator.isNotNull(prefix) || Validator.isNotNull(suffix) %>">
 		<c:if test="<%= Validator.isNotNull(suffix) %>">
-			<span class="<%= helpTextCssClass %>"><liferay-ui:message key="<%= suffix %>" /></span>
+			<span class="<%= XSS.attribute(helpTextCssClass) %>"><liferay-ui:message key="<%= suffix %>" /></span>
 		</c:if>
 	</div>
 </c:if>
 
 <c:if test='<%= !type.equals("assetCategories") && !type.equals("hidden") && Validator.isNotNull(labelContent) %>'>
 	<c:if test='<%= choiceField || inlineLabel.equals("right") %>'>
-			<%= labelContent %>
+			<%= XSS.html(labelContent) %>
 		</label>
 	</c:if>
 </c:if>
