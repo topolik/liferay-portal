@@ -35,8 +35,7 @@ import java.util.Set;
 /**
  * @author Stian Sigvartsen
  */
-public class SAQProcessor
-	implements SAQContextMatcher {
+public class SAQProcessor implements SAQContextMatcher {
 
 	public SAQProcessor(SAQContext saqContext) {
 		_saqContext = saqContext;
