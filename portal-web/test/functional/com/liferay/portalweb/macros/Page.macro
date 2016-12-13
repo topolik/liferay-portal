@@ -17,6 +17,7 @@
 		<var name="key_componentOrPortletName" value="${componentName}" />
 
 		<execute function="Click" locator1="SitePagesEditPage#PAGE_TYPE_PANEL_CHECKBOX" />
+
 		<execute function="AssertChecked#waitForElementPresentAssertChecked" locator1="SitePagesEditPage#PAGE_TYPE_PANEL_CHECKBOX_INPUT" />
 	</command>
 
@@ -195,8 +196,8 @@
 			<var name="page" value="${pageName}" />
 		</execute>
 
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="Advanced" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="Advanced" />
 		</execute>
 
 		<execute macro="Panel#expandPanel">
@@ -211,8 +212,8 @@
 	</command>
 
 	<command name="addPageCategory">
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="SEO" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="SEO" />
 		</execute>
 
 		<execute macro="Panel#expandPanel">
@@ -841,8 +842,8 @@
 
 		<var name="key_defaultSiteLanguageKey" value="${defaultSiteLanguageKey}" />
 
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="SEO" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="SEO" />
 		</execute>
 
 		<execute macro="Panel#expandPanel">

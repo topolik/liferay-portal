@@ -44,9 +44,9 @@ public class PortalSessionListener implements HttpSessionListener {
 				compoundSessionIdHttpSession);
 		}
 
-		new PortalSessionCreator(httpSessionEvent);
-
 		HttpSession session = httpSessionEvent.getSession();
+
+		new PortalSessionCreator(session);
 
 		PortalSessionActivationListener.setInstance(session);
 
@@ -72,7 +72,7 @@ public class PortalSessionListener implements HttpSessionListener {
 				compoundSessionIdHttpSession);
 		}
 
-		new PortalSessionDestroyer(httpSessionEvent);
+		new PortalSessionDestroyer(httpSessionEvent.getSession());
 
 		ThreadLocalCacheManager.clearAll(Lifecycle.SESSION);
 

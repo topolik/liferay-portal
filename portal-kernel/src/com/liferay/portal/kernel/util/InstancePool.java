@@ -26,40 +26,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InstancePool {
 
 	public static boolean contains(String className) {
-		return _instance._contains(className);
+		return _instances.containsKey(className.trim());
 	}
 
 	public static Object get(String className) {
-		return _instance._get(className);
+		return get(className, true);
 	}
 
 	public static Object get(String className, boolean logErrors) {
-		return _instance._get(className, logErrors);
-	}
-
-	public static void put(String className, Object obj) {
-		_instance._put(className, obj);
-	}
-
-	public static void reset() {
-		_instance._reset();
-	}
-
-	private InstancePool() {
-		_instances = new ConcurrentHashMap<>();
-	}
-
-	private boolean _contains(String className) {
-		className = className.trim();
-
-		return _instances.containsKey(className);
-	}
-
-	private Object _get(String className) {
-		return _get(className, true);
-	}
-
-	private Object _get(String className, boolean logErrors) {
 		className = className.trim();
 
 		Object instance = _instances.get(className);
@@ -111,20 +85,20 @@ public class InstancePool {
 		return instance;
 	}
 
-	private void _put(String className, Object obj) {
-		className = className.trim();
-
-		_instances.put(className, obj);
+	public static void put(String className, Object obj) {
+		_instances.put(className.trim(), obj);
 	}
 
-	private void _reset() {
+	public static void reset() {
 		_instances.clear();
+	}
+
+	private InstancePool() {
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(InstancePool.class);
 
-	private static final InstancePool _instance = new InstancePool();
-
-	private final Map<String, Object> _instances;
+	private static final Map<String, Object> _instances =
+		new ConcurrentHashMap<>();
 
 }

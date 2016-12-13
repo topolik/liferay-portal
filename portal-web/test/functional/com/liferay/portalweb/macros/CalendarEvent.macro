@@ -337,7 +337,9 @@
 						<condition function="IsElementPresent" locator1="Comments#ADD_COMMENT_LINK" />
 						<then>
 							<execute function="AssertClick" locator1="Comments#ADD_COMMENT_LINK" value1="Add Comment" />
+
 							<execute function="MakeVisible" locator1="Comments#COMMENT_FIELD" />
+
 							<execute function="Type" locator1="Comments#COMMENT_FIELD" value1="${eventComment}" />
 						</then>
 						<else>
@@ -594,6 +596,13 @@
 		<execute function="Pause" value1="3000" />
 
 		<if>
+			<condition function="IsElementPresent" locator1="CalendarEditEvent#ENTIRE_SERIES_BUTTON" />
+			<then>
+				<execute function="AssertClick" locator1="CalendarEditEvent#ENTIRE_SERIES_BUTTON" value1="Entire Series"  />
+			</then>
+		</if>
+
+		<if>
 			<equals arg1="${rsvp}" arg2="No" />
 			<then>
 				<execute macro="CalendarScheduler#viewSpecificEventNotPresent">
@@ -812,26 +821,32 @@
 							<condition function="IsElementPresent" locator1="xpath=(//input[contains(@value,'Repeating')])" />
 							<then>
 								<execute function="Pause" value1="1000" />
+
 								<execute function="AssertClickNoError" locator1="Calendar#SCHEDULER_EVENT_DIALOG_BOX_DELETE_BUTTON" value1="Delete" />
 
 								<execute function="AssertClick" locator1="CalendarEditEvent#ENTIRE_SERIES_BUTTON" value1="Entire Series"  />
+
 								<execute function="Pause" value1="10000" />
 							</then>
 							<elseif>
 								<condition function="IsTextEqual" locator1="Calendar#SCHEDULER_EVENT_DIALOG_BOX_USERS_FIELD" value1="—" />
 								<then>
 									<execute function="Pause" value1="1000" />
+
 									<execute function="AssertClickNoError" locator1="Calendar#SCHEDULER_EVENT_DIALOG_BOX_DELETE_BUTTON" value1="Delete" />
 
 									<execute function="Confirm#waitForConfirmation" value1="Would you like to delete this event?" />
+
 									<execute function="Pause" value1="2000" />
 								</then>
 							</elseif>
 							<else>
 								<execute function="Pause" value1="1000" />
+
 								<execute function="AssertClickNoError" locator1="Calendar#SCHEDULER_EVENT_DIALOG_BOX_DELETE_BUTTON" value1="Delete" />
 
 								<execute function="Confirm#waitForConfirmation" value1="Deleting this event will cancel the meeting with your guests. Would you like to delete?" />
+
 								<execute function="Pause" value1="2000" />
 							</else>
 						</if>
@@ -2169,6 +2184,10 @@
 		<execute function="AssertElementPresent" locator1="Calendar#SCHEDULER_EVENT_DIALOG_BOX_CALENDAR" value1="${siteCalendarName}" />
 
 		<execute function="AssertElementNotPresent" locator1="Calendar#SCHEDULER_EVENT_ATTENDING_ROW_OPTIONS" />
+	</command>
+
+	<command name="viewStatusViaDetails">
+		<execute function="AssertTextEquals#assertPartialText" locator1="CalendarViewEventDetails#STATUS" value1="${status}" />
 	</command>
 
 	<command name="viewTimes">

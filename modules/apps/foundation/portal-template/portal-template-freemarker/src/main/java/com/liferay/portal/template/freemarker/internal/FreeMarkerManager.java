@@ -16,8 +16,10 @@ package com.liferay.portal.template.freemarker.internal;
 
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.cache.SingleVMPool;
+import com.liferay.portal.kernel.concurrent.ConcurrentReferenceKeyHashMap;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.memory.FinalizeManager;
 import com.liferay.portal.kernel.servlet.JSPSupportServlet;
 import com.liferay.portal.kernel.template.Template;
 import com.liferay.portal.kernel.template.TemplateConstants;
@@ -104,10 +106,22 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 public class FreeMarkerManager extends BaseSingleTemplateManager {
 
 	public static BeansWrapper getBeansWrapper() {
-		BeansWrapperBuilder beansWrapperBuilder = new BeansWrapperBuilder(
-			Configuration.getVersion());
+		Thread currentThread = Thread.currentThread();
 
-		return beansWrapperBuilder.build();
+		ClassLoader classLoader = currentThread.getContextClassLoader();
+
+		BeansWrapper beansWrapper = _beansWrappers.get(classLoader);
+
+		if (beansWrapper == null) {
+			BeansWrapperBuilder beansWrapperBuilder = new BeansWrapperBuilder(
+				Configuration.getVersion());
+
+			beansWrapper = beansWrapperBuilder.build();
+
+			_beansWrappers.put(classLoader, beansWrapper);
+		}
+
+		return beansWrapper;
 	}
 
 	@Override
@@ -387,6 +401,10 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		FreeMarkerManager.class);
+
+	private static final Map<ClassLoader, BeansWrapper> _beansWrappers =
+		new ConcurrentReferenceKeyHashMap<>(
+			FinalizeManager.WEAK_REFERENCE_FACTORY);
 
 	private Bundle _bundle;
 	private BundleTracker<Set<String>> _bundleTracker;

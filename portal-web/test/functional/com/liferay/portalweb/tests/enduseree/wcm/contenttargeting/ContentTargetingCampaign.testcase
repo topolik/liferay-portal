@@ -435,8 +435,8 @@
 			<var name="portlet" value="Instance Settings" />
 		</execute>
 
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="Configuration" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="Configuration" />
 		</execute>
 
 		<execute macro="ContentTargeting#enableAnalytics">
@@ -620,8 +620,8 @@
 			<var name="portlet" value="Instance Settings" />
 		</execute>
 
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="Configuration" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="Configuration" />
 		</execute>
 
 		<execute macro="ContentTargeting#enableAnalytics">
@@ -847,8 +847,8 @@
 			<var name="portlet" value="Instance Settings" />
 		</execute>
 
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="Configuration" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="Configuration" />
 		</execute>
 
 		<execute macro="ContentTargeting#enableAnalytics">

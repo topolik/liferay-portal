@@ -3,7 +3,7 @@
 ;
 [subrepo]
 	cmdver = liferay
-	commit = ec62c70bff81786ca09e07de10dd12ef0c3030a1
+	commit = c972840cda15c5d170d152a0f958d772e099636a
 	mode = push
-	parent = 5472143cf61dfa41e9b8ebea8960792947fffd55
+	parent = 562f3f86fca476573a0a1bed1b7ce5d732d3f419
 	remote = git@github.com:liferay/com-liferay-message-boards.git

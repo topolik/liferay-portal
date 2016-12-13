@@ -17,6 +17,8 @@
 <%@ include file="/init.jsp" %>
 
 <%
+String redirect = ParamUtil.getString(request, "redirect");
+
 PortletURL portletURL = ddmDataProviderDisplayContext.getPortletURL();
 
 portletURL.setParameter("displayStyle", "descriptive");
@@ -28,6 +30,11 @@ OrderByComparator<DDMDataProviderInstance> orderByComparator = DDMDataProviderPo
 ddmDataProviderSearch.setOrderByCol(ddmDataProviderDisplayContext.getOrderByCol());
 ddmDataProviderSearch.setOrderByComparator(orderByComparator);
 ddmDataProviderSearch.setOrderByType(ddmDataProviderDisplayContext.getOrderByType());
+
+portletDisplay.setShowBackIcon(true);
+portletDisplay.setURLBack(redirect);
+
+renderResponse.setTitle(LanguageUtil.get(request, "data-providers"));
 %>
 
 <liferay-ui:error exception="<%= RequiredDataProviderInstanceException.MustNotDeleteDataProviderInstanceReferencedByDataProviderInstanceLinks.class %>" message="the-data-provider-cannot-be-deleted-because-it-is-required-by-one-or-more-forms" />

@@ -712,10 +712,26 @@ to version 1.0.56.
 
 ### Added
 - [LPS-69501]: Allow portal tool versions to be overridden in a
-`gradle.properties` file contained in any parent directory of the project, for
-example:
+`gradle.properties` file contained in any parent directory of the project. For
+example,
 
 		com.liferay.source.formatter.version=1.0.300
+
+## 3.0.48 - 2016-12-08
+
+### Changed
+- [LPS-69618]: Update the [Liferay Gradle Plugins Gulp] dependency to version
+2.0.5.
+- [LPS-69618]: Update the [Liferay Gradle Plugins JS Module Config Generator]
+dependency to version 2.1.3.
+- [LPS-69618]: Update the [Liferay Gradle Plugins JS Transpiler] dependency to
+version 2.3.2.
+
+## 3.0.49 - 2016-12-08
+
+### Fixed
+- [LPS-69501]: Continue searching in the parent directories for a custom portal
+tool version defined in a `gradle.properties` file until one is found.
 
 [Gradle Bundle Plugin]: https://github.com/TomDmitriev/gradle-bundle-plugin
 [Liferay Ant BND]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/ant-bnd
@@ -790,4 +806,5 @@ example:
 [LPS-69492]: https://issues.liferay.com/browse/LPS-69492
 [LPS-69501]: https://issues.liferay.com/browse/LPS-69501
 [LPS-69518]: https://issues.liferay.com/browse/LPS-69518
+[LPS-69618]: https://issues.liferay.com/browse/LPS-69618
 [LRDOCS-3023]: https://issues.liferay.com/browse/LRDOCS-3023

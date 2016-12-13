@@ -14,15 +14,20 @@
 
 package com.liferay.dynamic.data.lists.form.web.internal.portlet.configuration.icon;
 
+import com.liferay.dynamic.data.lists.form.web.constants.DDLFormPortletKeys;
 import com.liferay.dynamic.data.mapping.model.DDMDataProviderInstance;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.configuration.icon.BasePortletConfigurationIcon;
 import com.liferay.portal.kernel.portlet.configuration.icon.PortletConfigurationIcon;
-import com.liferay.portal.kernel.util.ResourceBundleUtil;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ResourceBundleLoader;
+import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.ResourceBundle;
 
@@ -32,13 +37,14 @@ import javax.portlet.PortletURL;
 import javax.portlet.WindowStateException;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Rafael Praxedes
  */
 @Component(
 	immediate = true,
-	property = {"javax.portlet.name=" + com.liferay.dynamic.data.lists.form.web.constants.DDLFormPortletKeys.DYNAMIC_DATA_LISTS_FORM_ADMIN},
+	property = {"javax.portlet.name=" + DDLFormPortletKeys.DYNAMIC_DATA_LISTS_FORM_ADMIN},
 	service = PortletConfigurationIcon.class
 )
 public class DDMDataProviderPortletConfigurationIcon
@@ -46,10 +52,12 @@ public class DDMDataProviderPortletConfigurationIcon
 
 	@Override
 	public String getMessage(PortletRequest portletRequest) {
-		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
-			"content.Language", getLocale(portletRequest), getClass());
+		String languageId = getLanguageId(portletRequest);
 
-		return LanguageUtil.get(resourceBundle, "data-providers");
+		ResourceBundle resourceBundle =
+			_resourceBundleLoader.loadResourceBundle(languageId);
+
+		return LanguageUtil.get(resourceBundle, getMessageKey());
 	}
 
 	@Override
@@ -64,13 +72,14 @@ public class DDMDataProviderPortletConfigurationIcon
 			portletRequest, portletId, PortletRequest.RENDER_PHASE);
 
 		try {
-			portletURL.setWindowState(LiferayWindowState.POP_UP);
+			portletURL.setWindowState(LiferayWindowState.NORMAL);
+			portletURL.setParameter("redirect", getRedirectURL(portletRequest));
 		}
 		catch (WindowStateException wse) {
+			_log.error(wse);
 		}
 
-		return "javascript:Liferay.DDL.Portlet.openDDMDataProvider('" +
-			portletURL.toString() + "');";
+		return portletURL.toString();
 	}
 
 	@Override
@@ -92,5 +101,39 @@ public class DDMDataProviderPortletConfigurationIcon
 	public boolean isUseDialog() {
 		return false;
 	}
+
+	protected String getLanguageId(PortletRequest portletRequest) {
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		return themeDisplay.getLanguageId();
+	}
+
+	protected String getMessageKey() {
+		return "data-providers";
+	}
+
+	protected String getRedirectURL(PortletRequest portletRequest) {
+		PortletURL redirectURL = PortletURLFactoryUtil.create(
+			portletRequest, DDLFormPortletKeys.DYNAMIC_DATA_LISTS_FORM_ADMIN,
+			PortletRequest.RENDER_PHASE);
+
+		return redirectURL.toString();
+	}
+
+	@Reference(
+		target = "(bundle.symbolic.name=com.liferay.dynamic.data.mapping.data.provider.web)",
+		unbind = "-"
+	)
+	protected void setResourceBundleLoader(
+		ResourceBundleLoader resourceBundleLoader) {
+
+		_resourceBundleLoader = resourceBundleLoader;
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		DDMDataProviderPortletConfigurationIcon.class);
+
+	private ResourceBundleLoader _resourceBundleLoader;
 
 }

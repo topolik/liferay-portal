@@ -29,6 +29,17 @@ String title = BeanParamUtil.getString(wikiPage, request, "title");
 boolean editTitle = ParamUtil.getBoolean(request, "editTitle");
 
 String selectedFormat = BeanParamUtil.getString(wikiPage, request, "format", wikiGroupServiceOverriddenConfiguration.defaultFormat());
+
+Collection<String> formats = wikiEngineRenderer.getFormats();
+
+if (!formats.contains(selectedFormat)) {
+	Iterator<String> iterator = formats.iterator();
+
+	if (iterator.hasNext()) {
+		selectedFormat = iterator.next();
+	}
+}
+
 String parentTitle = BeanParamUtil.getString(wikiPage, request, "parentTitle");
 
 boolean editable = false;
@@ -121,8 +132,8 @@ if (portletTitleBasedNavigation) {
 	<portlet:param name="mvcRenderCommandName" value="/wiki/edit_page" />
 </portlet:renderURL>
 
-<div <%= portletTitleBasedNavigation ? "class=\"container-fluid-1280\"" : StringPool.BLANK %>>
-	<aui:form action="<%= editPageActionURL %>" method="post" name="fm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "savePage();" %>'>
+<div <%= portletTitleBasedNavigation ? "class=\"container-fluid-1280\"" : StringPool.BLANK %> id='<%= renderResponse.getNamespace() + "wikiEditPageContainer" %>'>
+	<aui:form action="<%= editPageActionURL %>" method="post" name="fm">
 		<aui:input name="<%= Constants.CMD %>" type="hidden" />
 		<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 		<aui:input name="editTitle" type="hidden" value="<%= editTitle %>" />
@@ -278,10 +289,6 @@ if (portletTitleBasedNavigation) {
 
 						<aui:input label="Summary" name="summary" />
 
-						<%
-						Collection<String> formats = wikiEngineRenderer.getFormats();
-						%>
-
 						<c:choose>
 							<c:when test="<%= !formats.isEmpty() %>">
 								<aui:select changesContext="<%= true %>" name="format">
@@ -317,16 +324,16 @@ if (portletTitleBasedNavigation) {
 					</aui:fieldset>
 
 					<c:if test="<%= wikiPage != null %>">
-						<liferay-ui:custom-attributes-available className="<%= WikiPage.class.getName() %>">
+						<liferay-expando:custom-attributes-available className="<%= WikiPage.class.getName() %>">
 							<aui:fieldset collapsed="<%= true %>" collapsible="<%= true %>" label="custom-fields">
-								<liferay-ui:custom-attribute-list
+								<liferay-expando:custom-attribute-list
 									className="<%= WikiPage.class.getName() %>"
 									classPK="<%= (templatePage != null) ? templatePage.getPrimaryKey() : wikiPage.getPrimaryKey() %>"
 									editable="<%= true %>"
 									label="<%= true %>"
 								/>
 							</aui:fieldset>
-						</liferay-ui:custom-attributes-available>
+						</liferay-expando:custom-attributes-available>
 					</c:if>
 
 					<c:if test="<%= (wikiPage == null) || wikiPage.isNew() %>">
@@ -367,7 +374,7 @@ if (portletTitleBasedNavigation) {
 				%>
 
 				<aui:button-row>
-					<aui:button cssClass="btn-lg" disabled="<%= pending %>" name="publishButton" onClick='<%= renderResponse.getNamespace() + "publishPage();" %>' primary="<%= true %>" value="<%= publishButtonLabel %>" />
+					<aui:button cssClass="btn-lg" disabled="<%= pending %>" name="publishButton" primary="<%= true %>" value="<%= publishButtonLabel %>" />
 
 					<aui:button cssClass="btn-lg" name="saveButton" primary="<%= false %>" type="submit" value="<%= saveButtonLabel %>" />
 
@@ -378,77 +385,20 @@ if (portletTitleBasedNavigation) {
 	</aui:form>
 </div>
 
-<aui:script sandbox="<%= true %>">
-	var form = $(document.<portlet:namespace />fm);
-
-	var formatSelect = form.fm('format');
-
-	var currentFormat = formatSelect.find('option:selected').text().trim();
-
-	var currentIndex = formatSelect.prop('selectedIndex');
-
-	formatSelect.on(
-		'change',
-		function(event) {
-			var newFormat = formatSelect.find('option:selected').text().trim();
-
-			var confirmMessage = '<%= UnicodeLanguageUtil.get(request, "you-may-lose-formatting-when-switching-from-x-to-x") %>';
-
-			confirmMessage = _.sub(confirmMessage, currentFormat, newFormat);
-
-			if (!confirm(confirmMessage)) {
-				formatSelect.prop('selectedIndex', currentIndex);
-
-				return;
-			}
-
-			var titleEditor = window.<portlet:namespace />titleEditor;
-
-			if (titleEditor) {
-				form.fm('title').val(titleEditor.getText());
-			}
-
-			var contentEditor = window.<portlet:namespace />contentEditor;
-
-			if (contentEditor) {
-				form.fm('content').val(contentEditor.getHTML());
-			}
-
-			form.attr('action', '<%= editPageRenderURL %>');
-
-			submitForm(form, null, null, false);
+<aui:script require="wiki-web/wiki/js/WikiPortlet.es">
+	new wikiWebWikiJsWikiPortletEs.default(
+		{
+			constants: {
+				'ACTION_PUBLISH': '<%= WorkflowConstants.ACTION_PUBLISH %>',
+				'ACTION_SAVE_DRAFT': '<%= WorkflowConstants.ACTION_SAVE_DRAFT %>',
+				'CMD': '<%= Constants.CMD %>'
+			},
+			currentAction: '<%= (wikiPage == null || wikiPage.isNew()) ? Constants.ADD : Constants.UPDATE %>',
+			namespace: '<portlet:namespace />',
+			renderUrl: '<%= editPageRenderURL %>',
+			rootNode: '#<portlet:namespace/>wikiEditPageContainer'
 		}
 	);
-</aui:script>
-
-<aui:script>
-	function <portlet:namespace />publishPage() {
-		var form = AUI.$(document.<portlet:namespace />fm);
-
-		form.fm('workflowAction').val('<%= WorkflowConstants.ACTION_PUBLISH %>');
-
-		<portlet:namespace />savePage();
-	}
-
-	function <portlet:namespace />savePage() {
-		var form = AUI.$(document.<portlet:namespace />fm);
-
-		form.fm('<%= Constants.CMD %>').val('<%= ((wikiPage == null) || wikiPage.isNew()) ? Constants.ADD : Constants.UPDATE %>');
-
-		var titleEditor = window.<portlet:namespace />titleEditor;
-
-		if (titleEditor) {
-			form.fm('title').val(titleEditor.getText());
-		}
-
-		var contentEditor = window.<portlet:namespace />contentEditor;
-
-		if (contentEditor) {
-			form.fm('content').val(contentEditor.getHTML());
-		}
-
-		submitForm(form);
-	}
 </aui:script>
 
 <%

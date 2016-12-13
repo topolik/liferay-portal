@@ -49,6 +49,12 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 		<aui:fieldset markupView="lexicon">
 			<dl class="property-list">
 				<dt>
+					<liferay-ui:message key="status" />:
+				</dt>
+				<dd>
+					<aui:workflow-status markupView="lexicon" model="<%= CalendarBooking.class %>" showHelpMessage="<%= false %>" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= calendarBooking.getStatus() %>" />
+				</dd>
+				<dt>
 					<liferay-ui:message key="starts" />:
 				</dt>
 				<dd>
@@ -104,14 +110,14 @@ AssetEntry layoutAssetEntry = AssetEntryLocalServiceUtil.getEntry(CalendarBookin
 				</c:if>
 			</dl>
 
-			<liferay-ui:custom-attributes-available className="<%= CalendarBooking.class.getName() %>">
-				<liferay-ui:custom-attribute-list
+			<liferay-expando:custom-attributes-available className="<%= CalendarBooking.class.getName() %>">
+				<liferay-expando:custom-attribute-list
 					className="<%= CalendarBooking.class.getName() %>"
 					classPK="<%= calendarBooking.getCalendarBookingId() %>"
 					editable="<%= false %>"
 					label="<%= true %>"
 				/>
-			</liferay-ui:custom-attributes-available>
+			</liferay-expando:custom-attributes-available>
 
 			<p>
 				<%= calendarBooking.getDescription(locale) %>

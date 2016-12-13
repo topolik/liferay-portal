@@ -427,8 +427,8 @@
 		<if>
 			<condition function="IsNotVisible" locator1="SiteSettingsDisplaySettings#DEFINE_DEFAULT_AND_AVAILABLE_SITE_LANGUAGES_RADIO" />
 			<then>
-				<execute macro="Navigator#gotoTab">
-					<var name="tab" value="Languages" />
+				<execute macro="Navigator#gotoNavTab">
+					<var name="navTab" value="Languages" />
 				</execute>
 			</then>
 		</if>
@@ -1101,8 +1101,8 @@
 		<if>
 			<condition function="IsNotVisible" locator1="SiteSettingsDisplaySettings#DEFINE_DEFAULT_AND_AVAILABLE_SITE_LANGUAGES_RADIO" />
 			<then>
-				<execute macro="Navigator#gotoTab">
-					<var name="tab" value="Languages" />
+				<execute macro="Navigator#gotoNavTab">
+					<var name="navTab" value="Languages" />
 				</execute>
 			</then>
 		</if>

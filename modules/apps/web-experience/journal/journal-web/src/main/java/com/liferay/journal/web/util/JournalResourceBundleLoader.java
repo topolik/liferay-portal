@@ -14,8 +14,10 @@
 
 package com.liferay.journal.web.util;
 
+import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
 import com.liferay.portal.kernel.util.ClassResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
+import com.liferay.portal.kernel.util.ResourceBundleLoaderUtil;
 
 /**
  * @author Adolfo Pérez
@@ -23,7 +25,9 @@ import com.liferay.portal.kernel.util.ResourceBundleLoader;
 public class JournalResourceBundleLoader extends ClassResourceBundleLoader {
 
 	public static final ResourceBundleLoader INSTANCE =
-		new JournalResourceBundleLoader();
+		new AggregateResourceBundleLoader(
+			new JournalResourceBundleLoader(),
+			ResourceBundleLoaderUtil.getPortalResourceBundleLoader());
 
 	protected JournalResourceBundleLoader() {
 		super("content.Language", JournalResourceBundleLoader.class);

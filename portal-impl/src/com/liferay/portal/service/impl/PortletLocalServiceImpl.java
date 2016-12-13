@@ -417,8 +417,6 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 	@Skip
 	public Portlet fetchPortletById(long companyId, String portletId) {
 		portletId = PortalUtil.getJsSafePortletId(portletId);
-		portletId = StringUtil.replace(
-			portletId, new char[] {'$'}, new char[] {'_'});
 
 		Map<String, Portlet> companyPortletsMap = getPortletsMap(companyId);
 
@@ -1957,10 +1955,6 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 			GetterUtil.getString(
 				portletElement.elementText("css-class-wrapper"),
 				portletModel.getCssClassWrapper()));
-		portletModel.setFacebookIntegration(
-			GetterUtil.getString(
-				portletElement.elementText("facebook-integration"),
-				portletModel.getFacebookIntegration()));
 		portletModel.setAddDefaultResource(
 			GetterUtil.getBoolean(
 				portletElement.elementText("add-default-resource"),

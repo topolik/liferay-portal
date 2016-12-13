@@ -49,7 +49,7 @@ public class EventsProcessorUtil {
 	public static void process(String key, String[] classes)
 		throws ActionException {
 
-		_instance._process(key, classes, new LifecycleEvent());
+		process(key, classes, new LifecycleEvent());
 	}
 
 	public static void process(
@@ -57,59 +57,17 @@ public class EventsProcessorUtil {
 			HttpServletResponse response)
 		throws ActionException {
 
-		_instance._process(key, classes, new LifecycleEvent(request, response));
+		process(key, classes, new LifecycleEvent(request, response));
 	}
 
 	public static void process(
 			String key, String[] classes, HttpSession session)
 		throws ActionException {
 
-		_instance._process(key, classes, new LifecycleEvent(session));
+		process(key, classes, new LifecycleEvent(session));
 	}
 
 	public static void process(
-			String key, String[] classes, LifecycleEvent lifecycleEvent)
-		throws ActionException {
-
-		_instance._process(key, classes, lifecycleEvent);
-	}
-
-	public static void process(String key, String[] classes, String[] ids)
-		throws ActionException {
-
-		_instance._process(key, classes, new LifecycleEvent(ids));
-	}
-
-	public static void processEvent(
-			LifecycleAction lifecycleAction, LifecycleEvent lifecycleEvent)
-		throws ActionException {
-
-		_instance._processEvent(lifecycleAction, lifecycleEvent);
-	}
-
-	public static void registerEvent(String key, Object event) {
-		_instance._registerEvent(key, event);
-	}
-
-	public static void unregisterEvent(String key, Object event) {
-		_instance._unregisterEvent(key, event);
-	}
-
-	protected EventsProcessorUtil() {
-	}
-
-	protected Collection<LifecycleAction> _getLifecycleActions(String key) {
-		List<LifecycleAction> lifecycleActions = _lifecycleActions.getService(
-			key);
-
-		if (lifecycleActions == null) {
-			lifecycleActions = Collections.emptyList();
-		}
-
-		return lifecycleActions;
-	}
-
-	protected void _process(
 			String key, String[] classes, LifecycleEvent lifecycleEvent)
 		throws ActionException {
 
@@ -132,21 +90,30 @@ public class EventsProcessorUtil {
 			return;
 		}
 
-		for (LifecycleAction lifecycleAction : _instance._getLifecycleActions(
-				key)) {
+		List<LifecycleAction> lifecycleActions = _lifecycleActions.getService(
+			key);
 
-			lifecycleAction.processLifecycleEvent(lifecycleEvent);
+		if (lifecycleActions != null) {
+			for (LifecycleAction lifecycleAction : lifecycleActions) {
+				lifecycleAction.processLifecycleEvent(lifecycleEvent);
+			}
 		}
 	}
 
-	protected void _processEvent(
+	public static void process(String key, String[] classes, String[] ids)
+		throws ActionException {
+
+		process(key, classes, new LifecycleEvent(ids));
+	}
+
+	public static void processEvent(
 			LifecycleAction lifecycleAction, LifecycleEvent lifecycleEvent)
 		throws ActionException {
 
 		lifecycleAction.processLifecycleEvent(lifecycleEvent);
 	}
 
-	protected void _registerEvent(String key, Object event) {
+	public static void registerEvent(String key, Object event) {
 		Registry registry = RegistryUtil.getRegistry();
 
 		Map<String, Object> properties = new HashMap<>();
@@ -172,7 +139,7 @@ public class EventsProcessorUtil {
 		serviceRegistrationMap.put(event, serviceRegistration);
 	}
 
-	protected void _unregisterEvent(String key, Object event) {
+	public static void unregisterEvent(String key, Object event) {
 		Map<Object, ServiceRegistration<LifecycleAction>>
 			serviceRegistrationMap = _serviceRegistrationMaps.get(key);
 
@@ -188,16 +155,73 @@ public class EventsProcessorUtil {
 		}
 	}
 
+	protected EventsProcessorUtil() {
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
+	protected Collection<LifecycleAction> _getLifecycleActions(String key) {
+		List<LifecycleAction> lifecycleActions = _lifecycleActions.getService(
+			key);
+
+		if (lifecycleActions == null) {
+			lifecycleActions = Collections.emptyList();
+		}
+
+		return lifecycleActions;
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #process(String, String[], LifecycleEvent)}
+	 */
+	@Deprecated
+	protected void _process(
+			String key, String[] classes, LifecycleEvent lifecycleEvent)
+		throws ActionException {
+
+		process(key, classes, lifecycleEvent);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #processEvent(LifecycleAction, LifecycleEvent)}
+	 */
+	@Deprecated
+	protected void _processEvent(
+			LifecycleAction lifecycleAction, LifecycleEvent lifecycleEvent)
+		throws ActionException {
+
+		processEvent(lifecycleAction, lifecycleEvent);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #registerEvent(String, Object)}
+	 */
+	@Deprecated
+	protected void _registerEvent(String key, Object event) {
+		registerEvent(key, event);
+	}
+
+	/**
+	 * @deprecated As of 7.0.0, replaced by {@link
+	 *             #unregisterEvent(String, Object)}
+	 */
+	@Deprecated
+	protected void _unregisterEvent(String key, Object event) {
+		unregisterEvent(key, event);
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		EventsProcessorUtil.class);
 
-	private static final EventsProcessorUtil _instance =
-		new EventsProcessorUtil();
-
-	private final ServiceTrackerMap<String, List<LifecycleAction>>
+	private static final ServiceTrackerMap<String, List<LifecycleAction>>
 		_lifecycleActions = ServiceTrackerCollections.openMultiValueMap(
 			LifecycleAction.class, "key");
-	private final
+	private static final
 		ConcurrentMap<String, Map<Object, ServiceRegistration<LifecycleAction>>>
 			_serviceRegistrationMaps = new ConcurrentHashMap<>();
 

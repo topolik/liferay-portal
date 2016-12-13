@@ -6,8 +6,8 @@
 			<var name="page" value="${pageName}" />
 		</execute>
 
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="Advanced" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="Advanced" />
 		</execute>
 
 		<execute macro="Panel#expandPanel">
@@ -34,8 +34,8 @@
 	</command>
 
 	<command name="gotoCustomizationSettingsPG">
-		<execute macro="Navigator#gotoTab">
-			<var name="tab" value="Advanced" />
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="Advanced" />
 		</execute>
 
 		<execute macro="Panel#expandPanel">
@@ -57,6 +57,7 @@
 				<var name="key_menuItem" value="Reset My Customizations" />
 
 				<execute function="AssertClickNoError" locator1="MenuItem#ANY_MENU_ITEM" value1="Reset My Customizations" />
+
 				<execute function="Confirm" value1="Are you sure you want to reset your customizations to default?" />
 			</else>
 		</if>
