@@ -104,6 +104,8 @@ public interface LayoutTypePortlet extends LayoutType {
 
 	public int getNumOfColumns();
 
+	public List<Portlet> getOrphanPortlets(boolean includeSystem);
+
 	public PortalPreferences getPortalPreferences();
 
 	public List<String> getPortletIds();

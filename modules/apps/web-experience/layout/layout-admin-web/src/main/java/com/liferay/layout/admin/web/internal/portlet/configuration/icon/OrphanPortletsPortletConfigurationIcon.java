@@ -50,7 +50,7 @@ import org.osgi.service.component.annotations.Reference;
 	property = {"javax.portlet.name=" + LayoutAdminPortletKeys.GROUP_PAGES},
 	service = PortletConfigurationIcon.class
 )
-public class EmbeddedPortletsPortletConfigurationIcon
+public class OrphanPortletsPortletConfigurationIcon
 	extends BasePortletConfigurationIcon {
 
 	@Override
@@ -58,7 +58,7 @@ public class EmbeddedPortletsPortletConfigurationIcon
 		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
 			"content.Language", getLocale(portletRequest), getClass());
 
-		return LanguageUtil.get(resourceBundle, "embedded-portlets");
+		return LanguageUtil.get(resourceBundle, "orphan-portlets");
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class EmbeddedPortletsPortletConfigurationIcon
 				portletRequest, portletDisplay.getId(),
 				PortletRequest.RENDER_PHASE);
 
-			portletURL.setParameter("mvcPath", "/embedded_portlets.jsp");
+			portletURL.setParameter("mvcPath", "/orphan_portlets.jsp");
 			portletURL.setParameter("redirect", themeDisplay.getURLCurrent());
 			portletURL.setParameter(
 				"selPlid", String.valueOf(getSelPlid(portletRequest)));
@@ -96,28 +96,24 @@ public class EmbeddedPortletsPortletConfigurationIcon
 
 	@Override
 	public boolean isShow(PortletRequest portletRequest) {
-		try {
-			Layout layout = getLayout(portletRequest);
+		Layout layout = getLayout(portletRequest);
 
-			if (layout == null) {
-				return false;
-			}
-
-			if (!layout.isSupportsEmbeddedPortlets()) {
-				return false;
-			}
-
-			LayoutTypePortlet layoutTypePortlet =
-				(LayoutTypePortlet)layout.getLayoutType();
-
-			List<Portlet> embeddedPortlets =
-				layoutTypePortlet.getEmbeddedPortlets();
-
-			if (!embeddedPortlets.isEmpty()) {
-				return true;
-			}
+		if (layout == null) {
+			return false;
 		}
-		catch (Exception e) {
+
+		if (!layout.isSupportsEmbeddedPortlets()) {
+			return false;
+		}
+
+		LayoutTypePortlet layoutTypePortlet =
+			(LayoutTypePortlet)layout.getLayoutType();
+
+		List<Portlet> orphanPortlets = layoutTypePortlet.getOrphanPortlets(
+			false);
+
+		if (!orphanPortlets.isEmpty()) {
+			return true;
 		}
 
 		return false;
@@ -128,7 +124,7 @@ public class EmbeddedPortletsPortletConfigurationIcon
 		return true;
 	}
 
-	protected Layout getLayout(PortletRequest portletRequest) throws Exception {
+	protected Layout getLayout(PortletRequest portletRequest) {
 		long selPlid = getSelPlid(portletRequest);
 
 		return _layoutLocalService.fetchLayout(selPlid);
