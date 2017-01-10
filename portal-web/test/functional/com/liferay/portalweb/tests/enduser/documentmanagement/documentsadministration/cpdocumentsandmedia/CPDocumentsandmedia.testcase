@@ -350,7 +350,6 @@
 
 		<execute macro="DMDocument#viewSearchResultsCP">
 			<var name="dmDocumentTitle" value="DM Document Title" />
-			<var name="dmParentFolder" value="Home" />
 		</execute>
 	</command>
 

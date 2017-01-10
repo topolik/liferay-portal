@@ -69,22 +69,11 @@
 		<if>
 			<isset var="source" />
 			<then>
-				<execute function="Click" locator1="CKEditor#TOOLBAR_SOURCE_BUTTON" />
+				<execute function="Click" locator1="AlloyEditor#CONTENT_FIELD" />
 
-				<execute function="Type" locator1="CKEditor#BODY_FIELD_SOURCE_ON" value1="${threadBody}" />
+				<execute function="Click" locator1="Button#EDITOR_SWITCH" />
 
-				<execute function="Click" locator1="CKEditor#TOOLBAR_SOURCE_BUTTON" />
-
-				<if>
-					<isset var="fontSize" />
-					<then>
-						<var name="key_fontSize" value="${fontSize}" />
-
-						<execute function="AssertClick" locator1="CKEditor#TOOLBAR_SIZE_BUTTON" value1="Size" />
-
-						<execute function="AssertTextEquals" locator1="CKEditor#TOOLBAR_SIZE_BUTTON_DROPDOWN" value1="${key_fontSize}" />
-					</then>
-				</if>
+				<execute function="Type#sendKeysAceEditor" locator1="TextArea#ACE_EDITOR" value1="${threadBody}" />
 			</then>
 			<else>
 				<execute function="Type#typeEditor" locator1="AlloyEditor#CONTENT_FIELD" value1="${threadBody}" />
@@ -715,7 +704,7 @@
 			</then>
 		</if>
 
-		<execute function="Click" locator1="Button#PUBLISH_REPLY" />
+		<execute function="Click" locator1="Button#PUBLISH" />
 
 		<execute macro="Alert#viewSuccessMessage" />
 

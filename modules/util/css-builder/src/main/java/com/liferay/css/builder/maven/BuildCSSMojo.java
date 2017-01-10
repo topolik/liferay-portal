@@ -20,10 +20,25 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 
 import java.io.File;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.descriptor.PluginDescriptor;
+import org.apache.maven.project.MavenProject;
 
+import org.codehaus.plexus.component.repository.ComponentDependency;
 import org.codehaus.plexus.util.Scanner;
+
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.Artifact;
+import org.eclipse.aether.artifact.DefaultArtifact;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 
 import org.sonatype.plexus.build.incremental.BuildContext;
 
@@ -39,8 +54,24 @@ public class BuildCSSMojo extends AbstractMojo {
 	@Override
 	public void execute() throws MojoExecutionException {
 		try {
-			if (buildContext.isIncremental()) {
-				Scanner scanner = buildContext.newScanner(baseDir);
+			for (ComponentDependency componentDependency :
+					_pluginDescriptor.getDependencies()) {
+
+				String artifactId = componentDependency.getArtifactId();
+
+				if (artifactId.equals("com.liferay.frontend.css.common") &&
+					(_cssBuilderArgs.getPortalCommonPath() == null)) {
+
+					Artifact artifact = _resolveArtifact(componentDependency);
+
+					File file = artifact.getFile();
+
+					_cssBuilderArgs.setPortalCommonPath(file.getAbsolutePath());
+				}
+			}
+
+			if (_buildContext.isIncremental()) {
+				Scanner scanner = _buildContext.newScanner(_baseDir);
 
 				String[] includes = {"", "**/*.scss"};
 
@@ -51,11 +82,11 @@ public class BuildCSSMojo extends AbstractMojo {
 				String[] includedFiles = scanner.getIncludedFiles();
 
 				if (ArrayUtil.isNotEmpty(includedFiles)) {
-					CSSBuilderInvoker.invoke(baseDir, _cssBuilderArgs);
+					CSSBuilderInvoker.invoke(_baseDir, _cssBuilderArgs);
 				}
 			}
 			else {
-				CSSBuilderInvoker.invoke(baseDir, _cssBuilderArgs);
+				CSSBuilderInvoker.invoke(_baseDir, _cssBuilderArgs);
 			}
 		}
 		catch (Exception e) {
@@ -92,8 +123,7 @@ public class BuildCSSMojo extends AbstractMojo {
 	}
 
 	/**
-	 * @parameter default-value="/"
-	 * @required
+	 * @parameter
 	 */
 	public void setPortalCommonPath(String portalCommonPath) {
 		_cssBuilderArgs.setPortalCommonPath(portalCommonPath);
@@ -120,17 +150,68 @@ public class BuildCSSMojo extends AbstractMojo {
 		_cssBuilderArgs.setSassCompilerClassName(sassCompilerClassName);
 	}
 
+	private Artifact _resolveArtifact(ComponentDependency componentDependency)
+		throws ArtifactResolutionException {
+
+		Artifact artifact = new DefaultArtifact(
+			componentDependency.getGroupId(),
+			componentDependency.getArtifactId(), componentDependency.getType(),
+			componentDependency.getVersion());
+
+		ArtifactRequest artifactRequest = new ArtifactRequest();
+
+		artifactRequest.setArtifact(artifact);
+
+		List<RemoteRepository> repositories = new ArrayList<>();
+
+		repositories.addAll(_project.getRemotePluginRepositories());
+		repositories.addAll(_project.getRemoteProjectRepositories());
+
+		artifactRequest.setRepositories(repositories);
+
+		ArtifactResult artifactResult = _repositorySystem.resolveArtifact(
+			_repositorySystemSession, artifactRequest);
+
+		return artifactResult.getArtifact();
+	}
+
 	/**
 	 * @parameter default-value="${project.basedir}"
 	 * @readonly
 	 */
-	protected File baseDir;
+	private File _baseDir;
 
 	/**
 	 * @component
 	 */
-	protected BuildContext buildContext;
+	private BuildContext _buildContext;
 
 	private final CSSBuilderArgs _cssBuilderArgs = new CSSBuilderArgs();
+
+	/**
+	 * @parameter default-value="${plugin}"
+	 * @readonly
+	 * @required
+	 */
+	private PluginDescriptor _pluginDescriptor;
+
+	/**
+	 * @parameter property="project"
+	 * @required
+	 * @readonly
+	 */
+	private MavenProject _project;
+
+	/**
+	 * @component
+	 */
+	private RepositorySystem _repositorySystem;
+
+	/**
+	 * @parameter property="repositorySystemSession"
+	 * @readonly
+	 * @required
+	 */
+	private RepositorySystemSession _repositorySystemSession;
 
 }

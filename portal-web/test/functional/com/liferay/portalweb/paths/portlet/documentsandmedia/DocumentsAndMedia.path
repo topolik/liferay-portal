@@ -359,7 +359,7 @@
 </tr>
 <tr>
 	<td>SEARCH_TITLE</td>
-	<td>//a[@class='entry-link' and contains(.,'${dmDocumentTitle}')]/div/span[@class='entry-title']</td>
+	<td>//div[contains(@class,'searchcontainer')]//a[contains(.,'${dmDocumentTitle}')]</td>
 	<td></td>
 </tr>
 <tr>

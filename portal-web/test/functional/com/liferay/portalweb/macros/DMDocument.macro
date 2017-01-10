@@ -2495,7 +2495,6 @@
 		<var name="key_dmDocumentTitle" value="${dmDocumentTitle}" />
 
 		<execute function="AssertTextEquals" locator1="DocumentsAndMedia#SEARCH_TITLE" value1="${dmDocumentTitle}" />
-		<execute function="AssertTextEquals" locator1="DocumentsAndMedia#SEARCH_PARENT_FOLDER" value1="${dmParentFolder}" />
 	</command>
 
 	<command name="viewStagingDetailsPG">

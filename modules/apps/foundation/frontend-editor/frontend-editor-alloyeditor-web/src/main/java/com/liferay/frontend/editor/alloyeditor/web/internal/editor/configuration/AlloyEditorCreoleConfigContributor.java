@@ -67,6 +67,16 @@ public class AlloyEditorCreoleConfigContributor
 			}
 		}
 
+		JSONObject buttonCfgJSONObject = JSONFactoryUtil.createJSONObject();
+
+		JSONObject linkEditJSONObject = JSONFactoryUtil.createJSONObject();
+
+		linkEditJSONObject.put("showTargetSelector", false);
+
+		buttonCfgJSONObject.put("linkEdit", linkEditJSONObject);
+
+		jsonObject.put("buttonCfg", buttonCfgJSONObject);
+
 		jsonObject.put("decodeLinks", Boolean.TRUE);
 		jsonObject.put("disableObjectResizing", Boolean.TRUE);
 
@@ -157,7 +167,21 @@ public class AlloyEditorCreoleConfigContributor
 	protected JSONObject getToolbarsStylesSelectionsLinkJSONObject() {
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
-		jsonObject.put("buttons", toJSONArray("['linkEdit']"));
+		JSONArray linkButtonsJSONArray = JSONFactoryUtil.createJSONArray();
+
+		JSONObject linkEditJSONObject = JSONFactoryUtil.createJSONObject();
+
+		JSONObject cfgJSONObject = JSONFactoryUtil.createJSONObject();
+
+		cfgJSONObject.put("showTargetSelector", false);
+
+		linkEditJSONObject.put("cfg", cfgJSONObject);
+
+		linkEditJSONObject.put("name", "linkEdit");
+
+		linkButtonsJSONArray.put(linkEditJSONObject);
+
+		jsonObject.put("buttons", linkButtonsJSONArray);
 		jsonObject.put("name", "link");
 		jsonObject.put("test", "AlloyEditor.SelectionTest.link");
 

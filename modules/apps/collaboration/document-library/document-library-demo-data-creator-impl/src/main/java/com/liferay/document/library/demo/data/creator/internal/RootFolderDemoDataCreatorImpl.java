@@ -15,14 +15,17 @@
 package com.liferay.document.library.demo.data.creator.internal;
 
 import com.liferay.document.library.demo.data.creator.RootFolderDemoDataCreator;
+import com.liferay.document.library.kernel.exception.NoSuchFolderException;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.StringPool;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -53,9 +56,20 @@ public class RootFolderDemoDataCreatorImpl
 
 	@Override
 	public void delete() throws PortalException {
-		for (long folderId : _folderIds) {
-			_dlAppLocalService.deleteFolder(folderId);
+		try {
+			for (long folderId : _folderIds) {
+				_folderIds.remove(folderId);
+
+				_dlAppLocalService.deleteFolder(folderId);
+			}
 		}
+		catch (NoSuchFolderException nsfe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(nsfe, nsfe);
+			}
+		}
+
+		_folderIds.clear();
 	}
 
 	@Reference(unbind = "-")
@@ -63,7 +77,10 @@ public class RootFolderDemoDataCreatorImpl
 		_dlAppLocalService = dlAppLocalService;
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		RootFolderDemoDataCreatorImpl.class);
+
 	private DLAppLocalService _dlAppLocalService;
-	private final List<Long> _folderIds = new ArrayList<>();
+	private final List<Long> _folderIds = new CopyOnWriteArrayList<>();
 
 }

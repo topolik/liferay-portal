@@ -22,7 +22,8 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.trash.TrashRenderer;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -182,6 +183,34 @@ public class WikiNodeTrashHandler extends BaseWikiTrashHandler {
 	}
 
 	@Override
+	public int getTrashModelsCount(long classPK) throws PortalException {
+		return _wikiPageLocalService.getPagesCount(
+			classPK, true, WorkflowConstants.STATUS_IN_TRASH);
+	}
+
+	@Override
+	public List<TrashRenderer> getTrashModelTrashRenderers(
+			long classPK, int start, int end, OrderByComparator<?> obc)
+		throws PortalException {
+
+		List<WikiPage> pages = _wikiPageLocalService.getPages(
+			classPK, true, WorkflowConstants.STATUS_IN_TRASH, start, end,
+			(OrderByComparator<WikiPage>)obc);
+
+		TrashHandler trashHandler = TrashHandlerRegistryUtil.getTrashHandler(
+			WikiPage.class.getName());
+
+		List<TrashRenderer> trashRenderers = new ArrayList<>(pages.size());
+
+		for (WikiPage page : pages) {
+			trashRenderers.add(
+				trashHandler.getTrashRenderer(page.getResourcePrimKey()));
+		}
+
+		return trashRenderers;
+	}
+
+	@Override
 	public TrashRenderer getTrashRenderer(long classPK) throws PortalException {
 		WikiNode node = _wikiNodeLocalService.getNode(classPK);
 
@@ -226,11 +255,11 @@ public class WikiNodeTrashHandler extends BaseWikiTrashHandler {
 
 		WikiNode node = _wikiNodeLocalService.getNode(classPK);
 
-		long plid = PortalUtil.getPlidFromPortletId(
+		long plid = _portal.getPlidFromPortletId(
 			node.getGroupId(), WikiPortletKeys.WIKI);
 
 		if (plid == LayoutConstants.DEFAULT_PLID) {
-			portletURL = PortalUtil.getControlPanelPortletURL(
+			portletURL = _portal.getControlPanelPortletURL(
 				portletRequest, WikiPortletKeys.WIKI_ADMIN,
 				PortletRequest.RENDER_PHASE);
 		}
@@ -269,6 +298,9 @@ public class WikiNodeTrashHandler extends BaseWikiTrashHandler {
 
 		_wikiPageLocalService = wikiPageLocalService;
 	}
+
+	@Reference
+	private Portal _portal;
 
 	private WikiNodeLocalService _wikiNodeLocalService;
 	private WikiPageLocalService _wikiPageLocalService;

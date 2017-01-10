@@ -52,6 +52,10 @@ AUI.add(
 						valueFn: '_valueFormBuilder'
 					},
 
+					getDataProviderParametersSettingsURL: {
+						value: ''
+					},
+
 					getFieldTypeSettingFormContextURL: {
 						value: ''
 					},
@@ -445,8 +449,6 @@ AUI.add(
 						instance.serializeFormBuilder();
 
 						var state = instance.getState();
-
-						var definition = state.definition;
 
 						if (!instance.isEmpty()) {
 							if (!instance._isSameState(instance.savedState, state)) {

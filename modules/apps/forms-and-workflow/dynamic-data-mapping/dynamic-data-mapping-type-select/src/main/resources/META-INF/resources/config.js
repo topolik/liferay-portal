@@ -15,7 +15,18 @@
 							},
 							path: 'select_field.js',
 							requires: [
-								'liferay-ddm-form-renderer-field'
+								'liferay-ddm-form-field-select-search-support',
+								'liferay-ddm-form-field-select-template',
+								'liferay-ddm-form-renderer-field',
+								'liferay-ddm-soy-template-util'
+							]
+						},
+						'liferay-ddm-form-field-select-search-support': {
+							path: 'select_search_support.js',
+							requires: [
+								'highlight',
+								'liferay-ddm-form-field-select-template',
+								'liferay-ddm-soy-template-util'
 							]
 						},
 						'liferay-ddm-form-field-select-template': {

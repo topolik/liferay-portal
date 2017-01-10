@@ -357,7 +357,8 @@ public class PrintArtifactPublishCommandsTask extends DefaultTask {
 					File.separator;
 
 			commands.add(command + "*.wsdd");
-			commands.add(command + "**" + File.separator + "*.wsdd");
+			commands.add(
+				_getQuietCommand(command + "**" + File.separator + "*.wsdd"));
 
 			commands.add(_getGitCommitCommand("wsdd", false, false, true));
 		}
@@ -374,8 +375,11 @@ public class PrintArtifactPublishCommandsTask extends DefaultTask {
 
 		Project project = getProject();
 
-		if (all || quiet) {
-			sb.append("(git diff-index --quiet HEAD || ");
+		if (all) {
+			sb.append("(git diff --quiet || ");
+		}
+		else if (quiet) {
+			sb.append("(git diff --cached --quiet || ");
 		}
 
 		sb.append("git commit ");
@@ -443,6 +447,10 @@ public class PrintArtifactPublishCommandsTask extends DefaultTask {
 
 	private String _getGradleRelativePath() {
 		return _getRelativePath(_getGradleFile());
+	}
+
+	private String _getQuietCommand(String command) {
+		return "(" + command + " || true)";
 	}
 
 	private String _getRelativePath(Object object) {

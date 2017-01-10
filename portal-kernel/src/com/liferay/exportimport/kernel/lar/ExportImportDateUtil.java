@@ -524,7 +524,7 @@ public class ExportImportDateUtil {
 				return false;
 			}
 		}
-		else if ((startDate != null) || (endDate != null)) {
+		else if (startDate != null) {
 			return false;
 		}
 

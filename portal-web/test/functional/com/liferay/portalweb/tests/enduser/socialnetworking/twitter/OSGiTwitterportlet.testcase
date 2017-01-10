@@ -39,28 +39,27 @@
 		</execute>
 
 		<execute macro="Twitter#configureUserProfile">
-			<var name="twitterProfileName" value="liferayqa" />
+			<var name="twitterProfileName" value="liferayqa3" />
 		</execute>
 
-		<execute function="Pause" locator1="20000" />
+		<execute function="Pause" locator1="50000" />
 
 		<execute function="Refresh" />
 
 		<execute macro="Twitter#viewConfiguredScreenName">
-			<var name="twitterProfileName" value="liferayqa" />
+			<var name="twitterProfileName" value="liferayqa3" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="Activities" />
 		</execute>
 
-		<execute function="Pause" locator1="10000" />
+		<execute function="Pause" locator1="50000" />
 
 		<execute function="Refresh" />
 
 		<execute macro="Twitter#viewFeedEntry">
-			<var name="entryContent" value="Now Available! test.deprecated 1 (Liferay, Inc.) https://www-nightly.liferay.com/web/guest/marketplace/-/mp/application/83373616 … #TestLRMP" />
-			<var name="entryDate" value="December 1" />
+			<var name="entryContent" value="This is a tweet sent on Twitter." />
 		</execute>
 	</command>
 </definition>

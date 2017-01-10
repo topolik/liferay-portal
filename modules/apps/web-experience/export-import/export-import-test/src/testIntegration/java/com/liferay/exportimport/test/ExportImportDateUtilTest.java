@@ -356,6 +356,38 @@ public class ExportImportDateUtilTest {
 	}
 
 	@Test
+	public void testUpdateLastPublishDateWithoutExistingLastPublishDate()
+		throws Exception {
+
+		Date lastPublishDate = ExportImportDateUtil.getLastPublishDate(
+			_portletPreferences);
+
+		Assert.assertNull(lastPublishDate);
+
+		Date now = new Date();
+
+		DateRange dateRange = new DateRange(now, null);
+
+		ExportImportDateUtil.updateLastPublishDate(
+			PortletKeys.EXPORT_IMPORT, _portletPreferences, dateRange, now);
+
+		lastPublishDate = ExportImportDateUtil.getLastPublishDate(
+			_portletPreferences);
+
+		Assert.assertNull(lastPublishDate);
+
+		dateRange = new DateRange(null, now);
+
+		ExportImportDateUtil.updateLastPublishDate(
+			PortletKeys.EXPORT_IMPORT, _portletPreferences, dateRange, now);
+
+		lastPublishDate = ExportImportDateUtil.getLastPublishDate(
+			_portletPreferences);
+
+		Assert.assertEquals(now, lastPublishDate);
+	}
+
+	@Test
 	public void testUpdateLastPublishDateWithoutGapLayoutSet()
 		throws Exception {
 

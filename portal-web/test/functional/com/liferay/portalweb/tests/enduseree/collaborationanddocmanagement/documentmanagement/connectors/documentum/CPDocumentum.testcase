@@ -790,7 +790,6 @@
 
 		<execute macro="DMDocument#viewSearchResultsCP">
 			<var name="dmDocumentTitle" value="Document_2.doc" />
-			<var name="dmParentFolder" value="Home » Documentum Repository Name" />
 		</execute>
 	</command>
 
@@ -812,7 +811,6 @@
 
 		<execute macro="DMDocument#viewSearchResultsCP">
 			<var name="dmDocumentTitle" value="Document_3.doc" />
-			<var name="dmParentFolder" value="Home » Documentum Repository Name" />
 			<var name="dmRepositoryName" value="Documentum Repository Name" />
 		</execute>
 	</command>

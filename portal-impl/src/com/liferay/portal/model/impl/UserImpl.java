@@ -304,7 +304,7 @@ public class UserImpl extends UserBaseImpl {
 
 		String profileFriendlyURL = getProfileFriendlyURL();
 
-		if (Validator.isNotNull(profileFriendlyURL)) {
+		if (profileFriendlyURL != null) {
 			return portalURL.concat(PortalUtil.getPathContext()).concat(
 				profileFriendlyURL);
 		}
@@ -387,7 +387,7 @@ public class UserImpl extends UserBaseImpl {
 
 		String profileFriendlyURL = getProfileFriendlyURL();
 
-		if (Validator.isNotNull(profileFriendlyURL)) {
+		if (profileFriendlyURL != null) {
 			return PortalUtil.addPreservedParameters(
 				themeDisplay,
 				portalURL.concat(
@@ -955,7 +955,7 @@ public class UserImpl extends UserBaseImpl {
 	}
 
 	protected String getProfileFriendlyURL() {
-		if (Validator.isNull(PropsValues.USERS_PROFILE_FRIENDLY_URL)) {
+		if (!_hasUsersProfileFriendlyURL) {
 			return null;
 		}
 
@@ -968,6 +968,9 @@ public class UserImpl extends UserBaseImpl {
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(UserImpl.class);
+
+	private static final boolean _hasUsersProfileFriendlyURL = Validator.isNull(
+		PropsValues.USERS_PROFILE_FRIENDLY_URL);
 
 	private Locale _locale;
 	private boolean _passwordModified;

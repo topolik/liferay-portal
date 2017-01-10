@@ -173,6 +173,8 @@ public class ConfigurableUtil {
 
 			methodVisitor.visitCode();
 
+			method.setAccessible(true);
+
 			if (returnType.isPrimitive() || (returnType == String.class)) {
 				Object result = method.invoke(configurable);
 

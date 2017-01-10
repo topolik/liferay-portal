@@ -1,6 +1,8 @@
 AUI.add(
 	'liferay-ddm-form-field-select',
 	function(A) {
+		var CSS_SELECT_TRIGGER_ACTION = 'form-builder-select-field';
+
 		var Lang = A.Lang;
 
 		var TPL_OPTION = '<option>{label}</option>';
@@ -41,6 +43,10 @@ AUI.add(
 					}
 				},
 
+				AUGMENTS: [
+					Liferay.DDM.Field.SelectFieldSearchSupport
+				],
+
 				EXTENDS: Liferay.DDM.Renderer.Field,
 
 				NAME: 'liferay-ddm-form-field-select',
@@ -50,8 +56,8 @@ AUI.add(
 						var instance = this;
 
 						instance._eventHandlers.push(
-							A.one('doc').after('click', A.bind(instance.closeList, instance)),
-							instance.bindContainerEvent('mousedown', instance._afterClickSelectTrigger, '.form-builder-select-field'),
+							A.one('doc').after('click', A.bind(instance._afterClickOutside, instance)),
+							instance.bindContainerEvent('mousedown', instance._afterClickSelectTrigger, '.' + CSS_SELECT_TRIGGER_ACTION),
 							instance.bindContainerEvent('mousedown', instance._onClickItem, 'li')
 						);
 					},
@@ -66,21 +72,17 @@ AUI.add(
 						instance.set('value', []);
 					},
 
-					closeList: function(event) {
+					closeList: function() {
 						var instance = this;
 
-						var container = instance.get('container');
-
-						var ancestor = event.target.ancestor('.form-builder-select-field');
-
-						if (ancestor && ancestor == container.one('.form-builder-select-field')) {
-							return;
-						}
-
 						if (!instance.get('readOnly') && instance._isListOpen()) {
+							var container = instance.get('container');
+
 							container.one('.drop-chosen').addClass('hide');
 
 							container.one('.form-builder-select-field').removeClass('active');
+
+							instance.fire('closeList');
 						}
 					},
 
@@ -91,7 +93,8 @@ AUI.add(
 							SelectField.superclass.getTemplateContext.apply(instance, arguments),
 							{
 								options: instance.get('options'),
-								selecteCaretDoubleIcon: Liferay.Util.getLexiconIconTpl('caret-double-l', 'icon-monospaced'),
+								selectCaretDoubleIcon: Liferay.Util.getLexiconIconTpl('caret-double-l', 'icon-monospaced'),
+								selectSearchIcon: Liferay.Util.getLexiconIconTpl('search', 'icon-monospaced'),
 								strings: instance.get('strings'),
 								value: instance.getValueSelected()
 							}
@@ -143,6 +146,14 @@ AUI.add(
 						return values;
 					},
 
+					openList: function() {
+						var instance = this;
+
+						instance._getSelectTriggerAction().addClass('active');
+
+						instance.get('container').one('.drop-chosen').toggleClass('hide');
+					},
+
 					render: function() {
 						var instance = this;
 
@@ -170,6 +181,22 @@ AUI.add(
 						return instance;
 					},
 
+					setValue: function(value) {
+						var instance = this;
+
+						var inputNode = instance.getInputNode();
+
+						if (!Lang.isArray(value)) {
+							value = [value];
+						}
+
+						inputNode.all('option').each(
+							function(optionNode) {
+								instance._setSelectNodeOptions(optionNode, value);
+							}
+						);
+					},
+
 					showErrorMessage: function() {
 						var instance = this;
 
@@ -182,19 +209,27 @@ AUI.add(
 						inputGroup.insert(container.one('.help-block'), 'after');
 					},
 
+					_afterClickOutside: function(event) {
+						var instance = this;
+
+						if (instance._isClickingOutSide(event)) {
+							instance.closeList();
+						}
+					},
+
 					_afterClickSelectTrigger: function(event) {
-						event.stopPropagation();
+						event.preventDefault();
 
 						var instance = this;
 
-						var container = instance.get('container');
-
-						var selectGroup = container.one('.form-builder-select-field');
-
-						selectGroup.addClass('active');
-
 						if (!instance.get('readOnly')) {
-							container.one('.drop-chosen').toggleClass('hide');
+							var target = event.target;
+
+							if (target.ancestor('.search-chosen')) {
+								return;
+							}
+
+							instance.openList();
 						}
 					},
 
@@ -212,10 +247,6 @@ AUI.add(
 						}
 
 						return value;
-					},
-
-					_getIndexOfOption: function(value, optionValue) {
-						return value.indexOf(optionValue);
 					},
 
 					_getOptions: function(options) {
@@ -246,6 +277,20 @@ AUI.add(
 						return optionsSelected;
 					},
 
+					_getSelectTriggerAction: function() {
+						var instance = this;
+
+						return instance.get('container').one('.' + CSS_SELECT_TRIGGER_ACTION);
+					},
+
+					_isClickingOutSide: function(event) {
+						var instance = this;
+
+						var ancestor = event.target.ancestor('.' + CSS_SELECT_TRIGGER_ACTION);
+
+						return !ancestor || ancestor !== instance._getSelectTriggerAction();
+					},
+
 					_isListOpen: function() {
 						var instance = this;
 
@@ -261,15 +306,47 @@ AUI.add(
 
 						var options = instance.get('options');
 
-						var index = event.target.getAttribute('data-option-index');
+						var value = event.target.getAttribute('data-option-value');
 
-						var option = options[index];
+						instance.setValue(value);
 
-						instance.set('value', [option.value]);
-
-						instance.get('container').one('.option-selected').text(option.label);
+						instance.set('value', [value]);
 
 						instance.render();
+					},
+
+					_selectDOMOption: function(optionNode, value) {
+						var selected = false;
+
+						if (Lang.isArray(value)) {
+							value = value[0];
+						}
+
+						if (value) {
+							if (optionNode.val()) {
+								selected = value.indexOf(optionNode.val()) > -1;
+							}
+
+							if (selected) {
+								optionNode.attr('selected', selected);
+							}
+							else {
+								optionNode.removeAttribute('selected');
+							}
+						}
+					},
+
+					_setSelectNodeOptions: function(optionNode, value) {
+						var instance = this;
+
+						if (instance.get('multiple')) {
+							for (var i = 0; i < value.length; i++) {
+								instance._selectDOMOption(optionNode, value[i]);
+							}
+						}
+						else {
+							instance._selectDOMOption(optionNode, value);
+						}
 					}
 				}
 			}
@@ -279,6 +356,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['liferay-ddm-form-renderer-field']
+		requires: ['liferay-ddm-form-field-select', 'liferay-ddm-form-field-select-search-support', 'liferay-ddm-form-renderer-field']
 	}
 );

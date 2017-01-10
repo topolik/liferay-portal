@@ -24,42 +24,11 @@ import java.util.Date;
 public class ShutdownUtil {
 
 	public static void cancel() {
-		_instance._cancel();
-	}
-
-	public static long getInProcess() {
-		return _instance._getInProcess();
-	}
-
-	public static String getMessage() {
-		return _instance._getMessage();
-	}
-
-	public static boolean isInProcess() {
-		return _instance._isInProcess();
-	}
-
-	public static boolean isShutdown() {
-		return _instance._isShutdown();
-	}
-
-	public static void shutdown(long milliseconds) {
-		shutdown(milliseconds, StringPool.BLANK);
-	}
-
-	public static void shutdown(long milliseconds, String message) {
-		_instance._shutdown(milliseconds, message);
-	}
-
-	private ShutdownUtil() {
-	}
-
-	private void _cancel() {
 		_date = null;
 		_message = null;
 	}
 
-	private long _getInProcess() {
+	public static long getInProcess() {
 		long milliseconds = 0;
 
 		if (_date != null) {
@@ -69,11 +38,11 @@ public class ShutdownUtil {
 		return milliseconds;
 	}
 
-	private String _getMessage() {
+	public static String getMessage() {
 		return _message;
 	}
 
-	private boolean _isInProcess() {
+	public static boolean isInProcess() {
 		if (_date == null) {
 			return false;
 		}
@@ -86,7 +55,7 @@ public class ShutdownUtil {
 		}
 	}
 
-	private boolean _isShutdown() {
+	public static boolean isShutdown() {
 		if (_date == null) {
 			return false;
 		}
@@ -99,14 +68,16 @@ public class ShutdownUtil {
 		}
 	}
 
-	private void _shutdown(long milliseconds, String message) {
+	public static void shutdown(long milliseconds) {
+		shutdown(milliseconds, StringPool.BLANK);
+	}
+
+	public static void shutdown(long milliseconds, String message) {
 		_date = new Date(System.currentTimeMillis() + milliseconds);
 		_message = message;
 	}
 
-	private static final ShutdownUtil _instance = new ShutdownUtil();
-
-	private Date _date;
-	private String _message;
+	private static Date _date;
+	private static String _message;
 
 }

@@ -33,7 +33,8 @@ import com.liferay.portal.kernel.trash.TrashHandler;
 import com.liferay.portal.kernel.trash.TrashHandlerRegistryUtil;
 import com.liferay.portal.kernel.trash.TrashRenderer;
 import com.liferay.portal.kernel.trash.TrashRendererFactory;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portlet.messageboards.service.permission.MBCategoryPermission;
 import com.liferay.portlet.messageboards.util.MBUtil;
@@ -289,6 +290,60 @@ public class MBCategoryTrashHandler extends BaseTrashHandler {
 	}
 
 	@Override
+	public int getTrashModelsCount(long classPK) throws PortalException {
+		MBCategory category = _mbCategoryLocalService.getCategory(classPK);
+
+		return _mbCategoryLocalService.getCategoriesAndThreadsCount(
+			category.getGroupId(), classPK, WorkflowConstants.STATUS_IN_TRASH);
+	}
+
+	@Override
+	public List<TrashRenderer> getTrashModelTrashRenderers(
+			long classPK, int start, int end, OrderByComparator<?> obc)
+		throws PortalException {
+
+		MBCategory category = _mbCategoryLocalService.getCategory(classPK);
+
+		List<Object> categoriesAndThreads =
+			_mbCategoryLocalService.getCategoriesAndThreads(
+				category.getGroupId(), classPK,
+				WorkflowConstants.STATUS_IN_TRASH, start, end);
+
+		List<TrashRenderer> trashRenderers = new ArrayList<>(
+			categoriesAndThreads.size());
+
+		for (Object categoryOrThread : categoriesAndThreads) {
+			if (categoryOrThread instanceof MBThread) {
+				TrashHandler trashHandler =
+					TrashHandlerRegistryUtil.getTrashHandler(
+						MBThread.class.getName());
+
+				MBThread mbThread = (MBThread)categoryOrThread;
+
+				trashRenderers.add(
+					trashHandler.getTrashRenderer(mbThread.getThreadId()));
+			}
+			else if (categoryOrThread instanceof MBCategory) {
+				TrashHandler trashHandler =
+					TrashHandlerRegistryUtil.getTrashHandler(
+						MBCategory.class.getName());
+
+				MBCategory mbCategory = (MBCategory)categoryOrThread;
+
+				trashRenderers.add(
+					trashHandler.getTrashRenderer(mbCategory.getCategoryId()));
+			}
+			else {
+				throw new IllegalStateException(
+					"Expected MBThread or MBCategory, received " +
+						categoryOrThread.getClass());
+			}
+		}
+
+		return trashRenderers;
+	}
+
+	@Override
 	public TrashRenderer getTrashRenderer(long classPK) throws PortalException {
 		return _trashRendererFactory.getTrashRenderer(classPK);
 	}
@@ -391,14 +446,14 @@ public class MBCategoryTrashHandler extends BaseTrashHandler {
 		String portletId = PortletProviderUtil.getPortletId(
 			MBCategory.class.getName(), PortletProvider.Action.EDIT);
 
-		long plid = PortalUtil.getPlidFromPortletId(
+		long plid = _portal.getPlidFromPortletId(
 			category.getGroupId(), portletId);
 
 		if (plid == LayoutConstants.DEFAULT_PLID) {
 			portletId = PortletProviderUtil.getPortletId(
 				MBCategory.class.getName(), PortletProvider.Action.MANAGE);
 
-			portletURL = PortalUtil.getControlPanelPortletURL(
+			portletURL = _portal.getControlPanelPortletURL(
 				portletRequest, portletId, PortletRequest.RENDER_PHASE);
 		}
 		else {
@@ -449,6 +504,10 @@ public class MBCategoryTrashHandler extends BaseTrashHandler {
 
 	private MBCategoryLocalService _mbCategoryLocalService;
 	private MBThreadLocalService _mbThreadLocalService;
+
+	@Reference
+	private Portal _portal;
+
 	private TrashRendererFactory _trashRendererFactory;
 
 }

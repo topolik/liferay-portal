@@ -17,6 +17,8 @@
 <%
 PortletURL exportAssetURL = assetRenderer.getURLExport(liferayPortletRequest, liferayPortletResponse);
 
+exportAssetURL.setParameter("plid", String.valueOf(themeDisplay.getPlid()));
+exportAssetURL.setParameter("portletResource", portletDisplay.getId());
 exportAssetURL.setWindowState(LiferayWindowState.EXCLUSIVE);
 %>
 
