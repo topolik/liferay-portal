@@ -22,12 +22,10 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
-import com.liferay.portal.kernel.util.SearchContainerReference;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -146,14 +144,6 @@ public class SearchContainer<R> {
 		}
 
 		_emptyResultsMessage = emptyResultsMessage;
-
-		SearchContainerReference searchContainerReference =
-			(SearchContainerReference)portletRequest.getAttribute(
-				WebKeys.SEARCH_CONTAINER_REFERENCE);
-
-		if (searchContainerReference != null) {
-			searchContainerReference.register(this);
-		}
 
 		if (Validator.isNotNull(cssClass)) {
 			_cssClass = cssClass;

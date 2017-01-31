@@ -93,6 +93,17 @@
 	<td>//div[@id='index-data']//li[contains(@class,'current')]/dl/dd[contains(@class,'ico-1')]</td>
 	<td></td>
 </tr>
+<!--LOGGING_TABLE-->
+<tr>
+	<td>LOGGING_TABLE_LOGGER_NAME</td>
+	<td>//tr[@class='level-info']//span[contains(.,'${key_loggerName}')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
 </tbody>
 </table>
 </body>

@@ -500,6 +500,11 @@ public class LayoutLocalServiceUtil {
 		return getService().deleteLayout(plid);
 	}
 
+	public static com.liferay.portal.kernel.model.Layout fetchDefaultLayout(
+		long groupId, boolean privateLayout) {
+		return getService().fetchDefaultLayout(groupId, privateLayout);
+	}
+
 	public static com.liferay.portal.kernel.model.Layout fetchFirstLayout(
 		long groupId, boolean privateLayout, long parentLayoutId) {
 		return getService()

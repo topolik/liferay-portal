@@ -631,7 +631,7 @@
 		</execute>
 	</command>
 
-	<command name="MoveCheckedoutDocumentToFolder" priority="5">
+	<command ignore="true" name="MoveCheckedoutDocumentToFolder" priority="5">
 		<execute macro="Navigator#openURL" />
 
 		<execute macro="ProductMenu#gotoSitesContent">
@@ -790,7 +790,6 @@
 
 		<execute macro="DMDocument#viewSearchResultsCP">
 			<var name="dmDocumentTitle" value="Document_2.doc" />
-			<var name="dmParentFolder" value="Home » Documentum Repository Name" />
 		</execute>
 	</command>
 
@@ -812,12 +811,11 @@
 
 		<execute macro="DMDocument#viewSearchResultsCP">
 			<var name="dmDocumentTitle" value="Document_3.doc" />
-			<var name="dmParentFolder" value="Home » Documentum Repository Name" />
 			<var name="dmRepositoryName" value="Documentum Repository Name" />
 		</execute>
 	</command>
 
-	<command name="ViewEditedCheckedoutDocument" priority="5">
+	<command ignore="true" name="ViewEditedCheckedoutDocument" priority="5">
 		<execute macro="DMRepository#gotoCP">
 			<var name="dmRepositoryName" value="Documentum Repository Name" />
 		</execute>

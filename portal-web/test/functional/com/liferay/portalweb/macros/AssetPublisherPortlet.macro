@@ -288,9 +288,16 @@
 	</command>
 
 	<command name="configureFlaggableDisplaySettingsPG">
-		<execute macro="AssetPublisherPortlet#gotoConfigurationPG" />
+		<execute macro="Portlet#gotoPortletOptions">
+			<var name="portletName" value="${portletName}" />
+			<var name="portletOption" value="Configuration" />
+		</execute>
 
-		<execute function="AssertClick" locator1="NavTab#DISPLAY_SETTINGS" value1="Display Settings" />
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
+
+		<execute macro="Navigator#gotoNavTab">
+			<var name="navTab" value="Display Settings" />
+		</execute>
 
 		<if>
 			<equals arg1="${enableRatings}" arg2="true" />
@@ -376,7 +383,12 @@
 	</command>
 
 	<command name="configureShowMetadataFieldsPG">
-		<execute macro="AssetPublisherPortlet#gotoConfigurationPG" />
+		<execute macro="Portlet#gotoPortletOptions">
+			<var name="portletName" value="${portletName}" />
+			<var name="portletOption" value="Configuration" />
+		</execute>
+
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
 
 		<execute macro="Navigator#gotoNavTab">
 			<var name="navTab" value="Display Settings" />
@@ -386,27 +398,31 @@
 			<var name="panelHeading" value="Metadata" />
 		</execute>
 
-		<if>
-			<equals arg1="${addMetadata}" arg2="true" />
-			<then>
-				<execute function="AddSelection" locator1="APConfigurationDisplaysettings#SHOW_METADATA_AVAILABLE_FIELD_SELECT" value1="${metadataField}" />
+		<for list="${metadataFieldList}" param="metadataField">
+			<if>
+				<equals arg1="${addMetadata}" arg2="true" />
+				<then>
+					<execute function="AddSelection" locator1="APConfigurationDisplaysettings#SHOW_METADATA_AVAILABLE_FIELD_SELECT" value1="${metadataField}" />
 
-				<execute function="Click" locator1="Button#MOVE_AVAILABLE_TO_CURRENT" />
+					<execute function="Click" locator1="Button#MOVE_AVAILABLE_TO_CURRENT" />
 
-				<execute function="AssertTextEquals" locator1="APConfigurationDisplaysettings#SHOW_METADATA_CURRENT_FIELD_SELECT" value1="${metadataField}" />
-			</then>
-		</if>
+					<execute function="AssertTextEquals" locator1="APConfigurationDisplaysettings#SHOW_METADATA_CURRENT_FIELD_SELECT" value1="${metadataField}" />
+				</then>
+			</if>
+		</for>
 
-		<if>
-			<equals arg1="${removeMetadata}" arg2="true" />
-			<then>
-				<execute function="AddSelection" locator1="APConfigurationDisplaysettings#SHOW_METADATA_CURRENT_FIELD_SELECT" value1="${metadataField}" />
+		<for list="${metadataFieldList}" param="metadataField">
+			<if>
+				<equals arg1="${removeMetadata}" arg2="true" />
+				<then>
+					<execute function="AddSelection" locator1="APConfigurationDisplaysettings#SHOW_METADATA_CURRENT_FIELD_SELECT" value1="${metadataField}" />
 
-				<execute function="Click" locator1="Button#MOVE_CURRENT_TO_AVAILABLE" />
+					<execute function="Click" locator1="Button#MOVE_CURRENT_TO_AVAILABLE" />
 
-				<execute function="AssertTextEquals" locator1="APConfigurationDisplaysettings#SHOW_METADATA_AVAILABLE_FIELD_SELECT" value1="${metadataField}" />
-			</then>
-		</if>
+					<execute function="AssertTextEquals" locator1="APConfigurationDisplaysettings#SHOW_METADATA_AVAILABLE_FIELD_SELECT" value1="${metadataField}" />
+				</then>
+			</if>
+		</for>
 
 		<execute macro="PortletEntry#save" />
 
@@ -551,8 +567,10 @@
 		<execute function="AssertClick" locator1="Link#VIEW_IN_CONTEXT" value1="View in Context »" />
 	</command>
 
-	<command name="rate4StarsPG">
-		<execute function="Click#clickNoMouseOver" locator1="Ratings#YOUR_RATING_STAR_EMPTY_4" />
+	<command name="rateAssetPG">
+		<execute function="Click#clickNoMouseOver" locator1="Ratings#YOUR_RATING_STAR_EMPTY">
+			<var name="key_emptyStarPosition" value="${rating}" />
+		</execute>
 	</command>
 
 	<command name="removeSiteScope">
@@ -648,6 +666,68 @@
 		<execute function="AssertTextEquals#assertPartialText" locator1="AP#ASSET_ABSTRACT_DESCRIPTION" value1="${assetContent}" />
 	</command>
 
+	<command name="viewAssetRatingPG">
+		<if>
+			<equals arg1="${rating}" arg2="0" />
+			<then>
+				<execute function="AssertElementNotPresent" locator1="Ratings#YOUR_RATING_STAR">
+					<var name="key_ratingStarPosition" value="1" />
+				</execute>
+			</then>
+			<else>
+				<var name="ratingPosition" value="1" />
+
+				<while>
+					<not>
+						<equals arg1="${ratingPosition}" arg2="${rating}" />
+					</not>
+					<then>
+						<execute function="AssertElementPresent" locator1="Ratings#YOUR_RATING_STAR">
+							<var name="key_ratingStarPosition" value="${ratingPosition}" />
+						</execute>
+
+						<var method="MathUtil#sum('${ratingPosition}', '1')" name="ratingPosition" />
+					</then>
+				</while>
+
+				<execute function="AssertElementNotPresent" locator1="Ratings#YOUR_RATING_STAR">
+					<var name="key_ratingStarPosition" value="${ratingPosition}" />
+					<var method="MathUtil#sum('${ratingPosition}', '1')" name="key_ratingStarPosition" />
+				</execute>
+			</else>
+		</if>
+
+		<if>
+			<equals arg1="${rating}" arg2="5" />
+			<then>
+				<execute function="AssertElementNotPresent" locator1="Ratings#YOUR_RATING_STAR_EMPTY">
+					<var name="key_emptyStarPosition" value="1" />
+				</execute>
+			</then>
+			<else>
+				<var method="MathUtil#difference('5', '${rating}')" name="emptyRating" />
+				<var name="emptyStarPosition" value="1" />
+
+				<while>
+					<not>
+						<equals arg1="${emptyStarPosition}" arg2="${emptyRating}" />
+					</not>
+					<then>
+						<execute function="AssertElementPresent" locator1="Ratings#YOUR_RATING_STAR_EMPTY">
+							<var name="key_emptyStarPosition" value="${emptyStarPosition}" />
+						</execute>
+
+						<var method="MathUtil#sum('${emptyStarPosition}', '1')" name="emptyStarPosition" />
+					</then>
+				</while>
+
+				<execute function="AssertElementNotPresent" locator1="Ratings#YOUR_RATING_STAR_EMPTY">
+					<var method="MathUtil#sum('${emptyStarPosition}', '1')" name="key_emptyStarPosition" />
+				</execute>
+			</else>
+		</if>
+	</command>
+
 	<command name="viewAssetTypeNotAvailable">
 		<execute function="SelectFrame" locator1="IFrame#CONFIGURATION" />
 
@@ -658,6 +738,76 @@
 		<execute function="AssertTextNotEquals" locator1="APConfiguration#SOURCE_SCOPE_ASSET_TYPE_SELECT" value1="${assetType}" />
 
 		<execute function="SelectFrameTop" />
+	</command>
+
+	<command name="viewAssetViewCount">
+		<execute function="AssertTextEquals#assertPartialText" locator1="APAsset#ASSET_VIEW_COUNT" value1="${viewCount}">
+			<var name="key_assetTitle" value="${assetTitle}" />
+			<var name="key_viewCount" value="${viewCount}" />
+		</execute>
+	</command>
+
+	<command name="viewAverageRatingPG">
+		<if>
+			<equals arg1="${averageRating}" arg2="0" />
+			<then>
+				<execute function="AssertElementNotPresent" locator1="Ratings#AVERAGE_STAR">
+					<var name="key_averageRatingStar" value="1" />
+				</execute>
+			</then>
+			<else>
+				<var name="ratingPosition" value="1" />
+
+				<while>
+					<not>
+						<equals arg1="${ratingPosition}" arg2="${averageRating}" />
+					</not>
+					<then>
+						<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR">
+							<var name="key_averageRatingStar" value="${ratingPosition}" />
+						</execute>
+
+						<var method="MathUtil#sum('${ratingPosition}', '1')" name="ratingPosition" />
+					</then>
+				</while>
+
+				<execute function="AssertElementNotPresent" locator1="Ratings#AVERAGE_STAR">
+					<var method="MathUtil#sum('${ratingPosition}', '1')" name="key_averageRatingStar" />
+				</execute>
+			</else>
+		</if>
+
+		<if>
+			<equals arg1="${averageRating}" arg2="5" />
+			<then>
+				<execute function="AssertElementNotPresent" locator1="Ratings#AVERAGE_STAR_EMPTY">
+					<var name="key_averageEmptyStar" value="1" />
+				</execute>
+			</then>
+			<else>
+				<var method="MathUtil#difference('5', '${averageRating}')" name="emptyRating" />
+				<var name="emptyStarPosition" value="1" />
+
+				<while>
+					<not>
+						<equals arg1="${emptyStarPosition}" arg2="${emptyRating}" />
+					</not>
+					<then>
+						<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_EMPTY">
+							<var name="key_averageEmptyStar" value="${emptyStarPosition}" />
+						</execute>
+
+						<var method="MathUtil#sum('${emptyStarPosition}', '1')" name="emptyStarPosition" />
+					</then>
+				</while>
+
+				<execute function="AssertElementNotPresent" locator1="Ratings#AVERAGE_STAR_EMPTY">
+					<var method="MathUtil#sum('${emptyStarPosition}', '1')" name="key_averageEmptyStar" />
+				</execute>
+			</else>
+		</if>
+
+		<execute function="AssertTextEquals" locator1="Ratings#AVERAGE_LABEL" value1="Average (1 Vote)" />
 	</command>
 
 	<command name="viewConfigureAPDisplayTemplateFullContentBookmarksPG">
@@ -1049,24 +1199,6 @@
 				<execute function="AssertTextEquals" locator1="AP#METADATA_TAGS" value1="${tagName}" />
 			</then>
 		</if>
-	</command>
-
-	<command name="viewRate4StarsPG">
-		<execute function="AssertTextEquals" locator1="Ratings#AVERAGE_LABEL" value1="Average (1 Vote)" />
-
-		<var name="key_assetTitle" value="${assetTitle}" />
-
-		<execute function="AssertElementPresent" locator1="Ratings#YOUR_RATING_STAR_1" />
-		<execute function="AssertElementPresent" locator1="Ratings#YOUR_RATING_STAR_2" />
-		<execute function="AssertElementPresent" locator1="Ratings#YOUR_RATING_STAR_3" />
-		<execute function="AssertElementPresent" locator1="Ratings#YOUR_RATING_STAR_4" />
-		<execute function="AssertElementPresent" locator1="Ratings#YOUR_RATING_STAR_EMPTY_1" />
-
-		<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_1" />
-		<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_2" />
-		<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_3" />
-		<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_4" />
-		<execute function="AssertElementPresent" locator1="Ratings#AVERAGE_STAR_EMPTY_1" />
 	</command>
 
 	<command name="viewReadMoreLinkNotPresentPG">

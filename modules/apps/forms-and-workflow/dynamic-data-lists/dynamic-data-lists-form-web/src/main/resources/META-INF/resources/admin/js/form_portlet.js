@@ -52,6 +52,14 @@ AUI.add(
 						valueFn: '_valueFormBuilder'
 					},
 
+					getDataProviderParametersSettingsURL: {
+						value: ''
+					},
+
+					getDataProvidersURL: {
+						value: ''
+					},
+
 					getFieldTypeSettingFormContextURL: {
 						value: ''
 					},
@@ -446,8 +454,6 @@ AUI.add(
 
 						var state = instance.getState();
 
-						var definition = state.definition;
-
 						if (!instance.isEmpty()) {
 							if (!instance._isSameState(instance.savedState, state)) {
 								var editForm = instance.get('editForm');
@@ -511,7 +517,7 @@ AUI.add(
 
 						var formURL = instance._createFormURL();
 
-						return formURL   + '/preview';
+						return formURL + '/preview';
 					},
 
 					_defineIds: function(response) {

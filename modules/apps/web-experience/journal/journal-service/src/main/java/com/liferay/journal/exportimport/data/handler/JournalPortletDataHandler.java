@@ -49,7 +49,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
@@ -184,11 +184,11 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 
 		_ddmTemplateLocalService.deleteTemplates(
 			portletDataContext.getScopeGroupId(),
-			PortalUtil.getClassNameId(DDMStructure.class));
+			_portal.getClassNameId(DDMStructure.class));
 
 		_ddmStructureLocalService.deleteStructures(
 			portletDataContext.getScopeGroupId(),
-			PortalUtil.getClassNameId(JournalArticle.class));
+			_portal.getClassNameId(JournalArticle.class));
 
 		return portletPreferences;
 	}
@@ -467,7 +467,7 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 					Property classNameIdProperty = PropertyFactoryUtil.forName(
 						"classNameId");
 
-					long classNameId = PortalUtil.getClassNameId(
+					long classNameId = _portal.getClassNameId(
 						JournalArticle.class);
 
 					dynamicQuery.add(classNameIdProperty.eq(classNameId));
@@ -528,13 +528,13 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 					Property classNameIdProperty = PropertyFactoryUtil.forName(
 						"classNameId");
 
-					long ddmStructureClassNameId = PortalUtil.getClassNameId(
+					long ddmStructureClassNameId = _portal.getClassNameId(
 						DDMStructure.class);
 
 					dynamicQuery.add(
 						classNameIdProperty.eq(ddmStructureClassNameId));
 
-					long articleClassNameId = PortalUtil.getClassNameId(
+					long articleClassNameId = _portal.getClassNameId(
 						JournalArticle.class);
 
 					ddmStructureDynamicQuery.add(
@@ -623,5 +623,8 @@ public class JournalPortletDataHandler extends BasePortletDataHandler {
 	private JournalContent _journalContent;
 	private JournalFeedLocalService _journalFeedLocalService;
 	private JournalFolderLocalService _journalFolderLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

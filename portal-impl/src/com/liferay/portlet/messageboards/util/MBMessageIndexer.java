@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.messageboards.util;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.message.boards.kernel.model.MBCategory;
 import com.liferay.message.boards.kernel.model.MBCategoryConstants;
 import com.liferay.message.boards.kernel.model.MBDiscussion;
@@ -316,6 +317,8 @@ public class MBMessageIndexer
 		IndexWriterHelperUtil.updateDocument(
 			getSearchEngineId(), mbMessage.getCompanyId(), document,
 			isCommitImmediately());
+
+		reindexAttachments(mbMessage);
 	}
 
 	@Override
@@ -364,6 +367,19 @@ public class MBMessageIndexer
 		content = HtmlUtil.extractText(content);
 
 		return content;
+	}
+
+	protected void reindexAttachments(MBMessage mbMessage)
+		throws PortalException {
+
+		Indexer<DLFileEntry> indexer = IndexerRegistryUtil.nullSafeGetIndexer(
+			DLFileEntry.class);
+
+		for (FileEntry attachmentsFileEntry :
+				mbMessage.getAttachmentsFileEntries()) {
+
+			indexer.reindex((DLFileEntry)attachmentsFileEntry.getModel());
+		}
 	}
 
 	protected void reindexCategories(final long companyId)

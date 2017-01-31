@@ -991,8 +991,16 @@ public interface PropsKeys {
 
 	public static final String JNDI_ENVIRONMENT = "jndi.environment.";
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public static final String JOURNAL_IMAGE_EXTENSIONS = "journal.image.extensions";
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public static final String JOURNAL_IMAGE_SMALL_MAX_SIZE = "journal.image.small.max.size";
 
 	public static final String JSON_SERVICE_AUTH_TOKEN_ENABLED = "json.service.auth.token.enabled";
@@ -1916,6 +1924,8 @@ public interface PropsKeys {
 	public static final String SESSION_TIMEOUT = "session.timeout";
 
 	public static final String SESSION_TIMEOUT_AUTO_EXTEND = "session.timeout.auto.extend";
+
+	public static final String SESSION_TIMEOUT_AUTO_EXTEND_OFFSET = "session.timeout.auto.extend.offset";
 
 	public static final String SESSION_TIMEOUT_REDIRECT_ON_EXPIRE = "session.timeout.redirect.on.expire";
 

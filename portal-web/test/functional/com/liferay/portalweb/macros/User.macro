@@ -1032,9 +1032,7 @@
 	</command>
 
 	<command name="createAccount">
-		<execute function="AssertClick" locator1="UserBar#USER_SIGN_IN" value1="Sign In" />
-
-		<execute function="AssertClick" locator1="Link#CREATE_ACCOUNT" value1="Create Account" />
+		<execute macro="SignInNavigator#gotoCreateAccount" />
 
 		<execute function="Type" locator1="TextInput#FIRST_NAME" value1="${userFirstName}" />
 		<execute function="Type" locator1="TextInput#LAST_NAME" value1="${userLastName}" />
@@ -1551,6 +1549,7 @@
 			</then>
 			<else>
 				<execute macro="User#loginPG">
+					<var name="localization" value="${localization}" />
 					<var name="setupWizardEnabled" value="${setupWizardEnabled}" />
 					<var name="specificURL" value="${virtualHostsURL}" />
 					<var name="userEmailAddress" value="${userEmailAddress}" />
@@ -1589,6 +1588,26 @@
 		<execute function="AssertElementPresent" locator1="ProductMenu#PRODUCT_MENU_TABS_USER_EXPANDED" />
 	</command>
 
+	<command name="loginLocalizationPG">
+		<if>
+			<equals arg1="${localization}" arg2="JA" />
+			<then>
+				<var name="signIn" value="ログイン" />
+			</then>
+			<elseif>
+				<equals arg1="${localization}" arg2="ZH" />
+				<then>
+					<var name="signIn" value="登录" />
+				</then>
+			</elseif>
+			<else>
+				<var name="signIn" value="Sign In" />
+			</else>
+		</if>
+
+		<execute function="AssertClick" locator1="UserBar#USER_SIGN_IN" value1="${signIn}" />
+	</command>
+
 	<command name="loginPG" summary="Log into Liferay Portal as '${userEmailAddress}' using the password '${password}'">
 		<if>
 			<isset var="nodePort" />
@@ -1620,7 +1639,9 @@
 				<equals arg1="${samlEnabled}" arg2="true" />
 			</not>
 			<then>
-				<execute function="AssertClick" locator1="UserBar#USER_SIGN_IN" value1="Sign In" />
+				<execute macro="User#loginLocalizationPG">
+					<var name="localization" value="${localization}" />
+				</execute>
 			</then>
 		</if>
 
@@ -1859,6 +1880,17 @@
 		<execute function="Type" locator1="OpenIDLogin#LOGIN_PASSWORD_FIELD" value1="${openIDPassword}" />
 
 		<execute function="AssertClick" locator1="OpenIDLogin#LOGIN_BUTTON" value1="Login" />
+
+		<if>
+			<condition function="IsElementPresent" locator1="OpenIDLogin#LOGIN_ALLOW_ONCE_BUTTON" />
+			<then>
+				<var name="key_userName" value="${userName}" />
+
+				<execute function="Click" locator1="OpenIDLogin#LOGIN_PERSONA" />
+
+				<execute function="AssertClick" locator1="OpenIDLogin#LOGIN_ALLOW_ONCE_BUTTON" value1="Allow Once" />
+			</then>
+		</if>
 
 		<if>
 			<condition function="IsElementPresent#pauseIsElementPresent" locator1="Button#I_AGREE" value1="I Agree" />
@@ -2118,6 +2150,23 @@
 		<execute function="AssertClick" locator1="Button#UNLOCK" value1="Unlock" />
 
 		<execute macro="Alert#viewSuccessMessage" />
+	</command>
+
+	<command name="viewCaptchaPG">
+		<if>
+			<equals arg1="${captchaType}" arg2="captcha" />
+			<then>
+				<execute function="AssertElementPresent#assertElementPresent" locator1="SignInCreateAccount#CAPTCHA_IMAGE" />
+			</then>
+			<elseif>
+				<equals arg1="${captchaType}" arg2="recaptcha" />
+				<then>
+					<execute function="SelectFrame" locator1="IFrame#RECAPTCHA" />
+
+					<execute function="AssertElementPresent#assertElementPresent" locator1="SignInCreateAccount#RECAPTCHA_LABEL" />
+				</then>
+			</elseif>
+		</if>
 	</command>
 
 	<command name="viewCP">

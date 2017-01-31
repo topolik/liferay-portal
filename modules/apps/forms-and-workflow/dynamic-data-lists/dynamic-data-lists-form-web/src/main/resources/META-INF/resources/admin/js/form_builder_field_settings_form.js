@@ -7,7 +7,7 @@ AUI.add(
 
 		var RendererUtil = Liferay.DDM.Renderer.Util;
 
-		var SoyTemplateUtil = Liferay.DDL.SoyTemplateUtil;
+		var SoyTemplateUtil = Liferay.DDM.SoyTemplateUtil;
 
 		var FormBuilderSettingsForm = A.Component.create(
 			{
@@ -350,6 +350,6 @@ AUI.add(
 	},
 	'',
 	{
-		requires: ['liferay-ddl-soy-template-util', 'liferay-ddm-form-renderer', 'liferay-ddm-form-renderer-util', 'liferay-form']
+		requires: ['liferay-ddm-form-renderer', 'liferay-ddm-form-renderer-util', 'liferay-ddm-soy-template-util', 'liferay-form']
 	}
 );

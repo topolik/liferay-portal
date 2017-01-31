@@ -61,11 +61,6 @@
 			<bean class="com.liferay.portal.cache.key.SimpleCacheKeyGenerator" />
 		</property>
 	</bean>
-	<bean class="com.liferay.portal.kernel.captcha.CaptchaUtil" id="com.liferay.portal.kernel.captcha.CaptchaUtil">
-		<property name="captcha">
-			<bean class="com.liferay.portal.captcha.CaptchaImpl" />
-		</property>
-	</bean>
 	<bean class="com.liferay.portal.kernel.dao.jdbc.CurrentConnectionUtil">
 		<property name="currentConnection">
 			<bean class="com.liferay.portal.dao.jdbc.CurrentConnectionImpl" />
@@ -284,9 +279,7 @@
 		<property name="userPermission" ref="com.liferay.portal.service.permission.UserPermissionImpl" />
 	</bean>
 	<bean class="com.liferay.portal.kernel.servlet.BrowserSnifferUtil" id="com.liferay.portal.kernel.servlet.BrowserSnifferUtil">
-		<property name="browserSniffer">
-			<bean class="com.liferay.portal.servlet.BrowserSnifferImpl" />
-		</property>
+		<property name="browserSniffer" ref="com.liferay.portal.servlet.BrowserSnifferImpl" />
 	</bean>
 	<bean class="com.liferay.portal.kernel.servlet.DirectRequestDispatcherFactoryUtil" id="com.liferay.portal.kernel.servlet.DirectRequestDispatcherFactoryUtil">
 		<property name="directRequestDispatcherFactory">
@@ -484,6 +477,7 @@
 	</bean>
 	<bean class="com.liferay.portal.service.permission.GroupPermissionImpl" id="com.liferay.portal.service.permission.GroupPermissionImpl" />
 	<bean class="com.liferay.portal.service.permission.UserPermissionImpl" id="com.liferay.portal.service.permission.UserPermissionImpl" />
+	<bean class="com.liferay.portal.servlet.BrowserSnifferImpl" id="com.liferay.portal.servlet.BrowserSnifferImpl" />
 	<bean class="com.liferay.portal.servlet.ThreadLocalFacadeServletRequestWrapperUtil" id="com.liferay.portal.servlet.ThreadLocalFacadeServletRequestWrapperUtil">
 		<property name="stopperClassNames">
 			<set>

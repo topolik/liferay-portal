@@ -36,10 +36,6 @@ public class LayoutTypeAccessPolicyTracker {
 	public static LayoutTypeAccessPolicy getLayoutTypeAccessPolicy(
 		String type) {
 
-		return _instance._getLayoutTypeAccessPolicy(type);
-	}
-
-	private LayoutTypeAccessPolicy _getLayoutTypeAccessPolicy(String type) {
 		LayoutTypeAccessPolicy layoutTypeAccessPolicy =
 			_serviceTrackerMap.getService(type);
 
@@ -50,10 +46,7 @@ public class LayoutTypeAccessPolicyTracker {
 		return layoutTypeAccessPolicy;
 	}
 
-	private static final LayoutTypeAccessPolicyTracker _instance =
-		new LayoutTypeAccessPolicyTracker();
-
-	private final ServiceTrackerMap<String, LayoutTypeAccessPolicy>
+	private static final ServiceTrackerMap<String, LayoutTypeAccessPolicy>
 		_serviceTrackerMap = ServiceTrackerCollections.openSingleValueMap(
 			LayoutTypeAccessPolicy.class,
 			"(&(layout.type=*)(objectClass=" +

@@ -509,6 +509,12 @@ public class LayoutLocalServiceWrapper implements LayoutLocalService,
 	}
 
 	@Override
+	public com.liferay.portal.kernel.model.Layout fetchDefaultLayout(
+		long groupId, boolean privateLayout) {
+		return _layoutLocalService.fetchDefaultLayout(groupId, privateLayout);
+	}
+
+	@Override
 	public com.liferay.portal.kernel.model.Layout fetchFirstLayout(
 		long groupId, boolean privateLayout, long parentLayoutId) {
 		return _layoutLocalService.fetchFirstLayout(groupId, privateLayout,

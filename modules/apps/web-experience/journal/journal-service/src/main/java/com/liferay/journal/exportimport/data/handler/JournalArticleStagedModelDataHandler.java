@@ -56,7 +56,7 @@ import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -246,7 +246,7 @@ public class JournalArticleStagedModelDataHandler
 		PortletDataContext portletDataContext, JournalArticle article) {
 
 		if (article.getClassNameId() ==
-				PortalUtil.getClassNameId(DDMStructure.class)) {
+				_portal.getClassNameId(DDMStructure.class)) {
 
 			return false;
 		}
@@ -276,8 +276,7 @@ public class JournalArticleStagedModelDataHandler
 		}
 
 		DDMStructure ddmStructure = _ddmStructureLocalService.getStructure(
-			article.getGroupId(),
-			PortalUtil.getClassNameId(JournalArticle.class),
+			article.getGroupId(), _portal.getClassNameId(JournalArticle.class),
 			article.getDDMStructureKey(), true);
 
 		StagedModelDataHandlerUtil.exportReferenceStagedModel(
@@ -285,11 +284,11 @@ public class JournalArticleStagedModelDataHandler
 			PortletDataContext.REFERENCE_TYPE_STRONG);
 
 		if (article.getClassNameId() !=
-				PortalUtil.getClassNameId(DDMStructure.class)) {
+				_portal.getClassNameId(DDMStructure.class)) {
 
 			DDMTemplate ddmTemplate = _ddmTemplateLocalService.getTemplate(
 				article.getGroupId(),
-				PortalUtil.getClassNameId(DDMStructure.class),
+				_portal.getClassNameId(DDMStructure.class),
 				article.getDDMTemplateKey(), true);
 
 			StagedModelDataHandlerUtil.exportReferenceStagedModel(
@@ -1037,6 +1036,10 @@ public class JournalArticleStagedModelDataHandler
 	private JournalArticleResourceLocalService
 		_journalArticleResourceLocalService;
 	private JournalCreationStrategy _journalCreationStrategy;
+
+	@Reference
+	private Portal _portal;
+
 	private UserLocalService _userLocalService;
 
 }

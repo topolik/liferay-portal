@@ -215,7 +215,9 @@
 		</execute>
 	</command>
 
-	<command name="DeliverReportToEmail" priority="4">
+	<!-- LPS-69070 -->
+
+	<!-- <command name="DeliverReportToEmail" priority="4">
 		<property name="test.assert.javascript.errors" value="false" />
 		<property name="test.smtp.server.enabled" value="true" />
 
@@ -267,7 +269,7 @@
 		</execute>
 
 		<execute function="Open" locator1="http://localhost:8080" />
-	</command>
+	</command> -->
 
 	<command name="DownloadReportCSV" priority="4">
 		<execute macro="Navigator#openURL" />
@@ -611,7 +613,7 @@
 		</execute>
 
 		<execute macro="ReportsAdmin#addReportEntry">
-			<var method="TestPropsUtil#get('email.address.2')" name="emailRecipientAddress" />
+			<var method="TestPropsUtil#get('email.address.2')" name="emailNotificationsAddress" />
 			<var name="emailRecipientAddress" value="test@liferay.com" />
 			<var name="reportFormat" value="pdf" />
 			<var name="reportsDefinitionName" value="Reports Definition Name" />
@@ -640,7 +642,7 @@
 
 		<execute function="Pause" locator1="30000" />
 
-		<execute function="SelectWindow" locator1="title=Reports Admin - ${siteName}" />
+		<execute function="SelectWindow" locator1="title=Reports Definition Name - ${siteName}" />
 
 		<execute macro="ReportsAdmin#viewReportEntryFields">
 			<var name="dataSource" value="portal" />
@@ -650,15 +652,16 @@
 			<var name="userName" value="Test Test" />
 		</execute>
 
-		<execute macro="Gmail#tearDown">
-			<var method="TestPropsUtil#get('email.address.2')" name="userEmailAddress" />
-			<var method="TestPropsUtil#get('email.password.2')" name="userPassword" />
+		<execute macro="Gmail#gotoHtmlMode" />
+
+		<execute macro="Gmail#deleteSpecificMail">
+			<var name="gmailMessageTitleList" value="New Report: reports_admin_template_source_sample_class_name.pdf,Your New Account,Your New Password" />
 		</execute>
 
 		<execute function="Open" locator1="http://localhost:8080" />
 	</command>
 
-	<command name="ViewEmailRecipientDelivery" priority="4">
+	<command ignore="true" name="ViewEmailRecipientDelivery" priority="4">
 		<property name="test.assert.javascript.errors" value="false" />
 
 		<execute macro="ProductMenu#gotoControlPanelConfiguration">
@@ -714,9 +717,10 @@
 
 		<execute function="AssertElementNotPresent" locator1="Gmail#GMAIL_HTML_MODE_MESSAGE_BODY_LINK" />
 
-		<execute macro="Gmail#tearDown">
-			<var method="TestPropsUtil#get('email.address.4')" name="userEmailAddress" />
-			<var method="TestPropsUtil#get('email.password.4')" name="userPassword" />
+		<execute macro="Gmail#gotoHtmlMode" />
+
+		<execute macro="Gmail#deleteSpecificMail">
+			<var name="gmailMessageTitleList" value="New Report: reports_admin_template_source_sample_class_name.pdf,Your New Account,Your New Password" />
 		</execute>
 
 		<execute function="Open" locator1="http://localhost:8080" />

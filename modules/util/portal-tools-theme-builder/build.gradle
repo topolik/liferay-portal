@@ -1,9 +1,13 @@
+import org.gradle.api.artifacts.maven.Conf2ScopeMappingContainer
+
 apply plugin: "com.liferay.maven.plugin.builder"
 
 task writeParentThemeDependencies
 task writeTestThemeDependencies
 
 buildPluginDescriptor {
+	configurationScopeMapping "mavenCompile", Conf2ScopeMappingContainer.COMPILE
+
 	ext {
 		autoClean = false
 	}
@@ -15,21 +19,36 @@ buildPluginDescriptor {
 }
 
 configurations {
+	mavenCompile {
+		extendsFrom compile
+	}
+
+	mavenDistribution
 	parentThemes
 	testThemes
 }
 
 dependencies {
+	compileInclude group: "com.beust", name: "jcommander", version: "1.48"
+	compileInclude group: "net.coobird", name: "thumbnailator", version: "0.4.8"
+
+	mavenCompile group: "com.liferay", name: "com.liferay.frontend.theme.styled", version: "2.0.13"
+	mavenCompile group: "com.liferay", name: "com.liferay.frontend.theme.unstyled", version: "2.0.13"
+
+	mavenDistribution classifier: "bin", ext: "zip", group: "org.apache.maven", name: "apache-maven", version: "3.3.9"
+
+	parentThemes group: "com.liferay.plugins", name: "classic-theme", version: "1.0.2"
 	parentThemes project(":apps:foundation:frontend-theme:frontend-theme-styled")
 	parentThemes project(":apps:foundation:frontend-theme:frontend-theme-unstyled")
 
-	provided group: "com.beust", name: "jcommander", version: "1.48"
-	provided group: "net.coobird", name: "thumbnailator", transitive: false, version: "0.4.8"
 	provided group: "org.apache.ant", name: "ant", transitive: false, version: "1.9.7"
-	provided group: "org.apache.maven", name: "maven-plugin-api", transitive: false, version: "3.0.4"
+	provided group: "org.apache.maven", name: "maven-artifact", version: "3.2.5"
+	provided group: "org.apache.maven", name: "maven-core", version: "3.2.5"
+	provided group: "org.apache.maven", name: "maven-plugin-api", version: "3.2.5"
 
 	testCompile group: "com.googlecode.json-simple", name: "json-simple", version: "1.1"
 	testCompile group: "org.apache.ant", name: "ant-testutil", version: "1.9.7"
+	testCompile project(":test:maven-executor")
 
 	testThemes project(":apps:foundation:frontend-theme:frontend-theme-user-dashboard")
 	testThemes project(":apps:foundation:frontend-theme:frontend-theme-user-profile")
@@ -46,11 +65,20 @@ liferay {
 }
 
 test {
-	dependsOn jar
+	dependsOn install
 	dependsOn writeParentThemeDependencies
 	dependsOn writeTestThemeDependencies
 
+	doFirst {
+		systemProperty "maven.distribution.file.name", configurations.mavenDistribution.singleFile
+	}
+
 	systemProperty "theme.builder.classpath", jar.archivePath
+	systemProperty "theme.builder.version", jar.version
+}
+
+updateFileVersions {
+	match(/\t\t\t\t<version>(\d.+)<\/version>/, "samples/pom.xml")
 }
 
 writeParentThemeDependencies {

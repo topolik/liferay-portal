@@ -1,7 +1,7 @@
 <definition>
 	<command name="_addPageTypeEmbedded">
 		<execute function="Type" locator1="SitePagesEditPage#PAGE_TYPE_EMBEDDED_URL_FIELD" value1="${pageTypeURL}" />
-		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesEditPage#PAGE_TYPE_EMBEDDED_DESCRIPTION_FIELD" value1="Show content from another website." />
+		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesEditPage#PAGE_TYPE_DESCRIPTION" value1="Show content from another website." />
 	</command>
 
 	<command name="_addPageTypeFullPageApplication">
@@ -9,8 +9,8 @@
 	</command>
 
 	<command name="_addPageTypeLinkToURL">
-		<execute function="Type" locator1="SitePagesEditPage#PAGE_TYPE_LINK_TO_URL_URL_FIELD" value1="${pageTypeURL}" />
-		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesEditPage#PAGE_TYPE_LINK_TO_URL_DESCRIPTION_FIELD" value1="Link to another website." />
+		<execute function="Type" locator1="TextInput#URL" value1="${pageTypeURL}" />
+		<execute function="AssertTextEquals#assertPartialText" locator1="SitePagesEditPage#PAGE_TYPE_DESCRIPTION" value1="Link to another website." />
 	</command>
 
 	<command name="_addPageTypePanel">
@@ -341,16 +341,20 @@
 
 		<execute function="AssertClick" locator1="MenuItem#COPY_APPLICATIONS" value1="Copy Applications" />
 
-		<execute function="AssertTextEquals" locator1="SitePagesEditPage#COPY_APPLICATIONS_MESSAGE_INFO" value1="The applications in page ${pageName} will be replaced with the ones in the page you select below." />
+		<execute function="SelectFrameTop" />
+
+		<execute function="SelectFrame" locator1="IFrame#DIALOG" />
+
+		<execute function="AssertTextEquals" locator1="Message#INFO" value1="The applications in page ${pageName} will be replaced with the ones in the page you select below." />
 		<execute function="AssertTextEquals" locator1="SitePagesEditPage#COPY_APPLICATIONS_COPY_FROM_PAGE_LABEL" value1="Copy from Page" />
 
 		<execute function="Click" locator1="SitePagesEditPage#COPY_APPLICATIONS_COPY_FROM_PAGE_SELECT" value1="${pageNameCopy}" />
 
-		<execute function="AssertClick" locator1="SitePagesEditPage#COPY_APPLICATIONS_COPY_BUTTON" value1="Copy" />
+		<execute function="SelectFrameTop" />
 
-		<var name="key_portletName" value="Blogs" />
+		<execute macro="Button#clickDone" />
 
-		<execute function="AssertTextNotPresent" locator1="Portlet#TITLE" value1="Blogs" />
+		<execute macro="Alert#viewSuccessMessage" />
 	</command>
 
 	<command name="deleteFriendlyURLPG">
@@ -445,9 +449,7 @@
 		<if>
 			<equals arg1="${pageType}" arg2="Link to a Page of This Site" />
 			<then>
-				<var name="key_indexNumber" value="${indexNumber}" />
-
-				<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_LINK_TO_PAGE_PAGE_SELECT" value1="index=${indexNumber}" />
+				<execute function="Select" locator1="SitePagesEditPage#PAGE_TYPE_LINK_TO_PAGE_PAGE_SELECT" value1="regexp:.*${pageLinkName}.*" />
 			</then>
 			<elseif>
 				<equals arg1="${pageType}" arg2="Embedded" />
@@ -456,6 +458,8 @@
 				</then>
 			</elseif>
 		</if>
+
+		<execute function="Pause" locator1="3000" />
 
 		<execute macro="PortletEntry#save" />
 	</command>

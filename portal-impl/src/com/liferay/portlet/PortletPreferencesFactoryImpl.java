@@ -64,6 +64,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletRequest;
@@ -476,10 +477,7 @@ public class PortletPreferencesFactoryImpl
 				ownerType = PortletKeys.PREFS_OWNER_TYPE_LAYOUT;
 				plid = layout.getPlid();
 
-				LayoutTypePortlet layoutTypePortlet =
-					(LayoutTypePortlet)layout.getLayoutType();
-
-				if (layoutTypePortlet.isPortletEmbedded(portletId)) {
+				if (layout.isPortletEmbedded(portletId, layout.getGroupId())) {
 					ownerId = layout.getGroupId();
 					plid = PortletKeys.PREFS_PLID_SHARED;
 				}
@@ -883,6 +881,15 @@ public class PortletPreferencesFactoryImpl
 	}
 
 	protected Map<String, Preference> toPreferencesMap(String xml) {
+		if (Objects.equals(xml, PortletConstants.DEFAULT_PREFERENCES)) {
+			if (_defaultPreferencesMap == null) {
+				_defaultPreferencesMap = createPreferencesMap(
+					PortletConstants.DEFAULT_PREFERENCES);
+			}
+
+			return _defaultPreferencesMap;
+		}
+
 		if (Validator.isNull(xml)) {
 			return Collections.emptyMap();
 		}
@@ -924,6 +931,7 @@ public class PortletPreferencesFactoryImpl
 	private static final Log _log = LogFactoryUtil.getLog(
 		PortletPreferencesFactoryImpl.class);
 
+	private Map<String, Preference> _defaultPreferencesMap;
 	private final PortalCache<String, Map<String, Preference>>
 		_preferencesMapPortalCache = SingleVMPoolUtil.getPortalCache(
 			PortletPreferencesFactoryImpl.class.getName());

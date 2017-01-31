@@ -14,17 +14,28 @@
 
 package com.liferay.journal.web.internal.servlet.taglib.ui;
 
+import com.liferay.journal.configuration.JournalFileUploadsConfiguration;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.servlet.taglib.ui.FormNavigatorEntry;
 
-import javax.servlet.ServletContext;
+import java.io.IOException;
 
+import java.util.Map;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eudaldo Alonso
  */
 @Component(
+	configurationPid = "com.liferay.journal.configuration.JournalFileUploadsConfiguration",
 	property = {"form.navigator.entry.order:Integer=70"},
 	service = FormNavigatorEntry.class
 )
@@ -37,6 +48,18 @@ public class JournalSmallImageFormNavigatorEntry
 	}
 
 	@Override
+	public void include(
+			HttpServletRequest request, HttpServletResponse response)
+		throws IOException {
+
+		request.setAttribute(
+			JournalFileUploadsConfiguration.class.getName(),
+			_journalFileUploadsConfiguration);
+
+		super.include(request, response);
+	}
+
+	@Override
 	@Reference(
 		target = "(osgi.web.symbolicname=com.liferay.journal.web)", unbind = "-"
 	)
@@ -44,9 +67,19 @@ public class JournalSmallImageFormNavigatorEntry
 		super.setServletContext(servletContext);
 	}
 
+	@Activate
+	@Modified
+	protected void activate(Map<String, Object> properties) {
+		_journalFileUploadsConfiguration = ConfigurableUtil.createConfigurable(
+			JournalFileUploadsConfiguration.class, properties);
+	}
+
 	@Override
 	protected String getJspPath() {
 		return "/article/small_image.jsp";
 	}
+
+	private volatile JournalFileUploadsConfiguration
+		_journalFileUploadsConfiguration;
 
 }

@@ -1175,9 +1175,6 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 								userGroupId);
 					}
 
-					_userLocalService.addUserGroupUsers(
-						userGroupId, new long[] {user.getUserId()});
-
 					newUserIds.add(user.getUserId());
 				}
 			}
@@ -1193,6 +1190,8 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 						ldapServerId + " in " + stopWatch.getTime() + "ms");
 		}
 
+		Set<Long> deletedUserIds = new LinkedHashSet<>();
+
 		List<User> userGroupUsers = _userLocalService.getUserGroupUsers(
 			userGroupId);
 
@@ -1206,10 +1205,15 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 							userGroupId);
 				}
 
-				_userLocalService.deleteUserGroupUser(
-					userGroupId, user.getUserId());
+				deletedUserIds.add(user.getUserId());
 			}
 		}
+
+		_userLocalService.addUserGroupUsers(
+			userGroupId, ArrayUtil.toLongArray(newUserIds));
+
+		_userLocalService.deleteUserGroupUsers(
+			userGroupId, ArrayUtil.toLongArray(deletedUserIds));
 	}
 
 	protected void populateExpandoAttributes(

@@ -421,62 +421,50 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 			boolean updateName)
 		throws Exception {
 
-		try (PreparedStatement ps1 = connection.prepareStatement(
-				"select resourcePermissionId, name, scope, primKey from " +
-					"ResourcePermission where name = '" + oldRootPortletId +
-						"'");
+		StringBundler sb = new StringBundler(5);
+
+		sb.append("select distinct primKey from ResourcePermission where ");
+		sb.append("name = '");
+		sb.append(oldRootPortletId);
+		sb.append("' and scope = ");
+		sb.append(ResourceConstants.SCOPE_INDIVIDUAL);
+
+		try (PreparedStatement ps1 = connection.prepareStatement(sb.toString());
 			PreparedStatement ps2 =
 				AutoBatchPreparedStatementUtil.concurrentAutoBatch(
 					connection,
-					"update ResourcePermission set name = ?, primKey = ? " +
-						"where resourcePermissionId = ?");
+					"update ResourcePermission set primKey = ? where primKey " +
+						"= ?");
 			ResultSet rs = ps1.executeQuery()) {
 
 			while (rs.next()) {
-				long resourcePermissionId = rs.getLong("resourcePermissionId");
-				String name = rs.getString("name");
-				int scope = rs.getInt("scope");
-				String primKey = rs.getString("primKey");
+				String oldPrimKey = rs.getString("primKey");
 
-				String newName = name;
+				int pos = oldPrimKey.indexOf(PortletConstants.LAYOUT_SEPARATOR);
 
-				if (updateName) {
-					newName = newRootPortletId;
+				if (pos != -1) {
+					long plid = GetterUtil.getLong(
+						oldPrimKey.substring(0, pos));
+
+					String portletId = oldPrimKey.substring(
+						pos + PortletConstants.LAYOUT_SEPARATOR.length());
+
+					String instanceId = PortletConstants.getInstanceId(
+						portletId);
+					long userId = PortletConstants.getUserId(portletId);
+
+					String newPortletId = PortletConstants.assemblePortletId(
+						newRootPortletId, userId, instanceId);
+
+					String newPrimKey = PortletPermissionUtil.getPrimaryKey(
+						plid, newPortletId);
+
+					ps2.setString(1, newPrimKey);
+
+					ps2.setString(2, oldPrimKey);
+
+					ps2.addBatch();
 				}
-
-				if (scope == ResourceConstants.SCOPE_INDIVIDUAL) {
-					int pos = primKey.indexOf(
-						PortletConstants.LAYOUT_SEPARATOR);
-
-					if (pos != -1) {
-						long plid = GetterUtil.getLong(
-							primKey.substring(0, pos));
-
-						String portletId = primKey.substring(
-							pos + PortletConstants.LAYOUT_SEPARATOR.length());
-
-						String instanceId = PortletConstants.getInstanceId(
-							portletId);
-						long userId = PortletConstants.getUserId(portletId);
-
-						String newPortletId =
-							PortletConstants.assemblePortletId(
-								newRootPortletId, userId, instanceId);
-
-						primKey = PortletPermissionUtil.getPrimaryKey(
-							plid, newPortletId);
-					}
-
-					if (name.equals(primKey)) {
-						primKey = newName;
-					}
-				}
-
-				ps2.setString(1, newName);
-				ps2.setString(2, primKey);
-				ps2.setLong(3, resourcePermissionId);
-
-				ps2.addBatch();
 			}
 
 			ps2.executeBatch();
@@ -485,6 +473,17 @@ public abstract class BaseUpgradePortletId extends UpgradeProcess {
 			if (_log.isWarnEnabled()) {
 				_log.warn(sqle, sqle);
 			}
+		}
+
+		if (updateName) {
+			runSQL(
+				"update ResourcePermission set primKey = '" + newRootPortletId +
+					"' where primKey = '" + oldRootPortletId + "' and name = " +
+						"'" + oldRootPortletId + "'");
+
+			runSQL(
+				"update ResourcePermission set name = '" + newRootPortletId +
+					"' where name = '" + oldRootPortletId + "'");
 		}
 	}
 

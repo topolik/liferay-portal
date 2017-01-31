@@ -362,17 +362,6 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 		mbMessagePersistence.update(message);
 
-		// Attachments
-
-		if (ListUtil.isNotEmpty(inputStreamOVPs)) {
-			Folder folder = message.addAttachmentsFolder();
-
-			PortletFileRepositoryUtil.addPortletFileEntries(
-				message.getGroupId(), userId, MBMessage.class.getName(),
-				message.getMessageId(), MBConstants.SERVICE_NAME,
-				folder.getFolderId(), inputStreamOVPs);
-		}
-
 		// Resources
 
 		if ((parentMessageId !=
@@ -400,6 +389,17 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 				addMessageResources(
 					message, serviceContext.getModelPermissions());
 			}
+		}
+
+		// Attachments
+
+		if (ListUtil.isNotEmpty(inputStreamOVPs)) {
+			Folder folder = message.addAttachmentsFolder();
+
+			PortletFileRepositoryUtil.addPortletFileEntries(
+				message.getGroupId(), userId, MBMessage.class.getName(),
+				message.getMessageId(), MBConstants.SERVICE_NAME,
+				folder.getFolderId(), inputStreamOVPs);
 		}
 
 		// Asset
@@ -1964,11 +1964,14 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 
 		subject = HtmlUtil.extractText(body);
 
-		if (subject.length() <= 50) {
+		if (subject.length() <= MBMessageConstants.MESSAGE_SUBJECT_MAX_LENGTH) {
 			return subject;
 		}
 
-		return subject.substring(50) + StringPool.TRIPLE_PERIOD;
+		String subjectSubstring = subject.substring(
+			0, MBMessageConstants.MESSAGE_SUBJECT_MAX_LENGTH);
+
+		return subjectSubstring + StringPool.TRIPLE_PERIOD;
 	}
 
 	protected String getMessageURL(
@@ -2029,7 +2032,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, with no direct replacement.
+	 * @deprecated As of 7.0.0, with no direct replacement
 	 */
 	@Deprecated
 	protected MBSubscriptionSender getSubscriptionSender(
@@ -2046,7 +2049,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, with no direct replacement.
+	 * @deprecated As of 7.0.0, with no direct replacement
 	 */
 	@Deprecated
 	protected void notifyDiscussionSubscribers(
@@ -2055,7 +2058,7 @@ public class MBMessageLocalServiceImpl extends MBMessageLocalServiceBaseImpl {
 	}
 
 	/**
-	 * @deprecated As of 7.0.0, with no direct replacement.
+	 * @deprecated As of 7.0.0, with no direct replacement
 	 */
 	@Deprecated
 	protected void notifySubscribers(

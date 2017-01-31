@@ -28,6 +28,7 @@ import com.liferay.asset.publisher.web.util.AssetPublisherCustomizerRegistry;
 import com.liferay.asset.publisher.web.util.AssetPublisherUtil;
 import com.liferay.exportimport.kernel.staging.LayoutStagingUtil;
 import com.liferay.exportimport.kernel.staging.StagingUtil;
+import com.liferay.item.selector.ItemSelector;
 import com.liferay.petra.content.ContentUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
@@ -50,7 +51,7 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
@@ -60,6 +61,7 @@ import com.liferay.portlet.PortletPreferencesImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -90,6 +92,12 @@ public class AssetPublisherConfigurationAction
 
 	@Override
 	public String getJspPath(HttpServletRequest request) {
+		String cmd = ParamUtil.getString(request, Constants.CMD);
+
+		if (Objects.equals(cmd, "edit_query_rule")) {
+			return "/edit_query_rule.jsp";
+		}
+
 		return "/configuration.jsp";
 	}
 
@@ -112,6 +120,8 @@ public class AssetPublisherConfigurationAction
 		request.setAttribute(
 			AssetPublisherWebKeys.ASSET_PUBLISHER_CUSTOMIZER,
 			assetPublisherCustomizer);
+
+		request.setAttribute(AssetPublisherWebKeys.ITEM_SELECTOR, itemSelector);
 
 		super.include(portletConfig, request, response);
 	}
@@ -218,17 +228,17 @@ public class AssetPublisherConfigurationAction
 
 				SessionMessages.add(
 					actionRequest,
-					PortalUtil.getPortletId(actionRequest) +
+					portal.getPortletId(actionRequest) +
 						SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
 					portletResource);
 
 				SessionMessages.add(
 					actionRequest,
-					PortalUtil.getPortletId(actionRequest) +
+					portal.getPortletId(actionRequest) +
 						SessionMessages.KEY_SUFFIX_UPDATED_CONFIGURATION);
 			}
 
-			String redirect = PortalUtil.escapeRedirect(
+			String redirect = portal.escapeRedirect(
 				ParamUtil.getString(actionRequest, "redirect"));
 
 			if (Validator.isNotNull(redirect)) {
@@ -314,7 +324,7 @@ public class AssetPublisherConfigurationAction
 			return null;
 		}
 
-		String className = PortalUtil.getClassName(defaultAssetTypeId);
+		String className = portal.getClassName(defaultAssetTypeId);
 
 		AssetRendererFactory<?> assetRendererFactory =
 			AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClassName(
@@ -512,6 +522,11 @@ public class AssetPublisherConfigurationAction
 	}
 
 	@Reference(unbind = "-")
+	protected void setItemSelector(ItemSelector itemSelector) {
+		this.itemSelector = itemSelector;
+	}
+
+	@Reference(unbind = "-")
 	protected void setLayoutLocalService(
 		LayoutLocalService layoutLocalService) {
 
@@ -603,7 +618,7 @@ public class AssetPublisherConfigurationAction
 			layout.getTypeSettings());
 
 		if (LayoutStagingUtil.isBranchingLayout(layout)) {
-			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+			HttpServletRequest request = portal.getHttpServletRequest(
 				actionRequest);
 
 			LayoutSetBranch layoutSetBranch =
@@ -734,7 +749,11 @@ public class AssetPublisherConfigurationAction
 
 	protected AssetTagLocalService assetTagLocalService;
 	protected GroupLocalService groupLocalService;
+	protected ItemSelector itemSelector;
 	protected LayoutLocalService layoutLocalService;
 	protected LayoutRevisionLocalService layoutRevisionLocalService;
+
+	@Reference
+	protected Portal portal;
 
 }

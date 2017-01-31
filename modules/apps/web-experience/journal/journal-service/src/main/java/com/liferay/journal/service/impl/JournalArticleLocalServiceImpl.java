@@ -39,6 +39,7 @@ import com.liferay.expando.kernel.util.ExpandoBridgeUtil;
 import com.liferay.exportimport.content.processor.ExportImportContentProcessor;
 import com.liferay.exportimport.content.processor.ExportImportContentProcessorRegistryUtil;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
+import com.liferay.journal.configuration.JournalFileUploadsConfiguration;
 import com.liferay.journal.configuration.JournalGroupServiceConfiguration;
 import com.liferay.journal.configuration.JournalServiceConfiguration;
 import com.liferay.journal.constants.JournalConstants;
@@ -147,7 +148,6 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -163,7 +163,6 @@ import com.liferay.portal.kernel.xml.Node;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
 import com.liferay.portal.kernel.xml.XPath;
 import com.liferay.portal.spring.extender.service.ServiceReference;
-import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.social.kernel.model.SocialActivityConstants;
 import com.liferay.trash.kernel.exception.RestoreEntryException;
 import com.liferay.trash.kernel.exception.TrashEntryException;
@@ -7170,8 +7169,7 @@ public class JournalArticleLocalServiceImpl
 			groupId, urlTitle);
 
 		if ((urlTitleArticle != null) &&
-			!Objects.equals(
-				urlTitleArticle.getArticleId(), articleId)) {
+			!Objects.equals(urlTitleArticle.getArticleId(), articleId)) {
 
 			urlTitle = getUniqueUrlTitle(id, groupId, articleId, urlTitle);
 		}
@@ -7875,9 +7873,6 @@ public class JournalArticleLocalServiceImpl
 			throw new NoSuchTemplateException("DDM template key is null");
 		}
 
-		String[] imageExtensions = PrefsPropsUtil.getStringArray(
-			PropsKeys.JOURNAL_IMAGE_EXTENSIONS, StringPool.COMMA);
-
 		if (!smallImage || Validator.isNotNull(smallImageURL) ||
 			(smallImageFile == null) || (smallImageBytes == null)) {
 
@@ -7888,7 +7883,9 @@ public class JournalArticleLocalServiceImpl
 
 		boolean validSmallImageExtension = false;
 
-		for (String imageExtension : imageExtensions) {
+		for (String imageExtension :
+				_journalFileUploadsConfiguration.imageExtensions()) {
+
 			if (StringPool.STAR.equals(imageExtension) ||
 				StringUtil.endsWith(smallImageName, imageExtension)) {
 
@@ -7902,8 +7899,8 @@ public class JournalArticleLocalServiceImpl
 			throw new ArticleSmallImageNameException(smallImageName);
 		}
 
-		long smallImageMaxSize = PrefsPropsUtil.getLong(
-			PropsKeys.JOURNAL_IMAGE_SMALL_MAX_SIZE);
+		long smallImageMaxSize =
+			_journalFileUploadsConfiguration.smallImageMaxSize();
 
 		if ((smallImageMaxSize > 0) &&
 			(smallImageBytes.length > smallImageMaxSize)) {
@@ -7991,8 +7988,16 @@ public class JournalArticleLocalServiceImpl
 				Validator.isNull(field.getValue(defaultlocale)) &&
 				(classNameId == JournalArticleConstants.CLASSNAME_ID_DEFAULT)) {
 
-				throw new StorageFieldRequiredException(
-					"Required field value is not present for " + defaultlocale);
+				StringBundler sb = new StringBundler(6);
+
+				sb.append("Required field ");
+				sb.append(field.getName());
+				sb.append(" is not present for structure ");
+				sb.append(ddmStructure.getNameCurrentValue());
+				sb.append(" for locale ");
+				sb.append(defaultlocale);
+
+				throw new StorageFieldRequiredException(sb.toString());
 			}
 		}
 	}
@@ -8259,6 +8264,9 @@ public class JournalArticleLocalServiceImpl
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		JournalArticleLocalServiceImpl.class);
+
+	@ServiceReference(type = JournalFileUploadsConfiguration.class)
+	private JournalFileUploadsConfiguration _journalFileUploadsConfiguration;
 
 	private Date _previousCheckDate;
 

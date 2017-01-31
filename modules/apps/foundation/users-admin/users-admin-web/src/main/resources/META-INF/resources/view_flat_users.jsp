@@ -357,8 +357,3 @@ boolean showRestoreButton = (searchTerms.getStatus() != WorkflowConstants.STATUS
 		<liferay-frontend:add-menu-item title='<%= LanguageUtil.get(request, "user") %>' url="<%= addUserURL.toString() %>" />
 	</liferay-frontend:add-menu>
 </c:if>
-
-<aui:script>
-	Liferay.Util.toggleSearchContainerButton('#<portlet:namespace />deactivate', '#<portlet:namespace /><%= searchContainerReference.getId(request, "userSearchContainer") %>SearchContainer', document.<portlet:namespace />fm, '<portlet:namespace />allRowIds');
-	Liferay.Util.toggleSearchContainerButton('#<portlet:namespace />restore', '#<portlet:namespace /><%= searchContainerReference.getId(request, "userSearchContainer") %>SearchContainer', document.<portlet:namespace />fm, '<portlet:namespace />allRowIds');
-</aui:script>

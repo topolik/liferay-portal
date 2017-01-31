@@ -30,7 +30,7 @@ import com.liferay.portal.kernel.portlet.configuration.icon.PortletConfiguration
 import com.liferay.portal.kernel.service.PortletLocalService;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.webdav.WebDAVUtil;
 
@@ -84,10 +84,10 @@ public class TemplatesPortletConfigurationIcon
 			"groupId", String.valueOf(themeDisplay.getScopeGroupId()));
 		portletURL.setParameter(
 			"classNameId",
-			String.valueOf(PortalUtil.getClassNameId(DDMStructure.class)));
+			String.valueOf(_portal.getClassNameId(DDMStructure.class)));
 		portletURL.setParameter(
 			"resourceClassNameId",
-			String.valueOf(PortalUtil.getClassNameId(JournalArticle.class)));
+			String.valueOf(_portal.getClassNameId(JournalArticle.class)));
 		portletURL.setParameter(
 			"refererPortletName", JournalPortletKeys.JOURNAL);
 		portletURL.setParameter(
@@ -129,6 +129,9 @@ public class TemplatesPortletConfigurationIcon
 
 		_portletLocalService = portletLocalService;
 	}
+
+	@Reference
+	private Portal _portal;
 
 	private PortletLocalService _portletLocalService;
 

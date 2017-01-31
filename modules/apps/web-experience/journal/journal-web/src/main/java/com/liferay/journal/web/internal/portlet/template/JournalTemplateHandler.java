@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.template.TemplateHandler;
 import com.liferay.portal.kernel.template.TemplateVariableCodeHandler;
 import com.liferay.portal.kernel.template.TemplateVariableGroup;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringPool;
@@ -82,7 +82,7 @@ public class JournalTemplateHandler extends BaseDDMTemplateHandler {
 		ResourceBundle resourceBundle = ResourceBundleUtil.getBundle(
 			"content.Language", locale, getClass());
 
-		String portletTitle = PortalUtil.getPortletTitle(
+		String portletTitle = _portal.getPortletTitle(
 			JournalPortletKeys.JOURNAL, resourceBundle);
 
 		return portletTitle.concat(StringPool.SPACE).concat(
@@ -181,4 +181,6 @@ public class JournalTemplateHandler extends BaseDDMTemplateHandler {
 					"image", "link-to-page"
 				}));
 
+	@Reference
+	private Portal _portal;
 }

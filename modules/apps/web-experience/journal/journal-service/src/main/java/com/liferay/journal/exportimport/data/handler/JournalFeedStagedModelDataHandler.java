@@ -36,7 +36,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
@@ -104,7 +104,7 @@ public class JournalFeedStagedModelDataHandler
 		Element feedElement = portletDataContext.getExportDataElement(feed);
 
 		DDMStructure ddmStructure = _ddmStructureLocalService.fetchStructure(
-			feed.getGroupId(), PortalUtil.getClassNameId(JournalArticle.class),
+			feed.getGroupId(), _portal.getClassNameId(JournalArticle.class),
 			feed.getDDMStructureKey(), true);
 
 		if (ddmStructure != null) {
@@ -121,7 +121,7 @@ public class JournalFeedStagedModelDataHandler
 		}
 
 		DDMTemplate ddmTemplate = _ddmTemplateLocalService.fetchTemplate(
-			feed.getGroupId(), PortalUtil.getClassNameId(DDMStructure.class),
+			feed.getGroupId(), _portal.getClassNameId(DDMStructure.class),
 			feed.getDDMTemplateKey());
 
 		if (ddmTemplate != null) {
@@ -139,8 +139,7 @@ public class JournalFeedStagedModelDataHandler
 
 		DDMTemplate rendererDDMTemplate =
 			_ddmTemplateLocalService.fetchTemplate(
-				feed.getGroupId(),
-				PortalUtil.getClassNameId(DDMStructure.class),
+				feed.getGroupId(), _portal.getClassNameId(DDMStructure.class),
 				feed.getDDMRendererTemplateKey());
 
 		if (rendererDDMTemplate != null) {
@@ -355,5 +354,8 @@ public class JournalFeedStagedModelDataHandler
 	private JournalFeedExportImportContentProcessor
 		_journalFeedExportImportContentProcessor;
 	private JournalFeedLocalService _journalFeedLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

@@ -23,7 +23,7 @@ import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalFolderConstants;
 import com.liferay.journal.service.JournalFolderService;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.webdav.BaseWebDAVStorageImpl;
 import com.liferay.portal.kernel.webdav.Resource;
 import com.liferay.portal.kernel.webdav.WebDAVException;
@@ -58,7 +58,7 @@ public class JournalWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 
 		return _ddmWebDav.deleteResource(
 			webDAVRequest, getRootPath(), getToken(),
-			PortalUtil.getClassNameId(JournalArticle.class));
+			_portal.getClassNameId(JournalArticle.class));
 	}
 
 	@Override
@@ -67,7 +67,7 @@ public class JournalWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 
 		return _ddmWebDav.getResource(
 			webDAVRequest, getRootPath(), getToken(),
-			PortalUtil.getClassNameId(JournalArticle.class));
+			_portal.getClassNameId(JournalArticle.class));
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class JournalWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 	public int putResource(WebDAVRequest webDAVRequest) throws WebDAVException {
 		return _ddmWebDav.putResource(
 			webDAVRequest, getRootPath(), getToken(),
-			PortalUtil.getClassNameId(JournalArticle.class));
+			_portal.getClassNameId(JournalArticle.class));
 	}
 
 	protected List<Resource> getFolders(WebDAVRequest webDAVRequest)
@@ -149,7 +149,7 @@ public class JournalWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 		List<DDMTemplate> ddmTemplates =
 			_ddmTemplateLocalService.getTemplatesByStructureClassNameId(
 				webDAVRequest.getGroupId(),
-				PortalUtil.getClassNameId(JournalArticle.class),
+				_portal.getClassNameId(JournalArticle.class),
 				WorkflowConstants.STATUS_APPROVED, QueryUtil.ALL_POS,
 				QueryUtil.ALL_POS, null);
 
@@ -185,5 +185,8 @@ public class JournalWebDAVStorageImpl extends BaseWebDAVStorageImpl {
 	private DDMTemplateLocalService _ddmTemplateLocalService;
 	private DDMWebDav _ddmWebDav;
 	private JournalFolderService _journalFolderService;
+
+	@Reference
+	private Portal _portal;
 
 }

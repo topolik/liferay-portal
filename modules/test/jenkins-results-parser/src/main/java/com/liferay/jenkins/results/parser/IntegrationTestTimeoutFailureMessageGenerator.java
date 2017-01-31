@@ -14,10 +14,11 @@
 
 package com.liferay.jenkins.results.parser;
 
+import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.tools.ant.Project;
+import org.dom4j.Element;
 
 /**
  * @author Peter Yoo
@@ -27,8 +28,7 @@ public class IntegrationTestTimeoutFailureMessageGenerator
 
 	@Override
 	public String getMessage(
-			String buildURL, String consoleOutput, Project project)
-		throws Exception {
+		String buildURL, String consoleOutput, Hashtable<?, ?> properties) {
 
 		Matcher matcher = _pattern.matcher(consoleOutput);
 
@@ -48,6 +48,33 @@ public class IntegrationTestTimeoutFailureMessageGenerator
 		sb.append(getConsoleOutputSnippet(snippet, false, 0, snippet.length()));
 
 		return sb.toString();
+	}
+
+	@Override
+	public Element getMessageElement(Build build) {
+		String consoleText = build.getConsoleText();
+
+		Matcher matcher = _pattern.matcher(consoleText);
+
+		if (!matcher.find()) {
+			return null;
+		}
+
+		Element messageElement = Dom4JUtil.getNewElement(
+			"div", null,
+			Dom4JUtil.getNewElement(
+				"p", null,
+				Dom4JUtil.getNewElement(
+					"strong", null, matcher.group("testName")),
+				" was aborted because it exceeded the timeout period."));
+
+		String snippet = matcher.group(0);
+
+		messageElement.add(
+			getConsoleOutputSnippetElement(
+				snippet, false, 0, snippet.length()));
+
+		return messageElement;
 	}
 
 	private static final Pattern _pattern;

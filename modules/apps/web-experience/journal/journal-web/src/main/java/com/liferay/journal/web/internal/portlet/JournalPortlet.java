@@ -101,7 +101,7 @@ import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.RSSUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
@@ -216,7 +216,7 @@ public class JournalPortlet extends MVCPortlet {
 
 		SessionMessages.add(
 			actionRequest,
-			PortalUtil.getPortletId(actionRequest) +
+			_portal.getPortletId(actionRequest) +
 				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
 			JournalPortletKeys.JOURNAL);
 	}
@@ -450,7 +450,7 @@ public class JournalPortlet extends MVCPortlet {
 
 		SessionMessages.add(
 			actionRequest,
-			PortalUtil.getPortletId(actionRequest) +
+			_portal.getPortletId(actionRequest) +
 				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
 			JournalPortletKeys.JOURNAL);
 	}
@@ -499,10 +499,10 @@ public class JournalPortlet extends MVCPortlet {
 		String resourceID = GetterUtil.getString(
 			resourceRequest.getResourceID());
 
-		HttpServletRequest request = PortalUtil.getHttpServletRequest(
+		HttpServletRequest request = _portal.getHttpServletRequest(
 			resourceRequest);
 
-		HttpServletResponse response = PortalUtil.getHttpServletResponse(
+		HttpServletResponse response = _portal.getHttpServletResponse(
 			resourceResponse);
 
 		if (resourceID.equals("compareVersions")) {
@@ -535,7 +535,7 @@ public class JournalPortlet extends MVCPortlet {
 			}
 			catch (Exception e) {
 				try {
-					PortalUtil.sendError(e, request, response);
+					_portal.sendError(e, request, response);
 				}
 				catch (ServletException se) {
 				}
@@ -649,7 +649,7 @@ public class JournalPortlet extends MVCPortlet {
 		}
 
 		UploadPortletRequest uploadPortletRequest =
-			PortalUtil.getUploadPortletRequest(actionRequest);
+			_portal.getUploadPortletRequest(actionRequest);
 
 		if (_log.isDebugEnabled()) {
 			_log.debug(
@@ -686,8 +686,8 @@ public class JournalPortlet extends MVCPortlet {
 			uploadPortletRequest, "ddmStructureKey");
 
 		DDMStructure ddmStructure = _ddmStructureLocalService.getStructure(
-			PortalUtil.getSiteGroupId(groupId),
-			PortalUtil.getClassNameId(JournalArticle.class), ddmStructureKey,
+			_portal.getSiteGroupId(groupId),
+			_portal.getClassNameId(JournalArticle.class), ddmStructureKey,
 			true);
 
 		Fields fields = DDMUtil.getFields(
@@ -856,7 +856,7 @@ public class JournalPortlet extends MVCPortlet {
 		sendEditArticleRedirect(
 			actionRequest, actionResponse, article, oldUrlTitle);
 
-		long ddmStructureClassNameId = PortalUtil.getClassNameId(
+		long ddmStructureClassNameId = _portal.getClassNameId(
 			DDMStructure.class);
 
 		if (article.getClassNameId() == ddmStructureClassNameId) {
@@ -1243,7 +1243,7 @@ public class JournalPortlet extends MVCPortlet {
 
 		String portletId = HttpUtil.getParameter(redirect, "p_p_id", false);
 
-		String namespace = PortalUtil.getPortletNamespace(portletId);
+		String namespace = _portal.getPortletNamespace(portletId);
 
 		if (Validator.isNotNull(oldUrlTitle)) {
 			String oldRedirectParam = namespace + "redirect";
@@ -1294,7 +1294,7 @@ public class JournalPortlet extends MVCPortlet {
 			WindowState windowState = actionRequest.getWindowState();
 
 			if (windowState.equals(LiferayWindowState.POP_UP)) {
-				redirect = PortalUtil.escapeRedirect(redirect);
+				redirect = _portal.escapeRedirect(redirect);
 
 				if (Validator.isNotNull(redirect)) {
 					if (actionName.equals("addArticle") && (article != null)) {
@@ -1316,7 +1316,7 @@ public class JournalPortlet extends MVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		String redirect = PortalUtil.escapeRedirect(
+		String redirect = _portal.escapeRedirect(
 			ParamUtil.getString(actionRequest, "redirect"));
 
 		WindowState windowState = actionRequest.getWindowState();
@@ -1474,6 +1474,10 @@ public class JournalPortlet extends MVCPortlet {
 	private JournalFolderService _journalFolderService;
 	private volatile JournalWebConfiguration _journalWebConfiguration;
 	private LayoutLocalService _layoutLocalService;
+
+	@Reference
+	private Portal _portal;
+
 	private TrashEntryService _trashEntryService;
 
 }

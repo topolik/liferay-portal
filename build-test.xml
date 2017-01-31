@@ -598,8 +598,15 @@ jdbc.counter.connectionProperties=oracle.jdbc.ReadTimeout=0;oracle.net.CONNECT_T
 					<include name="**/.gitrepo" />
 				</fileset>
 				<sequential>
+					<local name="gitrepo.file.content" />
+
+					<loadfile property="gitrepo.file.content" srcfile="@{gitrepo.file}" />
+
 					<if>
-						<resourcecontains resource="@{gitrepo.file}" substring="git@github.com:liferay/${subrepository.name}.git" />
+						<or>
+							<contains string="${gitrepo.file.content}" substring="git@github.com:liferay/${subrepository.name}.git" />
+							<contains string="${gitrepo.file.content}" substring="git@github.com:liferay/${subrepository.name}-private.git" />
+						</or>
 						<then>
 							<antelope:stringutil property="module.base.dir" string="@{gitrepo.file}">
 								<antelope:replace regex="\\" replacement="/" />
@@ -4561,6 +4568,71 @@ go]]></replacevalue>
 				</then>
 			</elseif>
 		</if>
+
+		<if>
+			<or>
+				<equals arg1="${app.server.type}" arg2="jboss" />
+				<equals arg1="${app.server.type}" arg2="wildfly" />
+			</or>
+			<then>
+				<propertycopy from="app.server.${app.server.type}.lib.global.dir" name="app.server.lib.global.dir" override="true" />
+
+				<if>
+					<equals arg1="${database.type}" arg2="db2" />
+					<then>
+						<replace file="${app.server.lib.global.dir}/module.xml">
+							<replacetoken><![CDATA[<resource-root path="hsql.jar" />]]></replacetoken>
+							<replacevalue>
+								<![CDATA[
+									<resource-root path="db2jcc4.jar" />
+									<resource-root path="db2jcc_license_cu.jar" />
+									<resource-root path="hsql.jar" />
+								]]>
+							</replacevalue>
+						</replace>
+					</then>
+					<elseif>
+						<equals arg1="${database.type}" arg2="mariadb" />
+						<then>
+							<replace file="${app.server.lib.global.dir}/module.xml">
+								<replacetoken><![CDATA[<resource-root path="hsql.jar" />]]></replacetoken>
+								<replacevalue>
+									<![CDATA[
+										<resource-root path="hsql.jar" />
+										<resource-root path="mariadb.jar" />
+									]]>
+								</replacevalue>
+							</replace>
+						</then>
+					</elseif>
+					<elseif>
+						<equals arg1="${database.type}" arg2="oracle" />
+						<then>
+							<replace file="${app.server.lib.global.dir}/module.xml">
+								<replacetoken><![CDATA[<resource-root path="hsql.jar" />]]></replacetoken>
+								<replacevalue>
+									<![CDATA[
+										<resource-root path="hsql.jar" />
+										<resource-root path="ojdbc6.jar" />
+									]]>
+								</replacevalue>
+							</replace>
+						</then>
+					</elseif>
+					<else>
+						<replace file="${app.server.lib.global.dir}/module.xml">
+							<replacetoken><![CDATA[<resource-root path="hsql.jar" />]]></replacetoken>
+							<replacevalue>
+								<![CDATA[
+									<resource-root path="hsql.jar" />
+									<resource-root path="mysql.jar" />
+								]]>
+							</replacevalue>
+						</replace>
+					</else>
+				</if>
+			</then>
+		</if>
 	</target>
 
 	<target name="curl-execute">
@@ -4686,18 +4758,27 @@ go]]></replacevalue>
 								<if>
 									<available file="${liferay.home}/osgi/marketplace/${Liferay-Releng-App-Title}.lpkg" />
 									<then>
-										<echo>${liferay.home}/osgi/marketplace/${Liferay-Releng-App-Title}.lpkg already exists.</echo>
+										<delete file="${liferay.home}/osgi/marketplace/${Liferay-Releng-App-Title}.lpkg" />
+									</then>
+								</if>
+
+								<if>
+									<available file="${project.dir}/plugins/dist/${Liferay-Releng-App-Title}.lpkg" />
+									<then>
+										<echo>Copying ${project.dir}/plugins/dist/${Liferay-Releng-App-Title}.lpkg to ${liferay.home}/osgi/marketplace/${Liferay-Releng-App-Title}.lpkg.</echo>
+
+										<copy file="${project.dir}/plugins/dist/${Liferay-Releng-App-Title}.lpkg" tofile="${liferay.home}/osgi/marketplace/${Liferay-Releng-App-Title}.lpkg" />
 									</then>
 									<elseif>
 										<available file="${project.dir}/plugins/marketplace/${Liferay-Releng-App-Title}.lpkg" />
 										<then>
-											<echo>Copying ${project.dir}/plugins/marketplace/${Liferay-Releng-App-Title}.lpkg to ${liferay.home}/osgi/marketplace</echo>
+											<echo>Copying ${project.dir}/plugins/marketplace/${Liferay-Releng-App-Title}.lpkg to ${liferay.home}/osgi/marketplace/${Liferay-Releng-App-Title}.lpkg.</echo>
 
-											<copy file="${project.dir}/plugins/marketplace/${Liferay-Releng-App-Title}.lpkg" todir="${liferay.home}/osgi/marketplace" />
+											<copy file="${project.dir}/plugins/marketplace/${Liferay-Releng-App-Title}.lpkg" tofile="${liferay.home}/osgi/marketplace/${Liferay-Releng-App-Title}.lpkg" />
 										</then>
 									</elseif>
 									<else>
-										<echo>Deploying all relevant modules that make up '${Liferay-Releng-App-Title}.lpkg'</echo>
+										<echo>Deploying all relevant modules that make up ${Liferay-Releng-App-Title}.lpkg.</echo>
 
 										<for param="osgi.module.bnd.file">
 											<fileset dir="@{app.dir}">
@@ -5867,6 +5948,18 @@ hot.deploy.dependency.management.enabled=false</echo>
 			</then>
 		</if>
 
+		<get-testcase-property property.name="index.on.startup" />
+
+		<if>
+			<equals arg1="${index.on.startup}" arg2="false" />
+			<then>
+				<replace file="portal-impl/src/portal-ext.properties">
+					<replacetoken>index.on.startup=true</replacetoken>
+					<replacevalue>index.on.startup=false</replacevalue>
+				</replace>
+			</then>
+		</if>
+
 		<if>
 			<equals arg1="${java.security}" arg2="true" />
 			<then>
@@ -6359,6 +6452,7 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 		<antcall target="prepare-selenium-facebook-properties" />
 		<antcall target="prepare-selenium-google-properties" />
 		<antcall target="prepare-selenium-openid-properties" />
+		<antcall target="prepare-selenium-recaptcha-properties" />
 		<antcall target="prepare-selenium-required-properties" />
 		<antcall target="prepare-selenium-testcase-properties" />
 
@@ -7212,6 +7306,26 @@ auto.deploy.dest.dir=C:/WINDOWS/system32/config/systemprofile/liferay/websphere-
 			<then>
 				<echo append="true" file="${test.ext.properties.file}">
 					openid.username=${openid.username}
+				</echo>
+			</then>
+		</if>
+	</target>
+
+	<target name="prepare-selenium-recaptcha-properties">
+		<if>
+			<isset property="recaptcha.private.key" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					recaptcha.private.key=${recaptcha.private.key}
+				</echo>
+			</then>
+		</if>
+
+		<if>
+			<isset property="recaptcha.public.key" />
+			<then>
+				<echo append="true" file="${test.ext.properties.file}">
+					recaptcha.public.key=${recaptcha.public.key}
 				</echo>
 			</then>
 		</if>
@@ -8650,43 +8764,6 @@ jdbc.default.password=${database.mysql.password}</echo>
 
 		<antcall target="check-inet-address" />
 
-		<if>
-			<or>
-				<equals arg1="${app.server.type}" arg2="jboss" />
-				<equals arg1="${app.server.type}" arg2="wildfly" />
-			</or>
-			<then>
-				<propertycopy from="app.server.${app.server.type}.lib.global.dir" name="app.server.lib.global.dir" override="true" />
-
-				<if>
-					<equals arg1="${database.type}" arg2="oracle" />
-					<then>
-						<replace file="${app.server.lib.global.dir}/module.xml">
-							<replacetoken><![CDATA[<resource-root path="hsql.jar" />]]></replacetoken>
-							<replacevalue>
-								<![CDATA[
-									<resource-root path="hsql.jar" />
-									<resource-root path="ojdbc6.jar" />
-								]]>
-							</replacevalue>
-						</replace>
-					</then>
-					<else>
-						<replace file="${app.server.lib.global.dir}/module.xml">
-							<replacetoken><![CDATA[<resource-root path="hsql.jar" />]]></replacetoken>
-							<replacevalue>
-								<![CDATA[
-									<resource-root path="hsql.jar" />
-									<resource-root path="mariadb.jar" />
-									<resource-root path="mysql.jar" />
-								]]>
-							</replacevalue>
-						</replace>
-					</else>
-				</if>
-			</then>
-		</if>
-
 		<get-testcase-property property.name="database.jndi.enabled" />
 
 		<if>
@@ -9379,7 +9456,7 @@ jdbc.default.password=${database.mysql.password}</echo>
 			<equals arg1="${app.server.type}" arg2="jboss" />
 			<then>
 				<echo file="${liferay.home}/tools/portal-tools-db-upgrade-client/app-server.properties">dir=${app.server.dir}
-extra.lib.dirs=
+extra.lib.dirs=modules/system/layers/base/javax/mail,modules/system/layers/base/javax/persistence,modules/system/layers/base/javax/servlet,modules/system/layers/base/javax/transaction
 global.lib.dir=modules/com/liferay/portal/main
 portal.dir=standalone/deployments/ROOT.war
 server.detector.server.id=jboss</echo>

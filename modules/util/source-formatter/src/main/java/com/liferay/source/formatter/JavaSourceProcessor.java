@@ -268,7 +268,42 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 		}
 	}
 
-	protected void checkIndentationAndLineBreaks(
+	protected void checkInternalImports(
+		String fileName, String absolutePath, String content) {
+
+		if (absolutePath.contains("/modules/core/") ||
+			absolutePath.contains("/modules/util/") ||
+			fileName.contains("/test/") ||
+			fileName.contains("/testIntegration/")) {
+
+			return;
+		}
+
+		Matcher matcher = _internalImportPattern.matcher(content);
+
+		int pos = -1;
+
+		while (matcher.find()) {
+			if (pos == -1) {
+				pos = absolutePath.lastIndexOf("/com/liferay/");
+			}
+
+			String expectedImportFileLocation =
+				absolutePath.substring(0, pos + 13) +
+					StringUtil.replace(matcher.group(1), ".", "/") + ".java";
+
+			File file = new File(expectedImportFileLocation);
+
+			if (!file.exists()) {
+				processMessage(
+					fileName,
+					"Do not import internal class from another module",
+					getLineCount(content, matcher.start(1)));
+			}
+		}
+	}
+
+	protected void checkLineBreaks(
 		String line, String previousLine, String fileName, int lineCount) {
 
 		String trimmedLine = StringUtil.trimLeading(line);
@@ -297,48 +332,6 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 				lineCount - 1);
 		}
 
-		if ((lineLeadingTabCount == previousLineLeadingTabCount) &&
-			(previousLine.endsWith(StringPool.EQUAL) ||
-			 previousLine.endsWith(StringPool.OPEN_PARENTHESIS))) {
-
-			processMessage(fileName, "Line should be indented", lineCount);
-		}
-
-		if (Validator.isNotNull(previousLine) &&
-			!previousLine.matches(
-				".*\t(abstract|else|extends|for|if|implements|private|" +
-					"protected|public|try|while) .*") &&
-			(previousLineLeadingTabCount <= (lineLeadingTabCount - 2))) {
-
-			processMessage(fileName, "Incorrect indent", lineCount);
-		}
-
-		if (Validator.isNotNull(trimmedLine)) {
-			int expectedTabCount = -1;
-
-			if (previousLine.endsWith(StringPool.OPEN_CURLY_BRACE) &&
-				!trimmedLine.startsWith(StringPool.CLOSE_CURLY_BRACE)) {
-
-				expectedTabCount = previousLineLeadingTabCount + 1;
-			}
-			else if (previousLine.matches(".*\t(for|if|try) .*[(:]")) {
-				expectedTabCount = previousLineLeadingTabCount + 2;
-			}
-			else if (previousLine.matches(".*\t(else if|while) .*[(:]")) {
-				expectedTabCount = previousLineLeadingTabCount + 3;
-			}
-
-			if ((expectedTabCount != -1) &&
-				(lineLeadingTabCount != expectedTabCount)) {
-
-				processMessage(
-					fileName,
-					"Line starts with " + lineLeadingTabCount +
-						" tabs, but should be " + expectedTabCount,
-					lineCount);
-			}
-		}
-
 		if (previousLine.endsWith(StringPool.PERIOD)) {
 			int x = trimmedLine.indexOf(CharPool.OPEN_PARENTHESIS);
 
@@ -349,15 +342,6 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 
 				processMessage(fileName, "Incorrect line break", lineCount);
 			}
-		}
-
-		int diff = lineLeadingTabCount - previousLineLeadingTabCount;
-
-		if ((previousLine.contains("\tthrows ") && (diff == 0)) ||
-			(trimmedLine.startsWith("throws ") &&
-			 ((diff == 0) || (diff > 1)))) {
-
-			processMessage(fileName, "incorrect indent", lineCount);
 		}
 
 		String strippedQuotesLine = stripQuotes(trimmedLine);
@@ -517,41 +501,6 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 		if (trimmedLine.matches("^\\} (catch|else|finally) .*")) {
 			processMessage(
 				fileName, "There should be a line break after '}'", lineCount);
-		}
-	}
-
-	protected void checkInternalImports(
-		String fileName, String absolutePath, String content) {
-
-		if (absolutePath.contains("/modules/core/") ||
-			absolutePath.contains("/modules/util/") ||
-			fileName.contains("/test/") ||
-			fileName.contains("/testIntegration/")) {
-
-			return;
-		}
-
-		Matcher matcher = _internalImportPattern.matcher(content);
-
-		int pos = -1;
-
-		while (matcher.find()) {
-			if (pos == -1) {
-				pos = absolutePath.lastIndexOf("/com/liferay/");
-			}
-
-			String expectedImportFileLocation =
-				absolutePath.substring(0, pos + 13) +
-					StringUtil.replace(matcher.group(1), ".", "/") + ".java";
-
-			File file = new File(expectedImportFileLocation);
-
-			if (!file.exists()) {
-				processMessage(
-					fileName,
-					"Do not import internal class from another module",
-					getLineCount(content, matcher.start(1)));
-			}
 		}
 	}
 
@@ -1243,6 +1192,8 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 			checkGetterUtilGet(fileName, newContent);
 		}
 
+		newContent = fixIncorrectBooleanUse(newContent, "setAttribute");
+
 		// LPS-65213
 
 		if (portalSource || subrepository) {
@@ -1266,6 +1217,11 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 		}
 
 		checkUpgradeClass(fileName, absolutePath, className, newContent);
+
+		if (_addMissingDeprecationReleaseVersion) {
+			newContent = formatDeprecatedJavadoc(
+				fileName, absolutePath, newContent);
+		}
 
 		newContent = formatAssertEquals(fileName, newContent);
 
@@ -1434,6 +1390,42 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 			newLine, StringPool.FOUR_SPACES, StringPool.TAB);
 
 		return StringUtil.replace(ifClause, line, newLine);
+	}
+
+	protected String fixIncorrectBooleanUse(
+		String content, String... methodNames) {
+
+		for (String methodName : methodNames) {
+			Pattern pattern = Pattern.compile(
+				"\\." + methodName + "\\((.*?)\\);\n", Pattern.DOTALL);
+
+			Matcher matcher = pattern.matcher(content);
+
+			while (matcher.find()) {
+				String match = matcher.group();
+
+				List<String> parametersList = getParameterList(match);
+
+				if (parametersList.size() != 2) {
+					continue;
+				}
+
+				String secondParameterName = parametersList.get(1);
+
+				if (secondParameterName.equals("false") ||
+					secondParameterName.equals("true")) {
+
+					String replacement = StringUtil.replaceLast(
+						match, secondParameterName,
+						"Boolean." +
+							StringUtil.toUpperCase(secondParameterName));
+
+					return StringUtil.replace(content, match, replacement);
+				}
+			}
+		}
+
+		return content;
 	}
 
 	protected String fixIncorrectEmptyLineBeforeCloseCurlyBrace(
@@ -2009,50 +2001,62 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 	}
 
 	protected String formatDeprecatedJavadoc(
-			String fileName, String absolutePath, String line)
+			String fileName, String absolutePath, String content)
 		throws Exception {
-
-		Matcher matcher = _deprecatedPattern.matcher(line);
-
-		if (!matcher.find()) {
-			return line;
-		}
 
 		ComparableVersion mainReleaseComparableVersion =
 			getMainReleaseComparableVersion(fileName, absolutePath, true);
 
 		if (mainReleaseComparableVersion == null) {
-			return line;
+			return content;
 		}
 
-		if (matcher.group(2) == null) {
-			return StringUtil.insert(
-				line, " As of " + mainReleaseComparableVersion.toString(),
-				matcher.end(1));
+		Matcher matcher = _deprecatedPattern.matcher(content);
+
+		while (matcher.find()) {
+			if (matcher.group(2) == null) {
+				return StringUtil.insert(
+					content,
+					" As of " + mainReleaseComparableVersion.toString(),
+					matcher.end(1));
+			}
+
+			String version = matcher.group(3);
+
+			ComparableVersion comparableVersion = new ComparableVersion(
+				version);
+
+			if (comparableVersion.compareTo(mainReleaseComparableVersion) > 0) {
+				return StringUtil.replaceFirst(
+					content, version, mainReleaseComparableVersion.toString(),
+					matcher.start());
+			}
+
+			if (StringUtil.count(version, CharPool.PERIOD) == 1) {
+				return StringUtil.insert(content, ".0", matcher.end(3));
+			}
+
+			String deprecatedInfo = matcher.group(4);
+
+			if (Validator.isNull(deprecatedInfo)) {
+				return content;
+			}
+
+			if (!deprecatedInfo.startsWith(StringPool.COMMA)) {
+				return StringUtil.insert(
+					content, StringPool.COMMA, matcher.end(3));
+			}
+
+			if (deprecatedInfo.endsWith(StringPool.PERIOD) &&
+				!deprecatedInfo.matches("[\\S\\s]*\\.[ \n][\\S\\s]*")) {
+
+				return StringUtil.replaceFirst(
+					content, StringPool.PERIOD, StringPool.BLANK,
+					matcher.end(4) - 1);
+			}
 		}
 
-		String version = matcher.group(3);
-
-		ComparableVersion comparableVersion = new ComparableVersion(version);
-
-		if (comparableVersion.compareTo(mainReleaseComparableVersion) > 0) {
-			return StringUtil.replaceFirst(
-				line, version, mainReleaseComparableVersion.toString());
-		}
-
-		if (StringUtil.count(version, CharPool.PERIOD) == 1) {
-			return StringUtil.insert(line, ".0", matcher.end(3));
-		}
-
-		String deprecatedInfo = matcher.group(4);
-
-		if ((deprecatedInfo != null) &&
-			!deprecatedInfo.startsWith(StringPool.COMMA)) {
-
-			return StringUtil.insert(line, StringPool.COMMA, matcher.end(3));
-		}
-
-		return line;
+		return content;
 	}
 
 	protected String formatDuplicateReferenceMethods(
@@ -2506,11 +2510,6 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 
 				checkResourceUtil(line, fileName, absolutePath, lineCount);
 
-				if (_addMissingDeprecationReleaseVersion) {
-					line = formatDeprecatedJavadoc(
-						fileName, absolutePath, line);
-				}
-
 				if (trimmedLine.startsWith("* @see ") &&
 					(StringUtil.count(trimmedLine, CharPool.AT) > 1)) {
 
@@ -2667,7 +2666,12 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 
 					ifClause = ifClause + line + StringPool.NEW_LINE;
 
-					if (line.endsWith(") {")) {
+					String trimmedIfClause = StringUtil.trim(ifClause);
+
+					if (line.endsWith(") {") ||
+						(line.endsWith(StringPool.SEMICOLON) &&
+						 trimmedIfClause.startsWith("while "))) {
+
 						String newIfClause = formatIfClause(
 							ifClause, fileName, lineCount);
 
@@ -2681,11 +2685,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 						ifClause = StringPool.BLANK;
 					}
 					else if (line.endsWith(StringPool.SEMICOLON)) {
-						String trimmedIfClause = StringUtil.trim(ifClause);
-
-						if (!trimmedIfClause.startsWith("while ") &&
-							!trimmedIfClause.contains("{\t")) {
-
+						if (!trimmedIfClause.contains("{\t")) {
 							processMessage(
 								fileName, "Incorrect if statement", lineCount);
 						}
@@ -2730,7 +2730,7 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 						}
 					}
 					else {
-						checkIndentationAndLineBreaks(
+						checkLineBreaks(
 							line, previousLine, fileName, lineCount);
 
 						if (!trimmedLine.startsWith("//") &&
@@ -4651,7 +4651,8 @@ public class JavaSourceProcessor extends BaseSourceProcessor {
 	private final Pattern _customSQLFilePattern = Pattern.compile(
 		"<sql file=\"(.*)\" \\/>");
 	private final Pattern _deprecatedPattern = Pattern.compile(
-		"(^\\s*\\* @deprecated)( As of ([0-9\\.]+)(.+)?)?");
+		"(\n\\s*\\* @deprecated)( As of ([0-9\\.]+)(.*?)\n\\s*\\*( @|/))?",
+		Pattern.DOTALL);
 	private final Pattern _diamondOperatorPattern = Pattern.compile(
 		"(return|=)\n?(\t+| )new ([A-Za-z]+)(\\s*)<(.+)>\\(\n*\t*.*\\);\n");
 	private final Pattern _fetchByPrimaryKeysMethodPattern = Pattern.compile(

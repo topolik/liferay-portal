@@ -24,9 +24,6 @@
 	</command>
 
 	<command name="viewFeedEntry">
-		<var name="key_entryDate" value="${entryDate}" />
-
-		<execute function="AssertTextEquals" locator1="Activities#ENTRY_DATE" value1="${entryDate}" />
 		<execute function="AssertTextEquals" locator1="Activities#ENTRY_CONTENT" value1="${entryContent}" />
 	</command>
 </definition>

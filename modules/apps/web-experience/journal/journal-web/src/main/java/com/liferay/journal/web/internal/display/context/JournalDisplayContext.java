@@ -176,7 +176,7 @@ public class JournalDisplayContext {
 			Field.CLASS_NAME_ID,
 			PortalUtil.getClassNameId(JournalArticle.class));
 
-		searchContext.setAttribute("discussion", true);
+		searchContext.setAttribute("discussion", Boolean.TRUE);
 
 		List<MBMessage> mbMessages = new ArrayList<>();
 

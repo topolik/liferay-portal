@@ -18,18 +18,6 @@ import com.liferay.arquillian.extension.junit.bridge.LiferayArquillianJUnitBridg
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.arquillian.extension.junit.bridge.observer.JUnitBridgeObserver;
 import com.liferay.arquillian.extension.junit.bridge.util.FrameworkMethodComparator;
-import com.liferay.portal.kernel.util.CharPool;
-
-import java.io.File;
-import java.io.IOException;
-
-import java.net.URL;
-
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 import org.jboss.arquillian.container.test.spi.RemoteLoadableExtension;
 import org.jboss.arquillian.container.test.spi.TestRunner;
@@ -42,8 +30,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.ByteArrayAsset;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-
-import org.junit.Test;
 
 /**
  * @author Shuyang Zhou
@@ -75,80 +61,16 @@ public class JUnitBridgeAuxiliaryArchiveAppender
 		osgiManifestBuilder.addBundleManifestVersion(1);
 
 		osgiManifestBuilder.addImportPackages(
-			getPackageNames(getJarFile(Test.class)));
+			"org.junit.internal", "org.junit.internal.runners",
+			"org.junit.internal.runners.statements",
+			"org.junit.internal.runners.model", "org.junit.runners",
+			"org.junit.runners.model", "org.junit.runner.notification");
 
 		javaArchive.add(
 			new ByteArrayAsset(osgiManifestBuilder.openStream()),
 			"/META-INF/MANIFEST.MF");
 
 		return javaArchive;
-	}
-
-	protected File getJarFile(Class<?> clazz) {
-		String className = clazz.getName();
-
-		String resourceName = className.replace(
-			CharPool.PERIOD, CharPool.SLASH);
-
-		ClassLoader classLoader = clazz.getClassLoader();
-
-		URL url = classLoader.getResource(resourceName.concat(".class"));
-
-		String file = url.getFile();
-
-		if (file.startsWith("file:")) {
-			file = file.substring("file:".length());
-		}
-
-		int index = file.lastIndexOf(CharPool.EXCLAMATION);
-
-		if (index != -1) {
-			file = file.substring(0, index);
-		}
-
-		return new File(file);
-	}
-
-	protected String[] getPackageNames(File file) {
-		Set<String> packageNames = new HashSet<>();
-
-		try (JarFile jarFile = new JarFile(file)) {
-			Enumeration<JarEntry> enumeration = jarFile.entries();
-
-			while (enumeration.hasMoreElements()) {
-				JarEntry jarEntry = enumeration.nextElement();
-
-				if (jarEntry.isDirectory()) {
-					continue;
-				}
-
-				String name = jarEntry.getName();
-
-				if (!name.endsWith(".class")) {
-					continue;
-				}
-
-				int index = name.lastIndexOf('/');
-
-				if (index < 0) {
-					continue;
-				}
-
-				name = name.substring(0, index);
-
-				if (name.isEmpty()) {
-					continue;
-				}
-
-				packageNames.add(name.replace('/', '.'));
-			}
-		}
-		catch (IOException ioe) {
-			throw new IllegalArgumentException(
-				"Unable to get package names for " + file, ioe);
-		}
-
-		return packageNames.toArray(new String[packageNames.size()]);
 	}
 
 }

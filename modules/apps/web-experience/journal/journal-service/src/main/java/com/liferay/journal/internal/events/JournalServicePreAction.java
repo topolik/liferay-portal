@@ -26,7 +26,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,7 +57,7 @@ public class JournalServicePreAction extends Action {
 	}
 
 	public void servicePre(HttpServletRequest request) throws PortalException {
-		String strutsAction = PortalUtil.getStrutsAction(request);
+		String strutsAction = _portal.getStrutsAction(request);
 
 		if (!strutsAction.equals(_PATH_PORTAL_LAYOUT)) {
 			return;
@@ -107,5 +107,8 @@ public class JournalServicePreAction extends Action {
 
 	private AssetEntryLocalService _assetEntryLocalService;
 	private JournalArticleService _journalArticleService;
+
+	@Reference
+	private Portal _portal;
 
 }

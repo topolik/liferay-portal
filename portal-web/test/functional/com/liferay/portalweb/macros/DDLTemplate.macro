@@ -24,6 +24,8 @@
 	<command name="addDisplayTemplateCP">
 		<execute macro="DDLNavigator#gotoManageDataDefinitions" />
 
+		<execute function="Click" locator1="NavBar#BASIC_SEARCH_FIELD" />
+
 		<execute function="Type" locator1="NavBar#BASIC_SEARCH_FIELD" value1="${ddlDataDefinitionName}" />
 
 		<execute function="Click" locator1="Icon#BASIC_SEARCH" />
@@ -39,6 +41,8 @@
 		<execute function="AssertElementPresent#assertVisible" locator1="NavBar#ASSET_TITLE" value1="Templates" />
 
 		<execute macro="DDLNavigator#gotoAddDisplayTemplate" />
+
+		<execute function="Click" locator1="TextInput#NAME" />
 
 		<execute function="Type" locator1="TextInput#NAME" value1="${ddlDisplayTemplateName}" />
 
@@ -72,6 +76,8 @@
 		<execute function="Pause" locator1="3000" />
 
 		<execute function="SelectFrameTop" />
+
+		<execute function="ScrollBy" value1="0, 400" />
 
 		<execute macro="PortletEntry#save" />
 	</command>

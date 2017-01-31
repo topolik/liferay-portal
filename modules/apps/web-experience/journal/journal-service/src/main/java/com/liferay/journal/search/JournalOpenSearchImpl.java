@@ -34,7 +34,7 @@ import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.LayoutSetLocalService;
 import com.liferay.portal.kernel.service.permission.LayoutPermissionUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -103,7 +103,7 @@ public class JournalOpenSearchImpl extends HitsOpenSearchImpl {
 					contentSearch.getGroupId(), contentSearch.isPrivateLayout(),
 					contentSearch.getLayoutId());
 
-				return PortalUtil.getLayoutURL(hitLayout, themeDisplay);
+				return _portal.getLayoutURL(hitLayout, themeDisplay);
 			}
 		}
 
@@ -122,7 +122,7 @@ public class JournalOpenSearchImpl extends HitsOpenSearchImpl {
 			groupId, articleId);
 
 		if (Validator.isNotNull(article.getLayoutUuid())) {
-			String groupFriendlyURL = PortalUtil.getGroupFriendlyURL(
+			String groupFriendlyURL = _portal.getGroupFriendlyURL(
 				_layoutSetLocalService.getLayoutSet(
 					article.getGroupId(), false),
 				themeDisplay);
@@ -150,7 +150,7 @@ public class JournalOpenSearchImpl extends HitsOpenSearchImpl {
 					layout.getGroupId(), layout.isPrivateLayout(),
 					hitLayoutId.longValue());
 
-				return PortalUtil.getLayoutURL(hitLayout, themeDisplay);
+				return _portal.getLayoutURL(hitLayout, themeDisplay);
 			}
 		}
 
@@ -221,5 +221,8 @@ public class JournalOpenSearchImpl extends HitsOpenSearchImpl {
 	private JournalContentSearchLocalService _journalContentSearchLocalService;
 	private LayoutLocalService _layoutLocalService;
 	private LayoutSetLocalService _layoutSetLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

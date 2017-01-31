@@ -428,6 +428,9 @@ public interface LayoutLocalService extends BaseLocalService,
 	public Layout deleteLayout(long plid) throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Layout fetchDefaultLayout(long groupId, boolean privateLayout);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public Layout fetchFirstLayout(long groupId, boolean privateLayout,
 		long parentLayoutId);
 

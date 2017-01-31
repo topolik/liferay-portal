@@ -19,7 +19,7 @@ import com.liferay.journal.service.JournalArticleService;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.io.IOException;
@@ -72,7 +72,7 @@ public class JournalContentSearchPortlet extends MVCPortlet {
 		LayoutTypePortlet layoutTypePortlet =
 			themeDisplay.getLayoutTypePortlet();
 
-		String portletId = PortalUtil.getPortletId(renderRequest);
+		String portletId = _portal.getPortletId(renderRequest);
 
 		if (!layoutTypePortlet.hasPortletId(portletId)) {
 			renderResponse.setTitle(themeDisplay.translate("search"));
@@ -85,5 +85,8 @@ public class JournalContentSearchPortlet extends MVCPortlet {
 	protected void setJournalArticleService(
 		JournalArticleService journalArticleService) {
 	}
+
+	@Reference
+	private Portal _portal;
 
 }

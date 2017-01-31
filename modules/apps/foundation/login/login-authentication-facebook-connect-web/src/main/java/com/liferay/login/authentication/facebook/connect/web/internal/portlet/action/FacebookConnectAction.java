@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.CalendarFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -126,7 +126,7 @@ public class FacebookConnectAction extends BaseStrutsAction {
 
 		String redirect = ParamUtil.getString(request, "redirect");
 
-		redirect = PortalUtil.escapeRedirect(redirect);
+		redirect = _portal.escapeRedirect(redirect);
 
 		String code = ParamUtil.getString(request, "code");
 
@@ -277,8 +277,12 @@ public class FacebookConnectAction extends BaseStrutsAction {
 			user = _userLocalService.fetchUserByFacebookId(
 				companyId, facebookId);
 
-			if ((user != null) &&
-				(user.getStatus() != WorkflowConstants.STATUS_INCOMPLETE)) {
+			if ((user != null) && !user.isActive()) {
+				return null;
+			}
+			else if ((user != null) &&
+					 (user.getStatus() !=
+						 WorkflowConstants.STATUS_INCOMPLETE)) {
 
 				session.setAttribute(
 					FacebookConnectWebKeys.FACEBOOK_USER_ID,
@@ -292,8 +296,12 @@ public class FacebookConnectAction extends BaseStrutsAction {
 			user = _userLocalService.fetchUserByEmailAddress(
 				companyId, emailAddress);
 
-			if ((user != null) &&
-				(user.getStatus() != WorkflowConstants.STATUS_INCOMPLETE)) {
+			if ((user != null) && !user.isActive()) {
+				return null;
+			}
+			else if ((user != null) &&
+					 (user.getStatus() !=
+						 WorkflowConstants.STATUS_INCOMPLETE)) {
 
 				session.setAttribute(
 					WebKeys.FACEBOOK_USER_EMAIL_ADDRESS, emailAddress);
@@ -386,6 +394,10 @@ public class FacebookConnectAction extends BaseStrutsAction {
 
 	private FacebookConnect _facebookConnect;
 	private final Map<String, String> _forwards = new HashMap<>();
+
+	@Reference
+	private Portal _portal;
+
 	private UserLocalService _userLocalService;
 
 }

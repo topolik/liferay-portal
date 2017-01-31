@@ -175,6 +175,12 @@
 		<execute function="AssertClick" locator1="Form#SIDEBAR_BASIC_TAB" value1="Basic" />
 	</command>
 
+	<command name="gotoFormPage">
+		<var name="key_formPageName" value="${formPageName}" />
+
+		<execute function="Click" locator1="Form#FORM_PAGE" />
+	</command>
+
 	<command name="previewForm">
 		<execute macro="Navigator#selectSpecificWindow">
 			<var name="windowTitle" value="Form - Forms" />

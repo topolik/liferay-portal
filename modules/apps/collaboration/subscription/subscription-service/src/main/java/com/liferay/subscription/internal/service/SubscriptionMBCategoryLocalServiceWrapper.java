@@ -18,9 +18,13 @@ import com.liferay.message.boards.kernel.model.MBCategory;
 import com.liferay.message.boards.kernel.model.MBCategoryConstants;
 import com.liferay.message.boards.kernel.service.MBCategoryLocalService;
 import com.liferay.message.boards.kernel.service.MBCategoryLocalServiceWrapper;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceWrapper;
 import com.liferay.portal.kernel.service.SubscriptionLocalService;
+import com.liferay.subscription.internal.util.MBSubscriptionHelper;
+
+import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -55,6 +59,43 @@ public class SubscriptionMBCategoryLocalServiceWrapper
 	}
 
 	@Override
+	public List<MBCategory> getSubscribedCategories(
+		long groupId, long userId, int start, int end) {
+
+		List<MBCategory> categories = super.getSubscribedCategories(
+			groupId, userId, start, end);
+
+		int count = getSubscribedCategoriesCount(groupId, userId);
+
+		if ((start != QueryUtil.ALL_POS) && (end != QueryUtil.ALL_POS) &&
+			((end < count) || ((end - start) == categories.size()))) {
+
+			return categories;
+		}
+
+		try {
+			return _mbSubscriptionHelper.addSubscribedRootCategory(
+				groupId, userId, categories);
+		}
+		catch (PortalException pe) {
+			throw new RuntimeException(pe);
+		}
+	}
+
+	@Override
+	public int getSubscribedCategoriesCount(long groupId, long userId) {
+		int count = super.getSubscribedCategoriesCount(groupId, userId);
+
+		try {
+			return _mbSubscriptionHelper.addSubscribedRootCategoryCount(
+				groupId, userId, count);
+		}
+		catch (PortalException pe) {
+			throw new RuntimeException(pe);
+		}
+	}
+
+	@Override
 	public void subscribeCategory(long userId, long groupId, long categoryId)
 		throws PortalException {
 
@@ -83,12 +124,20 @@ public class SubscriptionMBCategoryLocalServiceWrapper
 	}
 
 	@Reference(unbind = "-")
+	protected void setMBSubscriptionHelper(
+		MBSubscriptionHelper mbSubscriptionHelper) {
+
+		_mbSubscriptionHelper = mbSubscriptionHelper;
+	}
+
+	@Reference(unbind = "-")
 	protected void setSubscriptionLocalService(
 		SubscriptionLocalService subscriptionLocalService) {
 
 		_subscriptionLocalService = subscriptionLocalService;
 	}
 
+	private MBSubscriptionHelper _mbSubscriptionHelper;
 	private SubscriptionLocalService _subscriptionLocalService;
 
 }

@@ -117,8 +117,6 @@ portletURL.setParameter("tabs1", "order");
 </aui:form>
 
 <aui:script>
-	Liferay.Util.toggleSearchContainerButton('#<portlet:namespace />delete', '#<portlet:namespace /><%= searchContainerReference.getId(request) %>SearchContainer', document.<portlet:namespace />fm, '<portlet:namespace />allRowIds');
-
 	Liferay.provide(
 		window,
 		'<portlet:namespace />deleteOrders',

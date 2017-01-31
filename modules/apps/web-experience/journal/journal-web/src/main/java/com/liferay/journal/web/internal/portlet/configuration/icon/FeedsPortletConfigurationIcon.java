@@ -20,7 +20,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.configuration.icon.BasePortletConfigurationIcon;
 import com.liferay.portal.kernel.portlet.configuration.icon.PortletConfigurationIcon;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import javax.portlet.PortletRequest;
@@ -28,6 +28,7 @@ import javax.portlet.PortletResponse;
 import javax.portlet.PortletURL;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Eudaldo Alonso
@@ -50,7 +51,7 @@ public class FeedsPortletConfigurationIcon
 	public String getURL(
 		PortletRequest portletRequest, PortletResponse portletResponse) {
 
-		PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
+		PortletURL portletURL = _portal.getControlPanelPortletURL(
 			portletRequest, JournalPortletKeys.JOURNAL,
 			PortletRequest.RENDER_PHASE);
 
@@ -80,7 +81,7 @@ public class FeedsPortletConfigurationIcon
 			return false;
 		}
 
-		if (!PortalUtil.isRSSFeedsEnabled()) {
+		if (!_portal.isRSSFeedsEnabled()) {
 			return false;
 		}
 
@@ -96,5 +97,8 @@ public class FeedsPortletConfigurationIcon
 	public boolean isUseDialog() {
 		return false;
 	}
+
+	@Reference
+	private Portal _portal;
 
 }

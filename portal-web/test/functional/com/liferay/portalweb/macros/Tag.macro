@@ -1,4 +1,10 @@
 <definition>
+	<command name="_addCP">
+		<execute macro="LexiconEntry#gotoAdd" />
+
+		<execute function="Type" locator1="TextInput#NAME" value1="${tagName}" />
+	</command>
+
 	<command name="addAutoAssertionTagViaBlogsPG">
 		<execute macro="BlogsNavigator#gotoAddEntry" />
 
@@ -23,48 +29,21 @@
 	</command>
 
 	<command name="addCP">
-		<execute function="Click" locator1="Button#PLUS" />
+		<execute macro="Tag#_addCP">
+			<var name="tagName" value="${tagName}" />
+		</execute>
 
-		<if>
-			<equals arg1="${tagNameVariation}" arg2="Variation" />
-			<then>
-				<var name="errorMessage1"><![CDATA[, = > / < [ { % | + # ` ? " ; / * ~.]]></var>
+		<execute macro="PortletEntry#save" />
+	</command>
 
-				<execute function="Type" locator1="TextInput#NAME" value1="${tagEntry}" />
-				<execute macro="Button#clickSave" />
+	<command name="addInvalidCP">
+		<execute macro="Tag#_addCP">
+			<var name="tagName" value="${tagName}" />
+		</execute>
 
-				<execute macro="Alert#viewRequestFailedToComplete" />
-			</then>
-			<elseif>
-				<equals arg1="${tagNameVariation}" arg2="Duplicate" />
-				<then>
-					<execute function="Type" locator1="TextInput#NAME" value1="${tagName}" />
+		<execute macro="Button#clickSave" />
 
-					<execute macro="Button#clickSave" />
-
-					<execute macro="Alert#viewSuccessMessage" />
-
-					<var name="key_tagName" value="${tagName}" />
-
-					<execute function="AssertTextEquals" locator1="Tags#TAG_ENTRY_TABLE_NAME" value1="${tagName}" />
-
-					<execute function="Click" locator1="Button#PLUS" />
-
-					<execute function="Type" locator1="TextInput#NAME" value1="${tagName}" />
-
-					<execute macro="Button#clickSave" />
-
-					<execute macro="Alert#viewRequestFailedToComplete" />
-				</then>
-			</elseif>
-			<else>
-				<execute function="Type" locator1="TextInput#NAME" value1="${tagName}" />
-
-				<execute macro="Button#clickSave" />
-
-				<execute macro="Alert#viewSuccessMessage" />
-			</else>
-		</if>
+		<execute macro="Alert#viewRequestFailedToComplete" />
 	</command>
 
 	<command name="addViaSiteCP">
@@ -80,9 +59,9 @@
 	</command>
 
 	<command name="addWithNullTitleCP">
-		<execute function="Click" locator1="Button#PLUS" />
-
-		<execute function="Type" locator1="TextInput#NAME" value1="${tagEntry}" />
+		<execute macro="Tag#_addCP">
+			<var name="tagName" value="${tagName}" />
+		</execute>
 
 		<execute macro="Button#clickSave" />
 
@@ -129,33 +108,33 @@
 	</command>
 
 	<command name="editCancelCP">
-		<var name="key_tagName" value="${tagName}" />
-
-		<execute function="Click" locator1="Tags#TAG_ENTRY_TABLE_ACTIONS_ARROW" />
-
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Edit" />
+			<var name="rowEntry" value="${tagName}" />
+		</execute>
 
 		<execute macro="SiteAdmin#viewPortletTitle">
 			<var name="portletTitle" value="${tagName}" />
 		</execute>
 
-		<execute function="AssertClick" locator1="Button#CANCEL" value1="Cancel" />
+		<execute macro="Button#clickCancel" />
 
-		<execute function="AssertTextEquals" locator1="Tags#TAG_ENTRY_TABLE_NAME" value1="${tagName}" />
+		<execute function="AssertTextEquals" locator1="Tags#TAG_ENTRY_TABLE_NAME" value1="${tagName}">
+			<var name="key_tagName" value="${tagName}" />
+		</execute>
 	</command>
 
 	<command name="editCP">
-		<var name="key_tagName" value="${tagName}" />
-
-		<execute function="Click" locator1="Tags#TAG_ENTRY_TABLE_ACTIONS_ARROW" />
-
-		<execute function="AssertClick" locator1="MenuItem#EDIT" value1="Edit" />
+		<execute macro="LexiconEntry#gotoEntryMenuItem">
+			<var name="menuItem" value="Edit" />
+			<var name="rowEntry" value="${tagName}" />
+		</execute>
 
 		<execute macro="SiteAdmin#viewPortletTitle">
 			<var name="portletTitle" value="${tagName}" />
 		</execute>
 
-		<execute function="Type" locator1="Tags#NAME_FIELD" value1="${tagNameEdit}" />
+		<execute function="Type" locator1="TextInput#NAME" value1="${tagNameEdit}" />
 
 		<execute macro="PortletEntry#save" />
 	</command>

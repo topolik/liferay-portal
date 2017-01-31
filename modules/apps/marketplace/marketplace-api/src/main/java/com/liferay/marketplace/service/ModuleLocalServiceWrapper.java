@@ -45,6 +45,20 @@ public class ModuleLocalServiceWrapper implements ModuleLocalService,
 	}
 
 	@Override
+	public com.liferay.marketplace.model.Module addModule(long appId,
+		java.lang.String bundleSymbolicName, java.lang.String bundleVersion,
+		java.lang.String contextName)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _moduleLocalService.addModule(appId, bundleSymbolicName,
+			bundleVersion, contextName);
+	}
+
+	/**
+	* @deprecated As of 1.1.0, replaced by {@link #addModule(long, String,
+	String, String)}
+	*/
+	@Deprecated
+	@Override
 	public com.liferay.marketplace.model.Module addModule(long userId,
 		long appId, java.lang.String bundleSymbolicName,
 		java.lang.String bundleVersion, java.lang.String contextName)
@@ -103,6 +117,19 @@ public class ModuleLocalServiceWrapper implements ModuleLocalService,
 	}
 
 	/**
+	* Returns the module with the matching UUID and company.
+	*
+	* @param uuid the module's UUID
+	* @param companyId the primary key of the company
+	* @return the matching module, or <code>null</code> if a matching module could not be found
+	*/
+	@Override
+	public com.liferay.marketplace.model.Module fetchModuleByUuidAndCompanyId(
+		java.lang.String uuid, long companyId) {
+		return _moduleLocalService.fetchModuleByUuidAndCompanyId(uuid, companyId);
+	}
+
+	/**
 	* Returns the module with the primary key.
 	*
 	* @param moduleId the primary key of the module
@@ -113,6 +140,21 @@ public class ModuleLocalServiceWrapper implements ModuleLocalService,
 	public com.liferay.marketplace.model.Module getModule(long moduleId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _moduleLocalService.getModule(moduleId);
+	}
+
+	/**
+	* Returns the module with the matching UUID and company.
+	*
+	* @param uuid the module's UUID
+	* @param companyId the primary key of the company
+	* @return the matching module
+	* @throws PortalException if a matching module could not be found
+	*/
+	@Override
+	public com.liferay.marketplace.model.Module getModuleByUuidAndCompanyId(
+		java.lang.String uuid, long companyId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _moduleLocalService.getModuleByUuidAndCompanyId(uuid, companyId);
 	}
 
 	/**
