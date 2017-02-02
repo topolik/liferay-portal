@@ -25,7 +25,7 @@ import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.LayoutSetLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Element;
@@ -106,7 +106,7 @@ public class JournalArticleSitemapURLProvider implements SitemapURLProvider {
 
 		Set<String> processedArticleIds = new HashSet<>();
 
-		String portalURL = PortalUtil.getPortalURL(layoutSet, themeDisplay);
+		String portalURL = _portal.getPortalURL(layoutSet, themeDisplay);
 
 		for (JournalArticle journalArticle : journalArticles) {
 			if (processedArticleIds.contains(journalArticle.getArticleId()) ||
@@ -117,7 +117,7 @@ public class JournalArticleSitemapURLProvider implements SitemapURLProvider {
 				continue;
 			}
 
-			String groupFriendlyURL = PortalUtil.getGroupFriendlyURL(
+			String groupFriendlyURL = _portal.getGroupFriendlyURL(
 				_layoutSetLocalService.getLayoutSet(
 					journalArticle.getGroupId(), false),
 				themeDisplay);
@@ -136,7 +136,7 @@ public class JournalArticleSitemapURLProvider implements SitemapURLProvider {
 				journalArticle.getLayoutUuid(), layoutSet.getGroupId(),
 				layoutSet.getPrivateLayout());
 
-			String articleURL = PortalUtil.getCanonicalURL(
+			String articleURL = _portal.getCanonicalURL(
 				sb.toString(), themeDisplay, layout);
 
 			Map<Locale, String> alternateURLs = SitemapUtil.getAlternateURLs(
@@ -156,5 +156,8 @@ public class JournalArticleSitemapURLProvider implements SitemapURLProvider {
 	private JournalArticleService _journalArticleService;
 	private LayoutLocalService _layoutLocalService;
 	private LayoutSetLocalService _layoutSetLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

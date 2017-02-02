@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletRequestModel;
+import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
@@ -269,9 +270,13 @@ public class JournalArticleAssetRenderer
 			LiferayPortletResponse liferayPortletResponse)
 		throws Exception {
 
-		PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay)liferayPortletRequest.getAttribute(
+				WebKeys.THEME_DISPLAY);
+
+		PortletURL portletURL = PortletURLFactoryUtil.create(
 			liferayPortletRequest, JournalPortletKeys.JOURNAL,
-			PortletRequest.RESOURCE_PHASE);
+			themeDisplay.getPlid(), PortletRequest.RESOURCE_PHASE);
 
 		LiferayPortletURL liferayPortletURL = (LiferayPortletURL)portletURL;
 

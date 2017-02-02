@@ -78,8 +78,7 @@ public class CalendarResourceLocalServiceImpl
 			code = String.valueOf(calendarResourceId);
 		}
 		else {
-			code = code.trim();
-			code = StringUtil.toUpperCase(code);
+			code = StringUtil.toUpperCase(StringUtil.trim(code));
 		}
 
 		Date now = new Date();

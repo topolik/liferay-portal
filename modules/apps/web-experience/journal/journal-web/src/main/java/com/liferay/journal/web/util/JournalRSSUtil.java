@@ -48,7 +48,7 @@ import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -379,7 +379,7 @@ public class JournalRSSUtil {
 
 		String languageId = LanguageUtil.getLanguageId(resourceRequest);
 
-		long plid = PortalUtil.getPlidFromFriendlyURL(
+		long plid = _portal.getPlidFromFriendlyURL(
 			themeDisplay.getCompanyId(), feed.getTargetLayoutFriendlyUrl());
 
 		Layout layout = null;
@@ -422,7 +422,7 @@ public class JournalRSSUtil {
 		for (JournalArticle article : articles) {
 			SyndEntry syndEntry = new SyndEntryImpl();
 
-			String author = PortalUtil.getUserName(article);
+			String author = _portal.getUserName(article);
 
 			syndEntry.setAuthor(author);
 
@@ -511,7 +511,7 @@ public class JournalRSSUtil {
 				layout.getGroupId(), layout.isPrivateLayout(),
 				hitLayoutId.longValue());
 
-			return PortalUtil.getLayoutFriendlyURL(hitLayout, themeDisplay);
+			return _portal.getLayoutFriendlyURL(hitLayout, themeDisplay);
 		}
 
 		String portletId = feed.getTargetPortletId();
@@ -520,7 +520,7 @@ public class JournalRSSUtil {
 			return StringPool.BLANK;
 		}
 
-		long plid = PortalUtil.getPlidFromFriendlyURL(
+		long plid = _portal.getPlidFromFriendlyURL(
 			feed.getCompanyId(), feed.getTargetLayoutFriendlyUrl());
 
 		PortletURL entryURL = PortletURLFactoryUtil.create(
@@ -728,5 +728,8 @@ public class JournalRSSUtil {
 	private JournalContentSearchLocalService _journalContentSearchLocalService;
 	private JournalFeedLocalService _journalFeedLocalService;
 	private LayoutLocalService _layoutLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

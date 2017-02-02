@@ -4,6 +4,7 @@
 	<property name="portal.upstream" value="true" />
 	<property name="plugins.deployment.type" value="osgi" />
 	<property name="testray.main.component.name" value="My Subscriptions" />
+	<property name="test.assert.warning.exceptions" value="true" />
 
 	<set-up>
 		<execute macro="TestCase#setUpPortalInstance" />

@@ -14,21 +14,28 @@
 
 package com.liferay.journal.web.internal.portlet.action;
 
+import com.liferay.journal.configuration.JournalFileUploadsConfiguration;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.web.internal.upload.ImageJournalUploadHandler;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.upload.UploadHandler;
 
+import java.util.Map;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 
 /**
  * @author Eduardo Garcia
  */
 @Component(
+	configurationPid = "com.liferay.journal.configuration.JournalFileUploadsConfiguration",
 	immediate = true,
 	property = {
 		"javax.portlet.name=" + JournalPortletKeys.JOURNAL,
@@ -38,6 +45,14 @@ import org.osgi.service.component.annotations.Component;
 )
 public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 
+	@Activate
+	@Modified
+	protected void activate(Map<String, Object> properties) {
+		_uploadHandler = new ImageJournalUploadHandler(
+			ConfigurableUtil.createConfigurable(
+				JournalFileUploadsConfiguration.class, properties));
+	}
+
 	@Override
 	protected void doProcessAction(
 			ActionRequest actionRequest, ActionResponse actionResponse)
@@ -46,7 +61,6 @@ public class UploadImageMVCActionCommand extends BaseMVCActionCommand {
 		_uploadHandler.upload(actionRequest, actionResponse);
 	}
 
-	private final UploadHandler _uploadHandler =
-		new ImageJournalUploadHandler();
+	private volatile UploadHandler _uploadHandler;
 
 }

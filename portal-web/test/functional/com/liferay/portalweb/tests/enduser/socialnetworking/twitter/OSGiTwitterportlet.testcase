@@ -4,6 +4,7 @@
 	<property name="portal.upstream" value="true" />
 	<property name="plugins.deployment.type" value="osgi" />
 	<property name="testray.main.component.name" value="Social Networking" />
+	<property name="test.assert.warning.exceptions" value="true" />
 
 	<set-up>
 		<execute macro="User#firstLoginPG" />
@@ -39,28 +40,45 @@
 		</execute>
 
 		<execute macro="Twitter#configureUserProfile">
-			<var name="twitterProfileName" value="liferayqa" />
+			<var name="twitterProfileName" value="liferayqa3" />
 		</execute>
 
-		<execute function="Pause" locator1="20000" />
+		<execute function="Pause" locator1="1000" />
 
 		<execute function="Refresh" />
 
 		<execute macro="Twitter#viewConfiguredScreenName">
-			<var name="twitterProfileName" value="liferayqa" />
+			<var name="twitterProfileName" value="liferayqa3" />
 		</execute>
 
 		<execute macro="Portlet#addPG">
 			<var name="portletName" value="Activities" />
 		</execute>
 
-		<execute function="Pause" locator1="10000" />
+		<execute macro="ProductMenu#gotoControlPanelConfiguration">
+			<var name="portlet" value="System Settings" />
+		</execute>
+
+		<execute macro="SystemSettings#gotoCategory">
+			<var name="category" value="Other" />
+		</execute>
+
+		<execute macro="SystemSettings#editConfiguration">
+			<var name="configurationName" value="Twitter Service" />
+		</execute>
+
+		<execute function="Type" locator1="TextInput#TWITTER" value1="1" />
+
+		<execute macro="SystemSettings#saveConfiguration" />
+
+		<execute macro="UserBar#gotoProfile" />
+
+		<execute function="Pause" locator1="3000" />
 
 		<execute function="Refresh" />
 
 		<execute macro="Twitter#viewFeedEntry">
-			<var name="entryContent" value="Now Available! test.deprecated 1 (Liferay, Inc.) https://www-nightly.liferay.com/web/guest/marketplace/-/mp/application/83373616 … #TestLRMP" />
-			<var name="entryDate" value="December 1" />
+			<var name="entryContent" value="This is a tweet sent on Twitter." />
 		</execute>
 	</command>
 </definition>

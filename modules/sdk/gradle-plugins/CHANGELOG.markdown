@@ -885,8 +885,8 @@ version 2.3.4.
 ## 3.0.61 - 2016-12-21
 
 ### Added
-- [LPS-69838]: Allow to configure the `npmArgs` argument in the `node` extension
-object by setting the project property `nodejs.npm.args`.
+- [LPS-69838]: Add the ability to configure the `npmArgs` argument in the `node`
+extension object by setting the project property `nodejs.npm.args`.
 
 ## 3.0.62 - 2016-12-29
 
@@ -910,6 +910,93 @@ dependency to version 2.1.6.
 - [LPS-69920]: Update the [Liferay Gradle Plugins JS Transpiler] dependency to
 version 2.3.5.
 
+## 3.0.64 - 2016-12-29
+
+### Changed
+- [LPS-67352]: Update the [Liferay Source Formatter] dependency to version
+1.0.335.
+- [LPS-67352]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.69.
+
+## 3.0.65 - 2017-01-02
+
+### Changed
+- [LPS-67352]: Update the [Liferay Source Formatter] dependency to version
+1.0.336.
+- [LPS-67352]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.70.
+
+## 3.0.66 - 2017-01-03
+
+### Changed
+- [LPS-67352]: Update the [Liferay Source Formatter] dependency to version
+1.0.337.
+
+## 3.0.67 - 2017-01-03
+
+*No changes.*
+
+## 3.0.68 - 2017-01-06
+
+### Changed
+- [LPS-66853]: Update the [Liferay Source Formatter] dependency to version
+1.0.338.
+- [LPS-66853]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.71.
+- [LPS-69706]: Update the [Liferay CSS Builder] dependency to version 1.0.22.
+- [LPS-69899]: Update the [Liferay Ant BND] dependency to version 2.0.32.
+
+## 3.0.69 - 2017-01-09
+
+### Changed
+- [LPS-69706]: Update the [Liferay CSS Builder] dependency to version 1.0.23.
+
+## 3.0.70 - 2017-01-10
+
+### Changed
+- [LPS-66853]: Update the [Liferay Source Formatter] dependency to version
+1.0.339.
+- [LPS-66853]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.72.
+
+## 3.0.71 - 2017-01-10
+
+### Changed
+- [LPS-70060]: Update the [Liferay Gradle Plugins WSDL Builder] dependency to
+version 2.0.0.
+- [LPS-70084]: Update the [Liferay Source Formatter] dependency to version
+1.0.340.
+- [LPS-70084]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.73.
+
+## 3.1.0 - 2017-01-12
+
+### Added
+- [LPS-69926]: Add the ability to automatically include one or more
+dependencies in the final OSGi bundle via the `compileInclude` configuration.
+
+### Changed
+- [LPS-69926]: Update the [Gradle Bundle Plugin] dependency to version 0.9.0.
+- [LPS-69980]: Update the [Liferay Source Formatter] dependency to version
+1.0.341.
+- [LPS-69980]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.74.
+- [LPS-70092]: Update the [Liferay Gradle Plugins Soy] dependency to version
+3.0.0.
+
+## 3.1.1 - 2017-01-13
+
+### Changed
+- [LPS-70036]: Update the [Liferay Gradle Plugins Soy] dependency to version
+3.0.1.
+
+## 3.1.2 - 2017-01-26
+
+### Added
+- [LPS-70282]: Automatically configure the `mainClassName` project property
+based on the `Main-Class` header in the `bnd.bnd` file, if the `application`
+plugin is applied.
+
 [Gradle Bundle Plugin]: https://github.com/TomDmitriev/gradle-bundle-plugin
 [Liferay Ant BND]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/ant-bnd
 [Liferay CSS Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/util/css-builder
@@ -921,9 +1008,11 @@ version 2.3.5.
 [Liferay Gradle Plugins Javadoc Formatter]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-javadoc-formatter
 [Liferay Gradle Plugins Service Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-service-builder
 [Liferay Gradle Plugins Source Formatter]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-source-formatter
+[Liferay Gradle Plugins Soy]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-soy
 [Liferay Gradle Plugins Test Integration]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-test-integration
 [Liferay Gradle Plugins Theme Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-theme-builder
 [Liferay Gradle Plugins Upgrade Table Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-upgrade-table-builder
+[Liferay Gradle Plugins WSDL Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/gradle-plugins-wsdl-builder
 [Liferay Jasper JSPC]: https://github.com/liferay/liferay-portal/tree/master/modules/util/jasper-jspc
 [Liferay Javadoc Formatter]: https://github.com/liferay/liferay-portal/tree/master/modules/util/javadoc-formatter
 [Liferay Lang Builder]: https://github.com/liferay/liferay-portal/tree/master/modules/util/lang-builder
@@ -987,9 +1076,18 @@ version 2.3.5.
 [LPS-69518]: https://issues.liferay.com/browse/LPS-69518
 [LPS-69618]: https://issues.liferay.com/browse/LPS-69618
 [LPS-69677]: https://issues.liferay.com/browse/LPS-69677
+[LPS-69706]: https://issues.liferay.com/browse/LPS-69706
 [LPS-69730]: https://issues.liferay.com/browse/LPS-69730
 [LPS-69802]: https://issues.liferay.com/browse/LPS-69802
 [LPS-69824]: https://issues.liferay.com/browse/LPS-69824
 [LPS-69838]: https://issues.liferay.com/browse/LPS-69838
+[LPS-69899]: https://issues.liferay.com/browse/LPS-69899
 [LPS-69920]: https://issues.liferay.com/browse/LPS-69920
+[LPS-69926]: https://issues.liferay.com/browse/LPS-69926
+[LPS-69980]: https://issues.liferay.com/browse/LPS-69980
+[LPS-70036]: https://issues.liferay.com/browse/LPS-70036
+[LPS-70060]: https://issues.liferay.com/browse/LPS-70060
+[LPS-70084]: https://issues.liferay.com/browse/LPS-70084
+[LPS-70092]: https://issues.liferay.com/browse/LPS-70092
+[LPS-70282]: https://issues.liferay.com/browse/LPS-70282
 [LRDOCS-3023]: https://issues.liferay.com/browse/LRDOCS-3023

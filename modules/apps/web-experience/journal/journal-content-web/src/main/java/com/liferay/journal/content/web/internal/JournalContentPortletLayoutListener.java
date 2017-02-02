@@ -33,7 +33,7 @@ import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.PortletLocalService;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
@@ -224,7 +224,7 @@ public class JournalContentPortletLayoutListener
 
 		if (Validator.isNotNull(article.getDDMTemplateKey())) {
 			DDMTemplate ddmTemplate = _ddmTemplateLocalService.getTemplate(
-				scopeGroupId, PortalUtil.getClassNameId(DDMStructure.class),
+				scopeGroupId, _portal.getClassNameId(DDMStructure.class),
 				article.getDDMTemplateKey(), true);
 
 			portletIds.addAll(getRuntimePortletIds(ddmTemplate.getScript()));
@@ -318,6 +318,10 @@ public class JournalContentPortletLayoutListener
 	private JournalArticleLocalService _journalArticleLocalService;
 	private JournalContentSearchLocalService _journalContentSearchLocalService;
 	private LayoutLocalService _layoutLocalService;
+
+	@Reference
+	private Portal _portal;
+
 	private PortletLocalService _portletLocalService;
 
 }

@@ -120,7 +120,7 @@ public class ModulesIntegrationBatchBuild extends BatchBuild {
 				_notificationsComplete = true;
 			}
 
-			try {
+			/*try {
 				JenkinsResultsParserUtil.sendEmail(
 					sb.toString(),
 					"root@" + JenkinsResultsParserUtil.getHostName("UNKNOWN"),
@@ -129,7 +129,7 @@ public class ModulesIntegrationBatchBuild extends BatchBuild {
 			catch (Exception e) {
 				System.out.println(
 					"Unable to send email notification: " + e.getMessage());
-			}
+			}*/
 		}
 	}
 

@@ -24,7 +24,7 @@ import com.liferay.portal.kernel.portlet.BaseJSPSettingsConfigurationAction;
 import com.liferay.portal.kernel.portlet.ConfigurationAction;
 import com.liferay.portal.kernel.settings.ModifiableSettings;
 import com.liferay.portal.kernel.settings.Settings;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 
 import java.util.Map;
 
@@ -81,7 +81,7 @@ public class JournalConfigurationAction
 		ModifiableSettings modifiableSettings =
 			settings.getModifiableSettings();
 
-		HttpServletRequest request = PortalUtil.getHttpServletRequest(
+		HttpServletRequest request = _portal.getHttpServletRequest(
 			portletRequest);
 
 		JournalWebRequestHelper journalWebRequestHelper =
@@ -188,5 +188,8 @@ public class JournalConfigurationAction
 	}
 
 	private volatile JournalWebConfiguration _journalWebConfiguration;
+
+	@Reference
+	private Portal _portal;
 
 }

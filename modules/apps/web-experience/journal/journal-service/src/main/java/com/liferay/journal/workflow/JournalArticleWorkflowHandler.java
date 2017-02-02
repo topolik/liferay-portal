@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.workflow.BaseWorkflowHandler;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandler;
@@ -77,8 +77,7 @@ public class JournalArticleWorkflowHandler
 			article.getFolderId());
 
 		DDMStructure ddmStructure = _ddmStructureLocalService.getStructure(
-			article.getGroupId(),
-			PortalUtil.getClassNameId(JournalArticle.class),
+			article.getGroupId(), _portal.getClassNameId(JournalArticle.class),
 			article.getDDMStructureKey(), true);
 
 		WorkflowDefinitionLink workflowDefinitionLink =
@@ -118,7 +117,7 @@ public class JournalArticleWorkflowHandler
 		ServiceContext serviceContext = (ServiceContext)workflowContext.get(
 			"serviceContext");
 
-		String articleURL = PortalUtil.getControlPanelFullURL(
+		String articleURL = _portal.getControlPanelFullURL(
 			serviceContext.getScopeGroupId(),
 			PortletProviderUtil.getPortletId(
 				JournalArticle.class.getName(), PortletProvider.Action.EDIT),
@@ -163,6 +162,10 @@ public class JournalArticleWorkflowHandler
 	private DDMStructureLocalService _ddmStructureLocalService;
 	private JournalArticleLocalService _journalArticleLocalService;
 	private JournalFolderLocalService _journalFolderLocalService;
+
+	@Reference
+	private Portal _portal;
+
 	private WorkflowDefinitionLinkLocalService
 		_workflowDefinitionLinkLocalService;
 

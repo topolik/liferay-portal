@@ -54,6 +54,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>FORM_PAGE</td>
+	<td>//ul[contains(@class,'multi-step-progress-bar')]//li/div[contains(.,'${key_formPageName}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -207,6 +212,16 @@
 	<td></td>
 </tr>
 <tr>
+	<td>RULE_BUILDER_SUMMARY</td>
+	<td>//p[contains(@class,'form-builder-rule-builder-rule-description')][${key_ruleNumber}]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>RULE_BUILDER_ROW_VERTICAL_ELLIPSIS</td>
+	<td>xpath=(//p[contains(@class,'form-builder-rule-builder-rule-description')]/../..//a[contains(@class,'dropdown-toggle')])[${key_ruleNumber}]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>RULE_BUILDER_ADD_CONDITION</td>
 	<td>//a[contains(@class,'form-builder-rule-add-condition')]</td>
 	<td></td>
@@ -258,7 +273,7 @@
 </tr>
 <tr>
 	<td>RULE_BUILDER_SELECT_CONDITION_VALUE_FIELD</td>
-	<td>//li[contains(@class,'form-builder-rule-condition')][${key_conditionRowNumber}]//a[contains(@id,'condition-second-operand-options')]/following-sibling::div[@class='drop-chosen']//ul[contains(.,'${key_conditionValueField}')]</td>
+	<td>//li[contains(@class,'form-builder-rule-condition')][${key_conditionRowNumber}]//a[contains(@id,'condition-second-operand-options')]/following-sibling::div[@class='drop-chosen']//li[contains(.,'${key_conditionValueField}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -283,7 +298,12 @@
 </tr>
 <tr>
 	<td>RULE_BUILDER_ACTION_TARGET_FIELD</td>
-	<td>//li[contains(@class,'form-builder-rule-action')][${key_actionRowNumber}]//a[contains(@id,'action') and contains(@class,'select-field-trigger')]</td>
+	<td>//li[contains(@class,'form-builder-rule-action')][${key_actionRowNumber}]//a[contains(@id,'action') and contains(@class,'select-field-trigger')]/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>RULE_BUILDER_ACTION_TARGET_FIELD_2</td>
+	<td>xpath=(//li[contains(@class,'form-builder-rule-action')][${key_actionRowNumber}]//a[contains(@id,'action') and contains(@class,'select-field-trigger')]/span)[2]</td>
 	<td></td>
 </tr>
 <tr>

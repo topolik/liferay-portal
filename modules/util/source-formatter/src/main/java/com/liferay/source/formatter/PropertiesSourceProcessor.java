@@ -231,7 +231,8 @@ public class PropertiesSourceProcessor extends BaseSourceProcessor {
 		String newContent = content;
 
 		if (portalSource && !fileName.contains("/samples/") &&
-			fileName.endsWith("Language.properties")) {
+			fileName.endsWith("Language.properties") &&
+			!isExcludedPath(LANGUAGE_KEYS_CHECK_EXCLUDES, absolutePath)) {
 
 			checkLanguageProperties(fileName);
 		}
@@ -666,6 +667,10 @@ public class PropertiesSourceProcessor extends BaseSourceProcessor {
 			true);
 
 		for (String fileName : modulesLanguagePropertiesNames) {
+			if (isExcludedPath(LANGUAGE_KEYS_CHECK_EXCLUDES, fileName)) {
+				continue;
+			}
+
 			Properties properties = new Properties();
 
 			fileName = StringUtil.replace(

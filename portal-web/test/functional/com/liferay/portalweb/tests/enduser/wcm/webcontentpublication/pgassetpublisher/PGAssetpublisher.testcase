@@ -265,6 +265,7 @@
 
 		<execute macro="AssetPublisherPortlet#configureFlaggableDisplaySettingsPG">
 			<var name="enableRatings" value="true" />
+			<var name="portletName" value="Asset Publisher" />
 		</execute>
 
 		<execute macro="Navigator#gotoPage">
@@ -301,14 +302,22 @@
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#rate4StarsPG" />
+		<execute macro="AssetPublisherPortlet#rateAssetPG">
+			<var name="rating" value="4" />
+		</execute>
 
 		<execute macro="Navigator#gotoPage">
 			<var name="assetTitle" value="WC WebContent Title" />
 			<var name="pageName" value="Asset Publisher Page" />
 		</execute>
 
-		<execute macro="AssetPublisherPortlet#viewRate4StarsPG" />
+		<execute macro="AssetPublisherPortlet#viewAssetRatingPG">
+			<var name="rating" value="4" />
+		</execute>
+
+		<execute macro="AssetPublisherPortlet#viewAverageRatingPG">
+			<var name="averageRating" value="4" />
+		</execute>
 	</command>
 
 	<command name="ConfigureAPPortletScopeMultipleSites" priority="4">
@@ -415,6 +424,7 @@
 
 	<command name="ConfigureAPPortletSetAsDefault" priority="4">
 		<execute macro="AssetPublisherPortlet#configureFlaggableDisplaySettingsPG">
+			<var name="portletName" value="Asset Publisher" />
 			<var name="setAsDefaultPage" value="true" />
 		</execute>
 

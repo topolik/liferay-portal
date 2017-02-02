@@ -20,6 +20,7 @@
 
 <%@ taglib uri="http://liferay.com/tld/asset" prefix="liferay-asset" %><%@
 taglib uri="http://liferay.com/tld/aui" prefix="aui" %><%@
+taglib uri="http://liferay.com/tld/comment" prefix="liferay-comment" %><%@
 taglib uri="http://liferay.com/tld/ddm" prefix="liferay-ddm" %><%@
 taglib uri="http://liferay.com/tld/expando" prefix="liferay-expando" %><%@
 taglib uri="http://liferay.com/tld/frontend" prefix="liferay-frontend" %><%@
@@ -102,6 +103,7 @@ page import="com.liferay.document.library.web.internal.search.EntriesChecker" %>
 page import="com.liferay.document.library.web.internal.search.EntriesMover" %><%@
 page import="com.liferay.document.library.web.internal.settings.DLPortletInstanceSettings" %><%@
 page import="com.liferay.document.library.web.internal.util.DLBreadcrumbUtil" %><%@
+page import="com.liferay.document.library.web.internal.util.DLSubscriptionUtil" %><%@
 page import="com.liferay.document.library.web.internal.util.DLTrashUtil" %><%@
 page import="com.liferay.document.library.web.internal.util.DLWebComponentProvider" %><%@
 page import="com.liferay.document.library.web.internal.util.IGUtil" %><%@

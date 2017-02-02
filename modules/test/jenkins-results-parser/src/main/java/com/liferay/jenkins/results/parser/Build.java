@@ -17,6 +17,8 @@ package com.liferay.jenkins.results.parser;
 import java.util.List;
 import java.util.Map;
 
+import org.dom4j.Element;
+
 import org.json.JSONObject;
 
 /**
@@ -28,9 +30,15 @@ public interface Build {
 
 	public void archive(String archiveName);
 
+	public String getAppServer();
+
 	public String getArchivePath();
 
 	public List<String> getBadBuildURLs();
+
+	public String getBranchName();
+
+	public String getBrowser();
 
 	public JSONObject getBuildJSONObject();
 
@@ -42,17 +50,33 @@ public interface Build {
 
 	public String getConsoleText();
 
+	public String getDatabase();
+
+	public String getDisplayName();
+
 	public int getDownstreamBuildCount(String status);
 
 	public List<Build> getDownstreamBuilds(String status);
 
+	public long getDuration();
+
+	public Element getGitHubMessageBuildAnchorElement();
+
+	public Element getGitHubMessageElement();
+
 	public String getInvocationURL();
+
+	public String getJDK();
 
 	public String getJobName();
 
 	public String getJobURL();
 
+	public String getJobVariant();
+
 	public String getMaster();
+
+	public String getOperatingSystem();
 
 	public Map<String, String> getParameters();
 
@@ -60,9 +84,13 @@ public interface Build {
 
 	public Build getParentBuild();
 
+	public String getRepositoryName();
+
+	public String getRepositorySHA(String repositoryName);
+
 	public String getResult();
 
-	public Map<String, String> getStartPropertiesMap();
+	public Map<String, String> getStartPropertiesTempMap();
 
 	public String getStatus();
 
@@ -74,7 +102,7 @@ public interface Build {
 
 	public String getStatusSummary();
 
-	public Map<String, String> getStopPropertiesMap();
+	public Map<String, String> getStopPropertiesTempMap();
 
 	public JSONObject getTestReportJSONObject();
 

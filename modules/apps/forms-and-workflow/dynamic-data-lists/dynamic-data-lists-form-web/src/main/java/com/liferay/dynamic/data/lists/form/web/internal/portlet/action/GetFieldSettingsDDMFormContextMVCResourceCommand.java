@@ -33,6 +33,8 @@ import com.liferay.dynamic.data.mapping.storage.DDMFormFieldValue;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.util.DDMFormFactory;
 import com.liferay.dynamic.data.mapping.util.DDMFormLayoutFactory;
+import com.liferay.dynamic.data.mapping.util.comparator.DataProviderInstanceNameComparator;
+import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONSerializer;
@@ -42,7 +44,7 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.List;
@@ -70,15 +72,25 @@ public class GetFieldSettingsDDMFormContextMVCResourceCommand
 	extends BaseMVCResourceCommand {
 
 	protected void addDataProviderDDMFormFieldOptionLabels(
+			ResourceRequest resourceRequest,
 			DDMFormFieldOptions ddmFormFieldOptions, ThemeDisplay themeDisplay)
 		throws PortalException {
 
 		Locale locale = themeDisplay.getLocale();
+		long[] groupIds = _portal.getCurrentAndAncestorSiteGroupIds(
+			themeDisplay.getScopeGroupId());
+
+		int start = ParamUtil.getInteger(
+			resourceRequest, "start", QueryUtil.ALL_POS);
+		int end = ParamUtil.getInteger(
+			resourceRequest, "end", QueryUtil.ALL_POS);
+
+		DataProviderInstanceNameComparator dataProviderInstanceNameComparator =
+			new DataProviderInstanceNameComparator(true);
 
 		List<DDMDataProviderInstance> ddmDataProviderInstances =
 			_ddmDataProviderInstanceLocalService.getDataProviderInstances(
-				PortalUtil.getCurrentAndAncestorSiteGroupIds(
-					themeDisplay.getScopeGroupId()));
+				groupIds, start, end, dataProviderInstanceNameComparator);
 
 		for (DDMDataProviderInstance ddmDataProviderInstance :
 				ddmDataProviderInstances) {
@@ -93,7 +105,7 @@ public class GetFieldSettingsDDMFormContextMVCResourceCommand
 	}
 
 	protected DDMFormFieldOptions createDataProviderDDMFormFieldOptions(
-			ThemeDisplay themeDisplay)
+			ResourceRequest resourceRequest, ThemeDisplay themeDisplay)
 		throws PortalException {
 
 		DDMFormFieldOptions ddmFormFieldOptions = new DDMFormFieldOptions();
@@ -101,7 +113,7 @@ public class GetFieldSettingsDDMFormContextMVCResourceCommand
 		ddmFormFieldOptions.setDefaultLocale(themeDisplay.getLocale());
 
 		addDataProviderDDMFormFieldOptionLabels(
-			ddmFormFieldOptions, themeDisplay);
+			resourceRequest, ddmFormFieldOptions, themeDisplay);
 
 		return ddmFormFieldOptions;
 	}
@@ -174,7 +186,8 @@ public class GetFieldSettingsDDMFormContextMVCResourceCommand
 
 		if (ddmFormField != null) {
 			DDMFormFieldOptions ddmFormFieldOptions =
-				createDataProviderDDMFormFieldOptions(themeDisplay);
+				createDataProviderDDMFormFieldOptions(
+					resourceRequest, themeDisplay);
 
 			ddmFormField.setDDMFormFieldOptions(ddmFormFieldOptions);
 		}
@@ -186,9 +199,9 @@ public class GetFieldSettingsDDMFormContextMVCResourceCommand
 			new DDMFormRenderingContext();
 
 		ddmFormRenderingContext.setHttpServletRequest(
-			PortalUtil.getHttpServletRequest(resourceRequest));
+			_portal.getHttpServletRequest(resourceRequest));
 		ddmFormRenderingContext.setHttpServletResponse(
-			PortalUtil.getHttpServletResponse(resourceResponse));
+			_portal.getHttpServletResponse(resourceResponse));
 		ddmFormRenderingContext.setContainerId("settings");
 		ddmFormRenderingContext.setLocale(themeDisplay.getLocale());
 		ddmFormRenderingContext.setPortletNamespace(
@@ -231,5 +244,8 @@ public class GetFieldSettingsDDMFormContextMVCResourceCommand
 
 	@Reference
 	private JSONFactory _jsonFactory;
+
+	@Reference
+	private Portal _portal;
 
 }

@@ -294,6 +294,12 @@ AUI.add(
 						return instance._sidebar;
 					},
 
+					getPagesTitle: function() {
+						var instance = this;
+
+						return instance._getPageManagerInstance().get('titles');
+					},
+
 					openConfirmCancelFieldChangesDiolog: function(confirmFn) {
 						var instance = this;
 

@@ -42,7 +42,7 @@ import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -187,13 +187,13 @@ public class JournalContentExportImportPortletPreferencesProcessor
 				DDMTemplate ddmTemplate =
 					_ddmTemplateLocalService.fetchTemplate(
 						article.getGroupId(),
-						PortalUtil.getClassNameId(DDMStructure.class),
+						_portal.getClassNameId(DDMStructure.class),
 						preferenceDDMTemplateKey, true);
 
 				if (ddmTemplate == null) {
 					ddmTemplate = _ddmTemplateLocalService.getTemplate(
 						article.getGroupId(),
-						PortalUtil.getClassNameId(DDMStructure.class),
+						_portal.getClassNameId(DDMStructure.class),
 						defaultDDMTemplateKey, true);
 
 					portletPreferences.setValue(
@@ -283,10 +283,6 @@ public class JournalContentExportImportPortletPreferencesProcessor
 						articleId, true);
 				}
 			}
-			else {
-				portletPreferences.setValue("groupId", StringPool.BLANK);
-				portletPreferences.setValue("articleId", StringPool.BLANK);
-			}
 
 			String ddmTemplateKey = portletPreferences.getValue(
 				"ddmTemplateKey", null);
@@ -301,9 +297,6 @@ public class JournalContentExportImportPortletPreferencesProcessor
 					ddmTemplateKeys, ddmTemplateKey, ddmTemplateKey);
 
 				portletPreferences.setValue("ddmTemplateKey", ddmTemplateKey);
-			}
-			else {
-				portletPreferences.setValue("ddmTemplateKey", StringPool.BLANK);
 			}
 		}
 		catch (PortalException pe) {
@@ -372,6 +365,10 @@ public class JournalContentExportImportPortletPreferencesProcessor
 	private JournalArticleLocalService _journalArticleLocalService;
 	private JournalContentSearchLocalService _journalContentSearchLocalService;
 	private LayoutLocalService _layoutLocalService;
+
+	@Reference
+	private Portal _portal;
+
 	private ReferencedStagedModelImporterCapability
 		_referencedStagedModelImporterCapability;
 

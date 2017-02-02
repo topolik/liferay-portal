@@ -15,9 +15,12 @@
 package com.liferay.invitation.web.internal.upgrade;
 
 import com.liferay.invitation.web.internal.constants.InvitationPortletKeys;
+import com.liferay.invitation.web.internal.upgrade.v1_0_0.UpgradePortletPreferences;
 import com.liferay.portal.kernel.upgrade.BaseUpgradePortletId;
 import com.liferay.portal.kernel.upgrade.DummyUpgradeStep;
+import com.liferay.portal.kernel.upgrade.UpgradeException;
 import com.liferay.portal.upgrade.registry.UpgradeStepRegistrator;
+import com.liferay.portal.upgrade.release.BaseUpgradeWebModuleRelease;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -30,6 +33,28 @@ public class InvitationWebUpgrade implements UpgradeStepRegistrator {
 
 	@Override
 	public void register(Registry registry) {
+		BaseUpgradeWebModuleRelease upgradeWebModuleRelease =
+			new BaseUpgradeWebModuleRelease() {
+
+				@Override
+				protected String getBundleSymbolicName() {
+					return "com.liferay.invitation.web";
+				}
+
+				@Override
+				protected String[] getPortletIds() {
+					return new String[] {"100"};
+				}
+
+			};
+
+		try {
+			upgradeWebModuleRelease.upgrade();
+		}
+		catch (UpgradeException ue) {
+			throw new RuntimeException(ue);
+		}
+
 		registry.register(
 			"com.liferay.invitation.web", "0.0.0", "1.0.0",
 			new DummyUpgradeStep());
@@ -45,7 +70,8 @@ public class InvitationWebUpgrade implements UpgradeStepRegistrator {
 					};
 				}
 
-			});
+			},
+			new UpgradePortletPreferences());
 	}
 
 }

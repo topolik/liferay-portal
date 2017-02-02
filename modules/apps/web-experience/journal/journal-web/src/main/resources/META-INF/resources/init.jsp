@@ -59,6 +59,7 @@ page import="com.liferay.frontend.taglib.servlet.taglib.util.AddMenuKeys" %><%@
 page import="com.liferay.item.selector.ItemSelector" %><%@
 page import="com.liferay.item.selector.ItemSelectorReturnType" %><%@
 page import="com.liferay.item.selector.criteria.UUIDItemSelectorReturnType" %><%@
+page import="com.liferay.journal.configuration.JournalFileUploadsConfiguration" %><%@
 page import="com.liferay.journal.configuration.JournalGroupServiceConfiguration" %><%@
 page import="com.liferay.journal.constants.JournalConstants" %><%@
 page import="com.liferay.journal.constants.JournalPortletKeys" %><%@

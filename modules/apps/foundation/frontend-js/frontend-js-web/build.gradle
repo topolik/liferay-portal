@@ -20,10 +20,10 @@ task buildLodash(type: Copy)
 task buildSvg4everybody(type: Copy)
 task testJS
 
-String alloyUIVersion = "3.1.0-deprecated.2"
+String alloyUIVersion = "3.1.0-deprecated.4"
 String jqueryPluginsFormVersion = "3.51"
 String jQueryVersion = "2.1.4"
-String lexiconVersion = "1.0.14"
+String lexiconVersion = "1.0.15"
 String lodashVersion = "3.10.1"
 String svg4everybodyVersion = "2.0.0"
 
@@ -185,8 +185,9 @@ dependencies {
 
 	lodash group: "org.webjars.bower", name: "lodash", transitive: false, version: lodashVersion
 
-	provided group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
-	provided group: "com.liferay.portal", name: "com.liferay.util.taglib", version: "2.0.0"
+	provided group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "2.11.0"
+	provided group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.20.0"
+	provided group: "com.liferay.portal", name: "com.liferay.util.taglib", version: "2.6.0"
 	provided group: "javax.portlet", name: "portlet-api", version: "2.0"
 	provided group: "javax.servlet", name: "javax.servlet-api", version: "3.0.1"
 	provided group: "javax.servlet.jsp", name: "javax.servlet.jsp-api", version: "2.3.1"

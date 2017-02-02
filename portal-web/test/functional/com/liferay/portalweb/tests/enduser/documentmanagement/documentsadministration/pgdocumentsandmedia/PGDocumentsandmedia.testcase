@@ -904,6 +904,33 @@
 		</execute>
 	</command>
 
+	<command name="DeleteDocumentInFolder" priority="5">
+		<property name="portal.acceptance" value="true" />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Documents and Media Page" />
+		</execute>
+
+		<execute macro="DMFolder#addPG">
+			<var name="dmFolderDescription" value="DM Folder Description" />
+			<var name="dmFolderName" value="DM Folder Name" />
+		</execute>
+
+		<execute macro="DMNavigator#gotoFolder">
+			<var name="dmFolderName" value="DM Folder Name" />
+		</execute>
+
+		<execute macro="DMDocument#addPG">
+			<var name="dmDocumentDescription" value="DM Document Description" />
+			<var name="dmDocumentFile" value="Document_1.doc" />
+			<var name="dmDocumentTitle" value="DM Document Title" />
+		</execute>
+
+		<execute macro="DMDocument#deletePG">
+			<var name="dmDocumentTitle" value="DM Document Title" />
+		</execute>
+	</command>
+
 	<command name="DeleteDocumentType" priority="4">
 		<execute macro="ProductMenu#gotoSitesContent">
 			<var name="portlet" value="Documents and Media" />
@@ -987,33 +1014,6 @@
 		</execute>
 	</command>
 
-	<command name="DeleteFolderDocument" priority="5">
-		<property name="portal.acceptance" value="true" />
-
-		<execute macro="Navigator#gotoPage">
-			<var name="pageName" value="Documents and Media Page" />
-		</execute>
-
-		<execute macro="DMFolder#addPG">
-			<var name="dmFolderDescription" value="DM Folder Description" />
-			<var name="dmFolderName" value="DM Folder Name" />
-		</execute>
-
-		<execute macro="DMNavigator#gotoFolder">
-			<var name="dmFolderName" value="DM Folder Name" />
-		</execute>
-
-		<execute macro="DMDocument#addPG">
-			<var name="dmDocumentDescription" value="DM Document Description" />
-			<var name="dmDocumentFile" value="Document_1.doc" />
-			<var name="dmDocumentTitle" value="DM Document Title" />
-		</execute>
-
-		<execute macro="DMDocument#deletePG">
-			<var name="dmDocumentTitle" value="DM Document Title" />
-		</execute>
-	</command>
-
 	<command name="DeleteFolderImageActions" priority="4">
 		<execute macro="Navigator#gotoPage">
 			<var name="pageName" value="Documents and Media Page" />
@@ -1036,6 +1036,41 @@
 
 		<execute macro="DMDocument#deleteViaActionsPG">
 			<var name="dmDocumentTitle" value="DM Image Title" />
+		</execute>
+	</command>
+
+	<command name="DeleteFolderWithDocument" priority="5">
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Documents and Media Page" />
+		</execute>
+
+		<execute macro="DMFolder#addPG">
+			<var name="dmFolderDescription" value="DM Folder Description" />
+			<var name="dmFolderName" value="DM Folder Name" />
+		</execute>
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Documents and Media Page" />
+		</execute>
+
+		<execute macro="DMNavigator#gotoFolder">
+			<var name="dmFolderName" value="DM Folder Name" />
+		</execute>
+
+		<execute macro="DMDocument#addPG">
+			<var name="dmDocumentDescription" value="DM Document Description 1" />
+			<var name="dmDocumentFile" value="Document_1.doc" />
+			<var name="dmDocumentTitle" value="DM Document Title 1" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="Navigator#gotoPage">
+			<var name="pageName" value="Documents and Media Page" />
+		</execute>
+
+		<execute macro="DMFolder#deletePG">
+			<var name="dmFolderName" value="DM Folder Name" />
 		</execute>
 	</command>
 

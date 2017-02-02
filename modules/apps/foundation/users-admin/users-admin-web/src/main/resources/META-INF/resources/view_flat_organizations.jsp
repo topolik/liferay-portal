@@ -198,7 +198,3 @@ boolean hasAddOrganizationPermission = PortalPermissionUtil.contains(permissionC
 
 	</liferay-frontend:add-menu>
 </c:if>
-
-<aui:script>
-	Liferay.Util.toggleSearchContainerButton('#<portlet:namespace />delete', '#<portlet:namespace /><%= searchContainerReference.getId(request, "organizationSearchContainer") %>SearchContainer', document.<portlet:namespace />fm, '<portlet:namespace />allRowIds');
-</aui:script>

@@ -183,11 +183,10 @@ public class ContentTransformerListener extends BaseTransformerListener {
 								article.getDocument(), elementName));
 					}
 				}
-
-				// Make sure to point images to the full path
-
 				else if ((text != null) &&
 						 text.startsWith("/image/journal/article?img_id")) {
+
+					// Make sure to point images to the full path
 
 					dynamicContentElement.setText(
 						"@cdn_host@@root_path@" + text);

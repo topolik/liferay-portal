@@ -26,7 +26,7 @@ import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.social.kernel.model.BaseSocialActivityInterpreter;
@@ -64,7 +64,7 @@ public class JournalArticleActivityInterpreter
 		Layout layout = article.getLayout();
 
 		if (layout != null) {
-			String groupFriendlyURL = PortalUtil.getGroupFriendlyURL(
+			String groupFriendlyURL = _portal.getGroupFriendlyURL(
 				layout.getLayoutSet(), serviceContext.getThemeDisplay());
 
 			return groupFriendlyURL.concat(
@@ -161,5 +161,8 @@ public class JournalArticleActivityInterpreter
 		{JournalArticle.class.getName()};
 
 	private JournalArticleLocalService _journalArticleLocalService;
+
+	@Reference
+	private Portal _portal;
 
 }

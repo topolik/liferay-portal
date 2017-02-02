@@ -268,6 +268,37 @@
 		<execute function="AssertAlertNotPresent" />
 	</command>
 
+	<command name="ViewRolesNoXSS" priority="4">
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Roles" />
+		</execute>
+
+		<execute macro="Role#addCP">
+			<var name="roleTitle"><![CDATA[<script>document.write("XSS"); window.stop();</script>]]></var>
+		</execute>
+
+		<execute macro="ProductMenu#gotoControlPanelUsers">
+			<var name="portlet" value="Roles" />
+		</execute>
+
+		<execute macro="Role#viewCP">
+			<var name="roleTitle"><![CDATA[<script>document.write("XSS"); window.stop();</script>]]></var>
+			<var name="roleType" value="Regular" />
+		</execute>
+
+		<execute macro="Navigator#openURL" />
+
+		<execute macro="Portlet#addPG">
+			<var name="portletName" value="Sign In" />
+		</execute>
+
+		<execute macro="PermissionsInline#gotoConfigurationPG">
+			<var name="portletName" value="Sign In" />
+		</execute>
+
+		<execute function="AssertElementNotPresent" locator1="//body[.='XSS']" />
+	</command>
+
 	<command name="ViewURLValidateNoXSS" priority="5">
 		<property name="portal.acceptance" value="true" />
 
@@ -353,6 +384,6 @@
 			<var name="wikiPageTitle" value="Wiki Page Title" />
 		</execute>
 
-		<execute function="AssertTextNotPresent" locator1="//body" value1="XSS" />
+		<execute function="AssertElementNotPresent" locator1="//body[.='XSS']" />
 	</command>
 </definition>

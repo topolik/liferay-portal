@@ -62,7 +62,7 @@ import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.LoggingTimer;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -350,8 +350,7 @@ public class JournalServiceVerifyProcess extends VerifyLayout {
 
 		Node node = dynamicContentElement.node(0);
 
-			node.setText(
-				context + path + StringPool.SLASH + fileEntry.getUuid());
+		node.setText(context + path + StringPool.SLASH + fileEntry.getUuid());
 	}
 
 	protected void updateDynamicElements(JournalArticle article)
@@ -362,8 +361,7 @@ public class JournalServiceVerifyProcess extends VerifyLayout {
 		}
 
 		DDMStructure ddmStructure = _ddmStructureLocalService.getStructure(
-			article.getGroupId(),
-			PortalUtil.getClassNameId(JournalArticle.class),
+			article.getGroupId(), _portal.getClassNameId(JournalArticle.class),
 			article.getDDMStructureKey(), true);
 
 		Locale originalefaultLocale = LocaleThreadLocal.getDefaultLocale();
@@ -377,7 +375,7 @@ public class JournalServiceVerifyProcess extends VerifyLayout {
 			LocaleThreadLocal.setDefaultLocale(company.getLocale());
 
 			LocaleThreadLocal.setSiteDefaultLocale(
-				PortalUtil.getSiteDefaultLocale(article.getGroupId()));
+				_portal.getSiteDefaultLocale(article.getGroupId()));
 
 			Fields ddmFields = _journalConverter.getDDMFields(
 				ddmStructure, article.getContent());
@@ -965,6 +963,10 @@ public class JournalServiceVerifyProcess extends VerifyLayout {
 	private JournalContentSearchLocalService _journalContentSearchLocalService;
 	private JournalConverter _journalConverter;
 	private JournalFolderLocalService _journalFolderLocalService;
+
+	@Reference
+	private Portal _portal;
+
 	private ResourceLocalService _resourceLocalService;
 	private SystemEventLocalService _systemEventLocalService;
 	private final VerifyResourcePermissions _verifyResourcePermissions =

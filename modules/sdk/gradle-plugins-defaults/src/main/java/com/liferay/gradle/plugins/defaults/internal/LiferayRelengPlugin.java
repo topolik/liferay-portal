@@ -79,6 +79,9 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 	public static final String PRINT_ARTIFACT_PUBLISH_COMMANDS =
 		"printArtifactPublishCommands";
 
+	public static final String PRINT_DEPENDENT_ARTIFACT_TASK_NAME =
+		"printDependentArtifact";
+
 	public static final String PRINT_STALE_ARTIFACT_TASK_NAME =
 		"printStaleArtifact";
 
@@ -119,6 +122,8 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 
 		_addTaskPrintArtifactPublishCommands(project, recordArtifactTask);
 		_addTaskPrintStaleArtifact(project, recordArtifactTask);
+
+		_addTaskPrintDependentArtifact(project);
 
 		_configureTaskBuildChangeLog(buildChangeLogTask, relengDir);
 		_configureTaskUploadArchives(project, recordArtifactTask);
@@ -169,7 +174,20 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		if (projectPath.startsWith(":apps:") ||
 			projectPath.startsWith(":private:apps:")) {
 
-			_configureTaskEnabledIfLeaf(printArtifactPublishCommandsTask);
+			printArtifactPublishCommandsTask.onlyIf(
+				new Spec<Task>() {
+
+					@Override
+					public boolean isSatisfiedBy(Task task) {
+						if (_hasProjectDependencies(task.getProject())) {
+							return false;
+						}
+
+						return true;
+					}
+
+				});
+
 			_configureTaskEnabledIfDependenciesArePublished(
 				printArtifactPublishCommandsTask);
 		}
@@ -238,6 +256,45 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 			});
 
 		return printArtifactPublishCommandsTask;
+	}
+
+	private Task _addTaskPrintDependentArtifact(Project project) {
+		Task task = project.task(PRINT_DEPENDENT_ARTIFACT_TASK_NAME);
+
+		task.doLast(
+			new Action<Task>() {
+
+				@Override
+				public void execute(Task task) {
+					Project project = task.getProject();
+
+					File projectDir = project.getProjectDir();
+
+					System.out.println(projectDir.getAbsolutePath());
+				}
+
+			});
+
+		task.onlyIf(
+			new Spec<Task>() {
+
+				@Override
+				public boolean isSatisfiedBy(Task task) {
+					if (_hasProjectDependencies(task.getProject())) {
+						return true;
+					}
+
+					return false;
+				}
+
+			});
+
+		task.setDescription(
+			"Prints the project directory if this project contains " +
+				"dependencies to other projects.");
+		task.setGroup(JavaBasePlugin.VERIFICATION_GROUP);
+
+		return task;
 	}
 
 	private Task _addTaskPrintStaleArtifact(
@@ -379,42 +436,6 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 					catch (IOException ioe) {
 						throw new UncheckedIOException(ioe);
 					}
-				}
-
-			});
-	}
-
-	private void _configureTaskEnabledIfLeaf(Task task) {
-		task.onlyIf(
-			new Spec<Task>() {
-
-				@Override
-				public boolean isSatisfiedBy(Task task) {
-					Project project = task.getProject();
-
-					for (Configuration configuration :
-							project.getConfigurations()) {
-
-						if (_hasProjectDependencies(configuration)) {
-							return false;
-						}
-					}
-
-					return true;
-				}
-
-				private boolean _hasProjectDependencies(
-					Configuration configuration) {
-
-					for (Dependency dependency :
-							configuration.getDependencies()) {
-
-						if (dependency instanceof ProjectDependency) {
-							return true;
-						}
-					}
-
-					return false;
 				}
 
 			});
@@ -617,6 +638,18 @@ public class LiferayRelengPlugin implements Plugin<Project> {
 		sb.append(publishArtifact.getExtension());
 
 		return sb.toString();
+	}
+
+	private boolean _hasProjectDependencies(Project project) {
+		for (Configuration configuration : project.getConfigurations()) {
+			for (Dependency dependency : configuration.getDependencies()) {
+				if (dependency instanceof ProjectDependency) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private boolean _isStale(

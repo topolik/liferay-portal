@@ -1443,6 +1443,8 @@
 			<var name="entryTitle" value="Blogs Entry Title" />
 		</execute>
 
+		<execute function="Pause" locator1="3000" />
+
 		<execute macro="BlogsEntry#viewRSS">
 			<var name="entryContent" value="Blogs Entry Content" />
 			<var name="entryTitle" value="Blogs Entry Title" />

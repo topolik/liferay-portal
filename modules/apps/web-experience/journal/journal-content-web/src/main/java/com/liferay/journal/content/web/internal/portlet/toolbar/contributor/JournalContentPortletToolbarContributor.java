@@ -22,6 +22,7 @@ import com.liferay.journal.service.JournalFolderService;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.toolbar.contributor.BasePortletToolbarContributor;
@@ -33,7 +34,7 @@ import com.liferay.portal.kernel.servlet.taglib.ui.URLMenuItem;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public class JournalContentPortletToolbarContributor
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 		long scopeGroupId = themeDisplay.getScopeGroupId();
 
-		PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
+		PortletURL portletURL = _portal.getControlPanelPortletURL(
 			portletRequest, JournalPortletKeys.JOURNAL,
 			PortletRequest.RENDER_PHASE);
 
@@ -94,7 +95,7 @@ public class JournalContentPortletToolbarContributor
 
 		List<DDMStructure> ddmStructures =
 			_journalFolderService.getDDMStructures(
-				PortalUtil.getCurrentAndAncestorSiteGroupIds(scopeGroupId),
+				_portal.getCurrentAndAncestorSiteGroupIds(scopeGroupId),
 				JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 				JournalFolderConstants.RESTRICTION_TYPE_INHERIT);
 
@@ -141,11 +142,13 @@ public class JournalContentPortletToolbarContributor
 		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		Layout layout = themeDisplay.getLayout();
 		long scopeGroupId = themeDisplay.getScopeGroupId();
 
 		if (!_resourcePermissionChecker.checkResource(
 				themeDisplay.getPermissionChecker(), scopeGroupId,
-				ActionKeys.ADD_ARTICLE)) {
+				ActionKeys.ADD_ARTICLE) ||
+			layout.isLayoutPrototypeLinkActive()) {
 
 			return Collections.emptyList();
 		}
@@ -201,6 +204,10 @@ public class JournalContentPortletToolbarContributor
 		JournalContentPortletToolbarContributor.class);
 
 	private JournalFolderService _journalFolderService;
+
+	@Reference
+	private Portal _portal;
+
 	private ResourcePermissionChecker _resourcePermissionChecker;
 
 }

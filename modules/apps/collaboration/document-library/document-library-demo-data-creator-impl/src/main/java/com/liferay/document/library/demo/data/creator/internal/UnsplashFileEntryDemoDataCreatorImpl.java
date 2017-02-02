@@ -15,10 +15,14 @@
 package com.liferay.document.library.demo.data.creator.internal;
 
 import com.liferay.document.library.demo.data.creator.FileEntryDemoDataCreator;
+import com.liferay.document.library.kernel.exception.NoSuchFileEntryException;
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.security.RandomUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.FileUtil;
 
@@ -31,6 +35,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -73,8 +78,17 @@ public class UnsplashFileEntryDemoDataCreatorImpl
 
 	@Override
 	public void delete() throws PortalException {
-		for (long fileEntryId : _fileEntryIds) {
-			_dlAppLocalService.deleteFileEntry(fileEntryId);
+		try {
+			for (long fileEntryId : _fileEntryIds) {
+				_fileEntryIds.remove(fileEntryId);
+
+				_dlAppLocalService.deleteFileEntry(fileEntryId);
+			}
+		}
+		catch (NoSuchFileEntryException nsfee) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(nsfee, nsfee);
+			}
 		}
 	}
 
@@ -83,7 +97,7 @@ public class UnsplashFileEntryDemoDataCreatorImpl
 		_dlAppLocalService = dlAppLocalService;
 	}
 
-	private byte[] _getBytes() throws IOException {
+	private byte[] _getBytes() throws IOException, PortalException {
 		URL url = _getNextUrl();
 
 		InputStream inputStream = null;
@@ -92,6 +106,21 @@ public class UnsplashFileEntryDemoDataCreatorImpl
 			inputStream = url.openStream();
 
 			return FileUtil.getBytes(inputStream);
+		}
+		catch (IOException ioe) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(ioe, ioe);
+			}
+
+			String fileName = String.format(
+				"dependencies/%d.jpg", RandomUtil.nextInt(5));
+
+			try {
+				return FileUtil.getBytes(getClass(), fileName);
+			}
+			catch (Exception e) {
+				throw new PortalException(e);
+			}
 		}
 		finally {
 			if (inputStream != null) {
@@ -116,6 +145,9 @@ public class UnsplashFileEntryDemoDataCreatorImpl
 
 	private static final List<String> _categories = new ArrayList<>();
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		UnsplashFileEntryDemoDataCreatorImpl.class);
+
 	static {
 		_categories.add("buildings");
 		_categories.add("food");
@@ -127,6 +159,6 @@ public class UnsplashFileEntryDemoDataCreatorImpl
 
 	private int _categoryIndex = -1;
 	private DLAppLocalService _dlAppLocalService;
-	private final List<Long> _fileEntryIds = new ArrayList<>();
+	private final List<Long> _fileEntryIds = new CopyOnWriteArrayList<>();
 
 }

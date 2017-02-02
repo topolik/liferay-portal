@@ -53,6 +53,7 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.systemevent.SystemEventHierarchyEntry;
 import com.liferay.portal.kernel.systemevent.SystemEventHierarchyEntryThreadLocal;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.AutoResetThreadLocal;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -949,6 +950,20 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	}
 
 	@Override
+	public Layout fetchDefaultLayout(long groupId, boolean privateLayout) {
+		if (groupId > 0) {
+			List<Layout> layouts = layoutPersistence.findByG_P(
+				groupId, privateLayout, 0, 1);
+
+			if (!layouts.isEmpty()) {
+				return layouts.get(0);
+			}
+		}
+
+		return null;
+	}
+
+	@Override
 	public Layout fetchFirstLayout(
 		long groupId, boolean privateLayout, long parentLayoutId) {
 
@@ -1020,15 +1035,10 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	 */
 	@Override
 	public long getDefaultPlid(long groupId, boolean privateLayout) {
-		if (groupId > 0) {
-			List<Layout> layouts = layoutPersistence.findByG_P(
-				groupId, privateLayout, 0, 1);
+		Layout layout = fetchDefaultLayout(groupId, privateLayout);
 
-			if (!layouts.isEmpty()) {
-				Layout layout = layouts.get(0);
-
-				return layout.getPlid();
-			}
+		if (layout != null) {
+			return layout.getPlid();
 		}
 
 		return LayoutConstants.DEFAULT_PLID;
@@ -1435,6 +1445,10 @@ public class LayoutLocalServiceImpl extends LayoutLocalServiceBaseImpl {
 	@Override
 	public int getLayoutsCount(
 		Group group, boolean privateLayout, long[] layoutIds) {
+
+		if (ArrayUtil.isEmpty(layoutIds)) {
+			return 0;
+		}
 
 		DynamicQuery dynamicQuery = dynamicQuery();
 

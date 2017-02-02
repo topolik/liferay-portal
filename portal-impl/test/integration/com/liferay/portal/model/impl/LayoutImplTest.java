@@ -17,17 +17,20 @@ package com.liferay.portal.model.impl;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
-import com.liferay.portal.kernel.model.LayoutType;
+import com.liferay.portal.kernel.model.LayoutTypeController;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
-import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.util.test.LayoutTestUtil;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
+import com.liferay.registry.ServiceRegistration;
 
-import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -111,14 +114,10 @@ public class LayoutImplTest {
 
 	@Test
 	public void testIsTypeEmbeddedWithLayoutTypeController() throws Exception {
-		LayoutType layoutType = _layout.getLayoutType();
+		Registry registry = RegistryUtil.getRegistry();
 
-		Field field = ReflectionUtil.getDeclaredField(
-			LayoutTypeImpl.class, "_layoutTypeController");
-
-		field.set(
-			layoutType,
-			new LayoutTypeControllerImpl(LayoutConstants.TYPE_EMBEDDED));
+		LayoutTypeController layoutTypeController =
+			new LayoutTypeControllerImpl(LayoutConstants.TYPE_EMBEDDED);
 
 		for (String type : _TYPES) {
 			if (type.equals(LayoutConstants.TYPE_EMBEDDED)) {
@@ -127,7 +126,21 @@ public class LayoutImplTest {
 
 			_layout.setType(type);
 
-			Assert.assertTrue(_layout.isTypeEmbedded());
+			Map<String, Object> properties = new HashMap<>();
+
+			properties.put("layout.type", type);
+
+			ServiceRegistration<LayoutTypeController> serviceRegistration =
+				registry.registerService(
+					LayoutTypeController.class, layoutTypeController,
+					properties);
+
+			try {
+				Assert.assertTrue(_layout.isTypeEmbedded());
+			}
+			finally {
+				serviceRegistration.unregister();
+			}
 		}
 	}
 
@@ -153,14 +166,10 @@ public class LayoutImplTest {
 
 	@Test
 	public void testIsTypePanelWithLayoutTypeController() throws Exception {
-		LayoutType layoutType = _layout.getLayoutType();
+		Registry registry = RegistryUtil.getRegistry();
 
-		Field field = ReflectionUtil.getDeclaredField(
-			LayoutTypeImpl.class, "_layoutTypeController");
-
-		field.set(
-			layoutType,
-			new LayoutTypeControllerImpl(LayoutConstants.TYPE_PANEL));
+		LayoutTypeController layoutTypeController =
+			new LayoutTypeControllerImpl(LayoutConstants.TYPE_PANEL);
 
 		for (String layoutTypeValue : _TYPES) {
 			if (layoutTypeValue.equals(LayoutConstants.TYPE_PANEL)) {
@@ -169,27 +178,53 @@ public class LayoutImplTest {
 
 			_layout.setType(layoutTypeValue);
 
-			Assert.assertTrue(_layout.isTypePanel());
+			Map<String, Object> properties = new HashMap<>();
+
+			properties.put("layout.type", layoutTypeValue);
+
+			ServiceRegistration<LayoutTypeController> serviceRegistration =
+				registry.registerService(
+					LayoutTypeController.class, layoutTypeController,
+					properties);
+
+			try {
+				Assert.assertTrue(_layout.isTypePanel());
+			}
+			finally {
+				serviceRegistration.unregister();
+			}
 		}
 	}
 
 	@Test
 	public void testIsTypePortletReturnsFalse() throws Exception {
-		LayoutType layoutType = _layout.getLayoutType();
-
-		Field field = ReflectionUtil.getDeclaredField(
-			LayoutTypeImpl.class, "_layoutTypeController");
+		Registry registry = RegistryUtil.getRegistry();
 
 		for (String type : _TYPES) {
 			if (type.equals(LayoutConstants.TYPE_PORTLET)) {
 				continue;
 			}
 
-			field.set(layoutType, new LayoutTypeControllerImpl(type));
+			LayoutTypeController layoutTypeController =
+				new LayoutTypeControllerImpl(type);
 
-			_layout.setType(type);
+			Map<String, Object> properties = new HashMap<>();
 
-			Assert.assertFalse(_layout.isTypePortlet());
+			properties.put("layout.type", type);
+
+			ServiceRegistration<LayoutTypeController> serviceRegistration =
+				registry.registerService(
+					LayoutTypeController.class, layoutTypeController,
+					properties);
+
+			try {
+				_layout.setType(type);
+
+				Assert.assertFalse(_layout.isTypePortlet());
+			}
+			finally {
+				serviceRegistration.unregister();
+			}
 		}
 	}
 
@@ -202,14 +237,10 @@ public class LayoutImplTest {
 
 	@Test
 	public void testIsTypePortletWithLayoutTypeController() throws Exception {
-		LayoutType layoutType = _layout.getLayoutType();
+		Registry registry = RegistryUtil.getRegistry();
 
-		Field field = ReflectionUtil.getDeclaredField(
-			LayoutTypeImpl.class, "_layoutTypeController");
-
-		field.set(
-			layoutType,
-			new LayoutTypeControllerImpl(LayoutConstants.TYPE_PORTLET));
+		LayoutTypeController layoutTypeController =
+			new LayoutTypeControllerImpl(LayoutConstants.TYPE_PORTLET);
 
 		for (String type : _TYPES) {
 			if (type.equals(LayoutConstants.TYPE_PORTLET)) {
@@ -218,7 +249,21 @@ public class LayoutImplTest {
 
 			_layout.setType(type);
 
-			Assert.assertTrue(_layout.isTypePortlet());
+			Map<String, Object> properties = new HashMap<>();
+
+			properties.put("layout.type", type);
+
+			ServiceRegistration<LayoutTypeController> serviceRegistration =
+				registry.registerService(
+					LayoutTypeController.class, layoutTypeController,
+					properties);
+
+			try {
+				Assert.assertTrue(_layout.isTypePortlet());
+			}
+			finally {
+				serviceRegistration.unregister();
+			}
 		}
 	}
 

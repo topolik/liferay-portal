@@ -147,7 +147,7 @@
 
 		<execute macro="DMPortlet#setDescriptiveView" />
 
-		<execute macro="DMRepository#gotoCP">
+		<execute macro="DMNavigator#gotoRepository">
 			<var name="dmRepositoryName" value="Sharepoint Repository Name" />
 		</execute>
 

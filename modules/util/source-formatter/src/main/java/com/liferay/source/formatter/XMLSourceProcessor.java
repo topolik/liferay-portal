@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.tools.ImportPackage;
 import com.liferay.source.formatter.util.FileUtil;
 import com.liferay.util.ContentUtil;
 import com.liferay.util.xml.Dom4jUtil;
@@ -459,7 +460,10 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 		else if (fileName.endsWith("/schema.xml") &&
 				 absolutePath.contains("solr")) {
 
-			formatSolrSchema(fileName, newContent);
+			formatSolrSchemaXML(fileName, newContent);
+		}
+		else if (fileName.endsWith("-spring.xml")) {
+			formatSpringXML(fileName, newContent);
 		}
 		else if ((portalSource || subrepository) &&
 				 fileName.endsWith("/struts-config.xml")) {
@@ -1039,29 +1043,29 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 			new ServiceExceptionElementComparator());
 	}
 
-	protected void formatSolrSchema(String fileName, String content)
+	protected void formatSolrSchemaXML(String fileName, String content)
 		throws Exception {
 
 		Document document = readXML(content);
 
 		Element rootElement = document.getRootElement();
 
-		SolrElementComparator solrElementComparator =
-			new SolrElementComparator();
+		checkOrder(
+			fileName, rootElement.element("fields"), "field", null,
+			new ElementComparator());
+		checkOrder(
+			fileName, rootElement.element("types"), "fieldType", null,
+			new ElementComparator());
+	}
 
-		Element typesElement = rootElement.element("types");
+	protected void formatSpringXML(String fileName, String content)
+		throws Exception {
 
-		_solrElementsContent = typesElement.asXML();
+		Document document = readXML(content);
 
 		checkOrder(
-			fileName, typesElement, "fieldType", null, solrElementComparator);
-
-		Element fieldsElement = rootElement.element("fields");
-
-		_solrElementsContent = fieldsElement.asXML();
-
-		checkOrder(
-			fileName, fieldsElement, "field", null, solrElementComparator);
+			fileName, document.getRootElement(), "bean", null,
+			new SpringBeanElementComparator("id"));
 	}
 
 	protected void formatStrutsConfigXML(String fileName, String content)
@@ -1550,8 +1554,8 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 	}
 
 	private static final String[] _INCLUDES = new String[] {
-		"**/*.action", "**/*.function", "**/*.macro", "**/*.testcase",
-		"**/*.xml"
+		"**/*.action", "**/*.function", "**/*.jrxml", "**/*.macro",
+		"**/*.testcase", "**/*.xml"
 	};
 
 	private static final String _NUMERICAL_PORTLET_NAME_ELEMENT_EXCLUDES =
@@ -1603,7 +1607,6 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 		"<[^\\>^/]*\\/>");
 	private final Pattern _projectNamePattern = Pattern.compile(
 		"/(\\w*-(ext|hooks|layouttpl|portlet|theme|web))/build\\.xml$");
-	private String _solrElementsContent;
 	private String _tablesContent;
 	private final Map<String, String> _tablesContentMap =
 		new ConcurrentHashMap<>();
@@ -1687,6 +1690,163 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 			String entityName2 = referenceElement2.attributeValue("entity");
 
 			return entityName1.compareToIgnoreCase(entityName2);
+		}
+
+	}
+
+	private static class SpringBeanElementComparator extends ElementComparator {
+
+		public SpringBeanElementComparator(String nameAttribute) {
+			super(nameAttribute);
+		}
+
+		@Override
+		public int compare(Element element1, Element element2) {
+			String elementName1 = getElementName(element1);
+			String elementName2 = getElementName(element2);
+
+			if ((elementName1 == null) || (elementName2 == null)) {
+				return 0;
+			}
+
+			int startsWithWeight = StringUtil.startsWithWeight(
+				elementName1, elementName2);
+
+			if (startsWithWeight != 0) {
+				String startKey = elementName1.substring(0, startsWithWeight);
+
+				if (startKey.contains(".service.")) {
+					return _compareServiceElements(elementName1, elementName2);
+				}
+			}
+
+			if ((StringUtil.count(elementName1, StringPool.PERIOD) > 1) &&
+				(StringUtil.count(elementName2, StringPool.PERIOD) > 1)) {
+
+				ImportPackage importPackage1 = new ImportPackage(
+					elementName1, false, elementName1);
+				ImportPackage importPackage2 = new ImportPackage(
+					elementName2, false, elementName2);
+
+				return importPackage1.compareTo(importPackage2);
+			}
+
+			if (StringUtil.count(elementName1, StringPool.PERIOD) > 1) {
+				return -1;
+			}
+
+			return super.compare(element1, element2);
+		}
+
+		@Override
+		protected String getElementName(Element element) {
+			String elementName = super.getElementName(element);
+
+			if ((elementName != null) &&
+				(StringUtil.count(elementName, StringPool.PERIOD) > 1)) {
+
+				return elementName;
+			}
+
+			return element.attributeValue("class");
+		}
+
+		private int _compareServiceElements(String name1, String name2) {
+			SpringBeanServiceElement springBeanServiceElemen1 =
+				new SpringBeanServiceElement(name1);
+			SpringBeanServiceElement springBeanServiceElemen2 =
+				new SpringBeanServiceElement(name2);
+
+			return springBeanServiceElemen1.compareTo(springBeanServiceElemen2);
+		}
+
+		private static class SpringBeanServiceElement
+			implements Comparable<SpringBeanServiceElement> {
+
+			public SpringBeanServiceElement(String name) {
+				_beanObjectName = StringPool.BLANK;
+				_type = -1;
+
+				Matcher matcher = _localServicePattern.matcher(name);
+
+				if (matcher.find()) {
+					_beanObjectName = matcher.group(1);
+					_type = _LOCAL_SERVICE;
+
+					return;
+				}
+
+				matcher = _servicePattern.matcher(name);
+
+				if (matcher.find()) {
+					_beanObjectName = matcher.group(1);
+					_type = _SERVICE;
+
+					return;
+				}
+
+				matcher = _persistencePattern.matcher(name);
+
+				if (matcher.find()) {
+					_beanObjectName = matcher.group(1);
+					_type = _PERSISTENCE;
+
+					return;
+				}
+
+				matcher = _finderPattern.matcher(name);
+
+				if (matcher.find()) {
+					_beanObjectName = matcher.group(1);
+					_type = _FINDER;
+				}
+			}
+
+			@Override
+			public int compareTo(
+				SpringBeanServiceElement springBeanServiceElement) {
+
+				if (_beanObjectName.equals(
+						springBeanServiceElement.getBeanObjectName())) {
+
+					return _type - springBeanServiceElement.getType();
+				}
+
+				NaturalOrderStringComparator comparator =
+					new NaturalOrderStringComparator();
+
+				return comparator.compare(
+					_beanObjectName,
+					springBeanServiceElement.getBeanObjectName());
+			}
+
+			public String getBeanObjectName() {
+				return _beanObjectName;
+			}
+
+			public int getType() {
+				return _type;
+			}
+
+			private static final int _FINDER = 4;
+
+			private static final int _LOCAL_SERVICE = 1;
+
+			private static final int _PERSISTENCE = 3;
+
+			private static final int _SERVICE = 2;
+
+			private String _beanObjectName;
+			private final Pattern _finderPattern = Pattern.compile(
+				"\\.service\\.persistence\\.(\\w+)Finder");
+			private final Pattern _localServicePattern = Pattern.compile(
+				"\\.service\\.(\\w+)LocalService");
+			private final Pattern _persistencePattern = Pattern.compile(
+				"\\.service\\.persistence\\.(\\w+)Persistence");
+			private final Pattern _servicePattern = Pattern.compile(
+				"\\.service\\.(\\w+)Service");
+			private int _type;
+
 		}
 
 	}
@@ -1885,40 +2045,6 @@ public class XMLSourceProcessor extends BaseSourceProcessor {
 		}
 
 		private final List<String> _columnNames;
-
-	}
-
-	private class SolrElementComparator extends ElementComparator {
-
-		@Override
-		public int compare(Element solrElement1, Element solrElement2) {
-			int value = super.compare(solrElement1, solrElement2);
-
-			if (value <= 0) {
-				return value;
-			}
-
-			String solrElementContent1 = solrElement1.asXML();
-			String solrElementContent2 = solrElement2.asXML();
-
-			int x =
-				_solrElementsContent.indexOf(solrElementContent1) +
-					solrElementContent1.length();
-			int y = _solrElementsContent.indexOf(solrElementContent2);
-
-			if (x > y) {
-				return -1;
-			}
-
-			String betweenElementsContent = _solrElementsContent.substring(
-				x, y);
-
-			if (betweenElementsContent.contains("<!--")) {
-				return -1;
-			}
-
-			return 1;
-		}
 
 	}
 

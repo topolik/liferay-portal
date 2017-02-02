@@ -1248,6 +1248,16 @@ this task.
 			</replacevalue>
 		</replace>
 
+		<replace file="${app.server.jboss.dir}/standalone/configuration/standalone.xml">
+			<replacetoken><![CDATA[<formatter>
+                    <named-formatter name="COLOR-PATTERN" />
+                </formatter>]]></replacetoken>
+			<replacevalue><![CDATA[<filter-spec value="not(any(match(&quot;WFLYSRV0059&quot;),match(&quot;WFLYEE0007&quot;)))" />
+                <formatter>
+                    <named-formatter name="COLOR-PATTERN" />
+                </formatter>]]></replacevalue>
+		</replace>
+
 		<echo file="${app.server.jboss.bin.dir}/server.policy">
 			grant {
 				permission java.security.AllPermission;
@@ -1271,6 +1281,8 @@ this task.
 					<replacetoken><![CDATA[JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MaxPermSize=256m ]]></replacetoken>
 					<replacevalue><![CDATA[JAVA_OPTS="]]></replacevalue>
 				</replace>
+
+				<echo append="true" file="${app.server.jboss.bin.dir}/standalone.conf">${line.separator}<![CDATA[JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true ${java.security.config} -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xmx1024m -XX:MaxMetaspaceSize=384m"]]></echo>
 			</then>
 			<elseif>
 				<equals arg1="${app.server.jboss.version}" arg2="7.0.0" />
@@ -1279,15 +1291,11 @@ this task.
 						<replacetoken><![CDATA[JAVA_OPTS="-Xms1303m -Xmx1303m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m ]]></replacetoken>
 						<replacevalue><![CDATA[JAVA_OPTS="]]></replacevalue>
 					</replace>
+
+					<echo append="true" file="${app.server.jboss.bin.dir}/standalone.conf">${line.separator}<![CDATA[JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true ${java.security.config} -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xmx1024m -XX:MaxMetaspaceSize=512m"]]></echo>
 				</then>
 			</elseif>
 		</if>
-
-		<echo append="true" file="${app.server.jboss.bin.dir}/standalone.conf">
-			<![CDATA[
-				JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true ${java.security.config} -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xmx1024m -XX:MaxMetaspaceSize=384m"
-			]]>
-		</echo>
 
 		<replace file="${app.server.jboss.bin.dir}/standalone.conf.bat">
 			<replacetoken><![CDATA[set "JAVA_OPTS=-Xms1G -Xmx1G -XX:MaxPermSize=256M"]]></replacetoken>
@@ -1764,6 +1772,23 @@ this task.
 			<replacevalue><![CDATA[redirectPort="${bio.https.port}" URIEncoding="UTF-8"/>]]></replacevalue>
 		</replace>
 
+		<replace file="${app.server.tcserver.dir}/liferay/conf/web.xml">
+			<replacetoken><![CDATA[<load-on-startup>3</load-on-startup>]]></replacetoken>
+			<replacevalue>
+				<![CDATA[
+					<init-param>
+						<param-name>compilerSourceVM</param-name>
+						<param-value>1.8</param-value>
+					</init-param>
+					<init-param>
+						<param-name>compilerTargetVM</param-name>
+						<param-value>1.8</param-value>
+					</init-param>
+					<load-on-startup>3</load-on-startup>
+				]]>
+			</replacevalue>
+		</replace>
+
 		<if>
 			<os family="windows" />
 			<then>
@@ -1838,6 +1863,23 @@ wrapper.java.additional.11="-Dfile.encoding=UTF-8"]]></replacevalue>
 			<replacetoken><![CDATA[xmlValidation="false" xmlNamespaceAware="false">]]></replacetoken>
 			<replacevalue><![CDATA[xmlValidation="false" deployXML="false" xmlNamespaceAware="false">]]></replacevalue>
 		</replace>-->
+
+		<replace file="${app.server.tomcat.dir}/conf/web.xml">
+			<replacetoken><![CDATA[<load-on-startup>3</load-on-startup>]]></replacetoken>
+			<replacevalue>
+				<![CDATA[
+					<init-param>
+						<param-name>compilerSourceVM</param-name>
+						<param-value>1.8</param-value>
+					</init-param>
+					<init-param>
+						<param-name>compilerTargetVM</param-name>
+						<param-value>1.8</param-value>
+					</init-param>
+					<load-on-startup>3</load-on-startup>
+				]]>
+			</replacevalue>
+		</replace>
 
 		<if>
 			<available file="${jdk.windows.home}/jre/bin/java.exe" />
@@ -2824,6 +2866,16 @@ this task.
 			match=" *&lt;handlers>\r?\n *&lt;file name=&quot;welcome-content&quot; path=&quot;\$\{jboss\.home\.dir}\/welcome-content&quot;\/>\r?\n *&lt;\/handlers>"
 			replace=""
 		/>
+
+		<replace file="${app.server.wildfly.dir}/standalone/configuration/standalone.xml">
+			<replacetoken><![CDATA[<formatter>
+                    <named-formatter name="COLOR-PATTERN" />
+                </formatter>]]></replacetoken>
+			<replacevalue><![CDATA[<filter-spec value="not(any(match(&quot;WFLYSRV0059&quot;),match(&quot;WFLYEE0007&quot;)))" />
+                <formatter>
+                    <named-formatter name="COLOR-PATTERN" />
+                </formatter>]]></replacevalue>
+		</replace>
 
 		<echo file="${app.server.wildfly.bin.dir}/server.policy">
 			grant {

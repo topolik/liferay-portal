@@ -18,7 +18,7 @@ import com.liferay.calendar.constants.CalendarPortletKeys;
 import com.liferay.portal.kernel.portlet.ConfigurationAction;
 import com.liferay.portal.kernel.portlet.DefaultConfigurationAction;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.SessionClicks;
 
 import javax.portlet.ActionRequest;
@@ -79,16 +79,12 @@ public class CalendarConfigurationAction extends DefaultConfigurationAction {
 			actionRequest, "displaySchedulerHeader");
 		boolean displaySchedulerOnly = ParamUtil.getBoolean(
 			actionRequest, "displaySchedulerOnly");
+		int eventsPerPage = ParamUtil.getInteger(
+			actionRequest, "eventsPerPage");
+		int maxDaysDisplayed = ParamUtil.getInteger(
+			actionRequest, "maxDaysDisplayed");
 		boolean showUserEvents = ParamUtil.getBoolean(
 			actionRequest, "showUserEvents");
-
-		portletPreferences.setValue(
-			"displaySchedulerHeader", String.valueOf(displaySchedulerHeader));
-		portletPreferences.setValue(
-			"displaySchedulerOnly", String.valueOf(displaySchedulerOnly));
-		portletPreferences.setValue(
-			"showUserEvents", String.valueOf(showUserEvents));
-
 		boolean showAgendaView = ParamUtil.getBoolean(
 			actionRequest, "showAgendaView");
 		boolean showDayView = ParamUtil.getBoolean(
@@ -99,12 +95,22 @@ public class CalendarConfigurationAction extends DefaultConfigurationAction {
 			actionRequest, "showMonthView");
 
 		portletPreferences.setValue(
+			"displaySchedulerHeader", String.valueOf(displaySchedulerHeader));
+		portletPreferences.setValue(
+			"displaySchedulerOnly", String.valueOf(displaySchedulerOnly));
+		portletPreferences.setValue(
+			"eventsPerPage", String.valueOf(eventsPerPage));
+		portletPreferences.setValue(
+			"maxDaysDisplayed", String.valueOf(maxDaysDisplayed));
+		portletPreferences.setValue(
 			"showAgendaView", String.valueOf(showAgendaView));
 		portletPreferences.setValue("showDayView", String.valueOf(showDayView));
 		portletPreferences.setValue(
 			"showWeekView", String.valueOf(showWeekView));
 		portletPreferences.setValue(
 			"showMonthView", String.valueOf(showMonthView));
+		portletPreferences.setValue(
+			"showUserEvents", String.valueOf(showUserEvents));
 
 		portletPreferences.store();
 	}
@@ -134,8 +140,8 @@ public class CalendarConfigurationAction extends DefaultConfigurationAction {
 		portletPreferences.setValue(
 			"weekStartsOn", String.valueOf(weekStartsOn));
 
-		HttpServletRequest httpServletRequest =
-			PortalUtil.getHttpServletRequest(actionRequest);
+		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
+			actionRequest);
 
 		SessionClicks.put(
 			httpServletRequest, "com.liferay.calendar.web_defaultView",
@@ -143,5 +149,8 @@ public class CalendarConfigurationAction extends DefaultConfigurationAction {
 
 		portletPreferences.store();
 	}
+
+	@Reference
+	private Portal _portal;
 
 }

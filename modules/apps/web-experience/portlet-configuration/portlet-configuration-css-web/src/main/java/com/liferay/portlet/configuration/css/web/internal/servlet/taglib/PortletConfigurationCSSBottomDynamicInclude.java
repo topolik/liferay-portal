@@ -14,16 +14,18 @@
 
 package com.liferay.portlet.configuration.css.web.internal.servlet.taglib;
 
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.taglib.BaseDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
-import javax.servlet.RequestDispatcher;
+import java.util.Collections;
+import java.util.Map;
+
 import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,17 +45,11 @@ public class PortletConfigurationCSSBottomDynamicInclude
 			String key)
 		throws IOException {
 
-		RequestDispatcher requestDispatcher =
-			_servletContext.getRequestDispatcher(_JSP_PATH);
+		PrintWriter printWriter = response.getWriter();
 
-		try {
-			requestDispatcher.include(request, response);
-		}
-		catch (ServletException se) {
-			_log.error("Unable to include JSP " + _JSP_PATH, se);
-
-			throw new IOException("Unable to include " + _JSP_PATH, se);
-		}
+		printWriter.print(
+			StringUtil.replace(
+				_TMPL_CONTENT, StringPool.POUND, StringPool.POUND, _values));
 	}
 
 	@Override
@@ -66,14 +62,14 @@ public class PortletConfigurationCSSBottomDynamicInclude
 		unbind = "-"
 	)
 	protected void setServletContext(ServletContext servletContext) {
-		_servletContext = servletContext;
+		_values = Collections.singletonMap(
+			"contextPath", servletContext.getContextPath());
 	}
 
-	private static final String _JSP_PATH = "/definitions.jsp";
+	private static final String _TMPL_CONTENT = StringUtil.read(
+		PortletConfigurationCSSBottomDynamicInclude.class,
+		"/META-INF/resources/definitions.tmpl");
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		PortletConfigurationCSSBottomDynamicInclude.class);
-
-	private ServletContext _servletContext;
+	private Map<String, String> _values;
 
 }

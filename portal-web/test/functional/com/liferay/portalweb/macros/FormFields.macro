@@ -48,7 +48,7 @@
 
 		<execute function="Type" locator1="FormFields#OPTIONS_OPTION_VALUE_FIELD" value1="${optionValue}" />
 
-		<execute function="AssertElementPresent" locator1="FormFields#OPTIONS_OPTION_NAME_FIELD" value1="Field Name:${optionName}" />
+		<execute function="AssertElementPresent" locator1="FormFields#OPTIONS_OPTION_NAME_FIELD" />
 	</command>
 
 	<command name="editOptionsRowNameField">
@@ -82,6 +82,12 @@
 		<var name="key_fieldName" value="${fieldName}" />
 
 		<execute function="Type" locator1="FormFields#TEXT_FIELD" value1="${fieldValue}" />
+	</command>
+
+	<command name="editTextAlt">
+		<var name="key_fieldName" value="${fieldName}" />
+
+		<execute function="Type" locator1="FormFields#TEXT_FIELD_ALT" value1="${fieldValue}" />
 	</command>
 
 	<command name="editTextMultiline">
@@ -539,5 +545,11 @@
 		<var name="key_fieldName" value="${fieldName}" />
 
 		<execute function="AssertTextEquals" locator1="FormFields#TEXT_FIELD" value1="${fieldValue}" />
+	</command>
+
+	<command name="viewTextValueAlt">
+		<var name="key_fieldName" value="${fieldName}" />
+
+		<execute function="AssertTextEquals" locator1="FormFields#TEXT_FIELD_ALT" value1="${fieldValue}" />
 	</command>
 </definition>

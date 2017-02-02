@@ -16,7 +16,7 @@ package com.liferay.dynamic.data.lists.form.web.internal.portlet;
 
 import com.liferay.dynamic.data.lists.form.web.configuration.DDLFormWebConfigurationActivator;
 import com.liferay.dynamic.data.lists.form.web.constants.DDLFormPortletKeys;
-import com.liferay.dynamic.data.lists.form.web.internal.converter.DDMFormRulesToDDLFormRulesConverter;
+import com.liferay.dynamic.data.lists.form.web.internal.converter.DDMFormRuleToDDLFormRuleConverter;
 import com.liferay.dynamic.data.lists.form.web.internal.display.context.DDLFormAdminDisplayContext;
 import com.liferay.dynamic.data.lists.model.DDLRecordSet;
 import com.liferay.dynamic.data.lists.model.DDLRecordSetSettings;
@@ -49,7 +49,7 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowEngineManager;
 
@@ -133,9 +133,9 @@ public class DDLFormAdminPortlet extends MVCPortlet {
 			new DDMFormRenderingContext();
 
 		ddmFormRenderingContext.setHttpServletRequest(
-			PortalUtil.getHttpServletRequest(renderRequest));
+			_portal.getHttpServletRequest(renderRequest));
 		ddmFormRenderingContext.setHttpServletResponse(
-			PortalUtil.getHttpServletResponse(renderResponse));
+			_portal.getHttpServletResponse(renderResponse));
 		ddmFormRenderingContext.setContainerId("settings");
 		ddmFormRenderingContext.setLocale(
 			LocaleUtil.fromLanguageId(languageId));
@@ -262,7 +262,7 @@ public class DDLFormAdminPortlet extends MVCPortlet {
 
 	@Reference(unbind = "-")
 	protected void setDDMFormRulesToDDLFormRulesConverter(
-		DDMFormRulesToDDLFormRulesConverter
+		DDMFormRuleToDDLFormRuleConverter
 			ddmFormRulesToDDLFormRulesConverter) {
 
 		_ddmFormRulesToDDLFormRulesConverter =
@@ -371,12 +371,16 @@ public class DDLFormAdminPortlet extends MVCPortlet {
 	private DDMFormJSONSerializer _ddmFormJSONSerializer;
 	private DDMFormLayoutJSONSerializer _ddmFormLayoutJSONSerializer;
 	private DDMFormRenderer _ddmFormRenderer;
-	private DDMFormRulesToDDLFormRulesConverter
+	private DDMFormRuleToDDLFormRuleConverter
 		_ddmFormRulesToDDLFormRulesConverter;
 	private DDMFormValuesFactory _ddmFormValuesFactory;
 	private DDMFormValuesMerger _ddmFormValuesMerger;
 	private DDMStructureLocalService _ddmStructureLocalService;
 	private JSONFactory _jsonFactory;
+
+	@Reference
+	private Portal _portal;
+
 	private StorageEngine _storageEngine;
 	private WorkflowEngineManager _workflowEngineManager;
 

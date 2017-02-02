@@ -200,21 +200,17 @@ public class PortletContainerImpl implements PortletContainer {
 	protected void processPublicRenderParameters(
 		HttpServletRequest request, Layout layout, Portlet portlet) {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
 		PortletApp portletApp = portlet.getPortletApp();
-
-		Map<String, String[]> publicRenderParameters =
-			PublicRenderParametersPool.get(
-				request, layout.getPlid(), portletApp.isWARFile());
+		PortletQName portletQName = PortletQNameUtil.getPortletQName();
+		Map<String, String[]> publicRenderParameters = null;
+		ThemeDisplay themeDisplay = null;
 
 		Map<String, String[]> parameters = request.getParameterMap();
 
 		for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
 			String name = entry.getKey();
 
-			QName qName = PortletQNameUtil.getQName(name);
+			QName qName = portletQName.getQName(name);
 
 			if (qName == null) {
 				continue;
@@ -228,11 +224,21 @@ public class PortletContainerImpl implements PortletContainer {
 				continue;
 			}
 
+			if (publicRenderParameters == null) {
+				publicRenderParameters = PublicRenderParametersPool.get(
+					request, layout.getPlid(), portletApp.isWARFile());
+			}
+
 			String publicRenderParameterName =
-				PortletQNameUtil.getPublicRenderParameterName(qName);
+				portletQName.getPublicRenderParameterName(qName);
 
 			if (name.startsWith(
 					PortletQName.PUBLIC_RENDER_PARAMETER_NAMESPACE)) {
+
+				if (themeDisplay == null) {
+					themeDisplay = (ThemeDisplay)request.getAttribute(
+						WebKeys.THEME_DISPLAY);
+				}
 
 				String[] values = entry.getValue();
 
@@ -407,8 +413,7 @@ public class PortletContainerImpl implements PortletContainer {
 
 			ActionResponseImpl actionResponseImpl =
 				ActionResponseFactory.create(
-					actionRequestImpl, response, portlet.getPortletId(), user,
-					layout, windowState, portletMode);
+					actionRequestImpl, response, user, layout);
 
 			actionRequestImpl.defineObjects(portletConfig, actionResponseImpl);
 
@@ -553,8 +558,7 @@ public class PortletContainerImpl implements PortletContainer {
 		Layout requestLayout = (Layout)request.getAttribute(WebKeys.LAYOUT);
 
 		EventResponseImpl eventResponseImpl = EventResponseFactory.create(
-			eventRequestImpl, response, portlet.getPortletId(), user,
-			requestLayout);
+			eventRequestImpl, response, user, requestLayout);
 
 		eventRequestImpl.defineObjects(portletConfig, eventResponseImpl);
 
@@ -796,12 +800,8 @@ public class PortletContainerImpl implements PortletContainer {
 			request, portlet, invokerPortlet, portletContext, windowState,
 			portletMode, portletPreferences, layout.getPlid());
 
-		long companyId = PortalUtil.getCompanyId(request);
-
 		ResourceResponseImpl resourceResponseImpl =
-			ResourceResponseFactory.create(
-				resourceRequestImpl, response, portlet.getPortletId(),
-				companyId);
+			ResourceResponseFactory.create(resourceRequestImpl, response);
 
 		resourceRequestImpl.defineObjects(portletConfig, resourceResponseImpl);
 

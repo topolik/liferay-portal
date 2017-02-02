@@ -1069,14 +1069,6 @@
 		<execute function="AssertTextEquals" locator1="Message#EMPTY_INFO" value1="No roles were found." />
 	</command>
 
-	<command name="viewNoXSSCP">
-		<var name="key_itemName" value="${roleTitle}" />
-
-		<execute function="AssertAlertNotPresent" />
-		<execute function="AssertTextEquals" locator1="ListGroupItem#ITEM_NAME" value1="${roleTitle}" />
-		<execute function="AssertTextEquals" locator1="ListGroupItem#ITEM_DESCRIPTION" value1="${roleDescription}" />
-	</command>
-
 	<command name="viewPermissionCP">
 		<if>
 			<contains string="${permissionDefinitionKey}" substring="CONTROL_PANEL_GENERAL_PERMISSIONS" />

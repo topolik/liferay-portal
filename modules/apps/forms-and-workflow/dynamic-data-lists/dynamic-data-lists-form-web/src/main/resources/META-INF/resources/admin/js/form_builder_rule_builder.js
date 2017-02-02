@@ -1,7 +1,14 @@
 AUI.add(
 	'liferay-ddl-form-builder-rule-builder',
 	function(A) {
-		var SoyTemplateUtil = Liferay.DDL.SoyTemplateUtil;
+		var SoyTemplateUtil = Liferay.DDM.SoyTemplateUtil;
+
+		var MAP_ACTION_DESCRIPTIONS = {
+			enable: 'enable-field',
+			'jump-to-page': 'jump-from-page-to-page',
+			require: 'require-field',
+			show: 'show-field'
+		};
 
 		var FormBuilderRuleBuilder = A.Component.create(
 			{
@@ -20,10 +27,14 @@ AUI.add(
 							delete: Liferay.Language.get('delete'),
 							edit: Liferay.Language.get('edit'),
 							emptyListText: Liferay.Language.get('there-are-no-rules-yet-click-on-plus-icon-bellow-to-add-the-first'),
+							'enable-field': Liferay.Language.get('enable-x'),
 							'equals-to': Liferay.Language.get('is-equal-to'),
+							'jump-from-page-to-page': Liferay.Language.get('jump-from-x-to-x'),
 							'not-contains': Liferay.Language.get('does-not-contain'),
 							'not-equals-to': Liferay.Language.get('is-not-equal-to'),
-							ruleBuilder: Liferay.Language.get('rule-builder')
+							'require-field': Liferay.Language.get('require-x'),
+							ruleBuilder: Liferay.Language.get('rule-builder'),
+							'show-field': Liferay.Language.get('show-x')
 						}
 					}
 				},
@@ -113,31 +124,118 @@ AUI.add(
 						return fields;
 					},
 
-					hide: function() {
+					getPages: function() {
 						var instance = this;
 
-						FormBuilderRuleBuilder.superclass.hide.apply(instance, arguments);
+						var pages;
 
-						instance.syncUI();
+						var formBuilder = instance.get('formBuilder');
+
+						var pagesTitles = formBuilder.getPagesTitle();
+
+						var pagesQuantity = formBuilder.get('layouts').length;
+
+						pages = new Array(pagesQuantity);
+
+						for (var i = 0; i < pagesQuantity; i++) {
+							pages[i] = {
+								label: pagesTitles[i] ? pagesTitles[i] : (i + 1).toString(),
+								value: i.toString()
+							};
+						}
+
+						return pages;
 					},
 
 					renderRule: function(rule) {
 						var instance = this;
 
 						if (!instance._ruleClasses) {
-							instance._ruleClasses = new Liferay.DDL.FormBuilderRule(
+							instance._ruleClasses = new Liferay.DDL.FormBuilderRenderRule(
 								{
 									boundingBox: instance.get('boundingBox'),
 									bubbleTargets: [instance],
 									contentBox: instance.get('contentBox'),
-									fields: instance.getFields()
+									fields: instance.getFields(),
+									pages: instance.getPages()
 								}
 							);
 						}
 
 						instance._ruleClasses.set('fields', instance.getFields());
+						instance._ruleClasses.set('pages', instance.getPages());
 
 						instance._ruleClasses.render(rule);
+					},
+
+					show: function() {
+						var instance = this;
+
+						FormBuilderRuleBuilder.superclass.show.apply(instance, arguments);
+
+						instance.syncUI();
+					},
+
+					_getActionDescription: function(type, action) {
+						var instance = this;
+
+						var actionDescription = '';
+
+						var strings = instance.get('strings');
+
+						var badgeTemplate = SoyTemplateUtil.getTemplateRenderer('ddl.badge');
+
+						var actionKey = MAP_ACTION_DESCRIPTIONS[type];
+
+						var pages = instance.getPages();
+
+						if (actionKey) {
+							var data;
+
+							if (type === 'jump-to-page') {
+								data = [
+									badgeTemplate(
+										{
+											content: pages[action.source].label
+										}
+									),
+									badgeTemplate(
+										{
+											content: pages[action.target].label
+										}
+									)
+								];
+							}
+							else {
+								data = [
+									badgeTemplate(
+										{
+											content: action.target
+										}
+									)
+								];
+							}
+
+							actionDescription = A.Lang.sub(strings[actionKey], data);
+						}
+
+						return actionDescription;
+					},
+
+					_getActionsDescription: function(actions) {
+						var instance = this;
+
+						var actionsDescription = [];
+
+						var actionDescription = '';
+
+						for (var i = 0; i < actions.length; i++) {
+							actionDescription = instance._getActionDescription(actions[i].action, actions[i]);
+
+							actionsDescription.push(actionDescription);
+						}
+
+						return actionsDescription;
 					},
 
 					_getFieldLabel: function(fieldValue) {
@@ -154,6 +252,24 @@ AUI.add(
 						}
 
 						return fieldLabel;
+					},
+
+					_getRulesDescription: function(rules) {
+						var instance = this;
+
+						var rulesDescription = [];
+
+						var ruleDescription = {};
+
+						for (var i = 0; i < rules.length; i++) {
+							ruleDescription.conditions = rules[i].conditions;
+
+							ruleDescription.actions = instance._getActionsDescription(rules[i].actions);
+
+							rulesDescription.push(ruleDescription);
+						}
+
+						return rulesDescription;
 					},
 
 					_handleAddRuleClick: function() {
@@ -226,11 +342,13 @@ AUI.add(
 
 						var ruleListTemplateRenderer = SoyTemplateUtil.getTemplateRenderer('ddl.rule_list');
 
+						var rulesDescription = instance._getRulesDescription(rules);
+
 						rulesList.setHTML(
 							ruleListTemplateRenderer(
 								{
 									kebab: Liferay.Util.getLexiconIconTpl('ellipsis-v', 'icon-monospaced'),
-									rules: rules,
+									rules: rulesDescription,
 									strings: instance.get('strings')
 								}
 							)

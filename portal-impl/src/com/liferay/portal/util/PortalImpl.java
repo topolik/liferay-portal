@@ -2765,10 +2765,8 @@ public class PortalImpl implements Portal {
 			layoutActualURL = layoutActualURL.concat(queryString);
 		}
 		else if (params.isEmpty()) {
-			LayoutType layoutType = layout.getLayoutType();
-
 			UnicodeProperties typeSettingsProperties =
-				layoutType.getTypeSettingsProperties();
+				layout.getTypeSettingsProperties();
 
 			queryString = typeSettingsProperties.getProperty("query-string");
 
@@ -2787,9 +2785,11 @@ public class PortalImpl implements Portal {
 	public String getLayoutFriendlyURL(Layout layout, ThemeDisplay themeDisplay)
 		throws PortalException {
 
-		LayoutType layoutType = layout.getLayoutType();
+		LayoutTypeController layoutTypeController =
+			LayoutTypeControllerTracker.getLayoutTypeController(
+				layout.getType());
 
-		if (!layoutType.isURLFriendliable()) {
+		if (!layoutTypeController.isURLFriendliable()) {
 			return null;
 		}
 
@@ -3657,11 +3657,9 @@ public class PortalImpl implements Portal {
 	public HttpServletRequest getOriginalServletRequest(
 		HttpServletRequest request) {
 
-		HttpServletRequest originalRequest = null;
-
-		HttpServletRequestWrapper currentRequestWrapper = null;
-
 		HttpServletRequest currentRequest = request;
+		HttpServletRequestWrapper currentRequestWrapper = null;
+		HttpServletRequest originalRequest = null;
 
 		while (currentRequest instanceof HttpServletRequestWrapper) {
 			if (currentRequest instanceof
@@ -4379,8 +4377,18 @@ public class PortalImpl implements Portal {
 			friendlyURL = friendlyURL.substring(0, friendlyURL.length() - 1);
 		}
 
-		Layout layout = LayoutLocalServiceUtil.getFriendlyURLLayout(
-			groupId, privateLayout, friendlyURL);
+		Layout layout = null;
+
+		if (Validator.isNotNull(friendlyURL)) {
+			layout = LayoutLocalServiceUtil.getFriendlyURLLayout(
+				groupId, privateLayout, friendlyURL);
+		}
+		else {
+			long defaultPlid = LayoutLocalServiceUtil.getDefaultPlid(
+				groupId, privateLayout);
+
+			layout = LayoutLocalServiceUtil.getLayout(defaultPlid);
+		}
 
 		return new LayoutQueryStringComposite(layout, friendlyURL, queryString);
 	}
@@ -7064,13 +7072,6 @@ public class PortalImpl implements Portal {
 			Portlet portlet = PortletLocalServiceUtil.getPortletById(
 				getCompanyId(request), portletId);
 
-			if (!PortletPermissionUtil.contains(
-					permissionChecker, getScopeGroupId(request), layout,
-					portlet, ActionKeys.VIEW)) {
-
-				return portletMode;
-			}
-
 			boolean updateLayout = false;
 
 			if (portletMode.equals(LiferayPortletMode.ABOUT) &&
@@ -7149,7 +7150,11 @@ public class PortalImpl implements Portal {
 				updateLayout = true;
 			}
 
-			if (updateLayout) {
+			if (updateLayout &&
+				PortletPermissionUtil.contains(
+					permissionChecker, getScopeGroupId(request), layout,
+					portlet, ActionKeys.VIEW)) {
+
 				LayoutClone layoutClone = LayoutCloneFactory.getInstance();
 
 				if (layoutClone != null) {
@@ -7492,9 +7497,11 @@ public class PortalImpl implements Portal {
 	}
 
 	protected Layout getBrowsableLayout(Layout layout) {
-		LayoutType layoutType = layout.getLayoutType();
+		LayoutTypeController layoutTypeController =
+			LayoutTypeControllerTracker.getLayoutTypeController(
+				layout.getType());
 
-		if (layoutType.isBrowsable()) {
+		if (layoutTypeController.isBrowsable()) {
 			return layout;
 		}
 
@@ -7503,9 +7510,11 @@ public class PortalImpl implements Portal {
 		List<Layout> childLayouts = layout.getAllChildren();
 
 		for (Layout childLayout : childLayouts) {
-			LayoutType childLayoutType = childLayout.getLayoutType();
+			LayoutTypeController childLayoutTypeController =
+				LayoutTypeControllerTracker.getLayoutTypeController(
+					childLayout.getType());
 
-			if (childLayoutType.isBrowsable()) {
+			if (childLayoutTypeController.isBrowsable()) {
 				browsableChildLayout = childLayout;
 
 				break;

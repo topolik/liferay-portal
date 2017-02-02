@@ -44,6 +44,7 @@ import com.liferay.portal.kernel.service.permission.OrganizationPermissionUtil;
 import com.liferay.portal.kernel.service.permission.UserGroupPermissionUtil;
 import com.liferay.portal.kernel.service.permission.UserPermissionUtil;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
+import com.liferay.portal.util.LayoutTypeControllerTracker;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.sites.kernel.util.SitesUtil;
 
@@ -128,10 +129,9 @@ public class LayoutPermissionImpl
 		throws PortalException {
 
 		if (actionId.equals(ActionKeys.VIEW)) {
-			LayoutType layoutType = layout.getLayoutType();
-
 			LayoutTypeController layoutTypeController =
-				layoutType.getLayoutTypeController();
+				LayoutTypeControllerTracker.getLayoutTypeController(
+					layout.getType());
 
 			if (!layoutTypeController.isCheckLayoutViewPermission()) {
 				return true;
