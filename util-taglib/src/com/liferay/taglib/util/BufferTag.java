@@ -14,6 +14,8 @@
 
 package com.liferay.taglib.util;
 
+import com.liferay.portal.kernel.security.xss.XSS;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 
 import javax.servlet.jsp.tagext.BodyTagSupport;
@@ -26,8 +28,11 @@ public class BufferTag extends BodyTagSupport {
 	@Override
 	public int doEndTag() {
 		try {
-			pageContext.setAttribute(
-				_var, StringUtil.trim(getBodyContent().getString()));
+			CharSequence bodyContent = StringUtil.trim(getBodyContent().getString());
+
+			bodyContent = XSS.safeHtml(bodyContent);
+
+			pageContext.setAttribute(_var, bodyContent);
 
 			return EVAL_PAGE;
 		}

@@ -14,6 +14,9 @@
 
 package com.liferay.taglib.util;
 
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.xss.XSS;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 
@@ -33,14 +36,33 @@ public class InlineUtil {
 
 		StringBundler sb = new StringBundler(dynamicAttributes.size() * 4);
 
-		for (Map.Entry<String, Object> entry : dynamicAttributes.entrySet()) {
+		for (Map.Entry<String, Object> entry :
+				dynamicAttributes.entrySet()) {
+
 			String key = entry.getKey();
-			String value = String.valueOf(entry.getValue());
+			Object value = entry.getValue();
+
+			String normalizedKey = key.toLowerCase();
+
+			if (normalizedKey.startsWith("on") || normalizedKey.equals("src") ||
+				normalizedKey.equals("href")){
+
+				if (!(value instanceof XSS.SafeHtml)) {
+					value = "--sanitized--";
+
+					if (_log.isWarnEnabled()) {
+						_log.warn(
+							"Unable to recognize safe content for " + key,
+							new Exception());
+					}
+				}
+			}
+
 
 			if (!key.equals("class")) {
-				sb.append(key);
+				sb.append(key.toString());
 				sb.append("=\"");
-				sb.append(value);
+				sb.append(XSS.attribute(value.toString()));
 				sb.append("\" ");
 			}
 		}
@@ -48,4 +70,7 @@ public class InlineUtil {
 		return sb.toString();
 	}
 
+	private static final String[] INLINE_JAVASCRIPT_SINKS = {"onblur","onfocus","onclick","ondblclick","onmousedown","onmouseup","onmouseover"};
+
+	private static final Log _log = LogFactoryUtil.getLog(InlineUtil.class);
 }
