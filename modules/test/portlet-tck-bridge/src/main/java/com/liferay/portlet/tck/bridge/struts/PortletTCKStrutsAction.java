@@ -183,6 +183,11 @@ public class PortletTCKStrutsAction extends BaseStrutsAction {
 			long[] userGroupIds = null;
 			boolean sendEmail = false;
 
+			Role powerUserRole = RoleLocalServiceUtil.getRole(
+				companyId, RoleConstants.POWER_USER);
+
+			roleIds = new long[] {powerUserRole.getRoleId()};
+
 			ServiceContext serviceContext = new ServiceContext();
 
 			User user = UserLocalServiceUtil.addUser(
