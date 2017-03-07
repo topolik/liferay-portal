@@ -54,7 +54,6 @@ import javax.portlet.WindowState;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -158,22 +157,7 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 	protected String getCompleteRedirectURL(
 		HttpServletRequest request, String redirect) {
 
-		HttpSession session = request.getSession();
-
-		Boolean httpsInitial = (Boolean)session.getAttribute(
-			WebKeys.HTTPS_INITIAL);
-
-		String portalURL = null;
-
-		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS &&
-			!PropsValues.SESSION_ENABLE_PHISHING_PROTECTION &&
-			(httpsInitial != null) && !httpsInitial.booleanValue()) {
-
-			portalURL = _portal.getPortalURL(request, false);
-		}
-		else {
-			portalURL = _portal.getPortalURL(request);
-		}
+		String portalURL = _portal.getPortalURL(request);
 
 		return portalURL.concat(redirect);
 	}

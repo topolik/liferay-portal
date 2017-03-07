@@ -403,6 +403,10 @@ public interface PropsKeys {
 
 	public static final String COMPANY_LOGIN_PREPOPULATE_DOMAIN = "company.login.prepopulate.domain";
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public static final String COMPANY_SECURITY_AUTH_REQUIRES_HTTPS = "company.security.auth.requires.https";
 
 	public static final String COMPANY_SECURITY_AUTH_TYPE = "company.security.auth.type";
@@ -2433,6 +2437,8 @@ public interface PropsKeys {
 	public static final String WEB_SERVER_SERVLET_MAX_RANGE_FIELDS = "web.server.servlet.max.range.fields";
 
 	public static final String WEB_SERVER_SERVLET_VERSION_VERBOSITY = "web.server.servlet.version.verbosity";
+
+	public static final String WEB_SERVER_UPGRADE_INSECURE_CONNECTIONS = "web.server.upgrade.insecure.connections";
 
 	public static final String WEBDAV_IGNORE = "webdav.ignore";
 

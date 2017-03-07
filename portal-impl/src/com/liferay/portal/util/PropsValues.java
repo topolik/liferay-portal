@@ -1209,6 +1209,10 @@ public class PropsValues {
 
 	public static final String PORTAL_INSTANCE_INET_SOCKET_ADDRESS = PropsUtil.get(PropsKeys.PORTAL_INSTANCE_INET_SOCKET_ADDRESS);
 
+	/**
+	 * @deprecated As of 7.0.0, with no direct replacement
+	 */
+	@Deprecated
 	public static final String PORTAL_INSTANCE_PROTOCOL = PropsUtil.get(PropsKeys.PORTAL_INSTANCE_PROTOCOL);
 
 	public static final String PORTAL_JAAS_AUTH_TYPE = GetterUtil.getString(PropsUtil.get(PropsKeys.PORTAL_JAAS_AUTH_TYPE));

@@ -1024,10 +1024,6 @@ public class ServicePreAction extends Action {
 
 		themeDisplay.setURLPortal(portalURL.concat(contextPath));
 
-		if (!secure && PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS) {
-			secure = true;
-		}
-
 		String securePortalURL = PortalUtil.getPortalURL(request, secure);
 
 		String urlSignIn = securePortalURL.concat(mainPath).concat(

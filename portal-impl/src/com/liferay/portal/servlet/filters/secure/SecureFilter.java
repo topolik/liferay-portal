@@ -75,13 +75,9 @@ public class SecureFilter extends BasePortalFilter {
 		if (Validator.isNull(propertyPrefix)) {
 			hostsAllowed = StringUtil.split(
 				filterConfig.getInitParameter("hosts.allowed"));
-			_httpsRequired = GetterUtil.getBoolean(
-				filterConfig.getInitParameter("https.required"));
 		}
 		else {
 			hostsAllowed = PropsUtil.getArray(propertyPrefix + "hosts.allowed");
-			_httpsRequired = GetterUtil.getBoolean(
-				PropsUtil.get(propertyPrefix + "https.required"));
 		}
 
 		if (hostsAllowed.length == 0) {
@@ -259,83 +255,46 @@ public class SecureFilter extends BasePortalFilter {
 		}
 
 		if (_log.isDebugEnabled()) {
-			if (_httpsRequired) {
-				_log.debug("https is required");
-			}
-			else {
-				_log.debug("https is not required");
-			}
+			_log.debug("Not securing " + HttpUtil.getCompleteURL(request));
 		}
 
-		if (_httpsRequired && !request.isSecure()) {
-			if (_log.isDebugEnabled()) {
-				String completeURL = HttpUtil.getCompleteURL(request);
+		User user = null;
 
-				_log.debug("Securing " + completeURL);
-			}
+		try {
+			user = PortalUtil.initUser(request);
+		}
+		catch (NoSuchUserException nsue) {
 
-			StringBundler redirectURL = new StringBundler(5);
-
-			redirectURL.append(Http.HTTPS_WITH_SLASH);
-			redirectURL.append(request.getServerName());
-			redirectURL.append(request.getServletPath());
-
-			String queryString = request.getQueryString();
-
-			if (Validator.isNotNull(queryString)) {
-				redirectURL.append(StringPool.QUESTION);
-				redirectURL.append(request.getQueryString());
-			}
+			// LPS-52675
 
 			if (_log.isDebugEnabled()) {
-				_log.debug("Redirect to " + redirectURL);
+				_log.debug(nsue, nsue);
 			}
 
-			response.sendRedirect(redirectURL.toString());
+			response.sendRedirect(HttpUtil.getCompleteURL(request));
+
+			return;
+		}
+
+		initThreadLocals(user);
+
+		if (!user.isDefaultUser()) {
+			request = setCredentials(
+				request, request.getSession(), user, null);
 		}
 		else {
-			if (_log.isDebugEnabled()) {
-				_log.debug("Not securing " + HttpUtil.getCompleteURL(request));
+			if (_digestAuthEnabled) {
+				request = digestAuth(request, response);
 			}
-
-			User user = null;
-
-			try {
-				user = PortalUtil.initUser(request);
+			else if (_basicAuthEnabled) {
+				request = basicAuth(request, response);
 			}
-			catch (NoSuchUserException nsue) {
+		}
 
-				// LPS-52675
+		if (request != null) {
+			Class<?> clazz = getClass();
 
-				if (_log.isDebugEnabled()) {
-					_log.debug(nsue, nsue);
-				}
-
-				response.sendRedirect(HttpUtil.getCompleteURL(request));
-
-				return;
-			}
-
-			initThreadLocals(user);
-
-			if (!user.isDefaultUser()) {
-				request = setCredentials(
-					request, request.getSession(), user, null);
-			}
-			else {
-				if (_digestAuthEnabled) {
-					request = digestAuth(request, response);
-				}
-				else if (_basicAuthEnabled) {
-					request = basicAuth(request, response);
-				}
-			}
-
-			if (request != null) {
-				Class<?> clazz = getClass();
-
-				processFilter(clazz.getName(), request, response, filterChain);
-			}
+			processFilter(clazz.getName(), request, response, filterChain);
 		}
 	}
 
@@ -378,7 +337,6 @@ public class SecureFilter extends BasePortalFilter {
 	private boolean _basicAuthEnabled;
 	private boolean _digestAuthEnabled;
 	private Set<String> _hostsAllowed;
-	private boolean _httpsRequired;
 	private boolean _usePermissionChecker;
 
 }

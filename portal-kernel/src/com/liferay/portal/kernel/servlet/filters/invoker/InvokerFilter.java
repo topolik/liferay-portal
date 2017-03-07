@@ -17,13 +17,16 @@ package com.liferay.portal.kernel.servlet.filters.invoker;
 import com.liferay.portal.kernel.concurrent.ConcurrentLFUCache;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.security.HttpsThreadLocal;
 import com.liferay.portal.kernel.servlet.HttpOnlyCookieServletResponse;
 import com.liferay.portal.kernel.servlet.NonSerializableObjectRequestWrapper;
 import com.liferay.portal.kernel.servlet.SanitizedServletResponse;
 import com.liferay.portal.kernel.util.BasePortalLifecycle;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ServerDetector;
@@ -73,6 +76,15 @@ public class InvokerFilter extends BasePortalLifecycle implements Filter {
 			return;
 		}
 
+		HttpsThreadLocal.setSecure(
+			HttpsThreadLocal.isSecure() || PortalUtil.isSecure(request));
+
+		if (checkHttpsRedirect(request, response, originalURI)) {
+			return;
+		}
+
+		checkUpgradeInsecureRequests(response);
+
 		request = handleNonSerializableRequest(request);
 
 		response =
@@ -100,6 +112,8 @@ public class InvokerFilter extends BasePortalLifecycle implements Filter {
 		}
 		finally {
 			request.removeAttribute(WebKeys.INVOKER_FILTER_URI);
+
+			HttpsThreadLocal.clear();
 		}
 	}
 
@@ -126,6 +140,48 @@ public class InvokerFilter extends BasePortalLifecycle implements Filter {
 
 				throw new ServletException(e);
 			}
+		}
+	}
+
+	protected boolean checkHttpsRedirect(
+			HttpServletRequest request, HttpServletResponse response,
+			String originalURI)
+		throws IOException {
+
+		if (StringUtil.equalsIgnoreCase(
+				Http.HTTPS, PropsUtil.get(PropsKeys.WEB_SERVER_PROTOCOL)) &&
+			!PortalUtil.isSecure(request)) {
+
+			String portalURL = PortalUtil.getPortalURL(
+				request.getServerName(), -1, true);
+
+			StringBuilder stringBuilder = new StringBuilder();
+
+			stringBuilder.append(portalURL);
+
+			if (Validator.isNotNull(originalURI)) {
+				stringBuilder.append(originalURI);
+			}
+
+			String queryString = request.getQueryString();
+
+			if (Validator.isNotNull(queryString)) {
+				stringBuilder.append(StringPool.QUESTION);
+				stringBuilder.append(queryString);
+			}
+
+			response.sendRedirect(stringBuilder.toString());
+
+			return true;
+		}
+
+		return false;
+	}
+
+	protected void checkUpgradeInsecureRequests(HttpServletResponse response) {
+		if (HttpsThreadLocal.isSecure() && _UPGRADE_INSECURE_CONNECTIONS) {
+			response.addHeader(
+				"Content-Security-Policy", "upgrade-insecure-requests");
 		}
 	}
 
@@ -329,6 +385,10 @@ public class InvokerFilter extends BasePortalLifecycle implements Filter {
 
 	private static final String _SECURE_RESPONSE =
 		InvokerFilter.class.getName() + "SECURE_RESPONSE";
+
+	private static final boolean _UPGRADE_INSECURE_CONNECTIONS =
+		GetterUtil.getBoolean(
+			PropsUtil.get(PropsKeys.WEB_SERVER_UPGRADE_INSECURE_CONNECTIONS));
 
 	private static final Log _log = LogFactoryUtil.getLog(InvokerFilter.class);
 

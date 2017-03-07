@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserTracker;
+import com.liferay.portal.kernel.security.HttpsThreadLocal;
 import com.liferay.portal.kernel.security.auth.AuthException;
 import com.liferay.portal.kernel.security.auth.AuthenticatedUserUUIDStoreUtil;
 import com.liferay.portal.kernel.security.auth.Authenticator;
@@ -165,19 +166,7 @@ public class AuthenticatedSessionManagerImpl
 			idCookie.setMaxAge(-1);
 		}
 
-		boolean secure = request.isSecure();
-
-		if (secure && !PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS &&
-			!StringUtil.equalsIgnoreCase(
-				Http.HTTPS, PropsValues.WEB_SERVER_PROTOCOL)) {
-
-			Boolean httpsInitial = (Boolean)session.getAttribute(
-				WebKeys.HTTPS_INITIAL);
-
-			if ((httpsInitial == null) || !httpsInitial.booleanValue()) {
-				secure = false;
-			}
-		}
+		boolean secure = PortalUtil.isSecure(request);
 
 		CookieKeys.addCookie(request, response, companyIdCookie, secure);
 		CookieKeys.addCookie(request, response, idCookie, secure);
