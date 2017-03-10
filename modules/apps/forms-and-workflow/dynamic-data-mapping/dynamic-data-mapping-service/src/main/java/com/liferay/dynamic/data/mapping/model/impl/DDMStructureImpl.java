@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.cache.CacheField;
+import com.liferay.portal.kernel.security.HttpsThreadLocal;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -44,7 +45,6 @@ import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.util.PropsValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -344,13 +344,7 @@ public class DDMStructureImpl extends DDMStructureBaseImpl {
 	public String getWebDavURL(ThemeDisplay themeDisplay, String webDAVToken) {
 		StringBundler sb = new StringBundler(11);
 
-		boolean secure = false;
-
-		if (themeDisplay.isSecure() ||
-			PropsValues.WEBDAV_SERVLET_HTTPS_REQUIRED) {
-
-			secure = true;
-		}
+		boolean secure = HttpsThreadLocal.isSecure();
 
 		String portalURL = PortalUtil.getPortalURL(
 			themeDisplay.getServerName(), themeDisplay.getServerPort(), secure);

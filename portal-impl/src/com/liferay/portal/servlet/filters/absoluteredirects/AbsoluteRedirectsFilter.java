@@ -23,13 +23,11 @@ import com.liferay.portal.kernel.servlet.TryFilter;
 import com.liferay.portal.kernel.servlet.WrapHttpServletResponseFilter;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.servlet.filters.BasePortalFilter;
 import com.liferay.portal.util.PortalInstances;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * <p>
@@ -65,21 +63,6 @@ public class AbsoluteRedirectsFilter
 
 		PortalUtil.getCurrentCompleteURL(request);
 		PortalUtil.getCurrentURL(request);
-
-		HttpSession session = request.getSession();
-
-		Boolean httpsInitial = (Boolean)session.getAttribute(
-			WebKeys.HTTPS_INITIAL);
-
-		if (httpsInitial == null) {
-			httpsInitial = Boolean.valueOf(request.isSecure());
-
-			session.setAttribute(WebKeys.HTTPS_INITIAL, httpsInitial);
-
-			if (_log.isDebugEnabled()) {
-				_log.debug("Setting httpsInitial to " + httpsInitial);
-			}
-		}
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			request);

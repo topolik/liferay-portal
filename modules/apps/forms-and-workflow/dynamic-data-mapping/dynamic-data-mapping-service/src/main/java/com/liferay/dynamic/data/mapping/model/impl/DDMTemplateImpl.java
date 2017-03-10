@@ -19,6 +19,7 @@ import com.liferay.dynamic.data.mapping.service.DDMTemplateVersionLocalServiceUt
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Image;
+import com.liferay.portal.kernel.security.HttpsThreadLocal;
 import com.liferay.portal.kernel.service.ImageLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -30,7 +31,6 @@ import com.liferay.portal.kernel.webserver.WebServerServletTokenUtil;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
-import com.liferay.portal.util.PropsValues;
 
 import java.util.Locale;
 
@@ -114,13 +114,7 @@ public class DDMTemplateImpl extends DDMTemplateBaseImpl {
 	public String getWebDavURL(ThemeDisplay themeDisplay, String webDAVToken) {
 		StringBundler sb = new StringBundler(11);
 
-		boolean secure = false;
-
-		if (themeDisplay.isSecure() ||
-			PropsValues.WEBDAV_SERVLET_HTTPS_REQUIRED) {
-
-			secure = true;
-		}
+		boolean secure = HttpsThreadLocal.isSecure();
 
 		String portalURL = PortalUtil.getPortalURL(
 			themeDisplay.getServerName(), themeDisplay.getServerPort(), secure);
