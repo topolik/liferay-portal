@@ -89,16 +89,23 @@ public class InlineSQLHelperImpl implements InlineSQLHelper {
 
 				return false;
 			}
-		}
-		else if (companyId > 0) {
-			if (permissionChecker.isCompanyAdmin(companyId)) {
-				return false;
+
+			Group group = GroupLocalServiceUtil.fetchGroup(groupId);
+
+			if (group != null) {
+				companyId = group.getCompanyId();
 			}
 		}
-		else {
-			if (permissionChecker.isOmniadmin()) {
-				return false;
-			}
+
+		if (companyId == 0) {
+
+			// Fallback default
+
+			companyId = permissionChecker.getCompanyId();
+		}
+
+		if (permissionChecker.isCompanyAdmin(companyId)) {
+			return false;
 		}
 
 		return true;
