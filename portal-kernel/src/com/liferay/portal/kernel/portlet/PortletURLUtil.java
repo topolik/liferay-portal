@@ -187,6 +187,13 @@ public class PortletURLUtil {
 
 		sb.append(plid);
 
+		String p_p_auth = ParamUtil.getString(request, "p_p_auth");
+
+		if (!Validator.isBlank(p_p_auth)) {
+			sb.append("&p_p_auth=");
+			sb.append(HttpUtil.encodeURL(p_p_auth));
+		}
+
 		Portlet portlet = (Portlet)request.getAttribute(WebKeys.RENDER_PORTLET);
 
 		String portletId = portlet.getPortletId();
