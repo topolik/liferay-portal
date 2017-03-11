@@ -150,6 +150,32 @@ public class BlogsEntryLocalServiceTest {
 		Assert.assertEquals(initialCount + 1, actualCount);
 	}
 
+	@Test
+	public void testAddEntryWithPictureTag() throws Exception {
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(_group, _user.getUserId());
+
+		StringBundler sb = new StringBundler(9);
+
+		sb.append("<picture>");
+		sb.append("<!--[if IE 9]><video style=\"display: none;\"><![endif]-->");
+		sb.append("<source srcset=\"/url1.jpg\" media=\"(max-width=200px)\">");
+		sb.append("<source srcset=\"/url2.jpg\" media=\"(min-width=200px) ");
+		sb.append("and (max-width=800px)\">");
+		sb.append("<source srcset=\"/url3.jpg\" media=\"(max-width=1600px)\">");
+		sb.append("<!--[if IE 9]></video><![endif]-->");
+		sb.append("<img src=\"/url.jpg\">");
+		sb.append("</picture>");
+
+		String content = sb.toString();
+
+		BlogsEntry entry = BlogsEntryLocalServiceUtil.addEntry(
+			_user.getUserId(), RandomTestUtil.randomString(), content,
+			serviceContext);
+
+		Assert.assertEquals(content, entry.getContent());
+	}
+
 	@Test(expected = EntryContentException.class)
 	public void testAddEntryWithVeryLongContent() throws Exception {
 		int maxLength = ModelHintsUtil.getMaxLength(
