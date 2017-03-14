@@ -1858,8 +1858,8 @@ public class KaleoConditionPersistenceImpl extends BasePersistenceImpl<KaleoCond
 
 		query.append(_SQL_SELECT_KALEOCONDITION_WHERE_PKS_IN);
 
-		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+		for (int i = 0; i < uncachedPrimaryKeys.size(); i++) {
+			query.append(StringPool.QUESTION);
 
 			query.append(StringPool.COMMA);
 		}
@@ -1876,6 +1876,12 @@ public class KaleoConditionPersistenceImpl extends BasePersistenceImpl<KaleoCond
 			session = openSession();
 
 			Query q = session.createQuery(sql);
+
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			for (Serializable primaryKey : uncachedPrimaryKeys) {
+				qPos.add(String.valueOf(primaryKey));
+			}
 
 			for (KaleoCondition kaleoCondition : (List<KaleoCondition>)q.list()) {
 				map.put(kaleoCondition.getPrimaryKeyObj(), kaleoCondition);

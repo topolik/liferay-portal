@@ -3061,8 +3061,8 @@ public class DDMContentPersistenceImpl extends BasePersistenceImpl<DDMContent>
 
 		query.append(_SQL_SELECT_DDMCONTENT_WHERE_PKS_IN);
 
-		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+		for (int i = 0; i < uncachedPrimaryKeys.size(); i++) {
+			query.append(StringPool.QUESTION);
 
 			query.append(StringPool.COMMA);
 		}
@@ -3079,6 +3079,12 @@ public class DDMContentPersistenceImpl extends BasePersistenceImpl<DDMContent>
 			session = openSession();
 
 			Query q = session.createQuery(sql);
+
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			for (Serializable primaryKey : uncachedPrimaryKeys) {
+				qPos.add(String.valueOf(primaryKey));
+			}
 
 			for (DDMContent ddmContent : (List<DDMContent>)q.list()) {
 				map.put(ddmContent.getPrimaryKeyObj(), ddmContent);

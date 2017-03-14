@@ -2614,8 +2614,8 @@ public class KaleoTimerInstanceTokenPersistenceImpl extends BasePersistenceImpl<
 
 		query.append(_SQL_SELECT_KALEOTIMERINSTANCETOKEN_WHERE_PKS_IN);
 
-		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+		for (int i = 0; i < uncachedPrimaryKeys.size(); i++) {
+			query.append(StringPool.QUESTION);
 
 			query.append(StringPool.COMMA);
 		}
@@ -2632,6 +2632,12 @@ public class KaleoTimerInstanceTokenPersistenceImpl extends BasePersistenceImpl<
 			session = openSession();
 
 			Query q = session.createQuery(sql);
+
+			QueryPos qPos = QueryPos.getInstance(q);
+
+			for (Serializable primaryKey : uncachedPrimaryKeys) {
+				qPos.add(String.valueOf(primaryKey));
+			}
 
 			for (KaleoTimerInstanceToken kaleoTimerInstanceToken : (List<KaleoTimerInstanceToken>)q.list()) {
 				map.put(kaleoTimerInstanceToken.getPrimaryKeyObj(),
