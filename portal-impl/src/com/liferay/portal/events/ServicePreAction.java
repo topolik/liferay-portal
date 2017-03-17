@@ -741,7 +741,7 @@ public class ServicePreAction extends Action {
 		// Set attributes first that other methods (getCDNBaseURL and
 		// setLookAndFeel) depend on
 
-		boolean secure = PortalUtil.isForwardedSecure(request);
+		boolean secure = PortalUtil.isSecure(request);
 
 		themeDisplay.setCDNHost(cdnHost);
 		themeDisplay.setCDNDynamicResourcesHost(dynamicResourcesCDNHost);
@@ -1030,10 +1030,6 @@ public class ServicePreAction extends Action {
 		}
 
 		themeDisplay.setURLPortal(portalURL.concat(contextPath));
-
-		if (!secure && PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS) {
-			secure = true;
-		}
 
 		String securePortalURL = PortalUtil.getPortalURL(request, secure);
 

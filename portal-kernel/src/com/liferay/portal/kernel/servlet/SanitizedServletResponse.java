@@ -14,12 +14,15 @@
 
 package com.liferay.portal.kernel.servlet;
 
+import com.liferay.portal.kernel.security.HttpsThreadLocal;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.KeyValuePair;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropertiesUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ServerDetector;
 import com.liferay.portal.kernel.util.SortedProperties;
 import com.liferay.portal.kernel.util.StringPool;
@@ -76,6 +79,7 @@ public class SanitizedServletResponse extends HttpServletResponseWrapper {
 	public static HttpServletResponse getSanitizedServletResponse(
 		HttpServletRequest request, HttpServletResponse response) {
 
+		setUpgradeInsecureRequests(request, response);
 		setXContentOptions(request, response);
 		setXFrameOptions(request, response);
 		setXXSSProtection(request, response);
@@ -112,6 +116,28 @@ public class SanitizedServletResponse extends HttpServletResponseWrapper {
 	public void setHeader(String name, String value) {
 		super.setHeader(
 			HttpUtil.sanitizeHeader(name), HttpUtil.sanitizeHeader(value));
+	}
+
+	protected static void setUpgradeInsecureRequests(
+		HttpServletRequest request, HttpServletResponse response) {
+
+		if (!HttpsThreadLocal.isSecure()) {
+			return;
+		}
+
+		if (!_UPGRADE_INSECURE_REQUESTS) {
+			return;
+		}
+
+		boolean browserCanHandleUpgrade = GetterUtil.getBoolean(
+			request.getHeader("Upgrade-Insecure-Requests"));
+
+		if (!browserCanHandleUpgrade) {
+			return;
+		}
+
+		response.addHeader(
+			"Content-Security-Policy", "upgrade-insecure-requests");
 	}
 
 	protected static void setXContentOptions(
@@ -189,6 +215,10 @@ public class SanitizedServletResponse extends HttpServletResponseWrapper {
 
 	private static final String _DISABLE_XSS_AUDITOR =
 		SanitizedServletResponse.class.getName() + "DISABLE_XSS_AUDITOR";
+
+	private static final boolean _UPGRADE_INSECURE_REQUESTS =
+		GetterUtil.getBoolean(
+			PropsUtil.get(PropsKeys.WEB_SERVER_UPGRADE_INSECURE_REQUESTS));
 
 	private static final boolean _X_CONTENT_TYPE_OPTIONS =
 		GetterUtil.getBoolean(

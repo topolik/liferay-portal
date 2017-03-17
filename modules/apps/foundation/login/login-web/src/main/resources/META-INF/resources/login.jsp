@@ -52,7 +52,7 @@
 		%>
 
 		<div class="login-container">
-			<portlet:actionURL name="/login/login" secure="<%= PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS || request.isSecure() %>" var="loginURL">
+			<portlet:actionURL name="/login/login" var="loginURL">
 				<portlet:param name="mvcRenderCommandName" value="/login/login" />
 			</portlet:actionURL>
 

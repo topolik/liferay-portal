@@ -23,9 +23,6 @@ import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.sso.SSOUtil;
@@ -64,21 +61,6 @@ public class LoginAction extends Action {
 			response.sendRedirect(
 				themeDisplay.getPathMain() +
 					PropsValues.AUTH_LOGIN_DISABLED_PATH);
-
-			return null;
-		}
-
-		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS &&
-			!request.isSecure()) {
-
-			StringBundler sb = new StringBundler(4);
-
-			sb.append(PortalUtil.getPortalURL(request, true));
-			sb.append(request.getRequestURI());
-			sb.append(StringPool.QUESTION);
-			sb.append(request.getQueryString());
-
-			response.sendRedirect(sb.toString());
 
 			return null;
 		}
@@ -140,16 +122,6 @@ public class LoginAction extends Action {
 			portletURL.setWindowState(getWindowState(request));
 
 			redirect = portletURL.toString();
-		}
-
-		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS) {
-			String portalURL = PortalUtil.getPortalURL(request);
-			String portalURLSecure = PortalUtil.getPortalURL(request, true);
-
-			if (!portalURL.equals(portalURLSecure)) {
-				redirect = StringUtil.replaceFirst(
-					redirect, portalURL, portalURLSecure);
-			}
 		}
 
 		String loginRedirect = ParamUtil.getString(request, "redirect");

@@ -103,6 +103,7 @@ import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.UserAttributes;
+import com.liferay.portal.kernel.security.HttpsThreadLocal;
 import com.liferay.portal.kernel.security.auth.AlwaysAllowDoAsUser;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.auth.FullNameGenerator;
@@ -1420,6 +1421,12 @@ public class PortalImpl implements Portal {
 	public String getCDNHost(boolean secure) {
 		long companyId = CompanyThreadLocal.getCompanyId();
 
+		Company company = CompanyLocalServiceUtil.fetchCompany(companyId);
+
+		String virtualHostname = company.getVirtualHostname();
+
+		secure = HttpsThreadLocal.isSecure(virtualHostname, secure);
+
 		if (secure) {
 			return getCDNHostHttps(companyId);
 		}
@@ -1443,7 +1450,7 @@ public class PortalImpl implements Portal {
 
 		Company company = getCompany(request);
 
-		if (request.isSecure()) {
+		if (HttpsThreadLocal.isSecure()) {
 			cdnHost = getCDNHostHttps(company.getCompanyId());
 		}
 		else {
@@ -1738,15 +1745,7 @@ public class PortalImpl implements Portal {
 			createAccountURL.setPortletMode(PortletMode.VIEW);
 			createAccountURL.setWindowState(WindowState.MAXIMIZED);
 
-			if (!PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS) {
-				return createAccountURL.toString();
-			}
-
-			String portalURL = getPortalURL(request);
-			String portalURLSecure = getPortalURL(request, true);
-
-			return StringUtil.replaceFirst(
-				createAccountURL.toString(), portalURL, portalURLSecure);
+			return createAccountURL.toString();
 		}
 
 		try {
@@ -2972,25 +2971,33 @@ public class PortalImpl implements Portal {
 			layoutSet.getCompanyId());
 		int portalPort = getPortalServerPort(secureConnection);
 
+		String companyVirtualHostname = company.getVirtualHostname();
+
 		String portalURL = getPortalURL(
-			company.getVirtualHostname(), portalPort, secureConnection);
+			companyVirtualHostname, portalPort,
+			HttpsThreadLocal.isSecure(
+				companyVirtualHostname, secureConnection));
 
-		String virtualHostname = getVirtualHostname(layoutSet);
+		String layoutSetVirtualHostName = getVirtualHostname(layoutSet);
 
-		if (Validator.isNotNull(virtualHostname) &&
-			!StringUtil.equalsIgnoreCase(virtualHostname, "localhost")) {
+		if (Validator.isNotNull(layoutSetVirtualHostName) &&
+			!StringUtil.equalsIgnoreCase(
+				layoutSetVirtualHostName, "localhost")) {
 
 			int index = portalURL.indexOf("://");
 
 			String portalDomain = portalURL.substring(index + 3);
 
-			virtualHostname = getCanonicalDomain(virtualHostname, portalDomain);
+			layoutSetVirtualHostName = getCanonicalDomain(
+				layoutSetVirtualHostName, portalDomain);
 
-			virtualHostname = getPortalURL(
-				virtualHostname, portalPort, secureConnection);
+			layoutSetVirtualHostName = getPortalURL(
+				layoutSetVirtualHostName, portalPort,
+				HttpsThreadLocal.isSecure(
+					layoutSetVirtualHostName, secureConnection));
 
-			if (virtualHostname.contains(portalDomain)) {
-				return virtualHostname.concat(getPathContext());
+			if (layoutSetVirtualHostName.contains(portalDomain)) {
+				return layoutSetVirtualHostName.concat(getPathContext());
 			}
 		}
 
@@ -3907,6 +3914,8 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public InetAddress getPortalLocalInetAddress(boolean secure) {
+		secure = secure || HttpsThreadLocal.isSecure();
+
 		InetSocketAddress inetSocketAddress = null;
 
 		if (secure) {
@@ -3926,6 +3935,8 @@ public class PortalImpl implements Portal {
 	@Override
 	public int getPortalLocalPort(boolean secure) {
 		InetSocketAddress inetSocketAddress = null;
+
+		secure = secure || HttpsThreadLocal.isSecure();
 
 		if (secure) {
 			inetSocketAddress = _securePortalLocalInetSocketAddress.get();
@@ -3960,6 +3971,8 @@ public class PortalImpl implements Portal {
 	public InetAddress getPortalServerInetAddress(boolean secure) {
 		InetSocketAddress inetSocketAddress = null;
 
+		secure = secure || HttpsThreadLocal.isSecure();
+
 		if (secure) {
 			inetSocketAddress = _securePortalServerInetSocketAddress.get();
 		}
@@ -3978,6 +3991,8 @@ public class PortalImpl implements Portal {
 	public int getPortalServerPort(boolean secure) {
 		InetSocketAddress inetSocketAddress = null;
 
+		secure = secure || HttpsThreadLocal.isSecure();
+
 		if (secure) {
 			inetSocketAddress = _securePortalServerInetSocketAddress.get();
 		}
@@ -3994,7 +4009,7 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public String getPortalURL(HttpServletRequest request) {
-		return getPortalURL(request, isSecure(request));
+		return getPortalURL(request, false);
 	}
 
 	@Override
@@ -4066,14 +4081,13 @@ public class PortalImpl implements Portal {
 	public String getPortalURL(
 		String serverName, int serverPort, boolean secure) {
 
+		secure = HttpsThreadLocal.isSecure(serverName, secure);
+
 		StringBundler sb = new StringBundler(4);
 
 		boolean https = false;
 
-		if (secure ||
-			StringUtil.equalsIgnoreCase(
-				Http.HTTPS, PropsValues.WEB_SERVER_PROTOCOL)) {
-
+		if (secure) {
 			https = true;
 		}
 
@@ -6345,12 +6359,6 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public boolean isLoginRedirectRequired(HttpServletRequest request) {
-		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS &&
-			!request.isSecure()) {
-
-			return true;
-		}
-
 		long companyId = getCompanyId(request);
 
 		if (SSOUtil.isLoginRedirectRequired(companyId)) {
@@ -6435,32 +6443,7 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public boolean isSecure(HttpServletRequest request) {
-		boolean secure = false;
-
-		if (PropsValues.WEB_SERVER_FORWARDED_PROTOCOL_ENABLED) {
-			return isForwardedSecure(request);
-		}
-
-		HttpSession session = request.getSession();
-
-		if (session == null) {
-			return request.isSecure();
-		}
-
-		Boolean httpsInitial = (Boolean)session.getAttribute(
-			WebKeys.HTTPS_INITIAL);
-
-		if (PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS &&
-			!PropsValues.SESSION_ENABLE_PHISHING_PROTECTION &&
-			(httpsInitial != null) && !httpsInitial.booleanValue()) {
-
-			secure = false;
-		}
-		else {
-			secure = request.isSecure();
-		}
-
-		return secure;
+		return isForwardedSecure(request);
 	}
 
 	@Override
@@ -6871,7 +6854,7 @@ public class PortalImpl implements Portal {
 
 	@Override
 	public void setPortalInetSocketAddresses(HttpServletRequest request) {
-		boolean secure = request.isSecure();
+		boolean secure = isSecure(request);
 
 		if ((secure && (_securePortalLocalInetSocketAddress.get() != null) &&
 			 (_securePortalServerInetSocketAddress.get() != null)) ||

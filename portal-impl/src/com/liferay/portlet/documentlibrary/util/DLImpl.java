@@ -51,6 +51,7 @@ import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Hits;
+import com.liferay.portal.kernel.security.HttpsThreadLocal;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.SubscriptionLocalServiceUtil;
@@ -877,13 +878,7 @@ public class DLImpl implements DL {
 
 		StringBundler webDavURL = new StringBundler(7);
 
-		boolean secure = false;
-
-		if (themeDisplay.isSecure() ||
-			PropsValues.WEBDAV_SERVLET_HTTPS_REQUIRED) {
-
-			secure = true;
-		}
+		boolean secure = HttpsThreadLocal.isSecure();
 
 		String portalURL = PortalUtil.getPortalURL(
 			themeDisplay.getServerName(), themeDisplay.getServerPort(), secure);
