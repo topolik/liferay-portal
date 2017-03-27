@@ -14,8 +14,6 @@
 
 package com.liferay.portal.servlet.filters.aggregate;
 
-import com.liferay.portal.kernel.cache.key.CacheKeyGenerator;
-import com.liferay.portal.kernel.cache.key.CacheKeyGeneratorUtil;
 import com.liferay.portal.kernel.configuration.Filter;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -29,7 +27,6 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -41,6 +38,7 @@ import com.liferay.portal.kernel.util.URLUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.minifier.MinifierUtil;
 import com.liferay.portal.servlet.filters.IgnoreModuleRequestFilter;
+import com.liferay.portal.servlet.filters.cache.CacheUtil;
 import com.liferay.portal.servlet.filters.dynamiccss.DynamicCSSUtil;
 import com.liferay.portal.util.AggregateUtil;
 import com.liferay.portal.util.JavaScriptBundleUtil;
@@ -315,27 +313,8 @@ public class AggregateFilter extends IgnoreModuleRequestFilter {
 	}
 
 	protected String getCacheFileName(HttpServletRequest request) {
-		CacheKeyGenerator cacheKeyGenerator =
-			CacheKeyGeneratorUtil.getCacheKeyGenerator(
-				AggregateFilter.class.getName());
-
-		cacheKeyGenerator.append(HttpUtil.getProtocol(request.isSecure()));
-		cacheKeyGenerator.append(StringPool.UNDERLINE);
-		cacheKeyGenerator.append(request.getRequestURI());
-
-		String requestURL = String.valueOf(request.getRequestURL());
-
-		if (requestURL != null) {
-			requestURL = HttpUtil.removeParameter(requestURL, "zx");
-
-			String queryString = HttpUtil.getQueryString(requestURL);
-
-			if (queryString != null) {
-				cacheKeyGenerator.append(sterilizeQueryString(queryString));
-			}
-		}
-
-		return String.valueOf(cacheKeyGenerator.finish());
+		return CacheUtil.getCacheFileName(
+			request, AggregateFilter.class.getName(), _log);
 	}
 
 	protected Object getContent(

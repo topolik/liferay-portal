@@ -14,8 +14,6 @@
 
 package com.liferay.portal.servlet.filters.dynamiccss;
 
-import com.liferay.portal.kernel.cache.key.CacheKeyGenerator;
-import com.liferay.portal.kernel.cache.key.CacheKeyGeneratorUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.BufferCacheServletResponse;
@@ -28,7 +26,6 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -36,6 +33,7 @@ import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.URLUtil;
 import com.liferay.portal.servlet.filters.IgnoreModuleRequestFilter;
+import com.liferay.portal.servlet.filters.cache.CacheUtil;
 import com.liferay.portal.util.PropsUtil;
 
 import java.io.File;
@@ -72,31 +70,14 @@ public class DynamicCSSFilter extends IgnoreModuleRequestFilter {
 	}
 
 	protected String getCacheFileName(HttpServletRequest request) {
-		CacheKeyGenerator cacheKeyGenerator =
-			CacheKeyGeneratorUtil.getCacheKeyGenerator(
-				DynamicCSSFilter.class.getName());
-
-		cacheKeyGenerator.append(HttpUtil.getProtocol(request.isSecure()));
-		cacheKeyGenerator.append(StringPool.UNDERLINE);
-		cacheKeyGenerator.append(request.getRequestURI());
-
-		String requestURL = String.valueOf(request.getRequestURL());
-
-		if (requestURL != null) {
-			requestURL = HttpUtil.removeParameter(requestURL, "zx");
-
-			String queryString = HttpUtil.getQueryString(requestURL);
-
-			if (queryString != null) {
-				cacheKeyGenerator.append(sterilizeQueryString(queryString));
-			}
-		}
+		String cacheFileName = CacheUtil.getCacheFileName(
+			request, DynamicCSSFilter.class.getName(), _log);
 
 		if (PortalUtil.isRightToLeft(request)) {
-			cacheKeyGenerator.append("_rtl");
+			return cacheFileName + "_rtl";
 		}
 
-		return String.valueOf(cacheKeyGenerator.finish());
+		return cacheFileName;
 	}
 
 	protected Object getDynamicContent(

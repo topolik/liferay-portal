@@ -17,11 +17,27 @@ package com.liferay.portal.servlet.filters.cache;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
 import com.liferay.portal.kernel.cache.MultiVMPoolUtil;
 import com.liferay.portal.kernel.cache.PortalCache;
+import com.liferay.portal.kernel.cache.RequestParameterCacheValidator;
+import com.liferay.portal.kernel.cache.key.CacheKeyGenerator;
+import com.liferay.portal.kernel.cache.key.CacheKeyGeneratorUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.servlet.ServletRequestParameterReader;
+import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.registry.collections.ServiceTrackerCollections;
+import com.liferay.registry.collections.ServiceTrackerMap;
 import com.liferay.util.servlet.filters.CacheResponseData;
+
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Alexander Chow
@@ -41,6 +57,91 @@ public class CacheUtil {
 
 	public static void clearCache(long companyId) {
 		clearCache();
+	}
+
+	public static String getCacheFileName(
+		final HttpServletRequest request, String cacheName, Log log) {
+
+		CacheKeyGenerator cacheKeyGenerator =
+			CacheKeyGeneratorUtil.getCacheKeyGenerator(cacheName);
+
+		cacheKeyGenerator.append(HttpUtil.getProtocol(request.isSecure()));
+		cacheKeyGenerator.append(StringPool.UNDERLINE);
+		cacheKeyGenerator.append(request.getRequestURI());
+
+		Enumeration<String> parameterNamesEnumeration =
+			request.getParameterNames();
+
+		List<String> parameterNames = ListUtil.fromEnumeration(
+			parameterNamesEnumeration);
+
+		Collections.sort(parameterNames);
+
+		for (String parameterName : _serviceTrackerMap.keySet()) {
+			for (RequestParameterCacheValidator requestParameterCacheValidator :
+					_serviceTrackerMap.getService(parameterName)) {
+
+				if (requestParameterCacheValidator == null) {
+					continue;
+				}
+
+				try {
+					boolean valid = requestParameterCacheValidator.validate(
+						parameterName,
+						new ServletRequestParameterReader() {
+
+							@Override
+							public long getCompanyId() {
+								return PortalUtil.getCompanyId(request);
+							}
+
+							@Override
+							public String getParameter(String paramName) {
+								return request.getParameter(paramName);
+							}
+
+							@Override
+							public String[] getParameterValues(
+								String paramName) {
+
+								return request.getParameterValues(paramName);
+							}
+
+						});
+
+					if (valid) {
+						cacheKeyGenerator.append(StringPool.UNDERLINE);
+						cacheKeyGenerator.append(parameterName);
+						cacheKeyGenerator.append(StringPool.UNDERLINE);
+						cacheKeyGenerator.append(
+							request.getParameter(parameterName));
+					}
+					else {
+						if (log.isDebugEnabled()) {
+							StringBundler sb = new StringBundler(5);
+
+							sb.append("Parameter value ");
+							sb.append(request.getParameter(parameterName));
+							sb.append(" for parameter ");
+							sb.append(parameterName);
+							sb.append(" has been discarded for cache key");
+
+							log.debug(sb.toString());
+						}
+					}
+				}
+				catch (Exception e) {
+					if (log.isInfoEnabled()) {
+						log.info(
+							"Error validating request parameter " +
+								parameterName + " for cache",
+							e);
+					}
+				}
+			}
+		}
+
+		return String.valueOf(cacheKeyGenerator.finish());
 	}
 
 	public static CacheResponseData getCacheResponseData(
@@ -79,5 +180,10 @@ public class CacheUtil {
 
 	private static final PortalCache<String, CacheResponseData> _portalCache =
 		MultiVMPoolUtil.getPortalCache(CACHE_NAME);
+	private static final
+		ServiceTrackerMap<String, List<RequestParameterCacheValidator>>
+			_serviceTrackerMap = ServiceTrackerCollections.openMultiValueMap(
+				RequestParameterCacheValidator.class,
+				"filter.request.parameter");
 
 }
