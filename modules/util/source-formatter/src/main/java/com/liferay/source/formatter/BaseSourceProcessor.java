@@ -26,7 +26,6 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TextFormatter;
-import com.liferay.portal.kernel.util.Tuple;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.tools.ToolsUtil;
 import com.liferay.portal.xml.SAXReaderFactory;
@@ -51,7 +50,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -560,12 +558,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		processFormattedFile(file, fileName, content, newContent);
 	}
 
-	protected String formatDefinitionKey(
-		String fileName, String content, String definitionKey) {
-
-		return content;
-	}
-
 	protected String formatEmptyArray(String line) {
 		Matcher matcher = emptyArrayPattern.matcher(line);
 
@@ -972,6 +964,10 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		return x + 1;
 	}
 
+	protected List<FileCheck> getModuleFileChecks() {
+		return null;
+	}
+
 	protected List<String> getParameterList(String methodCall) {
 		String parameters = null;
 
@@ -1213,25 +1209,12 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			String fileName, String absolutePath, String content)
 		throws Exception {
 
-		List<FileCheck> fileChecks = getFileChecks();
+		content = _processFileChecks(
+			fileName, absolutePath, content, getFileChecks());
 
-		if (fileChecks == null) {
-			return content;
-		}
-
-		for (FileCheck fileCheck : fileChecks) {
-			Tuple tuple = fileCheck.process(fileName, absolutePath, content);
-
-			content = (String)tuple.getObject(0);
-
-			Set<SourceFormatterMessage> sourceFormatterMessages =
-				(Set<SourceFormatterMessage>)tuple.getObject(1);
-
-			for (SourceFormatterMessage sourceFormatterMessage :
-					sourceFormatterMessages) {
-
-				processMessage(fileName, sourceFormatterMessage);
-			}
+		if (isModulesFile(absolutePath)) {
+			content = _processFileChecks(
+				fileName, absolutePath, content, getModuleFileChecks());
 		}
 
 		return content;
@@ -1324,53 +1307,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 				"Double.valueOf(", "Float.valueOf(", "Integer.valueOf(",
 				"Long.valueOf(", "Short.valueOf("
 			});
-	}
-
-	protected String sortDefinitions(
-		String fileName, String content, Comparator<String> comparator) {
-
-		String previousDefinition = null;
-
-		Matcher matcher = _definitionPattern.matcher(content);
-
-		while (matcher.find()) {
-			String newContent = formatDefinitionKey(
-				fileName, content, matcher.group(1));
-
-			if (!newContent.equals(content)) {
-				return newContent;
-			}
-
-			String definition = matcher.group();
-
-			if (Validator.isNotNull(matcher.group(1)) &&
-				definition.endsWith("\n")) {
-
-				definition = definition.substring(0, definition.length() - 1);
-			}
-
-			if (Validator.isNotNull(previousDefinition)) {
-				int value = comparator.compare(previousDefinition, definition);
-
-				if (value > 0) {
-					content = StringUtil.replaceFirst(
-						content, previousDefinition, definition);
-					content = StringUtil.replaceLast(
-						content, definition, previousDefinition);
-
-					return content;
-				}
-
-				if (value == 0) {
-					return StringUtil.replaceFirst(
-						content, previousDefinition + "\n", StringPool.BLANK);
-				}
-			}
-
-			previousDefinition = definition;
-		}
-
-		return content;
 	}
 
 	protected List<String> splitParameters(String parameters) {
@@ -1610,6 +1546,31 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		return pattern;
 	}
 
+	private String _processFileChecks(
+			String fileName, String absolutePath, String content,
+			List<FileCheck> fileChecks)
+		throws Exception {
+
+		if (fileChecks == null) {
+			return content;
+		}
+
+		for (FileCheck fileCheck : fileChecks) {
+			content = fileCheck.process(fileName, absolutePath, content);
+
+			Set<SourceFormatterMessage> sourceFormatterMessages =
+				fileCheck.getSourceFormatterMessage(fileName);
+
+			for (SourceFormatterMessage sourceFormatterMessage :
+					sourceFormatterMessages) {
+
+				processMessage(fileName, sourceFormatterMessage);
+			}
+		}
+
+		return content;
+	}
+
 	private static final String _DOCUMENTATION_URL =
 		"https://github.com/liferay/liferay-portal/blob/master/modules/util" +
 			"/source-formatter/documentation/";
@@ -1617,8 +1578,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	private Set<String> _annotationsExclusions;
 	private boolean _browserStarted;
 	private Map<String, String> _compatClassNamesMap;
-	private final Pattern _definitionPattern = Pattern.compile(
-		"^([A-Za-z-]+?)[:=](\n|[\\s\\S]*?([^\\\\]\n|\\Z))", Pattern.MULTILINE);
 	private String[] _excludes;
 	private Map<String, List<String>> _exclusionPropertiesMap = new HashMap<>();
 	private SourceMismatchException _firstSourceMismatchException;

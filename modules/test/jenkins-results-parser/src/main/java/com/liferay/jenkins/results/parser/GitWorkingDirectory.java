@@ -19,6 +19,8 @@ import com.jcraft.jsch.Session;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import java.net.URISyntaxException;
 
@@ -51,6 +53,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.eclipse.jgit.lib.TextProgressMonitor;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.JschConfigSessionFactory;
 import org.eclipse.jgit.transport.OpenSshConfig.Host;
@@ -361,10 +364,15 @@ public class GitWorkingDirectory {
 			fetchCommand.setRefSpecs(remoteConfig.getFetchRefSpecs());
 		}
 
+		Writer consoleWriter = new OutputStreamWriter(System.out);
+
+		fetchCommand.setProgressMonitor(new TextProgressMonitor(consoleWriter));
+
 		fetchCommand.setRemote(getRemoteURL(remoteConfig));
 		fetchCommand.setTimeout(360);
 
 		int retries = 0;
+		long start = 0;
 
 		while (true) {
 			try {
@@ -380,7 +388,14 @@ public class GitWorkingDirectory {
 							refSpec.toString()));
 				}
 
+				start = System.currentTimeMillis();
+
 				fetchCommand.call();
+
+				System.out.println(
+					"Fetch completed in " +
+						JenkinsResultsParserUtil.toDurationString(
+							System.currentTimeMillis() - start));
 
 				return;
 			}
@@ -772,6 +787,10 @@ public class GitWorkingDirectory {
 
 	public void reset(String ref, ResetCommand.ResetType resetType)
 		throws GitAPIException {
+
+		if ((ref != null) && (ref.equals("head") || ref.equals("HEAD"))) {
+			ref = null;
+		}
 
 		ResetCommand resetCommand = _git.reset();
 

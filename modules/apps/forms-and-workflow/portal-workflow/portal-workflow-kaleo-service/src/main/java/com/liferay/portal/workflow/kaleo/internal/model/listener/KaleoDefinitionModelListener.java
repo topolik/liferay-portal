@@ -21,7 +21,10 @@ import com.liferay.portal.kernel.model.BaseModelListener;
 import com.liferay.portal.kernel.model.ModelListener;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
+import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.workflow.kaleo.model.KaleoDefinition;
+
+import java.util.concurrent.Callable;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -33,22 +36,65 @@ public class KaleoDefinitionModelListener
 	extends BaseModelListener<KaleoDefinition> {
 
 	@Override
-	public void onAfterRemove(KaleoDefinition kaleoDefinition)
+	public void onAfterCreate(final KaleoDefinition kaleoDefinition)
 		throws ModelListenerException {
 
-		try {
-			Message message = new Message();
+		TransactionCommitCallbackUtil.registerCallback(
+			new Callable<Void>() {
 
-			message.put("command", "delete");
-			message.put("name", kaleoDefinition.getName());
-			message.put("serviceContext", getServiceContext(kaleoDefinition));
-			message.put("version", kaleoDefinition.getVersion());
+				@Override
+				public Void call() throws Exception {
+					Message message = new Message();
 
-			MessageBusUtil.sendMessage("liferay/kaleo_definition", message);
+					message.put("command", "create");
+					message.put("name", kaleoDefinition.getName());
+					message.put(
+						"serviceContext", getServiceContext(kaleoDefinition));
+					message.put("version", kaleoDefinition.getVersion());
+
+					MessageBusUtil.sendMessage(
+						"liferay/kaleo_definition", message);
+
+					return null;
+				}
+
+			});
+	}
+
+	@Override
+	public void onAfterRemove(final KaleoDefinition kaleoDefinition)
+		throws ModelListenerException {
+
+		if (kaleoDefinition == null) {
+			return;
 		}
-		catch (Exception e) {
-			throw new ModelListenerException(e);
-		}
+
+		TransactionCommitCallbackUtil.registerCallback(
+			new Callable<Void>() {
+
+				@Override
+				public Void call() throws Exception {
+					try {
+						Message message = new Message();
+
+						message.put("command", "delete");
+						message.put("name", kaleoDefinition.getName());
+						message.put(
+							"serviceContext",
+							getServiceContext(kaleoDefinition));
+						message.put("version", kaleoDefinition.getVersion());
+
+						MessageBusUtil.sendMessage(
+							"liferay/kaleo_definition", message);
+					}
+					catch (Exception e) {
+						throw new ModelListenerException(e);
+					}
+
+					return null;
+				}
+
+			});
 	}
 
 	protected ServiceContext getServiceContext(

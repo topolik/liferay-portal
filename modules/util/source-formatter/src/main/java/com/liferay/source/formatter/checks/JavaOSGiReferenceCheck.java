@@ -18,17 +18,13 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Tuple;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.source.formatter.BNDSettings;
-import com.liferay.source.formatter.SourceFormatterMessage;
 import com.liferay.source.formatter.checks.util.JavaSourceUtil;
 import com.liferay.source.formatter.util.FileUtil;
 
 import java.io.File;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,35 +37,29 @@ import java.util.regex.Pattern;
  */
 public class JavaOSGiReferenceCheck extends BaseFileCheck {
 
-	public JavaOSGiReferenceCheck(
-		Map<String, String> moduleFileNamesMap, boolean subrepository) {
-
+	public JavaOSGiReferenceCheck(Map<String, String> moduleFileNamesMap) {
 		_moduleFileNamesMap = moduleFileNamesMap;
-		_subrepository = subrepository;
 	}
 
 	@Override
-	public Tuple process(String fileName, String absolutePath, String content)
+	protected String doProcess(
+			String fileName, String absolutePath, String content)
 		throws Exception {
 
-		if (!content.contains("@Component") ||
-			!isModulesFile(absolutePath, _subrepository)) {
-
-			return new Tuple(content, Collections.emptySet());
+		if (!content.contains("@Component")) {
+			return content;
 		}
 
 		String packagePath = JavaSourceUtil.getPackagePath(content);
 
 		if (!packagePath.startsWith("com.liferay")) {
-			return new Tuple(content, Collections.emptySet());
+			return content;
 		}
 
-		Set<SourceFormatterMessage> sourceFormatterMessages = new HashSet<>();
-
-		_checkMissingReference(sourceFormatterMessages, fileName, content);
+		_checkMissingReference(fileName, content);
 
 		content = _formatDuplicateReferenceMethods(
-			sourceFormatterMessages, fileName, content, packagePath);
+			fileName, content, packagePath);
 
 		Matcher matcher = _referenceMethodPattern.matcher(content);
 
@@ -93,13 +83,10 @@ public class JavaOSGiReferenceCheck extends BaseFileCheck {
 				content, methodBody, typeName);
 		}
 
-		return new Tuple(content, sourceFormatterMessages);
+		return content;
 	}
 
-	private void _checkMissingReference(
-		Set<SourceFormatterMessage> sourceFormatterMessages, String fileName,
-		String content) {
-
+	private void _checkMissingReference(String fileName, String content) {
 		String moduleServicePackagePath = null;
 
 		Matcher matcher = _serviceUtilImportPattern.matcher(content);
@@ -123,14 +110,13 @@ public class JavaOSGiReferenceCheck extends BaseFileCheck {
 			}
 
 			addMessage(
-				sourceFormatterMessages, fileName,
+				fileName,
 				"Use @Reference instead of calling " + serviceUtilClassName +
 					" directly, see LPS-59076");
 		}
 	}
 
 	private String _formatDuplicateReferenceMethods(
-			Set<SourceFormatterMessage> sourceFormatterMessages,
 			String fileName, String content, String packagePath)
 		throws Exception {
 
@@ -228,7 +214,7 @@ public class JavaOSGiReferenceCheck extends BaseFileCheck {
 				_bndFileNames.add(bndFileName)) {
 
 				addMessage(
-					sourceFormatterMessages,
+
 					bndSettings.getFileLocation() + "bnd.bnd",
 					"Add '-dsannotations-options: inherit'");
 			}
@@ -433,6 +419,5 @@ public class JavaOSGiReferenceCheck extends BaseFileCheck {
 			"\\s*([ ,<>\\w]+)\\s+\\w+\\) \\{\\s+([\\s\\S]*?)\\s*?\n\t\\}\n");
 	private final Pattern _serviceUtilImportPattern = Pattern.compile(
 		"\nimport ([A-Za-z1-9\\.]*)\\.([A-Za-z1-9]*ServiceUtil);");
-	private final boolean _subrepository;
 
 }

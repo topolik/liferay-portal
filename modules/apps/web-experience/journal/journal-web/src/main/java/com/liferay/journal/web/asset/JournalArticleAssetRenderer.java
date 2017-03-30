@@ -136,6 +136,20 @@ public class JournalArticleAssetRenderer
 
 	@Override
 	public String getDiscussionPath() {
+		if (_journalServiceConfiguration == null) {
+			try {
+				_journalServiceConfiguration =
+					ConfigurationProviderUtil.getCompanyConfiguration(
+						JournalServiceConfiguration.class,
+						_article.getCompanyId());
+			}
+			catch (Exception e) {
+				_log.error(e, e);
+
+				return null;
+			}
+		}
+
 		if (_journalServiceConfiguration.articleCommentsEnabled()) {
 			return "edit_article_discussion";
 		}
@@ -554,15 +568,11 @@ public class JournalArticleAssetRenderer
 		return new PortletRequestModel(portletRequest, portletResponse);
 	}
 
+	/**
+	 * @deprecated As of 2.0.0, with no direct replacement
+	 */
+	@Deprecated
 	protected void setJournalServiceConfiguration() {
-		try {
-			_journalServiceConfiguration =
-				ConfigurationProviderUtil.getCompanyConfiguration(
-					JournalServiceConfiguration.class, _article.getCompanyId());
-		}
-		catch (Exception e) {
-			_log.error(e, e);
-		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

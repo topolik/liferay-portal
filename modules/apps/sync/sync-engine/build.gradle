@@ -30,7 +30,8 @@ dependencies {
 	compileInclude group: "org.apache.poi", name: "poi-ooxml", version: "3.14"
 	compileInclude group: "org.bouncycastle", name: "bcpkix-jdk15on", version: "1.54"
 	compileInclude group: "org.bouncycastle", name: "bcprov-jdk15on", version: "1.54"
-	compileInclude group: "org.slf4j", name: "slf4j-api", version: "1.7.21"
+	compileInclude group: "org.slf4j", name: "jcl-over-slf4j", version: "1.7.25"
+	compileInclude group: "org.slf4j", name: "slf4j-api", version: "1.7.25"
 }
 
 liferayOSGi {

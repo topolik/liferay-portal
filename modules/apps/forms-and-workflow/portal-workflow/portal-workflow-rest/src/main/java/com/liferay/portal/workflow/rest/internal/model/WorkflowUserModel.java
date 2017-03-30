@@ -52,7 +52,7 @@ public class WorkflowUserModel {
 		return _portraitURL;
 	}
 
-	@XmlElement
+	@XmlElement(name = "id")
 	public long getUserId() {
 		return _userId;
 	}

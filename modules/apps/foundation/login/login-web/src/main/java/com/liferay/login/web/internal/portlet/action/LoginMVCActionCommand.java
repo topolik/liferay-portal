@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PropsValues;
@@ -80,6 +81,12 @@ public class LoginMVCActionCommand extends BaseMVCActionCommand {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
+
+		if (!PortalUtil.isMethodPost(actionRequest)) {
+			postProcessAuthFailure(actionRequest, actionResponse);
+
+			return;
+		}
 
 		if (PropsValues.AUTH_LOGIN_DISABLED) {
 			actionResponse.sendRedirect(

@@ -67,8 +67,7 @@ public class RebaseFailureMessageGenerator extends BaseFailureMessageGenerator {
 		String consoleText = build.getConsoleText();
 
 		if (!consoleText.contains(_REBASE_END_STRING) ||
-			!consoleText.contains(_REBASE_START_STRING) ||
-			!consoleText.contains("CONFLICT")) {
+			!consoleText.contains(_REBASE_START_STRING)) {
 
 			return null;
 		}
@@ -93,10 +92,9 @@ public class RebaseFailureMessageGenerator extends BaseFailureMessageGenerator {
 				getConsoleOutputSnippetElement(consoleText, true, start, end)));
 	}
 
-	private static final String _REBASE_END_STRING =
-		"The copy of the patch that failed is found in";
+	private static final String _REBASE_END_STRING = "Aborting rebase ABORT";
 
 	private static final String _REBASE_START_STRING =
-		"First, rewinding head to replay your work on top of it...";
+		"[beanshell] Rebasing cache-";
 
 }
