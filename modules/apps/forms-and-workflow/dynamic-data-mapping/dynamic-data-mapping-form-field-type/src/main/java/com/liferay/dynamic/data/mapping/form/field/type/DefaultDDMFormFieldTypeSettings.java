@@ -131,7 +131,7 @@ public interface DefaultDDMFormFieldTypeSettings
 	public LocalizedValue tip();
 
 	@DDMFormField(
-		dataType = "ddm-validation", label = "%validation", type = "validation"
+		dataType = "string", label = "%validation", type = "validation"
 	)
 	public DDMFormFieldValidation validation();
 

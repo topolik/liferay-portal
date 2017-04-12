@@ -142,8 +142,15 @@ public class DDMFormEvaluatorHelper {
 		setDDMFormFieldEvaluationResultValidation(
 			ddmFormFieldEvaluationResult, ddmFormField, ddmFormFieldValue);
 
-		String valueString = getValueString(
-			ddmFormFieldValue.getValue(), ddmFormField.getType());
+		String type = ddmFormField.getType();
+
+		String valueString = getValueString(ddmFormFieldValue.getValue(), type);
+
+		if (Objects.equals(type, "validation")) {
+			ddmFormFieldEvaluationResult.setValue(valueString);
+
+			return ddmFormFieldEvaluationResult;
+		}
 
 		Object value = FieldConstants.getSerializable(
 			ddmFormField.getDataType(), valueString);

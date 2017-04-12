@@ -32,6 +32,7 @@ import com.liferay.portal.xml.SAXReaderFactory;
 import com.liferay.source.formatter.checks.FileCheck;
 import com.liferay.source.formatter.checks.JavaTermCheck;
 import com.liferay.source.formatter.checks.SourceCheck;
+import com.liferay.source.formatter.parser.JavaClass;
 import com.liferay.source.formatter.parser.JavaClassParser;
 import com.liferay.source.formatter.util.FileUtil;
 
@@ -580,45 +581,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		return line;
 	}
 
-	protected String formatJavaTerms(
-			String javaClassName, String packagePath, File file,
-			String fileName, String absolutePath, String content,
-			String javaClassContent, int javaClassLineCount, String indent,
-			String checkJavaFieldTypesExcludesProperty,
-			String javaTermSortExcludesProperty,
-			String testAnnotationsExcludesProperty)
-		throws Exception {
-
-		JavaSourceProcessor javaSourceProcessor = null;
-
-		if (this instanceof JavaSourceProcessor) {
-			javaSourceProcessor = (JavaSourceProcessor)this;
-		}
-		else {
-			javaSourceProcessor = new JavaSourceProcessor();
-
-			javaSourceProcessor.setProperties(_properties);
-			javaSourceProcessor.setSourceFormatterArgs(sourceFormatterArgs);
-		}
-
-		JavaClass javaClass = new JavaClass(
-			javaClassName, packagePath, file, fileName, absolutePath, content,
-			javaClassContent, javaClassLineCount, indent + StringPool.TAB, null,
-			javaSourceProcessor);
-
-		String newJavaClassContent = javaClass.formatJavaTerms(
-			getAnnotationsExclusions(), getImmutableFieldTypes(),
-			checkJavaFieldTypesExcludesProperty, javaTermSortExcludesProperty,
-			testAnnotationsExcludesProperty);
-
-		if (!javaClassContent.equals(newJavaClassContent)) {
-			return StringUtil.replaceFirst(
-				content, javaClassContent, newJavaClassContent);
-		}
-
-		return content;
-	}
-
 	protected String formatStringBundler(
 		String fileName, String content, int maxLineLength) {
 
@@ -775,6 +737,22 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 		return StringPool.BLANK;
 	}
 
+	protected String getCopyright() throws Exception {
+		String copyright = getContent(
+			sourceFormatterArgs.getCopyrightFileName(), PORTAL_MAX_DIR_LEVEL);
+
+		if (Validator.isNotNull(copyright)) {
+			return copyright;
+		}
+
+		Class<?> clazz = getClass();
+
+		ClassLoader classLoader = clazz.getClassLoader();
+
+		return StringUtil.read(
+			classLoader.getResourceAsStream("dependencies/copyright.txt"));
+	}
+
 	protected List<String> getExcludes(String property) {
 		List<String> excludes = _exclusionPropertiesMap.get(property);
 
@@ -833,25 +811,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 
 		return getFileNames(
 			sourceFormatterArgs.getBaseDirName(), excludes, includes);
-	}
-
-	protected Set<String> getImmutableFieldTypes() {
-		if (_immutableFieldTypes != null) {
-			return _immutableFieldTypes;
-		}
-
-		Set<String> immutableFieldTypes = SetUtil.fromArray(
-			new String[] {
-				"boolean", "byte", "char", "double", "float", "int", "long",
-				"short", "Boolean", "Byte", "Character", "Class", "Double",
-				"Float", "Int", "Long", "Number", "Short", "String"
-			});
-
-		immutableFieldTypes.addAll(getPropertyList("immutable.field.types"));
-
-		_immutableFieldTypes = immutableFieldTypes;
-
-		return _immutableFieldTypes;
 	}
 
 	protected int getLeadingTabCount(String line) {
@@ -1559,9 +1518,8 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 			return content;
 		}
 
-		com.liferay.source.formatter.parser.JavaClass javaClass = null;
-		List<com.liferay.source.formatter.parser.JavaClass> anonymousClasses =
-			null;
+		JavaClass javaClass = null;
+		List<JavaClass> anonymousClasses = null;
 
 		for (SourceCheck sourceCheck : sourceChecks) {
 			String newContent = null;
@@ -1598,9 +1556,7 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 					processMessage(fileName, sourceFormatterMessage);
 				}
 
-				for (com.liferay.source.formatter.parser.JavaClass
-						anonymousClass : anonymousClasses) {
-
+				for (JavaClass anonymousClass : anonymousClasses) {
 					newContent = javaTermCheck.process(
 						fileName, absolutePath, anonymousClass, newContent);
 
@@ -1630,7 +1586,6 @@ public abstract class BaseSourceProcessor implements SourceProcessor {
 	private String[] _excludes;
 	private Map<String, List<String>> _exclusionPropertiesMap = new HashMap<>();
 	private SourceMismatchException _firstSourceMismatchException;
-	private Set<String> _immutableFieldTypes;
 	private final List<String> _modifiedFileNames =
 		new CopyOnWriteArrayList<>();
 	private List<String> _pluginsInsideModulesDirectoryNames;

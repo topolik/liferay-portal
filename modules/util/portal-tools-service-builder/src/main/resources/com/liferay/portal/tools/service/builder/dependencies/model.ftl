@@ -363,6 +363,12 @@ public interface ${entity.name}Model extends
 		</#if>
 	</#list>
 
+	<#list entity.localizationColumns as column>
+		public String get${column.methodName}(String languageId);
+
+		public String get${column.methodName}(String languageId, boolean useDefault);
+	</#list>
+
 	<#if entity.isTrashEnabled()>
 		<#if !entity.isWorkflowEnabled()>
 			/**

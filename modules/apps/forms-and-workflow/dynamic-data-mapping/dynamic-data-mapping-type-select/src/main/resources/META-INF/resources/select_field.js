@@ -443,9 +443,15 @@ AUI.add(
 
 						var container = instance.get('container');
 
-						var openList = container.one('.' + CSS_DROP_CHOSEN).hasClass(CSS_HIDE);
+						var dropChosen = container.one('.' + CSS_DROP_CHOSEN);
 
-						return !openList;
+						if (dropChosen) {
+							var openList = dropChosen.hasClass(CSS_HIDE);
+
+							return !openList;
+						}
+
+						return false;
 					},
 
 					_removeBadge: function(value) {

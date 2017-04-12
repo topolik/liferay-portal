@@ -1,8 +1,11 @@
 apply plugin: "com.liferay.gulp"
 apply plugin: "com.liferay.lang.merger"
 
+task testJS
+
 configJSModules {
-	includes = ["**/*.es.js*"]
+	dependsOn = []
+	enabled = false
 }
 
 dependencies {
@@ -14,8 +17,6 @@ dependencies {
 	provided project(":apps:forms-and-workflow:dynamic-data-mapping:dynamic-data-mapping-api")
 	provided project(":apps:forms-and-workflow:dynamic-data-mapping:dynamic-data-mapping-form-field-type")
 }
-
-task testJS
 
 testJS {
 	dependsOn gulpTest

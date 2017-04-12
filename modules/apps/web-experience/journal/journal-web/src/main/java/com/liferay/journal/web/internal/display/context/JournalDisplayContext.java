@@ -77,6 +77,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -174,6 +175,22 @@ public class JournalDisplayContext {
 			themeDisplay);
 
 		return _articleDisplay;
+	}
+
+	public List<Locale> getAvailableArticleLocales() throws PortalException {
+		JournalArticle article = getArticle();
+
+		if (article == null) {
+			return Collections.emptyList();
+		}
+
+		List<Locale> availableLocales = new ArrayList<>();
+
+		for (String languageId : article.getAvailableLanguageIds()) {
+			availableLocales.add(LocaleUtil.fromLanguageId(languageId));
+		}
+
+		return availableLocales;
 	}
 
 	public String[] getCharactersBlacklist() throws PortalException {
@@ -657,6 +674,12 @@ public class JournalDisplayContext {
 				"showEditActions", String.valueOf(isShowEditActions()));
 		}
 
+		String tabs1 = getTabs1();
+
+		if (Validator.isNotNull(tabs1)) {
+			portletURL.setParameter("tabs1", tabs1);
+		}
+
 		return portletURL;
 	}
 
@@ -976,6 +999,16 @@ public class JournalDisplayContext {
 		_status = ParamUtil.getInteger(_request, "status", defaultStatus);
 
 		return _status;
+	}
+
+	public String getTabs1() {
+		if (_tabs1 != null) {
+			return _tabs1;
+		}
+
+		_tabs1 = ParamUtil.getString(_request, "tabs1");
+
+		return _tabs1;
 	}
 
 	public int getTotal() throws PortalException {
@@ -1332,5 +1365,6 @@ public class JournalDisplayContext {
 	private Integer _restrictionType;
 	private Boolean _showEditActions;
 	private Integer _status;
+	private String _tabs1;
 
 }

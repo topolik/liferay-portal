@@ -115,6 +115,7 @@
 			AUI().use('liferay-item-selector-dialog', (A) => {
 				var itemSelectorDialog = new A.LiferayItemSelectorDialog(
 					{
+						eventName: editor.name + 'selectDocument',
 						on: {
 							selectedItemChange: function(event) {
 								var selectedItem = event.newVal;
@@ -124,7 +125,7 @@
 								}
 							}
 						},
-						eventName: editor.name + 'selectDocument',
+						title: Liferay.Language.get('select-item'),
 						url: url
 					}
 				);

@@ -37,10 +37,13 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URL;
 
+import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.utils.DateUtils;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -159,6 +162,20 @@ public class BundleSupportCommandsTest {
 	@Test
 	public void testInitBundleTar() throws Exception {
 		_testInitBundleTar(null, null, null, null, null, null, null);
+	}
+
+	@Test
+	public void testInitBundleTarDifferentLocale() throws Exception {
+		Locale locale = Locale.getDefault();
+
+		try {
+			Locale.setDefault(Locale.ITALY);
+
+			_testInitBundleTar(null, null, null, null, null, null, null);
+		}
+		finally {
+			Locale.setDefault(locale);
+		}
 	}
 
 	@Test
@@ -324,6 +341,12 @@ public class BundleSupportCommandsTest {
 					"dependencies" + contextPath);
 
 				File file = new File(url.getFile());
+
+				Date lastModifiedDate = new Date(file.lastModified());
+
+				headers.add(
+					HttpHeaders.LAST_MODIFIED,
+					DateUtils.formatDate(lastModifiedDate));
 
 				try (BufferedInputStream bufferedInputStream =
 						new BufferedInputStream(new FileInputStream(file))) {

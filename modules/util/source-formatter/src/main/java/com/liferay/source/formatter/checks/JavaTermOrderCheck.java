@@ -42,7 +42,8 @@ public class JavaTermOrderCheck extends BaseJavaTermCheck {
 
 	@Override
 	protected String doProcess(
-			String fileName, String absolutePath, JavaTerm javaTerm)
+			String fileName, String absolutePath, JavaTerm javaTerm,
+			String fileContent)
 		throws Exception {
 
 		String javaTermContent = javaTerm.getContent();
@@ -62,7 +63,7 @@ public class JavaTermOrderCheck extends BaseJavaTermCheck {
 		}
 
 		return _sortJavaTerms(
-			absolutePath, (JavaClass)javaTerm, customSQLContent);
+			fileName, absolutePath, (JavaClass)javaTerm, customSQLContent);
 	}
 
 	protected String[] getCheckableJavaTermNames() {
@@ -105,7 +106,8 @@ public class JavaTermOrderCheck extends BaseJavaTermCheck {
 	}
 
 	private String _sortJavaTerms(
-		String absolutePath, JavaClass javaClass, String customSQLContent) {
+		String fileName, String absolutePath, JavaClass javaClass,
+		String customSQLContent) {
 
 		List<JavaTerm> childJavaTerms = javaClass.getChildJavaTerms();
 
@@ -129,10 +131,17 @@ public class JavaTermOrderCheck extends BaseJavaTermCheck {
 				continue;
 			}
 
-			if (!isExcludedPath(
-					_excludes, absolutePath, previousJavaTerm.getName()) &&
-				!isExcludedPath(_excludes, absolutePath, javaTerm.getName()) &&
-				(javaTermComparator.compare(previousJavaTerm, javaTerm) > 0)) {
+			int compare = javaTermComparator.compare(
+				previousJavaTerm, javaTerm);
+
+			if (compare == 0) {
+				addMessage(fileName, "Duplicate " + javaTerm.getName());
+			}
+			else if (!isExcludedPath(
+						_excludes, absolutePath, previousJavaTerm.getName()) &&
+					 !isExcludedPath(
+						 _excludes, absolutePath, javaTerm.getName()) &&
+					 (compare > 0)) {
 
 				String classContent = javaClass.getContent();
 

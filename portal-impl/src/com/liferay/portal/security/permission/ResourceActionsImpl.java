@@ -43,7 +43,6 @@ import com.liferay.portal.kernel.util.CharPool;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
-import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
@@ -941,13 +940,11 @@ public class ResourceActionsImpl implements ResourceActions {
 			return null;
 		}
 
-		String languageId = LocaleUtil.toLanguageId(locale);
-
 		for (ResourceBundleLoader resourceBundleLoader :
 				_resourceBundleLoaders) {
 
 			ResourceBundle resourceBundle =
-				resourceBundleLoader.loadResourceBundle(languageId);
+				resourceBundleLoader.loadResourceBundle(locale);
 
 			if (resourceBundle == null) {
 				continue;
@@ -1121,6 +1118,12 @@ public class ResourceActionsImpl implements ResourceActions {
 			}
 		}
 
+		if (groupDefaultsElement == null) {
+			return;
+		}
+
+		groupDefaultActions.clear();
+
 		groupDefaultActions.addAll(readActionKeys(groupDefaultsElement));
 	}
 
@@ -1129,6 +1132,12 @@ public class ResourceActionsImpl implements ResourceActions {
 
 		Element guestDefaultsElement = getPermissionsChildElement(
 			parentElement, "guest-defaults");
+
+		if (guestDefaultsElement == null) {
+			return;
+		}
+
+		guestDefaultActions.clear();
 
 		guestDefaultActions.addAll(readActionKeys(guestDefaultsElement));
 	}
@@ -1139,6 +1148,12 @@ public class ResourceActionsImpl implements ResourceActions {
 
 		Element guestUnsupportedElement = getPermissionsChildElement(
 			parentElement, "guest-unsupported");
+
+		if (guestUnsupportedElement == null) {
+			return;
+		}
+
+		guestUnsupportedActions.clear();
 
 		guestUnsupportedActions.addAll(readActionKeys(guestUnsupportedElement));
 
@@ -1153,12 +1168,15 @@ public class ResourceActionsImpl implements ResourceActions {
 		Element layoutManagerElement = getPermissionsChildElement(
 			parentElement, "layout-manager");
 
-		if (layoutManagerElement != null) {
-			layoutManagerActions.addAll(readActionKeys(layoutManagerElement));
-		}
-		else {
+		if (layoutManagerElement == null) {
 			layoutManagerActions.addAll(supportsActions);
+
+			return;
 		}
+
+		layoutManagerActions.clear();
+
+		layoutManagerActions.addAll(readActionKeys(layoutManagerElement));
 	}
 
 	protected String readModelResource(

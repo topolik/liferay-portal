@@ -940,6 +940,14 @@ public class JenkinsResultsParserUtil {
 			_RETRY_PERIOD_DEFAULT, _TIMEOUT_DEFAULT);
 	}
 
+	public static Properties toProperties(String url) throws IOException {
+		Properties properties = new Properties();
+
+		properties.load(new StringReader(toString(url)));
+
+		return properties;
+	}
+
 	public static String toString(String url) throws IOException {
 		return toString(
 			url, true, _MAX_RETRIES_DEFAULT, _RETRY_PERIOD_DEFAULT,

@@ -1,10 +1,15 @@
+apply plugin: "com.liferay.gulp"
 apply plugin: "com.liferay.lang.merger"
+
+task testJS
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
-apply plugin: "com.liferay.gulp"
-apply plugin: "com.liferay.lang.merger"
+configJSModules {
+	dependsOn = []
+	enabled = false
+}
 
 dependencies {
 	provided group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "3.1.0"
@@ -31,8 +36,6 @@ dependencies {
 	testCompile project(":apps:forms-and-workflow:dynamic-data-mapping:dynamic-data-mapping-form-evaluator-impl")
 	testCompile project(":apps:forms-and-workflow:dynamic-data-mapping:dynamic-data-mapping-service")
 }
-
-task testJS
 
 testJS {
 	dependsOn gulpTest

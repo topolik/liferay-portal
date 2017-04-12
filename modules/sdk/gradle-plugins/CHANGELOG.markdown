@@ -1358,9 +1358,94 @@ to version 1.0.107.
 
 ### Changed
 - [LPS-71558]: Update the [Liferay Gradle Plugins Source Formatter] dependency
-to version 1.0.108.
+to version 1.0.109.
 - [LPS-71558]: Update the [Liferay Source Formatter] dependency to version
-1.0.375.
+1.0.376.
+- [LPS-71603]: Update the [Liferay Gradle Plugins Service Builder] dependency
+to version 1.0.33.
+- [LPS-71603]: Update the [Liferay Portal Tools Service Builder] dependency to
+version 1.0.148.
+
+## 3.2.31 - 2017-04-03
+
+### Changed
+- [LPS-71164]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.110.
+- [LPS-71164]: Update the [Liferay Source Formatter] dependency to version
+1.0.377.
+
+## 3.2.32 - 2017-04-03
+
+### Changed
+- [LPS-53392]: Update the [Liferay Portal Tools Service Builder] dependency to
+version 1.0.149.
+
+## 3.2.33 - 2017-04-04
+
+### Changed
+- [LPS-53392]: Update the [Liferay Gradle Plugins Service Builder] dependency
+to version 1.0.34.
+- [LPS-53392]: Update the [Liferay Portal Tools Service Builder] dependency to
+version 1.0.150.
+- [LPS-71164]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.111.
+
+## 3.2.34 - 2017-04-04
+
+### Changed
+- [LPS-71164]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.112.
+- [LPS-71164]: Update the [Liferay Source Formatter] dependency to version
+1.0.379.
+
+## 3.2.35 - 2017-04-05
+
+### Changed
+- [LPS-71164]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.113.
+- [LPS-71164]: Update the [Liferay Source Formatter] dependency to version
+1.0.380.
+
+## 3.2.36 - 2017-04-06
+
+### Added
+- [LPS-71375]: Add the ability to configure the `translateSubscriptionKey`
+property in all `BuildLangTask` instances by setting the project property
+`microsoft.translator.subscription.key`.
+
+### Changed
+- [LPS-71164]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.114.
+- [LPS-71164]: Update the [Liferay Source Formatter] dependency to version
+1.0.381.
+- [LPS-71375]: Update the [Liferay Gradle Plugins Lang Builder] dependency to
+version 2.0.0.
+- [LPS-71375]: Update the [Liferay Lang Builder] dependency to version 1.0.12.
+- [LPS-71591]: Update the [Liferay Gradle Plugins TLDDoc Builder] dependency
+to version 1.3.0.
+
+### Removed
+- [LPS-71375]: The project properties `microsoft.translator.client.id` and
+`microsoft.translator.client.secret` are no longer available.
+
+## 3.2.37 - 2017-04-08
+
+### Changed
+- [LPS-64098]: Update the [Liferay Ant BND] dependency to version 2.0.35.
+
+## 3.2.38 - 2017-04-11
+
+### Changed
+- [LPS-71555]: Update the [Liferay Gradle Plugins Source Formatter] dependency
+to version 1.0.115.
+- [LPS-71555]: Update the [Liferay Source Formatter] dependency to version
+1.0.382.
+- [LPS-71826]: Update the [Liferay Gradle Plugins Gulp] dependency to version
+2.0.13.
+- [LPS-71826]: Update the [Liferay Gradle Plugins JS Module Config Generator]
+dependency to version 2.1.12.
+- [LPS-71826]: Update the [Liferay Gradle Plugins JS Transpiler] dependency to
+version 2.3.10.
 
 [Gradle Bundle Plugin]: https://github.com/TomDmitriev/gradle-bundle-plugin
 [Liferay Ant BND]: https://github.com/liferay/liferay-portal/tree/master/modules/sdk/ant-bnd
@@ -1392,9 +1477,11 @@ to version 1.0.108.
 [Liferay TLD Formatter]: https://github.com/liferay/liferay-portal/tree/master/modules/util/tld-formatter
 [Liferay XML Formatter]: https://github.com/liferay/liferay-portal/tree/master/modules/util/xml-formatter
 [LPS-52675]: https://issues.liferay.com/browse/LPS-52675
+[LPS-53392]: https://issues.liferay.com/browse/LPS-53392
 [LPS-58672]: https://issues.liferay.com/browse/LPS-58672
 [LPS-61099]: https://issues.liferay.com/browse/LPS-61099
 [LPS-62970]: https://issues.liferay.com/browse/LPS-62970
+[LPS-64098]: https://issues.liferay.com/browse/LPS-64098
 [LPS-66222]: https://issues.liferay.com/browse/LPS-66222
 [LPS-66396]: https://issues.liferay.com/browse/LPS-66396
 [LPS-66853]: https://issues.liferay.com/browse/LPS-66853
@@ -1484,5 +1571,10 @@ to version 1.0.108.
 [LPS-71164]: https://issues.liferay.com/browse/LPS-71164
 [LPS-71222]: https://issues.liferay.com/browse/LPS-71222
 [LPS-71331]: https://issues.liferay.com/browse/LPS-71331
+[LPS-71375]: https://issues.liferay.com/browse/LPS-71375
+[LPS-71555]: https://issues.liferay.com/browse/LPS-71555
 [LPS-71558]: https://issues.liferay.com/browse/LPS-71558
+[LPS-71591]: https://issues.liferay.com/browse/LPS-71591
+[LPS-71603]: https://issues.liferay.com/browse/LPS-71603
+[LPS-71826]: https://issues.liferay.com/browse/LPS-71826
 [LRDOCS-3023]: https://issues.liferay.com/browse/LRDOCS-3023
