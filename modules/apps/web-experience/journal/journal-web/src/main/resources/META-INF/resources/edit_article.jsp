@@ -334,7 +334,7 @@ request.setAttribute("edit_article.jsp-changeStructure", changeStructure);
 					previewUrl: '<%= HtmlUtil.escapeJS(previewArticleContentURL.toString()) %>',
 				</c:if>
 
-				title: '<%= (article != null) ? HtmlUtil.escapeJS(HtmlUtil.escape(article.getTitle(locale))) : StringPool.BLANK %>'
+				title: '<%= (article != null) ? HtmlUtil.escapeJS(article.getTitle(locale)) : StringPool.BLANK %>'
 			},
 			namespace: '<portlet:namespace />',
 			'strings.addTemplate': '<liferay-ui:message key="please-add-a-template-to-render-this-structure" />',
