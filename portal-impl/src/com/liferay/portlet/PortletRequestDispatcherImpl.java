@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.model.PortletApp;
 import com.liferay.portal.kernel.portlet.LiferayPortletContext;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequestDispatcher;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
+import com.liferay.portal.kernel.security.auth.AuthException;
 import com.liferay.portal.kernel.servlet.URLEncoder;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.CharPool;
@@ -258,9 +259,13 @@ public class PortletRequestDispatcherImpl
 			}
 		}
 		catch (ServletException se) {
-			_log.error(se, se);
-
-			throw new PortletException(se);
+			if (se.getCause() instanceof AuthException) {
+				_log.error(se.getMessage());
+			}
+			else {
+				_log.error(se, se);
+				throw new PortletException(se);
+			}
 		}
 	}
 
