@@ -22,11 +22,13 @@ import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
+import javax.ws.rs.ext.MessageBodyWriter;
 
 import org.apache.cxf.jaxrs.ext.ContextProvider;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
@@ -45,6 +47,7 @@ public class VulcanApplication extends Application {
 		singletons.add(_rootEndpoint);
 
 		singletons.addAll(_contextProviders);
+		singletons.addAll(_messageBodyWriters);
 
 		return singletons;
 	}
@@ -54,6 +57,13 @@ public class VulcanApplication extends Application {
 		target = "(liferay.vulcan.context.provider=true)"
 	)
 	private List<ContextProvider> _contextProviders;
+
+	@Reference(
+		cardinality = ReferenceCardinality.AT_LEAST_ONE,
+		policyOption = ReferencePolicyOption.GREEDY,
+		target = "(liferay.vulcan.message.body.writer=true)"
+	)
+	private List<MessageBodyWriter> _messageBodyWriters;
 
 	@Reference
 	private RootEndpoint _rootEndpoint;

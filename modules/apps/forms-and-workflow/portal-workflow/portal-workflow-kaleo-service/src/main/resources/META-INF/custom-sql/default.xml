@@ -10,6 +10,12 @@
 			INNER JOIN
 				KaleoTaskAssignmentInstance ON
 					(KaleoTaskAssignmentInstance.kaleoTaskInstanceTokenId = KaleoTaskInstanceToken.kaleoTaskInstanceTokenId)
+			LEFT JOIN
+				ClassName_ ON
+					(ClassName_.value = KaleoTaskInstanceToken.className)
+			LEFT JOIN
+				AssetEntry ON
+					(AssetEntry.classNameId = ClassName_.classNameId AND AssetEntry.classPK = KaleoTaskInstanceToken.classPK)
 			WHERE
 				(KaleoTaskInstanceToken.companyId = ?)
 		]]>
@@ -23,6 +29,12 @@
 			INNER JOIN
 				KaleoTaskAssignmentInstance ON
 					(KaleoTaskAssignmentInstance.kaleoTaskInstanceTokenId = KaleoTaskInstanceToken.kaleoTaskInstanceTokenId)
+			LEFT JOIN
+				ClassName_ ON
+					(ClassName_.value = KaleoTaskInstanceToken.className)
+			LEFT JOIN
+				AssetEntry ON
+					(AssetEntry.classNameId = ClassName_.classNameId AND AssetEntry.classPK = KaleoTaskInstanceToken.classPK)
 			WHERE
 				(KaleoTaskInstanceToken.companyId = ?)
 		]]>

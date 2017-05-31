@@ -15,6 +15,7 @@
 package com.liferay.vulcan.wiring.osgi.internal;
 
 import com.liferay.vulcan.representor.builder.RepresentorBuilder;
+import com.liferay.vulcan.wiring.osgi.RelatedModel;
 
 import java.util.List;
 import java.util.Map;

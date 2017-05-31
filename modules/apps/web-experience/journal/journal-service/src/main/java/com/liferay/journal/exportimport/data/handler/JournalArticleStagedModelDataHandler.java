@@ -179,7 +179,8 @@ public class JournalArticleStagedModelDataHandler
 		catch (Exception e) {
 			throw new IllegalStateException(
 				"Unable to find article resource for article " +
-					article.getArticleId());
+					article.getArticleId(),
+				e);
 		}
 
 		referenceAttributes.put("article-resource-uuid", articleResourceUuid);

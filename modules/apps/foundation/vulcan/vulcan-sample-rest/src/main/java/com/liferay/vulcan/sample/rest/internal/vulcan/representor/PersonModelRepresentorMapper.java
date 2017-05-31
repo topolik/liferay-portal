@@ -42,12 +42,6 @@ public class PersonModelRepresentorMapper
 
 	@Override
 	public void buildRepresentor(RepresentorBuilder<User> representorBuilder) {
-		RepresentorBuilder.FirstStep<User> firstStep =
-			representorBuilder.getFirstStep(
-				user -> String.valueOf(user.getUserId()));
-
-		firstStep.addField("additionalName", User::getMiddleName);
-
 		Function<User, Object> birthDateFunction = user -> {
 			try {
 				DateFormat dateFormat = DateUtil.getISO8601Format();
@@ -59,14 +53,25 @@ public class PersonModelRepresentorMapper
 			}
 		};
 
-		firstStep.addField("birthDate", birthDateFunction);
-
-		firstStep.addField("email", User::getEmailAddress);
-		firstStep.addField("familyName", User::getLastName);
-		firstStep.addField("givenName", User::getFirstName);
-		firstStep.addField("name", User::getFullName);
-		firstStep.addField("jobTitle", User::getJobTitle);
-		firstStep.addType("Person");
+		representorBuilder.getFirstStep(
+			user -> String.valueOf(user.getUserId())
+		).addField(
+			"additionalName", User::getMiddleName
+		).addField(
+			"birthDate", birthDateFunction
+		).addField(
+			"email", User::getEmailAddress
+		).addField(
+			"familyName", User::getLastName
+		).addField(
+			"givenName", User::getFirstName
+		).addField(
+			"name", User::getFullName
+		).addField(
+			"jobTitle", User::getJobTitle
+		).addType(
+			"Person"
+		);
 	}
 
 }

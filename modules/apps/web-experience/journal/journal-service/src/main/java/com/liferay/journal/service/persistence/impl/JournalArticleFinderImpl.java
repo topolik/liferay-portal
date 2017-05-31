@@ -1616,10 +1616,19 @@ public class JournalArticleFinderImpl
 				sql, "([$STRUCTURE_TEMPLATE$]) AND", StringPool.BLANK);
 		}
 
-		StringBundler sb = new StringBundler(3);
+		StringBundler sb = new StringBundler();
 
 		if (!isNullArray(ddmStructureKeys)) {
-			sb.append(_DDM_STRUCTURE_KEY_SQL);
+			sb.append("(");
+
+			for (int i = 0; i < ddmStructureKeys.length; i++) {
+				sb.append(_DDM_STRUCTURE_KEY_SQL);
+				sb.append("OR ");
+			}
+
+			sb.setIndex(sb.index() - 1);
+
+			sb.append(")");
 		}
 
 		if (!isNullArray(ddmTemplateKeys)) {
@@ -1627,7 +1636,16 @@ public class JournalArticleFinderImpl
 				sb.append(_AND_OR_CONNECTOR);
 			}
 
-			sb.append(_DDM_TEMPLATE_KEY_SQL);
+			sb.append("(");
+
+			for (int i = 0; i < ddmTemplateKeys.length; i++) {
+				sb.append(_DDM_TEMPLATE_KEY_SQL);
+				sb.append("OR ");
+			}
+
+			sb.setIndex(sb.index() - 1);
+
+			sb.append(")");
 		}
 
 		return StringUtil.replace(sql, "[$STRUCTURE_TEMPLATE$]", sb.toString());

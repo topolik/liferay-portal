@@ -29,6 +29,12 @@ public class SimpleFacetTest extends BaseSimpleFacetTestCase {
 
 	@Override
 	@Test
+	public void testFrequencyThreshold() throws Exception {
+		super.testFrequencyThreshold();
+	}
+
+	@Override
+	@Test
 	public void testMaxTerms() throws Exception {
 		super.testMaxTerms();
 	}
@@ -43,6 +49,12 @@ public class SimpleFacetTest extends BaseSimpleFacetTestCase {
 	@Test
 	public void testMaxTermsZero() throws Exception {
 		super.testMaxTermsZero();
+	}
+
+	@Override
+	@Test
+	public void testUnmatchedAreIgnored() throws Exception {
+		super.testUnmatchedAreIgnored();
 	}
 
 	@Override

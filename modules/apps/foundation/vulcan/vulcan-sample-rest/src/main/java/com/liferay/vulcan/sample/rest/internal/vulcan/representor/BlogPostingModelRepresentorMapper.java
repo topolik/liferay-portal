@@ -54,15 +54,6 @@ public class BlogPostingModelRepresentorMapper
 	public void buildRepresentor(
 		RepresentorBuilder<BlogsEntry> representorBuilder) {
 
-		RepresentorBuilder.FirstStep<BlogsEntry> firstStep =
-			representorBuilder.getFirstStep(
-				blogsEntry -> String.valueOf(blogsEntry.getEntryId()));
-
-		firstStep.addEmbeddedModel(
-			"creator", User.class, this::_getUserOptional);
-		firstStep.addField("alternativeHeadline", BlogsEntry::getSubtitle);
-		firstStep.addField("articleBody", BlogsEntry::getContent);
-
 		Function<Date, Object> formatFunction = date -> {
 			if (date == null) {
 				return null;
@@ -73,23 +64,34 @@ public class BlogPostingModelRepresentorMapper
 			return dateFormat.format(date);
 		};
 
-		firstStep.addField(
+		representorBuilder.getFirstStep(
+			blogsEntry -> String.valueOf(blogsEntry.getEntryId())
+		).addEmbeddedModel(
+			"creator", User.class, this::_getUserOptional
+		).addField(
+			"alternativeHeadline", BlogsEntry::getSubtitle
+		).addField(
+			"articleBody", BlogsEntry::getContent
+		).addField(
 			"createDate",
-			blogsEntry -> formatFunction.apply(blogsEntry.getCreateDate()));
-
-		firstStep.addField("fileFormat", blogsEntry -> "text/html");
-		firstStep.addField("headline", BlogsEntry::getTitle);
-		firstStep.addField(
+			blogsEntry -> formatFunction.apply(blogsEntry.getCreateDate())
+		).addField(
+			"fileFormat", blogsEntry -> "text/html"
+		).addField(
+			"headline", BlogsEntry::getTitle
+		).addField(
 			"modifiedDate",
-			blogsEntry -> formatFunction.apply(blogsEntry.getModifiedDate()));
-		firstStep.addField(
+			blogsEntry -> formatFunction.apply(blogsEntry.getModifiedDate())
+		).addField(
 			"publishedDate",
-			blogsEntry -> formatFunction.apply(
-				blogsEntry.getLastPublishDate()));
-		firstStep.addLinkedModel("author", User.class, this::_getUserOptional);
-		firstStep.addLink(
-			"license", "https://creativecommons.org/licenses/by/4.0");
-		firstStep.addType("BlogPosting");
+			blogsEntry -> formatFunction.apply(blogsEntry.getLastPublishDate())
+		).addLinkedModel(
+			"author", User.class, this::_getUserOptional
+		).addLink(
+			"license", "https://creativecommons.org/licenses/by/4.0"
+		).addType(
+			"BlogPosting"
+		);
 	}
 
 	private Optional<User> _getUserOptional(BlogsEntry blogsEntry) {

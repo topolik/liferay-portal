@@ -25,6 +25,8 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.workflow.WorkflowException;
 import com.liferay.portal.kernel.workflow.WorkflowHandler;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.kernel.workflow.WorkflowTask;
@@ -60,16 +62,13 @@ public class WorkflowTaskUserNotificationHandler
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
 			userNotificationEvent.getPayload());
 
-		long workflowTaskId = jsonObject.getLong("workflowTaskId");
+		if (!isWorkflowTaskVisible(
+				jsonObject.getLong("workflowTaskId"), serviceContext)) {
 
-		WorkflowTask workflowTask = WorkflowTaskManagerUtil.fetchWorkflowTask(
-			serviceContext.getCompanyId(), workflowTaskId);
-
-		if (!isWorkflowTaskVisible(workflowTask, serviceContext)) {
 			_userNotificationEventLocalService.deleteUserNotificationEvent(
 				userNotificationEvent.getUserNotificationEventId());
 
-			return null;
+			return StringPool.BLANK;
 		}
 
 		return HtmlUtil.escape(jsonObject.getString("notificationMessage"));
@@ -89,18 +88,26 @@ public class WorkflowTaskUserNotificationHandler
 		WorkflowHandler<?> workflowHandler =
 			WorkflowHandlerRegistryUtil.getWorkflowHandler(entryClassName);
 
-		if (workflowHandler == null) {
-			return null;
-		}
-
 		long workflowTaskId = jsonObject.getLong("workflowTaskId");
+
+		if ((workflowHandler == null) || (workflowTaskId <= 0)) {
+			return StringPool.BLANK;
+		}
 
 		return workflowHandler.getURLEditWorkflowTask(
 			workflowTaskId, serviceContext);
 	}
 
 	protected boolean isWorkflowTaskVisible(
-		WorkflowTask workflowTask, ServiceContext serviceContext) {
+			long workflowTaskId, ServiceContext serviceContext)
+		throws WorkflowException {
+
+		if (workflowTaskId <= 0) {
+			return true;
+		}
+
+		WorkflowTask workflowTask = WorkflowTaskManagerUtil.fetchWorkflowTask(
+			serviceContext.getCompanyId(), workflowTaskId);
 
 		if (workflowTask == null) {
 			return false;

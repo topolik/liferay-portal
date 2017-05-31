@@ -56,6 +56,12 @@ public class SubstringFieldQueryBuilderTest
 
 	@Override
 	@Test
+	public void testParentheses() throws Exception {
+		super.testParentheses();
+	}
+
+	@Override
+	@Test
 	public void testPhrases() throws Exception {
 		super.testPhrases();
 	}

@@ -35,6 +35,8 @@ import com.liferay.portal.kernel.workflow.WorkflowTaskAssignee;
 
 import java.io.Serializable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -78,6 +80,33 @@ public class WorkflowTaskPermissionChecker {
 		return false;
 	}
 
+	protected List<Group> getAncestorGroups(Group group)
+		throws PortalException {
+
+		List<Group> groups = new ArrayList<>();
+
+		for (Group ancestorGroup : group.getAncestors()) {
+			groups.add(ancestorGroup);
+		}
+
+		return groups;
+	}
+
+	protected List<Group> getAncestorOrganizationGroups(Group group)
+		throws PortalException {
+
+		List<Group> groups = new ArrayList<>();
+
+		Organization organization =
+			OrganizationLocalServiceUtil.getOrganization(group.getClassPK());
+
+		for (Organization ancestorOrganization : organization.getAncestors()) {
+			groups.add(ancestorOrganization.getGroup());
+		}
+
+		return groups;
+	}
+
 	protected long[] getRoleIds(
 		long groupId, PermissionChecker permissionChecker) {
 
@@ -85,34 +114,25 @@ public class WorkflowTaskPermissionChecker {
 			permissionChecker.getUserId(), groupId);
 
 		try {
+			List<Group> groups = new ArrayList<>();
+
 			if (groupId != WorkflowConstants.DEFAULT_GROUP_ID) {
 				Group group = GroupLocalServiceUtil.getGroup(groupId);
 
 				if (group.isOrganization()) {
-					Organization organization =
-						OrganizationLocalServiceUtil.getOrganization(
-							group.getClassPK());
-
-					for (Organization ancestorOrganization :
-							organization.getAncestors()) {
-
-						long[] ancestorRoleIds = permissionChecker.getRoleIds(
-							permissionChecker.getUserId(),
-							ancestorOrganization.getGroupId());
-
-						roleIds = ArrayUtil.append(roleIds, ancestorRoleIds);
-					}
+					groups.addAll(getAncestorOrganizationGroups(group));
 				}
 
 				if (group.isSite()) {
-					for (Group ancestorGroup : group.getAncestors()) {
-						long[] ancestorRoleIds = permissionChecker.getRoleIds(
-							permissionChecker.getUserId(),
-							ancestorGroup.getGroupId());
-
-						roleIds = ArrayUtil.append(roleIds, ancestorRoleIds);
-					}
+					groups.addAll(getAncestorGroups(group));
 				}
+			}
+
+			for (Group group : groups) {
+				long[] roleIdArray = permissionChecker.getRoleIds(
+					permissionChecker.getUserId(), group.getGroupId());
+
+				roleIds = ArrayUtil.append(roleIds, roleIdArray);
 			}
 		}
 		catch (PortalException pe) {

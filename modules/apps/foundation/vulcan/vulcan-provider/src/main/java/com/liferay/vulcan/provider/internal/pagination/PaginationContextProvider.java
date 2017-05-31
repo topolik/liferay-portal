@@ -14,7 +14,7 @@
 
 package com.liferay.vulcan.provider.internal.pagination;
 
-import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.vulcan.pagination.Page;
 import com.liferay.vulcan.pagination.Pagination;
@@ -28,6 +28,7 @@ import org.apache.cxf.jaxrs.ext.ContextProvider;
 import org.apache.cxf.message.Message;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Alejandro Hernández
@@ -43,8 +44,7 @@ public class PaginationContextProvider implements ContextProvider<Pagination> {
 		String queryString = (String)message.getContextualProperty(
 			Message.QUERY_STRING);
 
-		Map<String, String[]> parameterMap = HttpUtil.getParameterMap(
-			queryString);
+		Map<String, String[]> parameterMap = _http.getParameterMap(queryString);
 
 		int itemsPerPage = MapUtil.getInteger(
 			parameterMap, "per_page", _ITEMS_PER_PAGE_DEFAULT);
@@ -57,6 +57,9 @@ public class PaginationContextProvider implements ContextProvider<Pagination> {
 	private static final int _ITEMS_PER_PAGE_DEFAULT = 30;
 
 	private static final int _PAGE_NUMBER_DEFAULT = 1;
+
+	@Reference
+	private Http _http;
 
 	private static class DefaultPage<T> implements Page<T> {
 

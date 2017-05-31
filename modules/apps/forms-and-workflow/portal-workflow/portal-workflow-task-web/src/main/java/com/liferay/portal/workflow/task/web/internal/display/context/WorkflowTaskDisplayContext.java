@@ -919,7 +919,7 @@ public class WorkflowTaskDisplayContext {
 		return StringPool.BLANK;
 	}
 
-	protected String getAssetType(String keywords) {
+	protected String[] getAssetType(String keywords) {
 		for (WorkflowHandler<?> workflowHandler :
 				getSearchableAssetsWorkflowHandlers()) {
 
@@ -927,11 +927,11 @@ public class WorkflowTaskDisplayContext {
 				_workflowTaskRequestHelper.getLocale());
 
 			if (StringUtil.equalsIgnoreCase(keywords, assetType)) {
-				return workflowHandler.getClassName();
+				return new String[] {workflowHandler.getClassName()};
 			}
 		}
 
-		return StringPool.BLANK;
+		return null;
 	}
 
 	protected Boolean getCompleted() {
@@ -1025,18 +1025,17 @@ public class WorkflowTaskDisplayContext {
 		int total = WorkflowTaskManagerUtil.searchCount(
 			_workflowTaskRequestHelper.getCompanyId(),
 			_workflowTaskRequestHelper.getUserId(), searchTerms.getKeywords(),
-			getAssetType(searchTerms.getKeywords()), null, null, null,
-			getCompleted(), searchByUserRoles, false);
+			getAssetType(searchTerms.getKeywords()), getCompleted(),
+			searchByUserRoles);
 
 		searchContainer.setTotal(total);
 
 		List<WorkflowTask> results = WorkflowTaskManagerUtil.search(
 			_workflowTaskRequestHelper.getCompanyId(),
 			_workflowTaskRequestHelper.getUserId(), searchTerms.getKeywords(),
-			getAssetType(searchTerms.getKeywords()), null, null, null,
-			getCompleted(), searchByUserRoles, false,
-			searchContainer.getStart(), searchContainer.getEnd(),
-			searchContainer.getOrderByComparator());
+			getAssetType(searchTerms.getKeywords()), getCompleted(),
+			searchByUserRoles, searchContainer.getStart(),
+			searchContainer.getEnd(), searchContainer.getOrderByComparator());
 
 		searchContainer.setResults(results);
 

@@ -16,6 +16,15 @@ package com.liferay.portal.workflow.kaleo.runtime.integration.impl.internal.test
 
 import com.liferay.blogs.model.BlogsEntry;
 import com.liferay.blogs.service.BlogsEntryLocalServiceUtil;
+import com.liferay.document.library.kernel.model.DLFileEntry;
+import com.liferay.document.library.kernel.model.DLFileEntryType;
+import com.liferay.document.library.kernel.model.DLFileVersion;
+import com.liferay.document.library.kernel.model.DLFolder;
+import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLAppServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileEntryLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalServiceUtil;
+import com.liferay.document.library.kernel.service.DLFolderLocalServiceUtil;
 import com.liferay.dynamic.data.lists.model.DDLRecord;
 import com.liferay.dynamic.data.lists.model.DDLRecordConstants;
 import com.liferay.dynamic.data.lists.model.DDLRecordSet;
@@ -33,6 +42,7 @@ import com.liferay.dynamic.data.mapping.test.util.DDMFormValuesTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestHelper;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMTemplateTestUtil;
+import com.liferay.dynamic.data.mapping.util.DDMBeanTranslatorUtil;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.model.JournalFolderConstants;
@@ -48,6 +58,10 @@ import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserNotificationDeliveryConstants;
 import com.liferay.portal.kernel.model.UserNotificationEvent;
+import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.repository.model.FileVersion;
+import com.liferay.portal.kernel.repository.model.Folder;
+import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionCheckerFactoryUtil;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
@@ -58,24 +72,30 @@ import com.liferay.portal.kernel.service.UserGroupRoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserNotificationEventLocalServiceUtil;
 import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalServiceUtil;
+import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
+import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowDefinitionManagerUtil;
 import com.liferay.portal.kernel.workflow.WorkflowException;
 import com.liferay.portal.kernel.workflow.WorkflowInstance;
 import com.liferay.portal.kernel.workflow.WorkflowInstanceManagerUtil;
 import com.liferay.portal.kernel.workflow.WorkflowTask;
 import com.liferay.portal.kernel.workflow.WorkflowTaskManagerUtil;
+import com.liferay.portal.security.permission.SimplePermissionChecker;
 import com.liferay.portal.test.log.CaptureAppender;
 import com.liferay.portal.test.log.Log4JLoggerTestUtil;
+import com.liferay.portal.test.randomizerbumpers.TikaSafeRandomizerBumper;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -103,16 +123,17 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 		serviceContext = ServiceContextTestUtil.getServiceContext(
 			group.getGroupId());
 
-		_originalPermissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
+		setUpPermissionThreadLocal();
+		setUpPrincipalThreadLocal();
 		setUpUsers();
 		setUpWorkflow();
 	}
 
 	@After
 	public void tearDown() throws PortalException {
-		PermissionThreadLocal.setPermissionChecker(_originalPermissionChecker);
+		PermissionThreadLocal.setPermissionChecker(_permissionChecker);
+
+		PrincipalThreadLocal.setName(_name);
 	}
 
 	protected void activateSingleApproverWorkflow(
@@ -166,6 +187,78 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 				user.getUserId(), StringUtil.randomString(),
 				StringUtil.randomString(), new Date(), serviceContext);
 		}
+	}
+
+	protected DLFileEntryType addFileEntryType() throws Exception {
+		LocalizedValuesMap localizedValuesMap = new LocalizedValuesMap(
+			"defaultValue");
+
+		localizedValuesMap.put(LocaleUtil.US, RandomTestUtil.randomString());
+
+		Map<Locale, String> map = LocalizationUtil.getMap(localizedValuesMap);
+
+		DDMForm ddmForm = DDMStructureTestUtil.getSampleDDMForm();
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+		serviceContext.setAttribute(
+			"ddmForm", DDMBeanTranslatorUtil.translate(ddmForm));
+
+		DLFileEntryType fileEntryType =
+			DLFileEntryTypeLocalServiceUtil.addFileEntryType(
+				adminUser.getUserId(), group.getGroupId(), null, map, map,
+				new long[0], serviceContext);
+
+		_dlFileEntryType.add(fileEntryType);
+
+		return fileEntryType;
+	}
+
+	protected FileVersion addFileVersion(long folderId) throws Exception {
+		return addFileVersion(folderId, 0);
+	}
+
+	protected FileVersion addFileVersion(long folderId, long fileEntryTypeId)
+		throws Exception {
+
+		try (CaptureAppender captureAppender =
+				Log4JLoggerTestUtil.configureLog4JLogger(
+					_MAIL_ENGINE_CLASS_NAME, Level.OFF)) {
+
+			ServiceContext serviceContext =
+				ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+			serviceContext.setAttribute("fileEntryTypeId", fileEntryTypeId);
+
+			FileEntry fileEntry = DLAppLocalServiceUtil.addFileEntry(
+				adminUser.getUserId(), group.getGroupId(), folderId,
+				RandomTestUtil.randomString(), ContentTypes.TEXT_PLAIN,
+				RandomTestUtil.randomString(), StringPool.BLANK,
+				StringPool.BLANK,
+				RandomTestUtil.randomBytes(TikaSafeRandomizerBumper.INSTANCE),
+				serviceContext);
+
+			DLFileEntry dlFileEntry = DLFileEntryLocalServiceUtil.getFileEntry(
+				fileEntry.getFileEntryId());
+
+			_dlFileEntries.add(dlFileEntry);
+
+			_dlFileVersions.add(dlFileEntry.getFileVersion());
+
+			return fileEntry.getLatestFileVersion();
+		}
+	}
+
+	protected Folder addFolder() throws PortalException {
+		Folder folder = DLAppServiceUtil.addFolder(
+			group.getGroupId(), 0, RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(), serviceContext);
+
+		_dlFolders.add(
+			DLFolderLocalServiceUtil.getDLFolder(folder.getFolderId()));
+
+		return folder;
 	}
 
 	protected JournalArticle addJournalArticle(long folderId) throws Exception {
@@ -279,18 +372,27 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 	protected void assignWorkflowTaskToUser(User user, User assigneeUser)
 		throws Exception {
 
-		assignWorkflowTaskToUser(user, assigneeUser, null);
+		assignWorkflowTaskToUser(user, assigneeUser, null, null, 0);
 	}
 
 	protected void assignWorkflowTaskToUser(
 			User user, User assigneeUser, String taskName)
 		throws Exception {
 
+		assignWorkflowTaskToUser(user, assigneeUser, taskName, null, 0);
+	}
+
+	protected void assignWorkflowTaskToUser(
+			User user, User assigneeUser, String taskName, String className,
+			long classPK)
+		throws Exception {
+
 		try (CaptureAppender captureAppender =
 				Log4JLoggerTestUtil.configureLog4JLogger(
 					_MAIL_ENGINE_CLASS_NAME, Level.OFF)) {
 
-			WorkflowTask workflowTask = getWorkflowTask(user, taskName, false);
+			WorkflowTask workflowTask = getWorkflowTask(
+				user, taskName, false, className, classPK);
 
 			PermissionChecker userPermissionChecker =
 				PermissionCheckerFactoryUtil.create(user);
@@ -326,33 +428,30 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 		}
 	}
 
-	protected void checkWorkflowInstance(String className, long classPK)
-		throws WorkflowException {
-
-		List<WorkflowInstance> workflowInstances =
-			WorkflowInstanceManagerUtil.getWorkflowInstances(
-				adminUser.getCompanyId(), adminUser.getUserId(), className,
-				classPK, true, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
-
-		Assert.assertEquals(
-			workflowInstances.toString(), 1, workflowInstances.size());
-	}
-
 	protected void completeWorkflowTask(User user, String transition)
 		throws Exception {
 
-		completeWorkflowTask(user, transition, null);
+		completeWorkflowTask(user, transition, null, null, 0);
 	}
 
 	protected void completeWorkflowTask(
 			User user, String transition, String taskName)
 		throws Exception {
 
+		completeWorkflowTask(user, transition, taskName, null, 0);
+	}
+
+	protected void completeWorkflowTask(
+			User user, String transition, String taskName, String className,
+			long classPK)
+		throws Exception {
+
 		try (CaptureAppender captureAppender =
 				Log4JLoggerTestUtil.configureLog4JLogger(
 					_MAIL_ENGINE_CLASS_NAME, Level.OFF)) {
 
-			WorkflowTask workflowTask = getWorkflowTask(user, taskName, false);
+			WorkflowTask workflowTask = getWorkflowTask(
+				user, taskName, false, className, classPK);
 
 			PermissionChecker userPermissionChecker =
 				PermissionCheckerFactoryUtil.create(user);
@@ -477,12 +576,47 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 		return "com/liferay/portal/workflow/kaleo/dependencies/";
 	}
 
+	protected DLFileEntryType getBasicFileEntryType() throws Exception {
+		return DLFileEntryTypeLocalServiceUtil.getFileEntryType(
+			0, "BASIC-DOCUMENT");
+	}
+
+	protected WorkflowInstance getWorkflowInstance(
+			String className, long classPK)
+		throws WorkflowException {
+
+		return getWorkflowInstance(className, classPK, true);
+	}
+
+	protected WorkflowInstance getWorkflowInstance(
+			String className, long classPK, boolean completed)
+		throws WorkflowException {
+
+		List<WorkflowInstance> workflowInstances =
+			WorkflowInstanceManagerUtil.getWorkflowInstances(
+				adminUser.getCompanyId(), adminUser.getUserId(), className,
+				classPK, completed, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		Assert.assertEquals(
+			workflowInstances.toString(), 1, workflowInstances.size());
+
+		return workflowInstances.get(0);
+	}
+
 	protected WorkflowTask getWorkflowTask() throws Exception {
-		return getWorkflowTask(adminUser, null, false);
+		return getWorkflowTask(adminUser, null, false, null, 0);
 	}
 
 	protected WorkflowTask getWorkflowTask(
 			User user, String taskName, boolean completed)
+		throws Exception {
+
+		return getWorkflowTask(adminUser, taskName, completed, null, 0);
+	}
+
+	protected WorkflowTask getWorkflowTask(
+			User user, String taskName, boolean completed, String className,
+			long classPK)
 		throws Exception {
 
 		List<WorkflowTask> workflowTasks = new ArrayList<>();
@@ -497,16 +631,37 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 				user.getCompanyId(), user.getUserId(), completed,
 				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null));
 
+		WorkflowInstance workflowInstance = null;
+
+		if (Validator.isNotNull(className) && (classPK > 0)) {
+			workflowInstance = getWorkflowInstance(
+				className, classPK, completed);
+
+			if (workflowTasks.isEmpty()) {
+				workflowTasks.addAll(
+					WorkflowTaskManagerUtil.getWorkflowTasksByWorkflowInstance(
+						user.getCompanyId(), user.getUserId(),
+						workflowInstance.getWorkflowInstanceId(), completed,
+						QueryUtil.ALL_POS, QueryUtil.ALL_POS, null));
+			}
+		}
+
 		for (WorkflowTask workflowTask : workflowTasks) {
-			PermissionChecker userPermissionChecker =
-				PermissionCheckerFactoryUtil.create(user);
-
-			PermissionThreadLocal.setPermissionChecker(userPermissionChecker);
-
 			if (Objects.equals(taskName, workflowTask.getName())) {
+				if ((workflowInstance != null) &&
+					(workflowInstance.getWorkflowInstanceId() !=
+						workflowTask.getWorkflowInstanceId())) {
+
+					continue;
+				}
+
 				return workflowTask;
 			}
 		}
+
+		Assert.assertNull(taskName);
+
+		Assert.assertNull(className);
 
 		Assert.assertEquals(workflowTasks.toString(), 1, workflowTasks.size());
 
@@ -518,6 +673,38 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 
 		return StringUtil.read(
 			clazz.getClassLoader(), getBasePath() + fileName);
+	}
+
+	protected int searchCount(String keywords) throws Exception {
+		return WorkflowTaskManagerUtil.searchCount(
+			adminUser.getCompanyId(), adminUser.getUserId(), keywords, null,
+			false, true);
+	}
+
+	protected void setUpPermissionThreadLocal() throws Exception {
+		_permissionChecker = PermissionThreadLocal.getPermissionChecker();
+
+		PermissionThreadLocal.setPermissionChecker(
+			new SimplePermissionChecker() {
+				{
+					init(TestPropsValues.getUser());
+				}
+
+				@Override
+				public boolean hasOwnerPermission(
+					long companyId, String name, String primKey, long ownerId,
+					String actionId) {
+
+					return true;
+				}
+
+			});
+	}
+
+	protected void setUpPrincipalThreadLocal() throws Exception {
+		_name = PrincipalThreadLocal.getName();
+
+		PrincipalThreadLocal.setName(TestPropsValues.getUserId());
 	}
 
 	protected void setUpUsers() throws Exception {
@@ -534,10 +721,56 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 		createScriptedAssignmentWorkflow();
 	}
 
+	protected Folder updateFolder(Folder folder, int restrictionType)
+		throws PortalException {
+
+		return updateFolder(folder, restrictionType, -1, new HashMap<>());
+	}
+
+	protected Folder updateFolder(
+			Folder folder, int restrictionType, long defaultFileEntryTypeId,
+			Map<String, String> dlFileEntryTypeMap)
+		throws PortalException {
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(group.getGroupId());
+
+		serviceContext.setAttribute("restrictionType", restrictionType);
+
+		if (defaultFileEntryTypeId > -1) {
+			serviceContext.setAttribute(
+				"defaultFileEntryTypeId", defaultFileEntryTypeId);
+		}
+
+		serviceContext.setAttribute(
+			"dlFileEntryTypesSearchContainerPrimaryKeys",
+			String.join(StringPool.COMMA, dlFileEntryTypeMap.keySet()));
+
+		dlFileEntryTypeMap.forEach(
+			(dlFileEntryType, workflowDefinition) ->
+				serviceContext.setAttribute(
+					"workflowDefinition" + dlFileEntryType,
+					workflowDefinition));
+
+		return DLAppServiceUtil.updateFolder(
+			folder.getFolderId(), folder.getName(), folder.getDescription(),
+			serviceContext);
+	}
+
+	protected Folder updateFolder(
+			Folder folder, int restrictionType,
+			Map<String, String> dlFileEntryTypeMap)
+		throws PortalException {
+
+		return updateFolder(folder, restrictionType, -1, dlFileEntryTypeMap);
+	}
+
 	protected static final String JOIN_XOR = "Join Xor";
 
 	protected static final String ORGANIZATION_CONTENT_REVIEWER =
 		"Organization Content Reviewer";
+
+	protected static final String REVIEW = "review";
 
 	protected static final String SCRIPTED_SINGLE_APPROVER =
 		"Scripted Single Approver";
@@ -558,9 +791,23 @@ public abstract class BaseWorkflowTaskManagerTestCase {
 		"com.liferay.portal.kernel.messaging.proxy.ProxyMessageListener";
 
 	@DeleteAfterTestRun
+	private final List<DLFileEntry> _dlFileEntries = new ArrayList<>();
+
+	@DeleteAfterTestRun
+	private final List<DLFileEntryType> _dlFileEntryType = new ArrayList<>();
+
+	@DeleteAfterTestRun
+	private final List<DLFileVersion> _dlFileVersions = new ArrayList<>();
+
+	@DeleteAfterTestRun
+	private final List<DLFolder> _dlFolders = new ArrayList<>();
+
+	private String _name;
+
+	@DeleteAfterTestRun
 	private final List<Organization> _organizations = new ArrayList<>();
 
-	private PermissionChecker _originalPermissionChecker;
+	private PermissionChecker _permissionChecker;
 
 	@DeleteAfterTestRun
 	private final List<User> _users = new ArrayList<>();

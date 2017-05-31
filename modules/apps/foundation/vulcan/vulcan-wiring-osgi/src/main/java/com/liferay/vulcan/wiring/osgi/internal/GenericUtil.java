@@ -14,15 +14,12 @@
 
 package com.liferay.vulcan.wiring.osgi.internal;
 
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ReflectionUtil;
+import com.liferay.vulcan.error.VulcanDeveloperError;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-
-import java.util.Optional;
 
 /**
  * @author Alejandro Hernández
@@ -31,9 +28,7 @@ import java.util.Optional;
  */
 public class GenericUtil {
 
-	public static <T, S> Optional<Class<S>> getGenericClassOptional(
-		T t, Class<T> clazz) {
-
+	public static <T, S> Class<S> getGenericClass(T t, Class<T> clazz) {
 		Type genericType = ReflectionUtil.getGenericInterface(t, clazz);
 
 		if ((genericType != null) &&
@@ -48,19 +43,14 @@ public class GenericUtil {
 				(typeArguments.length == 1)) {
 
 				try {
-					return Optional.of((Class<S>)typeArguments[0]);
+					return (Class<S>)typeArguments[0];
 				}
 				catch (ClassCastException cce) {
-					if (_log.isWarnEnabled()) {
-						_log.warn(cce, cce);
-					}
 				}
 			}
 		}
 
-		return Optional.empty();
+		throw new VulcanDeveloperError.MustHaveValidGenericType(t.getClass());
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(GenericUtil.class);
 
 }

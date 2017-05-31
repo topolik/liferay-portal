@@ -19,7 +19,9 @@ package com.liferay.vulcan.liferay.scope;
  * @author Carlos Sierra Andrés
  * @author Jorge Ferrer
  */
-public interface GroupScoped {
+public interface GroupScoped<T> {
+
+	public long getGroupId(T t);
 
 	public void setGroupId(long groupId);
 

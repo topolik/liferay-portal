@@ -166,6 +166,10 @@ public class KaleoTaskInstanceTokenFinderImpl
 			return true;
 		}
 
+		if (Validator.isNotNull(kaleoTaskInstanceTokenQuery.getAssetTitle())) {
+			return true;
+		}
+
 		return false;
 	}
 
@@ -251,6 +255,18 @@ public class KaleoTaskInstanceTokenFinderImpl
 						 kaleoTaskInstanceTokenQuery.getAssetTypes()) &&
 					 (kaleoTaskInstanceTokenQuery.getDueDateGT() == null) &&
 					 (kaleoTaskInstanceTokenQuery.getDueDateLT() == null)));
+			sql = CustomSQLUtil.appendCriteria(
+				sql,
+				getAssetTitle(
+					kaleoTaskInstanceTokenQuery,
+					ArrayUtil.isEmpty(
+						kaleoTaskInstanceTokenQuery.getAssetPrimaryKeys()) &&
+					ArrayUtil.isEmpty(
+						kaleoTaskInstanceTokenQuery.getAssetTypes()) &&
+					(kaleoTaskInstanceTokenQuery.getDueDateGT() == null) &&
+					(kaleoTaskInstanceTokenQuery.getDueDateLT() == null) &&
+					Validator.isNull(
+						kaleoTaskInstanceTokenQuery.getTaskName())));
 			sql = CustomSQLUtil.appendCriteria(sql, ")");
 
 			sql = CustomSQLUtil.replaceAndOperator(
@@ -313,6 +329,8 @@ public class KaleoTaskInstanceTokenFinderImpl
 		setDueDateLT(qPos, kaleoTaskInstanceTokenQuery);
 		setTaskName(qPos, kaleoTaskInstanceTokenQuery);
 
+		setAssetTitle(qPos, kaleoTaskInstanceTokenQuery);
+
 		return q;
 	}
 
@@ -335,6 +353,43 @@ public class KaleoTaskInstanceTokenFinderImpl
 		}
 
 		sb.append("(KaleoTaskInstanceToken.classPK = ?))");
+
+		return sb.toString();
+	}
+
+	protected String getAssetTitle(
+		KaleoTaskInstanceTokenQuery kaleoTaskInstanceTokenQuery,
+		boolean firstCriteria) {
+
+		String assetTitle = kaleoTaskInstanceTokenQuery.getAssetTitle();
+
+		if (Validator.isNull(assetTitle)) {
+			return StringPool.BLANK;
+		}
+
+		String[] assetTitles = CustomSQLUtil.keywords(assetTitle, false);
+
+		if (ArrayUtil.isEmpty(assetTitles)) {
+			return StringPool.BLANK;
+		}
+
+		StringBundler sb = new StringBundler(assetTitles.length * 2 + 1);
+
+		if (!firstCriteria) {
+			sb.append("[$AND_OR_CONNECTOR$] (");
+		}
+		else {
+			sb.append(StringPool.OPEN_PARENTHESIS);
+		}
+
+		for (int i = 0; i < assetTitles.length; i++) {
+			sb.append("(lower(AssetEntry.title) LIKE lower(?)) ");
+			sb.append("OR ");
+		}
+
+		sb.setIndex(sb.index() - 1);
+
+		sb.append(")");
 
 		return sb.toString();
 	}
@@ -737,6 +792,21 @@ public class KaleoTaskInstanceTokenFinderImpl
 		}
 
 		qPos.add(assetPrimaryKeys);
+	}
+
+	protected void setAssetTitle(
+		QueryPos qPos,
+		KaleoTaskInstanceTokenQuery kaleoTaskInstanceTokenQuery) {
+
+		String assetTitle = kaleoTaskInstanceTokenQuery.getAssetTitle();
+
+		if (Validator.isNull(assetTitle)) {
+			return;
+		}
+
+		String[] assetTitles = CustomSQLUtil.keywords(assetTitle, false);
+
+		qPos.add(assetTitles);
 	}
 
 	protected void setAssetType(
