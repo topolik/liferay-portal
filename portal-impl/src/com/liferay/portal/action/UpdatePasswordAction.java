@@ -22,6 +22,8 @@ import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.model.Ticket;
 import com.liferay.portal.kernel.model.TicketConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.security.auth.AuthTokenUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.auth.session.AuthenticatedSessionManagerUtil;
@@ -33,10 +35,15 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.pwd.PwdToolkitUtilThreadLocal;
 import com.liferay.portal.util.PropsValues;
+
+import javax.portlet.PortletMode;
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletURL;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -67,23 +74,43 @@ public class UpdatePasswordAction extends Action {
 		request.setAttribute(WebKeys.TICKET, ticket);
 
 		String cmd = ParamUtil.getString(request, Constants.CMD);
+		boolean x = ParamUtil.getBoolean(request, "x");
 
 		if (Validator.isNull(cmd)) {
 			if (ticket != null) {
-				User user = UserLocalServiceUtil.getUser(ticket.getClassPK());
+				if (!x) {
+					User user = UserLocalServiceUtil.getUser(
+						ticket.getClassPK());
 
-				try {
-					UserLocalServiceUtil.checkLockout(user);
+					try {
+						UserLocalServiceUtil.checkLockout(user);
 
-					UserLocalServiceUtil.updatePasswordReset(
+						UserLocalServiceUtil.updatePasswordReset(
 						user.getUserId(), true);
-				}
-				catch (UserLockoutException ule) {
-					SessionErrors.add(request, ule.getClass(), ule);
-				}
-			}
+					}
+					catch (UserLockoutException ule) {
+						SessionErrors.add(request, ule.getClass(), ule);
+					}
 
-			return actionMapping.findForward("portal.update_password");
+					if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
+						PortletURL portletURL = PortletURLFactoryUtil.create(
+							request, PortletKeys.LOGIN, themeDisplay.getPlid(),
+							PortletRequest.RENDER_PHASE);
+
+						portletURL.setParameter(
+							"struts_action", "/login/forgot_password");
+						portletURL.setParameter("ticketKey", ticket.getKey());
+						portletURL.setPortletMode(PortletMode.VIEW);
+						portletURL.setWindowState(LiferayWindowState.EXCLUSIVE);
+
+						response.sendRedirect(portletURL.toString());
+
+						return null;
+					}
+				}
+
+				return actionMapping.findForward("portal.update_password");
+			}
 		}
 
 		try {
