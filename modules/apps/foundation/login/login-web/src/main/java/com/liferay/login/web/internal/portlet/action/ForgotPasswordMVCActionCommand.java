@@ -96,6 +96,8 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 				WebKeys.FORGOT_PASSWORD_REMINDER_ATTEMPTS);
 			portletSession.removeAttribute(
 				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
+
+			sendPassword(actionRequest, actionResponse);
 		}
 
 		User user = getUser(actionRequest);
@@ -121,8 +123,6 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 
 			portletSession.setAttribute(
 				WebKeys.FORGOT_PASSWORD_REMINDER_ATTEMPTS, reminderAttempts);
-
-			sendPassword(actionRequest, actionResponse);
 		}
 	}
 
