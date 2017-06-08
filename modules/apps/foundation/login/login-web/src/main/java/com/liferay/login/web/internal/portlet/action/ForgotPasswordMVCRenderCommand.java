@@ -16,10 +16,19 @@ package com.liferay.login.web.internal.portlet.action;
 
 import com.liferay.login.web.internal.constants.LoginPortletKeys;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Ticket;
+import com.liferay.portal.kernel.model.TicketConstants;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
+import com.liferay.portal.kernel.service.TicketLocalServiceUtil;
+import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
+import javax.portlet.PortletRequest;
+import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
@@ -51,9 +60,61 @@ public class ForgotPasswordMVCRenderCommand implements MVCRenderCommand {
 			return "/login.jsp";
 		}
 
+		Ticket ticket = getTicket(renderRequest);
+
+		if (ticket != null) {
+			User user = UserLocalServiceUtil.getUser(ticket.getClassPK());
+
+			PortletSession portletSession = renderRequest.getPortletSession();
+
+			portletSession.setAttribute(
+				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS,
+				user.getEmailAddress());
+			portletSession.setAttribute(WebKeys.TICKET, ticket);
+
+			renderRequest.setAttribute(
+				WebKeys.FORGOT_PASSWORD_REMINDER_USER, user);
+		}
+
 		renderResponse.setTitle(themeDisplay.translate("forgot-password"));
 
 		return "/forgot_password.jsp";
+	}
+
+	protected Ticket getTicket(PortletRequest portletRequest) {
+		PortletSession portletSession = portletRequest.getPortletSession();
+
+		Ticket ticket = (Ticket)portletSession.getAttribute(WebKeys.TICKET);
+
+		if (ticket != null) {
+			return ticket;
+		}
+
+		String ticketKey = ParamUtil.getString(portletRequest, "ticketKey");
+
+		if (Validator.isNull(ticketKey)) {
+			return null;
+		}
+
+		try {
+			ticket = TicketLocalServiceUtil.fetchTicket(ticketKey);
+
+			if ((ticket == null) ||
+				(ticket.getType() != TicketConstants.TYPE_PASSWORD)) {
+
+				return null;
+			}
+
+			if (!ticket.isExpired()) {
+				return ticket;
+			}
+
+			TicketLocalServiceUtil.deleteTicket(ticket);
+		}
+		catch (Exception e) {
+		}
+
+		return null;
 	}
 
 }
