@@ -39,7 +39,6 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.TicketLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.servlet.HttpSessionWrapper;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -57,6 +56,7 @@ import javax.portlet.PortletPreferences;
 import javax.portlet.PortletSession;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -144,6 +144,14 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 			portletSession.removeAttribute(
 				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
 
+			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+				actionRequest);
+
+			HttpSession session = request.getSession();
+
+			session.setAttribute(
+				"FORGOT_PASSWORD_CHECK_REMINDER_QUERY_COMPLETED", Boolean.TRUE);
+
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
@@ -153,9 +161,9 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 				PortalUtil.getPortalURL(actionRequest) +
 					PortalUtil.getPathMain() +
 					"/portal/update_password?p_l_id=" + themeDisplay.getPlid() +
-						"&ticketKey=" + ticket.getKey() + "&x=true";
+						"&ticketKey=" + ticket.getKey();
 
-			actionResponse.sendRedirect(passwordResetURL);
+			sendRedirect(actionRequest, actionResponse, passwordResetURL);
 		}
 	}
 

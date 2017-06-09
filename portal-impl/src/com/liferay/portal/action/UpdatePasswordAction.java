@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
@@ -74,43 +75,48 @@ public class UpdatePasswordAction extends Action {
 		request.setAttribute(WebKeys.TICKET, ticket);
 
 		String cmd = ParamUtil.getString(request, Constants.CMD);
-		boolean x = ParamUtil.getBoolean(request, "x");
 
 		if (Validator.isNull(cmd)) {
-			if (ticket != null) {
-				if (!x) {
-					User user = UserLocalServiceUtil.getUser(
-						ticket.getClassPK());
+			HttpSession session = request.getSession();
 
-					try {
-						UserLocalServiceUtil.checkLockout(user);
+			boolean checkReminderQueryCompleted = GetterUtil.getBoolean(
+				session.getAttribute(
+					"FORGOT_PASSWORD_CHECK_REMINDER_QUERY_COMPLETED"));
 
-						UserLocalServiceUtil.updatePasswordReset(
+			if ((ticket != null) && !checkReminderQueryCompleted) {
+				User user = UserLocalServiceUtil.getUser(ticket.getClassPK());
+
+				try {
+					UserLocalServiceUtil.checkLockout(user);
+
+					UserLocalServiceUtil.updatePasswordReset(
 						user.getUserId(), true);
-					}
-					catch (UserLockoutException ule) {
-						SessionErrors.add(request, ule.getClass(), ule);
-					}
-
-					if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
-						PortletURL portletURL = PortletURLFactoryUtil.create(
-							request, PortletKeys.LOGIN, themeDisplay.getPlid(),
-							PortletRequest.RENDER_PHASE);
-
-						portletURL.setParameter(
-							"struts_action", "/login/forgot_password");
-						portletURL.setParameter("ticketKey", ticket.getKey());
-						portletURL.setPortletMode(PortletMode.VIEW);
-						portletURL.setWindowState(LiferayWindowState.EXCLUSIVE);
-
-						response.sendRedirect(portletURL.toString());
-
-						return null;
-					}
+				}
+				catch (UserLockoutException ule) {
+					SessionErrors.add(request, ule.getClass());
 				}
 
-				return actionMapping.findForward("portal.update_password");
+				if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
+					PortletURL portletURL = PortletURLFactoryUtil.create(
+						request, PortletKeys.LOGIN, themeDisplay.getPlid(),
+						PortletRequest.RENDER_PHASE);
+
+					portletURL.setParameter(
+						"struts_action", "/login/forgot_password");
+					portletURL.setParameter("ticketKey", ticket.getKey());
+					portletURL.setPortletMode(PortletMode.VIEW);
+					portletURL.setWindowState(LiferayWindowState.EXCLUSIVE);
+
+					response.sendRedirect(portletURL.toString());
+
+					return null;
+				}
 			}
+
+			session.removeAttribute(
+				"FORGOT_PASSWORD_CHECK_REMINDER_QUERY_COMPLETED");
+
+			return actionMapping.findForward("portal.update_password");
 		}
 
 		try {
