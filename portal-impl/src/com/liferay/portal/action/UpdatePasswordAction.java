@@ -122,14 +122,21 @@ public class UpdatePasswordAction extends Action {
 		try {
 			updatePassword(request, response, themeDisplay, ticket);
 
-			String redirect = ParamUtil.getString(request, WebKeys.REFERER);
+			String redirect;
 
-			if (Validator.isNotNull(redirect)) {
-				redirect = PortalUtil.escapeRedirect(redirect);
+			if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
+				redirect = PortalUtil.getHomeURL(request);
 			}
+			else {
+				redirect = ParamUtil.getString(request, WebKeys.REFERER);
 
-			if (Validator.isNull(redirect)) {
-				redirect = themeDisplay.getPathMain();
+				if (Validator.isNotNull(redirect)) {
+					redirect = PortalUtil.escapeRedirect(redirect);
+				}
+
+				if (Validator.isNull(redirect)) {
+					redirect = themeDisplay.getPathMain();
+				}
 			}
 
 			response.sendRedirect(redirect);
