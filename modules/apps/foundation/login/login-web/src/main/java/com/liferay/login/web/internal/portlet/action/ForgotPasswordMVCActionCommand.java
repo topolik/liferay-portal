@@ -31,20 +31,17 @@ import com.liferay.portal.kernel.exception.UserReminderQueryException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Ticket;
-import com.liferay.portal.kernel.model.TicketConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
-import com.liferay.portal.kernel.service.TicketLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -144,7 +141,7 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 			portletSession.removeAttribute(
 				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
 
-			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+			HttpServletRequest request = _portal.getHttpServletRequest(
 				actionRequest);
 
 			HttpSession session = request.getSession();
@@ -155,13 +152,25 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
-			Ticket ticket = getTicket(actionRequest);
+			Ticket ticket = LoginUtil.getTicket(actionRequest);
 
-			String passwordResetURL =
-				PortalUtil.getPortalURL(actionRequest) +
-					PortalUtil.getPathMain() +
-					"/portal/update_password?p_l_id=" + themeDisplay.getPlid() +
-						"&ticketKey=" + ticket.getKey();
+			StringBuilder sb = new StringBuilder();
+
+			sb.append(_portal.getPortalURL(actionRequest));
+			sb.append(_portal.getPathMain());
+			sb.append("/portal/update_password?p_l_id=");
+			sb.append(themeDisplay.getPlid());
+			sb.append("&ticketKey=");
+			sb.append(ticket.getKey());
+
+			String passwordResetURL = sb.toString();
+
+			portletSession.removeAttribute(WebKeys.TICKET);
+
+			SessionMessages.add(
+				actionRequest,
+				_portal.getPortletId(actionRequest) +
+					SessionMessages.KEY_SUFFIX_FORCE_SEND_REDIRECT);
 
 			sendRedirect(actionRequest, actionResponse, passwordResetURL);
 		}

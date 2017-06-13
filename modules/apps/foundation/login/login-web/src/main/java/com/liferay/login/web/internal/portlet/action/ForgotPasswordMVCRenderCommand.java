@@ -15,24 +15,23 @@
 package com.liferay.login.web.internal.portlet.action;
 
 import com.liferay.login.web.internal.constants.LoginPortletKeys;
+import com.liferay.login.web.internal.portlet.util.LoginUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.Ticket;
-import com.liferay.portal.kernel.model.TicketConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
-import com.liferay.portal.kernel.service.TicketLocalServiceUtil;
-import com.liferay.portal.kernel.service.UserLocalServiceUtil;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
-import javax.portlet.PortletRequest;
+import javax.portlet.PortletException;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Peter Fellwock
@@ -49,7 +48,8 @@ public class ForgotPasswordMVCRenderCommand implements MVCRenderCommand {
 
 	@Override
 	public String render(
-		RenderRequest renderRequest, RenderResponse renderResponse) {
+			RenderRequest renderRequest, RenderResponse renderResponse)
+		throws PortletException {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -60,20 +60,29 @@ public class ForgotPasswordMVCRenderCommand implements MVCRenderCommand {
 			return "/login.jsp";
 		}
 
-		Ticket ticket = getTicket(renderRequest);
+		Ticket ticket = LoginUtil.getTicket(renderRequest);
+		long userId = 0;
 
 		if (ticket != null) {
-			User user = UserLocalServiceUtil.getUser(ticket.getClassPK());
+			try {
+				userId = ticket.getClassPK();
 
-			PortletSession portletSession = renderRequest.getPortletSession();
+				User user = _userLocalService.getUser(userId);
 
-			portletSession.setAttribute(
-				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS,
-				user.getEmailAddress());
-			portletSession.setAttribute(WebKeys.TICKET, ticket);
+				PortletSession portletSession =
+					renderRequest.getPortletSession();
 
-			renderRequest.setAttribute(
-				WebKeys.FORGOT_PASSWORD_REMINDER_USER, user);
+				portletSession.setAttribute(
+					WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS,
+					user.getEmailAddress());
+				portletSession.setAttribute(WebKeys.TICKET, ticket);
+
+				renderRequest.setAttribute(
+					WebKeys.FORGOT_PASSWORD_REMINDER_USER, user);
+			}
+			catch (PortalException pe) {
+				throw new PortletException(pe);
+			}
 		}
 
 		renderResponse.setTitle(themeDisplay.translate("forgot-password"));
@@ -81,40 +90,11 @@ public class ForgotPasswordMVCRenderCommand implements MVCRenderCommand {
 		return "/forgot_password.jsp";
 	}
 
-	protected Ticket getTicket(PortletRequest portletRequest) {
-		PortletSession portletSession = portletRequest.getPortletSession();
-
-		Ticket ticket = (Ticket)portletSession.getAttribute(WebKeys.TICKET);
-
-		if (ticket != null) {
-			return ticket;
-		}
-
-		String ticketKey = ParamUtil.getString(portletRequest, "ticketKey");
-
-		if (Validator.isNull(ticketKey)) {
-			return null;
-		}
-
-		try {
-			ticket = TicketLocalServiceUtil.fetchTicket(ticketKey);
-
-			if ((ticket == null) ||
-				(ticket.getType() != TicketConstants.TYPE_PASSWORD)) {
-
-				return null;
-			}
-
-			if (!ticket.isExpired()) {
-				return ticket;
-			}
-
-			TicketLocalServiceUtil.deleteTicket(ticket);
-		}
-		catch (Exception e) {
-		}
-
-		return null;
+	@Reference(unbind = "-")
+	protected void setUserLocalService(UserLocalService userLocalService) {
+		_userLocalService = userLocalService;
 	}
+
+	private UserLocalService _userLocalService;
 
 }
