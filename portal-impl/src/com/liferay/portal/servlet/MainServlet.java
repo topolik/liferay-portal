@@ -54,6 +54,7 @@ import com.liferay.portal.kernel.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.kernel.service.ThemeLocalServiceUtil;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.DynamicServletRequest;
+import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.servlet.InactiveRequestHandler;
 import com.liferay.portal.kernel.servlet.PortalSessionThreadLocal;
 import com.liferay.portal.kernel.template.TemplateConstants;
@@ -1061,8 +1062,14 @@ public class MainServlet extends ActionServlet {
 			if (PropsValues.USERS_UPDATE_LAST_LOGIN ||
 				(user.getLastLoginDate() == null)) {
 
-				user = UserLocalServiceUtil.updateLastLogin(
-					userId, request.getRemoteAddr());
+				String remoteAddr = request.getHeader(
+					HttpHeaders.X_FORWARDED_FOR);
+
+				if (remoteAddr == null) {
+					remoteAddr = request.getRemoteAddr();
+				}
+
+				user = UserLocalServiceUtil.updateLastLogin(userId, remoteAddr);
 			}
 		}
 
