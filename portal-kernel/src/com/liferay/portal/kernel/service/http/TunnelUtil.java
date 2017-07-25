@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.MethodHandler;
 import com.liferay.portal.kernel.util.ObjectValuePair;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.ProtectedClassLoaderObjectInputStream;
 
@@ -34,6 +35,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 import javax.net.ssl.HostnameVerifier;
@@ -60,6 +62,14 @@ public class TunnelUtil {
 			objectOutputStream.writeObject(
 				new ObjectValuePair<HttpPrincipal, MethodHandler>(
 					httpPrincipal, methodHandler));
+		}
+		catch (SocketTimeoutException ste) {
+			_log.error(
+				"Tunnel connection timed out in TunnelUtil (timeout length " +
+					"in ms is set with with tunneling.servlet.timeout in " +
+						"portal-ext.properties)");
+
+			throw ste;
 		}
 
 		Object returnObject = null;
@@ -124,6 +134,13 @@ public class TunnelUtil {
 			HttpHeaders.CONTENT_TYPE,
 			ContentTypes.APPLICATION_X_JAVA_SERIALIZED_OBJECT);
 		httpURLConnection.setUseCaches(false);
+
+		int connectTimeout = GetterUtil.getInteger(
+			PropsUtil.get(PropsKeys.TUNNELING_SERVLET_TIMEOUT));
+
+		if (connectTimeout > 0) {
+			httpURLConnection.setConnectTimeout(connectTimeout);
+		}
 
 		httpURLConnection.setRequestMethod(HttpMethods.POST);
 
