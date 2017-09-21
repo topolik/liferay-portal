@@ -186,10 +186,7 @@ public class VirtualHostFilter extends BasePortalFilter {
 
 		String originalFriendlyURL = request.getRequestURI();
 
-		String friendlyURL = originalFriendlyURL;
-
-		friendlyURL = StringUtil.replace(
-			friendlyURL, StringPool.DOUBLE_SLASH, StringPool.SLASH);
+		String friendlyURL = HttpUtil.normalizePath(originalFriendlyURL);
 
 		if (!friendlyURL.equals(StringPool.SLASH) && !_contextPath.isEmpty() &&
 			(friendlyURL.length() > _contextPath.length()) &&
