@@ -204,6 +204,10 @@ public class SessionAuthToken implements AuthToken {
 			return true;
 		}
 
+		if (!portlet.isAddDefaultResource()) {
+			return false;
+		}
+
 		long plid = layout.getPlid();
 
 		String portletId = portlet.getPortletId();

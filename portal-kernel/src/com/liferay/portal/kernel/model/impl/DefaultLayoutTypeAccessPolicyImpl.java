@@ -162,10 +162,6 @@ public class DefaultLayoutTypeAccessPolicyImpl
 	protected boolean isAccessGrantedByPortletAuthenticationToken(
 		HttpServletRequest request, Layout layout, Portlet portlet) {
 
-		if (!portlet.isAddDefaultResource()) {
-			return false;
-		}
-
 		if (!_PORTLET_ADD_DEFAULT_RESOURCE_CHECK_ENABLED) {
 			return true;
 		}
