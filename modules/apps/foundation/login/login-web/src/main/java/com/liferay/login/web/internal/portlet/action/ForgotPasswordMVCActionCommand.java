@@ -51,7 +51,7 @@ import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletSession;
-
+import javax.portlet.PortletURL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -330,7 +330,8 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 
 		SessionMessages.add(request, "passwordSent");
 
-		sendRedirect(actionRequest, actionResponse, null);
+		sendRedirect(
+			actionRequest, actionResponse, _portal.getHomeURL(request));
 	}
 
 	@Reference(unbind = "-")
