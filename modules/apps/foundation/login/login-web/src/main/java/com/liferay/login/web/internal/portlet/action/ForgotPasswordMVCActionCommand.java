@@ -51,9 +51,8 @@ import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletPreferences;
 import javax.portlet.PortletSession;
-import javax.portlet.PortletURL;
+
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -141,14 +140,6 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 			portletSession.removeAttribute(
 				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
 
-			HttpServletRequest request = _portal.getHttpServletRequest(
-				actionRequest);
-
-			HttpSession session = request.getSession();
-
-			session.setAttribute(
-				"FORGOT_PASSWORD_CHECK_REMINDER_QUERY_COMPLETED", Boolean.TRUE);
-
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
@@ -162,6 +153,7 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 			sb.append(themeDisplay.getPlid());
 			sb.append("&ticketKey=");
 			sb.append(ticket.getKey());
+			sb.append("&checkReminderQueryCompleted=1");
 
 			String passwordResetURL = sb.toString();
 
