@@ -75,10 +75,10 @@ public class ForgotPasswordMVCRenderCommand implements MVCRenderCommand {
 				portletSession.setAttribute(
 					WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS,
 					user.getEmailAddress());
-				portletSession.setAttribute(WebKeys.TICKET, ticket);
 
 				renderRequest.setAttribute(
 					WebKeys.FORGOT_PASSWORD_REMINDER_USER, user);
+				renderRequest.setAttribute(WebKeys.TICKET, ticket);
 			}
 			catch (PortalException pe) {
 				throw new PortletException(pe);

@@ -157,8 +157,6 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 
 			String passwordResetURL = sb.toString();
 
-			portletSession.removeAttribute(WebKeys.TICKET);
-
 			SessionMessages.add(
 				actionRequest,
 				_portal.getPortletId(actionRequest) +

@@ -18,6 +18,7 @@
 
 <%
 User user2 = (User)request.getAttribute(WebKeys.FORGOT_PASSWORD_REMINDER_USER);
+Ticket ticket = (Ticket)request.getAttribute(WebKeys.TICKET);
 
 if (Validator.isNull(authType)) {
 	authType = company.getAuthType();
@@ -116,6 +117,7 @@ if (reminderAttempts == null) {
 			<c:when test="<%= (user2 != null) && Validator.isNotNull(user2.getEmailAddress()) %>">
 				<aui:input name="step" type="hidden" value="2" />
 				<aui:input name="emailAddress" type="hidden" value="<%= user2.getEmailAddress() %>" />
+				<aui:input name="ticketKey" type="hidden" value="<%= ticket.getKey() %>" />
 
 				<portlet:renderURL var="redirectURL">
 					<portlet:param name="mvcRenderCommandName" value="/login/login" />
