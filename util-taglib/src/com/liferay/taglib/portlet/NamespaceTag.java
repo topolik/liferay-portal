@@ -14,6 +14,7 @@
 
 package com.liferay.taglib.portlet;
 
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.taglib.TagSupport;
 
@@ -43,7 +44,7 @@ public class NamespaceTag extends TagSupport {
 
 				JspWriter jspWriter = pageContext.getOut();
 
-				jspWriter.write(namespace);
+				jspWriter.write(HtmlUtil.escapeJS(namespace));
 			}
 		}
 		catch (Exception e) {
