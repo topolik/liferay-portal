@@ -74,6 +74,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
+import com.liferay.portal.kernel.util.ReflectionUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -557,6 +558,15 @@ public class PortletLocalServiceImpl extends PortletLocalServiceBaseImpl {
 					StringBundler.concat(
 						"Portlet not found for ", String.valueOf(companyId),
 						" ", portletId));
+			}
+
+			try {
+				_checkValidPortletId(portletId);
+			}
+			catch (PrincipalException pe) {
+				_log.error("Invalid portletId " + portletId, pe);
+
+				ReflectionUtil.throwException(pe);
 			}
 
 			portlet = new PortletImpl(CompanyConstants.SYSTEM, portletId);
