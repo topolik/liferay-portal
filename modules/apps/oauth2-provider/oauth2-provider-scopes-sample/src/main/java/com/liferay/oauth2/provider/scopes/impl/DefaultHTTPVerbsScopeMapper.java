@@ -23,7 +23,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Component(immediate = true)
+@Component(
+	immediate = true,
+	property = "osgi.jaxrs.name=com.liferay.oauth2.provider.sample.oauth.Test"
+)
 public class DefaultHTTPVerbsScopeMapper implements ScopeMapper {
 
 	private boolean _passtrough;
