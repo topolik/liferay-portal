@@ -20,6 +20,7 @@ import com.liferay.oauth2.provider.scopes.spi.PrefixHandlerMapper;
 import com.liferay.oauth2.provider.scopes.spi.PropertyGetter;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.Validator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
@@ -27,6 +28,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +36,7 @@ import java.util.Map;
 @Component(immediate = true, property = "default=true")
 public class BundleNamespacePrefixHandlerMapper implements PrefixHandlerMapper {
 
-	private List<String> _excludedScopes;
+	private List<String> _excludedScopes = new ArrayList<>();
 
 	@Override
 	public PrefixHandler mapFrom(PropertyGetter propertyGetter) {
@@ -68,8 +70,10 @@ public class BundleNamespacePrefixHandlerMapper implements PrefixHandlerMapper {
 		String excludedScopesProperty = MapUtil.getString(
 			properties, "excluded.scopes");
 
-		_excludedScopes = Arrays.asList(
-			excludedScopesProperty.split(StringPool.COMMA));
+		_excludedScopes.addAll(Arrays.asList(
+			excludedScopesProperty.split(StringPool.COMMA)));
+
+		_excludedScopes.removeIf(Validator::isBlank);
 	}
 
 	private BundleContext _bundleContext;
