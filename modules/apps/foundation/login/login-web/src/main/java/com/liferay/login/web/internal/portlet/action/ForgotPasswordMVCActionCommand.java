@@ -208,7 +208,12 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 					 e instanceof UserReminderQueryException) {
 
 				if (PropsValues.LOGIN_SECURE_FORGOT_PASSWORD) {
-					sendRedirect(actionRequest, actionResponse, null);
+					HttpServletRequest request = _portal.getHttpServletRequest(
+						actionRequest);
+
+					sendRedirect(
+						actionRequest, actionResponse,
+						_portal.getHomeURL(request));
 				}
 				else {
 					SessionErrors.add(actionRequest, e.getClass(), e);
