@@ -43,6 +43,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PropsValues;
@@ -145,6 +146,17 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 
 			Ticket ticket = LoginUtil.getTicket(actionRequest);
 
+			UnicodeProperties extraInfoProperties = new UnicodeProperties();
+
+			extraInfoProperties.fastLoad(ticket.getExtraInfo());
+
+			extraInfoProperties.put(
+				"checkReminderQueryCompleted", Boolean.TRUE.toString());
+
+			ticket.setExtraInfo(extraInfoProperties.toString());
+
+			LoginUtil.updateTicket(ticket);
+
 			StringBuilder sb = new StringBuilder();
 
 			sb.append(_portal.getPortalURL(actionRequest));
@@ -153,7 +165,6 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 			sb.append(themeDisplay.getPlid());
 			sb.append("&ticketKey=");
 			sb.append(ticket.getKey());
-			sb.append("&checkReminderQueryCompleted=1");
 
 			String passwordResetURL = sb.toString();
 

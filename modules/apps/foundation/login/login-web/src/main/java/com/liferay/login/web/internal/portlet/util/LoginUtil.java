@@ -282,4 +282,12 @@ public class LoginUtil {
 		AuthenticatedSessionManagerUtil.signOutSimultaneousLogins(userId);
 	}
 
+	public static Ticket updateTicket(Ticket ticket) throws Exception {
+		if (ticket != null) {
+			ticket = TicketLocalServiceUtil.updateTicket(ticket);
+		}
+
+		return ticket;
+	}
+
 }
