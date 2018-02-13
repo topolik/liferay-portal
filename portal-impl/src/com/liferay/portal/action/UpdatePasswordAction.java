@@ -32,9 +32,11 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.pwd.PwdToolkitUtilThreadLocal;
@@ -76,10 +78,7 @@ public class UpdatePasswordAction extends Action {
 		String cmd = ParamUtil.getString(request, Constants.CMD);
 
 		if (Validator.isNull(cmd)) {
-			boolean checkReminderQueryCompleted = ParamUtil.getBoolean(
-				request, "checkReminderQueryCompleted");
-
-			if ((ticket != null) && !checkReminderQueryCompleted) {
+			if (ticket != null) {
 				User user = UserLocalServiceUtil.getUser(ticket.getClassPK());
 
 				try {
@@ -95,19 +94,30 @@ public class UpdatePasswordAction extends Action {
 				if (PropsValues.USERS_REMINDER_QUERIES_ENABLED &&
 					PropsValues.USERS_REMINDER_QUERIES_REQUIRED) {
 
-					PortletURL portletURL = PortletURLFactoryUtil.create(
-						request, PortletKeys.LOGIN,
-						PortletRequest.RENDER_PHASE);
+					UnicodeProperties extraInfoProperties =
+						new UnicodeProperties();
 
-					portletURL.setParameter(
-						"mvcRenderCommandName", "/login/forgot_password");
-					portletURL.setParameter("ticketKey", ticket.getKey());
-					portletURL.setPortletMode(PortletMode.VIEW);
-					portletURL.setWindowState(WindowState.MAXIMIZED);
+					extraInfoProperties.fastLoad(ticket.getExtraInfo());
 
-					response.sendRedirect(portletURL.toString());
+					boolean checkReminderQueryCompleted = GetterUtil.getBoolean(
+						extraInfoProperties.getProperty(
+							"checkReminderQueryCompleted"));
 
-					return null;
+					if (!checkReminderQueryCompleted) {
+						PortletURL portletURL = PortletURLFactoryUtil.create(
+							request, PortletKeys.LOGIN,
+							PortletRequest.RENDER_PHASE);
+
+						portletURL.setParameter(
+							"mvcRenderCommandName", "/login/forgot_password");
+						portletURL.setParameter("ticketKey", ticket.getKey());
+						portletURL.setPortletMode(PortletMode.VIEW);
+						portletURL.setWindowState(WindowState.MAXIMIZED);
+
+						response.sendRedirect(portletURL.toString());
+
+						return null;
+					}
 				}
 			}
 
