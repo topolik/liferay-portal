@@ -131,7 +131,9 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 
 				String answer = ParamUtil.getString(actionRequest, "answer");
 
-				if (!user.getReminderQueryAnswer().equals(answer)) {
+				String reminderQueryAnswer = user.getReminderQueryAnswer();
+
+				if (!reminderQueryAnswer.equals(answer)) {
 					throw new UserReminderQueryException();
 				}
 			}
