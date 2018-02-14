@@ -195,7 +195,9 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 		}
 
 		try {
-			if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
+			if (PropsValues.USERS_REMINDER_QUERIES_ENABLED &&
+				PropsValues.USERS_REMINDER_QUERIES_REQUIRED) {
+
 				checkReminderQueries(actionRequest, actionResponse);
 			}
 			else {
