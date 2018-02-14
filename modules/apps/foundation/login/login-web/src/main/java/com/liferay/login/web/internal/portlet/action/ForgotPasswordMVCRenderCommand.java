@@ -61,13 +61,10 @@ public class ForgotPasswordMVCRenderCommand implements MVCRenderCommand {
 		}
 
 		Ticket ticket = LoginUtil.getTicket(renderRequest);
-		long userId = 0;
 
 		if (ticket != null) {
 			try {
-				userId = ticket.getClassPK();
-
-				User user = _userLocalService.getUser(userId);
+				User user = _userLocalService.getUser(ticket.getClassPK());
 
 				PortletSession portletSession =
 					renderRequest.getPortletSession();
