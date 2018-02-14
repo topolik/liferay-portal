@@ -151,7 +151,7 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 			extraInfoProperties.fastLoad(ticket.getExtraInfo());
 
 			extraInfoProperties.put(
-				"checkReminderQueryCompleted", Boolean.TRUE.toString());
+				"userReminderQueryChecked", Boolean.TRUE.toString());
 
 			ticket.setExtraInfo(extraInfoProperties.toString());
 

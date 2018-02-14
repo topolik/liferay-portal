@@ -99,11 +99,11 @@ public class UpdatePasswordAction extends Action {
 
 					extraInfoProperties.fastLoad(ticket.getExtraInfo());
 
-					boolean checkReminderQueryCompleted = GetterUtil.getBoolean(
+					boolean userReminderQueryChecked = GetterUtil.getBoolean(
 						extraInfoProperties.getProperty(
-							"checkReminderQueryCompleted"));
+							"userReminderQueryChecked"));
 
-					if (!checkReminderQueryCompleted) {
+					if (!userReminderQueryChecked) {
 						PortletURL portletURL = PortletURLFactoryUtil.create(
 							request, PortletKeys.LOGIN,
 							PortletRequest.RENDER_PHASE);
