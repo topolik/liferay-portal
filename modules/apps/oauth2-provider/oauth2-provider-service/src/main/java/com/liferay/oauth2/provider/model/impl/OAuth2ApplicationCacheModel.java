@@ -65,12 +65,10 @@ public class OAuth2ApplicationCacheModel implements CacheModel<OAuth2Application
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(19);
+		StringBundler sb = new StringBundler(27);
 
 		sb.append("{oAuth2ApplicationId=");
 		sb.append(oAuth2ApplicationId);
-		sb.append(", groupId=");
-		sb.append(groupId);
 		sb.append(", companyId=");
 		sb.append(companyId);
 		sb.append(", userId=");
@@ -81,10 +79,20 @@ public class OAuth2ApplicationCacheModel implements CacheModel<OAuth2Application
 		sb.append(createDate);
 		sb.append(", modifiedDate=");
 		sb.append(modifiedDate);
-		sb.append(", name=");
-		sb.append(name);
+		sb.append(", clientId=");
+		sb.append(clientId);
+		sb.append(", clientSecret=");
+		sb.append(clientSecret);
+		sb.append(", redirectUri=");
+		sb.append(redirectUri);
+		sb.append(", clientConfidential=");
+		sb.append(clientConfidential);
 		sb.append(", description=");
 		sb.append(description);
+		sb.append(", name=");
+		sb.append(name);
+		sb.append(", webUrl=");
+		sb.append(webUrl);
 		sb.append("}");
 
 		return sb.toString();
@@ -95,7 +103,6 @@ public class OAuth2ApplicationCacheModel implements CacheModel<OAuth2Application
 		OAuth2ApplicationImpl oAuth2ApplicationImpl = new OAuth2ApplicationImpl();
 
 		oAuth2ApplicationImpl.setOAuth2ApplicationId(oAuth2ApplicationId);
-		oAuth2ApplicationImpl.setGroupId(groupId);
 		oAuth2ApplicationImpl.setCompanyId(companyId);
 		oAuth2ApplicationImpl.setUserId(userId);
 
@@ -120,6 +127,36 @@ public class OAuth2ApplicationCacheModel implements CacheModel<OAuth2Application
 			oAuth2ApplicationImpl.setModifiedDate(new Date(modifiedDate));
 		}
 
+		if (clientId == null) {
+			oAuth2ApplicationImpl.setClientId("");
+		}
+		else {
+			oAuth2ApplicationImpl.setClientId(clientId);
+		}
+
+		if (clientSecret == null) {
+			oAuth2ApplicationImpl.setClientSecret("");
+		}
+		else {
+			oAuth2ApplicationImpl.setClientSecret(clientSecret);
+		}
+
+		if (redirectUri == null) {
+			oAuth2ApplicationImpl.setRedirectUri("");
+		}
+		else {
+			oAuth2ApplicationImpl.setRedirectUri(redirectUri);
+		}
+
+		oAuth2ApplicationImpl.setClientConfidential(clientConfidential);
+
+		if (description == null) {
+			oAuth2ApplicationImpl.setDescription("");
+		}
+		else {
+			oAuth2ApplicationImpl.setDescription(description);
+		}
+
 		if (name == null) {
 			oAuth2ApplicationImpl.setName("");
 		}
@@ -127,11 +164,11 @@ public class OAuth2ApplicationCacheModel implements CacheModel<OAuth2Application
 			oAuth2ApplicationImpl.setName(name);
 		}
 
-		if (description == null) {
-			oAuth2ApplicationImpl.setDescription("");
+		if (webUrl == null) {
+			oAuth2ApplicationImpl.setWebUrl("");
 		}
 		else {
-			oAuth2ApplicationImpl.setDescription(description);
+			oAuth2ApplicationImpl.setWebUrl(webUrl);
 		}
 
 		oAuth2ApplicationImpl.resetOriginalValues();
@@ -143,24 +180,26 @@ public class OAuth2ApplicationCacheModel implements CacheModel<OAuth2Application
 	public void readExternal(ObjectInput objectInput) throws IOException {
 		oAuth2ApplicationId = objectInput.readLong();
 
-		groupId = objectInput.readLong();
-
 		companyId = objectInput.readLong();
 
 		userId = objectInput.readLong();
 		userName = objectInput.readUTF();
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
-		name = objectInput.readUTF();
+		clientId = objectInput.readUTF();
+		clientSecret = objectInput.readUTF();
+		redirectUri = objectInput.readUTF();
+
+		clientConfidential = objectInput.readBoolean();
 		description = objectInput.readUTF();
+		name = objectInput.readUTF();
+		webUrl = objectInput.readUTF();
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput objectOutput)
 		throws IOException {
 		objectOutput.writeLong(oAuth2ApplicationId);
-
-		objectOutput.writeLong(groupId);
 
 		objectOutput.writeLong(companyId);
 
@@ -176,12 +215,28 @@ public class OAuth2ApplicationCacheModel implements CacheModel<OAuth2Application
 		objectOutput.writeLong(createDate);
 		objectOutput.writeLong(modifiedDate);
 
-		if (name == null) {
+		if (clientId == null) {
 			objectOutput.writeUTF("");
 		}
 		else {
-			objectOutput.writeUTF(name);
+			objectOutput.writeUTF(clientId);
 		}
+
+		if (clientSecret == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(clientSecret);
+		}
+
+		if (redirectUri == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(redirectUri);
+		}
+
+		objectOutput.writeBoolean(clientConfidential);
 
 		if (description == null) {
 			objectOutput.writeUTF("");
@@ -189,15 +244,33 @@ public class OAuth2ApplicationCacheModel implements CacheModel<OAuth2Application
 		else {
 			objectOutput.writeUTF(description);
 		}
+
+		if (name == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(name);
+		}
+
+		if (webUrl == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(webUrl);
+		}
 	}
 
 	public long oAuth2ApplicationId;
-	public long groupId;
 	public long companyId;
 	public long userId;
 	public String userName;
 	public long createDate;
 	public long modifiedDate;
-	public String name;
+	public String clientId;
+	public String clientSecret;
+	public String redirectUri;
+	public boolean clientConfidential;
 	public String description;
+	public String name;
+	public String webUrl;
 }

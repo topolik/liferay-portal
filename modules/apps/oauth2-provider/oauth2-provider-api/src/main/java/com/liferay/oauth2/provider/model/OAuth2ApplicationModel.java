@@ -19,9 +19,9 @@ import aQute.bnd.annotation.ProviderType;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 
 import com.liferay.portal.kernel.bean.AutoEscape;
+import com.liferay.portal.kernel.model.AuditedModel;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.CacheModel;
-import com.liferay.portal.kernel.model.GroupedModel;
 import com.liferay.portal.kernel.model.ShardedModel;
 import com.liferay.portal.kernel.service.ServiceContext;
 
@@ -43,8 +43,8 @@ import java.util.Date;
  * @generated
  */
 @ProviderType
-public interface OAuth2ApplicationModel extends BaseModel<OAuth2Application>,
-	GroupedModel, ShardedModel {
+public interface OAuth2ApplicationModel extends AuditedModel,
+	BaseModel<OAuth2Application>, ShardedModel {
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
@@ -78,22 +78,6 @@ public interface OAuth2ApplicationModel extends BaseModel<OAuth2Application>,
 	 * @param oAuth2ApplicationId the o auth2 application ID of this o auth2 application
 	 */
 	public void setOAuth2ApplicationId(long oAuth2ApplicationId);
-
-	/**
-	 * Returns the group ID of this o auth2 application.
-	 *
-	 * @return the group ID of this o auth2 application
-	 */
-	@Override
-	public long getGroupId();
-
-	/**
-	 * Sets the group ID of this o auth2 application.
-	 *
-	 * @param groupId the group ID of this o auth2 application
-	 */
-	@Override
-	public void setGroupId(long groupId);
 
 	/**
 	 * Returns the company ID of this o auth2 application.
@@ -193,19 +177,63 @@ public interface OAuth2ApplicationModel extends BaseModel<OAuth2Application>,
 	public void setModifiedDate(Date modifiedDate);
 
 	/**
-	 * Returns the name of this o auth2 application.
+	 * Returns the client ID of this o auth2 application.
 	 *
-	 * @return the name of this o auth2 application
+	 * @return the client ID of this o auth2 application
 	 */
 	@AutoEscape
-	public String getName();
+	public String getClientId();
 
 	/**
-	 * Sets the name of this o auth2 application.
+	 * Sets the client ID of this o auth2 application.
 	 *
-	 * @param name the name of this o auth2 application
+	 * @param clientId the client ID of this o auth2 application
 	 */
-	public void setName(String name);
+	public void setClientId(String clientId);
+
+	/**
+	 * Returns the client secret of this o auth2 application.
+	 *
+	 * @return the client secret of this o auth2 application
+	 */
+	@AutoEscape
+	public String getClientSecret();
+
+	/**
+	 * Sets the client secret of this o auth2 application.
+	 *
+	 * @param clientSecret the client secret of this o auth2 application
+	 */
+	public void setClientSecret(String clientSecret);
+
+	/**
+	 * Returns the redirect uri of this o auth2 application.
+	 *
+	 * @return the redirect uri of this o auth2 application
+	 */
+	@AutoEscape
+	public String getRedirectUri();
+
+	/**
+	 * Sets the redirect uri of this o auth2 application.
+	 *
+	 * @param redirectUri the redirect uri of this o auth2 application
+	 */
+	public void setRedirectUri(String redirectUri);
+
+	/**
+	 * Returns the client confidential of this o auth2 application.
+	 *
+	 * @return the client confidential of this o auth2 application
+	 */
+	public Boolean getClientConfidential();
+
+	/**
+	 * Sets the client confidential of this o auth2 application.
+	 *
+	 * @param clientConfidential the client confidential of this o auth2 application
+	 */
+	public void setClientConfidential(Boolean clientConfidential);
 
 	/**
 	 * Returns the description of this o auth2 application.
@@ -221,6 +249,36 @@ public interface OAuth2ApplicationModel extends BaseModel<OAuth2Application>,
 	 * @param description the description of this o auth2 application
 	 */
 	public void setDescription(String description);
+
+	/**
+	 * Returns the name of this o auth2 application.
+	 *
+	 * @return the name of this o auth2 application
+	 */
+	@AutoEscape
+	public String getName();
+
+	/**
+	 * Sets the name of this o auth2 application.
+	 *
+	 * @param name the name of this o auth2 application
+	 */
+	public void setName(String name);
+
+	/**
+	 * Returns the web url of this o auth2 application.
+	 *
+	 * @return the web url of this o auth2 application
+	 */
+	@AutoEscape
+	public String getWebUrl();
+
+	/**
+	 * Sets the web url of this o auth2 application.
+	 *
+	 * @param webUrl the web url of this o auth2 application
+	 */
+	public void setWebUrl(String webUrl);
 
 	@Override
 	public boolean isNew();

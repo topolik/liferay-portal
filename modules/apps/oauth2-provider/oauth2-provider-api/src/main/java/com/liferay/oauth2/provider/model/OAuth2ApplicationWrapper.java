@@ -59,14 +59,18 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
 		attributes.put("oAuth2ApplicationId", getOAuth2ApplicationId());
-		attributes.put("groupId", getGroupId());
 		attributes.put("companyId", getCompanyId());
 		attributes.put("userId", getUserId());
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
-		attributes.put("name", getName());
+		attributes.put("clientId", getClientId());
+		attributes.put("clientSecret", getClientSecret());
+		attributes.put("redirectUri", getRedirectUri());
+		attributes.put("clientConfidential", getClientConfidential());
 		attributes.put("description", getDescription());
+		attributes.put("name", getName());
+		attributes.put("webUrl", getWebUrl());
 
 		return attributes;
 	}
@@ -77,12 +81,6 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 
 		if (oAuth2ApplicationId != null) {
 			setOAuth2ApplicationId(oAuth2ApplicationId);
-		}
-
-		Long groupId = (Long)attributes.get("groupId");
-
-		if (groupId != null) {
-			setGroupId(groupId);
 		}
 
 		Long companyId = (Long)attributes.get("companyId");
@@ -115,16 +113,47 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 			setModifiedDate(modifiedDate);
 		}
 
-		String name = (String)attributes.get("name");
+		String clientId = (String)attributes.get("clientId");
 
-		if (name != null) {
-			setName(name);
+		if (clientId != null) {
+			setClientId(clientId);
+		}
+
+		String clientSecret = (String)attributes.get("clientSecret");
+
+		if (clientSecret != null) {
+			setClientSecret(clientSecret);
+		}
+
+		String redirectUri = (String)attributes.get("redirectUri");
+
+		if (redirectUri != null) {
+			setRedirectUri(redirectUri);
+		}
+
+		Boolean clientConfidential = (Boolean)attributes.get(
+				"clientConfidential");
+
+		if (clientConfidential != null) {
+			setClientConfidential(clientConfidential);
 		}
 
 		String description = (String)attributes.get("description");
 
 		if (description != null) {
 			setDescription(description);
+		}
+
+		String name = (String)attributes.get("name");
+
+		if (name != null) {
+			setName(name);
+		}
+
+		String webUrl = (String)attributes.get("webUrl");
+
+		if (webUrl != null) {
+			setWebUrl(webUrl);
 		}
 	}
 
@@ -136,6 +165,36 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 	@Override
 	public int compareTo(OAuth2Application oAuth2Application) {
 		return _oAuth2Application.compareTo(oAuth2Application);
+	}
+
+	/**
+	* Returns the client confidential of this o auth2 application.
+	*
+	* @return the client confidential of this o auth2 application
+	*/
+	@Override
+	public java.lang.Boolean getClientConfidential() {
+		return _oAuth2Application.getClientConfidential();
+	}
+
+	/**
+	* Returns the client ID of this o auth2 application.
+	*
+	* @return the client ID of this o auth2 application
+	*/
+	@Override
+	public java.lang.String getClientId() {
+		return _oAuth2Application.getClientId();
+	}
+
+	/**
+	* Returns the client secret of this o auth2 application.
+	*
+	* @return the client secret of this o auth2 application
+	*/
+	@Override
+	public java.lang.String getClientSecret() {
+		return _oAuth2Application.getClientSecret();
 	}
 
 	/**
@@ -171,16 +230,6 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 	@Override
 	public ExpandoBridge getExpandoBridge() {
 		return _oAuth2Application.getExpandoBridge();
-	}
-
-	/**
-	* Returns the group ID of this o auth2 application.
-	*
-	* @return the group ID of this o auth2 application
-	*/
-	@Override
-	public long getGroupId() {
-		return _oAuth2Application.getGroupId();
 	}
 
 	/**
@@ -229,6 +278,16 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 	}
 
 	/**
+	* Returns the redirect uri of this o auth2 application.
+	*
+	* @return the redirect uri of this o auth2 application
+	*/
+	@Override
+	public java.lang.String getRedirectUri() {
+		return _oAuth2Application.getRedirectUri();
+	}
+
+	/**
 	* Returns the user ID of this o auth2 application.
 	*
 	* @return the user ID of this o auth2 application
@@ -256,6 +315,16 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 	@Override
 	public java.lang.String getUserUuid() {
 		return _oAuth2Application.getUserUuid();
+	}
+
+	/**
+	* Returns the web url of this o auth2 application.
+	*
+	* @return the web url of this o auth2 application
+	*/
+	@Override
+	public java.lang.String getWebUrl() {
+		return _oAuth2Application.getWebUrl();
 	}
 
 	@Override
@@ -286,6 +355,36 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 	@Override
 	public void setCachedModel(boolean cachedModel) {
 		_oAuth2Application.setCachedModel(cachedModel);
+	}
+
+	/**
+	* Sets the client confidential of this o auth2 application.
+	*
+	* @param clientConfidential the client confidential of this o auth2 application
+	*/
+	@Override
+	public void setClientConfidential(java.lang.Boolean clientConfidential) {
+		_oAuth2Application.setClientConfidential(clientConfidential);
+	}
+
+	/**
+	* Sets the client ID of this o auth2 application.
+	*
+	* @param clientId the client ID of this o auth2 application
+	*/
+	@Override
+	public void setClientId(java.lang.String clientId) {
+		_oAuth2Application.setClientId(clientId);
+	}
+
+	/**
+	* Sets the client secret of this o auth2 application.
+	*
+	* @param clientSecret the client secret of this o auth2 application
+	*/
+	@Override
+	public void setClientSecret(java.lang.String clientSecret) {
+		_oAuth2Application.setClientSecret(clientSecret);
 	}
 
 	/**
@@ -332,16 +431,6 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 	@Override
 	public void setExpandoBridgeAttributes(ServiceContext serviceContext) {
 		_oAuth2Application.setExpandoBridgeAttributes(serviceContext);
-	}
-
-	/**
-	* Sets the group ID of this o auth2 application.
-	*
-	* @param groupId the group ID of this o auth2 application
-	*/
-	@Override
-	public void setGroupId(long groupId) {
-		_oAuth2Application.setGroupId(groupId);
 	}
 
 	/**
@@ -395,6 +484,16 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 	}
 
 	/**
+	* Sets the redirect uri of this o auth2 application.
+	*
+	* @param redirectUri the redirect uri of this o auth2 application
+	*/
+	@Override
+	public void setRedirectUri(java.lang.String redirectUri) {
+		_oAuth2Application.setRedirectUri(redirectUri);
+	}
+
+	/**
 	* Sets the user ID of this o auth2 application.
 	*
 	* @param userId the user ID of this o auth2 application
@@ -422,6 +521,16 @@ public class OAuth2ApplicationWrapper implements OAuth2Application,
 	@Override
 	public void setUserUuid(java.lang.String userUuid) {
 		_oAuth2Application.setUserUuid(userUuid);
+	}
+
+	/**
+	* Sets the web url of this o auth2 application.
+	*
+	* @param webUrl the web url of this o auth2 application
+	*/
+	@Override
+	public void setWebUrl(java.lang.String webUrl) {
+		_oAuth2Application.setWebUrl(webUrl);
 	}
 
 	@Override

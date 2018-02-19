@@ -16,6 +16,7 @@ package com.liferay.oauth2.provider.service;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.oauth2.provider.exception.NoSuchOAuth2ApplicationException;
 import com.liferay.oauth2.provider.model.OAuth2Application;
 
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
@@ -29,6 +30,7 @@ import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.service.BaseLocalService;
 import com.liferay.portal.kernel.service.PersistedModelLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
@@ -60,6 +62,18 @@ public interface OAuth2ApplicationLocalService extends BaseLocalService,
 	 *
 	 * Never modify or reference this interface directly. Always use {@link OAuth2ApplicationLocalServiceUtil} to access the o auth2 application local service. Add custom service methods to {@link com.liferay.oauth2.provider.service.impl.OAuth2ApplicationLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+
+	/**
+	* NOTE FOR DEVELOPERS:
+	*
+	* Never reference this class directly. Always use {@link OAuth2ApplicationLocalServiceUtil} to access the o auth2 application local service.
+	*/
+	public OAuth2Application addOAuth2Application(long userId,
+		java.lang.String name, java.lang.String description,
+		java.lang.String webURL, boolean oAuth2ClientConfidential,
+		java.lang.String oAuth2ClientId, java.lang.String oAuth2ClientSecret,
+		java.lang.String oAuth2RedirectURI, ServiceContext serviceContext)
+		throws PortalException;
 
 	/**
 	* Adds the o auth2 application to the database. Also notifies the appropriate model listeners.
@@ -170,6 +184,10 @@ public interface OAuth2ApplicationLocalService extends BaseLocalService,
 	public OAuth2Application fetchOAuth2Application(long oAuth2ApplicationId);
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public OAuth2Application fetchOAuth2Application(long companyId,
+		java.lang.String clientId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ActionableDynamicQuery getActionableDynamicQuery();
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
@@ -185,6 +203,10 @@ public interface OAuth2ApplicationLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public OAuth2Application getOAuth2Application(long oAuth2ApplicationId)
 		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public OAuth2Application getOAuth2Application(long companyId,
+		java.lang.String clientId) throws NoSuchOAuth2ApplicationException;
 
 	/**
 	* Returns a range of all the o auth2 applications.
@@ -218,6 +240,14 @@ public interface OAuth2ApplicationLocalService extends BaseLocalService,
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
+		throws PortalException;
+
+	public OAuth2Application updateOAuth2Application(long userId,
+		long oAuth2ApplicationId, java.lang.String name,
+		java.lang.String description, java.lang.String webURL,
+		boolean oAuth2ClientConfidential, java.lang.String oAuth2ClientId,
+		java.lang.String oAuth2ClientSecret,
+		java.lang.String oAuth2RedirectURI, ServiceContext serviceContext)
 		throws PortalException;
 
 	/**

@@ -34,14 +34,18 @@ public class OAuth2ApplicationSoap implements Serializable {
 		OAuth2ApplicationSoap soapModel = new OAuth2ApplicationSoap();
 
 		soapModel.setOAuth2ApplicationId(model.getOAuth2ApplicationId());
-		soapModel.setGroupId(model.getGroupId());
 		soapModel.setCompanyId(model.getCompanyId());
 		soapModel.setUserId(model.getUserId());
 		soapModel.setUserName(model.getUserName());
 		soapModel.setCreateDate(model.getCreateDate());
 		soapModel.setModifiedDate(model.getModifiedDate());
-		soapModel.setName(model.getName());
+		soapModel.setClientId(model.getClientId());
+		soapModel.setClientSecret(model.getClientSecret());
+		soapModel.setRedirectUri(model.getRedirectUri());
+		soapModel.setClientConfidential(model.getClientConfidential());
 		soapModel.setDescription(model.getDescription());
+		soapModel.setName(model.getName());
+		soapModel.setWebUrl(model.getWebUrl());
 
 		return soapModel;
 	}
@@ -105,14 +109,6 @@ public class OAuth2ApplicationSoap implements Serializable {
 		_oAuth2ApplicationId = oAuth2ApplicationId;
 	}
 
-	public long getGroupId() {
-		return _groupId;
-	}
-
-	public void setGroupId(long groupId) {
-		_groupId = groupId;
-	}
-
 	public long getCompanyId() {
 		return _companyId;
 	}
@@ -153,12 +149,36 @@ public class OAuth2ApplicationSoap implements Serializable {
 		_modifiedDate = modifiedDate;
 	}
 
-	public String getName() {
-		return _name;
+	public String getClientId() {
+		return _clientId;
 	}
 
-	public void setName(String name) {
-		_name = name;
+	public void setClientId(String clientId) {
+		_clientId = clientId;
+	}
+
+	public String getClientSecret() {
+		return _clientSecret;
+	}
+
+	public void setClientSecret(String clientSecret) {
+		_clientSecret = clientSecret;
+	}
+
+	public String getRedirectUri() {
+		return _redirectUri;
+	}
+
+	public void setRedirectUri(String redirectUri) {
+		_redirectUri = redirectUri;
+	}
+
+	public Boolean getClientConfidential() {
+		return _clientConfidential;
+	}
+
+	public void setClientConfidential(Boolean clientConfidential) {
+		_clientConfidential = clientConfidential;
 	}
 
 	public String getDescription() {
@@ -169,13 +189,33 @@ public class OAuth2ApplicationSoap implements Serializable {
 		_description = description;
 	}
 
+	public String getName() {
+		return _name;
+	}
+
+	public void setName(String name) {
+		_name = name;
+	}
+
+	public String getWebUrl() {
+		return _webUrl;
+	}
+
+	public void setWebUrl(String webUrl) {
+		_webUrl = webUrl;
+	}
+
 	private long _oAuth2ApplicationId;
-	private long _groupId;
 	private long _companyId;
 	private long _userId;
 	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
-	private String _name;
+	private String _clientId;
+	private String _clientSecret;
+	private String _redirectUri;
+	private Boolean _clientConfidential;
 	private String _description;
+	private String _name;
+	private String _webUrl;
 }

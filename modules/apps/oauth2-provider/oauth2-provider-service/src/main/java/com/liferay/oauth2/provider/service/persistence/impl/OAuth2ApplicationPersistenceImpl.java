@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
 import com.liferay.portal.kernel.dao.orm.Query;
+import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
 import com.liferay.portal.kernel.log.Log;
@@ -37,6 +38,7 @@ import com.liferay.portal.kernel.service.persistence.CompanyProviderWrapper;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
@@ -48,6 +50,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -86,6 +89,272 @@ public class OAuth2ApplicationPersistenceImpl extends BasePersistenceImpl<OAuth2
 	public static final FinderPath FINDER_PATH_COUNT_ALL = new FinderPath(OAuth2ApplicationModelImpl.ENTITY_CACHE_ENABLED,
 			OAuth2ApplicationModelImpl.FINDER_CACHE_ENABLED, Long.class,
 			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll", new String[0]);
+	public static final FinderPath FINDER_PATH_FETCH_BY_C_CI = new FinderPath(OAuth2ApplicationModelImpl.ENTITY_CACHE_ENABLED,
+			OAuth2ApplicationModelImpl.FINDER_CACHE_ENABLED,
+			OAuth2ApplicationImpl.class, FINDER_CLASS_NAME_ENTITY,
+			"fetchByC_CI",
+			new String[] { Long.class.getName(), String.class.getName() },
+			OAuth2ApplicationModelImpl.COMPANYID_COLUMN_BITMASK |
+			OAuth2ApplicationModelImpl.CLIENTID_COLUMN_BITMASK);
+	public static final FinderPath FINDER_PATH_COUNT_BY_C_CI = new FinderPath(OAuth2ApplicationModelImpl.ENTITY_CACHE_ENABLED,
+			OAuth2ApplicationModelImpl.FINDER_CACHE_ENABLED, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByC_CI",
+			new String[] { Long.class.getName(), String.class.getName() });
+
+	/**
+	 * Returns the o auth2 application where companyId = &#63; and clientId = &#63; or throws a {@link NoSuchOAuth2ApplicationException} if it could not be found.
+	 *
+	 * @param companyId the company ID
+	 * @param clientId the client ID
+	 * @return the matching o auth2 application
+	 * @throws NoSuchOAuth2ApplicationException if a matching o auth2 application could not be found
+	 */
+	@Override
+	public OAuth2Application findByC_CI(long companyId, String clientId)
+		throws NoSuchOAuth2ApplicationException {
+		OAuth2Application oAuth2Application = fetchByC_CI(companyId, clientId);
+
+		if (oAuth2Application == null) {
+			StringBundler msg = new StringBundler(6);
+
+			msg.append(_NO_SUCH_ENTITY_WITH_KEY);
+
+			msg.append("companyId=");
+			msg.append(companyId);
+
+			msg.append(", clientId=");
+			msg.append(clientId);
+
+			msg.append("}");
+
+			if (_log.isDebugEnabled()) {
+				_log.debug(msg.toString());
+			}
+
+			throw new NoSuchOAuth2ApplicationException(msg.toString());
+		}
+
+		return oAuth2Application;
+	}
+
+	/**
+	 * Returns the o auth2 application where companyId = &#63; and clientId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 *
+	 * @param companyId the company ID
+	 * @param clientId the client ID
+	 * @return the matching o auth2 application, or <code>null</code> if a matching o auth2 application could not be found
+	 */
+	@Override
+	public OAuth2Application fetchByC_CI(long companyId, String clientId) {
+		return fetchByC_CI(companyId, clientId, true);
+	}
+
+	/**
+	 * Returns the o auth2 application where companyId = &#63; and clientId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 *
+	 * @param companyId the company ID
+	 * @param clientId the client ID
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the matching o auth2 application, or <code>null</code> if a matching o auth2 application could not be found
+	 */
+	@Override
+	public OAuth2Application fetchByC_CI(long companyId, String clientId,
+		boolean retrieveFromCache) {
+		Object[] finderArgs = new Object[] { companyId, clientId };
+
+		Object result = null;
+
+		if (retrieveFromCache) {
+			result = finderCache.getResult(FINDER_PATH_FETCH_BY_C_CI,
+					finderArgs, this);
+		}
+
+		if (result instanceof OAuth2Application) {
+			OAuth2Application oAuth2Application = (OAuth2Application)result;
+
+			if ((companyId != oAuth2Application.getCompanyId()) ||
+					!Objects.equals(clientId, oAuth2Application.getClientId())) {
+				result = null;
+			}
+		}
+
+		if (result == null) {
+			StringBundler query = new StringBundler(4);
+
+			query.append(_SQL_SELECT_OAUTH2APPLICATION_WHERE);
+
+			query.append(_FINDER_COLUMN_C_CI_COMPANYID_2);
+
+			boolean bindClientId = false;
+
+			if (clientId == null) {
+				query.append(_FINDER_COLUMN_C_CI_CLIENTID_1);
+			}
+			else if (clientId.equals("")) {
+				query.append(_FINDER_COLUMN_C_CI_CLIENTID_3);
+			}
+			else {
+				bindClientId = true;
+
+				query.append(_FINDER_COLUMN_C_CI_CLIENTID_2);
+			}
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				qPos.add(companyId);
+
+				if (bindClientId) {
+					qPos.add(clientId);
+				}
+
+				List<OAuth2Application> list = q.list();
+
+				if (list.isEmpty()) {
+					finderCache.putResult(FINDER_PATH_FETCH_BY_C_CI,
+						finderArgs, list);
+				}
+				else {
+					if (list.size() > 1) {
+						Collections.sort(list, Collections.reverseOrder());
+
+						if (_log.isWarnEnabled()) {
+							_log.warn(
+								"OAuth2ApplicationPersistenceImpl.fetchByC_CI(long, String, boolean) with parameters (" +
+								StringUtil.merge(finderArgs) +
+								") yields a result set with more than 1 result. This violates the logical unique restriction. There is no order guarantee on which result is returned by this finder.");
+						}
+					}
+
+					OAuth2Application oAuth2Application = list.get(0);
+
+					result = oAuth2Application;
+
+					cacheResult(oAuth2Application);
+
+					if ((oAuth2Application.getCompanyId() != companyId) ||
+							(oAuth2Application.getClientId() == null) ||
+							!oAuth2Application.getClientId().equals(clientId)) {
+						finderCache.putResult(FINDER_PATH_FETCH_BY_C_CI,
+							finderArgs, oAuth2Application);
+					}
+				}
+			}
+			catch (Exception e) {
+				finderCache.removeResult(FINDER_PATH_FETCH_BY_C_CI, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		if (result instanceof List<?>) {
+			return null;
+		}
+		else {
+			return (OAuth2Application)result;
+		}
+	}
+
+	/**
+	 * Removes the o auth2 application where companyId = &#63; and clientId = &#63; from the database.
+	 *
+	 * @param companyId the company ID
+	 * @param clientId the client ID
+	 * @return the o auth2 application that was removed
+	 */
+	@Override
+	public OAuth2Application removeByC_CI(long companyId, String clientId)
+		throws NoSuchOAuth2ApplicationException {
+		OAuth2Application oAuth2Application = findByC_CI(companyId, clientId);
+
+		return remove(oAuth2Application);
+	}
+
+	/**
+	 * Returns the number of o auth2 applications where companyId = &#63; and clientId = &#63;.
+	 *
+	 * @param companyId the company ID
+	 * @param clientId the client ID
+	 * @return the number of matching o auth2 applications
+	 */
+	@Override
+	public int countByC_CI(long companyId, String clientId) {
+		FinderPath finderPath = FINDER_PATH_COUNT_BY_C_CI;
+
+		Object[] finderArgs = new Object[] { companyId, clientId };
+
+		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
+
+		if (count == null) {
+			StringBundler query = new StringBundler(3);
+
+			query.append(_SQL_COUNT_OAUTH2APPLICATION_WHERE);
+
+			query.append(_FINDER_COLUMN_C_CI_COMPANYID_2);
+
+			boolean bindClientId = false;
+
+			if (clientId == null) {
+				query.append(_FINDER_COLUMN_C_CI_CLIENTID_1);
+			}
+			else if (clientId.equals("")) {
+				query.append(_FINDER_COLUMN_C_CI_CLIENTID_3);
+			}
+			else {
+				bindClientId = true;
+
+				query.append(_FINDER_COLUMN_C_CI_CLIENTID_2);
+			}
+
+			String sql = query.toString();
+
+			Session session = null;
+
+			try {
+				session = openSession();
+
+				Query q = session.createQuery(sql);
+
+				QueryPos qPos = QueryPos.getInstance(q);
+
+				qPos.add(companyId);
+
+				if (bindClientId) {
+					qPos.add(clientId);
+				}
+
+				count = (Long)q.uniqueResult();
+
+				finderCache.putResult(finderPath, finderArgs, count);
+			}
+			catch (Exception e) {
+				finderCache.removeResult(finderPath, finderArgs);
+
+				throw processException(e);
+			}
+			finally {
+				closeSession(session);
+			}
+		}
+
+		return count.intValue();
+	}
+
+	private static final String _FINDER_COLUMN_C_CI_COMPANYID_2 = "oAuth2Application.companyId = ? AND ";
+	private static final String _FINDER_COLUMN_C_CI_CLIENTID_1 = "oAuth2Application.clientId IS NULL";
+	private static final String _FINDER_COLUMN_C_CI_CLIENTID_2 = "oAuth2Application.clientId = ?";
+	private static final String _FINDER_COLUMN_C_CI_CLIENTID_3 = "(oAuth2Application.clientId IS NULL OR oAuth2Application.clientId = '')";
 
 	public OAuth2ApplicationPersistenceImpl() {
 		setModelClass(OAuth2Application.class);
@@ -101,6 +370,12 @@ public class OAuth2ApplicationPersistenceImpl extends BasePersistenceImpl<OAuth2
 		entityCache.putResult(OAuth2ApplicationModelImpl.ENTITY_CACHE_ENABLED,
 			OAuth2ApplicationImpl.class, oAuth2Application.getPrimaryKey(),
 			oAuth2Application);
+
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_CI,
+			new Object[] {
+				oAuth2Application.getCompanyId(),
+				oAuth2Application.getClientId()
+			}, oAuth2Application);
 
 		oAuth2Application.resetOriginalValues();
 	}
@@ -155,6 +430,9 @@ public class OAuth2ApplicationPersistenceImpl extends BasePersistenceImpl<OAuth2
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+
+		clearUniqueFindersCache((OAuth2ApplicationModelImpl)oAuth2Application,
+			true);
 	}
 
 	@Override
@@ -165,6 +443,47 @@ public class OAuth2ApplicationPersistenceImpl extends BasePersistenceImpl<OAuth2
 		for (OAuth2Application oAuth2Application : oAuth2Applications) {
 			entityCache.removeResult(OAuth2ApplicationModelImpl.ENTITY_CACHE_ENABLED,
 				OAuth2ApplicationImpl.class, oAuth2Application.getPrimaryKey());
+
+			clearUniqueFindersCache((OAuth2ApplicationModelImpl)oAuth2Application,
+				true);
+		}
+	}
+
+	protected void cacheUniqueFindersCache(
+		OAuth2ApplicationModelImpl oAuth2ApplicationModelImpl) {
+		Object[] args = new Object[] {
+				oAuth2ApplicationModelImpl.getCompanyId(),
+				oAuth2ApplicationModelImpl.getClientId()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_C_CI, args, Long.valueOf(1),
+			false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_C_CI, args,
+			oAuth2ApplicationModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		OAuth2ApplicationModelImpl oAuth2ApplicationModelImpl,
+		boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					oAuth2ApplicationModelImpl.getCompanyId(),
+					oAuth2ApplicationModelImpl.getClientId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_CI, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_CI, args);
+		}
+
+		if ((oAuth2ApplicationModelImpl.getColumnBitmask() &
+				FINDER_PATH_FETCH_BY_C_CI.getColumnBitmask()) != 0) {
+			Object[] args = new Object[] {
+					oAuth2ApplicationModelImpl.getOriginalCompanyId(),
+					oAuth2ApplicationModelImpl.getOriginalClientId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_C_CI, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_C_CI, args);
 		}
 	}
 
@@ -326,7 +645,11 @@ public class OAuth2ApplicationPersistenceImpl extends BasePersistenceImpl<OAuth2
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew) {
+		if (!OAuth2ApplicationModelImpl.COLUMN_BITMASK_ENABLED) {
+			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
 			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
 			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
 				FINDER_ARGS_EMPTY);
@@ -335,6 +658,9 @@ public class OAuth2ApplicationPersistenceImpl extends BasePersistenceImpl<OAuth2
 		entityCache.putResult(OAuth2ApplicationModelImpl.ENTITY_CACHE_ENABLED,
 			OAuth2ApplicationImpl.class, oAuth2Application.getPrimaryKey(),
 			oAuth2Application, false);
+
+		clearUniqueFindersCache(oAuth2ApplicationModelImpl, false);
+		cacheUniqueFindersCache(oAuth2ApplicationModelImpl);
 
 		oAuth2Application.resetOriginalValues();
 
@@ -353,14 +679,18 @@ public class OAuth2ApplicationPersistenceImpl extends BasePersistenceImpl<OAuth2
 		oAuth2ApplicationImpl.setPrimaryKey(oAuth2Application.getPrimaryKey());
 
 		oAuth2ApplicationImpl.setOAuth2ApplicationId(oAuth2Application.getOAuth2ApplicationId());
-		oAuth2ApplicationImpl.setGroupId(oAuth2Application.getGroupId());
 		oAuth2ApplicationImpl.setCompanyId(oAuth2Application.getCompanyId());
 		oAuth2ApplicationImpl.setUserId(oAuth2Application.getUserId());
 		oAuth2ApplicationImpl.setUserName(oAuth2Application.getUserName());
 		oAuth2ApplicationImpl.setCreateDate(oAuth2Application.getCreateDate());
 		oAuth2ApplicationImpl.setModifiedDate(oAuth2Application.getModifiedDate());
-		oAuth2ApplicationImpl.setName(oAuth2Application.getName());
+		oAuth2ApplicationImpl.setClientId(oAuth2Application.getClientId());
+		oAuth2ApplicationImpl.setClientSecret(oAuth2Application.getClientSecret());
+		oAuth2ApplicationImpl.setRedirectUri(oAuth2Application.getRedirectUri());
+		oAuth2ApplicationImpl.setClientConfidential(oAuth2Application.getClientConfidential());
 		oAuth2ApplicationImpl.setDescription(oAuth2Application.getDescription());
+		oAuth2ApplicationImpl.setName(oAuth2Application.getName());
+		oAuth2ApplicationImpl.setWebUrl(oAuth2Application.getWebUrl());
 
 		return oAuth2ApplicationImpl;
 	}
@@ -772,8 +1102,11 @@ public class OAuth2ApplicationPersistenceImpl extends BasePersistenceImpl<OAuth2
 	protected FinderCache finderCache;
 	private static final String _SQL_SELECT_OAUTH2APPLICATION = "SELECT oAuth2Application FROM OAuth2Application oAuth2Application";
 	private static final String _SQL_SELECT_OAUTH2APPLICATION_WHERE_PKS_IN = "SELECT oAuth2Application FROM OAuth2Application oAuth2Application WHERE oAuth2ApplicationId IN (";
+	private static final String _SQL_SELECT_OAUTH2APPLICATION_WHERE = "SELECT oAuth2Application FROM OAuth2Application oAuth2Application WHERE ";
 	private static final String _SQL_COUNT_OAUTH2APPLICATION = "SELECT COUNT(oAuth2Application) FROM OAuth2Application oAuth2Application";
+	private static final String _SQL_COUNT_OAUTH2APPLICATION_WHERE = "SELECT COUNT(oAuth2Application) FROM OAuth2Application oAuth2Application WHERE ";
 	private static final String _ORDER_BY_ENTITY_ALIAS = "oAuth2Application.";
 	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY = "No OAuth2Application exists with the primary key ";
+	private static final String _NO_SUCH_ENTITY_WITH_KEY = "No OAuth2Application exists with the key {";
 	private static final Log _log = LogFactoryUtil.getLog(OAuth2ApplicationPersistenceImpl.class);
 }

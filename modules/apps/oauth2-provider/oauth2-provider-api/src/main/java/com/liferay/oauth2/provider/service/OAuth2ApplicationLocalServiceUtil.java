@@ -43,6 +43,24 @@ public class OAuth2ApplicationLocalServiceUtil {
 	 */
 
 	/**
+	* NOTE FOR DEVELOPERS:
+	*
+	* Never reference this class directly. Always use {@link OAuth2ApplicationLocalServiceUtil} to access the o auth2 application local service.
+	*/
+	public static com.liferay.oauth2.provider.model.OAuth2Application addOAuth2Application(
+		long userId, java.lang.String name, java.lang.String description,
+		java.lang.String webURL, boolean oAuth2ClientConfidential,
+		java.lang.String oAuth2ClientId, java.lang.String oAuth2ClientSecret,
+		java.lang.String oAuth2RedirectURI,
+		com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .addOAuth2Application(userId, name, description, webURL,
+			oAuth2ClientConfidential, oAuth2ClientId, oAuth2ClientSecret,
+			oAuth2RedirectURI, serviceContext);
+	}
+
+	/**
 	* Adds the o auth2 application to the database. Also notifies the appropriate model listeners.
 	*
 	* @param oAuth2Application the o auth2 application
@@ -180,6 +198,11 @@ public class OAuth2ApplicationLocalServiceUtil {
 		return getService().fetchOAuth2Application(oAuth2ApplicationId);
 	}
 
+	public static com.liferay.oauth2.provider.model.OAuth2Application fetchOAuth2Application(
+		long companyId, java.lang.String clientId) {
+		return getService().fetchOAuth2Application(companyId, clientId);
+	}
+
 	public static com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
 		return getService().getActionableDynamicQuery();
 	}
@@ -199,6 +222,12 @@ public class OAuth2ApplicationLocalServiceUtil {
 		long oAuth2ApplicationId)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getOAuth2Application(oAuth2ApplicationId);
+	}
+
+	public static com.liferay.oauth2.provider.model.OAuth2Application getOAuth2Application(
+		long companyId, java.lang.String clientId)
+		throws com.liferay.oauth2.provider.exception.NoSuchOAuth2ApplicationException {
+		return getService().getOAuth2Application(companyId, clientId);
 	}
 
 	/**
@@ -239,6 +268,20 @@ public class OAuth2ApplicationLocalServiceUtil {
 		java.io.Serializable primaryKeyObj)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getPersistedModel(primaryKeyObj);
+	}
+
+	public static com.liferay.oauth2.provider.model.OAuth2Application updateOAuth2Application(
+		long userId, long oAuth2ApplicationId, java.lang.String name,
+		java.lang.String description, java.lang.String webURL,
+		boolean oAuth2ClientConfidential, java.lang.String oAuth2ClientId,
+		java.lang.String oAuth2ClientSecret,
+		java.lang.String oAuth2RedirectURI,
+		com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .updateOAuth2Application(userId, oAuth2ApplicationId, name,
+			description, webURL, oAuth2ClientConfidential, oAuth2ClientId,
+			oAuth2ClientSecret, oAuth2RedirectURI, serviceContext);
 	}
 
 	/**

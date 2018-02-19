@@ -11,7 +11,6 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
 package com.liferay.oauth2.provider.exception;
 
 import aQute.bnd.annotation.ProviderType;
