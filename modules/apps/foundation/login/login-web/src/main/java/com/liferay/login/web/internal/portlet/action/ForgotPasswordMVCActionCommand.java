@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.exception.UserLockoutException;
 import com.liferay.portal.kernel.exception.UserReminderQueryException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Ticket;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
@@ -42,6 +43,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PropsKeys;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.util.PropsValues;
@@ -96,15 +98,9 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 				WebKeys.FORGOT_PASSWORD_REMINDER_ATTEMPTS);
 			portletSession.removeAttribute(
 				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
+
+			sendPassword(actionRequest, actionResponse);
 		}
-
-		User user = getUser(actionRequest);
-
-		portletSession.setAttribute(
-			WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS,
-			user.getEmailAddress());
-
-		actionRequest.setAttribute(WebKeys.FORGOT_PASSWORD_REMINDER_USER, user);
 
 		if (step == 2) {
 			Integer reminderAttempts = (Integer)portletSession.getAttribute(
@@ -122,7 +118,64 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 			portletSession.setAttribute(
 				WebKeys.FORGOT_PASSWORD_REMINDER_ATTEMPTS, reminderAttempts);
 
-			sendPassword(actionRequest, actionResponse);
+			User user = getUser(actionRequest);
+
+			if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
+				if (PropsValues.USERS_REMINDER_QUERIES_REQUIRED &&
+					!user.hasReminderQuery()) {
+
+					throw new RequiredReminderQueryException(
+						"No reminder query or answer is defined for user " +
+							user.getUserId());
+				}
+
+				String answer = ParamUtil.getString(actionRequest, "answer");
+
+				String reminderQueryAnswer = user.getReminderQueryAnswer();
+
+				if (!reminderQueryAnswer.equals(answer)) {
+					throw new UserReminderQueryException();
+				}
+			}
+
+			portletSession.removeAttribute(
+				WebKeys.FORGOT_PASSWORD_REMINDER_ATTEMPTS);
+			portletSession.removeAttribute(
+				WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS);
+
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
+
+			Ticket ticket = LoginUtil.getTicket(actionRequest);
+
+			UnicodeProperties extraInfoProperties = new UnicodeProperties();
+
+			extraInfoProperties.fastLoad(ticket.getExtraInfo());
+
+			extraInfoProperties.put(
+				"userReminderQueryChecked", Boolean.TRUE.toString());
+
+			ticket.setExtraInfo(extraInfoProperties.toString());
+
+			LoginUtil.updateTicket(ticket);
+
+			StringBuilder sb = new StringBuilder();
+
+			sb.append(_portal.getPortalURL(actionRequest));
+			sb.append(_portal.getPathMain());
+			sb.append("/portal/update_password?p_l_id=");
+			sb.append(themeDisplay.getPlid());
+			sb.append("&ticketKey=");
+			sb.append(ticket.getKey());
+
+			String passwordResetURL = sb.toString();
+
+			SessionMessages.add(
+				actionRequest,
+				_portal.getPortletId(actionRequest) +
+					SessionMessages.KEY_SUFFIX_FORCE_SEND_REDIRECT);
+
+			sendRedirect(actionRequest, actionResponse, passwordResetURL);
 		}
 	}
 
@@ -144,7 +197,9 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 		}
 
 		try {
-			if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
+			if (PropsValues.USERS_REMINDER_QUERIES_ENABLED &&
+				PropsValues.USERS_REMINDER_QUERIES_REQUIRED) {
+
 				checkReminderQueries(actionRequest, actionResponse);
 			}
 			else {
@@ -168,7 +223,12 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 					 e instanceof UserReminderQueryException) {
 
 				if (PropsValues.LOGIN_SECURE_FORGOT_PASSWORD) {
-					sendRedirect(actionRequest, actionResponse, null);
+					HttpServletRequest request = _portal.getHttpServletRequest(
+						actionRequest);
+
+					sendRedirect(
+						actionRequest, actionResponse,
+						_portal.getHomeURL(request));
 				}
 				else {
 					SessionErrors.add(actionRequest, e.getClass(), e);
@@ -250,25 +310,6 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 
 		User user = getUser(actionRequest);
 
-		if (PropsValues.USERS_REMINDER_QUERIES_ENABLED) {
-			if (PropsValues.USERS_REMINDER_QUERIES_REQUIRED &&
-				!user.hasReminderQuery()) {
-
-				throw new RequiredReminderQueryException(
-					"No reminder query or answer is defined for user " +
-						user.getUserId());
-			}
-
-			String answer = ParamUtil.getString(actionRequest, "answer");
-
-			String reminderQueryAnswer = user.getReminderQueryAnswer();
-
-			if (!reminderQueryAnswer.equals(answer)) {
-				throw new UserReminderQueryException(
-					"Reminder query answer does not match answer");
-			}
-		}
-
 		PortletPreferences portletPreferences = actionRequest.getPreferences();
 
 		String languageId = LanguageUtil.getLanguageId(actionRequest);
@@ -299,7 +340,8 @@ public class ForgotPasswordMVCActionCommand extends BaseMVCActionCommand {
 
 		SessionMessages.add(request, "passwordSent");
 
-		sendRedirect(actionRequest, actionResponse, null);
+		sendRedirect(
+			actionRequest, actionResponse, _portal.getHomeURL(request));
 	}
 
 	@Reference(unbind = "-")

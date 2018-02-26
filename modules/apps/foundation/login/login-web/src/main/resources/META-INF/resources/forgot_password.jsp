@@ -18,6 +18,7 @@
 
 <%
 User user2 = (User)request.getAttribute(WebKeys.FORGOT_PASSWORD_REMINDER_USER);
+Ticket ticket = (Ticket)request.getAttribute(WebKeys.TICKET);
 
 if (Validator.isNull(authType)) {
 	authType = company.getAuthType();
@@ -110,12 +111,13 @@ if (reminderAttempts == null) {
 				</c:if>
 
 				<aui:button-row>
-					<aui:button type="submit" value='<%= PropsValues.USERS_REMINDER_QUERIES_ENABLED ? "next" : "send-new-password" %>' />
+					<aui:button type="submit" value="request-a-new-password-reset-link" />
 				</aui:button-row>
 			</c:when>
 			<c:when test="<%= (user2 != null) && Validator.isNotNull(user2.getEmailAddress()) %>">
 				<aui:input name="step" type="hidden" value="2" />
 				<aui:input name="emailAddress" type="hidden" value="<%= user2.getEmailAddress() %>" />
+				<aui:input name="ticketKey" type="hidden" value="<%= ticket.getKey() %>" />
 
 				<portlet:renderURL var="redirectURL">
 					<portlet:param name="mvcRenderCommandName" value="/login/login" />
@@ -124,23 +126,8 @@ if (reminderAttempts == null) {
 				<aui:input name="redirect" type="hidden" value="<%= redirectURL %>" />
 
 				<c:if test="<%= Validator.isNotNull(user2.getReminderQueryQuestion()) && Validator.isNotNull(user2.getReminderQueryAnswer()) %>">
-
-					<%
-					String login = null;
-
-					if (authType.equals(CompanyConstants.AUTH_TYPE_EA)) {
-						login = user2.getEmailAddress();
-					}
-					else if (authType.equals(CompanyConstants.AUTH_TYPE_SN)) {
-						login = user2.getScreenName();
-					}
-					else if (authType.equals(CompanyConstants.AUTH_TYPE_ID)) {
-						login = String.valueOf(user2.getUserId());
-					}
-					%>
-
 					<div class="alert alert-info">
-						<liferay-ui:message arguments="<%= HtmlUtil.escape(login) %>" key="a-new-password-will-be-sent-to-x-if-you-can-correctly-answer-the-following-question" translateArguments="<%= false %>" />
+						<liferay-ui:message key="you-can-reset-your-password-if-you-can-correctly-answer-the-following-question" />
 					</div>
 
 					<aui:input autoFocus="<%= true %>" label="<%= HtmlUtil.escape(LanguageUtil.get(request, user2.getReminderQueryQuestion())) %>" name="answer" type="text" />
@@ -160,7 +147,7 @@ if (reminderAttempts == null) {
 						</c:if>
 
 						<aui:button-row>
-							<aui:button type="submit" value='<%= company.isSendPasswordResetLink() ? "send-password-reset-link" : "send-new-password" %>' />
+							<aui:button type="submit" value="next" />
 						</aui:button-row>
 					</c:otherwise>
 				</c:choose>

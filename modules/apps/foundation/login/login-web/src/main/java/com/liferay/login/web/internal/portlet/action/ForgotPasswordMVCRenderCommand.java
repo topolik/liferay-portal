@@ -15,15 +15,23 @@
 package com.liferay.login.web.internal.portlet.action;
 
 import com.liferay.login.web.internal.constants.LoginPortletKeys;
+import com.liferay.login.web.internal.portlet.util.LoginUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Ticket;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
 
+import javax.portlet.PortletException;
+import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Peter Fellwock
@@ -40,7 +48,8 @@ public class ForgotPasswordMVCRenderCommand implements MVCRenderCommand {
 
 	@Override
 	public String render(
-		RenderRequest renderRequest, RenderResponse renderResponse) {
+			RenderRequest renderRequest, RenderResponse renderResponse)
+		throws PortletException {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)renderRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -51,9 +60,38 @@ public class ForgotPasswordMVCRenderCommand implements MVCRenderCommand {
 			return "/login.jsp";
 		}
 
+		Ticket ticket = LoginUtil.getTicket(renderRequest);
+
+		if (ticket != null) {
+			try {
+				User user = _userLocalService.getUser(ticket.getClassPK());
+
+				PortletSession portletSession =
+					renderRequest.getPortletSession();
+
+				portletSession.setAttribute(
+					WebKeys.FORGOT_PASSWORD_REMINDER_USER_EMAIL_ADDRESS,
+					user.getEmailAddress());
+
+				renderRequest.setAttribute(
+					WebKeys.FORGOT_PASSWORD_REMINDER_USER, user);
+				renderRequest.setAttribute(WebKeys.TICKET, ticket);
+			}
+			catch (PortalException pe) {
+				throw new PortletException(pe);
+			}
+		}
+
 		renderResponse.setTitle(themeDisplay.translate("forgot-password"));
 
 		return "/forgot_password.jsp";
 	}
+
+	@Reference(unbind = "-")
+	protected void setUserLocalService(UserLocalService userLocalService) {
+		_userLocalService = userLocalService;
+	}
+
+	private UserLocalService _userLocalService;
 
 }
