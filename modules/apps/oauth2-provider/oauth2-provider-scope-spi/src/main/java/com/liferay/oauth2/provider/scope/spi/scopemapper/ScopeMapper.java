@@ -35,26 +35,6 @@ public interface ScopeMapper {
 		Collections::singleton;
 
 	/**
-	 * Returns a new {@link ScopeMatcher} that takes into account the effect
-	 * of the given {@link ScopeMapper}. Some implementations might have
-	 * optimization opportunities.
-	 * @param scopeMatcher the scope matcher that should take into account this
-	 * scope mapper.
-	 * @return the new {@link ScopeMatcher} that takes into account the given
-	 * {@link ScopeMapper}.
-	 * @review
-	 */
-	public default ScopeMatcher applyTo(ScopeMatcher scopeMatcher) {
-		return localName -> {
-			Set<String> map = map(localName);
-
-			Stream<String> stream = map.stream();
-
-			return stream.anyMatch(scopeMatcher::match);
-		};
-	}
-
-	/**
 	 * Renames an application provided scope to new scope names
 	 *
 	 * @param scope application provided scope
