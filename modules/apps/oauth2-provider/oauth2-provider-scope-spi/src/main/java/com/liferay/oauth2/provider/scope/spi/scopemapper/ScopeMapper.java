@@ -16,11 +16,8 @@ package com.liferay.oauth2.provider.scope.spi.scopemapper;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.oauth2.provider.scope.spi.scopematcher.ScopeMatcher;
-
 import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Represents a transformation between internal scope names to external aliases.
