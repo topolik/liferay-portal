@@ -44,6 +44,6 @@ public class LDAPSettingsConstants {
 
 	public static final String SSHA = "SSHA";
 
-	public static final String UFC_CRYPT = "UFC-CRYPT";
+	public static final String UFC_CRYPT = "CRYPT";
 
 }

@@ -58,9 +58,13 @@ public interface LDAPAuthConfiguration extends CompanyScopedConfiguration {
 	@Meta.AD(
 		deflt = "NONE", description = "password-encryption-algorithm-help",
 		name = "password-encryption-algorithm",
-		optionValues = {
+		optionLabels = {
 			"BCRYPT", "MD2", "MD5", "NONE", "SHA", "SHA-256", "SHA-384", "SSHA",
 			"UFC-CRYPT"
+		},
+		optionValues = {
+			"BCRYPT", "MD2", "MD5", "NONE", "SHA", "SHA-256", "SHA-384", "SSHA",
+			"CRYPT"
 		},
 		required = false
 	)

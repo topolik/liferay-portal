@@ -52,7 +52,7 @@ public class PasswordEncryptorUtil {
 
 	public static final String TYPE_SSHA = "SSHA";
 
-	public static final String TYPE_UFC_CRYPT = "UFC-CRYPT";
+	public static final String TYPE_UFC_CRYPT = "CRYPT";
 
 	public static String encrypt(String plainTextPassword)
 		throws PwdEncryptorException {
