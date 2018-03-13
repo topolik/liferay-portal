@@ -22,7 +22,7 @@ import javax.ws.rs.core.Request;
 /**
  * Responsible for checking if a given JAX-RS request is allowed.
  * Can use the provided ScopeChecker to check if particular application
- * provided scopes have been granted
+ * provided scopes have been granted.
  *
  * @author Carlos Sierra Andrés
  * @review
