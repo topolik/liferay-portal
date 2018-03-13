@@ -14,7 +14,17 @@
 
 package com.liferay.oauth2.provider.service.impl;
 
+import com.liferay.oauth2.provider.exception.NoSuchOAuth2TokenException;
+import com.liferay.oauth2.provider.model.OAuth2ScopeGrant;
+import com.liferay.oauth2.provider.model.OAuth2Token;
+import com.liferay.oauth2.provider.scope.liferay.LiferayOAuth2Scope;
 import com.liferay.oauth2.provider.service.base.OAuth2ScopeGrantLocalServiceBaseImpl;
+import com.liferay.oauth2.provider.service.persistence.OAuth2ScopeGrantPK;
+import org.osgi.framework.Bundle;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * The implementation of the o auth2 scope grant local service.
@@ -37,4 +47,51 @@ public class OAuth2ScopeGrantLocalServiceImpl
 	 *
 	 * Never reference this class directly. Always use {@link com.liferay.oauth2.provider.service.OAuth2ScopeGrantLocalServiceUtil} to access the o auth2 scope grant local service.
 	 */
+
+	public Collection<OAuth2ScopeGrant> grantScopesToToken(
+		String tokenString, Collection<LiferayOAuth2Scope> scopes)
+		throws NoSuchOAuth2TokenException {
+
+		if (scopes.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		OAuth2Token oAuth2Token = oAuth2TokenPersistence.fetchByContent(
+			tokenString);
+
+		if (oAuth2Token == null) {
+			throw new NoSuchOAuth2TokenException(tokenString);
+		}
+
+		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants = new ArrayList<>(
+			scopes.size());
+
+		for (LiferayOAuth2Scope scope : scopes) {
+			Bundle bundle = scope.getBundle();
+
+			OAuth2ScopeGrant oAuth2ScopeGrant = createOAuth2ScopeGrant(
+				new OAuth2ScopeGrantPK(
+					scope.getApplicationName(), bundle.getSymbolicName(),
+					oAuth2Token.getCompanyId(), scope.getScope(),
+					oAuth2Token.getOAuth2TokenId()));
+
+			oAuth2ScopeGrants.add(updateOAuth2ScopeGrant(oAuth2ScopeGrant));
+		}
+
+		return oAuth2ScopeGrants;
+	}
+
+	@Override
+	public Collection<OAuth2ScopeGrant> findByA_BSN_C_T(
+		String applicationName, String bundleSymbolicName, Long companyId,
+		String tokenContent) {
+
+		return oAuth2ScopeGrantFinder.findByA_BSN_C_T(
+			applicationName, bundleSymbolicName, companyId, tokenContent);
+	}
+
+	public Collection<OAuth2ScopeGrant> findByToken(long tokenId) {
+		return oAuth2ScopeGrantPersistence.findByToken(tokenId);
+	}
+
 }
