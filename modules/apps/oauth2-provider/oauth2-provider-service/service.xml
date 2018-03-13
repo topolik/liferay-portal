@@ -3,11 +3,6 @@
 
 <service-builder auto-import-default-references="false" auto-namespace-tables="false" package-path="com.liferay.oauth2.provider">
 	<namespace>OAuthTwo</namespace>
-	<entity local-service="true" name="OAuth2Authorization"  remote-service="true" json-enabled="false">
-		<reference entity="OAuth2Application" package-path="com.liferay.oauth2.provider" />
-		<reference entity="OAuth2RefreshToken" package-path="com.liferay.oauth2.provider" />
-		<reference entity="OAuth2Token" package-path="com.liferay.oauth2.provider" />
-	</entity>
 	<entity local-service="true" name="OAuth2Application" remote-service="true">
 
 		<!-- PK fields -->
@@ -36,16 +31,13 @@
 		<column name="redirectURIs" type="String" />
 		<column name="scopes" type="String" />
 		<column name="features" type="String" />
-
 		<finder name="C" return-type="Collection">
 			<finder-column name="companyId" />
 		</finder>
-
 		<finder name="C_CI" return-type="OAuth2Application">
 			<finder-column name="companyId" />
 			<finder-column name="clientId" />
 		</finder>
-
 		<reference entity="OAuth2RefreshToken" package-path="com.liferay.oauth2.provider" />
 		<reference entity="OAuth2ScopeGrant" package-path="com.liferay.oauth2.provider" />
 		<reference entity="OAuth2Token" package-path="com.liferay.oauth2.provider" />
@@ -53,7 +45,76 @@
 		<reference entity="Resource" package-path="com.liferay.portal" />
 		<reference entity="User" package-path="com.liferay.portal" />
 	</entity>
-	<entity name="OAuth2Token" local-service="true" remote-service="true" json-enabled="false">
+	<entity json-enabled="false" local-service="true"  name="OAuth2Authorization" remote-service="true">
+		<reference entity="OAuth2Application" package-path="com.liferay.oauth2.provider" />
+		<reference entity="OAuth2RefreshToken" package-path="com.liferay.oauth2.provider" />
+		<reference entity="OAuth2Token" package-path="com.liferay.oauth2.provider" />
+	</entity>
+	<entity json-enabled="false" local-service="true" name="OAuth2RefreshToken" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="oAuth2RefreshTokenId" primary="true" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="companyId" type="long" />
+		<column name="userId" type="long" />
+		<column name="userName" type="String" />
+		<column name="createDate" type="Date" />
+		<column name="expirationDate" type="Date" />
+		<column name="remoteIPInfo" type="String" />
+
+		<!-- Other fields -->
+
+		<column name="oAuth2RefreshTokenContent" type="String" />
+		<column name="oAuth2ApplicationId" type="long" />
+		<column name="scopes" type="String" />
+		<finder name="A" return-type="Collection">
+			<finder-column name="oAuth2ApplicationId" />
+		</finder>
+		<finder name="A_U" return-type="Collection">
+			<finder-column name="oAuth2ApplicationId" />
+			<finder-column name="userName" />
+		</finder>
+		<finder name="Content" return-type="OAuth2RefreshToken">
+			<finder-column name="oAuth2RefreshTokenContent" />
+		</finder>
+		<reference entity="OAuth2Application" package-path="com.liferay.oauth2.provider" />
+		<reference entity="OAuth2Token" package-path="com.liferay.oauth2.provider" />
+	</entity>
+	<entity local-service="true" name="OAuth2ScopeGrant" remote-service="false">
+
+		<!-- PK fields -->
+
+		<column name="applicationName" primary="true" type="String" />
+		<column name="bundleSymbolicName" primary="true" type="String" />
+		<column name="companyId" primary="true" type="long" />
+		<column name="oAuth2ScopeName" primary="true" type="String" />
+		<column name="oAuth2TokenId" primary="true" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="createDate" type="Date" />
+
+		<!-- Other fields -->
+
+		<!-- Finder methods -->
+
+		<finder name="Token" return-type="Collection">
+			<finder-column name="oAuth2TokenId" />
+		</finder>
+		<finder name="A_BSN_C_O_T" return-type="OAuth2ScopeGrant">
+			<finder-column name="applicationName" />
+			<finder-column name="bundleSymbolicName" />
+			<finder-column name="companyId" />
+			<finder-column name="oAuth2ScopeName" />
+			<finder-column name="oAuth2TokenId" />
+		</finder>
+		<reference entity="OAuth2Token" package-path="com.liferay.oauth2.provider" />
+	</entity>
+	<entity json-enabled="false" local-service="true" name="OAuth2Token" remote-service="true">
+
 		<!-- PK fields -->
 
 		<column name="oAuth2TokenId" primary="true" type="long" />
@@ -74,7 +135,6 @@
 		<column name="oAuth2TokenType" type="String" />
 		<column name="oAuth2RefreshTokenId" type="long" />
 		<column name="scopes" type="String" />
-
 		<finder name="A" return-type="Collection">
 			<finder-column name="oAuth2ApplicationId" />
 		</finder>
@@ -88,77 +148,9 @@
 		<finder name="RefreshToken" return-type="Collection">
 			<finder-column name="oAuth2RefreshTokenId"></finder-column>
 		</finder>
-
 		<reference entity="OAuth2Application" package-path="com.liferay.oauth2.provider" />
 		<reference entity="OAuth2RefreshToken" package-path="com.liferay.oauth2.provider" />
 		<reference entity="OAuth2ScopeGrant" package-path="com.liferay.oauth2.provider" />
-	</entity>
-	<entity name="OAuth2RefreshToken" local-service="true" remote-service="true" json-enabled="false">
-		<!-- PK fields -->
-
-		<column name="oAuth2RefreshTokenId" primary="true" type="long" />
-
-		<!-- Audit fields -->
-
-		<column name="companyId" type="long" />
-		<column name="userId" type="long" />
-		<column name="userName" type="String" />
-		<column name="createDate" type="Date" />
-		<column name="expirationDate" type="Date" />
-		<column name="remoteIPInfo" type="String" />
-
-		<!-- Other fields -->
-
-		<column name="oAuth2RefreshTokenContent" type="String" />
-		<column name="oAuth2ApplicationId" type="long" />
-		<column name="scopes" type="String" />
-
-		<finder name="A" return-type="Collection">
-			<finder-column name="oAuth2ApplicationId" />
-		</finder>
-		<finder name="A_U" return-type="Collection">
-			<finder-column name="oAuth2ApplicationId" />
-			<finder-column name="userName" />
-		</finder>
-		<finder name="Content" return-type="OAuth2RefreshToken">
-			<finder-column name="oAuth2RefreshTokenContent" />
-		</finder>
-
-		<reference entity="OAuth2Application" package-path="com.liferay.oauth2.provider" />
-		<reference entity="OAuth2Token" package-path="com.liferay.oauth2.provider" />
-	</entity>
-
-	<entity name="OAuth2ScopeGrant" local-service="true" remote-service="false">
-		<!-- PK fields -->
-
-		<column name="applicationName" primary="true" type="String" />
-		<column name="bundleSymbolicName" primary="true" type="String" />
-		<column name="companyId" type="long" primary="true" />
-		<column name="oAuth2ScopeName" primary="true" type="String" />
-		<column name="oAuth2TokenId" primary="true" type="long" />
-
-		<!-- Audit fields -->
-
-		<column name="createDate" type="Date" />
-
-		<!-- Other fields -->
-
-
-		<!-- Finder methods -->
-
-		<finder name="Token" return-type="Collection">
-			<finder-column name="oAuth2TokenId" />
-		</finder>
-
-		<finder name="A_BSN_C_O_T" return-type="OAuth2ScopeGrant">
-			<finder-column name="applicationName" />
-			<finder-column name="bundleSymbolicName" />
-			<finder-column name="companyId" />
-			<finder-column name="oAuth2ScopeName" />
-			<finder-column name="oAuth2TokenId" />
-		</finder>
-
-		<reference entity="OAuth2Token" package-path="com.liferay.oauth2.provider" />
 	</entity>
 	<exceptions>
 		<exception>ApplicationName</exception>
