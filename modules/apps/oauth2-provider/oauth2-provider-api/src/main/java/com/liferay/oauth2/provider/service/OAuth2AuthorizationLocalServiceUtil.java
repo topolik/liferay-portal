@@ -41,6 +41,29 @@ public class OAuth2AuthorizationLocalServiceUtil {
 	 *
 	 * Never modify this class directly. Add custom service methods to {@link com.liferay.oauth2.provider.service.impl.OAuth2AuthorizationLocalServiceImpl} and rerun ServiceBuilder to regenerate this class.
 	 */
+	public static int countByApplicationId(long companyId, long applicationId) {
+		return getService().countByApplicationId(companyId, applicationId);
+	}
+
+	public static int countByUserId(long companyId, long userId) {
+		return getService().countByUserId(companyId, userId);
+	}
+
+	public static java.util.List<com.liferay.oauth2.provider.model.OAuth2Authorization> findByApplicationId(
+		long companyId, long applicationId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.oauth2.provider.model.OAuth2Authorization> orderByComparator) {
+		return getService()
+				   .findByApplicationId(companyId, applicationId, start, end,
+			orderByComparator);
+	}
+
+	public static java.util.List<com.liferay.oauth2.provider.model.OAuth2Authorization> findByUserId(
+		long companyId, long userId, int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.oauth2.provider.model.OAuth2Authorization> orderByComparator) {
+		return getService()
+				   .findByUserId(companyId, userId, start, end,
+			orderByComparator);
+	}
 
 	/**
 	* Returns the OSGi service identifier.
@@ -49,6 +72,13 @@ public class OAuth2AuthorizationLocalServiceUtil {
 	*/
 	public static java.lang.String getOSGiServiceIdentifier() {
 		return getService().getOSGiServiceIdentifier();
+	}
+
+	public static boolean revokeAuthorization(long oAuth2TokenId,
+		long oAuth2RefreshTokenId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .revokeAuthorization(oAuth2TokenId, oAuth2RefreshTokenId);
 	}
 
 	public static OAuth2AuthorizationLocalService getService() {

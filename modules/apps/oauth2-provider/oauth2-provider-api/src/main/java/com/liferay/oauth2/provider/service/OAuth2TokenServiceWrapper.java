@@ -32,6 +32,13 @@ public class OAuth2TokenServiceWrapper implements OAuth2TokenService,
 		_oAuth2TokenService = oAuth2TokenService;
 	}
 
+	@Override
+	public com.liferay.oauth2.provider.model.OAuth2Token deleteOAuth2Token(
+		long oAuth2TokenId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _oAuth2TokenService.deleteOAuth2Token(oAuth2TokenId);
+	}
+
 	/**
 	* Returns the OSGi service identifier.
 	*

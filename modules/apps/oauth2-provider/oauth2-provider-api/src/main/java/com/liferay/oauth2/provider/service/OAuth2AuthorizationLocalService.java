@@ -16,11 +16,16 @@ package com.liferay.oauth2.provider.service;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.oauth2.provider.model.OAuth2Authorization;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.service.BaseLocalService;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.kernel.util.OrderByComparator;
+
+import java.util.List;
 
 /**
  * Provides the local service interface for OAuth2Authorization. Methods of this
@@ -43,6 +48,17 @@ public interface OAuth2AuthorizationLocalService extends BaseLocalService {
 	 *
 	 * Never modify or reference this interface directly. Always use {@link OAuth2AuthorizationLocalServiceUtil} to access the o auth2 authorization local service. Add custom service methods to {@link com.liferay.oauth2.provider.service.impl.OAuth2AuthorizationLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	public int countByApplicationId(long companyId, long applicationId);
+
+	public int countByUserId(long companyId, long userId);
+
+	public List<OAuth2Authorization> findByApplicationId(long companyId,
+		long applicationId, int start, int end,
+		OrderByComparator<OAuth2Authorization> orderByComparator);
+
+	public List<OAuth2Authorization> findByUserId(long companyId, long userId,
+		int start, int end,
+		OrderByComparator<OAuth2Authorization> orderByComparator);
 
 	/**
 	* Returns the OSGi service identifier.
@@ -50,4 +66,7 @@ public interface OAuth2AuthorizationLocalService extends BaseLocalService {
 	* @return the OSGi service identifier
 	*/
 	public java.lang.String getOSGiServiceIdentifier();
+
+	public boolean revokeAuthorization(long oAuth2TokenId,
+		long oAuth2RefreshTokenId) throws PortalException;
 }

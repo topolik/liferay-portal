@@ -41,6 +41,17 @@ public class OAuth2AuthorizationServiceUtil {
 	 *
 	 * Never modify this class directly. Add custom service methods to {@link com.liferay.oauth2.provider.service.impl.OAuth2AuthorizationServiceImpl} and rerun ServiceBuilder to regenerate this class.
 	 */
+	public static int countByUserId()
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().countByUserId();
+	}
+
+	public static java.util.List<com.liferay.oauth2.provider.model.OAuth2Authorization> findByUserId(
+		int start, int end,
+		com.liferay.portal.kernel.util.OrderByComparator<com.liferay.oauth2.provider.model.OAuth2Authorization> orderByComparator)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().findByUserId(start, end, orderByComparator);
+	}
 
 	/**
 	* Returns the OSGi service identifier.
@@ -49,6 +60,13 @@ public class OAuth2AuthorizationServiceUtil {
 	*/
 	public static java.lang.String getOSGiServiceIdentifier() {
 		return getService().getOSGiServiceIdentifier();
+	}
+
+	public static boolean revokeAuthorization(long oAuth2TokenId,
+		long oAuth2RefreshTokenId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return getService()
+				   .revokeAuthorization(oAuth2TokenId, oAuth2RefreshTokenId);
 	}
 
 	public static OAuth2AuthorizationService getService() {

@@ -16,6 +16,8 @@ package com.liferay.oauth2.provider.service;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.oauth2.provider.model.OAuth2Authorization;
+
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
@@ -24,6 +26,9 @@ import com.liferay.portal.kernel.service.BaseService;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Transactional;
+import com.liferay.portal.kernel.util.OrderByComparator;
+
+import java.util.List;
 
 /**
  * Provides the remote service interface for OAuth2Authorization. Methods of this
@@ -49,6 +54,11 @@ public interface OAuth2AuthorizationService extends BaseService {
 	 *
 	 * Never modify or reference this interface directly. Always use {@link OAuth2AuthorizationServiceUtil} to access the o auth2 authorization remote service. Add custom service methods to {@link com.liferay.oauth2.provider.service.impl.OAuth2AuthorizationServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	public int countByUserId() throws PortalException;
+
+	public List<OAuth2Authorization> findByUserId(int start, int end,
+		OrderByComparator<OAuth2Authorization> orderByComparator)
+		throws PortalException;
 
 	/**
 	* Returns the OSGi service identifier.
@@ -56,4 +66,7 @@ public interface OAuth2AuthorizationService extends BaseService {
 	* @return the OSGi service identifier
 	*/
 	public java.lang.String getOSGiServiceIdentifier();
+
+	public boolean revokeAuthorization(long oAuth2TokenId,
+		long oAuth2RefreshTokenId) throws PortalException;
 }
