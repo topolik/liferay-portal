@@ -14,6 +14,7 @@
 
 package com.liferay.asset.categories.internal.search;
 
+import com.liferay.asset.categories.internal.security.permission.resource.AssetVocabularyPermission;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetVocabularyLocalService;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
@@ -37,7 +38,6 @@ import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portlet.asset.service.permission.AssetVocabularyPermission;
 
 import java.util.Locale;
 
