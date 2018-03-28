@@ -18,7 +18,7 @@ import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
+import com.liferay.portal.search.web.internal.security.permission.resource.AssetCategoryPermission;
 
 /**
  * @author André de Oliveira
