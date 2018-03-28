@@ -19,16 +19,18 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.BaseResourcePermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
+import com.liferay.portlet.asset.constants.AssetConstants;
 
 /**
  * @author Pavel Savinov
  */
 @OSGiBeanProperties(
-	property = {"resource.name=" + AssetTagsPermission.RESOURCE_NAME}
+	property = {"resource.name=" + AssetConstants.RESOURCE_NAME_TAGS}
 )
 public class AssetTagsPermission extends BaseResourcePermissionChecker {
 
-	public static final String RESOURCE_NAME = "com.liferay.asset.tags";
+	public static final String RESOURCE_NAME =
+		AssetConstants.RESOURCE_NAME_TAGS;
 
 	public static void check(
 			PermissionChecker permissionChecker, long groupId, String actionId)
