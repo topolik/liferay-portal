@@ -34,11 +34,12 @@ import com.liferay.portal.kernel.search.filter.TermsFilter;
 import com.liferay.portal.kernel.search.generic.BooleanQueryImpl;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +80,7 @@ public class AssetCategoryIndexer extends BaseIndexer<AssetCategory> {
 		AssetCategory category = AssetCategoryLocalServiceUtil.getCategory(
 			entryClassPK);
 
-		return AssetCategoryPermission.contains(
+		return _modelResourcePermission.contains(
 			permissionChecker, category, ActionKeys.VIEW);
 	}
 
@@ -263,5 +264,10 @@ public class AssetCategoryIndexer extends BaseIndexer<AssetCategory> {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		AssetCategoryIndexer.class);
+
+	private static volatile ModelResourcePermission<AssetCategory>
+		_modelResourcePermission = ModelResourcePermissionFactory.getInstance(
+			AssetCategoryIndexer.class, "_modelResourcePermission",
+			AssetCategory.class);
 
 }

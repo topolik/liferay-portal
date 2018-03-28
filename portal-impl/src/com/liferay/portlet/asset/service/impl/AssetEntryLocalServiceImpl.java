@@ -46,6 +46,8 @@ import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.social.SocialActivityManagerUtil;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
@@ -54,7 +56,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.asset.service.base.AssetEntryLocalServiceBaseImpl;
-import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
 import com.liferay.portlet.asset.util.AssetSearcher;
 import com.liferay.portlet.asset.validator.AssetEntryValidatorRegistry;
 import com.liferay.registry.collections.ServiceTrackerCollections;
@@ -1167,7 +1168,7 @@ public class AssetEntryLocalServiceImpl extends AssetEntryLocalServiceBaseImpl {
 
 		for (AssetCategory category : oldCategories) {
 			if (!ArrayUtil.contains(categoryIds, category.getCategoryId()) &&
-				!AssetCategoryPermission.contains(
+				!_modelResourcePermission.contains(
 					permissionChecker, category, ActionKeys.VIEW)) {
 
 				categoryIds = ArrayUtil.append(
@@ -1315,6 +1316,11 @@ public class AssetEntryLocalServiceImpl extends AssetEntryLocalServiceBaseImpl {
 			}
 		}
 	}
+
+	private static volatile ModelResourcePermission<AssetCategory>
+		_modelResourcePermission = ModelResourcePermissionFactory.getInstance(
+			AssetEntryLocalServiceImpl.class, "_modelResourcePermission",
+			AssetCategory.class);
 
 	private final ServiceTrackerMap
 		<String, List<AssetEntryValidatorExclusionRule>>

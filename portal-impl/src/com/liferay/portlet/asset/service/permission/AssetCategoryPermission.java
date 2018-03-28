@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.asset.service.permission;
 
+import com.liferay.asset.kernel.constants.AssetConstants;
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetCategoryConstants;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -22,11 +23,10 @@ import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermi
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
-import com.liferay.portlet.asset.constants.AssetConstants;
 
 /**
  * @author Eduardo Lundgren
- * @deprecated As of 7.1.0, with no direct replacement
+ * @deprecated As of 7.0.0, with no direct replacement
  */
 @Deprecated
 public class AssetCategoryPermission {
@@ -59,8 +59,7 @@ public class AssetCategoryPermission {
 			String actionId)
 		throws PortalException {
 
-		_modelResourcePermission.check(
-			permissionChecker, categoryId, actionId);
+		_modelResourcePermission.check(permissionChecker, categoryId, actionId);
 	}
 
 	public static boolean contains(
@@ -97,15 +96,13 @@ public class AssetCategoryPermission {
 	}
 
 	private static volatile ModelResourcePermission<AssetCategory>
-		_modelResourcePermission =
-			ModelResourcePermissionFactory.getInstance(
-				AssetCategoryPermission.class, "_modelResourcePermission",
-				AssetCategory.class);
-
+		_modelResourcePermission = ModelResourcePermissionFactory.getInstance(
+			AssetCategoryPermission.class, "_modelResourcePermission",
+			AssetCategory.class);
 	private static volatile PortletResourcePermission
 		_portletResourcePermission =
 			PortletResourcePermissionFactory.getInstance(
-				AssetCategoryPermission.class,
-				"_portletResourcePermission",
+				AssetCategoryPermission.class, "_portletResourcePermission",
 				AssetConstants.RESOURCE_NAME_CATEGORIES);
+
 }

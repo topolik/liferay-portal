@@ -26,6 +26,9 @@ import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionHelper;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.Autocomplete;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -33,7 +36,6 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.asset.service.base.AssetCategoryServiceBaseImpl;
-import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
 import com.liferay.util.dao.orm.CustomSQLUtil;
 
 import java.util.ArrayList;
@@ -61,9 +63,9 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 			String[] categoryProperties, ServiceContext serviceContext)
 		throws PortalException {
 
-		AssetCategoryPermission.check(
-			getPermissionChecker(), groupId, parentCategoryId,
-			ActionKeys.ADD_CATEGORY);
+		ModelResourcePermissionHelper.check(
+			_modelResourcePermission, getPermissionChecker(), groupId,
+			parentCategoryId, ActionKeys.ADD_CATEGORY);
 
 		return assetCategoryLocalService.addCategory(
 			getUserId(), groupId, parentCategoryId, titleMap, descriptionMap,
@@ -76,9 +78,8 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		AssetCategoryPermission.check(
-			getPermissionChecker(), groupId,
-			AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID,
+		ModelResourcePermissionHelper.check(
+			_modelResourcePermission, getPermissionChecker(), groupId, 0,
 			ActionKeys.ADD_CATEGORY);
 
 		return assetCategoryLocalService.addCategory(
@@ -88,7 +89,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 	@Override
 	public void deleteCategories(long[] categoryIds) throws PortalException {
 		for (long categoryId : categoryIds) {
-			AssetCategoryPermission.check(
+			_modelResourcePermission.check(
 				getPermissionChecker(), categoryId, ActionKeys.DELETE);
 		}
 
@@ -108,7 +109,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 
 		for (long categoryId : categoryIds) {
 			try {
-				AssetCategoryPermission.check(
+				_modelResourcePermission.check(
 					getPermissionChecker(), categoryId, ActionKeys.DELETE);
 
 				assetCategoryLocalService.deleteCategory(categoryId);
@@ -138,7 +139,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 
 	@Override
 	public void deleteCategory(long categoryId) throws PortalException {
-		AssetCategoryPermission.check(
+		_modelResourcePermission.check(
 			getPermissionChecker(), categoryId, ActionKeys.DELETE);
 
 		assetCategoryLocalService.deleteCategory(categoryId);
@@ -150,7 +151,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 			categoryId);
 
 		if (category != null) {
-			AssetCategoryPermission.check(
+			_modelResourcePermission.check(
 				getPermissionChecker(), category, ActionKeys.VIEW);
 		}
 
@@ -167,7 +168,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 
 	@Override
 	public AssetCategory getCategory(long categoryId) throws PortalException {
-		AssetCategoryPermission.check(
+		_modelResourcePermission.check(
 			getPermissionChecker(), categoryId, ActionKeys.VIEW);
 
 		return assetCategoryLocalService.getCategory(categoryId);
@@ -175,7 +176,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 
 	@Override
 	public String getCategoryPath(long categoryId) throws PortalException {
-		AssetCategoryPermission.check(
+		_modelResourcePermission.check(
 			getPermissionChecker(), categoryId, ActionKeys.VIEW);
 
 		AssetCategory category = getCategory(categoryId);
@@ -338,7 +339,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		AssetCategoryPermission.check(
+		_modelResourcePermission.check(
 			getPermissionChecker(), categoryId, ActionKeys.UPDATE);
 
 		return assetCategoryLocalService.moveCategory(
@@ -499,7 +500,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		AssetCategoryPermission.check(
+		_modelResourcePermission.check(
 			getPermissionChecker(), categoryId, ActionKeys.UPDATE);
 
 		return assetCategoryLocalService.updateCategory(
@@ -520,7 +521,7 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 		while (itr.hasNext()) {
 			AssetCategory category = itr.next();
 
-			if (!AssetCategoryPermission.contains(
+			if (!_modelResourcePermission.contains(
 					permissionChecker, category, ActionKeys.VIEW)) {
 
 				itr.remove();
@@ -549,5 +550,10 @@ public class AssetCategoryServiceImpl extends AssetCategoryServiceBaseImpl {
 
 		return jsonArray;
 	}
+
+	private static volatile ModelResourcePermission<AssetCategory>
+		_modelResourcePermission = ModelResourcePermissionFactory.getInstance(
+			AssetCategoryServiceImpl.class, "_modelResourcePermission",
+			AssetCategory.class);
 
 }

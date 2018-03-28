@@ -58,6 +58,8 @@ import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.theme.PortletDisplay;
@@ -75,8 +77,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portlet.PortletURLImpl;
-import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
-import com.liferay.portlet.asset.service.permission.AssetVocabularyPermission;
 
 import java.io.Serializable;
 
@@ -222,7 +222,7 @@ public class AssetUtil {
 				AssetCategoryLocalServiceUtil.fetchCategory(categoryId);
 
 			if ((category != null) &&
-				AssetCategoryPermission.contains(
+				_assetCategoryModelResourcePermission.contains(
 					permissionChecker, category, ActionKeys.VIEW)) {
 
 				viewableCategoryIds.add(categoryId);
@@ -261,7 +261,7 @@ public class AssetUtil {
 		List<Long> viewableVocabularyIds = new ArrayList<>();
 
 		for (long vocabularyId : vocabularyIds) {
-			if (AssetVocabularyPermission.contains(
+			if (_assetVocabularyModelResourcePermission.contains(
 					permissionChecker, vocabularyId, ActionKeys.VIEW)) {
 
 				viewableVocabularyIds.add(vocabularyId);
@@ -1048,5 +1048,16 @@ public class AssetUtil {
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(AssetUtil.class);
+
+	private static volatile ModelResourcePermission<AssetCategory>
+		_assetCategoryModelResourcePermission =
+			ModelResourcePermissionFactory.getInstance(
+				AssetUtil.class, "_assetCategoryModelResourcePermission",
+				AssetCategory.class);
+	private static volatile ModelResourcePermission<AssetVocabulary>
+		_assetVocabularyModelResourcePermission =
+			ModelResourcePermissionFactory.getInstance(
+				AssetUtil.class, "_assetVocabularyModelResourcePermission",
+				AssetVocabulary.class);
 
 }

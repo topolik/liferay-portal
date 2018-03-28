@@ -33,10 +33,11 @@ import com.liferay.portal.kernel.search.filter.BooleanFilter;
 import com.liferay.portal.kernel.search.generic.BooleanQueryImpl;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portlet.asset.service.permission.AssetVocabularyPermission;
 
 import java.util.Locale;
 
@@ -75,7 +76,7 @@ public class AssetVocabularyIndexer extends BaseIndexer<AssetVocabulary> {
 		AssetVocabulary vocabulary =
 			AssetVocabularyLocalServiceUtil.getVocabulary(entryClassPK);
 
-		return AssetVocabularyPermission.contains(
+		return _modelResourcePermission.contains(
 			permissionChecker, vocabulary, ActionKeys.VIEW);
 	}
 
@@ -203,5 +204,10 @@ public class AssetVocabularyIndexer extends BaseIndexer<AssetVocabulary> {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		AssetVocabularyIndexer.class);
+
+	private static volatile ModelResourcePermission<AssetVocabulary>
+		_modelResourcePermission = ModelResourcePermissionFactory.getInstance(
+			AssetVocabularyIndexer.class, "_modelResourcePermission",
+			AssetVocabulary.class);
 
 }

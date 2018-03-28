@@ -41,6 +41,8 @@ import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionThreadLocal;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
@@ -53,7 +55,6 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.asset.service.base.AssetCategoryLocalServiceBaseImpl;
-import com.liferay.portlet.asset.service.permission.AssetCategoryPermission;
 import com.liferay.portlet.asset.util.comparator.AssetCategoryLeftCategoryIdComparator;
 
 import java.io.Serializable;
@@ -464,7 +465,7 @@ public class AssetCategoryLocalServiceImpl
 
 		for (AssetCategory category : oldCategories) {
 			if (!ArrayUtil.contains(categoryIds, category.getCategoryId()) &&
-				!AssetCategoryPermission.contains(
+				!_modelResourcePermission.contains(
 					permissionChecker, category, ActionKeys.VIEW)) {
 
 				categoryIds = ArrayUtil.append(
@@ -784,5 +785,10 @@ public class AssetCategoryLocalServiceImpl
 			throw new DuplicateCategoryException(sb.toString());
 		}
 	}
+
+	private static volatile ModelResourcePermission<AssetCategory>
+		_modelResourcePermission = ModelResourcePermissionFactory.getInstance(
+			AssetCategoryLocalServiceImpl.class, "_modelResourcePermission",
+			AssetCategory.class);
 
 }

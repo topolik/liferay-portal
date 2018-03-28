@@ -23,7 +23,7 @@ import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermi
 /**
  * @author Eduardo Lundgren
  * @author JorgeFerrer
- * @deprecated As of 7.1.0, with no direct replacement
+ * @deprecated As of 7.0.0, with no direct replacement
  */
 @Deprecated
 public class AssetVocabularyPermission {
@@ -64,9 +64,8 @@ public class AssetVocabularyPermission {
 	}
 
 	private static volatile ModelResourcePermission<AssetVocabulary>
-		_modelResourcePermission =
-			ModelResourcePermissionFactory.getInstance(
-				AssetVocabularyPermission.class, "_modelResourcePermission",
-				AssetVocabulary.class);
+		_modelResourcePermission = ModelResourcePermissionFactory.getInstance(
+			AssetVocabularyPermission.class, "_modelResourcePermission",
+			AssetVocabulary.class);
 
 }

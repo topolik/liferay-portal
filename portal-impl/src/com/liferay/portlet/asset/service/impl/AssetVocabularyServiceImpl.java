@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.asset.service.impl;
 
+import com.liferay.asset.kernel.constants.AssetConstants;
 import com.liferay.asset.kernel.model.AssetCategoryConstants;
 import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.model.AssetVocabularyDisplay;
@@ -23,13 +24,15 @@ import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.asset.service.base.AssetVocabularyServiceBaseImpl;
-import com.liferay.portlet.asset.service.permission.AssetCategoriesPermission;
-import com.liferay.portlet.asset.service.permission.AssetVocabularyPermission;
 import com.liferay.portlet.asset.util.AssetUtil;
 import com.liferay.util.dao.orm.CustomSQLUtil;
 
@@ -57,7 +60,7 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		AssetCategoriesPermission.check(
+		_portletResourcePermission.check(
 			getPermissionChecker(), groupId, ActionKeys.ADD_VOCABULARY);
 
 		return assetVocabularyLocalService.addVocabulary(
@@ -70,7 +73,7 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 			long groupId, String title, ServiceContext serviceContext)
 		throws PortalException {
 
-		AssetCategoriesPermission.check(
+		_portletResourcePermission.check(
 			getPermissionChecker(), groupId, ActionKeys.ADD_VOCABULARY);
 
 		return assetVocabularyLocalService.addVocabulary(
@@ -86,7 +89,7 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 
 		for (long vocabularyId : vocabularyIds) {
 			try {
-				AssetVocabularyPermission.check(
+				_modelResourcePermission.check(
 					getPermissionChecker(), vocabularyId, ActionKeys.DELETE);
 
 				assetVocabularyLocalService.deleteVocabulary(vocabularyId);
@@ -117,7 +120,7 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 
 	@Override
 	public void deleteVocabulary(long vocabularyId) throws PortalException {
-		AssetVocabularyPermission.check(
+		_modelResourcePermission.check(
 			getPermissionChecker(), vocabularyId, ActionKeys.DELETE);
 
 		assetVocabularyLocalService.deleteVocabulary(vocabularyId);
@@ -131,7 +134,7 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 			assetVocabularyLocalService.fetchAssetVocabulary(vocabularyId);
 
 		if (vocabulary != null) {
-			AssetVocabularyPermission.check(
+			_modelResourcePermission.check(
 				getPermissionChecker(), vocabulary, ActionKeys.VIEW);
 		}
 
@@ -337,7 +340,7 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 	public AssetVocabulary getVocabulary(long vocabularyId)
 		throws PortalException {
 
-		AssetVocabularyPermission.check(
+		_modelResourcePermission.check(
 			getPermissionChecker(), vocabularyId, ActionKeys.VIEW);
 
 		return assetVocabularyLocalService.getVocabulary(vocabularyId);
@@ -394,7 +397,7 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		AssetVocabularyPermission.check(
+		_modelResourcePermission.check(
 			getPermissionChecker(), vocabularyId, ActionKeys.UPDATE);
 
 		return assetVocabularyLocalService.updateVocabulary(
@@ -419,7 +422,7 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 		while (itr.hasNext()) {
 			AssetVocabulary vocabulary = itr.next();
 
-			if (!AssetVocabularyPermission.contains(
+			if (!_modelResourcePermission.contains(
 					permissionChecker, vocabulary, ActionKeys.VIEW)) {
 
 				itr.remove();
@@ -428,5 +431,15 @@ public class AssetVocabularyServiceImpl extends AssetVocabularyServiceBaseImpl {
 
 		return vocabularies;
 	}
+
+	private static volatile ModelResourcePermission<AssetVocabulary>
+		_modelResourcePermission = ModelResourcePermissionFactory.getInstance(
+			AssetVocabularyServiceImpl.class, "_modelResourcePermission",
+			AssetVocabulary.class);
+	private static volatile PortletResourcePermission
+		_portletResourcePermission =
+			PortletResourcePermissionFactory.getInstance(
+				AssetVocabularyServiceImpl.class, "_portletResourcePermission",
+				AssetConstants.RESOURCE_NAME_CATEGORIES);
 
 }

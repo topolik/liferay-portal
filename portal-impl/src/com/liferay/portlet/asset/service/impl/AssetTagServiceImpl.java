@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.asset.service.impl;
 
+import com.liferay.asset.kernel.constants.AssetConstants;
 import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.model.AssetTagDisplay;
 import com.liferay.petra.string.StringPool;
@@ -25,12 +26,13 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.Autocomplete;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portlet.asset.service.base.AssetTagServiceBaseImpl;
-import com.liferay.portlet.asset.service.permission.AssetTagsPermission;
 import com.liferay.portlet.asset.util.comparator.AssetTagNameComparator;
 import com.liferay.util.dao.orm.CustomSQLUtil;
 
@@ -57,7 +59,7 @@ public class AssetTagServiceImpl extends AssetTagServiceBaseImpl {
 			long groupId, String name, ServiceContext serviceContext)
 		throws PortalException {
 
-		AssetTagsPermission.check(
+		_portletResourcePermission.check(
 			getPermissionChecker(), groupId, ActionKeys.ADD_TAG);
 
 		return assetTagLocalService.addTag(
@@ -284,5 +286,11 @@ public class AssetTagServiceImpl extends AssetTagServiceBaseImpl {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		AssetTagServiceImpl.class);
+
+	private static volatile PortletResourcePermission
+		_portletResourcePermission =
+			PortletResourcePermissionFactory.getInstance(
+				AssetTagServiceImpl.class, "_portletResourcePermission",
+				AssetConstants.RESOURCE_NAME_TAGS);
 
 }

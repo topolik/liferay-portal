@@ -14,13 +14,13 @@
 
 package com.liferay.portlet.asset.service.permission;
 
+import com.liferay.asset.kernel.constants.AssetConstants;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.permission.BaseResourcePermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
-import com.liferay.portlet.asset.constants.AssetConstants;
 
 /**
  * @author Pavel Savinov
