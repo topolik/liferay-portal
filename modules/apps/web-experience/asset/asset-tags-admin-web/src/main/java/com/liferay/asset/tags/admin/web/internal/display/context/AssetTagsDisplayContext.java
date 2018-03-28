@@ -18,6 +18,7 @@ import com.liferay.asset.kernel.model.AssetTag;
 import com.liferay.asset.kernel.service.AssetEntryLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetTagLocalServiceUtil;
 import com.liferay.asset.kernel.service.AssetTagServiceUtil;
+import com.liferay.asset.tags.admin.web.internal.security.permission.resource.AssetTagsPermission;
 import com.liferay.asset.tags.constants.AssetTagsAdminPortletKeys;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItem;
 import com.liferay.petra.string.StringPool;
@@ -39,7 +40,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portlet.asset.service.permission.AssetTagsPermission;
 import com.liferay.portlet.asset.util.comparator.AssetTagAssetCountComparator;
 import com.liferay.portlet.asset.util.comparator.AssetTagNameComparator;
 
@@ -317,8 +317,6 @@ public class AssetTagsDisplayContext {
 
 		if (AssetTagsPermission.contains(
 				themeDisplay.getPermissionChecker(),
-				AssetTagsPermission.RESOURCE_NAME,
-				AssetTagsAdminPortletKeys.ASSET_TAGS_ADMIN,
 				themeDisplay.getSiteGroupId(), ActionKeys.ADD_TAG)) {
 
 			return true;
