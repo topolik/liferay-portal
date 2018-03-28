@@ -7,5 +7,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
 >
+	<bean class="com.liferay.portlet.asset.security.permission.resource.AssetCategoriesPortletResourcePermissionRegistrar" id="com.liferay.portlet.asset.security.permission.resource.AssetCategoriesPortletResourcePermissionRegistrar" />
+	<bean class="com.liferay.portlet.asset.security.permission.resource.AssetCategoryModelResourcePermission" id="com.liferay.portlet.asset.security.permission.resource.AssetCategoryModelResourcePermission" />
+	<bean class="com.liferay.portlet.asset.security.permission.resource.AssetTagsPortletResourcePermissionRegistrar" id="com.liferay.portlet.asset.security.permission.resource.AssetTagsPortletResourcePermissionRegistrar" />
+	<bean class="com.liferay.portlet.asset.security.permission.resource.AssetVocabularyModelResourcePermission" id="com.liferay.portlet.asset.security.permission.resource.AssetVocabularyModelResourcePermission" />
 	<bean class="com.liferay.portlet.asset.validator.AssetEntryValidatorRegistry" id="com.liferay.portlet.asset.validator.AssetEntryValidatorRegistry" />
 </beans>

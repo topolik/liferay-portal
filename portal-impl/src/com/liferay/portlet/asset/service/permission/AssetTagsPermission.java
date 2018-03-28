@@ -15,15 +15,18 @@
 package com.liferay.portlet.asset.service.permission;
 
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.BaseResourcePermissionChecker;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
 import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
 import com.liferay.portlet.asset.constants.AssetConstants;
 
 /**
  * @author Pavel Savinov
+ * @deprecated As of 7.0.0, with no direct replacement
  */
+@Deprecated
 @OSGiBeanProperties(
 	property = {"resource.name=" + AssetConstants.RESOURCE_NAME_TAGS}
 )
@@ -36,23 +39,28 @@ public class AssetTagsPermission extends BaseResourcePermissionChecker {
 			PermissionChecker permissionChecker, long groupId, String actionId)
 		throws PortalException {
 
-		if (!contains(permissionChecker, groupId, actionId)) {
-			throw new PrincipalException.MustHavePermission(
-				permissionChecker, RESOURCE_NAME, groupId, actionId);
-		}
+		_portletResourcePermission.check(permissionChecker, groupId, actionId);
 	}
 
 	public static boolean contains(
 		PermissionChecker permissionChecker, long groupId, String actionId) {
 
-		return contains(permissionChecker, RESOURCE_NAME, groupId, actionId);
+		return _portletResourcePermission.contains(
+			permissionChecker, groupId, actionId);
 	}
 
 	@Override
 	public Boolean checkResource(
 		PermissionChecker permissionChecker, long classPK, String actionId) {
 
-		return contains(permissionChecker, classPK, actionId);
+		return _portletResourcePermission.contains(
+			permissionChecker, classPK, actionId);
 	}
+
+	private static volatile PortletResourcePermission
+		_portletResourcePermission =
+			PortletResourcePermissionFactory.getInstance(
+				AssetTagsPermission.class, "_portletResourcePermission",
+				AssetConstants.RESOURCE_NAME_TAGS);
 
 }

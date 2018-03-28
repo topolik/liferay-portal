@@ -15,15 +15,17 @@
 package com.liferay.portlet.asset.service.permission;
 
 import com.liferay.asset.kernel.model.AssetVocabulary;
-import com.liferay.asset.kernel.service.AssetVocabularyLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 
 /**
  * @author Eduardo Lundgren
  * @author JorgeFerrer
+ * @deprecated As of 7.1.0, with no direct replacement
  */
+@Deprecated
 public class AssetVocabularyPermission {
 
 	public static void check(
@@ -31,11 +33,7 @@ public class AssetVocabularyPermission {
 			String actionId)
 		throws PortalException {
 
-		if (!contains(permissionChecker, vocabulary, actionId)) {
-			throw new PrincipalException.MustHavePermission(
-				permissionChecker, AssetVocabulary.class.getName(),
-				vocabulary.getVocabularyId(), actionId);
-		}
+		_modelResourcePermission.check(permissionChecker, vocabulary, actionId);
 	}
 
 	public static void check(
@@ -43,28 +41,17 @@ public class AssetVocabularyPermission {
 			String actionId)
 		throws PortalException {
 
-		if (!contains(permissionChecker, vocabularyId, actionId)) {
-			throw new PrincipalException.MustHavePermission(
-				permissionChecker, AssetVocabulary.class.getName(),
-				vocabularyId, actionId);
-		}
+		_modelResourcePermission.check(
+			permissionChecker, vocabularyId, actionId);
 	}
 
 	public static boolean contains(
-		PermissionChecker permissionChecker, AssetVocabulary vocabulary,
-		String actionId) {
+			PermissionChecker permissionChecker, AssetVocabulary vocabulary,
+			String actionId)
+		throws PortalException {
 
-		if (permissionChecker.hasOwnerPermission(
-				vocabulary.getCompanyId(), AssetVocabulary.class.getName(),
-				vocabulary.getVocabularyId(), vocabulary.getUserId(),
-				actionId)) {
-
-			return true;
-		}
-
-		return permissionChecker.hasPermission(
-			vocabulary.getGroupId(), AssetVocabulary.class.getName(),
-			vocabulary.getVocabularyId(), actionId);
+		return _modelResourcePermission.contains(
+			permissionChecker, vocabulary, actionId);
 	}
 
 	public static boolean contains(
@@ -72,10 +59,14 @@ public class AssetVocabularyPermission {
 			String actionId)
 		throws PortalException {
 
-		AssetVocabulary vocabulary =
-			AssetVocabularyLocalServiceUtil.getVocabulary(vocabularyId);
-
-		return contains(permissionChecker, vocabulary, actionId);
+		return _modelResourcePermission.contains(
+			permissionChecker, vocabularyId, actionId);
 	}
+
+	private static volatile ModelResourcePermission<AssetVocabulary>
+		_modelResourcePermission =
+			ModelResourcePermissionFactory.getInstance(
+				AssetVocabularyPermission.class, "_modelResourcePermission",
+				AssetVocabulary.class);
 
 }

@@ -16,16 +16,19 @@ package com.liferay.portlet.asset.service.permission;
 
 import com.liferay.asset.kernel.model.AssetCategory;
 import com.liferay.asset.kernel.model.AssetCategoryConstants;
-import com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.security.auth.PrincipalException;
-import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.util.PropsValues;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
+import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
+import com.liferay.portlet.asset.constants.AssetConstants;
 
 /**
  * @author Eduardo Lundgren
+ * @deprecated As of 7.1.0, with no direct replacement
  */
+@Deprecated
 public class AssetCategoryPermission {
 
 	public static void check(
@@ -33,11 +36,7 @@ public class AssetCategoryPermission {
 			String actionId)
 		throws PortalException {
 
-		if (!contains(permissionChecker, category, actionId)) {
-			throw new PrincipalException.MustHavePermission(
-				permissionChecker, AssetCategory.class.getName(),
-				category.getCategoryId(), actionId);
-		}
+		_modelResourcePermission.check(permissionChecker, category, actionId);
 	}
 
 	public static void check(
@@ -45,10 +44,13 @@ public class AssetCategoryPermission {
 			String actionId)
 		throws PortalException {
 
-		if (!contains(permissionChecker, groupId, categoryId, actionId)) {
-			throw new PrincipalException.MustHavePermission(
-				permissionChecker, AssetCategory.class.getName(), categoryId,
-				actionId);
+		if (categoryId == AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
+			_portletResourcePermission.check(
+				permissionChecker, groupId, actionId);
+		}
+		else {
+			_modelResourcePermission.check(
+				permissionChecker, categoryId, actionId);
 		}
 	}
 
@@ -57,11 +59,8 @@ public class AssetCategoryPermission {
 			String actionId)
 		throws PortalException {
 
-		if (!contains(permissionChecker, categoryId, actionId)) {
-			throw new PrincipalException.MustHavePermission(
-				permissionChecker, AssetCategory.class.getName(), categoryId,
-				actionId);
-		}
+		_modelResourcePermission.check(
+			permissionChecker, categoryId, actionId);
 	}
 
 	public static boolean contains(
@@ -69,39 +68,8 @@ public class AssetCategoryPermission {
 			String actionId)
 		throws PortalException {
 
-		if (actionId.equals(ActionKeys.VIEW) &&
-			!AssetVocabularyPermission.contains(
-				permissionChecker, category.getVocabularyId(),
-				ActionKeys.VIEW)) {
-
-			return false;
-		}
-
-		if (actionId.equals(ActionKeys.VIEW) &&
-			PropsValues.PERMISSIONS_VIEW_DYNAMIC_INHERITANCE) {
-
-			while (true) {
-				if (!_hasPermission(permissionChecker, category, actionId)) {
-					return false;
-				}
-
-				long parentCategoryId = category.getParentCategoryId();
-
-				if (parentCategoryId ==
-						AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
-
-					break;
-				}
-
-				category = AssetCategoryLocalServiceUtil.getCategory(
-					parentCategoryId);
-			}
-
-			return AssetVocabularyPermission.contains(
-				permissionChecker, category.getVocabularyId(), actionId);
-		}
-
-		return _hasPermission(permissionChecker, category, actionId);
+		return _modelResourcePermission.contains(
+			permissionChecker, category, actionId);
 	}
 
 	public static boolean contains(
@@ -110,11 +78,12 @@ public class AssetCategoryPermission {
 		throws PortalException {
 
 		if (categoryId == AssetCategoryConstants.DEFAULT_PARENT_CATEGORY_ID) {
-			return AssetCategoriesPermission.contains(
+			return _portletResourcePermission.contains(
 				permissionChecker, groupId, actionId);
 		}
 		else {
-			return contains(permissionChecker, categoryId, actionId);
+			return _modelResourcePermission.contains(
+				permissionChecker, categoryId, actionId);
 		}
 	}
 
@@ -123,27 +92,20 @@ public class AssetCategoryPermission {
 			String actionId)
 		throws PortalException {
 
-		AssetCategory category = AssetCategoryLocalServiceUtil.getCategory(
-			categoryId);
-
-		return contains(permissionChecker, category, actionId);
+		return _modelResourcePermission.contains(
+			permissionChecker, categoryId, actionId);
 	}
 
-	private static boolean _hasPermission(
-		PermissionChecker permissionChecker, AssetCategory category,
-		String actionId) {
+	private static volatile ModelResourcePermission<AssetCategory>
+		_modelResourcePermission =
+			ModelResourcePermissionFactory.getInstance(
+				AssetCategoryPermission.class, "_modelResourcePermission",
+				AssetCategory.class);
 
-		if (permissionChecker.hasOwnerPermission(
-				category.getCompanyId(), AssetCategory.class.getName(),
-				category.getCategoryId(), category.getUserId(), actionId) ||
-			permissionChecker.hasPermission(
-				category.getGroupId(), AssetCategory.class.getName(),
-				category.getCategoryId(), actionId)) {
-
-			return true;
-		}
-
-		return false;
-	}
-
+	private static volatile PortletResourcePermission
+		_portletResourcePermission =
+			PortletResourcePermissionFactory.getInstance(
+				AssetCategoryPermission.class,
+				"_portletResourcePermission",
+				AssetConstants.RESOURCE_NAME_CATEGORIES);
 }
