@@ -94,6 +94,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import javax.naming.Binding;
+import javax.naming.InvalidNameException;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingEnumeration;
 import javax.naming.directory.Attribute;
@@ -101,6 +102,8 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapContext;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 
 import org.apache.commons.lang.time.StopWatch;
 
@@ -651,6 +654,16 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 		}
 	}
 
+	protected String cleanupLdapName(String name) throws InvalidNameException {
+		LdapName ldapNameString = new LdapName(name);
+
+		List<Rdn> rdns = ldapNameString.getRdns();
+
+		LdapName ldapNameRdns = new LdapName(rdns);
+
+		return ldapNameRdns.toString();
+	}
+
 	protected String escapeValue(String value) {
 		return StringUtil.replace(value, _UNESCAPED_CHARS, _ESCAPED_CHARS);
 	}
@@ -981,6 +994,8 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 				user.getEmailAddress());
 
 			String fullUserDN = binding.getNameInNamespace();
+
+			fullUserDN = cleanupLdapName(fullUserDN);
 
 			sb.append(escapeValue(fullUserDN));
 
@@ -1702,15 +1717,17 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 	};
 
 	private static final String[] _ESCAPED_CHARS = {
-		"\\\\,", "\\\\#", "\\\\+", "\\\\<", "\\\\>", "\\\\;", "\\\\=", "\\\\ "
+		"\\\\\\\\\\\\", "\\\\\"", "\\\\,", "\\\\#", "\\\\+", "\\\\<", "\\\\>",
+		"\\\\;", "\\\\=", "\\\\ "
 	};
 
 	private static final String _IMPORT_BY_GROUP = "group";
 
 	private static final String _IMPORT_BY_USER = "user";
 
-	private static final String[] _UNESCAPED_CHARS =
-		{"\\,", "\\#", "\\+", "\\<", "\\>", "\\;", "\\=", "\\ "};
+	private static final String[] _UNESCAPED_CHARS = {
+		"\\\\\\", "\\\"", "\\,", "\\#", "\\+", "\\<", "\\>", "\\;", "\\=", "\\ "
+	};
 
 	private static final String _USER_PASSWORD_SCREEN_NAME = "screenName";
 
