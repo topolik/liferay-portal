@@ -1717,7 +1717,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 	};
 
 	private static final String[] _ESCAPED_CHARS = {
-		"\\\\\\\\\\\\", "\\\\\"", "\\\\,", "\\\\#", "\\\\+", "\\\\<", "\\\\>",
+		"\\\\\\\\", "\\\\\"", "\\\\,", "\\\\#", "\\\\+", "\\\\<", "\\\\>",
 		"\\\\;", "\\\\=", "\\\\ "
 	};
 
@@ -1726,7 +1726,7 @@ public class LDAPUserImporterImpl implements LDAPUserImporter, UserImporter {
 	private static final String _IMPORT_BY_USER = "user";
 
 	private static final String[] _UNESCAPED_CHARS = {
-		"\\\\\\", "\\\"", "\\,", "\\#", "\\+", "\\<", "\\>", "\\;", "\\=", "\\ "
+		"\\\\", "\\\"", "\\,", "\\#", "\\+", "\\<", "\\>", "\\;", "\\=", "\\ "
 	};
 
 	private static final String _USER_PASSWORD_SCREEN_NAME = "screenName";
