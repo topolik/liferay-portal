@@ -54,7 +54,7 @@
 
 									<div aria-labelledby="appsAccordionHeading<%= applicationNameHtmlId %>" class="collapse panel-collapse" id="appsAccordion<%= applicationNameHtmlId %>" role="tabpanel">
 										<div class="panel-body">
-											<%@ include file="/admin/assign_scopes_tab1_app_scopes.jsp" %>
+											<%@ include file="/admin/assign_scopes_tab1_app_scopes.jspf" %>
 										</div>
 									</div>
 								</div>

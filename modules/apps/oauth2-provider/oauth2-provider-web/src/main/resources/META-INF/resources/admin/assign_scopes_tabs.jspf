@@ -25,10 +25,10 @@
 
 <div class="tab-content">
 	<div aria-labelledby="navResourceScopesTab" class="active fade show tab-pane" id="navResourceScopes" role="tabpanel">
-		<%@ include file="/admin/assign_scopes_tab1.jsp" %>
+		<%@ include file="/admin/assign_scopes_tab1.jspf" %>
 	</div>
 
 	<div aria-labelledby="navGlobalScopesTab" class="fade tab-pane" id="navGlobalScopes" role="tabpanel">
-		<%@ include file="/admin/assign_scopes_tab2.jsp" %>
+		<%@ include file="/admin/assign_scopes_tab2.jspf" %>
 	</div>
 </div>

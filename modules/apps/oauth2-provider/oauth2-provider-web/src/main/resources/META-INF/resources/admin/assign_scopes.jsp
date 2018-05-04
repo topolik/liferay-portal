@@ -67,7 +67,7 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 				<aui:input name="oAuth2ApplicationId" type="hidden" value="<%= oAuth2ApplicationId %>" />
 
 				<aui:fieldset-group markupView="lexicon">
-					<%@ include file="/admin/assign_scopes_tabs.jsp" %>
+					<%@ include file="/admin/assign_scopes_tabs.jspf" %>
 
 					<aui:button-row>
 						<aui:button cssClass="btn-lg" type="submit" />
