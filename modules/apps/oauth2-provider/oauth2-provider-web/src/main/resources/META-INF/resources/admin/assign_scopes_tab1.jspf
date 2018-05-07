@@ -22,13 +22,7 @@
 				List<Map.Entry<String, String>> applicationsNamesDescriptionsList =
 					new ArrayList<>(applicationNamesDescriptions.entrySet());
 
-				applicationsNamesDescriptionsList.sort(
-					new Comparator<Map.Entry<String, String>>() {
-
-						@Override
-						public int compare(Map.Entry<String, String> entry1, Map.Entry<String, String> entry2) {
-							return entry1.getValue().compareTo(entry2.getValue());
-						}});
+				applicationsNamesDescriptionsList.sort(Comparator.comparing(Map.Entry::getValue));
 
 				for (Map.Entry<String, String> applicationNameDescriptionEntry : applicationsNamesDescriptionsList) {
 					String applicationName = applicationNameDescriptionEntry.getKey();
