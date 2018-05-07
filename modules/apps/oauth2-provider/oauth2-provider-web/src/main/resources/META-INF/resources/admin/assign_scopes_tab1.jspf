@@ -14,47 +14,42 @@
  */
 --%>
 
-							<div aria-orientation="vertical" class="panel-group" id="appsAccordion" role="tablist">
+<div aria-orientation="vertical" class="panel-group" id="appsAccordion" role="tablist">
+	<%
+	Map<String, String> applicationNamesDescriptions = assignScopesModel.getApplicationNamesDescriptions();
 
-			<%
-				Map<String, String> applicationNamesDescriptions = assignScopesModel.getApplicationNamesDescriptions();
+	List<Map.Entry<String, String>> applicationsNamesDescriptionsList = new ArrayList<>(applicationNamesDescriptions.entrySet());
 
-				List<Map.Entry<String, String>> applicationsNamesDescriptionsList =
-					new ArrayList<>(applicationNamesDescriptions.entrySet());
+	applicationsNamesDescriptionsList.sort(Comparator.comparing(Map.Entry::getValue));
 
-				applicationsNamesDescriptionsList.sort(Comparator.comparing(Map.Entry::getValue));
+	for (Map.Entry<String, String> applicationNameDescriptionEntry : applicationsNamesDescriptionsList) {
+		String applicationName = applicationNameDescriptionEntry.getKey();
+		String applicationNameHtmlId = HtmlUtil.getAUICompatibleId(applicationNameDescriptionEntry.getKey());
 
-				for (Map.Entry<String, String> applicationNameDescriptionEntry : applicationsNamesDescriptionsList) {
-					String applicationName = applicationNameDescriptionEntry.getKey();
-					String applicationNameHtmlId = HtmlUtil.getAUICompatibleId(applicationNameDescriptionEntry.getKey());
+		String applicationDescription = applicationNameDescriptionEntry.getValue();
+		%>
+			<div class="panel panel-secondary">
+				<a aria-controls="appsAccordion<%= applicationNameHtmlId %>" aria-expanded="false" class="collapse-icon collapsed panel-header panel-header-link" data-parent="#appsAccordion" data-toggle="collapse" href="#appsAccordion<%= applicationNameHtmlId %>" id="appsAccordionHeading<%= applicationNameHtmlId %>" role="tab">
+					<span class="panel-title"><%= HtmlUtil.escape(applicationDescription) %></span>
+					<span class="collapse-icon-closed">
+						<svg aria-hidden="true" class="lexicon-icon lexicon-icon-angle-right">
+							<use xlink:href="/vendor/lexicon/icons.svg#angle-right" />
+						</svg>
+					</span>
+					<span class="collapse-icon-open">
+						<svg aria-hidden="true" class="lexicon-icon lexicon-icon-angle-down">
+							<use xlink:href="/vendor/lexicon/icons.svg#angle-down" />
+						</svg>
+					</span>
+				</a>
 
-					String applicationDescription = applicationNameDescriptionEntry.getValue();
-					%>
-
-								<div class="panel panel-secondary">
-									<a aria-controls="appsAccordion<%= applicationNameHtmlId %>" aria-expanded="false" class="collapse-icon collapsed panel-header panel-header-link" data-parent="#appsAccordion" data-toggle="collapse" href="#appsAccordion<%= applicationNameHtmlId %>" id="appsAccordionHeading<%= applicationNameHtmlId %>" role="tab">
-										<span class="panel-title"><%= HtmlUtil.escape(applicationDescription) %></span>
-										<span class="collapse-icon-closed">
-											<svg aria-hidden="true" class="lexicon-icon lexicon-icon-angle-right">
-												<use xlink:href="/vendor/lexicon/icons.svg#angle-right" />
-											</svg>
-										</span>
-										<span class="collapse-icon-open">
-											<svg aria-hidden="true" class="lexicon-icon lexicon-icon-angle-down">
-												<use xlink:href="/vendor/lexicon/icons.svg#angle-down" />
-											</svg>
-										</span>
-									</a>
-
-									<div aria-labelledby="appsAccordionHeading<%= applicationNameHtmlId %>" class="collapse panel-collapse" id="appsAccordion<%= applicationNameHtmlId %>" role="tabpanel">
-										<div class="panel-body">
-											<%@ include file="/admin/assign_scopes_tab1_app_scopes.jspf" %>
-										</div>
-									</div>
-								</div>
-
-					<%
-				}
-			%>
-
-							</div>
+				<div aria-labelledby="appsAccordionHeading<%= applicationNameHtmlId %>" class="collapse panel-collapse" id="appsAccordion<%= applicationNameHtmlId %>" role="tabpanel">
+					<div class="panel-body">
+						<%@ include file="/admin/assign_scopes_tab1_app_scopes.jspf" %>
+					</div>
+				</div>
+			</div>
+		<%
+	}
+	%>
+</div>
