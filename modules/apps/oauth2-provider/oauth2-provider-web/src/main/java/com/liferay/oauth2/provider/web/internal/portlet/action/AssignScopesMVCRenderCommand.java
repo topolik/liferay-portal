@@ -57,7 +57,7 @@ public class AssignScopesMVCRenderCommand implements MVCRenderCommand {
 		renderRequest.setAttribute(
 			OAuth2ProviderWebKeys.ASSIGN_SCOPES_MODEL, assignScopesModel);
 
-		return "/admin/assign_scopes.jsp";
+		return "/admin/edit_application.jsp";
 	}
 
 	@Reference

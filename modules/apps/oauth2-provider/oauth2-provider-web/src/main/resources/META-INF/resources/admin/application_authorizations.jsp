@@ -14,29 +14,7 @@
  */
 --%>
 
-<%@ include file="/admin/init.jsp" %>
-
 <%
-String redirect = ParamUtil.getString(request, "redirect");
-
-portletDisplay.setShowBackIcon(true);
-portletDisplay.setURLBack(redirect);
-
-// Instead of doing a return here we should have an MVCRenderCommand that checks
-// this permissions and decides whether or not we should dispatch to the
-// application_authorization.jsp or to some error.jsp, but we shouldn't have a
-// return here.
-
-if (!oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission()) {
-	return;
-}
-
-long oAuth2ApplicationId = ParamUtil.getLong(request, "oAuth2ApplicationId", 0);
-
-OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2Application();
-
-renderResponse.setTitle(LanguageUtil.format(request, "x-authorizations", new String[] {oAuth2Application.getName()}));
-
 OAuth2AuthorizationsManagementToolbarDisplayContext oAuth2AuthorizationsManagementToolbarDisplayContext = new OAuth2AuthorizationsManagementToolbarDisplayContext(liferayPortletRequest, liferayPortletResponse, currentURLObj);
 
 int oAuth2AuthorizationsCount = OAuth2AuthorizationServiceUtil.getApplicationOAuth2AuthorizationsCount(oAuth2ApplicationId);

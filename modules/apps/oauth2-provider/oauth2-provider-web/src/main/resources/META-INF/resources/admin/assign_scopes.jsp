@@ -14,20 +14,7 @@
  */
 --%>
 
-<%@ include file="/admin/init.jsp" %>
-
 <%
-String redirect = ParamUtil.getString(request, "redirect");
-
-long oAuth2ApplicationId = ParamUtil.getLong(request, "oAuth2ApplicationId");
-
-OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2Application();
-
-portletDisplay.setShowBackIcon(true);
-portletDisplay.setURLBack(redirect);
-
-renderResponse.setTitle(LanguageUtil.get(request, "assign-scopes"));
-
 AssignScopesModel assignScopesModel = (AssignScopesModel)request.getAttribute(OAuth2ProviderWebKeys.ASSIGN_SCOPES_MODEL);
 
 List<String> assignedScopes = Collections.emptyList();
@@ -42,11 +29,14 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 <div class="container-fluid container-fluid-max-xl container-view">
 	<div class="row">
 		<div class="col-lg-12">
-			<portlet:actionURL name="/admin/assign_scopes" var="assignScopesURL" />
+			<portlet:actionURL name="/admin/assign_scopes" var="assignScopesURL">				
+				<portlet:param name="appTab" value="scopes" />
+				<portlet:param name="mvcRenderCommandName" value="/admin/assign_scopes" />
+				<portlet:param name="oAuth2ApplicationId" value='<%= String.valueOf(oAuth2ApplicationId) %>' />
+				<portlet:param name="uRLBack" value='<%= redirect %>'/>
+			</portlet:actionURL>
 
 			<aui:form action="<%= assignScopesURL %>" name="fm">
-				<aui:input name="oAuth2ApplicationId" type="hidden" value="<%= oAuth2ApplicationId %>" />
-
 				<div class="sheet">
 					<%--I think there's probably a taglib for this navigation?--%>
 					<ul class="nav nav-underline" role="tablist">
