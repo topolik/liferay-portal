@@ -32,8 +32,8 @@ if (oAuth2Application != null) {
 
 renderResponse.setTitle(headerTitle);
 
-String clientId = oAuth2Application == null ? "" : oAuth2Application.getClientId();
-String clientSecret = oAuth2Application == null ? "" : oAuth2Application.getClientSecret();
+String clientId = (oAuth2Application == null) ? "" : oAuth2Application.getClientId();
+String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getClientSecret();
 %>
 
 <portlet:actionURL name="/admin/update_oauth2_application" var="updateOAuth2ApplicationURL" />
@@ -83,7 +83,7 @@ String clientSecret = oAuth2Application == null ? "" : oAuth2Application.getClie
 
 					<c:if test="<%= oAuth2Application != null %>">
 						<aui:fieldset>
-							<aui:input name="oAuth2ApplicationId" type="hidden" value='<%= oAuth2Application == null ? "" : oAuth2Application.getOAuth2ApplicationId() %>' />
+							<aui:input name="oAuth2ApplicationId" type="hidden" value='<%= (oAuth2Application == null) ? "" : oAuth2Application.getOAuth2ApplicationId() %>' />
 
 							<aui:input name="clientId" readonly="true" required="<%= true %>" type="text" />
 
@@ -147,6 +147,7 @@ String clientSecret = oAuth2Application == null ? "" : oAuth2Application.getClie
 				<div class="col-lg-12">
 					<aui:button-row>
 						<aui:button cssClass="btn-lg" type="submit" />
+
 						<aui:button cssClass="btn-lg" href="<%= portletDisplay.getURLBack() %>" type="cancel" />
 					</aui:button-row>
 				</div>
@@ -155,6 +156,7 @@ String clientSecret = oAuth2Application == null ? "" : oAuth2Application.getClie
 	</div>
 </aui:form>
 
+<%--We cannot have inline styles--%>
 <div style="display: none">
 	<aui:form action="" id="<portlet:namespace />edit-client-id-fm" name="edit-client-id-fm">
 		<div>
@@ -186,6 +188,7 @@ String clientSecret = oAuth2Application == null ? "" : oAuth2Application.getClie
 		</div>
 	</aui:form>
 
+	<%--I don't think that this id is working properly because aui form is already injecting the namespace and I think that <portlet:namespace /> is not being translated properly--%>
 	<aui:form action="" id="<portlet:namespace />edit-client-secret-fm" name="edit-client-secret-fm">
 		<div>
 			<div class="portlet-msg-error">
@@ -197,7 +200,9 @@ String clientSecret = oAuth2Application == null ? "" : oAuth2Application.getClie
 				<liferay-ui:message key="if-changed-clients-with-the-old-client-secret-will-no-longer-be-able-to-request-new-tokens-after-you-save-the-application-details" />
 			</div>
 
+			<%--We cannot have inline styles--%>
 			<div id="<portlet:namespace />clientSecretPadlock" style="flex: 1">
+					<%--We cannot have inline styles--%>
 				<div class="open" style="display:none">
 					<clay:icon symbol="unlock" /><liferay-ui:message key="changed" />
 				</div>
@@ -211,6 +216,7 @@ String clientSecret = oAuth2Application == null ? "" : oAuth2Application.getClie
 
 			<aui:button-row>
 				<aui:button href="" icon="icon-plus" onClick='<%= renderResponse.getNamespace() + "generateRandomSecret()" %>' value="generate-new-secret" />
+
 				<aui:button href="" icon="icon-undo" onClick='<%= renderResponse.getNamespace() + "setControlEqualTo('newClientSecret', 'originalClientSecret')" %>' value="revert" />
 			</aui:button-row>
 		</div>

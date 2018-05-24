@@ -84,6 +84,7 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class OAuth2AuthorizePortlet extends MVCPortlet {
 
+	// It would be better if this method was moved to MVCRenderCommand classes
 	@Override
 	public void doView(
 			RenderRequest renderRequest, RenderResponse renderResponse)

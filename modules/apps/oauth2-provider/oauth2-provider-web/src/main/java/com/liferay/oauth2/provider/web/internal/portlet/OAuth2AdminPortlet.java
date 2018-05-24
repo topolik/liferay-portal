@@ -70,6 +70,8 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class OAuth2AdminPortlet extends MVCPortlet {
 
+	// It would be better if this actions were moved to MVCActionCommand classes
+
 	public void deleteOAuth2Application(
 		ActionRequest request, ActionResponse response) {
 

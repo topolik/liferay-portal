@@ -48,6 +48,7 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 				<aui:input name="oAuth2ApplicationId" type="hidden" value="<%= oAuth2ApplicationId %>" />
 
 				<div class="sheet">
+					<%--I think there's probably a taglib for this navigation?--%>
 					<ul class="nav nav-underline" role="tablist">
 						<li class="nav-item">
 							<a aria-controls="<portlet:namespace />navResourceScopes" aria-expanded="true" class="active nav-link" data-toggle="tab" href="#<portlet:namespace />navResourceScopes" id="<portlet:namespace />navResourceScopesTab" role="tab">
@@ -73,6 +74,7 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 
 					<aui:button-row>
 						<aui:button cssClass="btn-lg" type="submit" />
+
 						<aui:button cssClass="btn-lg" href="<%= PortalUtil.escapeRedirect(redirect) %>" type="cancel" />
 					</aui:button-row>
 				</div>
@@ -82,7 +84,6 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 </div>
 
 <aui:script use="node,aui-modal,event-outside">
-
 	var appsAccordion = A.one('#appsAccordion');
 
 	var modal = new A.Modal(
@@ -103,7 +104,6 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 	appsAccordion.delegate(
 		'click',
 		function(event) {
-
 			event.stopPropagation();
 
 			if (handle) {
@@ -147,7 +147,6 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 	);
 
 	window.<portlet:namespace />recalculateDependants = function(checkboxElement) {
-
 		var checkbox = $(checkboxElement);
 
 		var value = checkbox.val();
@@ -182,7 +181,6 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 	}
 
 	window.<portlet:namespace />recalculateAll = function() {
-
 		var scopeAliasesCheckboxes = $('input[name="<portlet:namespace />scopeAliases"]');
 
 		for (var i = 0; i < scopeAliasesCheckboxes.length; i++) {
@@ -191,5 +189,4 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 	}
 
 	<portlet:namespace />recalculateAll();
-
 </aui:script>

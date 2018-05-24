@@ -34,9 +34,7 @@ String oAuth2ApplicationId = String.valueOf(oAuth2Application.getOAuth2Applicati
 	<c:if test="<%= oAuth2AdminPortletDisplayContext.hasUpdatePermission(oAuth2Application) %>">
 		<portlet:renderURL var="editURL">
 			<portlet:param name="oAuth2ApplicationId" value="<%= oAuth2ApplicationId %>" />
-
 			<portlet:param name="mvcPath" value="/admin/edit_application.jsp" />
-
 			<portlet:param name="redirect" value="<%= currentURL %>" />
 		</portlet:renderURL>
 

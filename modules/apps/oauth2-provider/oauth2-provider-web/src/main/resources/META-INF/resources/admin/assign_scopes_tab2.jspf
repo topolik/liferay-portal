@@ -19,13 +19,16 @@
 	<%
 	for (Map.Entry<AuthorizationModel, AssignScopesModel.Relations> scopeAliasAuthorizationModelEntry : assignScopesModel.getGlobalAuthorizationModelsRelations().entrySet()) {
 		String scopeAlias = scopeAliasAuthorizationModelEntry.getValue().getScopeAlias();
-		%>
+	%>
 
 		<div class="panel panel-secondary" id="<portlet:namespace /><%= scopeAlias %>">
 			<div class="collapse-icon panel-header panel-header-link" id="<portlet:namespace />globalAccordionHeading<%= scopeAlias %>">
 				<div class="custom-checkbox custom-control" style="display: inline-block;">
+
+					<%--We should be using aui:input instead of this label and input tags --%>
 					<label>
 						<input onChange="<portlet:namespace />recalculateDependants(this)" value="<%= HtmlUtil.escapeAttribute(scopeAlias) %>" <%= assignedScopes.contains(scopeAlias) ? "checked " : "" %>class="custom-control-input" name="<portlet:namespace />scopeAliases" type="checkbox">
+
 						<span class="custom-control-label">
 							<span class="custom-control-label-text panel-title"><%= HtmlUtil.escape(scopeAlias) %></span>
 						</span>
@@ -34,11 +37,13 @@
 
 				<a aria-controls="<portlet:namespace />globalAccordion<%= scopeAlias %>" aria-expanded="false" class="collapsed" data-parent="#<portlet:namespace />globalAccordion" data-toggle="collapse" href="#<portlet:namespace />globalAccordion<%= scopeAlias %>" role="tab">
 					<span>(<liferay-ui:message key="details" />)</span>
+
 					<span class="collapse-icon-closed">
 						<clay:icon
 							symbol="angle-right"
 						/>
 					</span>
+
 					<span class="collapse-icon-open">
 						<clay:icon
 							symbol="angle-down"
@@ -47,13 +52,14 @@
 				</a>
 			</div>
 
+			<%-- We should use panels here? --%>
 			<div aria-labelledby="<portlet:namespace />globalAccordionHeading<%= scopeAlias %>" class="collapse panel-collapse" id="<portlet:namespace />globalAccordion<%= scopeAlias %>" role="tabpanel">
 
 				<%
 				AuthorizationModel authorizationModel = scopeAliasAuthorizationModelEntry.getKey();
 
 				for (String applicationName : authorizationModel.getApplicationNames()) {
-					%>
+				%>
 
 					<ul>
 						<li>

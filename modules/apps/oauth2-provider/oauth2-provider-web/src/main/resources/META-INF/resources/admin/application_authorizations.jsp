@@ -22,6 +22,11 @@ String redirect = ParamUtil.getString(request, "redirect");
 portletDisplay.setShowBackIcon(true);
 portletDisplay.setURLBack(redirect);
 
+// Instead of doing a return here we should have an MVCRenderCommand that checks
+// this permissions and decides whether or not we should dispatch to the
+// application_authorization.jsp or to some error.jsp, but we shouldn't have a
+// return here.
+
 if (!oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission()) {
 	return;
 }

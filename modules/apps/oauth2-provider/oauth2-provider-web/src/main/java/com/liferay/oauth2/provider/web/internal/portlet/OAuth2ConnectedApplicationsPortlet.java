@@ -60,6 +60,7 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class OAuth2ConnectedApplicationsPortlet extends MVCPortlet {
 
+	// It would be better if this method was moved to MVCRenderCommand classes
 	@Override
 	public void render(
 			RenderRequest renderRequest, RenderResponse renderResponse)
@@ -78,6 +79,7 @@ public class OAuth2ConnectedApplicationsPortlet extends MVCPortlet {
 		super.render(renderRequest, renderResponse);
 	}
 
+	// It would be better if thes methods were moved to MVCActionCommand classes
 	public void revokeOAuth2Authorization(
 			ActionRequest request, ActionResponse response)
 		throws PortalException {
