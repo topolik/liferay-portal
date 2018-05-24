@@ -138,8 +138,8 @@ public class OAuth2AuthorizePortlet extends MVCPortlet {
 			AuthorizationModel authorizationModel = new AuthorizationModel(
 				_applicationDescriptorLocator, locale, _scopeDescriptorLocator);
 
-			locateLiferayOAuth2Scopes(
-				companyId, allowedScopeAliases, authorizationModel,
+			populateAuthorizationModel(
+				authorizationModel, companyId, allowedScopeAliases,
 				requestedScopeAliases);
 
 			oAuth2AuthorizePortletDisplayContext.setAuthorizationModel(
@@ -187,9 +187,9 @@ public class OAuth2AuthorizePortlet extends MVCPortlet {
 		return result;
 	}
 
-	protected void locateLiferayOAuth2Scopes(
-		long companyId, List<String> allowedScopeAliases,
-		AuthorizationModel authorizationModel, String[] requestedScopeAliases) {
+	protected void populateAuthorizationModel(
+		AuthorizationModel authorizationModel, long companyId,
+		List<String> allowedScopeAliases, String[] requestedScopeAliases) {
 
 		for (String requestedScopeAlias : requestedScopeAliases) {
 			if (!allowedScopeAliases.contains(requestedScopeAlias)) {
