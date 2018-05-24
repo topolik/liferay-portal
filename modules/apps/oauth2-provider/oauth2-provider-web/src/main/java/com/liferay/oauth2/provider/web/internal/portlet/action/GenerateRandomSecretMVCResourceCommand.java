@@ -14,7 +14,7 @@
 
 package com.liferay.oauth2.provider.web.internal.portlet.action;
 
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.OAuth2AdminPortletDisplayContext;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 

@@ -15,8 +15,8 @@
 package com.liferay.oauth2.provider.web.internal.portlet;
 
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationService;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderWebKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderWebKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.OAuth2ConnectedApplicationsPortletDisplayContext;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;

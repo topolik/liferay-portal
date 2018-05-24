@@ -17,7 +17,7 @@ package com.liferay.oauth2.provider.web.internal.application.list;
 import com.liferay.application.list.BasePanelApp;
 import com.liferay.application.list.PanelApp;
 import com.liferay.application.list.constants.PanelCategoryKeys;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
 import com.liferay.portal.kernel.model.Portlet;
 
 import org.osgi.service.component.annotations.Component;
