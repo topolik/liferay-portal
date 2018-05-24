@@ -128,8 +128,6 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 				OAuth2Application.class.getName(), request);
 
 			if (oAuth2ApplicationId == 0) {
-				clientId = name;
-
 				for (GrantType grantType : allowedGrantTypesList) {
 					if (!grantType.isSupportsPublicClients()) {
 						clientSecret =
