@@ -111,7 +111,7 @@ public class OAuth2AuthorizePortlet extends MVCPortlet {
 
 		try {
 			OAuth2Application oAuth2Application =
-				_oAuth2ApplicationService.fetchOAuth2Application(
+				_oAuth2ApplicationService.getOAuth2Application(
 					companyId, clientId);
 
 			oAuth2AuthorizePortletDisplayContext.setOAuth2Application(
