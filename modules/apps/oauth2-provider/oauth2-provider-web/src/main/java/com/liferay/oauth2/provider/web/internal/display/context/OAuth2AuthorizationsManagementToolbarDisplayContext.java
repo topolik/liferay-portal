@@ -52,10 +52,6 @@ public class OAuth2AuthorizationsManagementToolbarDisplayContext
 
 		dropdownItems.add(
 			dropdownItem -> {
-				LiferayPortletResponse liferayPortletResponse =
-					getLiferayPortletResponse();
-				HttpServletRequest httpServletRequest = getHttpServletRequest();
-
 				dropdownItem.setHref(
 					StringBundler.concat(
 						"javascript:", liferayPortletResponse.getNamespace(),
@@ -71,8 +67,6 @@ public class OAuth2AuthorizationsManagementToolbarDisplayContext
 	}
 
 	public List<DropdownItem> getFilterDropdownItems() {
-		HttpServletRequest httpServletRequest = getHttpServletRequest();
-
 		return new DropdownItemList() {
 			{
 				addGroup(
@@ -103,8 +97,6 @@ public class OAuth2AuthorizationsManagementToolbarDisplayContext
 	}
 
 	private List<DropdownItem> _getOrderByDropdownItems() {
-		HttpServletRequest httpServletRequest = getHttpServletRequest();
-
 		return new DropdownItemList() {
 			{
 				for (String orderByCol : _orderByColumns) {
