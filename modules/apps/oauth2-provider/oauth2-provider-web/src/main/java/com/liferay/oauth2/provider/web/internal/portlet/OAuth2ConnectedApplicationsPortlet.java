@@ -81,11 +81,11 @@ public class OAuth2ConnectedApplicationsPortlet extends MVCPortlet {
 
 	// It would be better if thes methods were moved to MVCActionCommand classes
 	public void revokeOAuth2Authorization(
-			ActionRequest request, ActionResponse response)
+			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws PortalException {
 
 		long oAuth2AuthorizationId = ParamUtil.getLong(
-			request, "oAuth2AuthorizationId");
+			actionRequest, "oAuth2AuthorizationId");
 
 		try {
 			_oAuth2AuthorizationService.revokeOAuth2Authorization(
@@ -96,15 +96,15 @@ public class OAuth2ConnectedApplicationsPortlet extends MVCPortlet {
 				_log.debug(pe);
 			}
 
-			SessionErrors.add(request, pe.getClass());
+			SessionErrors.add(actionRequest, pe.getClass());
 		}
 	}
 
 	public void revokeOAuth2Authorizations(
-		ActionRequest request, ActionResponse response) {
+		ActionRequest actionRequest, ActionResponse actionResponse) {
 
 		long[] oAuth2AuthorizationIds = StringUtil.split(
-			ParamUtil.getString(request, "oAuth2AuthorizationIds"), 0L);
+			ParamUtil.getString(actionRequest, "oAuth2AuthorizationIds"), 0L);
 
 		try {
 			for (long oAuth2AuthorizationId : oAuth2AuthorizationIds) {
@@ -117,7 +117,7 @@ public class OAuth2ConnectedApplicationsPortlet extends MVCPortlet {
 				_log.debug(pe);
 			}
 
-			SessionErrors.add(request, pe.getClass());
+			SessionErrors.add(actionRequest, pe.getClass());
 		}
 	}
 
