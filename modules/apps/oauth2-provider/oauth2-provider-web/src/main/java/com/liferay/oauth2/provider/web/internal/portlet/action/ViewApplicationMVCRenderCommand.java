@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -69,19 +70,10 @@ public class ViewApplicationMVCRenderCommand implements MVCRenderCommand {
 		long oAuth2AuthorizationId = ParamUtil.getLong(
 			request, "oAuth2AuthorizationId");
 
-		boolean found = false;
+		if (!ListUtil.exists(
+				userOAuth2Authorizations,
+				o -> o.getOAuth2AuthorizationId() == oAuth2AuthorizationId)) {
 
-		for (OAuth2Authorization oAuth2Authorization :
-				userOAuth2Authorizations) {
-
-			if (oAuth2Authorization.getOAuth2AuthorizationId() ==
-					oAuth2AuthorizationId) {
-
-				found = true;
-			}
-		}
-
-		if (!found) {
 			return "/connected_applications/view.jsp";
 		}
 
