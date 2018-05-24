@@ -74,7 +74,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 					allowedGrantTypesList = oAuth2Application.getAllowedGrantTypesList();
 				}
 
-				List<GrantType> oAuth2Grants = oAuth2AdminPortletDisplayContext.getOAuth2Grants(portletPreferences);
+				List<GrantType> oAuth2Grants = oAuth2AdminPortletDisplayContext.getGrantTypes(portletPreferences);
 
 				for (GrantType grantType : oAuth2Grants) {
 					Set<String> cssClasses = new HashSet<>();

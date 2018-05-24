@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,8 +66,6 @@ public class ViewApplicationMVCRenderCommand implements MVCRenderCommand {
 				themeDisplay.getUserId(), QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 				null);
 
-		List<Long> oAuth2ApplicationScopeAliasesIdList = new ArrayList<>();
-
 		long oAuth2AuthorizationId = ParamUtil.getLong(
 			request, "oAuth2AuthorizationId");
 
@@ -76,9 +73,6 @@ public class ViewApplicationMVCRenderCommand implements MVCRenderCommand {
 
 		for (OAuth2Authorization oAuth2Authorization :
 				userOAuth2Authorizations) {
-
-			oAuth2ApplicationScopeAliasesIdList.add(
-				oAuth2Authorization.getOAuth2ApplicationScopeAliasesId());
 
 			if (oAuth2Authorization.getOAuth2AuthorizationId() ==
 					oAuth2AuthorizationId) {

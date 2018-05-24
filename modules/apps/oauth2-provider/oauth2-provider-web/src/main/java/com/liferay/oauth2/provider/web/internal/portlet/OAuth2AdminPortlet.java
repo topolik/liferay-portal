@@ -119,8 +119,8 @@ public class OAuth2AdminPortlet extends MVCPortlet {
 
 		OAuth2AdminPortletDisplayContext oAuth2AdminPortletDisplayContext =
 			new OAuth2AdminPortletDisplayContext(
-				renderRequest, _oAuth2ApplicationService,
-				_oAuth2ProviderConfiguration, getThemeDisplay(renderRequest));
+				_oAuth2ApplicationService, _oAuth2ProviderConfiguration,
+				renderRequest, getThemeDisplay(renderRequest));
 
 		renderRequest.setAttribute(
 			OAuth2ProviderWebKeys.OAUTH2_ADMIN_PORTLET_DISPLAY_CONTEXT,
