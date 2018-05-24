@@ -24,10 +24,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -134,17 +132,6 @@ public class AuthorizationModel {
 		}
 
 		return applicationNames;
-	}
-
-	public Map<String, String> getApplicationNamesDescriptions() {
-		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
-
-		return stream.map(
-			LiferayOAuth2Scope::getApplicationName
-		).collect(
-			Collectors.toMap(
-				Function.identity(), this::getApplicationDescription)
-		);
 	}
 
 	public Set<String> getApplicationScopeDescription(String applicationName) {
