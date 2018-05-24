@@ -89,7 +89,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 
 					boolean checked = false;
 
-					if ((oAuth2Application != null) && allowedGrantTypesList.contains(grantType)) {
+					if ((oAuth2Application == null) || allowedGrantTypesList.contains(grantType)) {
 						checked = true;
 					}
 
