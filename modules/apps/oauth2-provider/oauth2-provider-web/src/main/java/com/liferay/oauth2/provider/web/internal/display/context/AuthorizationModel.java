@@ -201,19 +201,6 @@ public class AuthorizationModel {
 			_scopeDescriptorLocator);
 	}
 
-	private Set<String> _getApplicationScopes(String applicationName) {
-		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
-
-		return stream.filter(
-			liferayOAuth2Scope ->
-				applicationName.equals(liferayOAuth2Scope.getApplicationName())
-		).map(
-			LiferayOAuth2Scope::getScope
-		).collect(
-			Collectors.toSet()
-		);
-	}
-
 	private final ApplicationDescriptorLocator _applicationDescriptorLocator;
 	private Set<LiferayOAuth2Scope> _liferayOAuth2Scopes = new HashSet<>();
 	private final Locale _locale;
