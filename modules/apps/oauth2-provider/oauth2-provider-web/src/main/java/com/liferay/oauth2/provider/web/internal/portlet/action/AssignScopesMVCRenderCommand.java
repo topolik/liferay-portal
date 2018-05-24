@@ -51,9 +51,8 @@ public class AssignScopesMVCRenderCommand implements MVCRenderCommand {
 
 		AssignScopesModel assignScopesModel = new AssignScopesModel(
 			_applicationDescriptorLocator, themeDisplay.getLocale(),
-			themeDisplay.getCompanyId(),
-			_scopeDescriptorLocator, _scopeLocator
-		);
+			themeDisplay.getCompanyId(), _scopeDescriptorLocator,
+			_scopeLocator);
 
 		renderRequest.setAttribute(
 			OAuth2ProviderWebKeys.ASSIGN_SCOPES_MODEL, assignScopesModel);

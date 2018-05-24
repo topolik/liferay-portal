@@ -99,6 +99,23 @@ public class AuthorizationModel {
 		return true;
 	}
 
+	public AuthorizationModel getApplicationAuthorizationModel(
+		String applicationName) {
+
+		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
+
+		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = stream.filter(
+			liferayOAuth2Scope ->
+				applicationName.equals(liferayOAuth2Scope.getApplicationName())
+		).collect(
+			Collectors.toSet()
+		);
+
+		return new AuthorizationModel(
+			_applicationDescriptorLocator, liferayOAuth2Scopes, _locale,
+			_scopeDescriptorLocator);
+	}
+
 	public String getApplicationDescription(String applicationName) {
 		ApplicationDescriptor applicationDescriptor =
 			_applicationDescriptorLocator.getApplicationDescriptor(
@@ -159,23 +176,6 @@ public class AuthorizationModel {
 		return getApplicationNames().hashCode(); // ???
 	}
 
-	public AuthorizationModel reduceToApplication(String applicationName) {
-		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
-
-		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = stream.filter(
-			liferayOAuth2Scope ->
-				applicationName.equals(liferayOAuth2Scope.getApplicationName())
-		).collect(
-			Collectors.toSet()
-		);
-
-		AuthorizationModel authorizationModel = new AuthorizationModel(
-			_applicationDescriptorLocator, liferayOAuth2Scopes, _locale,
-			_scopeDescriptorLocator);
-
-		return authorizationModel;
-	}
-
 	public Set<AuthorizationModel> splitByApplicationScopes() {
 		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
 
@@ -189,17 +189,16 @@ public class AuthorizationModel {
 		);
 	}
 
-	public AuthorizationModel subtract(AuthorizationModel model2) {
+	public AuthorizationModel subtract(AuthorizationModel authorizationModel) {
 		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>(
 			_liferayOAuth2Scopes);
 
-		liferayOAuth2Scopes.removeAll(model2.getLiferayOAuth2Scopes());
+		liferayOAuth2Scopes.removeAll(
+			authorizationModel.getLiferayOAuth2Scopes());
 
-		AuthorizationModel authorizationModel = new AuthorizationModel(
+		return new AuthorizationModel(
 			_applicationDescriptorLocator, liferayOAuth2Scopes, _locale,
 			_scopeDescriptorLocator);
-
-		return authorizationModel;
 	}
 
 	private Set<String> _getApplicationScopes(String applicationName) {
