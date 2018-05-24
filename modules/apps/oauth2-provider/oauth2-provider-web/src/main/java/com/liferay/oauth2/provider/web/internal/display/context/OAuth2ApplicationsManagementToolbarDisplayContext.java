@@ -130,8 +130,8 @@ public class OAuth2ApplicationsManagementToolbarDisplayContext
 	}
 
 	public OrderByComparator<OAuth2Application> getOrderByComparator() {
-		String orderByType = getOrderByType();
 		String orderByCol = getOrderByCol();
+		String orderByType = getOrderByType();
 
 		String columnName = "name";
 
@@ -140,9 +140,6 @@ public class OAuth2ApplicationsManagementToolbarDisplayContext
 		}
 		else if (orderByCol.equals("clientId")) {
 			columnName = "clientId";
-		}
-		else if (orderByCol.equals("name")) {
-			columnName = "name";
 		}
 
 		return OrderByComparatorFactoryUtil.create(
@@ -160,7 +157,6 @@ public class OAuth2ApplicationsManagementToolbarDisplayContext
 		}
 
 		portletURL.setParameter("orderByCol", getOrderByCol());
-
 		portletURL.setParameter("orderByType", getOrderByType());
 
 		int cur = ParamUtil.getInteger(
@@ -176,7 +172,6 @@ public class OAuth2ApplicationsManagementToolbarDisplayContext
 
 				addTableViewTypeItem();
 			}
-
 		};
 	}
 

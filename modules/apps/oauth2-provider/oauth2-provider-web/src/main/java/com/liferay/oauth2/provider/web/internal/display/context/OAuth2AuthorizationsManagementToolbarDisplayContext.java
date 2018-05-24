@@ -29,6 +29,8 @@ import java.util.List;
 
 import javax.portlet.PortletURL;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Tomas Polesovsky
  */
@@ -50,6 +52,10 @@ public class OAuth2AuthorizationsManagementToolbarDisplayContext
 
 		dropdownItems.add(
 			dropdownItem -> {
+				LiferayPortletResponse liferayPortletResponse =
+					getLiferayPortletResponse();
+				HttpServletRequest httpServletRequest = getHttpServletRequest();
+
 				dropdownItem.setHref(
 					StringBundler.concat(
 						"javascript:", liferayPortletResponse.getNamespace(),
@@ -65,6 +71,8 @@ public class OAuth2AuthorizationsManagementToolbarDisplayContext
 	}
 
 	public List<DropdownItem> getFilterDropdownItems() {
+		HttpServletRequest httpServletRequest = getHttpServletRequest();
+
 		return new DropdownItemList() {
 			{
 				addGroup(
@@ -79,8 +87,8 @@ public class OAuth2AuthorizationsManagementToolbarDisplayContext
 	}
 
 	public OrderByComparator<OAuth2Authorization> getOrderByComparator() {
-		String orderByType = getOrderByType();
 		String orderByCol = getOrderByCol();
+		String orderByType = getOrderByType();
 
 		String columnName = "createDate";
 
@@ -95,6 +103,8 @@ public class OAuth2AuthorizationsManagementToolbarDisplayContext
 	}
 
 	private List<DropdownItem> _getOrderByDropdownItems() {
+		HttpServletRequest httpServletRequest = getHttpServletRequest();
+
 		return new DropdownItemList() {
 			{
 				for (String orderByCol : _orderByColumns) {

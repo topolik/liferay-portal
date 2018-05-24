@@ -68,8 +68,6 @@ public abstract class BaseOAuth2ManagementToolbarDisplayContext {
 		return currentSortingURL;
 	}
 
-	public LiferayPortletRequest liferayPortletRequest;
-
 	protected PortletURL getCurrentSortingURL() throws PortletException {
 		PortletURL sortingURL = PortletURLUtil.clone(
 			currentURLObj, liferayPortletResponse);
@@ -110,6 +108,7 @@ public abstract class BaseOAuth2ManagementToolbarDisplayContext {
 
 	protected PortletURL currentURLObj;
 	protected HttpServletRequest httpServletRequest;
+	protected LiferayPortletRequest liferayPortletRequest;
 	protected LiferayPortletResponse liferayPortletResponse;
 
 }
