@@ -138,11 +138,16 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 					}
 				}
 
-				_oAuth2ApplicationService.addOAuth2Application(
-					allowedGrantTypesList, clientId, clientProfile.id(),
-					clientSecret, description, featuresList, homePageURL, 0,
-					name, privacyPolicyURL, redirectURIsList, scopeAliasesList,
-					serviceContext);
+				OAuth2Application oAuth2Application = 
+					_oAuth2ApplicationService.addOAuth2Application(
+						allowedGrantTypesList, clientId, clientProfile.id(),
+						clientSecret, description, featuresList, homePageURL, 0,
+						name, privacyPolicyURL, redirectURIsList, scopeAliasesList,
+						serviceContext);
+				
+				response.setRenderParameter(
+					"oAuth2ApplicationId", 
+					String.valueOf(oAuth2Application.getOAuth2ApplicationId()));					
 			}
 			else {
 				OAuth2Application oAuth2Application =
@@ -187,11 +192,16 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 			Class<?> peClass = pe.getClass();
 
 			SessionErrors.add(request, peClass.getName(), pe);
-
-			response.setRenderParameter(
-				"mvcPath", "/admin/edit_application.jsp");
 		}
 
+		response.setRenderParameter(
+			"mvcPath", "/admin/edit_application.jsp");		
+
+		String backURL = ParamUtil.get(request, "uRLBack", StringPool.BLANK);
+		
+		response.setRenderParameter(
+			"redirect", backURL);
+		
 		return true;
 	}
 

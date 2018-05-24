@@ -36,7 +36,11 @@ String clientId = (oAuth2Application == null) ? "" : oAuth2Application.getClient
 String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getClientSecret();
 %>
 
-<portlet:actionURL name="/admin/update_oauth2_application" var="updateOAuth2ApplicationURL" />
+<portlet:actionURL name="/admin/update_oauth2_application" var="updateOAuth2ApplicationURL">
+	<portlet:param name="uRLBack" value='<%= redirect %>'/>
+	<portlet:param name="oAuth2ApplicationId" value='<%= oAuth2Application == null ? "" : String.valueOf(oAuth2Application.getOAuth2ApplicationId()) %>' />
+</portlet:actionURL>
+
 
 <aui:form action="<%= updateOAuth2ApplicationURL %>" id="<portlet:namespace />oauth2-application-fm" method="post" name="oauth2-application-fm">
 	<div class="container-fluid container-fluid-max-xl container-view">
@@ -79,12 +83,8 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 
 					<aui:model-context bean="<%= oAuth2Application %>" model="<%= OAuth2Application.class %>" />
 
-					<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
-
 					<c:if test="<%= oAuth2Application != null %>">
 						<aui:fieldset>
-							<aui:input name="oAuth2ApplicationId" type="hidden" value='<%= (oAuth2Application == null) ? "" : oAuth2Application.getOAuth2ApplicationId() %>' />
-
 							<aui:input name="clientId" readonly="true" required="<%= true %>" type="text" />
 
 							<aui:field-wrapper>
