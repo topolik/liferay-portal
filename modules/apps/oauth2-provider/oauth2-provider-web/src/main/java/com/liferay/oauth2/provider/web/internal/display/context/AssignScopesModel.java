@@ -39,16 +39,57 @@ import java.util.stream.Stream;
 public class AssignScopesModel {
 
 	public AssignScopesModel(
-		long companyId, Locale locale, ScopeLocator scopeLocator,
 		ApplicationDescriptorLocator applicationDescriptorLocator,
-		ScopeDescriptorLocator scopeDescriptorLocator) {
+		Locale locale, long companyId,
+		ScopeDescriptorLocator scopeDescriptorLocator,
+		ScopeLocator scopeLocator) {
 
-		_applicationDescriptor = applicationDescriptorLocator;
+		_applicationDescriptorLocator = applicationDescriptorLocator;
 		_locale = locale;
 
-		init(
-			companyId, scopeLocator, applicationDescriptorLocator,
-			scopeDescriptorLocator);
+		Set<String> scopeAliases = new HashSet<>(
+			scopeLocator.getScopeAliases(companyId));
+
+		for (String scopeAlias : scopeAliases) {
+			AuthorizationModel authorizationModel = new AuthorizationModel(
+				applicationDescriptorLocator, _locale, scopeDescriptorLocator);
+
+			authorizationModel.addLiferayOAuth2Scopes(
+				scopeLocator.getLiferayOAuth2Scopes(companyId, scopeAlias));
+
+			_authorizationModelsRelations.put(
+				authorizationModel, new Relations(scopeAlias));
+
+			Set<String> applicationNames =
+				authorizationModel.getApplicationNames();
+
+			boolean globalScopeAlias = false;
+
+			if (applicationNames.size() > 1) {
+				globalScopeAlias = true;
+			}
+
+			if (globalScopeAlias) {
+				for (String applicationName : applicationNames) {
+					Set<AuthorizationModel> authorizationModels =
+						_globalAuthorizationModels.computeIfAbsent(
+							applicationName, appName -> new HashSet<>());
+
+					authorizationModels.add(authorizationModel);
+				}
+			}
+			else if (applicationNames.size() == 1) {
+				Iterator<String> iterator = applicationNames.iterator();
+
+				String applicationName = iterator.next();
+
+				Set<AuthorizationModel> authorizationModels =
+					_localAuthorizationModels.computeIfAbsent(
+						applicationName, __ -> new HashSet<>());
+
+				authorizationModels.add(authorizationModel);
+			}
+		}
 	}
 
 	public Map<AuthorizationModel, Relations>
@@ -107,7 +148,7 @@ public class AssignScopesModel {
 
 	public String getApplicationDescription(String applicationName) {
 		ApplicationDescriptor applicationDescriptor =
-			_applicationDescriptor.getApplicationDescriptor(applicationName);
+			_applicationDescriptorLocator.getApplicationDescriptor(applicationName);
 
 		return applicationDescriptor.describeApplication(_locale);
 	}
@@ -227,56 +268,6 @@ public class AssignScopesModel {
 		);
 	}
 
-	protected void init(
-		long companyId, ScopeLocator scopeLocator,
-		ApplicationDescriptorLocator applicationDescriptorLocator,
-		ScopeDescriptorLocator scopeDescriptorLocator) {
-
-		Set<String> scopeAliases = new HashSet<>(
-			scopeLocator.getScopeAliases(companyId));
-
-		for (String scopeAlias : scopeAliases) {
-			AuthorizationModel authorizationModel = new AuthorizationModel(
-				applicationDescriptorLocator, _locale, scopeDescriptorLocator);
-
-			authorizationModel.addLiferayOAuth2Scopes(
-				scopeLocator.getLiferayOAuth2Scopes(companyId, scopeAlias));
-
-			_authorizationModelsRelations.put(
-				authorizationModel, new Relations(scopeAlias));
-
-			Set<String> applicationNames =
-				authorizationModel.getApplicationNames();
-
-			boolean globalScopeAlias = false;
-
-			if (applicationNames.size() > 1) {
-				globalScopeAlias = true;
-			}
-
-			if (globalScopeAlias) {
-				for (String applicationName : applicationNames) {
-					Set<AuthorizationModel> authorizationModels =
-						_globalAuthorizationModels.computeIfAbsent(
-							applicationName, appName -> new HashSet<>());
-
-					authorizationModels.add(authorizationModel);
-				}
-			}
-			else if (applicationNames.size() == 1) {
-				Iterator<String> iterator = applicationNames.iterator();
-
-				String applicationName = iterator.next();
-
-				Set<AuthorizationModel> authorizationModels =
-					_localAuthorizationModels.computeIfAbsent(
-						applicationName, __ -> new HashSet<>());
-
-				authorizationModels.add(authorizationModel);
-			}
-		}
-	}
-
 	private <K, V> Map<V, K> _invertMap(Map<K, V> map) {
 		Map<V, K> ret = new HashMap<>(map.size());
 
@@ -357,7 +348,7 @@ public class AssignScopesModel {
 		return _invertMap(relationsAuthorizationModels);
 	}
 
-	private final ApplicationDescriptorLocator _applicationDescriptor;
+	private final ApplicationDescriptorLocator _applicationDescriptorLocator;
 	private Map<AuthorizationModel, Relations> _authorizationModelsRelations =
 		new HashMap<>();
 	private Map<String, Set<AuthorizationModel>> _globalAuthorizationModels =

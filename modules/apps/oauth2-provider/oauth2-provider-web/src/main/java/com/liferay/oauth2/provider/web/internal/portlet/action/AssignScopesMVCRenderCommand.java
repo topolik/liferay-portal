@@ -50,9 +50,10 @@ public class AssignScopesMVCRenderCommand implements MVCRenderCommand {
 			WebKeys.THEME_DISPLAY);
 
 		AssignScopesModel assignScopesModel = new AssignScopesModel(
-			themeDisplay.getCompanyId(), themeDisplay.getLocale(),
-			_scopeLocator, _applicationDescriptorLocator,
-			_scopeDescriptorLocator);
+			_applicationDescriptorLocator, themeDisplay.getLocale(),
+			themeDisplay.getCompanyId(),
+			_scopeDescriptorLocator, _scopeLocator
+		);
 
 		renderRequest.setAttribute(
 			OAuth2ProviderWebKeys.ASSIGN_SCOPES_MODEL, assignScopesModel);
