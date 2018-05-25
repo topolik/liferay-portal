@@ -40,7 +40,7 @@ import org.osgi.service.component.annotations.Reference;
 	configurationPid = "com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration",
 	property = {
 		"javax.portlet.name=" + OAuth2ProviderPortletKeys.OAUTH2_ADMIN,
-		"mvc.command.name=/admin/revoke_authorizations"
+		"mvc.command.name=/admin/revoke_oauth2_authorizations"
 	}
 )
 public class RevokeAuthorizationsMVCActionCommand implements MVCActionCommand {
