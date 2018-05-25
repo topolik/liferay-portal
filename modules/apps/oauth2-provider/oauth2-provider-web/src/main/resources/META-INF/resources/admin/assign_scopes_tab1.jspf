@@ -57,7 +57,7 @@
 					<ul class="list-group">
 
 						<%
-						Map<AuthorizationModel, AssignScopesModel.Relations> applicationAuthorizationModelsAssignModel = assignScopesModel.buildAssignmentModelForApplication(applicationName);
+						Map<AuthorizationModel, AssignScopesModel.Relations> applicationAuthorizationModelsAssignModel = assignScopesModel.getAuthorizationModelRelationsMap(applicationName);
 
 						for (Map.Entry<AuthorizationModel, AssignScopesModel.Relations> scopeAliasAuthorizationModelEntry : applicationAuthorizationModelsAssignModel.entrySet()) {
 							AuthorizationModel authorizationModel = scopeAliasAuthorizationModelEntry.getKey();
