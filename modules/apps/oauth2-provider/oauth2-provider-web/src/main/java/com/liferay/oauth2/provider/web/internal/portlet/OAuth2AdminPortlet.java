@@ -159,8 +159,6 @@ public class OAuth2AdminPortlet extends MVCPortlet {
 
 			SessionErrors.add(actionRequest, pe.getClass());
 
-			actionResponse.setRenderParameter(
-				"mvcPath", "/admin/application_authorizations.jsp");
 		}
 	}
 
