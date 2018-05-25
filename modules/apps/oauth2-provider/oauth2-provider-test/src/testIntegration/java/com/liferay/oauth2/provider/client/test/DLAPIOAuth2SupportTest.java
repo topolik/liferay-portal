@@ -1,11 +1,11 @@
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
- * <p>
+ *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
  * Software Foundation; either version 2.1 of the License, or (at your option)
  * any later version.
- * <p>
+ *
  * This library is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
@@ -73,6 +73,29 @@ public class DLAPIOAuth2SupportTest extends BaseClientTest {
 		return deployment;
 	}
 
+	@Test
+	public void testSomething() throws Exception {
+		String tokenString = getToken("oauthTestApplication");
+
+		WebTarget webTarget = getWebTarget("file-entry-url");
+
+		Invocation.Builder builder = authorize(
+			webTarget.request(), tokenString);
+
+		String fileEntryRelativeUrl = builder.get(String.class);
+
+		WebTarget fileEntryTarget = _getRootWebTarget(fileEntryRelativeUrl);
+
+		Invocation.Builder fileEntryBuilder = authorize(
+			fileEntryTarget.request(), tokenString);
+
+		Response response = fileEntryBuilder.get();
+
+		Assert.assertEquals(200, response.getStatus());
+		Assert.assertEquals(
+			"image/jpeg", response.getHeaderString("Content-Type"));
+	}
+
 	public static class DLAPIOAuth2SupportTestPreparator
 		extends BaseTestPreparatorBundleActivator {
 
@@ -130,6 +153,14 @@ public class DLAPIOAuth2SupportTest extends BaseClientTest {
 					fileEntry.getFileEntryId()));
 		}
 
+	}
+
+	private WebTarget _getRootWebTarget(String path) throws URISyntaxException {
+		Client client = getClient();
+
+		WebTarget webTarget = client.target(getUrl().toURI());
+
+		return webTarget.path(path);
 	}
 
 }
