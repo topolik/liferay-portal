@@ -53,7 +53,7 @@ String currentAppTab = ParamUtil.getString(request, "appTab", "credentials");
 
 <portlet:renderURL var="applicationAuthorizationsURL">
 	<portlet:param name="appTab" value="authorizations" />
-	<portlet:param name="mvcPath" value="/admin/edit_application.jsp" />
+	<portlet:param name="mvcRenderCommandName" value="/admin/view_oauth2_authorizations" />
 	<portlet:param name="oAuth2ApplicationId" value="<%= String.valueOf(oAuth2ApplicationId) %>" />
 	<portlet:param name="redirect" value="<%= redirect %>" />
 </portlet:renderURL>

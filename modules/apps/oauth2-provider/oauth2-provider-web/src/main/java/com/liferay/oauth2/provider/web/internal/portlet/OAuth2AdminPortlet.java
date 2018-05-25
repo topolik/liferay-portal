@@ -129,39 +129,6 @@ public class OAuth2AdminPortlet extends MVCPortlet {
 		super.render(renderRequest, renderResponse);
 	}
 
-	public void revokeOAuth2Authorization(
-			ActionRequest actionRequest, ActionResponse actionResponse)
-		throws PortalException {
-
-		long oAuth2AuthorizationId = ParamUtil.getLong(
-			actionRequest, "oAuth2AuthorizationId");
-
-		_oAuth2AuthorizationService.revokeOAuth2Authorization(
-			oAuth2AuthorizationId);
-	}
-
-	public void revokeOAuth2Authorizations(
-		ActionRequest actionRequest, ActionResponse actionResponse) {
-
-		long[] oAuth2AuthorizationIds = StringUtil.split(
-			ParamUtil.getString(actionRequest, "oAuth2AuthorizationIds"), 0L);
-
-		try {
-			for (long oAuth2AuthorizationId : oAuth2AuthorizationIds) {
-				_oAuth2AuthorizationService.revokeOAuth2Authorization(
-					oAuth2AuthorizationId);
-			}
-		}
-		catch (PortalException pe) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe);
-			}
-
-			SessionErrors.add(actionRequest, pe.getClass());
-
-		}
-	}
-
 	@Activate
 	protected void activate(Map<String, Object> properties) {
 		_oAuth2ProviderConfiguration = ConfigurableUtil.createConfigurable(
