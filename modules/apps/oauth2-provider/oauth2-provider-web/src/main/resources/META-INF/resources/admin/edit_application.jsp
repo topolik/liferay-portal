@@ -135,9 +135,9 @@ String currentAppTab = ParamUtil.getString(request, "appTab", "credentials");
 		<%@ include file="/admin/edit_application_credentials.jspf" %>
 	</c:when>
 	<c:when test='<%= (oAuth2Application != null) && currentAppTab.equals("scopes") %>'>
-		<%@ include file="/admin/assign_scopes.jsp" %>
+		<%@ include file="/admin/assign_scopes.jspf" %>
 	</c:when>
 	<c:when test='<%= (oAuth2Application != null) && currentAppTab.equals("authorizations") && oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission() %>'>
-		<%@ include file="/admin/application_authorizations.jsp" %>
+		<%@ include file="/admin/application_authorizations.jspf" %>
 	</c:when>
 </c:choose>
