@@ -182,6 +182,9 @@ public class AssignScopesModel {
 
 		return stream.flatMap(
 			Set::stream
+		).collect(
+			Collectors.toSet()
+		).stream(			
 		).filter(
 			_authorizationModelsRelations::containsKey
 		).collect(
