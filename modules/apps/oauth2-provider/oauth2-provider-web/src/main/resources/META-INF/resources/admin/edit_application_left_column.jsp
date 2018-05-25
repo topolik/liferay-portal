@@ -40,7 +40,9 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 	<aui:select name="clientProfile">
 
 		<%
+
 			// We should probably hide this inside a display context
+
 		ClientProfile[] clientProfiles = ClientProfile.values();
 		Arrays.sort(
 			clientProfiles, new Comparator<ClientProfile>() {

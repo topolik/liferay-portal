@@ -20,6 +20,7 @@
 	Map<String, String> applicationNamesDescriptions = assignScopesModel.getApplicationNamesDescriptions();
 
 	// This logic should be hidden in a display context java class instead of being here.
+
 	List<Map.Entry<String, String>> applicationsNamesDescriptionsList = new ArrayList<>(applicationNamesDescriptions.entrySet());
 
 	applicationsNamesDescriptionsList.sort(
@@ -44,7 +45,6 @@
 						symbol="angle-right"
 					/>
 				</span>
-
 				<span class="collapse-icon-open">
 					<clay:icon
 						symbol="angle-down"

@@ -67,12 +67,11 @@ public class AssignScopesMVCActionCommand implements MVCActionCommand {
 					pe);
 			}
 		}
-		
-		String backURL = 
-			ParamUtil.get(actionRequest, "uRLBack", StringPool.BLANK);
-		
-		actionResponse.setRenderParameter(
-			"redirect", backURL);
+
+		String backURL = ParamUtil.get(
+			actionRequest, "uRLBack", StringPool.BLANK);
+
+		actionResponse.setRenderParameter("redirect", backURL);
 
 		return true;
 	}

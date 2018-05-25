@@ -43,7 +43,6 @@
 							symbol="angle-right"
 						/>
 					</span>
-
 					<span class="collapse-icon-open">
 						<clay:icon
 							symbol="angle-down"

@@ -27,10 +27,7 @@ page import="com.liferay.petra.string.StringPool" %><%@
 page import="com.liferay.portal.kernel.dao.search.EmptyOnClickRowChecker" %><%@
 page import="com.liferay.portal.kernel.dao.search.ResultRow" %><%@
 page import="com.liferay.portal.kernel.util.StringUtil" %><%@
-page import="com.liferay.portal.kernel.util.Validator" %><%@
-page import="com.liferay.oauth2.provider.web.internal.display.context.OAuth2ConnectedApplicationsPortletDisplayContext" %><%@
-page import="com.liferay.oauth2.provider.web.internal.display.context.AuthorizationModel" %><%@
-page import="com.liferay.oauth2.provider.web.constants.OAuth2ProviderWebKeys" %>
+page import="com.liferay.portal.kernel.util.Validator" %>
 
 <%
 OAuth2ConnectedApplicationsPortletDisplayContext oAuth2ConnectedApplicationsPortletDisplayContext = (OAuth2ConnectedApplicationsPortletDisplayContext)request.getAttribute(OAuth2ProviderWebKeys.OAUTH2_CONNECTED_APPLICATIONS_PORTLET_DISPLAY_CONTEXT);

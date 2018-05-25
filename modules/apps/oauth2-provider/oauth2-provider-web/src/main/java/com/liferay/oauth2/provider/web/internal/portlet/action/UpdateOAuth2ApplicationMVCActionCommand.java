@@ -192,7 +192,6 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 			SessionErrors.add(request, peClass.getName(), pe);
 		}
 
-
 		String backURL = ParamUtil.get(request, "uRLBack", StringPool.BLANK);
 
 		response.setRenderParameter("redirect", backURL);
