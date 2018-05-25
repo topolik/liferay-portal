@@ -192,7 +192,6 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 			SessionErrors.add(request, peClass.getName(), pe);
 		}
 
-		response.setRenderParameter("mvcPath", "/admin/edit_application.jsp");
 
 		String backURL = ParamUtil.get(request, "uRLBack", StringPool.BLANK);
 

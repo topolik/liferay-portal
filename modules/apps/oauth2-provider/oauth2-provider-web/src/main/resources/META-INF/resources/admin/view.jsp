@@ -69,8 +69,8 @@ String displayStyle = oAuth2ApplicationsManagementToolbarDisplayContext.getDispl
 				modelVar="oAuth2Application"
 			>
 				<portlet:renderURL var="editURL">
+					<portlet:param name="mvcRenderCommandName" value="/admin/update_oauth2_application" />
 					<portlet:param name="oAuth2ApplicationId" value="<%= String.valueOf(oAuth2Application.getOAuth2ApplicationId()) %>" />
-					<portlet:param name="mvcPath" value="/admin/edit_application.jsp" />
 					<portlet:param name="redirect" value="<%= currentURL %>" />
 				</portlet:renderURL>
 
