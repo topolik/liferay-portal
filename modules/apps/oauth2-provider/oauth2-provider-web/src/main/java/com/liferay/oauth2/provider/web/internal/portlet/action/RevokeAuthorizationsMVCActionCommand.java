@@ -14,13 +14,11 @@
 
 package com.liferay.oauth2.provider.web.internal.portlet.action;
 
-import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationService;
 import com.liferay.oauth2.provider.web.constants.ClientProfile;
 import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -29,12 +27,9 @@ import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 
-import java.util.Map;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -79,12 +74,6 @@ public class RevokeAuthorizationsMVCActionCommand implements MVCActionCommand {
 		return true;
 	}
 
-	@Activate
-	protected void activate(Map<String, Object> properties) {
-		_oAuth2ProviderConfiguration = ConfigurableUtil.createConfigurable(
-			OAuth2ProviderConfiguration.class, properties);
-	}
-
 	protected ClientProfile getClientProfile(int clientProfileId) {
 		for (ClientProfile clientProfile : ClientProfile.values()) {
 			if (clientProfile.id() == clientProfileId) {
@@ -104,7 +93,5 @@ public class RevokeAuthorizationsMVCActionCommand implements MVCActionCommand {
 
 	@Reference
 	private OAuth2AuthorizationService _oAuth2AuthorizationService;
-
-	private OAuth2ProviderConfiguration _oAuth2ProviderConfiguration;
 
 }

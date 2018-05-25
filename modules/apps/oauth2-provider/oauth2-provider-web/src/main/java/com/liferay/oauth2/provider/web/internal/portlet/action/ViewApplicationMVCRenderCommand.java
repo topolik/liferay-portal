@@ -27,8 +27,6 @@ import com.liferay.oauth2.provider.web.constants.OAuth2ProviderWebKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.AuthorizationModel;
 import com.liferay.oauth2.provider.web.internal.display.context.OAuth2ConnectedApplicationsPortletDisplayContext;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ListUtil;
@@ -117,9 +115,6 @@ public class ViewApplicationMVCRenderCommand implements MVCRenderCommand {
 
 		return "/connected_applications/view_application.jsp";
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ViewApplicationMVCRenderCommand.class);
 
 	@Reference
 	private ApplicationDescriptorLocator _applicationDescriptorLocator;
