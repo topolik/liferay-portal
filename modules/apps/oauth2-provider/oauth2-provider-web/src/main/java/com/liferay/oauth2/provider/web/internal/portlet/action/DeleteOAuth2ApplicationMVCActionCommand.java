@@ -12,79 +12,81 @@
  * details.
  */
 
-package com.liferay.oauth2.provider.web.internal.portlet;
+package com.liferay.oauth2.provider.web.internal.portlet.action;
 
+import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
+import com.liferay.oauth2.provider.constants.GrantType;
+import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationService;
+import com.liferay.oauth2.provider.web.constants.ClientProfile;
 import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
-import com.liferay.oauth2.provider.web.constants.OAuth2ProviderWebKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.OAuth2AdminPortletDisplayContext;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
+import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.WebKeys;
 
-import java.io.IOException;
+import java.io.InputStream;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.Portlet;
-import javax.portlet.PortletException;
-import javax.portlet.PortletRequest;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
+import javax.portlet.PortletPreferences;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Stian Sigvartsen
+ * @author Tomas Polesovsky
  */
 @Component(
 	configurationPid = "com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration",
-	immediate = true,
 	property = {
-		"com.liferay.portlet.css-class-wrapper=portlet-oauth2-provider-admin",
-		"com.liferay.portlet.display-category=category.hidden",
-		"com.liferay.portlet.header-portlet-css=/css/main.css",
-		"com.liferay.portlet.preferences-company-wide=true",
-		"javax.portlet.display-name=OAuth2 Admin",
-		"javax.portlet.init-param.portlet-title-based-navigation=true",
-		"javax.portlet.init-param.template-path=/admin/",
-		"javax.portlet.init-param.view-template=/admin/view.jsp",
 		"javax.portlet.name=" + OAuth2ProviderPortletKeys.OAUTH2_ADMIN,
-		"javax.portlet.preferences=classpath:/META-INF/portlet-preferences/default-portlet-preferences.xml",
-		"javax.portlet.resource-bundle=content.Language"
-	},
-	service = Portlet.class
+		"mvc.command.name=/admin/delete_oauth2_application"
+	}
 )
-public class OAuth2AdminPortlet extends MVCPortlet {
+public class DeleteOAuth2ApplicationMVCActionCommand
+	implements MVCActionCommand {
 
 	@Override
-	public void render(
-			RenderRequest renderRequest, RenderResponse renderResponse)
-		throws IOException, PortletException {
+	public boolean processAction(
+		ActionRequest actionRequest, ActionResponse actionResponse) {
 
-		OAuth2AdminPortletDisplayContext oAuth2AdminPortletDisplayContext =
-			new OAuth2AdminPortletDisplayContext(
-				_oAuth2ApplicationService, _oAuth2ProviderConfiguration,
-				renderRequest, getThemeDisplay(renderRequest));
+		long[] oAuth2ApplicationIds = StringUtil.split(
+			ParamUtil.getString(actionRequest, "oAuth2ApplicationIds"), 0L);
 
-		renderRequest.setAttribute(
-			OAuth2ProviderWebKeys.OAUTH2_ADMIN_PORTLET_DISPLAY_CONTEXT,
-			oAuth2AdminPortletDisplayContext);
+		try {
+			for (long oAuth2ApplicationId : oAuth2ApplicationIds) {
+				_oAuth2ApplicationService.deleteOAuth2Application(
+					oAuth2ApplicationId);
+			}
+		}
+		catch (PortalException pe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(pe);
+			}
 
-		super.render(renderRequest, renderResponse);
+			SessionErrors.add(actionRequest, pe.getClass());
+		}
+		
+		return true;
 	}
 
 	@Activate
@@ -93,18 +95,22 @@ public class OAuth2AdminPortlet extends MVCPortlet {
 			OAuth2ProviderConfiguration.class, properties);
 	}
 
-	protected ThemeDisplay getThemeDisplay(PortletRequest portletRequest) {
-		return (ThemeDisplay)portletRequest.getAttribute(WebKeys.THEME_DISPLAY);
+	protected ClientProfile getClientProfile(int clientProfileId) {
+		for (ClientProfile clientProfile : ClientProfile.values()) {
+			if (clientProfile.id() == clientProfileId) {
+				return clientProfile;
+			}
+		}
+
+		throw new IllegalArgumentException(
+			"No ClientProfile enum constant found with ID " + clientProfileId);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		OAuth2AdminPortlet.class);
+		DeleteOAuth2ApplicationMVCActionCommand.class);
 
 	@Reference
 	private OAuth2ApplicationService _oAuth2ApplicationService;
-
-	@Reference
-	private OAuth2AuthorizationService _oAuth2AuthorizationService;
 
 	private OAuth2ProviderConfiguration _oAuth2ProviderConfiguration;
 
