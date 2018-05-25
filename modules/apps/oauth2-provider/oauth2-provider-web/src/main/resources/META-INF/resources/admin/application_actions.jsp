@@ -42,30 +42,6 @@ String oAuth2ApplicationId = String.valueOf(oAuth2Application.getOAuth2Applicati
 			message="edit"
 			url="<%= editURL.toString() %>"
 		/>
-
-		<portlet:renderURL var="assignScopesURL">
-			<portlet:param name="mvcRenderCommandName" value="/admin/assign_scopes" />
-			<portlet:param name="oAuth2ApplicationId" value="<%= oAuth2ApplicationId %>" />
-			<portlet:param name="redirect" value="<%= currentURL %>" />
-		</portlet:renderURL>
-
-		<liferay-ui:icon
-			message="assign-scopes"
-			url="<%= assignScopesURL.toString() %>"
-		/>
-	</c:if>
-
-	<c:if test="<%= oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission() %>">
-		<portlet:renderURL var="applicationAuthorizationsURL">
-			<portlet:param name="mvcPath" value="/admin/application_authorizations.jsp" />
-			<portlet:param name="oAuth2ApplicationId" value="<%= oAuth2ApplicationId %>" />
-			<portlet:param name="redirect" value="<%= currentURL %>" />
-		</portlet:renderURL>
-
-		<liferay-ui:icon
-			message="authorizations"
-			url="<%= applicationAuthorizationsURL.toString() %>"
-		/>
 	</c:if>
 
 	<c:if test="<%= oAuth2AdminPortletDisplayContext.hasPermissionsPermission(oAuth2Application) %>">
