@@ -16,6 +16,7 @@ package com.liferay.oauth2.provider.web.internal.portlet.action;
 
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -66,6 +67,12 @@ public class AssignScopesMVCActionCommand implements MVCActionCommand {
 					pe);
 			}
 		}
+		
+		String backURL = 
+			ParamUtil.get(actionRequest, "uRLBack", StringPool.BLANK);
+		
+		actionResponse.setRenderParameter(
+			"redirect", backURL);
 
 		return true;
 	}
