@@ -29,8 +29,6 @@ import java.util.List;
 
 import javax.portlet.PortletURL;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * @author Tomas Polesovsky
  */

@@ -184,7 +184,7 @@ public class AssignScopesModel {
 			Set::stream
 		).collect(
 			Collectors.toSet()
-		).stream(			
+		).stream(
 		).filter(
 			_authorizationModelsRelations::containsKey
 		).collect(
