@@ -33,6 +33,7 @@ import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
+ * @author Stian Sigvartsen
  */
 @Component(
 	configurationPid = "com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration",

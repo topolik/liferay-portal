@@ -34,6 +34,7 @@ import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
+ * @author Stian Sigvartsen
  */
 @Component(
 	property = {
