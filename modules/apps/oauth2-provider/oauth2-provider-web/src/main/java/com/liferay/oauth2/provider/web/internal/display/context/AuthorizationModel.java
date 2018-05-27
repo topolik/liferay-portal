@@ -24,9 +24,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -55,17 +54,15 @@ public class AuthorizationModel {
 		_scopeDescriptorLocator = scopeDescriptorLocator;
 	}
 
-	public AuthorizationModel add(AuthorizationModel model2) {
+	public AuthorizationModel add(AuthorizationModel authorizationModel) {
 		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>();
 
+		liferayOAuth2Scopes.addAll(authorizationModel.getLiferayOAuth2Scopes());
 		liferayOAuth2Scopes.addAll(_liferayOAuth2Scopes);
-		liferayOAuth2Scopes.addAll(model2.getLiferayOAuth2Scopes());
 
-		AuthorizationModel authorizationModel = new AuthorizationModel(
+		return new AuthorizationModel(
 			_applicationDescriptorLocator, liferayOAuth2Scopes, _locale,
 			_scopeDescriptorLocator);
-
-		return authorizationModel;
 	}
 
 	public void addLiferayOAuth2Scopes(
@@ -74,9 +71,9 @@ public class AuthorizationModel {
 		_liferayOAuth2Scopes.addAll(liferayOAuth2Scopes);
 	}
 
-	public boolean contains(AuthorizationModel model2) {
+	public boolean contains(AuthorizationModel authorizationModel) {
 		if (!_liferayOAuth2Scopes.containsAll(
-				model2.getLiferayOAuth2Scopes())) {
+				authorizationModel.getLiferayOAuth2Scopes())) {
 
 			return false;
 		}
@@ -85,18 +82,38 @@ public class AuthorizationModel {
 	}
 
 	@Override
-	public boolean equals(Object obj2) {
-		if (!(obj2 instanceof AuthorizationModel)) {
+	public boolean equals(Object o) {
+		if (!(o instanceof AuthorizationModel)) {
 			return false;
 		}
 
-		AuthorizationModel arm2 = (AuthorizationModel)obj2;
+		AuthorizationModel authorizationModel = (AuthorizationModel)o;
 
-		if (!_liferayOAuth2Scopes.equals(arm2.getLiferayOAuth2Scopes())) {
-			return false;
+		if (Objects.equals(
+				_liferayOAuth2Scopes,
+				authorizationModel.getLiferayOAuth2Scopes())) {
+
+			return true;
 		}
 
-		return true;
+		return false;
+	}
+
+	public AuthorizationModel getApplicationAuthorizationModel(
+		String applicationName) {
+
+		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
+
+		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = stream.filter(
+			liferayOAuth2Scope ->
+				applicationName.equals(liferayOAuth2Scope.getApplicationName())
+		).collect(
+			Collectors.toSet()
+		);
+
+		return new AuthorizationModel(
+			_applicationDescriptorLocator, liferayOAuth2Scopes, _locale,
+			_scopeDescriptorLocator);
 	}
 
 	public String getApplicationDescription(String applicationName) {
@@ -108,24 +125,13 @@ public class AuthorizationModel {
 	}
 
 	public Set<String> getApplicationNames() {
-		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
+		Set<String> applicationNames = new HashSet<>();
 
-		return stream.map(
-			LiferayOAuth2Scope::getApplicationName
-		).collect(
-			Collectors.toSet()
-		);
-	}
+		for (LiferayOAuth2Scope liferayOAuth2Scope : _liferayOAuth2Scopes) {
+			applicationNames.add(liferayOAuth2Scope.getApplicationName());
+		}
 
-	public Map<String, String> getApplicationNamesDescriptions() {
-		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
-
-		return stream.map(
-			LiferayOAuth2Scope::getApplicationName
-		).collect(
-			Collectors.toMap(
-				Function.identity(), this::getApplicationDescription)
-		);
+		return applicationNames;
 	}
 
 	public Set<String> getApplicationScopeDescription(String applicationName) {
@@ -156,24 +162,7 @@ public class AuthorizationModel {
 
 	@Override
 	public int hashCode() {
-		return getApplicationNames().hashCode(); // ???
-	}
-
-	public AuthorizationModel reduceToApplication(String applicationName) {
-		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
-
-		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = stream.filter(
-			liferayOAuth2Scope ->
-				applicationName.equals(liferayOAuth2Scope.getApplicationName())
-		).collect(
-			Collectors.toSet()
-		);
-
-		AuthorizationModel authorizationModel = new AuthorizationModel(
-			_applicationDescriptorLocator, liferayOAuth2Scopes, _locale,
-			_scopeDescriptorLocator);
-
-		return authorizationModel;
+		return _liferayOAuth2Scopes.hashCode();
 	}
 
 	public Set<AuthorizationModel> splitByApplicationScopes() {
@@ -189,30 +178,16 @@ public class AuthorizationModel {
 		);
 	}
 
-	public AuthorizationModel subtract(AuthorizationModel model2) {
+	public AuthorizationModel subtract(AuthorizationModel authorizationModel) {
 		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>(
 			_liferayOAuth2Scopes);
 
-		liferayOAuth2Scopes.removeAll(model2.getLiferayOAuth2Scopes());
+		liferayOAuth2Scopes.removeAll(
+			authorizationModel.getLiferayOAuth2Scopes());
 
-		AuthorizationModel authorizationModel = new AuthorizationModel(
+		return new AuthorizationModel(
 			_applicationDescriptorLocator, liferayOAuth2Scopes, _locale,
 			_scopeDescriptorLocator);
-
-		return authorizationModel;
-	}
-
-	private Set<String> _getApplicationScopes(String applicationName) {
-		Stream<LiferayOAuth2Scope> stream = _liferayOAuth2Scopes.stream();
-
-		return stream.filter(
-			liferayOAuth2Scope ->
-				applicationName.equals(liferayOAuth2Scope.getApplicationName())
-		).map(
-			LiferayOAuth2Scope::getScope
-		).collect(
-			Collectors.toSet()
-		);
 	}
 
 	private final ApplicationDescriptorLocator _applicationDescriptorLocator;

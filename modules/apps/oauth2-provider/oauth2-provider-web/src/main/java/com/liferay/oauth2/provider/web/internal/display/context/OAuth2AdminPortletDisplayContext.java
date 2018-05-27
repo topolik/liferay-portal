@@ -67,31 +67,18 @@ public class OAuth2AdminPortletDisplayContext
 	}
 
 	public OAuth2AdminPortletDisplayContext(
-		PortletRequest portletRequest,
 		OAuth2ApplicationService oAuth2ApplicationService,
 		OAuth2ProviderConfiguration oAuth2ProviderConfiguration,
-		ThemeDisplay themeDisplay) {
+		PortletRequest portletRequest, ThemeDisplay themeDisplay) {
+
+		_oAuth2ProviderConfiguration = oAuth2ProviderConfiguration;
 
 		super.oAuth2ApplicationService = oAuth2ApplicationService;
-		_oAuth2ProviderConfiguration = oAuth2ProviderConfiguration;
 		super.portletRequest = portletRequest;
 		super.themeDisplay = themeDisplay;
 	}
 
-	public int getOAuth2AuthorizationsCount(OAuth2Application oAuth2Application)
-		throws PortalException {
-
-		return OAuth2AuthorizationServiceUtil.
-			getApplicationOAuth2AuthorizationsCount(
-				oAuth2Application.getOAuth2ApplicationId());
-	}
-
-	public String[] getOAuth2Features(PortletPreferences portletPreferences) {
-		return StringUtil.split(
-			portletPreferences.getValue("oAuth2Features", StringPool.BLANK));
-	}
-
-	public List<GrantType> getOAuth2Grants(
+	public List<GrantType> getGrantTypes(
 		PortletPreferences portletPreferences) {
 
 		String[] oAuth2Grants = StringUtil.split(
@@ -130,6 +117,19 @@ public class OAuth2AdminPortletDisplayContext
 		}
 
 		return result;
+	}
+
+	public int getOAuth2AuthorizationsCount(OAuth2Application oAuth2Application)
+		throws PortalException {
+
+		return OAuth2AuthorizationServiceUtil.
+			getApplicationOAuth2AuthorizationsCount(
+				oAuth2Application.getOAuth2ApplicationId());
+	}
+
+	public String[] getOAuth2Features(PortletPreferences portletPreferences) {
+		return StringUtil.split(
+			portletPreferences.getValue("oAuth2Features", StringPool.BLANK));
 	}
 
 	public int getScopeAliasesSize(OAuth2Application oAuth2Application)

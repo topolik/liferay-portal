@@ -22,19 +22,17 @@ import com.liferay.oauth2.provider.scope.liferay.ScopeLocator;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalService;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationLocalService;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderWebKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderWebKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.AuthorizationModel;
 import com.liferay.oauth2.provider.web.internal.display.context.OAuth2ConnectedApplicationsPortletDisplayContext;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,27 +65,13 @@ public class ViewApplicationMVCRenderCommand implements MVCRenderCommand {
 				themeDisplay.getUserId(), QueryUtil.ALL_POS, QueryUtil.ALL_POS,
 				null);
 
-		List<Long> oAuth2ApplicationScopeAliasesIdList = new ArrayList<>();
-
 		long oAuth2AuthorizationId = ParamUtil.getLong(
 			request, "oAuth2AuthorizationId");
 
-		boolean found = false;
+		if (!ListUtil.exists(
+				userOAuth2Authorizations,
+				o -> o.getOAuth2AuthorizationId() == oAuth2AuthorizationId)) {
 
-		for (OAuth2Authorization oAuth2Authorization :
-				userOAuth2Authorizations) {
-
-			oAuth2ApplicationScopeAliasesIdList.add(
-				oAuth2Authorization.getOAuth2ApplicationScopeAliasesId());
-
-			if (oAuth2Authorization.getOAuth2AuthorizationId() ==
-					oAuth2AuthorizationId) {
-
-				found = true;
-			}
-		}
-
-		if (!found) {
 			return "/connected_applications/view.jsp";
 		}
 
@@ -131,9 +115,6 @@ public class ViewApplicationMVCRenderCommand implements MVCRenderCommand {
 
 		return "/connected_applications/view_application.jsp";
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		ViewApplicationMVCRenderCommand.class);
 
 	@Reference
 	private ApplicationDescriptorLocator _applicationDescriptorLocator;

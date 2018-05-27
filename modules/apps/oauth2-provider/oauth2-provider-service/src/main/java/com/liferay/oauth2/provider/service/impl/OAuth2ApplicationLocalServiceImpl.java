@@ -116,12 +116,12 @@ public class OAuth2ApplicationLocalServiceImpl
 			OAuth2Application.class.getName());
 
 		if (Validator.isBlank(clientId)) {
-			clientId = generateClientId(oAuth2ApplicationId);	
+			clientId = generateClientId(oAuth2ApplicationId);
 		}
 		else {
 			clientId = StringUtil.trim(clientId);
 		}
-		
+
 		OAuth2Application oAuth2Application =
 			oAuth2ApplicationPersistence.create(oAuth2ApplicationId);
 
@@ -425,11 +425,10 @@ public class OAuth2ApplicationLocalServiceImpl
 
 		return oAuth2ApplicationPersistence.update(oAuth2Application);
 	}
-	
+
 	protected String generateClientId(long applicationId) {
-		
 		int size = 16;
-		
+
 		int count = (int)Math.ceil((double)size / 8);
 
 		byte[] buffer = new byte[count * 8];
@@ -442,13 +441,13 @@ public class OAuth2ApplicationLocalServiceImpl
 
 		for (int i = 0; i < size; i++) {
 			sb.append(Integer.toHexString(0xFF & buffer[i]));
-		}		
-		
+		}
+
 		Matcher matcher = _baseIdPattern.matcher(sb.toString());
 
 		return matcher.replaceFirst(
 			String.format("%06d", applicationId % 1000000) + "-$1-$2-$3-$4-$5");
-	}	
+	}
 
 	protected void validate(
 			long companyId, List<GrantType> allowedGrantTypesList,
@@ -492,11 +491,11 @@ public class OAuth2ApplicationLocalServiceImpl
 		if (!Validator.isBlank(clientId)) {
 			OAuth2Application existingOAuth2Application =
 				oAuth2ApplicationPersistence.fetchByC_C(companyId, clientId);
-	
+
 			if ((existingOAuth2Application != null) &&
 				(existingOAuth2Application.getOAuth2ApplicationId() !=
 					oAuth2ApplicationId)) {
-	
+
 				throw new DuplicateOAuth2ApplicationClientIdException();
 			}
 		}
@@ -584,7 +583,6 @@ public class OAuth2ApplicationLocalServiceImpl
 
 	private static final Pattern _baseIdPattern = Pattern.compile(
 		"(.{8})(.{4})(.{4})(.{4})(.*)");
-	
 	private static Set<String> _ianaRegisteredUriSchemes = SetUtil.fromArray(
 		new String[] {
 			"aaa", "aaas", "about", "acap", "acct", "acr", "adiumxtra", "afp",

@@ -79,8 +79,8 @@ public class OAuth2AuthorizationsManagementToolbarDisplayContext
 	}
 
 	public OrderByComparator<OAuth2Authorization> getOrderByComparator() {
-		String orderByType = getOrderByType();
 		String orderByCol = getOrderByCol();
+		String orderByType = getOrderByType();
 
 		String columnName = "createDate";
 

@@ -39,25 +39,89 @@ import java.util.stream.Stream;
 public class AssignScopesModel {
 
 	public AssignScopesModel(
-		long companyId, Locale locale, ScopeLocator scopeLocator,
 		ApplicationDescriptorLocator applicationDescriptorLocator,
-		ScopeDescriptorLocator scopeDescriptorLocator) {
+		Locale locale, long companyId,
+		ScopeDescriptorLocator scopeDescriptorLocator,
+		ScopeLocator scopeLocator) {
 
-		_applicationDescriptor = applicationDescriptorLocator;
+		_applicationDescriptorLocator = applicationDescriptorLocator;
 		_locale = locale;
 
-		init(
-			companyId, scopeLocator, applicationDescriptorLocator,
-			scopeDescriptorLocator);
+		Set<String> scopeAliases = new HashSet<>(
+			scopeLocator.getScopeAliases(companyId));
+
+		for (String scopeAlias : scopeAliases) {
+			AuthorizationModel authorizationModel = new AuthorizationModel(
+				applicationDescriptorLocator, _locale, scopeDescriptorLocator);
+
+			authorizationModel.addLiferayOAuth2Scopes(
+				scopeLocator.getLiferayOAuth2Scopes(companyId, scopeAlias));
+
+			_authorizationModelsRelations.put(
+				authorizationModel, new Relations(scopeAlias));
+
+			Set<String> applicationNames =
+				authorizationModel.getApplicationNames();
+
+			if (applicationNames.size() > 1) {
+				for (String applicationName : applicationNames) {
+					Set<AuthorizationModel> authorizationModels =
+						_globalAuthorizationModelsByApplicationName.
+							computeIfAbsent(
+								applicationName, a -> new HashSet<>());
+
+					authorizationModels.add(authorizationModel);
+				}
+			}
+			else if (applicationNames.size() == 1) {
+				Iterator<String> iterator = applicationNames.iterator();
+
+				String applicationName = iterator.next();
+
+				Set<AuthorizationModel> authorizationModels =
+					_localAuthorizationModelsByApplicationName.computeIfAbsent(
+						applicationName, a -> new HashSet<>());
+
+				authorizationModels.add(authorizationModel);
+			}
+		}
+	}
+
+	public String getApplicationDescription(String applicationName) {
+		ApplicationDescriptor applicationDescriptor =
+			_applicationDescriptorLocator.getApplicationDescriptor(
+				applicationName);
+
+		return applicationDescriptor.describeApplication(_locale);
+	}
+
+	public Set<String> getApplicationNames() {
+		Set<String> applicationNames = new HashSet<>();
+
+		applicationNames.addAll(
+			_globalAuthorizationModelsByApplicationName.keySet());
+		applicationNames.addAll(
+			_localAuthorizationModelsByApplicationName.keySet());
+
+		return applicationNames;
+	}
+
+	public Map<String, String> getApplicationNamesDescriptions() {
+		Map<String, String> applicationNamesDescriptions = new HashMap<>();
+
+		for (String applicationName : getApplicationNames()) {
+			applicationNamesDescriptions.put(
+				applicationName, getApplicationDescription(applicationName));
+		}
+
+		return applicationNamesDescriptions;
 	}
 
 	public Map<AuthorizationModel, Relations>
-		buildAssignmentModelForApplication(String applicationName) {
-
-		Map<AuthorizationModel, Relations> assignmentModel = new HashMap<>();
+		getAuthorizationModelRelationsMap(String applicationName) {
 
 		Set<AuthorizationModel> localAuthorizationModels =
-			_localAuthorizationModels.get(applicationName);
+			_localAuthorizationModelsByApplicationName.get(applicationName);
 
 		Map<AuthorizationModel, Relations> localRelations = new HashMap<>();
 
@@ -67,77 +131,54 @@ public class AssignScopesModel {
 		}
 
 		Set<AuthorizationModel> globalAuthorizationModels =
-			_globalAuthorizationModels.get(applicationName);
+			_globalAuthorizationModelsByApplicationName.get(applicationName);
 
 		if (globalAuthorizationModels == null) {
 			return localRelations;
 		}
 
-		assignmentModel.putAll(localRelations);
+		Map<AuthorizationModel, Relations> authorizationModelRelationsMap =
+			new HashMap<>(localRelations);
 
-		for (AuthorizationModel globalAuthorizationModel :
+		for (AuthorizationModel authorizationModel :
 				globalAuthorizationModels) {
 
 			AuthorizationModel applicationAuthorizationModel =
-				globalAuthorizationModel.reduceToApplication(applicationName);
+				authorizationModel.getApplicationAuthorizationModel(
+					applicationName);
 
-			for (Map.Entry<AuthorizationModel, Relations> localEntry :
+			for (Map.Entry<AuthorizationModel, Relations> entry :
 					localRelations.entrySet()) {
 
-				if (globalAuthorizationModel.contains(localEntry.getKey())) {
-					Relations ownedEntryRelations = localEntry.getValue();
+				if (authorizationModel.contains(entry.getKey())) {
+					Relations relations = entry.getValue();
 
-					ownedEntryRelations._globalAuthorizationModels.add(
-						globalAuthorizationModel);
+					relations._globalAuthorizationModels.add(
+						authorizationModel);
 				}
 
 				applicationAuthorizationModel =
-					applicationAuthorizationModel.subtract(localEntry.getKey());
+					applicationAuthorizationModel.subtract(entry.getKey());
 			}
 
-			Relations relations = assignmentModel.computeIfAbsent(
-				applicationAuthorizationModel,
-				authorizationModel -> new Relations());
+			Relations relations =
+				authorizationModelRelationsMap.computeIfAbsent(
+					applicationAuthorizationModel, a -> new Relations());
 
-			relations._globalAuthorizationModels.add(globalAuthorizationModel);
+			relations._globalAuthorizationModels.add(authorizationModel);
 		}
 
-		return _normalize(assignmentModel);
-	}
-
-	public String getApplicationDescription(String applicationName) {
-		ApplicationDescriptor applicationDescriptor =
-			_applicationDescriptor.getApplicationDescriptor(applicationName);
-
-		return applicationDescriptor.describeApplication(_locale);
-	}
-
-	public Set<String> getApplicationNames() {
-		Set<String> applicationNames = new HashSet<>();
-
-		applicationNames.addAll(_localAuthorizationModels.keySet());
-		applicationNames.addAll(_globalAuthorizationModels.keySet());
-
-		return applicationNames;
-	}
-
-	public Map<String, String> getApplicationNamesDescriptions() {
-		Set<String> applicationNames = getApplicationNames();
-
-		Stream<String> applicationNamesStream = applicationNames.stream();
-
-		return applicationNamesStream.collect(
-			Collectors.toMap(
-				Function.identity(), this::getApplicationDescription));
+		return _normalize(authorizationModelRelationsMap);
 	}
 
 	public Map<AuthorizationModel, Relations>
 		getGlobalAuthorizationModelsRelations() {
 
-		Collection<Set<AuthorizationModel>> authorizationModels =
-			_globalAuthorizationModels.values();
+		Collection<Set<AuthorizationModel>> authorizationModelsCollection =
+			_globalAuthorizationModelsByApplicationName.values();
 
-		Stream<Set<AuthorizationModel>> stream = authorizationModels.stream();
+		Stream<Set<AuthorizationModel>> stream =
+			authorizationModelsCollection.stream();
 
 		return stream.flatMap(
 			Set::stream
@@ -155,6 +196,7 @@ public class AssignScopesModel {
 	public class Relations {
 
 		public Relations() {
+			_scopeAlias = StringPool.BLANK;
 		}
 
 		public Relations(String scopeAlias) {
@@ -208,7 +250,7 @@ public class AssignScopesModel {
 
 		private Set<AuthorizationModel> _globalAuthorizationModels =
 			new HashSet<>();
-		private String _scopeAlias = StringPool.BLANK;
+		private final String _scopeAlias;
 
 	}
 
@@ -227,57 +269,7 @@ public class AssignScopesModel {
 		);
 	}
 
-	protected void init(
-		long companyId, ScopeLocator scopeLocator,
-		ApplicationDescriptorLocator applicationDescriptorLocator,
-		ScopeDescriptorLocator scopeDescriptorLocator) {
-
-		Set<String> scopeAliases = new HashSet<>(
-			scopeLocator.getScopeAliases(companyId));
-
-		for (String scopeAlias : scopeAliases) {
-			AuthorizationModel authorizationModel = new AuthorizationModel(
-				applicationDescriptorLocator, _locale, scopeDescriptorLocator);
-
-			authorizationModel.addLiferayOAuth2Scopes(
-				scopeLocator.getLiferayOAuth2Scopes(companyId, scopeAlias));
-
-			_authorizationModelsRelations.put(
-				authorizationModel, new Relations(scopeAlias));
-
-			Set<String> applicationNames =
-				authorizationModel.getApplicationNames();
-
-			boolean globalScopeAlias = false;
-
-			if (applicationNames.size() > 1) {
-				globalScopeAlias = true;
-			}
-
-			if (globalScopeAlias) {
-				for (String applicationName : applicationNames) {
-					Set<AuthorizationModel> authorizationModels =
-						_globalAuthorizationModels.computeIfAbsent(
-							applicationName, appName -> new HashSet<>());
-
-					authorizationModels.add(authorizationModel);
-				}
-			}
-			else if (applicationNames.size() == 1) {
-				Iterator<String> iterator = applicationNames.iterator();
-
-				String applicationName = iterator.next();
-
-				Set<AuthorizationModel> authorizationModels =
-					_localAuthorizationModels.computeIfAbsent(
-						applicationName, __ -> new HashSet<>());
-
-				authorizationModels.add(authorizationModel);
-			}
-		}
-	}
-
-	private <K, V> Map<V, K> _invertMap(Map<K, V> map) {
+	private static <K, V> Map<V, K> _invertMap(Map<K, V> map) {
 		Map<V, K> ret = new HashMap<>(map.size());
 
 		for (Map.Entry<K, V> entry : map.entrySet()) {
@@ -288,19 +280,18 @@ public class AssignScopesModel {
 	}
 
 	private Map<AuthorizationModel, Relations> _normalize(
-		Map<AuthorizationModel, Relations> authorizationModelsRelations) {
+		Map<AuthorizationModel, Relations> authorizationModelRelationsMap) {
 
 		Map<AuthorizationModel, Relations>
-			combinedAuthorizationModelsRelations = new HashMap<>();
+			combinedAuthorizationModelsRelationsMap = new HashMap<>();
 
 		for (Map.Entry<AuthorizationModel, Relations>
 				authorizationModelsRelationsEntry :
-					authorizationModelsRelations.entrySet()) {
+					authorizationModelRelationsMap.entrySet()) {
 
-			Relations authorizationModelRelations =
-				authorizationModelsRelationsEntry.getValue();
+			Relations relations = authorizationModelsRelationsEntry.getValue();
 
-			String scopeAlias = authorizationModelRelations.getScopeAlias();
+			String scopeAlias = relations.getScopeAlias();
 
 			AuthorizationModel authorizationModel =
 				authorizationModelsRelationsEntry.getKey();
@@ -308,8 +299,8 @@ public class AssignScopesModel {
 			// Preserve AuthorizationModels that are assigned an alias
 
 			if (!Validator.isBlank(scopeAlias)) {
-				combinedAuthorizationModelsRelations.put(
-					authorizationModel, authorizationModelRelations);
+				combinedAuthorizationModelsRelationsMap.put(
+					authorizationModel, relations);
 
 				continue;
 			}
@@ -325,12 +316,12 @@ public class AssignScopesModel {
 					applicationScopeAuthorizationModels) {
 
 				Relations combinedRelations =
-					combinedAuthorizationModelsRelations.computeIfAbsent(
+					combinedAuthorizationModelsRelationsMap.computeIfAbsent(
 						applicationScopeAuthorizationModel,
 						__ -> new Relations());
 
 				combinedRelations._globalAuthorizationModels.addAll(
-					authorizationModelRelations._globalAuthorizationModels);
+					relations._globalAuthorizationModels);
 			}
 		}
 
@@ -340,7 +331,7 @@ public class AssignScopesModel {
 		// Finally merge those by identical master AuthorizationModel relations
 
 		for (Map.Entry<AuthorizationModel, Relations>
-				entry : combinedAuthorizationModelsRelations.entrySet()) {
+				entry : combinedAuthorizationModelsRelationsMap.entrySet()) {
 
 			relationsAuthorizationModels.compute(
 				entry.getValue(),
@@ -357,13 +348,13 @@ public class AssignScopesModel {
 		return _invertMap(relationsAuthorizationModels);
 	}
 
-	private final ApplicationDescriptorLocator _applicationDescriptor;
+	private final ApplicationDescriptorLocator _applicationDescriptorLocator;
 	private Map<AuthorizationModel, Relations> _authorizationModelsRelations =
 		new HashMap<>();
-	private Map<String, Set<AuthorizationModel>> _globalAuthorizationModels =
-		new HashMap<>();
-	private Map<String, Set<AuthorizationModel>> _localAuthorizationModels =
-		new HashMap<>();
+	private Map<String, Set<AuthorizationModel>>
+		_globalAuthorizationModelsByApplicationName = new HashMap<>();
+	private Map<String, Set<AuthorizationModel>>
+		_localAuthorizationModelsByApplicationName = new HashMap<>();
 	private final Locale _locale;
 
 }

@@ -31,8 +31,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 		<aui:input name="description" type="textarea" />
 	</c:if>
 
-	<aui:input helpMessage="redirect-uris-help" label="redirect-uris" name="redirectURIs">
-	</aui:input>
+	<aui:input helpMessage="redirect-uris-help" label="redirect-uris" name="redirectURIs" />
 
 	<c:if test="<%= oAuth2Application != null %>">
 		<aui:input name="privacyPolicyURL" />
@@ -41,6 +40,9 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 	<aui:select name="clientProfile">
 
 		<%
+
+			// We should probably hide this inside a display context
+
 		ClientProfile[] clientProfiles = ClientProfile.values();
 		Arrays.sort(
 			clientProfiles, new Comparator<ClientProfile>() {
@@ -74,7 +76,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 					allowedGrantTypesList = oAuth2Application.getAllowedGrantTypesList();
 				}
 
-				List<GrantType> oAuth2Grants = oAuth2AdminPortletDisplayContext.getOAuth2Grants(portletPreferences);
+				List<GrantType> oAuth2Grants = oAuth2AdminPortletDisplayContext.getGrantTypes(portletPreferences);
 
 				for (GrantType grantType : oAuth2Grants) {
 					Set<String> cssClasses = new HashSet<>();
@@ -89,7 +91,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 
 					boolean checked = false;
 
-					if ((oAuth2Application != null) && allowedGrantTypesList.contains(grantType)) {
+					if ((oAuth2Application == null) || allowedGrantTypesList.contains(grantType)) {
 						checked = true;
 					}
 
@@ -100,6 +102,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 
 					<div class="allowedGrantType <%= cssClassesStr %>">
 						<div class="custom-checkbox custom-control">
+							<%--should be using aui:input--%>
 							<label>
 								<input class="custom-control-input"<%= checked ? " checked" : "" %> data-isredirect="<%= grantType.isRequiresRedirectURI() %>" data-issupportsconfidentialclients="<%= grantType.isSupportsConfidentialClients() %>" data-issupportspublicclients="<%= grantType.isSupportsPublicClients() %>" name='<%= renderResponse.getNamespace() + name %>' type="checkbox">
 								<span class="custom-control-label">
@@ -145,6 +148,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 				%>
 
 					<div class="custom-checkbox custom-control">
+						<%--aui:input--%>
 						<label>
 							<input class="custom-control-input"<%= checked ? " checked" : "" %> name="<%= renderResponse.getNamespace() + HtmlUtil.escapeAttribute(name) %>" type="checkbox" />
 

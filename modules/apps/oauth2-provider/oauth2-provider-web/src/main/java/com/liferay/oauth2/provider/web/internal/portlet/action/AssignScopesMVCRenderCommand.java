@@ -17,8 +17,8 @@ package com.liferay.oauth2.provider.web.internal.portlet.action;
 import com.liferay.oauth2.provider.scope.liferay.ApplicationDescriptorLocator;
 import com.liferay.oauth2.provider.scope.liferay.ScopeDescriptorLocator;
 import com.liferay.oauth2.provider.scope.liferay.ScopeLocator;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderWebKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderWebKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.AssignScopesModel;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -50,14 +50,14 @@ public class AssignScopesMVCRenderCommand implements MVCRenderCommand {
 			WebKeys.THEME_DISPLAY);
 
 		AssignScopesModel assignScopesModel = new AssignScopesModel(
-			themeDisplay.getCompanyId(), themeDisplay.getLocale(),
-			_scopeLocator, _applicationDescriptorLocator,
-			_scopeDescriptorLocator);
+			_applicationDescriptorLocator, themeDisplay.getLocale(),
+			themeDisplay.getCompanyId(), _scopeDescriptorLocator,
+			_scopeLocator);
 
 		renderRequest.setAttribute(
 			OAuth2ProviderWebKeys.ASSIGN_SCOPES_MODEL, assignScopesModel);
 
-		return "/admin/assign_scopes.jsp";
+		return "/admin/edit_application.jsp";
 	}
 
 	@Reference

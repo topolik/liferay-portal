@@ -17,26 +17,20 @@ package com.liferay.oauth2.provider.web.internal.portlet;
 import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationService;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderWebKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderWebKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.OAuth2AdminPortletDisplayContext;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
-import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.io.IOException;
 
 import java.util.Map;
 
-import javax.portlet.ActionRequest;
-import javax.portlet.ActionResponse;
 import javax.portlet.Portlet;
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
@@ -70,46 +64,6 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class OAuth2AdminPortlet extends MVCPortlet {
 
-	public void deleteOAuth2Application(
-		ActionRequest request, ActionResponse response) {
-
-		long oAuth2ApplicationId = ParamUtil.getLong(
-			request, "oAuth2ApplicationId");
-
-		try {
-			_oAuth2ApplicationService.deleteOAuth2Application(
-				oAuth2ApplicationId);
-		}
-		catch (PortalException pe) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe);
-			}
-
-			SessionErrors.add(request, pe.getClass());
-		}
-	}
-
-	public void deleteOAuth2Applications(
-		ActionRequest request, ActionResponse response) {
-
-		long[] oAuth2ApplicationIds = StringUtil.split(
-			ParamUtil.getString(request, "oAuth2ApplicationIds"), 0L);
-
-		try {
-			for (long oAuth2ApplicationId : oAuth2ApplicationIds) {
-				_oAuth2ApplicationService.deleteOAuth2Application(
-					oAuth2ApplicationId);
-			}
-		}
-		catch (PortalException pe) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe);
-			}
-
-			SessionErrors.add(request, pe.getClass());
-		}
-	}
-
 	@Override
 	public void render(
 			RenderRequest renderRequest, RenderResponse renderResponse)
@@ -117,49 +71,14 @@ public class OAuth2AdminPortlet extends MVCPortlet {
 
 		OAuth2AdminPortletDisplayContext oAuth2AdminPortletDisplayContext =
 			new OAuth2AdminPortletDisplayContext(
-				renderRequest, _oAuth2ApplicationService,
-				_oAuth2ProviderConfiguration, getThemeDisplay(renderRequest));
+				_oAuth2ApplicationService, _oAuth2ProviderConfiguration,
+				renderRequest, getThemeDisplay(renderRequest));
 
 		renderRequest.setAttribute(
 			OAuth2ProviderWebKeys.OAUTH2_ADMIN_PORTLET_DISPLAY_CONTEXT,
 			oAuth2AdminPortletDisplayContext);
 
 		super.render(renderRequest, renderResponse);
-	}
-
-	public void revokeOAuth2Authorization(
-			ActionRequest request, ActionResponse response)
-		throws PortalException {
-
-		long oAuth2AuthorizationId = ParamUtil.getLong(
-			request, "oAuth2AuthorizationId");
-
-		_oAuth2AuthorizationService.revokeOAuth2Authorization(
-			oAuth2AuthorizationId);
-	}
-
-	public void revokeOAuth2Authorizations(
-		ActionRequest request, ActionResponse response) {
-
-		long[] oAuth2AuthorizationIds = StringUtil.split(
-			ParamUtil.getString(request, "oAuth2AuthorizationIds"), 0L);
-
-		try {
-			for (long oAuth2AuthorizationId : oAuth2AuthorizationIds) {
-				_oAuth2AuthorizationService.revokeOAuth2Authorization(
-					oAuth2AuthorizationId);
-			}
-		}
-		catch (PortalException pe) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe);
-			}
-
-			SessionErrors.add(request, pe.getClass());
-
-			response.setRenderParameter(
-				"mvcPath", "/admin/application_authorizations.jsp");
-		}
 	}
 
 	@Activate

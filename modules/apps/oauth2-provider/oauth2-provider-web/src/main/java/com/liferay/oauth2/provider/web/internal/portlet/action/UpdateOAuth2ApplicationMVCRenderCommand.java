@@ -14,51 +14,37 @@
 
 package com.liferay.oauth2.provider.web.internal.portlet.action;
 
+import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
-import com.liferay.oauth2.provider.web.internal.display.context.OAuth2AdminPortletDisplayContext;
-import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.portlet.PortletException;
-import javax.portlet.ResourceRequest;
-import javax.portlet.ResourceResponse;
+import javax.portlet.RenderRequest;
+import javax.portlet.RenderResponse;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
+ * @author Stian Sigvartsen
  */
 @Component(
 	property = {
 		"javax.portlet.name=" + OAuth2ProviderPortletKeys.OAUTH2_ADMIN,
-		"mvc.command.name=/admin/generate_random_secret"
+		"mvc.command.name=/admin/update_oauth2_application"
 	}
 )
-public class GenerateRandomSecretMVCResourceCommand
-	implements MVCResourceCommand {
+public class UpdateOAuth2ApplicationMVCRenderCommand
+	implements MVCRenderCommand {
 
 	@Override
-	public boolean serveResource(
-			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
-		throws PortletException {
+	public String render(
+		RenderRequest renderRequest, RenderResponse renderResponse) {
 
-		String randomSecret =
-			OAuth2AdminPortletDisplayContext.generateRandomSecret();
-
-		resourceResponse.setContentType("text/plain");
-
-		try {
-			PrintWriter writer = resourceResponse.getWriter();
-
-			writer.write(randomSecret);
-		}
-		catch (IOException ioe) {
-			throw new PortletException(ioe);
-		}
-
-		return false;
+		return "/admin/edit_application.jsp";
 	}
+
+	@Reference
+	private OAuth2ApplicationService _oAuth2ApplicationService;
 
 }

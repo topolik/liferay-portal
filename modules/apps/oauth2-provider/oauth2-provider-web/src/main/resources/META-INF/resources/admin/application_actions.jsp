@@ -33,40 +33,14 @@ String oAuth2ApplicationId = String.valueOf(oAuth2Application.getOAuth2Applicati
 >
 	<c:if test="<%= oAuth2AdminPortletDisplayContext.hasUpdatePermission(oAuth2Application) %>">
 		<portlet:renderURL var="editURL">
+			<portlet:param name="mvcRenderCommandName" value="/admin/update_oauth2_application" />
 			<portlet:param name="oAuth2ApplicationId" value="<%= oAuth2ApplicationId %>" />
-
-			<portlet:param name="mvcPath" value="/admin/edit_application.jsp" />
-
 			<portlet:param name="redirect" value="<%= currentURL %>" />
 		</portlet:renderURL>
 
 		<liferay-ui:icon
 			message="edit"
 			url="<%= editURL.toString() %>"
-		/>
-
-		<portlet:renderURL var="assignScopesURL">
-			<portlet:param name="mvcRenderCommandName" value="/admin/assign_scopes" />
-			<portlet:param name="oAuth2ApplicationId" value="<%= oAuth2ApplicationId %>" />
-			<portlet:param name="redirect" value="<%= currentURL %>" />
-		</portlet:renderURL>
-
-		<liferay-ui:icon
-			message="assign-scopes"
-			url="<%= assignScopesURL.toString() %>"
-		/>
-	</c:if>
-
-	<c:if test="<%= oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission() %>">
-		<portlet:renderURL var="applicationAuthorizationsURL">
-			<portlet:param name="mvcPath" value="/admin/application_authorizations.jsp" />
-			<portlet:param name="oAuth2ApplicationId" value="<%= oAuth2ApplicationId %>" />
-			<portlet:param name="redirect" value="<%= currentURL %>" />
-		</portlet:renderURL>
-
-		<liferay-ui:icon
-			message="authorizations"
-			url="<%= applicationAuthorizationsURL.toString() %>"
 		/>
 	</c:if>
 
@@ -88,8 +62,8 @@ String oAuth2ApplicationId = String.valueOf(oAuth2Application.getOAuth2Applicati
 	</c:if>
 
 	<c:if test="<%= oAuth2AdminPortletDisplayContext.hasDeletePermission(oAuth2Application) %>">
-		<portlet:actionURL name="deleteOAuth2Application" var="deleteURL">
-			<portlet:param name="oAuth2ApplicationId" value="<%= oAuth2ApplicationId %>" />
+		<portlet:actionURL name="/admin/delete_oauth2_application" var="deleteURL">
+			<portlet:param name="oAuth2ApplicationIds" value="<%= oAuth2ApplicationId %>" />
 		</portlet:actionURL>
 
 		<%

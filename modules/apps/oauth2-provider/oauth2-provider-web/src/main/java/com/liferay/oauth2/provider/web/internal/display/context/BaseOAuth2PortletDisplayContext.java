@@ -20,8 +20,8 @@ import com.liferay.oauth2.provider.constants.OAuth2ProviderActionKeys;
 import com.liferay.oauth2.provider.constants.OAuth2ProviderConstants;
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2AdminActionKeys;
-import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2AdminActionKeys;
+import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -81,15 +81,10 @@ public abstract class BaseOAuth2PortletDisplayContext {
 		PermissionChecker permissionChecker =
 			PermissionThreadLocal.getPermissionChecker();
 
-		if (permissionChecker.hasPermission(
-				0, OAuth2ProviderConstants.RESOURCE_NAME,
-				OAuth2ProviderConstants.RESOURCE_NAME,
-				OAuth2ProviderActionKeys.ACTION_ADD_APPLICATION)) {
-
-			return true;
-		}
-
-		return false;
+		return permissionChecker.hasPermission(
+			0, OAuth2ProviderConstants.RESOURCE_NAME,
+			OAuth2ProviderConstants.RESOURCE_NAME,
+			OAuth2ProviderActionKeys.ACTION_ADD_APPLICATION);
 	}
 
 	public boolean hasDeletePermission(OAuth2Application oAuth2Application) {
@@ -111,14 +106,9 @@ public abstract class BaseOAuth2PortletDisplayContext {
 			return true;
 		}
 
-		if (permissionChecker.hasPermission(
-				0, OAuth2Application.class.getName(),
-				oAuth2Application.getOAuth2ApplicationId(), actionId)) {
-
-			return true;
-		}
-
-		return false;
+		return permissionChecker.hasPermission(
+			0, OAuth2Application.class.getName(),
+			oAuth2Application.getOAuth2ApplicationId(), actionId);
 	}
 
 	public boolean hasPermissionsPermission(
@@ -152,10 +142,6 @@ public abstract class BaseOAuth2PortletDisplayContext {
 
 			return false;
 		}
-	}
-
-	public boolean hasViewPermission(OAuth2Application oAuth2Application) {
-		return hasPermission(oAuth2Application, ActionKeys.VIEW);
 	}
 
 	protected OAuth2Application oAuth2Application;

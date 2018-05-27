@@ -15,16 +15,15 @@
 package com.liferay.oauth2.provider.web.internal.portlet.action;
 
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
+import com.liferay.oauth2.provider.web.constants.ClientProfile;
 import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
+import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.ParamUtil;
-
-import java.util.Arrays;
-import java.util.List;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -37,48 +36,52 @@ import org.osgi.service.component.annotations.Reference;
  * @author Stian Sigvartsen
  */
 @Component(
+	configurationPid = "com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration",
 	property = {
 		"javax.portlet.name=" + OAuth2ProviderPortletKeys.OAUTH2_ADMIN,
-		"mvc.command.name=/admin/assign_scopes"
+		"mvc.command.name=/admin/delete_oauth2_application"
 	}
 )
-public class AssignScopesMVCActionCommand implements MVCActionCommand {
+public class DeleteOAuth2ApplicationMVCActionCommand
+	implements MVCActionCommand {
 
 	@Override
 	public boolean processAction(
 		ActionRequest actionRequest, ActionResponse actionResponse) {
 
-		String[] scopeAliases = ParamUtil.getStringValues(
-			actionRequest, "scopeAliases");
-
-		List<String> scopeAliasesList = Arrays.asList(scopeAliases);
-
-		long oAuth2ApplicationId = ParamUtil.getLong(
-			actionRequest, "oAuth2ApplicationId");
+		long[] oAuth2ApplicationIds = StringUtil.split(
+			ParamUtil.getString(actionRequest, "oAuth2ApplicationIds"), 0L);
 
 		try {
-			_oAuth2ApplicationService.updateScopeAliases(
-				oAuth2ApplicationId, scopeAliasesList);
-		}
-		catch (PortalException pe) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"Unable to load OAuth2Application with id " +
-						oAuth2ApplicationId,
-					pe);
+			for (long oAuth2ApplicationId : oAuth2ApplicationIds) {
+				_oAuth2ApplicationService.deleteOAuth2Application(
+					oAuth2ApplicationId);
 			}
 		}
+		catch (PortalException pe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(pe);
+			}
 
-		String backURL = ParamUtil.get(
-			actionRequest, "uRLBack", StringPool.BLANK);
-
-		actionResponse.setRenderParameter("redirect", backURL);
+			SessionErrors.add(actionRequest, pe.getClass());
+		}
 
 		return true;
 	}
 
+	protected ClientProfile getClientProfile(int clientProfileId) {
+		for (ClientProfile clientProfile : ClientProfile.values()) {
+			if (clientProfile.id() == clientProfileId) {
+				return clientProfile;
+			}
+		}
+
+		throw new IllegalArgumentException(
+			"No ClientProfile enum constant found with ID " + clientProfileId);
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
-		AssignScopesMVCActionCommand.class);
+		DeleteOAuth2ApplicationMVCActionCommand.class);
 
 	@Reference
 	private OAuth2ApplicationService _oAuth2ApplicationService;

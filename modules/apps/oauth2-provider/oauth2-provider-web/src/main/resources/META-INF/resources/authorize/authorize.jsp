@@ -111,6 +111,7 @@ String replyTo = PortalUtil.escapeRedirect(oAuth2Parameters.get("reply_to"));
 							<aui:input name="oauthDecision" type="hidden" useNamespace="<%= false %>" value="deny" />
 
 							<aui:button id="allow" value="authorize" />
+
 							<aui:button id="cancel" type="submit" value="cancel" />
 
 							<aui:script>

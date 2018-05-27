@@ -24,6 +24,7 @@ OAuth2ApplicationsManagementToolbarDisplayContext oAuth2ApplicationsManagementTo
 String displayStyle = oAuth2ApplicationsManagementToolbarDisplayContext.getDisplayStyle();
 %>
 
+<%--This should be using clay navbar--%>
 <aui:nav-bar cssClass="navbar-no-collapse" markupView="lexicon">
 	<aui:nav collapsible="<%= false %>" cssClass="navbar-nav">
 		<aui:nav-item label="oauth2-applications" selected="<%= true %>" />
@@ -68,8 +69,8 @@ String displayStyle = oAuth2ApplicationsManagementToolbarDisplayContext.getDispl
 				modelVar="oAuth2Application"
 			>
 				<portlet:renderURL var="editURL">
+					<portlet:param name="mvcRenderCommandName" value="/admin/update_oauth2_application" />
 					<portlet:param name="oAuth2ApplicationId" value="<%= String.valueOf(oAuth2Application.getOAuth2ApplicationId()) %>" />
-					<portlet:param name="mvcPath" value="/admin/edit_application.jsp" />
 					<portlet:param name="redirect" value="<%= currentURL %>" />
 				</portlet:renderURL>
 
@@ -164,7 +165,7 @@ String displayStyle = oAuth2ApplicationsManagementToolbarDisplayContext.getDispl
 			form.attr('method', 'post');
 			form.fm('oAuth2ApplicationIds').val(Liferay.Util.listCheckedExcept(form, '<portlet:namespace />allRowIds'));
 
-			submitForm(form, '<portlet:actionURL name="deleteOAuth2Applications" />');
+			submitForm(form, '<portlet:actionURL name="/admin/delete_oauth2_application" />');
 		}
 	}
 </aui:script>
