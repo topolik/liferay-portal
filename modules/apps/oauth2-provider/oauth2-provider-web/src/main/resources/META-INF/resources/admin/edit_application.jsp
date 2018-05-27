@@ -61,7 +61,7 @@ String currentAppTab = ParamUtil.getString(request, "appTab", "credentials");
 <nav class="navbar navbar-collapse-absolute navbar-expand-md navbar-underline navigation-bar navigation-bar-secondary">
 	<div class="container">
 		<a aria-controls="navigationBarCollapse00" aria-expanded="false" aria-label="Toggle Navigation" class="collapsed navbar-toggler navbar-toggler-link" data-toggle="collapse" href="#navigationBarCollapse00" role="button">
-			<span class="navbar-text-truncate">Credentials</span>
+			<span class="navbar-text-truncate"><liferay-ui:message key="<%= HtmlUtil.escape(currentAppTab) %>" /></span>
 			<svg aria-hidden="true" class="lexicon-icon lexicon-icon-caret-bottom">
 				<use xlink:href="/vendor/lexicon/icons.svg#caret-bottom" />
 			</svg>
