@@ -67,20 +67,22 @@ final String oAuth2ApplicationIdString = String.valueOf(oAuth2ApplicationId);
 
 							navigationItem.setActive(currentAppTab.equals("assign_scopes"));
 							navigationItem.setHref(portletURL.toString());
-							navigationItem.setLabel(LanguageUtil.get(request, "assign_scopes"));
+							navigationItem.setLabel(LanguageUtil.get(request, "scopes"));
 						});
-					add(
-						navigationItem -> {
-							PortletURL portletURL = renderResponse.createRenderURL();
-							portletURL.setParameter("appTab", "application_authorizations");
-							portletURL.setParameter("mvcRenderCommandName", "/admin/view_oauth2_authorizations");
-							portletURL.setParameter("oAuth2ApplicationId", oAuth2ApplicationIdString);
-							portletURL.setParameter("redirect", redirect);
+					if (oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission()) {
+						add(
+							navigationItem -> {
+								PortletURL portletURL = renderResponse.createRenderURL();
+								portletURL.setParameter("appTab", "application_authorizations");
+								portletURL.setParameter("mvcRenderCommandName", "/admin/view_oauth2_authorizations");
+								portletURL.setParameter("oAuth2ApplicationId", oAuth2ApplicationIdString);
+								portletURL.setParameter("redirect", redirect);
 
-							navigationItem.setActive(currentAppTab.equals("application_authorizations"));
-							navigationItem.setHref(portletURL.toString());
-							navigationItem.setLabel(LanguageUtil.get(request, "application_authorizations"));
-						});
+								navigationItem.setActive(currentAppTab.equals("application_authorizations"));
+								navigationItem.setHref(portletURL.toString());
+								navigationItem.setLabel(LanguageUtil.get(request, "authorizations"));
+							});
+					}
 				}
 			}
 		%>"

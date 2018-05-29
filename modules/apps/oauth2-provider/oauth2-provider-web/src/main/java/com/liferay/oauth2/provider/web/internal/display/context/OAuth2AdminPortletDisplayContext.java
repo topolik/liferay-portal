@@ -21,7 +21,7 @@ import com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalServiceUtil;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationServiceUtil;
-import com.liferay.oauth2.provider.web.constants.ClientProfile;
+import com.liferay.oauth2.provider.web.internal.constants.ClientProfile;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -47,6 +47,12 @@ import javax.portlet.PortletRequest;
  */
 public class OAuth2AdminPortletDisplayContext
 	extends BaseOAuth2PortletDisplayContext {
+
+	public static String generateRandomId() {
+		String randomSecret = generateRandomSecret();
+
+		return StringUtil.replace(randomSecret, "secret-", "id-");
+	}
 
 	public static String generateRandomSecret() {
 		int size = 16;

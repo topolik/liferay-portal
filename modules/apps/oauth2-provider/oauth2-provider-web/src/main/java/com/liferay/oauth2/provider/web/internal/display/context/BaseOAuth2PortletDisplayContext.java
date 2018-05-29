@@ -20,8 +20,8 @@ import com.liferay.oauth2.provider.constants.OAuth2ProviderActionKeys;
 import com.liferay.oauth2.provider.constants.OAuth2ProviderConstants;
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
-import com.liferay.oauth2.provider.web.constants.OAuth2AdminActionKeys;
-import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.internal.constants.OAuth2AdminPortletActionKeys;
+import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -135,7 +135,7 @@ public abstract class BaseOAuth2PortletDisplayContext {
 		try {
 			return PortletPermissionUtil.contains(
 				permissionChecker, OAuth2ProviderPortletKeys.OAUTH2_ADMIN,
-				OAuth2AdminActionKeys.VIEW_GRANTED_AUTHORIZATIONS);
+				OAuth2AdminPortletActionKeys.VIEW_GRANTED_AUTHORIZATIONS);
 		}
 		catch (PortalException pe) {
 			_log.error(pe);

@@ -19,8 +19,8 @@ import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
 import com.liferay.oauth2.provider.constants.GrantType;
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
-import com.liferay.oauth2.provider.web.constants.ClientProfile;
-import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.internal.constants.ClientProfile;
+import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.OAuth2AdminPortletDisplayContext;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.InputStream;
 
@@ -129,6 +130,11 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 				OAuth2Application.class.getName(), request);
 
 			if (oAuth2ApplicationId == 0) {
+				if (Validator.isBlank(clientId)) {
+					clientId = OAuth2AdminPortletDisplayContext.
+						generateRandomId();
+				}
+
 				for (GrantType grantType : allowedGrantTypesList) {
 					if (!grantType.isSupportsPublicClients()) {
 						clientSecret =
@@ -193,7 +199,7 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 			SessionErrors.add(request, peClass.getName(), pe);
 		}
 
-		String backURL = ParamUtil.get(request, "uRLBack", StringPool.BLANK);
+		String backURL = ParamUtil.get(request, "backURL", StringPool.BLANK);
 
 		response.setRenderParameter("redirect", backURL);
 

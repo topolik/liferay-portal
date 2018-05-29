@@ -19,10 +19,9 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.oauth2.provider.model.OAuth2Application;
-import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -120,10 +119,16 @@ public class OAuth2ApplicationsManagementToolbarDisplayContext
 	public List<DropdownItem> getFilterDropdownItems() {
 		return new DropdownItemList() {
 			{
+				Map<String, String> orderColumnsMap = new HashMap<>();
+
+				orderColumnsMap.put("clientId", "client-id");
+				orderColumnsMap.put("createDate", "createDate");
+				orderColumnsMap.put("name", "name");
+
 				addGroup(
 					dropdownGroupItem -> {
 						dropdownGroupItem.setDropdownItems(
-							_getOrderByDropdownItems());
+							getOrderByDropdownItems(orderColumnsMap));
 						dropdownGroupItem.setLabel(
 							LanguageUtil.get(httpServletRequest, "order-by"));
 					});
@@ -189,39 +194,6 @@ public class OAuth2ApplicationsManagementToolbarDisplayContext
 				addListViewTypeItem();
 
 				addTableViewTypeItem();
-			}
-		};
-	}
-
-	private List<DropdownItem> _getOrderByDropdownItems() {
-		return new DropdownItemList() {
-			{
-				final Map<String, String> orderColumnsMap = new HashMap<>();
-
-				orderColumnsMap.put("clientId", "client-id");
-				orderColumnsMap.put("createDate", "createDate");
-				orderColumnsMap.put("name", "name");
-
-				for (Map.Entry<String, String> orderByColEntry :
-						orderColumnsMap.entrySet()) {
-
-					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								String orderByCol = orderByColEntry.getKey();
-
-								dropdownItem.setActive(
-									orderByCol.equals(getOrderByCol()));
-								dropdownItem.setHref(
-									getCurrentSortingURL(), "orderByCol",
-									orderByCol);
-
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										httpServletRequest,
-										orderByColEntry.getValue()));
-							}));
-				}
 			}
 		};
 	}

@@ -28,7 +28,7 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 <portlet:actionURL name="/admin/update_oauth2_application" var="updateOAuth2ApplicationURL">
 	<portlet:param name="mvcRenderCommandName" value="/admin/update_oauth2_application" />
 	<portlet:param name="oAuth2ApplicationId" value='<%= oAuth2Application == null ? "" : String.valueOf(oAuth2Application.getOAuth2ApplicationId()) %>' />
-	<portlet:param name="uRLBack" value="<%= redirect %>" />
+	<portlet:param name="backURL" value="<%= redirect %>" />
 </portlet:actionURL>
 
 <aui:form action="<%= updateOAuth2ApplicationURL %>" id="oauth2-application-fm" method="post" name="oauth2-application-fm">
