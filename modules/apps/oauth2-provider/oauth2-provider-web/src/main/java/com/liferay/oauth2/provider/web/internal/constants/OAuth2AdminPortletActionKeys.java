@@ -12,22 +12,14 @@
  * details.
  */
 
-package com.liferay.oauth2.provider.web.constants;
+package com.liferay.oauth2.provider.web.internal.constants;
 
 /**
  * @author Stian Sigvartsen
  */
-public class OAuth2ProviderPortletKeys {
+public class OAuth2AdminPortletActionKeys {
 
-	public static final String OAUTH2_ADMIN =
-		"com_liferay_oauth2_provider_web_internal_portlet_OAuth2AdminPortlet";
-
-	public static final String OAUTH2_AUTHORIZE =
-		"com_liferay_oauth2_provider_web_internal_portlet_" +
-			"OAuth2AuthorizePortlet";
-
-	public static final String OAUTH2_CONNECTED_APPLICATIONS =
-		"com_liferay_oauth2_provider_web_internal_portlet_" +
-			"OAuth2ConnectedApplicationsPortlet";
+	public static final String VIEW_GRANTED_AUTHORIZATIONS =
+		"VIEW_GRANTED_AUTHORIZATIONS";
 
 }

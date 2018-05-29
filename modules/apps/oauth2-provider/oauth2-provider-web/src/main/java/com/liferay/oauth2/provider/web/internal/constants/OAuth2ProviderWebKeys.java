@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.oauth2.provider.web.constants;
+package com.liferay.oauth2.provider.web.internal.constants;
 
 /**
  * @author Stian Sigvartsen
@@ -20,8 +20,6 @@ package com.liferay.oauth2.provider.web.constants;
 public class OAuth2ProviderWebKeys {
 
 	public static final String ASSIGN_SCOPES_MODEL = "ASSIGN_SCOPES_MODEL";
-
-	public static final String AUTHORIZATION_MODEL = "AUTHORIZATION_MODEL";
 
 	public static final String OAUTH2_ADMIN_PORTLET_DISPLAY_CONTEXT =
 		"OAUTH2_ADMIN_PORTLET_DISPLAY_CONTEXT";

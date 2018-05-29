@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.oauth2.provider.web.constants;
+package com.liferay.oauth2.provider.web.internal.constants;
 
 import com.liferay.oauth2.provider.constants.GrantType;
 

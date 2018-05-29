@@ -273,6 +273,7 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 				bodyContent: bodyContent,
 				centered: true,
 				cssClass: 'edit-client-credentials-modal',
+				destroyOnHide: true,
 				footerContent: footerContent,
 				headerContent: title,
 				modal: true,

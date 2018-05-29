@@ -16,8 +16,7 @@ package com.liferay.oauth2.provider.web.internal.portlet.action;
 
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationService;
-import com.liferay.oauth2.provider.web.constants.ClientProfile;
-import com.liferay.oauth2.provider.web.constants.OAuth2ProviderPortletKeys;
+import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -44,7 +43,7 @@ import org.osgi.service.component.annotations.Reference;
 		"mvc.command.name=/admin/revoke_oauth2_authorizations"
 	}
 )
-public class RevokeAuthorizationsMVCActionCommand implements MVCActionCommand {
+public class RevokeOAuth2AuthorizationsMVCActionCommand implements MVCActionCommand {
 
 	@Override
 	public boolean processAction(
@@ -68,26 +67,15 @@ public class RevokeAuthorizationsMVCActionCommand implements MVCActionCommand {
 		}
 
 		String backURL = ParamUtil.get(
-			actionRequest, "uRLBack", StringPool.BLANK);
+			actionRequest, "backURL", StringPool.BLANK);
 
 		actionResponse.setRenderParameter("redirect", backURL);
 
 		return true;
 	}
 
-	protected ClientProfile getClientProfile(int clientProfileId) {
-		for (ClientProfile clientProfile : ClientProfile.values()) {
-			if (clientProfile.id() == clientProfileId) {
-				return clientProfile;
-			}
-		}
-
-		throw new IllegalArgumentException(
-			"No ClientProfile enum constant found with ID " + clientProfileId);
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
-		RevokeAuthorizationsMVCActionCommand.class);
+		RevokeOAuth2AuthorizationsMVCActionCommand.class);
 
 	@Reference
 	private OAuth2ApplicationService _oAuth2ApplicationService;
