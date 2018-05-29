@@ -132,12 +132,12 @@ String currentAppTab = ParamUtil.getString(request, "appTab", "credentials");
 
 <c:choose>
 	<c:when test='<%= currentAppTab.equals("credentials") %>'>
-		<%@ include file="/admin/edit_application_credentials.jspf" %>
+		<liferay-util:include page="/admin/edit_application_credentials.jsp" servletContext="<%= application %>" />
 	</c:when>
 	<c:when test='<%= (oAuth2Application != null) && currentAppTab.equals("scopes") %>'>
-		<%@ include file="/admin/assign_scopes.jspf" %>
+		<liferay-util:include page="/admin/assign_scopes.jsp" servletContext="<%= application %>" />
 	</c:when>
 	<c:when test='<%= (oAuth2Application != null) && currentAppTab.equals("authorizations") && oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission() %>'>
-		<%@ include file="/admin/application_authorizations.jspf" %>
+		<liferay-util:include page="/admin/application_authorizations.jsp" servletContext="<%= application %>" />
 	</c:when>
 </c:choose>

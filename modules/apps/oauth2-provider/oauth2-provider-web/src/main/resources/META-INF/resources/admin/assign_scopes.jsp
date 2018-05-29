@@ -14,7 +14,13 @@
  */
 --%>
 
+<%@ include file="/admin/init.jsp" %>
+
 <%
+String redirect = ParamUtil.getString(request, "redirect");
+
+OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2Application();
+
 AssignScopesModel assignScopesModel = (AssignScopesModel)request.getAttribute(OAuth2ProviderWebKeys.ASSIGN_SCOPES_MODEL);
 
 List<String> assignedScopes = Collections.emptyList();
@@ -32,7 +38,7 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 			<portlet:actionURL name="/admin/assign_scopes" var="assignScopesURL">
 				<portlet:param name="appTab" value="scopes" />
 				<portlet:param name="mvcRenderCommandName" value="/admin/assign_scopes" />
-				<portlet:param name="oAuth2ApplicationId" value="<%= String.valueOf(oAuth2ApplicationId) %>" />
+				<portlet:param name="oAuth2ApplicationId" value="<%= String.valueOf(oAuth2Application.getOAuth2ApplicationId()) %>" />
 				<portlet:param name="uRLBack" value="<%= redirect %>" />
 			</portlet:actionURL>
 

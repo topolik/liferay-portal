@@ -14,7 +14,13 @@
  */
 --%>
 
+<%@ include file="/admin/init.jsp" %>
+
 <%
+String redirect = ParamUtil.getString(request, "redirect");
+
+OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2Application();
+
 String clientId = (oAuth2Application == null) ? "" : oAuth2Application.getClientId();
 String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getClientSecret();
 %>

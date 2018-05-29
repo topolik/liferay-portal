@@ -14,7 +14,15 @@
  */
 --%>
 
+<%@ include file="/admin/init.jsp" %>
+
 <%
+String redirect = ParamUtil.getString(request, "redirect");
+
+OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2Application();
+
+long oAuth2ApplicationId = oAuth2Application.getOAuth2ApplicationId();
+
 OAuth2AuthorizationsManagementToolbarDisplayContext oAuth2AuthorizationsManagementToolbarDisplayContext = new OAuth2AuthorizationsManagementToolbarDisplayContext(liferayPortletRequest, liferayPortletResponse, currentURLObj);
 
 int oAuth2AuthorizationsCount = OAuth2AuthorizationServiceUtil.getApplicationOAuth2AuthorizationsCount(oAuth2ApplicationId);
