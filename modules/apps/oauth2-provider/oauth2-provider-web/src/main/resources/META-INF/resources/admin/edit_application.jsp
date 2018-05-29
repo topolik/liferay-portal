@@ -17,7 +17,7 @@
 <%@ include file="/admin/init.jsp" %>
 
 <%
-String redirect = ParamUtil.getString(request, "redirect");
+final String redirect = ParamUtil.getString(request, "redirect");
 
 portletDisplay.setShowBackIcon(true);
 portletDisplay.setURLBack(redirect);
@@ -34,110 +34,67 @@ if (oAuth2Application != null) {
 }
 
 renderResponse.setTitle(headerTitle);
-String currentAppTab = ParamUtil.getString(request, "appTab", "credentials");
+
+final String currentAppTab = ParamUtil.getString(request, "appTab", "credentials");
+final String oAuth2ApplicationIdString = String.valueOf(oAuth2ApplicationId);
 %>
 
-<portlet:renderURL var="editURL">
-	<portlet:param name="appTab" value="credentials" />
-	<portlet:param name="mvcRenderCommandName" value="/admin/update_oauth2_application" />
-	<portlet:param name="oAuth2ApplicationId" value="<%= String.valueOf(oAuth2ApplicationId) %>" />
-	<portlet:param name="redirect" value="<%= redirect %>" />
-</portlet:renderURL>
+<c:if test="<%= oAuth2Application != null %>">
+	<clay:navigation-bar
+		inverted="<%= true %>"
+		navigationItems="<%=
+				new JSPNavigationItemList(pageContext) {
+				{
+					add(
+						navigationItem -> {
+							PortletURL portletURL = renderResponse.createRenderURL();
+							portletURL.setParameter("appTab", "credentials");
+							portletURL.setParameter("mvcRenderCommandName", "/admin/update_oauth2_application");
+							portletURL.setParameter("oAuth2ApplicationId", oAuth2ApplicationIdString);
+							portletURL.setParameter("redirect", redirect);
 
-<portlet:renderURL var="assignScopesURL">
-	<portlet:param name="appTab" value="scopes" />
-	<portlet:param name="mvcRenderCommandName" value="/admin/assign_scopes" />
-	<portlet:param name="oAuth2ApplicationId" value="<%= String.valueOf(oAuth2ApplicationId) %>" />
-	<portlet:param name="redirect" value="<%= redirect %>" />
-</portlet:renderURL>
+							navigationItem.setActive(currentAppTab.equals("credentials"));
+							navigationItem.setHref(portletURL.toString());
+							navigationItem.setLabel(LanguageUtil.get(request, "credentials"));
+						});
+					add(
+						navigationItem -> {
+							PortletURL portletURL = renderResponse.createRenderURL();
+							portletURL.setParameter("appTab", "assign_scopes");
+							portletURL.setParameter("mvcRenderCommandName", "/admin/assign_scopes");
+							portletURL.setParameter("oAuth2ApplicationId", oAuth2ApplicationIdString);
+							portletURL.setParameter("redirect", redirect);
 
-<portlet:renderURL var="applicationAuthorizationsURL">
-	<portlet:param name="appTab" value="authorizations" />
-	<portlet:param name="mvcRenderCommandName" value="/admin/view_oauth2_authorizations" />
-	<portlet:param name="oAuth2ApplicationId" value="<%= String.valueOf(oAuth2ApplicationId) %>" />
-	<portlet:param name="redirect" value="<%= redirect %>" />
-</portlet:renderURL>
+							navigationItem.setActive(currentAppTab.equals("assign_scopes"));
+							navigationItem.setHref(portletURL.toString());
+							navigationItem.setLabel(LanguageUtil.get(request, "assign_scopes"));
+						});
+					add(
+						navigationItem -> {
+							PortletURL portletURL = renderResponse.createRenderURL();
+							portletURL.setParameter("appTab", "application_authorizations");
+							portletURL.setParameter("mvcRenderCommandName", "/admin/view_oauth2_authorizations");
+							portletURL.setParameter("oAuth2ApplicationId", oAuth2ApplicationIdString);
+							portletURL.setParameter("redirect", redirect);
 
-<nav class="navbar navbar-collapse-absolute navbar-expand-md navbar-underline navigation-bar navigation-bar-secondary">
-	<div class="container">
-		<a aria-controls="navigationBarCollapse00" aria-expanded="false" aria-label="Toggle Navigation" class="collapsed navbar-toggler navbar-toggler-link" data-toggle="collapse" href="#navigationBarCollapse00" role="button">
-			<span class="navbar-text-truncate"><liferay-ui:message key="<%= HtmlUtil.escape(currentAppTab) %>" /></span>
-			<svg aria-hidden="true" class="lexicon-icon lexicon-icon-caret-bottom">
-				<use xlink:href="/vendor/lexicon/icons.svg#caret-bottom" />
-			</svg>
-		</a>
-
-		<div class="collapse navbar-collapse" id="navigationBarCollapse00">
-			<div class="container">
-				<ul class="navbar-nav">
-					<c:choose>
-						<c:when test='<%= currentAppTab.equals("credentials") %>'>
-							<li aria-label="Current Page" class="nav-item">
-								<a class="active nav-link" href="<%= editURL %>">
-									<span class="navbar-text-truncate"><liferay-ui:message key="credentials" /></span>
-								</a>
-							</li>
-						</c:when>
-						<c:otherwise>
-							<li aria-label="Current Page" class="nav-item">
-								<a class="nav-link" href="<%= editURL %>">
-									<span class="navbar-text-truncate"><liferay-ui:message key="credentials" /></span>
-								</a>
-							</li>
-						</c:otherwise>
-					</c:choose>
-
-					<c:if test="<%= oAuth2Application != null %>">
-						<c:choose>
-							<c:when test='<%= currentAppTab.equals("scopes") %>'>
-								<li aria-label="Current Page" class="nav-item">
-									<a class="active nav-link" href="<%= assignScopesURL %>">
-										<span class="navbar-text-truncate"><liferay-ui:message key="scopes" /></span>
-									</a>
-								</li>
-							</c:when>
-							<c:otherwise>
-								<li class="nav-item">
-									<a class="nav-link" href="<%= assignScopesURL %>">
-										<span class="navbar-text-truncate"><liferay-ui:message key="scopes" /></span>
-									</a>
-								</li>
-							</c:otherwise>
-						</c:choose>
-
-						<c:if test="<%= oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission() %>">
-							<c:choose>
-								<c:when test='<%= currentAppTab.equals("authorizations") %>'>
-									<li aria-label="Current Page" class="nav-item">
-										<a class="active nav-link" href="<%= applicationAuthorizationsURL %>">
-											<span class="navbar-text-truncate"><liferay-ui:message key="authorizations" /></span>
-										</a>
-									</li>
-								</c:when>
-								<c:otherwise>
-									<li class="nav-item">
-										<a class="nav-link" href="<%= applicationAuthorizationsURL %>">
-											<span class="navbar-text-truncate"><liferay-ui:message key="authorizations" /></span>
-										</a>
-									</li>
-								</c:otherwise>
-							</c:choose>
-						</c:if>
-					</c:if>
-				</ul>
-			</div>
-		</div>
-	</div>
-</nav>
+							navigationItem.setActive(currentAppTab.equals("application_authorizations"));
+							navigationItem.setHref(portletURL.toString());
+							navigationItem.setLabel(LanguageUtil.get(request, "application_authorizations"));
+						});
+				}
+			}
+		%>"
+	/>
+</c:if>
 
 <c:choose>
 	<c:when test='<%= currentAppTab.equals("credentials") %>'>
 		<liferay-util:include page="/admin/edit_application_credentials.jsp" servletContext="<%= application %>" />
 	</c:when>
-	<c:when test='<%= (oAuth2Application != null) && currentAppTab.equals("scopes") %>'>
+	<c:when test='<%= (oAuth2Application != null) && currentAppTab.equals("assign_scopes") %>'>
 		<liferay-util:include page="/admin/assign_scopes.jsp" servletContext="<%= application %>" />
 	</c:when>
-	<c:when test='<%= (oAuth2Application != null) && currentAppTab.equals("authorizations") && oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission() %>'>
+	<c:when test='<%= (oAuth2Application != null) && currentAppTab.equals("application_authorizations") && oAuth2AdminPortletDisplayContext.hasViewGrantedAuthorizationsPermission() %>'>
 		<liferay-util:include page="/admin/application_authorizations.jsp" servletContext="<%= application %>" />
 	</c:when>
 </c:choose>
