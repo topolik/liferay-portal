@@ -3,6 +3,28 @@ $grayTextColor: #6B6C7E;
 
 .assign-scopes-modal {
 	max-width: 100%;
+
+	.inline {
+		display: inline-block;
+	}
+}
+
+.edit-client-credentials-modal {
+	.hidden {
+		display: none;
+	}
+	.padlock {
+		flex: 1;
+	}
+}
+
+.portlet-oauth2-provider-admin {
+	.hidden {
+		display: none;
+	}
+	.inline {
+		display: inline-block;
+	}
 }
 
 .portlet-oauth2-provider-authorize {

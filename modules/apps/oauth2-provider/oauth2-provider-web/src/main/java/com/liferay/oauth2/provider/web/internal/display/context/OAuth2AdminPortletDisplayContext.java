@@ -21,6 +21,7 @@ import com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalServiceUtil;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationServiceUtil;
+import com.liferay.oauth2.provider.web.constants.ClientProfile;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -30,8 +31,11 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,6 +80,30 @@ public class OAuth2AdminPortletDisplayContext
 		super.oAuth2ApplicationService = oAuth2ApplicationService;
 		super.portletRequest = portletRequest;
 		super.themeDisplay = themeDisplay;
+	}
+
+	public List<Map.Entry<String, String>>
+		getApplicationNamesDescriptionsSorted(
+			AssignScopesModel assignScopesModel) {
+
+		Map<String, String> applicationNamesDescriptions =
+			assignScopesModel.getApplicationNamesDescriptions();
+
+		List<Map.Entry<String, String>> applicationsNamesDescriptionsList =
+			new ArrayList<>(applicationNamesDescriptions.entrySet());
+
+		applicationsNamesDescriptionsList.sort(
+			Comparator.comparing(Map.Entry::getValue));
+
+		return applicationsNamesDescriptionsList;
+	}
+
+	public ClientProfile[] getClientProfilesSorted() {
+		ClientProfile[] clientProfiles = ClientProfile.values();
+
+		Arrays.sort(clientProfiles, Comparator.comparingInt(ClientProfile::id));
+
+		return clientProfiles;
 	}
 
 	public List<GrantType> getGrantTypes(

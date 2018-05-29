@@ -40,19 +40,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 	<aui:select name="clientProfile">
 
 		<%
-
-			// We should probably hide this inside a display context
-
-		ClientProfile[] clientProfiles = ClientProfile.values();
-		Arrays.sort(
-			clientProfiles, new Comparator<ClientProfile>() {
-
-				@Override
-				public int compare(ClientProfile clientProfile1, ClientProfile clientProfile2) {
-					return clientProfile1.id() - clientProfile2.id();
-				}
-
-			});
+		ClientProfile[] clientProfiles = oAuth2AdminPortletDisplayContext.getClientProfilesSorted();
 
 		for (ClientProfile clientProfile : clientProfiles) {
 		%>
@@ -98,20 +86,15 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 					String name = "grant-" + grantType.name();
 
 					checked = ParamUtil.getBoolean(request, name, checked);
+
+					Map<String, Object> data = new HashMap<>();
+					data.put("isredirect", grantType.isRequiresRedirectURI());
+					data.put("issupportsconfidentialclients", grantType.isSupportsConfidentialClients());
+					data.put("issupportspublicclients", grantType.isSupportsPublicClients());
 				%>
 
 					<div class="allowedGrantType <%= cssClassesStr %>">
-						<div class="custom-checkbox custom-control">
-							<%--should be using aui:input--%>
-							<label>
-								<input class="custom-control-input"<%= checked ? " checked" : "" %> data-isredirect="<%= grantType.isRequiresRedirectURI() %>" data-issupportsconfidentialclients="<%= grantType.isSupportsConfidentialClients() %>" data-issupportspublicclients="<%= grantType.isSupportsPublicClients() %>" name='<%= renderResponse.getNamespace() + name %>' type="checkbox">
-								<span class="custom-control-label">
-									<span class="custom-control-label-text">
-										<liferay-ui:message key="<%= grantType.name() %>" />
-									</span>
-								</span>
-							</label>
-						</div>
+						<aui:input checked="<%= checked %>" data="<%= data %>" label="<%= grantType.name() %>" name="<%= name %>" type="checkbox" />
 					</div>
 
 				<%
@@ -147,18 +130,7 @@ OAuth2Application oAuth2Application = oAuth2AdminPortletDisplayContext.getOAuth2
 					checked = ParamUtil.getBoolean(request, name, checked);
 				%>
 
-					<div class="custom-checkbox custom-control">
-						<%--aui:input--%>
-						<label>
-							<input class="custom-control-input"<%= checked ? " checked" : "" %> name="<%= renderResponse.getNamespace() + HtmlUtil.escapeAttribute(name) %>" type="checkbox" />
-
-							<span class="custom-control-label">
-								<span class="custom-control-label-text">
-									<liferay-ui:message key="<%= HtmlUtil.escape(oAuth2Feature) %>" />
-								</span>
-							</span>
-						</label>
-					</div>
+					<aui:input checked="<%= checked %>" label="<%= HtmlUtil.escape(oAuth2Feature) %>" name="<%= name %>" type="checkbox" />
 
 				<%
 				}

@@ -24,12 +24,10 @@ OAuth2ApplicationsManagementToolbarDisplayContext oAuth2ApplicationsManagementTo
 String displayStyle = oAuth2ApplicationsManagementToolbarDisplayContext.getDisplayStyle();
 %>
 
-<%--This should be using clay navbar--%>
-<aui:nav-bar cssClass="navbar-no-collapse" markupView="lexicon">
-	<aui:nav collapsible="<%= false %>" cssClass="navbar-nav">
-		<aui:nav-item label="oauth2-applications" selected="<%= true %>" />
-	</aui:nav>
-</aui:nav-bar>
+<clay:navigation-bar
+	inverted="<%= true %>"
+	navigationItems="<%= oAuth2ApplicationsManagementToolbarDisplayContext.getNavigationItems() %>"
+/>
 
 <clay:management-toolbar
 	actionDropdownItems="<%= oAuth2ApplicationsManagementToolbarDisplayContext.getActionDropdownItems() %>"
