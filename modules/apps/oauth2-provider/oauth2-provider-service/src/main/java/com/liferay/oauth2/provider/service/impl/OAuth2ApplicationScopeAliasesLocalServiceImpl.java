@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -94,11 +95,28 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 	public OAuth2ApplicationScopeAliases fetchOAuth2ApplicationScopeAliases(
 		long oAuth2ApplicationId, List<String> scopeAliasesList) {
 
+		scopeAliasesList = new ArrayList<>(scopeAliasesList);
+
+		scopeAliasesList.sort(null);
+
 		String scopeAliases = StringUtil.merge(
 			scopeAliasesList, StringPool.SPACE);
 
-		return oAuth2ApplicationScopeAliasesPersistence.fetchByO_S(
-			oAuth2ApplicationId, scopeAliases);
+		List<OAuth2ApplicationScopeAliases> oAuth2ApplicationScopeAliasesList =
+			oAuth2ApplicationScopeAliasesPersistence.findByO_S(
+				oAuth2ApplicationId, scopeAliases.hashCode());
+
+		for (OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases :
+				oAuth2ApplicationScopeAliasesList) {
+
+			if (scopeAliasesList.equals(
+					oAuth2ApplicationScopeAliases.getScopeAliasesList())) {
+
+				return oAuth2ApplicationScopeAliases;
+			}
+		}
+
+		return null;
 	}
 
 	@Override
