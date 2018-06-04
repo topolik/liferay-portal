@@ -16,28 +16,9 @@ package com.liferay.oauth2.provider.rest.internal.jaxrs.feature;
 
 import com.liferay.oauth2.provider.scope.ScopeChecker;
 import com.liferay.oauth2.provider.scope.spi.scope.finder.ScopeFinder;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ServiceScope;
 
-import javax.annotation.Priority;
-import javax.ws.rs.Priorities;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.ext.Provider;
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -50,6 +31,29 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Priority;
+
+import javax.ws.rs.Priorities;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.Configuration;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.ext.Provider;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ServiceScope;
 
 /**
  * @author Carlos Sierra Andrés
@@ -68,7 +72,7 @@ public class ConfigurableCheckerFeature implements Feature {
 
 	@Override
 	public boolean configure(FeatureContext context) {
-		if (patterns.isEmpty()) {
+		if (_patterns.isEmpty()) {
 			return false;
 		}
 
@@ -82,7 +86,7 @@ public class ConfigurableCheckerFeature implements Feature {
 
 		Configuration configuration = context.getConfiguration();
 
-		Stream<CheckPattern> stream = patterns.stream();
+		Stream<CheckPattern> stream = _patterns.stream();
 
 		_serviceRegistration = _bundleContext.registerService(
 			ScopeFinder.class,
@@ -98,29 +102,19 @@ public class ConfigurableCheckerFeature implements Feature {
 		return true;
 	}
 
-	protected Dictionary<String, Object> buildProperties(
-		Configuration configuration) {
-		Dictionary<String, Object> properties = new Hashtable<>(
-			(Map<String, Object>) configuration.getProperty(
-				"osgi.jaxrs.application.serviceProperties"));
-
-		properties.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
-
-		return properties;
-	}
-
 	protected void abortRequest(
 		ContainerRequestContext containerRequestContext) {
+
 		containerRequestContext.abortWith(
 			Response.status(
 				403
-			).build()
-		);
+			).build());
 	}
 
 	@Activate
 	protected void activate(
 		BundleContext bundleContext, Map<String, Object> properties) {
+
 		_bundleContext = bundleContext;
 
 		Object patternsObject = properties.get("patterns");
@@ -129,7 +123,7 @@ public class ConfigurableCheckerFeature implements Feature {
 			return;
 		}
 
-		String[] patternStrings = (String[]) patternsObject;
+		String[] patternStrings = (String[])patternsObject;
 
 		for (String patternString : patternStrings) {
 			String[] split = patternString.split("::");
@@ -146,13 +140,12 @@ public class ConfigurableCheckerFeature implements Feature {
 			String[] scopes = scopesString.split(",");
 
 			try {
-				patterns.add(
+				_patterns.add(
 					new CheckPattern(
 						Pattern.compile(methodPatternString),
-						Pattern.compile(urlPatternString),
-						scopes));
+						Pattern.compile(urlPatternString), scopes));
 			}
-			catch (PatternSyntaxException e) {
+			catch (PatternSyntaxException pse) {
 				//TODO: log
 
 				continue;
@@ -160,31 +153,16 @@ public class ConfigurableCheckerFeature implements Feature {
 		}
 	}
 
-	private static class CheckPattern {
+	protected Dictionary<String, Object> buildProperties(
+		Configuration configuration) {
 
-		public CheckPattern(
-			Pattern methodPattern, Pattern urlPattern, String[] scopes) {
+		Dictionary<String, Object> properties = new Hashtable<>(
+			(Map<String, Object>)configuration.getProperty(
+				"osgi.jaxrs.application.serviceProperties"));
 
-			_methodPattern = methodPattern;
-			_urlPattern = urlPattern;
-			_scopes = scopes;
-		}
+		properties.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
 
-		Pattern _methodPattern;
-		Pattern _urlPattern;
-		String[] _scopes;
-
-		public Predicate<String> getMethodPatternPredicate() {
-			return _methodPattern.asPredicate();
-		}
-
-		public Predicate<String> getUrlPatternPredicate() {
-			return _urlPattern.asPredicate();
-		}
-
-		public String[] getScopes() {
-			return _scopes;
-		}
+		return properties;
 	}
 
 	@Deactivate
@@ -195,12 +173,40 @@ public class ConfigurableCheckerFeature implements Feature {
 	}
 
 	private BundleContext _bundleContext;
-	private List<CheckPattern> patterns = new ArrayList<>();
+	private final List<CheckPattern> _patterns = new ArrayList<>();
 
 	@Reference
 	private ScopeChecker _scopeChecker;
 
 	private ServiceRegistration<ScopeFinder> _serviceRegistration;
+
+	private static class CheckPattern {
+
+		public CheckPattern(
+			Pattern methodPattern, Pattern urlPattern, String[] scopes) {
+
+			_methodPatternPredicate = methodPattern.asPredicate();
+			_urlPatternPredicate = urlPattern.asPredicate();
+			_scopes = scopes;
+		}
+
+		public Predicate<String> getMethodPatternPredicate() {
+			return _methodPatternPredicate;
+		}
+
+		public String[] getScopes() {
+			return _scopes;
+		}
+
+		public Predicate<String> getUrlPatternPredicate() {
+			return _urlPatternPredicate;
+		}
+
+		private final Predicate<String> _methodPatternPredicate;
+		private final String[] _scopes;
+		private final Predicate<String> _urlPatternPredicate;
+
+	}
 
 	private class ConfigurableCheckerContainerRequestFilter
 		implements ContainerRequestFilter {
@@ -213,7 +219,7 @@ public class ConfigurableCheckerFeature implements Feature {
 
 			String path = _uriInfo.getPath();
 
-			for (CheckPattern pattern : patterns) {
+			for (CheckPattern pattern : _patterns) {
 				Predicate<String> urlPatternPredicate =
 					pattern.getUrlPatternPredicate();
 
@@ -233,6 +239,8 @@ public class ConfigurableCheckerFeature implements Feature {
 		}
 
 		@Context
-		UriInfo _uriInfo;
+		private UriInfo _uriInfo;
+
 	}
+
 }
