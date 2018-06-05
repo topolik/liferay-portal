@@ -70,7 +70,7 @@
 											<aui:input checked="<%= assignedScopes.contains(scopeAlias) %>" data="<%= data %>" disabled="<%= true %>" id="<%= id %>" label="" name="<%= id %>" onClick="return false;" title="<%= HtmlUtil.escapeAttribute(scopeAlias) %>" type="checkbox" />
 										</c:when>
 										<c:otherwise>
-											<aui:input checked="<%= assignedScopes.contains(scopeAlias) %>" data="<%= data %>" id="<%= id %>" label="" name="scopeAliases" title="<%= HtmlUtil.escapeAttribute(scopeAlias) %>" type="checkbox" value="<%= HtmlUtil.escapeAttribute(scopeAlias) %>" />
+											<aui:input checked="<%= assignedScopes.contains(scopeAlias) %>" data="<%= data %>" id="<%= id %>" label="" name="scopeAliases" onChange='<%= renderResponse.getNamespace() + "recalculateDependants(this)" %>' title="<%= HtmlUtil.escapeAttribute(scopeAlias) %>" type="checkbox" value="<%= HtmlUtil.escapeAttribute(scopeAlias) %>" />
 										</c:otherwise>
 									</c:choose>
 								</div>

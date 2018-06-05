@@ -68,11 +68,13 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 					</div>
 
 					<aui:button-row>
-						<aui:button cssClass="btn-lg" type="submit" />
+						<aui:button id="save" type="submit" value="save" />
 
-						<aui:button cssClass="btn-lg" href="<%= PortalUtil.escapeRedirect(redirect) %>" type="cancel" />
+						<aui:button href="<%= PortalUtil.escapeRedirect(redirect) %>" type="cancel" />
 					</aui:button-row>
 				</div>
+
+				<input id="<portlet:namespace />impliedScopeAliases" name="<portlet:namespace />scopeAliases" type="hidden" />
 			</aui:form>
 		</div>
 	</div>
@@ -147,46 +149,103 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 	);
 
 	window.<portlet:namespace />recalculateDependants = function(checkboxElement) {
-		var checkbox = $(checkboxElement);
+		var checkbox = A.one(checkboxElement);
 
 		var value = checkbox.val();
 
-		return $('input[data-slave]').filter(
+		<portlet:namespace />changeScopeAliasStickyStatus(value, checkbox.attr('checked'));
+
+		return A.all('input[data-slave]').filter(
 			function() {
-				return $.inArray(value, $(this).attr("data-slave").split(" ")) >= 0
+				return $.inArray(value, this.attr("data-slave").split(" ")) >= 0
 			}).each(function() {
 
-				var slave = $(this);
+				var slave = this;
 
 				var scopeAliases = slave.attr("data-slave").split(" ");
 
-				var logicalOR = checkbox.prop('checked');
+				var logicalOR = checkbox.attr('checked');
 
 				for (var i = 0; i < scopeAliases.length; i++) {
 
 					logicalOR = logicalOR || $('input[value="' + scopeAliases[i] + '"]:checked').length > 0;
 
 					if (logicalOR) {
-						slave.prop('checked', true);
-						slave.prop('disabled', true);
+						slave.attr('checked', true);
+						slave.attr('disabled', true);
 						return;
 					}
 				}
-				slave.prop('checked', false);
 
-				if (slave.prop('name')) {
-					slave.prop('disabled', false);
+				var index = <portlet:namespace />getArrayIndexOfStickyScopeAlias(slave.val());
+				if (index == -1) {
+					slave.attr('checked', false);
+				}
+
+				if (slave.attr('name')) {
+					slave.attr('disabled', false);
 				}
 			});
 	}
 
 	window.<portlet:namespace />recalculateAll = function() {
-		var scopeAliasesCheckboxes = $('input[name="<portlet:namespace />scopeAliases"]');
+		A.all('input[name="<portlet:namespace />scopeAliases"]').each(
+			function() {
+				<portlet:namespace />recalculateDependants(this);
+			});
+	}
 
-		for (var i = 0; i < scopeAliasesCheckboxes.length; i++) {
-			<portlet:namespace />recalculateDependants(scopeAliasesCheckboxes[i]);
+	var <portlet:namespace />stickyScopeAliases = [];
+
+	window.<portlet:namespace />changeScopeAliasStickyStatus = function(scopeAlias, sticky) {
+		if (sticky) {
+			<portlet:namespace />stickyScopeAliases.push(scopeAlias);
+		}
+		else {
+
+			var index = <portlet:namespace />getArrayIndexOfStickyScopeAlias(scopeAlias);
+
+			if (index > -1) {
+				<portlet:namespace />stickyScopeAliases.splice(index, 1);
+			}
 		}
 	}
 
+	window.<portlet:namespace />getArrayIndexOfStickyScopeAlias = function(scopeAlias) {
+		for (var i = 0; i < <portlet:namespace />stickyScopeAliases.length; i++) {
+			if (<portlet:namespace />stickyScopeAliases[i] == scopeAlias) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	<%
+	for (String assignedScope : assignedScopes) {
+		%>
+
+			<portlet:namespace />changeScopeAliasStickyStatus('<%= assignedScope %>', true);
+
+		<%
+		}
+	%>
+
 	<portlet:namespace />recalculateAll();
+
+	A.one('#<portlet:namespace />save').on(
+		'click',
+		function(event) {
+
+			event.preventDefault();
+
+			var scopeAliases = [];
+			A.all('input[name="<portlet:namespace />scopeAliases"]:checked:disabled').each(
+				function() {
+					scopeAliases.push(this.val());
+				});
+			A.one('#<portlet:namespace />impliedScopeAliases').attr('value', scopeAliases.join(','));
+
+			document.<portlet:namespace/>fm.submit();
+		});
+
 </aui:script>
