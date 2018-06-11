@@ -106,9 +106,6 @@ public class SAPEntryScopeDescriptorFinderRegistrator {
 			ConfigurableUtil.createConfigurable(
 				OAuth2JSONWSConfiguration.class, properties);
 
-		_documentsScopeEnabled =
-			oAuth2JSONWSConfiguration.documentsScopeEnabled();
-
 		_documentsScopeDescription =
 			oAuth2JSONWSConfiguration.documentsScopeDescription();
 
