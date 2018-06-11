@@ -21,6 +21,6 @@ public class OAuth2JSONWSConstants {
 
 	public static final String APPLICATION_NAME = "liferay-json-web-services";
 
-	public static final String SCOPE_DOCUMENTS = "download.documents.and.media";
+	public static final String SCOPE_DOCUMENTS = "download";
 
 }

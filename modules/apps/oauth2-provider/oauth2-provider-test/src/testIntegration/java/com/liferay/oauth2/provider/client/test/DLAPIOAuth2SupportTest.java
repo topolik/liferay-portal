@@ -155,8 +155,7 @@ public class DLAPIOAuth2SupportTest extends BaseClientTestCase {
 			createOAuth2Application(
 				defaultCompanyId, user, "oauthTestApplication",
 				Collections.singletonList(GrantType.CLIENT_CREDENTIALS),
-				Arrays.asList(
-					new String[] {"GET", "download.documents.and.media"}));
+				Arrays.asList(new String[] {"GET", "download"}));
 
 			autoCloseables.add(
 				() -> dlAppLocalService.deleteFileEntry(
