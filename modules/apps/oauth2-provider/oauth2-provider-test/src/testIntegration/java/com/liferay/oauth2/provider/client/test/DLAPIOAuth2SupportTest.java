@@ -89,10 +89,15 @@ public class DLAPIOAuth2SupportTest extends BaseClientTestCase {
 
 		WebTarget fileEntryTarget = _getRootWebTarget(fileEntryRelativeUrl);
 
-		Invocation.Builder fileEntryBuilder = authorize(
-			fileEntryTarget.request(), tokenString);
+		Invocation.Builder fileEntryBuilder = fileEntryTarget.request();
 
 		Response response = fileEntryBuilder.get();
+
+		Assert.assertNotEquals(200, response.getStatus());
+
+		fileEntryBuilder = authorize(fileEntryBuilder, tokenString);
+
+		response = fileEntryBuilder.get();
 
 		Assert.assertEquals(200, response.getStatus());
 		Assert.assertEquals(
