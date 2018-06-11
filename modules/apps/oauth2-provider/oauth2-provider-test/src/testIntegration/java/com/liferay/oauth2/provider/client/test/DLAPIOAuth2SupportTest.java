@@ -16,8 +16,9 @@ package com.liferay.oauth2.provider.client.test;
 
 import com.liferay.document.library.kernel.service.DLAppLocalService;
 import com.liferay.document.library.kernel.util.DLUtil;
+import com.liferay.oauth2.provider.constants.GrantType;
 import com.liferay.oauth2.provider.test.internal.TestFileEntryUrlApplication;
-import com.liferay.oauth2.provider.test.internal.activator.configuration.BaseTestPreparatorBundleActivator;
+import com.liferay.oauth2.provider.test.internal.activator.BaseTestPreparatorBundleActivator;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 
@@ -43,6 +45,7 @@ import javax.ws.rs.core.Response;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.asset.FileAsset;
@@ -58,11 +61,11 @@ import org.osgi.framework.ServiceReference;
  */
 @RunAsClient
 @RunWith(Arquillian.class)
-public class DLAPIOAuth2SupportTest extends BaseClientTest {
+public class DLAPIOAuth2SupportTest extends BaseClientTestCase {
 
 	@Deployment
 	public static Archive<?> getDeployment() throws Exception {
-		Archive<?> deployment = BaseClientTest.getDeployment(
+		Archive<?> deployment = BaseClientTestCase.getDeployment(
 			DLAPIOAuth2SupportTestPreparator.class);
 
 		Asset asset = new FileAsset(
@@ -106,7 +109,7 @@ public class DLAPIOAuth2SupportTest extends BaseClientTest {
 
 		private byte[] _getFileBytes() throws IOException {
 			URL url =
-				_bundleContext.getBundle().getEntry("META-INF/test-image.jpg");
+				bundleContext.getBundle().getEntry("META-INF/test-image.jpg");
 
 			InputStream inputStream = url.openStream();
 
@@ -115,9 +118,9 @@ public class DLAPIOAuth2SupportTest extends BaseClientTest {
 
 		private void _saveTestFile() throws Exception {
 			ServiceReference<DLAppLocalService> serviceReference =
-				_bundleContext.getServiceReference(DLAppLocalService.class);
+				bundleContext.getServiceReference(DLAppLocalService.class);
 
-			DLAppLocalService dlAppLocalService = _bundleContext.getService(
+			DLAppLocalService dlAppLocalService = bundleContext.getService(
 				serviceReference);
 
 			long defaultCompanyId = PortalUtil.getDefaultCompanyId();
@@ -144,11 +147,13 @@ public class DLAPIOAuth2SupportTest extends BaseClientTest {
 				new TestFileEntryUrlApplication(donwloadUrlRelative),
 				"file-entry-url", properties);
 
-			createOauth2Application(
+			createOAuth2Application(
 				defaultCompanyId, user, "oauthTestApplication",
-				Collections.singletonList("GET"));
+				Collections.singletonList(GrantType.CLIENT_CREDENTIALS),
+				Arrays.asList(
+					new String[] {"GET", "download.documents.and.media"}));
 
-			_autoCloseables.add(
+			autoCloseables.add(
 				() -> dlAppLocalService.deleteFileEntry(
 					fileEntry.getFileEntryId()));
 		}
@@ -158,9 +163,12 @@ public class DLAPIOAuth2SupportTest extends BaseClientTest {
 	private WebTarget _getRootWebTarget(String path) throws URISyntaxException {
 		Client client = getClient();
 
-		WebTarget webTarget = client.target(getUrl().toURI());
+		WebTarget webTarget = client.target(_url.toURI());
 
 		return webTarget.path(path);
 	}
+
+	@ArquillianResource
+	private URL _url;
 
 }
