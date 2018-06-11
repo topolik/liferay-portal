@@ -39,6 +39,22 @@ public interface OAuth2JSONWSConfiguration {
 	public String applicationDescription();
 
 	@Meta.AD(
+		deflt = "oauth2.scope.download-documents-and-media",
+		description = "oauth2-documents-scope-description-description",
+		id = "oauth2.documents.scope.description",
+		name = "oauth2-documents-scope-description", required = false
+	)
+	public String documentsScopeDescription();
+
+	@Meta.AD(
+		deflt = "true",
+		description = "oauth2-documents-scope-enabled-description",
+		id = "oauth2.documents.scope.enabled",
+		name = "oauth2-documents-scope-enabled", required = false
+	)
+	public boolean documentsScopeEnabled();
+
+	@Meta.AD(
 		deflt = "true",
 		description = "oauth2-remove-sap-entry-oauth2-prefix-description",
 		id = "oauth2.remove.sap.entry.oauth2.prefix",
