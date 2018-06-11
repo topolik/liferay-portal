@@ -57,7 +57,7 @@ public class JSONWSOAuth2AuthVerifier extends BaseOAuth2AuthVerifier {
 		for (String scope : accessToken.getScopes()) {
 			Collection<LiferayOAuth2Scope> liferayOAuth2Scopes =
 				_scopeLocator.getLiferayOAuth2Scopes(
-					companyId, scope, OAuth2JSONWSConstants.APPLICATION_NAME);
+					companyId, scope, OAuth2JSONWSConstants.APPLICATION_NAME_JSONWS);
 
 			for (LiferayOAuth2Scope liferayOAuth2Scope : liferayOAuth2Scopes) {
 				scopes.add(liferayOAuth2Scope.getScope());

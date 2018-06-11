@@ -64,7 +64,7 @@ public class SAPEntryScopeDescriptorFinderRegistrator {
 
 			properties.put("companyId", String.valueOf(companyId));
 			properties.put(
-				"osgi.jaxrs.name", OAuth2JSONWSConstants.APPLICATION_NAME);
+				"osgi.jaxrs.name", OAuth2JSONWSConstants.APPLICATION_NAME_JSONWS);
 
 			_serviceRegistrations.compute(
 				companyId,

@@ -19,7 +19,9 @@ package com.liferay.oauth2.provider.jsonws.internal.constants;
  */
 public class OAuth2JSONWSConstants {
 
-	public static final String APPLICATION_NAME = "liferay-json-web-services";
+	public static final String APPLICATION_NAME_JSONWS = "liferay-json-web-services";
+	
+	public static final String APPLICATION_NAME_DOCUMENTS = "liferay-documents-and-media-download";
 
 	public static final String SCOPE_DOCUMENTS = "download";
 

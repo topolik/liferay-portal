@@ -65,7 +65,7 @@ public class WebServerOAuth2AuthVerifier extends BaseOAuth2AuthVerifier {
 
 		_scopeContext.setAccessToken(accessToken.getTokenKey());
 		_scopeContext.setApplicationName(
-			OAuth2JSONWSConstants.APPLICATION_NAME);
+			OAuth2JSONWSConstants.APPLICATION_NAME_JSONWS);
 		_scopeContext.setBundle(_bundleContext.getBundle());
 
 		OAuth2Application oAuth2Application =
