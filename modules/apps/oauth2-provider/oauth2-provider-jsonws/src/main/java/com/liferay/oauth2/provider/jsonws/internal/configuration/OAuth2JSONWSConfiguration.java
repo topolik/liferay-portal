@@ -48,14 +48,6 @@ public interface OAuth2JSONWSConfiguration {
 
 	@Meta.AD(
 		deflt = "true",
-		description = "oauth2-documents-scope-enabled-description",
-		id = "oauth2.documents.scope.enabled",
-		name = "oauth2-documents-scope-enabled", required = false
-	)
-	public boolean documentsScopeEnabled();
-
-	@Meta.AD(
-		deflt = "true",
 		description = "oauth2-remove-sap-entry-oauth2-prefix-description",
 		id = "oauth2.remove.sap.entry.oauth2.prefix",
 		name = "oauth2-remove-sap-entry-oauth2-prefix", required = false
