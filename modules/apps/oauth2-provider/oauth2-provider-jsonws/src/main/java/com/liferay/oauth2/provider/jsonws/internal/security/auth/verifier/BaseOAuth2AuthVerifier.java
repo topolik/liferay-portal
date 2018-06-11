@@ -15,17 +15,17 @@
 package com.liferay.oauth2.provider.jsonws.internal.security.auth.verifier;
 
 import com.liferay.oauth2.provider.constants.OAuth2ProviderConstants;
-import com.liferay.oauth2.provider.jsonws.internal.constants.OAuth2JSONWSConstants;
+import com.liferay.oauth2.provider.jsonws.internal.service.access.policy.scope.SAPEntryScopeDescriptorFinderRegistrator;
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases;
 import com.liferay.oauth2.provider.model.OAuth2Authorization;
-import com.liferay.oauth2.provider.model.OAuth2ScopeGrant;
 import com.liferay.oauth2.provider.rest.spi.bearer.token.provider.BearerTokenProvider;
 import com.liferay.oauth2.provider.rest.spi.bearer.token.provider.BearerTokenProviderAccessor;
+import com.liferay.oauth2.provider.scope.liferay.OAuth2ProviderScopeLiferayConstants;
+import com.liferay.oauth2.provider.scope.liferay.ScopeLocator;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationLocalService;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationLocalService;
-import com.liferay.oauth2.provider.service.OAuth2ScopeGrantLocalService;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -39,36 +39,26 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
- * @author Stian Sigvartsen
+ * @author Tomas Polesovsky
  */
-@Component(
-	immediate = true,
-	property = "auth.verifier.OAuth2DocumentsAuthVerifier.urls.includes=/documents/*"
-)
-public class OAuth2DocumentsAuthVerifier implements AuthVerifier {
+public abstract class BaseOAuth2AuthVerifier implements AuthVerifier {
 
 	@Override
 	public String getAuthType() {
-		return "OAuth2";
+		return OAuth2ProviderScopeLiferayConstants.AUTH_VERIFIER_OAUTH2_TYPE;
 	}
 
 	@Override
@@ -103,40 +93,15 @@ public class OAuth2DocumentsAuthVerifier implements AuthVerifier {
 				return authVerifierResult;
 			}
 
-			Bundle bundle = _bundleContext.getBundle();
-
-			Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
-				_oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
-					companyId, OAuth2JSONWSConstants.APPLICATION_NAME,
-					bundle.getSymbolicName(), accessToken.getTokenKey());
-
-			for (OAuth2ScopeGrant oAuth2ScopeGrant : oAuth2ScopeGrants) {
-				String scope = oAuth2ScopeGrant.getScope();
-
-				if (scope.equals(OAuth2JSONWSConstants.SCOPE_DOCUMENTS)) {
-					authVerifierResult.setPasswordBasedAuthentication(false);
-					authVerifierResult.setState(
-						AuthVerifierResult.State.SUCCESS);
-					authVerifierResult.setUserId(accessToken.getUserId());
-
-					return authVerifierResult;
-				}
-			}
+			return verify(accessToken);
 		}
 		catch (Exception e) {
 			if (_log.isDebugEnabled()) {
 				_log.debug("Unable to verify OAuth2 access token", e);
 			}
+
+			return authVerifierResult;
 		}
-
-		return authVerifierResult;
-	}
-
-	@Activate
-	protected void activate(
-		BundleContext bundleContext, Map<String, Object> properties) {
-
-		_bundleContext = bundleContext;
 	}
 
 	protected BearerTokenProvider.AccessToken getAccessToken(
@@ -221,18 +186,19 @@ public class OAuth2DocumentsAuthVerifier implements AuthVerifier {
 		return accessToken;
 	}
 
+	protected abstract AuthVerifierResult verify(
+		BearerTokenProvider.AccessToken accessToken);
+
 	private static final String _TOKEN_KEY = "Bearer";
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		OAuth2DocumentsAuthVerifier.class);
+		BaseOAuth2AuthVerifier.class);
 
 	@Reference(
 		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY
 	)
 	private volatile BearerTokenProviderAccessor _bearerTokenProviderAccessor;
-
-	private BundleContext _bundleContext;
 
 	@Reference
 	private OAuth2ApplicationLocalService _oAuth2ApplicationLocalService;
@@ -245,6 +211,10 @@ public class OAuth2DocumentsAuthVerifier implements AuthVerifier {
 	private OAuth2AuthorizationLocalService _oAuth2AuthorizationLocalService;
 
 	@Reference
-	private OAuth2ScopeGrantLocalService _oAuth2ScopeGrantLocalService;
+	private SAPEntryScopeDescriptorFinderRegistrator
+		_sapEntryScopeDescriptorFinderRegistrator;
+
+	@Reference
+	private ScopeLocator _scopeLocator;
 
 }
