@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
+import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.security.service.access.policy.model.SAPEntry;
 import com.liferay.portal.security.service.access.policy.service.SAPEntryLocalService;
@@ -63,7 +64,7 @@ public class SAPEntryScopeDescriptorFinderRegistrator {
 
 			properties.put("companyId", String.valueOf(companyId));
 			properties.put(
-				"osgi.jaxrs.name", OAuth2JSONWSConstants.APPLICATION_NAME);
+				"osgi.jaxrs.name", OAuth2JSONWSConstants.APPLICATION_NAME_JSONWS);
 
 			_serviceRegistrations.compute(
 				companyId,
@@ -77,7 +78,9 @@ public class SAPEntryScopeDescriptorFinderRegistrator {
 							ScopeDescriptor.class.getName(),
 							ScopeFinder.class.getName()
 						},
-						new SAPEntryScopeDescriptorFinder(sapEntryScopes),
+						new SAPEntryScopeDescriptorFinder(
+							sapEntryScopes, _documentsScopeEnabled,
+							_documentsScopeDescription, _resourceBundleLoader),
 						properties);
 
 					_registeredSAPEntryScopes.put(companyId, sapEntryScopes);
@@ -102,6 +105,9 @@ public class SAPEntryScopeDescriptorFinderRegistrator {
 		OAuth2JSONWSConfiguration oAuth2JSONWSConfiguration =
 			ConfigurableUtil.createConfigurable(
 				OAuth2JSONWSConfiguration.class, properties);
+
+		_documentsScopeDescription =
+			oAuth2JSONWSConfiguration.documentsScopeDescription();
 
 		_removeSAPEntryOAuth2Prefix =
 			oAuth2JSONWSConfiguration.removeSAPEntryOAuth2Prefix();
@@ -158,9 +164,16 @@ public class SAPEntryScopeDescriptorFinderRegistrator {
 		SAPEntryScopeDescriptorFinderRegistrator.class);
 
 	private BundleContext _bundleContext;
+	private String _documentsScopeDescription;
+	private boolean _documentsScopeEnabled;
 	private final Map<Long, List<SAPEntryScope>> _registeredSAPEntryScopes =
 		new ConcurrentHashMap<>();
 	private boolean _removeSAPEntryOAuth2Prefix = true;
+
+	@Reference(
+		target = "(bundle.symbolic.name=com.liferay.oauth2.provider.jsonws)"
+	)
+	private ResourceBundleLoader _resourceBundleLoader;
 
 	@Reference
 	private SAPEntryLocalService _sapEntryLocalService;

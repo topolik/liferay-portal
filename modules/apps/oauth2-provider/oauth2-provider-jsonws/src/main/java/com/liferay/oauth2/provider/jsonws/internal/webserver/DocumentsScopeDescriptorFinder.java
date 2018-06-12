@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.oauth2.provider.jsonws.internal.service.access.policy.scope;
+package com.liferay.oauth2.provider.jsonws.internal.webserver;
 
 import com.liferay.oauth2.provider.jsonws.internal.constants.OAuth2JSONWSConstants;
 import com.liferay.oauth2.provider.scope.spi.scope.descriptor.ScopeDescriptor;
@@ -23,78 +23,58 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+
+import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Tomas Polesovsky
  * @author Stian Sigvartsen
  */
-public class SAPEntryScopeDescriptorFinder
+public class DocumentsScopeDescriptorFinder
 	implements ScopeDescriptor, ScopeFinder {
 
-	public SAPEntryScopeDescriptorFinder(
-		List<SAPEntryScope> sapEntryScopes, boolean documentsScopeEnabled,
-		String documentsScopeDescription,
+	
+	public DocumentsScopeDescriptorFinder(
+		//String documentsScopeDescription,
 		ResourceBundleLoader resourceBundleLoader) {
-
-		_documentsScopeEnabled = documentsScopeEnabled;
-		_documentsScopeDescription = documentsScopeDescription;
+		
+		//_documentsScopeDescription = documentsScopeDescription;
 		_resourceBundleLoader = resourceBundleLoader;
-
-		for (SAPEntryScope sapEntryScope : sapEntryScopes) {
-			_sapEntryScopes.put(sapEntryScope.getScope(), sapEntryScope);
-		}
 	}
-
+	
 	@Override
 	public String describeScope(String scope, Locale locale) {
-		if (OAuth2JSONWSConstants.SCOPE_DOCUMENTS.equals(scope)) {
-			String scopeDescription = ResourceBundleUtil.getString(
-				_resourceBundleLoader.loadResourceBundle(locale),
-				_documentsScopeDescription);
+		String scopeDescription = ResourceBundleUtil.getString(
+			_resourceBundleLoader.loadResourceBundle(locale),
+			scope);
 
-			if (scopeDescription == null) {
-				return scope;
-			}
-
-			return scopeDescription;
+		if (scopeDescription == null) {
+			return scope;
 		}
 
-		SAPEntryScope sapEntryScope = _sapEntryScopes.get(scope);
-
-		if (sapEntryScope == null) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to get SAP entry scope " + scope);
-			}
-
-			return StringPool.BLANK;
-		}
-
-		return sapEntryScope.getTitle(locale);
+		return scopeDescription;
 	}
 
 	@Override
 	public Collection<String> findScopes() {
-		HashSet<String> scopes = new HashSet<>(_sapEntryScopes.keySet());
-
-		if (_documentsScopeEnabled) {
-			scopes.add(OAuth2JSONWSConstants.SCOPE_DOCUMENTS);
-		}
-
-		return scopes;
+		return new HashSet<>(_scopes);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		SAPEntryScopeDescriptorFinder.class);
+		DocumentsScopeDescriptorFinder.class);
 
-	private final String _documentsScopeDescription;
-	private final boolean _documentsScopeEnabled;
-	private final ResourceBundleLoader _resourceBundleLoader;
-	private final Map<String, SAPEntryScope> _sapEntryScopes = new HashMap<>();
-
+	private final List<String> _scopes =
+		Arrays.asList(
+			new String[] {
+				OAuth2JSONWSConstants.SCOPE_DOCUMENTS});	
+	
+	//private final String _documentsScopeDescription;
+	private ResourceBundleLoader _resourceBundleLoader;
 }

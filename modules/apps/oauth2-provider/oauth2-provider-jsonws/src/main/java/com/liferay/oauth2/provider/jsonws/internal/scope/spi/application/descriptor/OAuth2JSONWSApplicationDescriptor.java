@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	configurationPid = "com.liferay.oauth2.provider.jsonws.internal.configuration.OAuth2JSONWSConfiguration",
-	property = "osgi.jaxrs.name=" + OAuth2JSONWSConstants.APPLICATION_NAME
+	property = "osgi.jaxrs.name=" + OAuth2JSONWSConstants.APPLICATION_NAME_JSONWS
 )
 public class OAuth2JSONWSApplicationDescriptor
 	implements ApplicationDescriptor {

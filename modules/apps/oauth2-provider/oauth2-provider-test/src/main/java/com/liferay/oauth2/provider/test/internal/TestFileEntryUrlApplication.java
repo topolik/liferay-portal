@@ -12,17 +12,33 @@
  * details.
  */
 
-package com.liferay.oauth2.provider.jsonws.internal.constants;
+package com.liferay.oauth2.provider.test.internal;
+
+import java.util.Collections;
+import java.util.Set;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.core.Application;
 
 /**
- * @author Tomas Polesovsky
+ * @author Víctor Galán Grande
  */
-public class OAuth2JSONWSConstants {
+public class TestFileEntryUrlApplication extends Application {
 
-	public static final String APPLICATION_NAME_JSONWS = "liferay-json-web-services";
-	
-	public static final String APPLICATION_NAME_DOCUMENTS = "liferay-documents-and-media-download";
+	public TestFileEntryUrlApplication(String fileEntryUrl) {
+		_fileEntryUrl = fileEntryUrl;
+	}
 
-	public static final String SCOPE_DOCUMENTS = "download";
+	@GET
+	public String getFileEntryUrl() {
+		return _fileEntryUrl;
+	}
+
+	@Override
+	public Set<Object> getSingletons() {
+		return Collections.<Object>singleton(this);
+	}
+
+	private final String _fileEntryUrl;
 
 }
