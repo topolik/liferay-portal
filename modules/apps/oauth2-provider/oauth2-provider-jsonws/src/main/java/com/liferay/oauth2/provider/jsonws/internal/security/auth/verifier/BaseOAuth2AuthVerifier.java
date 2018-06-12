@@ -210,11 +210,4 @@ public abstract class BaseOAuth2AuthVerifier implements AuthVerifier {
 	@Reference
 	private OAuth2AuthorizationLocalService _oAuth2AuthorizationLocalService;
 
-	@Reference
-	private SAPEntryScopeDescriptorFinderRegistrator
-		_sapEntryScopeDescriptorFinderRegistrator;
-
-	@Reference
-	private ScopeLocator _scopeLocator;
-
 }
