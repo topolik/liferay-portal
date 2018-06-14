@@ -17,6 +17,8 @@ package com.liferay.oauth2.provider.rest.internal.endpoint.access.token;
 import com.liferay.oauth2.provider.rest.internal.endpoint.constants.OAuth2ProviderRestEndpointConstants;
 
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import java.util.ArrayList;
@@ -42,6 +44,40 @@ import org.apache.cxf.rs.security.oauth2.services.AccessTokenService;
  */
 @Path("/token")
 public class LiferayAccessTokenService extends AccessTokenService {
+
+	@Consumes("application/x-www-form-urlencoded")
+	@Override
+	@POST
+	@Produces("application/json")
+	public Response handleTokenRequest(MultivaluedMap<String, String> params) {
+		Response response = super.handleTokenRequest(params);
+
+		Client client = authenticateClientIfNeeded(params);
+
+		MultivaluedMap<String, Object> headers = response.getHeaders();
+
+		List hostUris = new ArrayList<>();
+
+		for (String redirectUri : client.getRedirectUris()) {
+			try {
+				URI uri = new URI(redirectUri);
+
+				String host = uri.getScheme() + "://" + uri.getHost();
+
+				hostUris.add(host);
+			}
+			catch (URISyntaxException urise) {
+			}
+		}
+
+		headers.put(
+			"Accept", Arrays.asList("application/x-www-form-urlencoded"));
+		headers.put("Access-Control-Allow-Origin", hostUris);
+		headers.put("Access-Control-Allow-Methods", Arrays.asList("POST"));
+		headers.put("Content-Type", Arrays.asList("application/json"));
+
+		return response;
+	}
 
 	@Override
 	protected Client authenticateClientIfNeeded(
@@ -76,26 +112,6 @@ public class LiferayAccessTokenService extends AccessTokenService {
 			remoteHost);
 
 		return client;
-	}
-
-	@POST
-	@Consumes("application/x-www-form-urlencoded")
-	@Produces("application/json")
-	@Override
-	public Response handleTokenRequest(MultivaluedMap<String, String> params) {
-		Response response = super.handleTokenRequest(params);
-
-		Client client = authenticateClientIfNeeded(params);
-
-		MultivaluedMap<String, Object> headers = response.getHeaders();
-
-		headers.put(
-			"Access-Control-Allow-Origin", new ArrayList<>(
-				client.getRedirectUris()));
-		headers.put(
-			"Access-Control-Allow-Methods", Arrays.asList("GET", "POST"));
-
-		return response;
 	}
 
 }
