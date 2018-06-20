@@ -25,6 +25,15 @@ $grayTextColor: #6B6C7E;
 	.inline {
 		display: inline-block;
 	}
+	.pencil-wrapper {
+		button {
+			float: right;
+			margin-top: 1.6rem;
+		}
+		.input-text-wrapper {
+			margin-right: 4rem;
+		}
+	}
 }
 
 .portlet-oauth2-provider-authorize {
