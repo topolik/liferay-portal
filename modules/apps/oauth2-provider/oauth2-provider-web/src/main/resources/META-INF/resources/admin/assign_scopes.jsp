@@ -73,8 +73,6 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 						<aui:button href="<%= PortalUtil.escapeRedirect(redirect) %>" type="cancel" />
 					</aui:button-row>
 				</div>
-
-				<aui:input id="impliedScopeAliases" name="scopeAliases" type="hidden" />
 			</aui:form>
 		</div>
 	</div>
@@ -229,20 +227,5 @@ if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() > 0) {
 	%>
 
 	<portlet:namespace />recalculateAll();
-
-	A.one('#<portlet:namespace />save').on(
-		'click',
-		function(event) {
-			event.preventDefault();
-
-			var scopeAliases = [];
-			A.all('input[name="<portlet:namespace />scopeAliases"]:checked:disabled').each(
-				function() {
-					scopeAliases.push(this.val());
-				});
-			A.one('#<portlet:namespace />impliedScopeAliases').attr('value', scopeAliases.join(','));
-
-			document.<portlet:namespace/>fm.submit();
-		});
 
 </aui:script>
