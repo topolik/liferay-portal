@@ -50,6 +50,7 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -57,6 +58,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.rs.security.oauth2.common.AccessTokenRegistration;
@@ -128,10 +131,34 @@ public class LiferayOAuthDataProvider
 		List<String> approvedScope = new ArrayList<>(
 			accessTokenRegistration.getRequestedScope());
 
-		if (approvedScope.isEmpty()) {
-			Client client = accessTokenRegistration.getClient();
+		Client client = accessTokenRegistration.getClient();
 
-			approvedScope.addAll(client.getRegisteredScopes());
+		List<String> registeredScopes = client.getRegisteredScopes();
+
+		if (approvedScope.isEmpty()) {
+			approvedScope.addAll(registeredScopes);
+		}
+		else {
+			long companyId = CompanyThreadLocal.getCompanyId();
+
+			Stream<String> stream = registeredScopes.stream();
+
+			approvedScope = new ArrayList<>(stream.flatMap(
+				as -> {
+					Collection<LiferayOAuth2Scope> liferayOAuth2Scopes =
+						_scopeLocator.getLiferayOAuth2Scopes(companyId, as);
+
+					Stream<LiferayOAuth2Scope> liferayOAuth2ScopeStream =
+						liferayOAuth2Scopes.stream();
+
+					return liferayOAuth2ScopeStream.map(
+						LiferayOAuth2Scope::getScope);
+				}
+			).filter(
+				approvedScope::contains
+			).collect(
+				Collectors.toSet()
+			));
 		}
 
 		accessTokenRegistration.setApprovedScope(approvedScope);
@@ -1030,7 +1057,7 @@ public class LiferayOAuthDataProvider
 
 		for (String scope : scopesList) {
 			liferayOAuth2Scopes.addAll(
-				_scopeFinderLocator.getLiferayOAuth2Scopes(
+				_scopeLocator.getLiferayOAuth2Scopes(
 					oAuth2Application.getCompanyId(), scope));
 		}
 
@@ -1084,7 +1111,7 @@ public class LiferayOAuthDataProvider
 	private ScopedServiceTrackerMapFactory _scopedServiceTrackerMapFactory;
 
 	@Reference
-	private ScopeLocator _scopeFinderLocator;
+	private ScopeLocator _scopeLocator;
 
 	@Reference
 	private UserLocalService _userLocalService;

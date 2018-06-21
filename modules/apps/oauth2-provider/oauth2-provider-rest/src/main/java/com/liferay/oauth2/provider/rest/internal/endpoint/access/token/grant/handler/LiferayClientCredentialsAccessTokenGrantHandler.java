@@ -17,13 +17,20 @@ package com.liferay.oauth2.provider.rest.internal.endpoint.access.token.grant.ha
 import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.rest.internal.endpoint.liferay.LiferayOAuthDataProvider;
+import com.liferay.oauth2.provider.scope.liferay.LiferayOAuth2Scope;
+import com.liferay.oauth2.provider.scope.liferay.ScopeLocator;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import org.apache.cxf.rs.security.oauth2.common.Client;
+import org.apache.cxf.rs.security.oauth2.common.ServerAccessToken;
+import org.apache.cxf.rs.security.oauth2.common.UserSubject;
 import org.apache.cxf.rs.security.oauth2.grants.clientcred.ClientCredentialsGrantHandler;
 import org.apache.cxf.rs.security.oauth2.provider.AccessTokenGrantHandler;
 
@@ -43,7 +50,28 @@ public class LiferayClientCredentialsAccessTokenGrantHandler
 
 	@Activate
 	protected void activate(Map<String, Object> properties) {
-		_clientCredentialsGrantHandler = new ClientCredentialsGrantHandler();
+		_clientCredentialsGrantHandler = new ClientCredentialsGrantHandler() {
+
+			@Override
+			protected ServerAccessToken getPreAuthorizedToken(
+				Client client, UserSubject subject, String requestedGrant,
+				List<String> requestedScopes, List<String> audiences) {
+
+				Client expandedClient = _liferayOAuthDataProvider.getClient(
+					client.getClientId());
+
+				expandedClient.setRegisteredScopes(
+					client.getRegisteredScopes().stream().flatMap(
+						s -> _scopeLocator.getLiferayOAuth2Scopes(
+					CompanyThreadLocal.getCompanyId(), s).stream().map(
+					LiferayOAuth2Scope::getScope)).collect(Collectors.toList()));
+
+				return super.getPreAuthorizedToken(
+					expandedClient, subject, requestedGrant, requestedScopes,
+					audiences);
+			}
+
+		};
 
 		_clientCredentialsGrantHandler.setDataProvider(
 			_liferayOAuthDataProvider);
@@ -77,6 +105,9 @@ public class LiferayClientCredentialsAccessTokenGrantHandler
 
 	@Reference
 	private LiferayOAuthDataProvider _liferayOAuthDataProvider;
+
+	@Reference
+	private ScopeLocator _scopeLocator;
 
 	private OAuth2ProviderConfiguration _oAuth2ProviderConfiguration;
 
