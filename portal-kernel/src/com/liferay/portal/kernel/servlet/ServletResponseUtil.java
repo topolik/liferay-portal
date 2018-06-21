@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.PropsUtil;
@@ -640,6 +641,8 @@ public class ServletResponseUtil {
 		if (Validator.isNull(fileName)) {
 			return;
 		}
+
+		fileName = HtmlUtil.escapeURL(fileName);
 
 		String contentDispositionFileName = "filename=\"" + fileName + "\"";
 
