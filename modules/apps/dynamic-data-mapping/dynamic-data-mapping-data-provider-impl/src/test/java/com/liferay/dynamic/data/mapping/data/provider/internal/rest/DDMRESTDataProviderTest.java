@@ -26,6 +26,9 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import java.util.Locale;
 import java.util.Map;
 
@@ -54,13 +57,14 @@ public class DDMRESTDataProviderTest {
 	}
 
 	@Test
-	public void testBuildURL() {
-		String url = _ddmRESTDataProvider.buildURL(
+	public void testBuildURL() throws URISyntaxException {
+		URI uri = _ddmRESTDataProvider.buildURL(
 			createDDMDataProviderRequest(),
 			createDDMRESTDataProviderSettings());
 
 		Assert.assertEquals(
-			"http://someservice.com/api/countries/1/regions", url);
+			"http://someservice.com/api/countries/1/regions?regionName=Region",
+			uri.toString());
 	}
 
 	@Test
