@@ -99,16 +99,6 @@ dependencies {
 	testCompile project(":core:petra:petra-reflect")
 }
 
-deployDependencies {
-	from configurations.compileOnly
-
-	include "stax2-api-*.jar"
-	include "woodstox-core-asl-*.jar"
-
-	rename(/stax2-api-(.+)\.jar/, "org.codehaus.stax2" + renameSuffix)
-	rename(/woodstox-core-asl-(.+)\.jar/, "com.ctc.wstx" + renameSuffix)
-}
-
 processResources {
 	into("plugins") {
 		from configurations.elasticsearchPlugins
