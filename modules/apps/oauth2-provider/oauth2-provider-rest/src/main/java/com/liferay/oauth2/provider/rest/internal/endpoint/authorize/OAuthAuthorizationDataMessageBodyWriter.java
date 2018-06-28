@@ -38,11 +38,13 @@ import java.net.URI;
 import javax.servlet.http.HttpServletRequest;
 
 import javax.ws.rs.Produces;
+import javax.ws.rs.RedirectionException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
@@ -62,12 +64,14 @@ import org.osgi.service.component.annotations.Reference;
 		"osgi.jaxrs.application.select=(osgi.jaxrs.name=Liferay.OAuth2.Application)",
 		"osgi.jaxrs.extension=true",
 		"osgi.jaxrs.name=OAuthAuthorizationDataMessageBodyWriter"
-	}
+	},
+	service = {ExceptionMapper.class, MessageBodyWriter.class}
 )
 @Produces("text/html")
 @Provider
 public class OAuthAuthorizationDataMessageBodyWriter
-	implements MessageBodyWriter<OAuthAuthorizationData> {
+	implements ExceptionMapper<RedirectionException>,
+			   MessageBodyWriter<OAuthAuthorizationData> {
 
 	@Override
 	public long getSize(
@@ -90,6 +94,15 @@ public class OAuthAuthorizationDataMessageBodyWriter
 		}
 
 		return false;
+	}
+
+	@Override
+	public Response toResponse(RedirectionException redirectionException) {
+		return Response.status(
+			Response.Status.FOUND
+		).location(
+			redirectionException.getLocation()
+		).build();
 	}
 
 	@Override
@@ -160,12 +173,8 @@ public class OAuthAuthorizationDataMessageBodyWriter
 				authorizeScreenURL, OAuthConstants.SCOPE);
 		}
 
-		throw new WebApplicationException(
-			Response.status(
-				Response.Status.FOUND
-			).location(
-				URI.create(authorizeScreenURL)
-			).build());
+		throw new RedirectionException(
+			Response.Status.FOUND, URI.create(authorizeScreenURL));
 	}
 
 	@Activate

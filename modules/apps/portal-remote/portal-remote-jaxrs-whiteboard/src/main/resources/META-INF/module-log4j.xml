@@ -13,4 +13,8 @@
 	<category name="org.apache.cxf.endpoint.ServerImpl">
 		<priority value="WARN" />
 	</category>
+
+	<category name="org.apache.cxf.jaxrs.utils.JAXRSUtils" >
+		<level value="OFF"/>
+	</category>
 </log4j:configuration>
