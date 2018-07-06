@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.access.control.AccessControlUtil;
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifierResult;
+import com.liferay.portal.kernel.servlet.HttpMethods;
 import com.liferay.portal.kernel.servlet.ProtectedServletRequest;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
@@ -31,6 +32,7 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.auth.AuthVerifierPipeline;
 import com.liferay.portal.servlet.filters.BasePortalFilter;
 import com.liferay.portal.util.PropsUtil;
+import com.liferay.util.servlet.NullServletOutputStream;
 
 import java.io.IOException;
 
@@ -43,8 +45,10 @@ import java.util.Set;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 /**
  * <p>
@@ -81,6 +85,13 @@ public class AuthVerifierFilter extends BasePortalFilter {
 				_initParametersMap.put(
 					(String)entry.getKey(), entry.getValue());
 			}
+		}
+
+		if (_initParametersMap.containsKey("cors.allowed")) {
+			_corsAllowed = GetterUtil.getBoolean(
+				_initParametersMap.get("cors.allowed"), true);
+
+			_initParametersMap.remove("cors.allowed");
 		}
 
 		if (_initParametersMap.containsKey("guest.allowed")) {
@@ -130,6 +141,16 @@ public class AuthVerifierFilter extends BasePortalFilter {
 		}
 
 		if (_isApplySSL(request, response)) {
+			return;
+		}
+
+		if (_isApplyCORSPreflight(request)) {
+			Class<?> clazz = getClass();
+
+			processFilter(
+				clazz.getName(), request, new CORSServletResponse(response),
+				filterChain);
+
 			return;
 		}
 
@@ -219,6 +240,33 @@ public class AuthVerifierFilter extends BasePortalFilter {
 		return false;
 	}
 
+	private boolean _isApplyCORSPreflight(HttpServletRequest request) {
+		if (!_corsAllowed) {
+			return false;
+		}
+
+		String method = request.getMethod();
+
+		if (!StringUtil.equals(method, HttpMethods.OPTIONS)) {
+			return false;
+		}
+
+		String origin = request.getHeader("Origin");
+
+		if (Validator.isBlank(origin)) {
+			return false;
+		}
+
+		String accessControlRequestMethod = request.getHeader(
+			"Access-Control-Request-Method");
+
+		if (Validator.isBlank(accessControlRequestMethod)) {
+			return false;
+		}
+
+		return true;
+	}
+
 	private boolean _isApplySSL(
 			HttpServletRequest request, HttpServletResponse response)
 		throws IOException {
@@ -258,9 +306,39 @@ public class AuthVerifierFilter extends BasePortalFilter {
 	private static final Log _log = LogFactoryUtil.getLog(
 		AuthVerifierFilter.class.getName());
 
+	private boolean _corsAllowed = false;
 	private boolean _guestAllowed = true;
 	private final Set<String> _hostsAllowed = new HashSet<>();
 	private boolean _httpsRequired;
 	private final Map<String, Object> _initParametersMap = new HashMap<>();
+
+	private static class CORSServletResponse
+		extends HttpServletResponseWrapper {
+
+		public static final String ACCESS_CONTROL_ALLOW_HEADERS =
+			"Access-Control-Allow-Headers";
+
+		public static final String ACCESS_CONTROL_ALLOW_ORIGIN =
+			"Access-Control-Allow-Origin";
+
+		public CORSServletResponse(HttpServletResponse response) {
+			super(response);
+		}
+
+		@Override
+		public ServletOutputStream getOutputStream() throws IOException {
+			return new NullServletOutputStream();
+		}
+
+		@Override
+		public void setHeader(String name, String value) {
+			if (name.equals(ACCESS_CONTROL_ALLOW_ORIGIN) ||
+				name.equals(ACCESS_CONTROL_ALLOW_HEADERS)) {
+
+				super.setHeader(name, value);
+			}
+		}
+
+	}
 
 }
