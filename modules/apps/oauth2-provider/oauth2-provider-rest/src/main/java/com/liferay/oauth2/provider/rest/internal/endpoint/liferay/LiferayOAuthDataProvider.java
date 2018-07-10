@@ -244,11 +244,7 @@ public class LiferayOAuthDataProvider
 		throws OAuthServiceException {
 
 		if (Validator.isBlank(accessToken)) {
-
-			// TODO: Inform the audit service that the user is trying to use an
-			// empty token
-
-			return null;
+			throw new OAuthServiceException("Invalid Request: Empty Token");
 		}
 
 		OAuth2Authorization oAuth2Authorization =
@@ -256,20 +252,14 @@ public class LiferayOAuthDataProvider
 				fetchOAuth2AuthorizationByAccessTokenContent(accessToken);
 
 		if (oAuth2Authorization == null) {
-
-			// TODO: Inform the audit service that the user is trying to use a
-			// deleted token or brute force token
-
-			return null;
+			throw new OAuthServiceException(
+				"Invalid Request: Access Token Denied");
 		}
 
 		if (OAuth2ProviderConstants.EXPIRED_TOKEN.equals(
 				oAuth2Authorization.getAccessTokenContent())) {
 
-			// TODO: Inform the audit service that the user is intentionally
-			// trying to use an expired token
-
-			return null;
+			throw new OAuthServiceException("Invalid Request: Expired Token");
 		}
 
 		try {
@@ -306,11 +296,7 @@ public class LiferayOAuthDataProvider
 				companyId, clientId);
 
 		if (oAuth2Application == null) {
-
-			// TODO: Inform the audit service that the user is trying a
-			// nonexistent or removed clientId
-
-			return null;
+			throw new SystemException("Client not found: " + clientId);
 		}
 
 		MessageContext messageContext = getMessageContext();
@@ -364,11 +350,7 @@ public class LiferayOAuthDataProvider
 	@Override
 	public RefreshToken getRefreshToken(String refreshTokenKey) {
 		if (Validator.isBlank(refreshTokenKey)) {
-
-			// TODO: Inform the audit service that the user is trying to use an
-			// empty token
-
-			return null;
+			throw new OAuthServiceException("Invalid Request: Empty token");
 		}
 
 		try {
@@ -378,20 +360,15 @@ public class LiferayOAuthDataProvider
 						refreshTokenKey);
 
 			if (oAuth2Authorization == null) {
-
-				// TODO: Inform the audit service that the user is trying to use
-				// a deleted token or brute force token
-
-				return null;
+				throw new OAuthServiceException(
+					"Invalid Request: Access Token Denied");
 			}
 
 			if (OAuth2ProviderConstants.EXPIRED_TOKEN.equals(
 					oAuth2Authorization.getRefreshTokenContent())) {
 
-				// TODO: Inform the audit service that the user is intentionally
-				// trying to use an expired token
-
-				return null;
+				throw new OAuthServiceException(
+					"Invalid Request: Expired Token");
 			}
 
 			OAuth2Application oAuth2Application =
@@ -471,8 +448,7 @@ public class LiferayOAuthDataProvider
 
 			doRevokeRefreshToken(oldRefreshToken);
 
-			// TODO: Inform the audit service that the user is using an expired
-			// refresh token
+			_log.error("Invalid Request: Expired token");
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
@@ -487,8 +463,7 @@ public class LiferayOAuthDataProvider
 
 			doRevokeRefreshToken(oldRefreshToken);
 
-			// TODO: Inform the audit service that the user is using an invalid
-			// refresh token
+			_log.error("Invalid Request: Access Token Denied");
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
@@ -498,9 +473,7 @@ public class LiferayOAuthDataProvider
 				fetchOAuth2AuthorizationByRefreshTokenContent(refreshTokenKey);
 
 		if (oAuth2Authorization == null) {
-
-			// TODO: Inform the audit service that the user is using a
-			// non-existent refresh token
+			_log.error("Invalid Request: Access Token Denied");
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
@@ -560,11 +533,8 @@ public class LiferayOAuthDataProvider
 				companyId, client.getClientId());
 
 		if (oAuth2Application == null) {
-
-			// TODO: Inform the audit service of a possible attack on the
-			// client ID
-
-			return null;
+			throw new SystemException(
+				"Client not found " + client.getClientId());
 		}
 
 		return oAuth2Application;
