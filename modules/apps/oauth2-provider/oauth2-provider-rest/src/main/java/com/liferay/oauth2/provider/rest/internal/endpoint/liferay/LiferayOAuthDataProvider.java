@@ -244,7 +244,11 @@ public class LiferayOAuthDataProvider
 		throws OAuthServiceException {
 
 		if (Validator.isBlank(accessToken)) {
-			throw new OAuthServiceException("Invalid Request: Empty Token");
+			if (_log.isWarnEnabled()) {
+				_log.warn("Invalid Request: Empty Token");
+			}
+
+			return null;
 		}
 
 		OAuth2Authorization oAuth2Authorization =
@@ -252,14 +256,23 @@ public class LiferayOAuthDataProvider
 				fetchOAuth2AuthorizationByAccessTokenContent(accessToken);
 
 		if (oAuth2Authorization == null) {
-			throw new OAuthServiceException(
-				"Invalid Request: Access Token Denied");
+			if (_log.isWarnEnabled()) {
+				_log.warn("Invalid Request: Access Token Denied");
+			}
+
+			return null;
 		}
 
 		if (OAuth2ProviderConstants.EXPIRED_TOKEN.equals(
 				oAuth2Authorization.getAccessTokenContent())) {
 
-			throw new OAuthServiceException("Invalid Request: Expired Token");
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Invalid Request: Expired Token - RemoteIP: " +
+						oAuth2Authorization.getRemoteIPInfo());
+			}
+
+			return null;
 		}
 
 		try {
@@ -296,7 +309,11 @@ public class LiferayOAuthDataProvider
 				companyId, clientId);
 
 		if (oAuth2Application == null) {
-			throw new SystemException("Client not found: " + clientId);
+			if (_log.isWarnEnabled()) {
+				_log.warn("Invalid Request: Client not found");
+			}
+
+			throw new SystemException("No client found: " + clientId);
 		}
 
 		MessageContext messageContext = getMessageContext();
@@ -350,7 +367,9 @@ public class LiferayOAuthDataProvider
 	@Override
 	public RefreshToken getRefreshToken(String refreshTokenKey) {
 		if (Validator.isBlank(refreshTokenKey)) {
-			throw new OAuthServiceException("Invalid Request: Empty token");
+			if (_log.isWarnEnabled()) {
+				_log.warn("Invalid Request: Empty Token");
+			}
 		}
 
 		try {
@@ -360,15 +379,23 @@ public class LiferayOAuthDataProvider
 						refreshTokenKey);
 
 			if (oAuth2Authorization == null) {
-				throw new OAuthServiceException(
-					"Invalid Request: Access Token Denied");
+				if (_log.isWarnEnabled()) {
+					_log.warn("Invalid Request: Access Token Denied");
+				}
+
+				return null;
 			}
 
 			if (OAuth2ProviderConstants.EXPIRED_TOKEN.equals(
 					oAuth2Authorization.getRefreshTokenContent())) {
 
-				throw new OAuthServiceException(
-					"Invalid Request: Expired Token");
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Invalid Request: Expired Token - RemoteIP: " +
+							oAuth2Authorization.getRemoteIPInfo());
+				}
+
+				return null;
 			}
 
 			OAuth2Application oAuth2Application =
@@ -448,7 +475,11 @@ public class LiferayOAuthDataProvider
 
 			doRevokeRefreshToken(oldRefreshToken);
 
-			_log.error("Invalid Request: Expired token");
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Invalid Request: Expired Token - Remote IP: " +
+						_getRemoteIP(client));
+			}
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
@@ -463,7 +494,11 @@ public class LiferayOAuthDataProvider
 
 			doRevokeRefreshToken(oldRefreshToken);
 
-			_log.error("Invalid Request: Access Token Denied");
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Invalid Request: Access Token Denied - Remote IP:" +
+						_getRemoteIP(client));
+			}
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
@@ -472,14 +507,18 @@ public class LiferayOAuthDataProvider
 			_oAuth2AuthorizationLocalService.
 				fetchOAuth2AuthorizationByRefreshTokenContent(refreshTokenKey);
 
+		ServerAccessToken accessToken = doRefreshAccessToken(
+			client, oldRefreshToken, Collections.emptyList());
+
 		if (oAuth2Authorization == null) {
-			_log.error("Invalid Request: Access Token Denied");
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Invalid Request: Access Token Denied - Remote IP:" +
+						_getRemoteIP(client));
+			}
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
-
-		ServerAccessToken accessToken = doRefreshAccessToken(
-			client, oldRefreshToken, Collections.emptyList());
 
 		accessToken.setRefreshToken(oldRefreshToken.getTokenKey());
 
@@ -533,8 +572,11 @@ public class LiferayOAuthDataProvider
 				companyId, client.getClientId());
 
 		if (oAuth2Application == null) {
-			throw new SystemException(
-				"Client not found " + client.getClientId());
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Invalid Request: Possible Attack - Remote IP:" +
+						_getRemoteIP(client));
+			}
 		}
 
 		return oAuth2Application;
@@ -932,6 +974,19 @@ public class LiferayOAuthDataProvider
 			});
 	}
 
+	private String _getRemoteIP(Client client) {
+		Map<String, String> properties = client.getProperties();
+
+		String remoteAddr = properties.get(
+			OAuth2ProviderRestEndpointConstants.
+				PROPERTY_KEY_CLIENT_REMOTE_ADDR);
+		String remoteHost = properties.get(
+			OAuth2ProviderRestEndpointConstants.
+				PROPERTY_KEY_CLIENT_REMOTE_HOST);
+
+		return remoteAddr + ", " + remoteHost;
+	}
+
 	private void _transactionalSaveServerAccessToken(
 		ServerAccessToken serverAccessToken) {
 
@@ -979,22 +1034,13 @@ public class LiferayOAuthDataProvider
 			}
 		}
 
-		Map<String, String> properties = client.getProperties();
-
-		String remoteAddr = properties.get(
-			OAuth2ProviderRestEndpointConstants.
-				PROPERTY_KEY_CLIENT_REMOTE_ADDR);
-		String remoteHost = properties.get(
-			OAuth2ProviderRestEndpointConstants.
-				PROPERTY_KEY_CLIENT_REMOTE_HOST);
-
 		OAuth2Authorization oAuth2Authorization =
 			_oAuth2AuthorizationLocalService.addOAuth2Authorization(
 				oAuth2Application.getCompanyId(), userId, userName,
 				oAuth2Application.getOAuth2ApplicationId(),
 				oAuth2Application.getOAuth2ApplicationScopeAliasesId(),
 				serverAccessToken.getTokenKey(), createDate, expirationDate,
-				remoteAddr + ", " + remoteHost, null, null, null);
+				_getRemoteIP(client), null, null, null);
 
 		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>();
 
