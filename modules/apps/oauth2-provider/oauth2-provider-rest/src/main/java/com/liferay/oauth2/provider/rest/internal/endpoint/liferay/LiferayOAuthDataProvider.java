@@ -58,6 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.rs.security.oauth2.common.AccessTokenRegistration;
 import org.apache.cxf.rs.security.oauth2.common.Client;
@@ -244,9 +246,11 @@ public class LiferayOAuthDataProvider
 		throws OAuthServiceException {
 
 		if (Validator.isBlank(accessToken)) {
-
-			// TODO: Inform the audit service that the user is trying to use an
-			// empty token
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use empty OAuth 2 access token.");
+			}
 
 			return null;
 		}
@@ -256,9 +260,11 @@ public class LiferayOAuthDataProvider
 				fetchOAuth2AuthorizationByAccessTokenContent(accessToken);
 
 		if (oAuth2Authorization == null) {
-
-			// TODO: Inform the audit service that the user is trying to use a
-			// deleted token or brute force token
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use deleted or brute force OAuth 2 token.");
+			}
 
 			return null;
 		}
@@ -266,8 +272,11 @@ public class LiferayOAuthDataProvider
 		if (OAuth2ProviderConstants.EXPIRED_TOKEN.equals(
 				oAuth2Authorization.getAccessTokenContent())) {
 
-			// TODO: Inform the audit service that the user is intentionally
-			// trying to use an expired token
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use an expired OAuth 2 token.");
+			}
 
 			return null;
 		}
@@ -306,11 +315,14 @@ public class LiferayOAuthDataProvider
 				companyId, clientId);
 
 		if (oAuth2Application == null) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use a nonexistent OAuth 2 clientId.");
+			}
 
-			// TODO: Inform the audit service that the user is trying a
-			// nonexistent or removed clientId
-
-			return null;
+			throw new SystemException(
+				"Nonexistent OAuth 2 clientId: " + clientId);
 		}
 
 		MessageContext messageContext = getMessageContext();
@@ -364,9 +376,11 @@ public class LiferayOAuthDataProvider
 	@Override
 	public RefreshToken getRefreshToken(String refreshTokenKey) {
 		if (Validator.isBlank(refreshTokenKey)) {
-
-			// TODO: Inform the audit service that the user is trying to use an
-			// empty token
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use empty OAuth 2 refresh token.");
+			}
 
 			return null;
 		}
@@ -378,9 +392,11 @@ public class LiferayOAuthDataProvider
 						refreshTokenKey);
 
 			if (oAuth2Authorization == null) {
-
-				// TODO: Inform the audit service that the user is trying to use
-				// a deleted token or brute force token
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Remote client " + _getRemoteIP() +
+							" tried to use an invalid OAuth 2 refresh token.");
+				}
 
 				return null;
 			}
@@ -388,8 +404,11 @@ public class LiferayOAuthDataProvider
 			if (OAuth2ProviderConstants.EXPIRED_TOKEN.equals(
 					oAuth2Authorization.getRefreshTokenContent())) {
 
-				// TODO: Inform the audit service that the user is intentionally
-				// trying to use an expired token
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Remote client " + _getRemoteIP() +
+							" tried to use an expired OAuth 2 token.");
+				}
 
 				return null;
 			}
@@ -471,8 +490,11 @@ public class LiferayOAuthDataProvider
 
 			doRevokeRefreshToken(oldRefreshToken);
 
-			// TODO: Inform the audit service that the user is using an expired
-			// refresh token
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use an expired OAuth 2 token.");
+			}
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
@@ -487,8 +509,11 @@ public class LiferayOAuthDataProvider
 
 			doRevokeRefreshToken(oldRefreshToken);
 
-			// TODO: Inform the audit service that the user is using an invalid
-			// refresh token
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use an invalid OAuth 2 token.");
+			}
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
@@ -498,9 +523,11 @@ public class LiferayOAuthDataProvider
 				fetchOAuth2AuthorizationByRefreshTokenContent(refreshTokenKey);
 
 		if (oAuth2Authorization == null) {
-
-			// TODO: Inform the audit service that the user is using a
-			// non-existent refresh token
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use an invalid OAuth 2 refresh token.");
+			}
 
 			throw new OAuthServiceException(OAuthConstants.ACCESS_DENIED);
 		}
@@ -560,11 +587,14 @@ public class LiferayOAuthDataProvider
 				companyId, client.getClientId());
 
 		if (oAuth2Application == null) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Remote client " + _getRemoteIP() +
+						" tried to use a nonexistent OAuth 2 client.");
+			}
 
-			// TODO: Inform the audit service of a possible attack on the
-			// client ID
-
-			return null;
+			throw new SystemException(
+				"Nonexistent OAuth 2 clientId: " + client.getClientId());
 		}
 
 		return oAuth2Application;
@@ -960,6 +990,18 @@ public class LiferayOAuthDataProvider
 
 				return null;
 			});
+	}
+
+	private String _getRemoteIP() {
+		MessageContext messageContext = getMessageContext();
+
+		HttpServletRequest httpServletRequest =
+			messageContext.getHttpServletRequest();
+
+		String remoteAddr = httpServletRequest.getRemoteAddr();
+		String remoteHost = httpServletRequest.getRemoteHost();
+
+		return remoteAddr + " - " + remoteHost;
 	}
 
 	private void _transactionalSaveServerAccessToken(
