@@ -14,6 +14,7 @@
 
 package com.liferay.oauth2.provider.client.test;
 
+import com.liferay.oauth2.provider.rest.internal.endpoint.liferay.LiferayOAuthDataProvider;
 import com.liferay.oauth2.provider.test.internal.TestAnnotatedApplication;
 import com.liferay.oauth2.provider.test.internal.activator.BaseTestPreparatorBundleActivator;
 import com.liferay.portal.kernel.model.User;
@@ -30,20 +31,21 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import com.liferay.portal.test.rule.ExpectedLog;
+import com.liferay.portal.test.rule.ExpectedLogs;
+import com.liferay.portal.test.rule.ExpectedType;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
  * @author Carlos Sierra Andrés
  */
-@Ignore
 @RunAsClient
 @RunWith(Arquillian.class)
 public class TokenExpeditionTest extends BaseClientTestCase {
@@ -54,6 +56,15 @@ public class TokenExpeditionTest extends BaseClientTestCase {
 			TokenExpeditionTestPreparatorBundleActivator.class);
 	}
 
+	@ExpectedLogs(
+		expectedLogs = {
+			@ExpectedLog(
+				expectedLog = "tried to use a nonexistent OAuth 2 client ID",
+				expectedType = ExpectedType.CONTAINS
+			)
+		},
+		level = "WARN", loggerClass = LiferayOAuthDataProvider.class
+	)
 	@Test
 	public void test() throws Exception {
 		WebTarget tokenWebTarget = getTokenWebTarget();
