@@ -41,7 +41,6 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -63,7 +62,6 @@ public class TOCTOUTest extends BaseClientTestCase {
 	/**
 	 * OAUTH2-101 / OAUTH2-102
 	 */
-	@Ignore
 	@Test
 	public void testPreventTOCTOUWithNewScopes() {
 
