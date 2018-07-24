@@ -553,40 +553,22 @@ public class OAuth2ApplicationLocalServiceImpl
 		}
 
 		for (LiferayOAuth2Scope liferayOAuth2Scope : liferayOAuth2Scopes) {
+			String applicationName = liferayOAuth2Scope.getApplicationName();
+
 			Bundle bundle = liferayOAuth2Scope.getBundle();
 
 			String bundleSymbolicName = bundle.getSymbolicName();
 
-			boolean matched = false;
+			String scope = liferayOAuth2Scope.getScope();
 
-			for (OAuth2ScopeGrant oAuth2ScopeGrant : oAuth2ScopeGrants) {
-				if (!Objects.equals(
-						oAuth2ScopeGrant.getApplicationName(),
-						liferayOAuth2Scope.getApplicationName())) {
+			boolean found = oAuth2ScopeGrants.removeIf(
+				oAuth2ScopeGrant -> applicationName.equals(
+					oAuth2ScopeGrant.getApplicationName()) &&
+					bundleSymbolicName.equals(
+						oAuth2ScopeGrant.getBundleSymbolicName()) &&
+					scope.equals(oAuth2ScopeGrant.getScope()));
 
-					continue;
-				}
-
-				if (!Objects.equals(
-						oAuth2ScopeGrant.getBundleSymbolicName(),
-						bundleSymbolicName)) {
-
-					continue;
-				}
-
-				if (!Objects.equals(
-						oAuth2ScopeGrant.getScope(),
-						liferayOAuth2Scope.getScope())) {
-
-					continue;
-				}
-
-				matched = true;
-
-				break;
-			}
-
-			if (!matched) {
+			if (!found) {
 				return false;
 			}
 		}
