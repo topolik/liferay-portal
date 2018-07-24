@@ -127,6 +127,55 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 				oAuth2ApplicationId, start, end, orderByComparator);
 	}
 
+	@Override
+	public boolean hasUpToDateScopeGrants(
+		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases) {
+
+		List<String> scopeAliasesList =
+			oAuth2ApplicationScopeAliases.getScopeAliasesList();
+
+		Collection<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>();
+
+		for (String scopeAlias : scopeAliasesList) {
+			liferayOAuth2Scopes.addAll(
+				_scopeLocator.getLiferayOAuth2Scopes(
+					oAuth2ApplicationScopeAliases.getCompanyId(), scopeAlias));
+		}
+
+		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
+			oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
+				oAuth2ApplicationScopeAliases.
+					getOAuth2ApplicationScopeAliasesId(),
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		if (liferayOAuth2Scopes.size() != oAuth2ScopeGrants.size()) {
+			return false;
+		}
+
+		for (LiferayOAuth2Scope liferayOAuth2Scope : liferayOAuth2Scopes) {
+			String applicationName = liferayOAuth2Scope.getApplicationName();
+
+			Bundle bundle = liferayOAuth2Scope.getBundle();
+
+			String bundleSymbolicName = bundle.getSymbolicName();
+
+			String scope = liferayOAuth2Scope.getScope();
+
+			boolean found = oAuth2ScopeGrants.removeIf(
+				oAuth2ScopeGrant -> applicationName.equals(
+					oAuth2ScopeGrant.getApplicationName()) &&
+					bundleSymbolicName.equals(
+						oAuth2ScopeGrant.getBundleSymbolicName()) &&
+					scope.equals(oAuth2ScopeGrant.getScope()));
+
+			if (!found) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	protected void createScopeGrants(
 			long companyId, long oAuth2ApplicationScopeAliasesId,
 			List<String> scopeAliasesList)
