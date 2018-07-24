@@ -546,7 +546,11 @@ public class OAuth2ApplicationLocalServiceImpl
 			oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
 				oAuth2ApplicationScopeAliases.
 					getOAuth2ApplicationScopeAliasesId(),
-				0, Integer.MAX_VALUE, null);
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		if (liferayOAuth2Scopes.size() != oAuth2ScopeGrants.size()) {
+			return false;
+		}
 
 		for (LiferayOAuth2Scope liferayOAuth2Scope : liferayOAuth2Scopes) {
 			Bundle bundle = liferayOAuth2Scope.getBundle();
