@@ -16,6 +16,8 @@ package com.liferay.portal.remote.cxf.common.internal;
 
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.security.access.control.AccessControlThreadLocal;
+import com.liferay.portal.kernel.settings.SettingsException;
+import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.remote.cxf.common.configuration.CXFEndpointPublisherConfiguration;
 import com.liferay.portal.servlet.filters.authverifier.AuthVerifierFilter;
 
@@ -41,6 +43,8 @@ import org.apache.felix.dm.DependencyManager;
 import org.apache.felix.dm.ServiceDependency;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -64,7 +68,18 @@ public class CXFEndpointPublisher {
 
 	@Activate
 	protected void activate(
-		BundleContext bundleContext, Map<String, Object> properties) {
+			BundleContext bundleContext, Map<String, Object> properties)
+		throws InvalidSyntaxException, SettingsException {
+
+		Object contextPathObject = properties.get("contextPath");
+
+		String contextPath = contextPathObject.toString();
+
+		if (checkIfEndpointExists(bundleContext, contextPath)) {
+			throw new SettingsException(
+				"A CXF Endpoint already exists with the context path: " +
+					contextPath);
+		}
 
 		_dependencyManager = new DependencyManager(bundleContext);
 
@@ -99,6 +114,30 @@ public class CXFEndpointPublisher {
 		_dependencyManager.add(component);
 	}
 
+	protected boolean checkIfEndpointExists(
+			BundleContext bundleContext, String contextPath)
+		throws InvalidSyntaxException {
+
+		String contextName = contextPath.substring(1);
+
+		contextName = contextName.replace("/", ".");
+
+		String filter = StringBundler.concat(
+			"(&(objectClass=", ServletContextHelper.class.getName(), ")(",
+			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME, "=",
+			contextName, "))");
+
+		ServiceReference<?>[] serviceReference =
+			bundleContext.getServiceReferences(
+				ServletContextHelper.class.getName(), filter);
+
+		if (serviceReference != null) {
+			return true;
+		}
+
+		return false;
+	}
+
 	@Deactivate
 	protected void deactivate() {
 		_dependencyManager.clear();
@@ -106,7 +145,8 @@ public class CXFEndpointPublisher {
 
 	@Modified
 	protected void modified(
-		BundleContext bundleContext, Map<String, Object> properties) {
+			BundleContext bundleContext, Map<String, Object> properties)
+		throws InvalidSyntaxException, SettingsException {
 
 		deactivate();
 

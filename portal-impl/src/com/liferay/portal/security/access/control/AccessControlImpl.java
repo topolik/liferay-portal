@@ -51,8 +51,14 @@ public class AccessControlImpl implements AccessControl {
 			AccessControlUtil.getAccessControlContext();
 
 		if (accessControlContext != null) {
+			HttpServletRequest httpServletRequest =
+				accessControlContext.getRequest();
+
+			String contextPath = httpServletRequest.getContextPath();
+
 			throw new IllegalStateException(
-				"Authentication context is already initialized");
+				"An authentication context is already initialized for " +
+					"context path: " + contextPath);
 		}
 
 		accessControlContext = new AccessControlContext();
