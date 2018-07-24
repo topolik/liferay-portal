@@ -33,6 +33,9 @@ import com.liferay.oauth2.provider.exception.OAuth2ApplicationRedirectURISchemeE
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases;
 import com.liferay.oauth2.provider.model.OAuth2Authorization;
+import com.liferay.oauth2.provider.model.OAuth2ScopeGrant;
+import com.liferay.oauth2.provider.scope.liferay.LiferayOAuth2Scope;
+import com.liferay.oauth2.provider.scope.liferay.ScopeLocator;
 import com.liferay.oauth2.provider.service.base.OAuth2ApplicationLocalServiceBaseImpl;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.ImageTypeException;
@@ -53,6 +56,7 @@ import com.liferay.portal.kernel.util.PropsUtil;
 import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.awt.image.RenderedImage;
 
@@ -64,11 +68,14 @@ import java.net.URISyntaxException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import org.osgi.framework.Bundle;
 
 /**
  * @author Brian Wing Shun Chan
@@ -357,44 +364,16 @@ public class OAuth2ApplicationLocalServiceImpl
 			return oAuth2ApplicationPersistence.update(oAuth2Application);
 		}
 
-		if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() == 0) {
-			OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases =
-				oAuth2ApplicationScopeAliasesLocalService.
-					fetchOAuth2ApplicationScopeAliases(
-						oAuth2ApplicationId, scopeAliasesList);
-
-			if (oAuth2ApplicationScopeAliases == null) {
-				oAuth2ApplicationScopeAliases =
-					oAuth2ApplicationScopeAliasesLocalService.
-						addOAuth2ApplicationScopeAliases(
-							oAuth2Application.getCompanyId(), userId, userName,
-							oAuth2ApplicationId, scopeAliasesList);
-			}
-
-			oAuth2Application.setModifiedDate(new Date());
-			oAuth2Application.setOAuth2ApplicationScopeAliasesId(
-				oAuth2ApplicationScopeAliases.
-					getOAuth2ApplicationScopeAliasesId());
-
-			return oAuth2ApplicationPersistence.update(oAuth2Application);
-		}
-
 		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases =
-			oAuth2ApplicationScopeAliasesLocalService.
-				getOAuth2ApplicationScopeAliases(
-					oAuth2Application.getOAuth2ApplicationScopeAliasesId());
-
-		List<String> actualScopeAliasesList =
-			oAuth2ApplicationScopeAliases.getScopeAliasesList();
-
-		if (actualScopeAliasesList.equals(scopeAliasesList)) {
-			return oAuth2Application;
-		}
-
-		oAuth2ApplicationScopeAliases =
 			oAuth2ApplicationScopeAliasesLocalService.
 				fetchOAuth2ApplicationScopeAliases(
 					oAuth2ApplicationId, scopeAliasesList);
+
+		if ((oAuth2ApplicationScopeAliases != null) &&
+			!_matchLatestLiferayOAuth2Scopes(oAuth2ApplicationScopeAliases)) {
+
+			oAuth2ApplicationScopeAliases = null;
+		}
 
 		if (oAuth2ApplicationScopeAliases == null) {
 			oAuth2ApplicationScopeAliases =
@@ -404,11 +383,20 @@ public class OAuth2ApplicationLocalServiceImpl
 						oAuth2ApplicationId, scopeAliasesList);
 		}
 
-		oAuth2Application.setModifiedDate(new Date());
-		oAuth2Application.setOAuth2ApplicationScopeAliasesId(
-			oAuth2ApplicationScopeAliases.getOAuth2ApplicationScopeAliasesId());
+		if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() !=
+				oAuth2ApplicationScopeAliases.
+					getOAuth2ApplicationScopeAliasesId()) {
 
-		return oAuth2ApplicationPersistence.update(oAuth2Application);
+			oAuth2Application.setModifiedDate(new Date());
+			oAuth2Application.setOAuth2ApplicationScopeAliasesId(
+				oAuth2ApplicationScopeAliases.
+					getOAuth2ApplicationScopeAliasesId());
+
+			return oAuth2ApplicationPersistence.update(oAuth2Application);
+		}
+		else {
+			return oAuth2Application;
+		}
 	}
 
 	protected void validate(
@@ -541,6 +529,67 @@ public class OAuth2ApplicationLocalServiceImpl
 		}
 	}
 
+	private boolean _matchLatestLiferayOAuth2Scopes(
+		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases) {
+
+		Collection<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>();
+		long companyId = oAuth2ApplicationScopeAliases.getCompanyId();
+		List<String> oAuth2ApplicationScopeAliasesList =
+			oAuth2ApplicationScopeAliases.getScopeAliasesList();
+
+		for (String scopeAlias : oAuth2ApplicationScopeAliasesList) {
+			liferayOAuth2Scopes.addAll(
+				_scopeLocator.getLiferayOAuth2Scopes(companyId, scopeAlias));
+		}
+
+		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
+			oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
+				oAuth2ApplicationScopeAliases.
+					getOAuth2ApplicationScopeAliasesId(),
+				0, Integer.MAX_VALUE, null);
+
+		for (LiferayOAuth2Scope liferayOAuth2Scope : liferayOAuth2Scopes) {
+			Bundle bundle = liferayOAuth2Scope.getBundle();
+
+			String bundleSymbolicName = bundle.getSymbolicName();
+
+			boolean matched = false;
+
+			for (OAuth2ScopeGrant oAuth2ScopeGrant : oAuth2ScopeGrants) {
+				if (!Objects.equals(
+						oAuth2ScopeGrant.getApplicationName(),
+						liferayOAuth2Scope.getApplicationName())) {
+
+					continue;
+				}
+
+				if (!Objects.equals(
+						oAuth2ScopeGrant.getBundleSymbolicName(),
+						bundleSymbolicName)) {
+
+					continue;
+				}
+
+				if (!Objects.equals(
+						oAuth2ScopeGrant.getScope(),
+						liferayOAuth2Scope.getScope())) {
+
+					continue;
+				}
+
+				matched = true;
+
+				break;
+			}
+
+			if (!matched) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	private static Set<String> _ianaRegisteredUriSchemes = SetUtil.fromArray(
 		new String[] {
 			"aaa", "aaas", "about", "acap", "acct", "acr", "adiumxtra", "afp",
@@ -596,5 +645,8 @@ public class OAuth2ApplicationLocalServiceImpl
 			"xmlrpc.beep", "xmlrpc.beeps", "xmpp", "xri", "ymsgr", "z39.50",
 			"z39.50r", "z39.50s"
 		});
+
+	@ServiceReference(type = ScopeLocator.class)
+	private ScopeLocator _scopeLocator;
 
 }
