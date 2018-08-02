@@ -69,6 +69,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Brian Wing Shun Chan
@@ -350,6 +352,17 @@ public class OAuth2ApplicationLocalServiceImpl
 		OAuth2Application oAuth2Application =
 			oAuth2ApplicationPersistence.findByPrimaryKey(oAuth2ApplicationId);
 
+		if (scopeAliasesList != null) {
+			Stream<String> stream = scopeAliasesList.stream();
+
+			scopeAliasesList = stream.filter(
+				Validator::isNotNull
+			).sorted(
+			).collect(
+				Collectors.toList()
+			);
+		}
+
 		if ((scopeAliasesList == null) || scopeAliasesList.isEmpty()) {
 			oAuth2Application.setModifiedDate(new Date());
 			oAuth2Application.setOAuth2ApplicationScopeAliasesId(0);
@@ -357,44 +370,17 @@ public class OAuth2ApplicationLocalServiceImpl
 			return oAuth2ApplicationPersistence.update(oAuth2Application);
 		}
 
-		if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() == 0) {
-			OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases =
-				oAuth2ApplicationScopeAliasesLocalService.
-					fetchOAuth2ApplicationScopeAliases(
-						oAuth2ApplicationId, scopeAliasesList);
-
-			if (oAuth2ApplicationScopeAliases == null) {
-				oAuth2ApplicationScopeAliases =
-					oAuth2ApplicationScopeAliasesLocalService.
-						addOAuth2ApplicationScopeAliases(
-							oAuth2Application.getCompanyId(), userId, userName,
-							oAuth2ApplicationId, scopeAliasesList);
-			}
-
-			oAuth2Application.setModifiedDate(new Date());
-			oAuth2Application.setOAuth2ApplicationScopeAliasesId(
-				oAuth2ApplicationScopeAliases.
-					getOAuth2ApplicationScopeAliasesId());
-
-			return oAuth2ApplicationPersistence.update(oAuth2Application);
-		}
-
 		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases =
-			oAuth2ApplicationScopeAliasesLocalService.
-				getOAuth2ApplicationScopeAliases(
-					oAuth2Application.getOAuth2ApplicationScopeAliasesId());
-
-		List<String> actualScopeAliasesList =
-			oAuth2ApplicationScopeAliases.getScopeAliasesList();
-
-		if (actualScopeAliasesList.equals(scopeAliasesList)) {
-			return oAuth2Application;
-		}
-
-		oAuth2ApplicationScopeAliases =
 			oAuth2ApplicationScopeAliasesLocalService.
 				fetchOAuth2ApplicationScopeAliases(
 					oAuth2ApplicationId, scopeAliasesList);
+
+		if ((oAuth2ApplicationScopeAliases != null) &&
+			!oAuth2ApplicationScopeAliasesLocalService.hasUpToDateScopeGrants(
+				oAuth2ApplicationScopeAliases)) {
+
+			oAuth2ApplicationScopeAliases = null;
+		}
 
 		if (oAuth2ApplicationScopeAliases == null) {
 			oAuth2ApplicationScopeAliases =
@@ -404,11 +390,20 @@ public class OAuth2ApplicationLocalServiceImpl
 						oAuth2ApplicationId, scopeAliasesList);
 		}
 
-		oAuth2Application.setModifiedDate(new Date());
-		oAuth2Application.setOAuth2ApplicationScopeAliasesId(
-			oAuth2ApplicationScopeAliases.getOAuth2ApplicationScopeAliasesId());
+		if (oAuth2Application.getOAuth2ApplicationScopeAliasesId() !=
+				oAuth2ApplicationScopeAliases.
+					getOAuth2ApplicationScopeAliasesId()) {
 
-		return oAuth2ApplicationPersistence.update(oAuth2Application);
+			oAuth2Application.setModifiedDate(new Date());
+			oAuth2Application.setOAuth2ApplicationScopeAliasesId(
+				oAuth2ApplicationScopeAliases.
+					getOAuth2ApplicationScopeAliasesId());
+
+			return oAuth2ApplicationPersistence.update(oAuth2Application);
+		}
+		else {
+			return oAuth2Application;
+		}
 	}
 
 	protected void validate(

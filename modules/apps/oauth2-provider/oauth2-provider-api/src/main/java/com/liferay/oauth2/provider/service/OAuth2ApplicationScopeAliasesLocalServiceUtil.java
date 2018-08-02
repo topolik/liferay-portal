@@ -271,6 +271,11 @@ public class OAuth2ApplicationScopeAliasesLocalServiceUtil {
 		return getService().getPersistedModel(primaryKeyObj);
 	}
 
+	public static boolean hasUpToDateScopeGrants(
+		com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases) {
+		return getService().hasUpToDateScopeGrants(oAuth2ApplicationScopeAliases);
+	}
+
 	/**
 	* Updates the o auth2 application scope aliases in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*

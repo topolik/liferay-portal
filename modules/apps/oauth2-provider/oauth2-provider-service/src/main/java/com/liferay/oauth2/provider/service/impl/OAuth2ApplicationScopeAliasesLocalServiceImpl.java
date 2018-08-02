@@ -22,7 +22,6 @@ import com.liferay.oauth2.provider.service.base.OAuth2ApplicationScopeAliasesLoc
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
@@ -31,6 +30,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.osgi.framework.Bundle;
@@ -96,7 +96,7 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 		long oAuth2ApplicationId, List<String> scopeAliasesList) {
 
 		String scopeAliases = StringUtil.merge(
-			ListUtil.sort(scopeAliasesList), StringPool.SPACE);
+			scopeAliasesList, StringPool.SPACE);
 
 		List<OAuth2ApplicationScopeAliases> oAuth2ApplicationScopeAliasesList =
 			oAuth2ApplicationScopeAliasesPersistence.findByO_S(
@@ -125,6 +125,60 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 		return oAuth2ApplicationScopeAliasesPersistence.
 			findByOAuth2ApplicationId(
 				oAuth2ApplicationId, start, end, orderByComparator);
+	}
+
+	@Override
+	public boolean hasUpToDateScopeGrants(
+		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases) {
+
+		List<String> scopeAliasesList =
+			oAuth2ApplicationScopeAliases.getScopeAliasesList();
+
+		Collection<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>();
+
+		for (String scopeAlias : scopeAliasesList) {
+			liferayOAuth2Scopes.addAll(
+				_scopeLocator.getLiferayOAuth2Scopes(
+					oAuth2ApplicationScopeAliases.getCompanyId(), scopeAlias));
+		}
+
+		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
+			oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
+				oAuth2ApplicationScopeAliases.
+					getOAuth2ApplicationScopeAliasesId(),
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		if (liferayOAuth2Scopes.size() != oAuth2ScopeGrants.size()) {
+			return false;
+		}
+
+		for (OAuth2ScopeGrant oAuth2ScopeGrant : oAuth2ScopeGrants) {
+			boolean found = liferayOAuth2Scopes.removeIf(
+				liferayOAuth2Scope -> {
+					Bundle bundle = liferayOAuth2Scope.getBundle();
+
+					if (Objects.equals(
+							liferayOAuth2Scope.getApplicationName(),
+							oAuth2ScopeGrant.getApplicationName()) &&
+						Objects.equals(
+							bundle.getSymbolicName(),
+							oAuth2ScopeGrant.getBundleSymbolicName()) &&
+						Objects.equals(
+							liferayOAuth2Scope.getScope(),
+							oAuth2ScopeGrant.getScope())) {
+
+						return true;
+					}
+
+					return false;
+				});
+
+			if (!found) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	protected void createScopeGrants(
