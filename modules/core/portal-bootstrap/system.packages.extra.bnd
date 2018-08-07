@@ -147,6 +147,8 @@ Export-Package:\
 	\
 	jodd.io.*;version='3.6.4',\
 	\
+	jodd.json.*;version='3.6.4',\
+	\
 	jodd.util.*;version='3.6.4',\
 	\
 	org.aopalliance.*;version='1.0',\
