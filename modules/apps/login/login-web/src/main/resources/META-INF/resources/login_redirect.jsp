@@ -23,6 +23,9 @@ boolean anonymousAccount = ParamUtil.getBoolean(request, "anonymousUser");
 %>
 
 <c:if test="<%= anonymousAccount && company.isStrangers() %>">
+
+<div class="login-container">
+
 	<div class="hide lfr-message-response" id="<portlet:namespace />login-status-messages"></div>
 
 	<div class="anonymous-account">
@@ -42,6 +45,8 @@ boolean anonymousAccount = ParamUtil.getBoolean(request, "anonymousUser");
 			<aui:button onClick='<%= renderResponse.getNamespace() + "closeDialog();" %>' value="cancel" />
 		</aui:form>
 	</div>
+	
+</div>
 
 	<aui:script sandbox="<%= true %>">
 		var showStatusMessage = Liferay.lazyLoad(

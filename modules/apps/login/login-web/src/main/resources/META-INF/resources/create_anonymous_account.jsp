@@ -20,6 +20,8 @@
 	<portlet:param name="mvcRenderCommandName" value="/login/create_anonymous_account" />
 </portlet:actionURL>
 
+<div class="login-container">
+
 <aui:form action="<%= createAnonymousAccountURL %>" method="post" name="fm">
 	<aui:input name="saveLastPath" type="hidden" value="<%= false %>" />
 	<aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.ADD %>" />
@@ -89,3 +91,4 @@
 </aui:form>
 
 <%@ include file="/navigation.jspf" %>
+</div>

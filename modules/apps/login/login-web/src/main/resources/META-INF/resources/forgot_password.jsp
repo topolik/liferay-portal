@@ -34,6 +34,8 @@ if (reminderAttempts == null) {
 	<portlet:param name="mvcRenderCommandName" value="/login/forgot_password" />
 </portlet:actionURL>
 
+<div class="login-container">
+
 <aui:form action="<%= forgotPasswordURL %>" method="post" name="fm">
 	<aui:input name="saveLastPath" type="hidden" value="<%= false %>" />
 
@@ -179,3 +181,4 @@ if (reminderAttempts == null) {
 </aui:form>
 
 <%@ include file="/navigation.jspf" %>
+</div>
