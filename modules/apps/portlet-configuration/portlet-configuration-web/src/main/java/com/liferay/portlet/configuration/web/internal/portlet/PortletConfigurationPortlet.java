@@ -667,7 +667,9 @@ public class PortletConfigurationPortlet extends MVCPortlet {
 			super.doDispatch(renderRequest, renderResponse);
 		}
 		catch (Exception e) {
-			_log.error(e.getMessage());
+			if (_log.isWarnEnabled()) {
+				_log.warn(e.getMessage());
+			}
 
 			SessionErrors.add(renderRequest, e.getClass());
 
