@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.cxf.rs.security.oauth2.common.Client;
 import org.apache.cxf.rs.security.oauth2.common.UserSubject;
 import org.apache.cxf.rs.security.oauth2.grants.owner.ResourceOwnerLoginHandler;
 
@@ -46,7 +47,9 @@ public class LiferayResourceOwnerLoginHandler
 	implements ResourceOwnerLoginHandler {
 
 	@Override
-	public UserSubject createSubject(String login, String password) {
+	public UserSubject createSubject(
+		Client client, String login, String password) {
+
 		try {
 			User user = authenticateUser(login, password);
 

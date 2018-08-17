@@ -87,7 +87,7 @@ public class LiferayResourceOwnerAccessTokenGrantHandler
 		}
 
 		UserSubject userSubject = _resourceOwnerLoginHandler.createSubject(
-			username, password);
+			client, username, password);
 
 		OAuth2Application oAuth2Application =
 			_liferayOAuthDataProvider.resolveOAuth2Application(client);

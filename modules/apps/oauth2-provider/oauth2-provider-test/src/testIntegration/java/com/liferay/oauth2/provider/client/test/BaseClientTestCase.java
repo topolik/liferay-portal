@@ -545,6 +545,10 @@ public abstract class BaseClientTestCase {
 		return parseJsonField(response, "error");
 	}
 
+	protected int parseStatus(Response response) {
+		return response.getStatus();
+	}
+
 	protected String parseJsonField(Response response, String fieldName) {
 		JSONObject jsonObject = parseJSONObject(response);
 
