@@ -16,16 +16,27 @@ package com.liferay.portal.json;
 
 import com.liferay.dynamic.data.mapping.kernel.DDMStructure;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.json.jabsorb.serializer.LiferayJSONDeserializationWhitelist;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONSerializer;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.search.HitsImpl;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.permission.ModelPermissions;
 import com.liferay.portal.kernel.util.LocalizationUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.util.LocalizationImpl;
+import com.liferay.registry.BasicRegistryImpl;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,6 +50,26 @@ import org.powermock.modules.junit4.PowerMockRunner;
  */
 @RunWith(PowerMockRunner.class)
 public class JSONSerializerTest extends PowerMockito {
+
+	@BeforeClass
+	public static void setUpClass() {
+		Registry registry = new BasicRegistryImpl();
+
+		RegistryUtil.setRegistry(registry);
+
+		List<String> whitelist = new ArrayList<>();
+
+		whitelist.add(ServiceContext.class.getName());
+		whitelist.add(ModelPermissions.class.getName());
+
+		registry.registerService(
+			Object.class, new Object(),
+			Collections.singletonMap(
+				PropsKeys.JSON_DESERIALIZATION_WHITELIST_CLASS_NAMES,
+				whitelist));
+
+		new LiferayJSONDeserializationWhitelist().afterPropertiesSet();
+	}
 
 	@Before
 	public void setUp() throws Exception {

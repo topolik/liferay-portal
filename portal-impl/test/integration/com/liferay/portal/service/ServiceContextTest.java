@@ -17,14 +17,21 @@ package com.liferay.portal.service;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
+import com.liferay.registry.ServiceRegistration;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -40,6 +47,23 @@ public class ServiceContextTest extends PowerMockito {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule =
 		new LiferayIntegrationTestRule();
+
+	@Before
+	public void setUp() {
+		Registry registry = RegistryUtil.getRegistry();
+
+		_serviceRegistration = registry.registerService(
+			Object.class, new Object(),
+			new HashMap<>(
+				Collections.singletonMap(
+					PropsKeys.JSON_DESERIALIZATION_WHITELIST_CLASS_NAMES,
+					ServiceContext.class.getName())));
+	}
+
+	@After
+	public void tearDown() {
+		_serviceRegistration.unregister();
+	}
 
 	@Test
 	public void testJSONSerialization() {
@@ -66,5 +90,7 @@ public class ServiceContextTest extends PowerMockito {
 		Assert.assertNull(deserializedServiceContext.getHeaders());
 		Assert.assertNull(deserializedServiceContext.getRequest());
 	}
+
+	private ServiceRegistration<Object> _serviceRegistration;
 
 }
