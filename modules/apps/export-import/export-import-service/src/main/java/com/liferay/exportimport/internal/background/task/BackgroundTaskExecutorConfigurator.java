@@ -14,6 +14,8 @@
 
 package com.liferay.exportimport.internal.background.task;
 
+import com.liferay.exportimport.internal.json.jabsorb.serializer.ExportImportLiferayJSONDeserializationWhitelist;
+import com.liferay.osgi.util.service.Reference;
 import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 
@@ -110,6 +112,10 @@ public class BackgroundTaskExecutorConfigurator {
 
 		_serviceRegistrations.add(serviceRegistration);
 	}
+
+	@Reference
+	private ExportImportLiferayJSONDeserializationWhitelist
+		_exportImportLiferayJSONDeserializationWhitelist;
 
 	private final Set<ServiceRegistration<BackgroundTaskExecutor>>
 		_serviceRegistrations = new HashSet<>();
