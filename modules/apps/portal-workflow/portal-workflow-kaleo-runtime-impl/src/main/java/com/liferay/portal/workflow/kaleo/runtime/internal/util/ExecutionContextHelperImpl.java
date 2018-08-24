@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.ServiceContextUtil;
 import com.liferay.portal.workflow.kaleo.model.KaleoInstance;
 import com.liferay.portal.workflow.kaleo.model.KaleoInstanceToken;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskInstanceToken;
@@ -147,9 +148,8 @@ public class ExecutionContextHelperImpl implements ExecutionContextHelper {
 		Map<String, Serializable> workflowContext = WorkflowContextUtil.convert(
 			jsonObject.getString("workflowContext"));
 
-		ServiceContext serviceContext =
-			(ServiceContext)_jsonFactory.deserialize(
-				jsonObject.getString("serviceContext"));
+		ServiceContext serviceContext = ServiceContextUtil.deserialize(
+			jsonObject.getString("serviceContext"));
 
 		return new ExecutionContext(
 			kaleoInstanceToken, kaleoTaskInstanceToken, workflowContext,
