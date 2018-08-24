@@ -219,11 +219,7 @@ public class JSONServiceAction extends JSONAction {
 		else if (typeNameOrClassDescriptor.equals(
 					 ServiceContext.class.getName())) {
 
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject(value);
-
-			jsonObject.put("javaClass", ServiceContext.class.getName());
-
-			return ServiceContextUtil.deserialize(jsonObject);
+			return ServiceContextUtil.deserialize(value);
 		}
 		else if (typeNameOrClassDescriptor.equals(String.class.getName())) {
 			return value;
