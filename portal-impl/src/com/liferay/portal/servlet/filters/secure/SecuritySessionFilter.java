@@ -21,14 +21,10 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.servlet.filters.BasePortalFilter;
 
-import java.io.IOException;
-
 import java.util.Date;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -39,12 +35,10 @@ import javax.servlet.http.HttpSession;
 public class SecuritySessionFilter extends BasePortalFilter {
 
 	@Override
-	public void doFilter(
-			ServletRequest servletRequest, ServletResponse servletResponse,
+	protected void processFilter(
+			HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain)
-		throws IOException, ServletException {
-
-		HttpServletRequest request = (HttpServletRequest)servletRequest;
+		throws Exception {
 
 		try {
 			if (_isPasswordChanged(request)) {
@@ -52,13 +46,10 @@ public class SecuritySessionFilter extends BasePortalFilter {
 
 				session.invalidate();
 
-				HttpServletResponse response =
-					(HttpServletResponse)servletResponse;
-
 				response.sendRedirect(request.getRequestURI());
 			}
 			else {
-				filterChain.doFilter(servletRequest, servletResponse);
+				filterChain.doFilter(request, response);
 			}
 		}
 		catch (PortalException pe) {
