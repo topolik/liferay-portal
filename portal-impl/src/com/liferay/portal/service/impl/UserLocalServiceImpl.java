@@ -5247,7 +5247,14 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 
 		user.setStatus(status);
 
-		userPersistence.update(user);
+		try {
+			ServiceContextThreadLocal.pushServiceContext(serviceContext);
+
+			userPersistence.update(user);
+		}
+		finally {
+			ServiceContextThreadLocal.popServiceContext();
+		}
 
 		reindex(user);
 
