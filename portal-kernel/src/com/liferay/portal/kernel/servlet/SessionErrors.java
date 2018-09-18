@@ -17,6 +17,7 @@ package com.liferay.portal.kernel.servlet;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletSession;
+import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 
@@ -65,6 +66,45 @@ public class SessionErrors {
 
 	public static void add(HttpSession session, Class<?> clazz, Object value) {
 		add(session, clazz.getName(), value);
+	}
+
+	public static void add(
+		HttpSession session, LiferayPortletURL liferayPortalURL,
+		Class<?> clazz) {
+
+		add(session, liferayPortalURL, clazz.getName());
+	}
+
+	public static void add(
+		HttpSession session, LiferayPortletURL portletRequest, Class<?> clazz,
+		Object value) {
+
+		add(session, portletRequest, clazz.getName(), value);
+	}
+
+	public static void add(
+		HttpSession session, LiferayPortletURL liferayPortletURL, String key) {
+
+		Map<String, Object> map = _getMap(session, liferayPortletURL, true);
+
+		if (map == null) {
+			return;
+		}
+
+		map.put(key, key);
+	}
+
+	public static void add(
+		HttpSession session, LiferayPortletURL liferayPortletURL, String key,
+		Object value) {
+
+		Map<String, Object> map = _getMap(session, liferayPortletURL, true);
+
+		if (map == null) {
+			return;
+		}
+
+		map.put(key, value);
 	}
 
 	public static void add(HttpSession session, String key) {
@@ -365,6 +405,19 @@ public class SessionErrors {
 		return map.size();
 	}
 
+	private static String _getKey(LiferayPortletURL liferayPortletURL) {
+		StringBundler sb = new StringBundler(6);
+
+		sb.append(LiferayPortletSession.PORTLET_SCOPE_NAMESPACE);
+		sb.append(liferayPortletURL.getPortletId());
+		sb.append(LiferayPortletSession.LAYOUT_SEPARATOR);
+		sb.append(liferayPortletURL.getPlid());
+		sb.append(StringPool.QUESTION);
+		sb.append(SessionErrors.class.getName());
+
+		return sb.toString();
+	}
+
 	private static String _getKey(PortletRequest portletRequest) {
 		StringBundler sb = new StringBundler(6);
 
@@ -379,6 +432,13 @@ public class SessionErrors {
 		sb.append(_CLASS_NAME);
 
 		return sb.toString();
+	}
+
+	private static Map<String, Object> _getMap(
+		HttpSession httpSession, LiferayPortletURL liferayPortletURL,
+		boolean createIfAbsent) {
+
+		return _getMap(httpSession, _getKey(liferayPortletURL), createIfAbsent);
 	}
 
 	private static Map<String, Object> _getMap(
