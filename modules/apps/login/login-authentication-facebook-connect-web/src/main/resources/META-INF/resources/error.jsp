@@ -28,9 +28,10 @@
 	</div>
 
 	<div class="sheet-text">
-		<liferay-ui:error exception="<%= MustVerifyEmailAddressException.class %>" message="you-need-to-verify-your-email-address-on-facebook-first" />
-		<liferay-ui:error exception="<%= StrangersNotAllowedException.class %>" message="only-known-users-are-allowed-to-sign-in-using-facebook" />
-		<liferay-ui:error exception="<%= UserEmailAddressException.MustNotUseCompanyMx.class %>" message="this-facebook-account-cannot-be-used-to-register-a-new-user-because-its-email-domain-is-reserved" />
+		<liferay-ui:error key="MustVerifyEmailAddressException" message="you-need-to-verify-your-email-address-on-facebook-first" />
+		<liferay-ui:error key="StrangersNotAllowedException" message="only-known-users-are-allowed-to-sign-in-using-facebook" />
+		<liferay-ui:error key="MustNotUseCompanyMx" message="this-facebook-account-cannot-be-used-to-register-a-new-user-because-its-email-domain-is-reserved" />
+		<liferay-ui:error key="unknownError" message="there-was-an-unknown-error" />
 	</div>
 
 	<div class="sheet-footer">

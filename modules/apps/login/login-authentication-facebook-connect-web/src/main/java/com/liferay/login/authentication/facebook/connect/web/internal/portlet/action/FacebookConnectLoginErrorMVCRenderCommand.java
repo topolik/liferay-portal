@@ -19,7 +19,10 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderConstants;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -66,6 +69,15 @@ public class FacebookConnectLoginErrorMVCRenderCommand
 					FacebookConnect.class.getName()));
 		}
 
+		String error = ParamUtil.getString(renderRequest, "error");
+
+		if (ArrayUtil.contains(_ERRORS, error)) {
+			SessionErrors.add(renderRequest, error);
+		}
+		else {
+			SessionErrors.add(renderRequest, "unknownError");
+		}
+
 		HttpServletRequest httpServletRequest = _portal.getHttpServletRequest(
 			renderRequest);
 
@@ -84,6 +96,11 @@ public class FacebookConnectLoginErrorMVCRenderCommand
 
 		return MVCRenderConstants.MVC_PATH_VALUE_SKIP_DISPATCH;
 	}
+
+	private static final String[] _ERRORS = {
+		"MustNotUseCompanyMx", "MustVerifyEmailAddressException",
+		"StrangersNotAllowedException"
+	};
 
 	@Reference
 	private FacebookConnect _facebookConnect;

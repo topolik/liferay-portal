@@ -33,7 +33,6 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.struts.BaseStrutsAction;
 import com.liferay.portal.kernel.struts.StrutsAction;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -42,7 +41,6 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -178,7 +176,13 @@ public class FacebookConnectAction extends BaseStrutsAction {
 				}
 			}
 			catch (PortalException pe) {
-				sendError(pe, request, response);
+				if (_log.isDebugEnabled()) {
+					_log.debug(pe, pe);
+				}
+
+				Class<?> clazz = pe.getClass();
+
+				sendError(clazz.getSimpleName(), request, response);
 
 				return null;
 			}
@@ -280,20 +284,17 @@ public class FacebookConnectAction extends BaseStrutsAction {
 	}
 
 	protected void sendError(
-			PortalException pe, HttpServletRequest request,
+			String error, HttpServletRequest request,
 			HttpServletResponse response)
 		throws Exception {
 
 		LiferayPortletURL portletURL = PortletURLFactoryUtil.create(
 			request, PortletKeys.LOGIN, PortletRequest.RENDER_PHASE);
 
+		portletURL.setParameter("error", error);
 		portletURL.setParameter(
 			"mvcRenderCommandName", "/login/facebook_connect_login_error");
 		portletURL.setWindowState(LiferayWindowState.POP_UP);
-
-		SessionErrors.add(
-			_getPortalSession(request), portletURL, pe.getClass().getName(),
-			pe);
 
 		response.sendRedirect(portletURL.toString());
 	}
@@ -449,13 +450,6 @@ public class FacebookConnectAction extends BaseStrutsAction {
 			contact.getJabberSn(), contact.getSkypeSn(), contact.getTwitterSn(),
 			contact.getJobTitle(), groupIds, organizationIds, roleIds,
 			userGroupRoles, userGroupIds, serviceContext);
-	}
-
-	private static HttpSession _getPortalSession(HttpServletRequest request) {
-		HttpServletRequest originalRequest =
-			PortalUtil.getOriginalServletRequest(request);
-
-		return originalRequest.getSession();
 	}
 
 	private void _checkAllowUserCreation(long companyId, JSONObject jsonObject)
