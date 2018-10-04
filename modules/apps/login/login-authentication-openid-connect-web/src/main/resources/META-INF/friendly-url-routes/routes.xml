@@ -7,4 +7,10 @@
 		<implicit-parameter name="javax.portlet.action">/login/openid_connect_request</implicit-parameter>
 		<implicit-parameter name="p_p_lifecycle">1</implicit-parameter>
 	</route>
+	<route>
+		<pattern>/openid_connect/{error}</pattern>
+		<implicit-parameter name="mvcRenderCommandName">/login/openid_connect_request</implicit-parameter>
+		<implicit-parameter name="p_p_lifecycle">0</implicit-parameter>
+		<implicit-parameter name="p_p_state">maximized</implicit-parameter>
+	</route>
 </routes>

@@ -14,13 +14,23 @@
 
 package com.liferay.portal.security.sso.openid.connect.internal.service.filter;
 
+import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.exception.UserEmailAddressException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.GroupConstants;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutSet;
+import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.servlet.BaseFilter;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.sso.openid.connect.OpenIdConnect;
 import com.liferay.portal.security.sso.openid.connect.OpenIdConnectServiceException;
 import com.liferay.portal.security.sso.openid.connect.OpenIdConnectServiceHandler;
+import com.liferay.portal.security.sso.openid.connect.StrangersNotAllowedException;
 import com.liferay.portal.security.sso.openid.connect.constants.OpenIdConnectConstants;
 import com.liferay.portal.security.sso.openid.connect.constants.OpenIdConnectWebKeys;
 import com.liferay.portal.security.sso.openid.connect.internal.OpenIdConnectFlowState;
@@ -104,9 +114,21 @@ public class OpenIdConnectFilter extends BaseFilter {
 				httpServletRequest, httpServletResponse);
 		}
 		catch (Exception e) {
-			_log.error("Unable to process the OpenID login", e);
-
-			_portal.sendError(e, httpServletRequest, httpServletResponse);
+			if (e instanceof UserEmailAddressException.MustNotUseCompanyMx) {
+				sendError(
+					UserEmailAddressException.MustNotUseCompanyMx.class.
+						getSimpleName(),
+					httpServletRequest, httpServletResponse);
+			}
+			else if (e instanceof StrangersNotAllowedException) {
+				sendError(
+					StrangersNotAllowedException.class.getSimpleName(),
+					httpServletRequest, httpServletResponse);
+			}
+			else {
+				_log.error("Unable to process the OpenID login", e);
+				_portal.sendError(e, httpServletRequest, httpServletResponse);
+			}
 		}
 	}
 
@@ -123,8 +145,54 @@ public class OpenIdConnectFilter extends BaseFilter {
 			filterChain);
 	}
 
+	protected void sendError(
+			String error, HttpServletRequest request,
+			HttpServletResponse response)
+		throws Exception {
+
+		LayoutSet layoutSet = (LayoutSet)request.getAttribute(
+			WebKeys.VIRTUAL_HOST_LAYOUT_SET);
+
+		StringBundler sb = new StringBundler(6);
+
+		sb.append(_portal.getPortalURL(request));
+
+		sb.append("/web");
+
+		Group group;
+
+		Layout defaultLayout = _layoutLocalService.fetchDefaultLayout(
+			layoutSet.getGroupId(), false);
+
+		if (defaultLayout == null) {
+			group = _groupLocalService.getGroup(
+				layoutSet.getCompanyId(), GroupConstants.GUEST);
+
+			defaultLayout = _layoutLocalService.fetchDefaultLayout(
+				group.getGroupId(), false);
+		}
+		else {
+			group = _groupLocalService.getGroup(defaultLayout.getGroupId());
+		}
+
+		sb.append(group.getFriendlyURL());
+
+		sb.append(defaultLayout.getFriendlyURL());
+
+		sb.append("/-/login/openid_connect/");
+		sb.append(error);
+
+		response.sendRedirect(sb.toString());
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
 		OpenIdConnectFilter.class);
+
+	@Reference
+	private GroupLocalService _groupLocalService;
+
+	@Reference
+	private LayoutLocalService _layoutLocalService;
 
 	@Reference
 	private OpenIdConnect _openIdConnect;
