@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.model.LayoutSet;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.servlet.BaseFilter;
+import com.liferay.portal.kernel.struts.LastPath;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.sso.openid.connect.OpenIdConnect;
@@ -149,6 +150,37 @@ public class OpenIdConnectFilter extends BaseFilter {
 			String error, HttpServletRequest request,
 			HttpServletResponse response)
 		throws Exception {
+
+		HttpSession session = request.getSession(false);
+
+		if (session != null) {
+			LastPath lastPath = (LastPath)session.getAttribute(
+				WebKeys.LAST_PATH);
+
+			if (lastPath != null) {
+				String path = lastPath.getPath();
+
+				int pos = path.indexOf(Portal.FRIENDLY_URL_SEPARATOR);
+
+				if (pos > -1) {
+					path = path.substring(0, pos);
+				}
+
+				StringBundler sb = new StringBundler(7);
+
+				sb.append(_portal.getPortalURL(request));
+				sb.append(_portal.getPathFriendlyURLPublic());
+				sb.append(path);
+				sb.append(Portal.FRIENDLY_URL_SEPARATOR);
+				sb.append("login/openid_connect/");
+				sb.append(error);
+				sb.append("?saveLastPath=false");
+
+				response.sendRedirect(sb.toString());
+
+				return;
+			}
+		}
 
 		Group group = null;
 
