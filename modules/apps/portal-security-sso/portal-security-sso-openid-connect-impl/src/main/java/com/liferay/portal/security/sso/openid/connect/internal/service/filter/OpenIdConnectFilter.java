@@ -117,22 +117,18 @@ public class OpenIdConnectFilter extends BaseFilter {
 					httpServletRequest, httpServletResponse);
 			}
 		}
+		catch (UserEmailAddressException.MustNotUseCompanyMx |
+			   StrangersNotAllowedException e) {
+
+			Class<?> clazz = e.getClass();
+
+			sendError(
+				clazz.getSimpleName(), httpServletRequest, httpServletResponse);
+		}
 		catch (Exception e) {
-			if (e instanceof UserEmailAddressException.MustNotUseCompanyMx) {
-				sendError(
-					UserEmailAddressException.MustNotUseCompanyMx.class.
-						getSimpleName(),
-					httpServletRequest, httpServletResponse);
-			}
-			else if (e instanceof StrangersNotAllowedException) {
-				sendError(
-					StrangersNotAllowedException.class.getSimpleName(),
-					httpServletRequest, httpServletResponse);
-			}
-			else {
-				_log.error("Unable to process the OpenID login", e);
-				_portal.sendError(e, httpServletRequest, httpServletResponse);
-			}
+			_log.error("Unable to process the OpenID login", e);
+
+			_portal.sendError(e, httpServletRequest, httpServletResponse);
 		}
 	}
 
