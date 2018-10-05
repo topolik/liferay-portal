@@ -150,16 +150,10 @@ public class OpenIdConnectFilter extends BaseFilter {
 			HttpServletResponse response)
 		throws Exception {
 
+		Group group = null;
+
 		LayoutSet layoutSet = (LayoutSet)request.getAttribute(
 			WebKeys.VIRTUAL_HOST_LAYOUT_SET);
-
-		StringBundler sb = new StringBundler(6);
-
-		sb.append(_portal.getPortalURL(request));
-
-		sb.append("/web");
-
-		Group group;
 
 		Layout defaultLayout = _layoutLocalService.fetchDefaultLayout(
 			layoutSet.getGroupId(), false);
@@ -175,11 +169,14 @@ public class OpenIdConnectFilter extends BaseFilter {
 			group = _groupLocalService.getGroup(defaultLayout.getGroupId());
 		}
 
+		StringBundler sb = new StringBundler(7);
+
+		sb.append(_portal.getPortalURL(request));
+		sb.append(_portal.getPathFriendlyURLPublic());
 		sb.append(group.getFriendlyURL());
-
 		sb.append(defaultLayout.getFriendlyURL());
-
-		sb.append("/-/login/openid_connect/");
+		sb.append(Portal.FRIENDLY_URL_SEPARATOR);
+		sb.append("login/openid_connect/");
 		sb.append(error);
 
 		response.sendRedirect(sb.toString());
