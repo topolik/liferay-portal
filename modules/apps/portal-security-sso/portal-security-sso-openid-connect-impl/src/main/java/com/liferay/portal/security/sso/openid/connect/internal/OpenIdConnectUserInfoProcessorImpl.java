@@ -57,14 +57,14 @@ public class OpenIdConnectUserInfoProcessorImpl
 
 		String emailAddress = internetAddress.getAddress();
 
-		checkAddUser(companyId, emailAddress);
-
 		User user = _userLocalService.fetchUserByEmailAddress(
 			companyId, emailAddress);
 
 		if (user != null) {
 			return user.getUserId();
 		}
+
+		checkAddUser(companyId, emailAddress);
 
 		if (Validator.isNull(firstName) || Validator.isNull(lastName) ||
 			Validator.isNull(emailAddress)) {
