@@ -57,7 +57,7 @@ public class OpenIdConnectUserInfoProcessorImpl
 
 		String emailAddress = internetAddress.getAddress();
 
-		_checkAllowUserCreation(companyId, emailAddress);
+		checkAddUser(companyId, emailAddress);
 
 		User user = _userLocalService.fetchUserByEmailAddress(
 			companyId, emailAddress);
@@ -128,7 +128,7 @@ public class OpenIdConnectUserInfoProcessorImpl
 		return user.getUserId();
 	}
 
-	private void _checkAllowUserCreation(long companyId, String emailAddress)
+	protected void checkAddUser(long companyId, String emailAddress)
 		throws PortalException {
 
 		Company company = _companyLocalService.getCompany(companyId);
@@ -137,11 +137,11 @@ public class OpenIdConnectUserInfoProcessorImpl
 			throw new StrangersNotAllowedException(companyId);
 		}
 
-		if (company.hasCompanyMx(emailAddress)) {
-			if (!company.isStrangersWithMx()) {
-				throw new UserEmailAddressException.MustNotUseCompanyMx(
-					emailAddress);
-			}
+		if (!company.isStrangersWithMx() &&
+			company.hasCompanyMx(emailAddress)) {
+
+			throw new UserEmailAddressException.MustNotUseCompanyMx(
+				emailAddress);
 		}
 	}
 
