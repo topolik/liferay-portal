@@ -85,7 +85,9 @@ public class OpenSSOBottomJSPDynamicInclude extends BaseJSPDynamicInclude {
 			request.setAttribute("open.sso.error.link", getErrorURL(request));
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			_log.error(e, e);
+
+			return;
 		}
 
 		super.include(request, response, key);
