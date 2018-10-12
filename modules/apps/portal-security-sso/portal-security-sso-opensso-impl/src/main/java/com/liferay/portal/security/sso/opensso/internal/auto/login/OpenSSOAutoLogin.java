@@ -15,9 +15,12 @@
 package com.liferay.portal.security.sso.opensso.internal.auto.login;
 
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.exception.UserEmailAddressException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
@@ -25,6 +28,7 @@ import com.liferay.portal.kernel.security.auth.ScreenNameGenerator;
 import com.liferay.portal.kernel.security.auto.login.AutoLogin;
 import com.liferay.portal.kernel.security.auto.login.BaseAutoLogin;
 import com.liferay.portal.kernel.security.sso.OpenSSO;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator;
@@ -41,6 +45,7 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.exportimport.UserImporter;
 import com.liferay.portal.security.sso.opensso.configuration.OpenSSOConfiguration;
 import com.liferay.portal.security.sso.opensso.constants.OpenSSOConstants;
+import com.liferay.portal.security.sso.opensso.internal.StrangersNotAllowedException;
 import com.liferay.portal.util.PropsValues;
 
 import java.util.Calendar;
@@ -83,7 +88,7 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 	protected User addUser(
 			long companyId, String firstName, String lastName,
 			String emailAddress, String screenName, Locale locale)
-		throws Exception {
+		throws PortalException {
 
 		long creatorUserId = 0;
 		boolean autoPassword = false;
@@ -116,6 +121,23 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 			locale, firstName, middleName, lastName, prefixId, suffixId, male,
 			birthdayMonth, birthdayDay, birthdayYear, jobTitle, groupIds,
 			organizationIds, roleIds, userGroupIds, sendEmail, serviceContext);
+	}
+
+	protected void checkAddUser(long companyId, String emailAddress)
+		throws PortalException {
+
+		Company company = _companyLocalService.getCompany(companyId);
+
+		if (!company.isStrangers()) {
+			throw new StrangersNotAllowedException(companyId);
+		}
+
+		if (!company.isStrangersWithMx() &&
+			company.hasCompanyMx(emailAddress)) {
+
+			throw new UserEmailAddressException.MustNotUseCompanyMx(
+				emailAddress);
+		}
 	}
 
 	@Override
@@ -220,13 +242,25 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 				locale = themeDisplay.getLocale();
 			}
 
-			if (_log.isDebugEnabled()) {
-				_log.debug("Adding user " + screenName);
-			}
+			try {
+				checkAddUser(companyId, emailAddress);
 
-			user = addUser(
-				companyId, firstName, lastName, emailAddress, screenName,
-				locale);
+				if (_log.isDebugEnabled()) {
+					_log.debug("Adding user " + screenName);
+				}
+
+				user = addUser(
+					companyId, firstName, lastName, emailAddress, screenName,
+					locale);
+			}
+			catch (PortalException pe) {
+				Class<?> clazz = pe.getClass();
+
+				request.setAttribute("open.sso.error", clazz.getSimpleName());
+				request.setAttribute("open.sso.subject.screenName", screenName);
+
+				return null;
+			}
 		}
 
 		String currentURL = _portal.getCurrentURL(request);
@@ -264,6 +298,9 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		OpenSSOAutoLogin.class);
+
+	@Reference
+	private CompanyLocalService _companyLocalService;
 
 	@Reference
 	private ConfigurationProvider _configurationProvider;
