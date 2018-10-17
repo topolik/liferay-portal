@@ -124,6 +124,10 @@ public class PermissionsPortletConfigurationIcon
 			rootPortletId = portlet.getRootPortletId();
 		}
 
+		if (portletDisplay.getInstanceId() != null) {
+			rootPortletId = portletDisplay.getId();
+		}
+
 		boolean showPermissionsIcon = false;
 
 		Layout layout = themeDisplay.getLayout();
