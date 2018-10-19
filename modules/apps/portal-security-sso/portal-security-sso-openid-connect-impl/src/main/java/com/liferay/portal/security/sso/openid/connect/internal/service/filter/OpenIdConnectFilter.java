@@ -108,7 +108,10 @@ public class OpenIdConnectFilter extends BaseFilter {
 			}
 		}
 		catch (Exception e) {
-			_log.error("Unable to process the OpenID login", e);
+			_log.error(
+				"Unable to process OpenID Connect authentication response: " +
+					e.getMessage(),
+				e);
 
 			_portal.sendError(e, httpServletRequest, httpServletResponse);
 		}
