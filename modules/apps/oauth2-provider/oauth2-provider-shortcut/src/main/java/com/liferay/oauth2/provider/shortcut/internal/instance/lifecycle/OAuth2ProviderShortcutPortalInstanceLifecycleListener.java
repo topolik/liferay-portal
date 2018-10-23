@@ -19,6 +19,7 @@ import com.liferay.oauth2.provider.constants.GrantType;
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationLocalService;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.instance.lifecycle.BasePortalInstanceLifecycleListener;
 import com.liferay.portal.instance.lifecycle.PortalInstanceLifecycleListener;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
@@ -34,7 +35,6 @@ import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.security.service.access.policy.model.SAPEntry;
 import com.liferay.portal.security.service.access.policy.service.SAPEntryLocalService;
 
@@ -78,7 +78,7 @@ public class OAuth2ProviderShortcutPortalInstanceLifecycleListener
 						add(GrantType.REFRESH_TOKEN);
 					}
 				},
-				_generateRandomId(), ClientProfile.WEB_APPLICATION.id(),
+				StringPool.BLANK, ClientProfile.WEB_APPLICATION.id(),
 				_generateRandomSecret(), null, null,
 				"https://analytics.liferay.com", 0, _APPLICATION_NAME, null,
 				Collections.singletonList(
@@ -93,12 +93,6 @@ public class OAuth2ProviderShortcutPortalInstanceLifecycleListener
 
 		_oAuth2ApplicationLocalService.updateIcon(
 			oAuth2Application.getOAuth2ApplicationId(), inputStream);
-	}
-
-	private static String _generateRandomId() {
-		String randomSecret = _generateRandomSecret();
-
-		return StringUtil.replace(randomSecret, "secret-", "id-");
 	}
 
 	private static String _generateRandomSecret() {
