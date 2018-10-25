@@ -1,6 +1,18 @@
 <definition>
 	<command name="addApplication">
-		<execute macro="LexiconEntry#gotoAdd" />
+		<if>
+			<isset var="menuItemTitle" />
+			<then>
+				<execute macro="LexiconEntry#gotoAddMenuItem">
+					<var name="menuItem" value="${menuItemTitle}" />
+				</execute>
+			</then>
+			<else>
+				<execute macro="LexiconEntry#gotoAddMenuItem">
+					<var name="menuItem" value="Add OAuth 2 Application" />
+				</execute>
+			</else>
+		</if>
 
 		<execute macro="OAuth2#inputApplicationValues">
 			<var name="applicationName" value="${applicationName}" />

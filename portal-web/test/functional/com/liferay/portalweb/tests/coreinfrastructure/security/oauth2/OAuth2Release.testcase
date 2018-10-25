@@ -33,6 +33,7 @@
 			<var name="applicationName" value="OAuth Application" />
 			<var name="callbackURI" value="http://www.liferay.com" />
 			<var name="clientProfile" value="Web Application" />
+			<var name="menuItemTitle" value="Add OAuth2 Application" />
 			<var name="websiteURL" value="http://www.liferay.com" />
 		</execute>
 
@@ -128,6 +129,7 @@
 		<execute macro="OAuth2#addApplication">
 			<var name="applicationName" value="OAuth Application" />
 			<var name="checkboxUncheckList" value="Authorization Code" />
+			<var name="menuItemTitle" value="Add OAuth2 Application" />
 		</execute>
 
 		<execute macro="Navigator#gotoBack" />
@@ -193,6 +195,7 @@
 		<execute macro="OAuth2#addApplication">
 			<var name="applicationName" value="OAuth Application" />
 			<var name="checkboxUncheckList" value="Authorization Code" />
+			<var name="menuItemTitle" value="Add OAuth2 Application" />
 		</execute>
 
 		<var method="selenium#getElementValue('OAuth2#ADMIN_INPUT_FORM_CLIENT_ID')" name="generatedClientId" />
