@@ -17,9 +17,9 @@
 <%@ include file="/captcha/init.jsp" %>
 
 <c:if test="<%= captchaEnabled %>">
-	<script src="<%= captchaConfiguration.reCaptchaScriptURL() %>?hl=<%= locale.getLanguage() %>" type="text/javascript"></script>
+	<script src="<%= captchaConfiguration.reCaptchaScriptURL() %>?hl=<%= locale.getLanguage() %>&render=<%= captchaConfiguration.reCaptchaPublicKey() %>" type="text/javascript"></script>
 
-	<div class="g-recaptcha" data-sitekey="<%= captchaConfiguration.reCaptchaPublicKey() %>"></div>
+	<input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
 
 	<noscript>
 		<div style="height: 525px; width: 302px;">
@@ -34,4 +34,22 @@
 			</div>
 		</div>
 	</noscript>
+
+	<script>
+	var siteKey = '<%= captchaConfiguration.reCaptchaPublicKey() %>';
+
+	grecaptcha.ready(function() {
+		grecaptcha.execute(
+			siteKey,
+			{
+				action: 'homepage'
+			}
+		).then(function(token) {
+			var reCaptchaField = document.getElementById('g-recaptcha-response');
+
+			reCaptchaField.value = token;
+		}
+		);
+	});
+	</script>
 </c:if>
