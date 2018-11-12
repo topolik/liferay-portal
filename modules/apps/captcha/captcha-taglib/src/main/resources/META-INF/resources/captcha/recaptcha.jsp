@@ -35,21 +35,22 @@
 		</div>
 	</noscript>
 
-	<script>
-	var siteKey = '<%= captchaConfiguration.reCaptchaPublicKey() %>';
+	<aui:script sandbox="<%= true %>">
+		grecaptcha.ready(
+			function() {
+				grecaptcha.execute(
+					'<%= captchaConfiguration.reCaptchaPublicKey() %>',
+					{
+						action: 'homepage'
+					}
+				).then(
+					function(token) {
+						var reCaptchaField = document.getElementById('g-recaptcha-response');
 
-	grecaptcha.ready(function() {
-		grecaptcha.execute(
-			siteKey,
-			{
-				action: 'homepage'
+						reCaptchaField.value = token;
+					}
+				);
 			}
-		).then(function(token) {
-			var reCaptchaField = document.getElementById('g-recaptcha-response');
-
-			reCaptchaField.value = token;
-		}
 		);
-	});
-	</script>
+	</aui:script>
 </c:if>
