@@ -349,50 +349,50 @@ http://www.w3.org/TR/html401/struct/global.html
 
 		<attribute name="onFocus" description="The 'onFocus' event is executed when the control associated with the tag gains focus">
 			<literal-list>
-				<literal value="javascript:void(0)"/>
-				<literal value="javascript:history.go(-1)"/>
+				<literal value="javascript:void(0);"/>
+				<literal value="javascript:history.go(-1);"/>
 			</literal-list>
 		</attribute>
 
 		<attribute name="onBlur" description="The 'onBlur' event is executed when the control associated with the tag loses focus">
 			<literal-list>
-				<literal value="javascript:void(0)"/>
-				<literal value="javascript:history.go(-1)"/>
+				<literal value="javascript:void(0);"/>
+				<literal value="javascript:history.go(-1);"/>
 			</literal-list>
 		</attribute>
 
 		 <attribute name="onClick" description="The 'onClick' event is executed when the control associated with the tag is clicked">
 			<literal-list>
-				<literal value="javascript:void(0)"/>
-				<literal value="javascript:history.go(-1)"/>
+				<literal value="javascript:void(0);"/>
+				<literal value="javascript:history.go(-1);"/>
 			</literal-list>
 		 </attribute>
 
 		 <attribute name="onDblClick" description="The 'onDblClick' event is executed when the control associated with the tag is clicked twice immediately">
 			<literal-list>
-				<literal value="javascript:void(0)"/>
-				<literal value="javascript:history.go(-1)"/>
+				<literal value="javascript:void(0);"/>
+				<literal value="javascript:history.go(-1);"/>
 			</literal-list>
 		 </attribute>
 
 		  <attribute name="onMouseDown" description="The 'onMouseDown' event is executed when the control associated with the tag is clicked but not yet released">
 			<literal-list>
-				<literal value="javascript:void(0)"/>
-				<literal value="javascript:history.go(-1)"/>
+				<literal value="javascript:void(0);"/>
+				<literal value="javascript:history.go(-1);"/>
 			</literal-list>
 		 </attribute>
 
 		 <attribute name="onMouseUp" description="The 'onMouseUp' event is executed when the control associated with the tag is clicked after the button is released">
 			<literal-list>
-				<literal value="javascript:void(0)"/>
-				<literal value="javascript:history.go(-1)"/>
+				<literal value="javascript:void(0);"/>
+				<literal value="javascript:history.go(-1);"/>
 			</literal-list>
 		 </attribute>
 
  		 <attribute name="onMouseOver" description="The 'onMouseOver' event is executed when the user's mouse hovers over the control associated with the tag">
 			<literal-list>
-				<literal value="javascript:void(0)"/>
-				<literal value="javascript:history.go(-1)"/>
+				<literal value="javascript:void(0);"/>
+				<literal value="javascript:history.go(-1);"/>
 			</literal-list>
 		 </attribute>
 
