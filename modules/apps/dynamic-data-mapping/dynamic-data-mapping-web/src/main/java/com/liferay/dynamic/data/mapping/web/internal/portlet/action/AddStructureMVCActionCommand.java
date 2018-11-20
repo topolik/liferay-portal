@@ -19,6 +19,7 @@ import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormLayout;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureConstants;
+import com.liferay.dynamic.data.mapping.security.permission.DDMPermissionSupport;
 import com.liferay.dynamic.data.mapping.service.DDMStructureService;
 import com.liferay.dynamic.data.mapping.util.DDM;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -71,8 +72,12 @@ public class AddStructureMVCActionCommand extends DDMBaseMVCActionCommand {
 
 		String storageType = ParamUtil.getString(actionRequest, "storageType");
 
+		String structureModelResourceName =
+			_ddmPermissionSupport.getStructureModelResourceName(
+				scopeClassNameId);
+
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			DDMStructure.class.getName(), actionRequest);
+			structureModelResourceName, actionRequest);
 
 		return _ddmStructureService.addStructure(
 			groupId, parentStructureId, scopeClassNameId, structureKey, nameMap,
@@ -105,6 +110,10 @@ public class AddStructureMVCActionCommand extends DDMBaseMVCActionCommand {
 	}
 
 	private DDM _ddm;
+
+	@Reference
+	private DDMPermissionSupport _ddmPermissionSupport;
+
 	private DDMStructureService _ddmStructureService;
 
 }

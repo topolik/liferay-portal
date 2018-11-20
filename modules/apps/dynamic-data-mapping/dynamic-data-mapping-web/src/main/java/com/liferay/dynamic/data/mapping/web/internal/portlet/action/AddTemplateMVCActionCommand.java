@@ -17,6 +17,7 @@ package com.liferay.dynamic.data.mapping.web.internal.portlet.action;
 import com.liferay.dynamic.data.mapping.constants.DDMPortletKeys;
 import com.liferay.dynamic.data.mapping.exception.TemplateScriptException;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
+import com.liferay.dynamic.data.mapping.security.permission.DDMPermissionSupport;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateService;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -91,8 +92,12 @@ public class AddTemplateMVCActionCommand extends DDMBaseMVCActionCommand {
 			uploadPortletRequest, "smallImageURL");
 		File smallImageFile = uploadPortletRequest.getFile("smallImageFile");
 
+		String templateModelResourceName =
+			ddmPermissionSupport.getTemplateModelResourceName(
+				resourceClassNameId);
+
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			DDMTemplate.class.getName(), uploadPortletRequest);
+			templateModelResourceName, uploadPortletRequest);
 
 		return ddmTemplateService.addTemplate(
 			groupId, classNameId, classPK, resourceClassNameId, templateKey,
@@ -166,6 +171,9 @@ public class AddTemplateMVCActionCommand extends DDMBaseMVCActionCommand {
 
 		this.ddmTemplateService = ddmTemplateService;
 	}
+
+	@Reference
+	protected DDMPermissionSupport ddmPermissionSupport;
 
 	protected DDMTemplateService ddmTemplateService;
 
