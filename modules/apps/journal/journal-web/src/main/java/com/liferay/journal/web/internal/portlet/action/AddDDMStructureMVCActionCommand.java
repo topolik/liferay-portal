@@ -16,8 +16,8 @@ package com.liferay.journal.web.internal.portlet.action;
 
 import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormLayout;
-import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureConstants;
+import com.liferay.dynamic.data.mapping.security.permission.DDMPermissionSupport;
 import com.liferay.dynamic.data.mapping.service.DDMStructureService;
 import com.liferay.dynamic.data.mapping.util.DDM;
 import com.liferay.journal.constants.JournalPortletKeys;
@@ -74,8 +74,12 @@ public class AddDDMStructureMVCActionCommand extends BaseMVCActionCommand {
 
 		String storageType = ParamUtil.getString(actionRequest, "storageType");
 
+		String structureModelResourceName =
+			_ddmPermissionSupport.getStructureModelResourceName(
+				JournalArticle.class.getName());
+
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			DDMStructure.class.getName(), actionRequest);
+			structureModelResourceName, actionRequest);
 
 		_ddmStructureService.addStructure(
 			groupId, parentDDMStructureId,
@@ -86,6 +90,9 @@ public class AddDDMStructureMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private DDM _ddm;
+
+	@Reference
+	private DDMPermissionSupport _ddmPermissionSupport;
 
 	@Reference
 	private DDMStructureService _ddmStructureService;

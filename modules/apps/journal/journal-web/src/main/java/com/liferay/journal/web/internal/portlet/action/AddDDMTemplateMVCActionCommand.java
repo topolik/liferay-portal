@@ -15,8 +15,8 @@
 package com.liferay.journal.web.internal.portlet.action;
 
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
-import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.model.DDMTemplateConstants;
+import com.liferay.dynamic.data.mapping.security.permission.DDMPermissionSupport;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateService;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.model.JournalArticle;
@@ -95,8 +95,12 @@ public class AddDDMTemplateMVCActionCommand extends BaseMVCActionCommand {
 			smallImageFile = uploadPortletRequest.getFile("smallImageFile");
 		}
 
+		String templateModelResourceName =
+			_ddmPermissionSupport.getTemplateModelResourceName(
+				JournalArticle.class.getName());
+
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			DDMTemplate.class.getName(), uploadPortletRequest);
+			templateModelResourceName, uploadPortletRequest);
 
 		_ddmTemplateService.addTemplate(
 			groupId, _portal.getClassNameId(DDMStructure.class), classPK,
@@ -105,6 +109,9 @@ public class AddDDMTemplateMVCActionCommand extends BaseMVCActionCommand {
 			StringPool.BLANK, language, script, cacheable, smallImage,
 			smallImageURL, smallImageFile, serviceContext);
 	}
+
+	@Reference
+	private DDMPermissionSupport _ddmPermissionSupport;
 
 	@Reference
 	private DDMTemplateService _ddmTemplateService;
