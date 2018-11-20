@@ -74,8 +74,12 @@ public class SaveStructureMVCActionCommand extends BaseMVCActionCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		String structureModelResourceName =
+			_ddmPermissionSupport.getStructureModelResourceName(
+				DDMFormInstance.class.getName());
+
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			DDMStructure.class.getName(), actionRequest);
+			structureModelResourceName, actionRequest);
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
 		long structureId = ParamUtil.getLong(actionRequest, "structureId");
@@ -190,6 +194,9 @@ public class SaveStructureMVCActionCommand extends BaseMVCActionCommand {
 	)
 	protected DDMFormContextDeserializer<DDMFormLayout>
 		ddlFormBuilderContextToDDMFormLayout;
+
+	@Reference
+	private DDMPermissionSupport _ddmPermissionSupport;
 
 	@Reference
 	protected JSONFactory jsonFactory;
