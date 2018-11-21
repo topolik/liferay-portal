@@ -99,7 +99,14 @@ public class ModelPermissionsFactory {
 	public static ModelPermissions create(
 		String[] groupPermissions, String[] guestPermissions) {
 
-		ModelPermissions modelPermissions = new ModelPermissions();
+		return create(groupPermissions, guestPermissions, null);
+	}
+
+	public static ModelPermissions create(
+		String[] groupPermissions, String[] guestPermissions,
+		String className) {
+
+		ModelPermissions modelPermissions = new ModelPermissions(className);
 
 		modelPermissions.addRolePermissions(
 			RoleConstants.PLACEHOLDER_DEFAULT_GROUP_ROLE, groupPermissions);
@@ -112,7 +119,7 @@ public class ModelPermissionsFactory {
 	public static ModelPermissions createWithDefaultPermissions(
 		String className) {
 
-		ModelPermissions modelPermissions = new ModelPermissions();
+		ModelPermissions modelPermissions = new ModelPermissions(className);
 
 		List<String> modelResourceGroupDefaultActions =
 			ResourceActionsUtil.getModelResourceGroupDefaultActions(className);
@@ -159,7 +166,7 @@ public class ModelPermissionsFactory {
 			_addClassNamePostfix("guestPermissions", className));
 
 		if ((groupPermissions != null) || (guestPermissions != null)) {
-			return create(groupPermissions, guestPermissions);
+			return create(groupPermissions, guestPermissions, className);
 		}
 
 		if (Validator.isNull(className)) {
