@@ -31,7 +31,11 @@ import java.util.Set;
  */
 public class ModelPermissions implements Cloneable, Serializable {
 
+	public static final String ALL_RESOURCES =
+		ModelPermissions.class.getName() + "#ALL_RESOURCES";
+
 	public ModelPermissions() {
+		_resourceName = ALL_RESOURCES;
 	}
 
 	public ModelPermissions(String resourceName) {
