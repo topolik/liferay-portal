@@ -181,11 +181,6 @@ public class OpenSSOFilter extends BaseFilter {
 
 				session.setAttribute(_SUBJECT_ID_KEY, newSubjectId);
 			}
-
-			processFilter(
-				OpenSSOFilter.class.getName(), request, response, filterChain);
-
-			return;
 		}
 		else if (_portal.getUserId(request) > 0) {
 			session.invalidate();
