@@ -20,7 +20,10 @@ import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
+import com.liferay.portal.kernel.service.PortletLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.ServiceComponentLocalService;
 import com.liferay.portal.kernel.service.configuration.ServiceComponentConfiguration;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -50,7 +53,9 @@ public class ServiceConfigurationInitializer {
 	public ServiceConfigurationInitializer(
 		Bundle bundle, ClassLoader classLoader,
 		Configuration portletConfiguration, Configuration serviceConfiguration,
+		PortletLocalService portletLocalService,
 		ResourceActions resourceActions,
+		ResourcePermissionLocalService resourcePermissionLocalService,
 		ServiceComponentLocalService serviceComponentLocalService) {
 
 		_bundle = bundle;
@@ -59,7 +64,9 @@ public class ServiceConfigurationInitializer {
 		_serviceConfiguration = serviceConfiguration;
 
 		_serviceComponentConfiguration = new ModuleResourceLoader(bundle);
+		_portletLocalService = portletLocalService;
 		_resourceActions = resourceActions;
+		_resourcePermissionLocalService = resourcePermissionLocalService;
 		_serviceComponentLocalService = serviceComponentLocalService;
 	}
 
@@ -155,6 +162,14 @@ public class ServiceConfigurationInitializer {
 
 			for (String portletId : portletNames) {
 				_resourceActions.check(portletId);
+
+				Portlet portlet = _portletLocalService.getPortletById(
+					portletId);
+
+				if (portlet != null) {
+					_resourcePermissionLocalService.
+						initPortletDefaultPermissions(portlet);
+				}
 			}
 		}
 		catch (Exception e) {
@@ -228,7 +243,10 @@ public class ServiceConfigurationInitializer {
 	private final Bundle _bundle;
 	private final ClassLoader _classLoader;
 	private final Configuration _portletConfiguration;
+	private final PortletLocalService _portletLocalService;
 	private final ResourceActions _resourceActions;
+	private final ResourcePermissionLocalService
+		_resourcePermissionLocalService;
 	private final ServiceComponentConfiguration _serviceComponentConfiguration;
 	private final ServiceComponentLocalService _serviceComponentLocalService;
 	private final Configuration _serviceConfiguration;

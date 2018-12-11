@@ -26,6 +26,8 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.module.framework.ModuleServiceLifecycle;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
+import com.liferay.portal.kernel.service.PortletLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.ServiceComponentLocalService;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -94,7 +96,8 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 		ServiceConfigurationInitializer serviceConfigurationInitializer =
 			new ServiceConfigurationInitializer(
 				bundle, classLoader, portletConfiguration, serviceConfiguration,
-				_resourceActions, _serviceComponentLocalService);
+				_portletLocalService, _resourceActions,
+				_resourcePermissionLocalService, _serviceComponentLocalService);
 
 		return new ServiceConfigurationExtension(
 			bundle, requireSchemaVersion, serviceConfigurationInitializer);
@@ -119,7 +122,13 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 	private ModuleServiceLifecycle _moduleServiceLifecycle;
 
 	@Reference
+	private PortletLocalService _portletLocalService;
+
+	@Reference
 	private ResourceActions _resourceActions;
+
+	@Reference
+	private ResourcePermissionLocalService _resourcePermissionLocalService;
 
 	@Reference
 	private ServiceComponentLocalService _serviceComponentLocalService;
