@@ -639,6 +639,15 @@ public class ResourceActionsImpl implements ResourceActions {
 		}
 	}
 
+	@Override
+	public void read(
+			String servletContextName, ClassLoader classLoader, String source,
+			Set<String> portletNames)
+		throws Exception {
+
+		_read(servletContextName, classLoader, source, portletNames);
+	}
+
 	/**
 	 * @deprecated As of Wilberforce (7.0.x)
 	 */

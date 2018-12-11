@@ -23,6 +23,7 @@ import java.io.InputStream;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -265,6 +266,15 @@ public class ResourceActionsUtil {
 		throws Exception {
 
 		getResourceActions().read(servletContextName, classLoader, sources);
+	}
+
+	public static void read(
+			String servletContextName, ClassLoader classLoader, String source,
+			Set<String> portletNames)
+		throws Exception {
+
+		getResourceActions().read(
+			servletContextName, classLoader, source, portletNames);
 	}
 
 	/**
