@@ -31,9 +31,12 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.spring.extender.internal.loader.ModuleResourceLoader;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -129,26 +132,29 @@ public class ServiceConfigurationInitializer {
 
 	private void _readResourceActions() {
 		try {
+			Set<String> portletNames = new HashSet<>();
+
+			String resourceActionConfigs = _portletConfiguration.get(
+				PropsKeys.RESOURCE_ACTIONS_CONFIGS);
+
+			for (String resourceActionConfig :
+					StringUtil.split(resourceActionConfigs)) {
+
+				_resourceActions.read(
+					null, _classLoader, resourceActionConfig, portletNames);
+			}
+
 			String portlets = _portletConfiguration.get(
 				"service.configurator.portlet.ids");
 
-			if (Validator.isNull(portlets)) {
-				_resourceActions.readAndCheck(
-					null, _classLoader,
-					StringUtil.split(
-						_portletConfiguration.get(
-							PropsKeys.RESOURCE_ACTIONS_CONFIGS)));
-			}
-			else {
-				_resourceActions.read(
-					null, _classLoader,
-					StringUtil.split(
-						_portletConfiguration.get(
-							PropsKeys.RESOURCE_ACTIONS_CONFIGS)));
+			if (Validator.isNotNull(portlets)) {
+				portletNames.clear();
 
-				for (String portletId : StringUtil.split(portlets)) {
-					_resourceActions.check(portletId);
-				}
+				Collections.addAll(portletNames, StringUtil.split(portlets));
+			}
+
+			for (String portletId : portletNames) {
+				_resourceActions.check(portletId);
 			}
 		}
 		catch (Exception e) {
