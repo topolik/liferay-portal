@@ -93,13 +93,12 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 
 		ServiceConfigurationInitializer serviceConfigurationInitializer =
 			new ServiceConfigurationInitializer(
-				bundle, classLoader, portletConfiguration, serviceConfiguration,
-				_resourceActions, _serviceComponentLocalService);
+				bundle, classLoader, serviceConfiguration,
+				_serviceComponentLocalService);
 
 		PortletConfigurationInitializer portletConfigurationInitializer =
 			new PortletConfigurationInitializer(
-				bundle, classLoader, portletConfiguration, serviceConfiguration,
-				_resourceActions, _serviceComponentLocalService);
+				bundle, classLoader, portletConfiguration, _resourceActions);
 
 		return new ServiceConfigurationExtension(
 			bundle, requireSchemaVersion, serviceConfigurationInitializer,

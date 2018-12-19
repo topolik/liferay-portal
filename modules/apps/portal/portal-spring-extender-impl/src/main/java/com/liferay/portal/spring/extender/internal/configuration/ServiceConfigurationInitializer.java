@@ -14,30 +14,21 @@
 
 package com.liferay.portal.spring.extender.internal.configuration;
 
-import com.liferay.portal.kernel.cache.PortalCacheManagerNames;
-import com.liferay.portal.kernel.cache.configurator.PortalCacheConfiguratorSettings;
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.security.permission.ResourceActions;
-import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceComponentLocalService;
 import com.liferay.portal.kernel.service.configuration.ServiceComponentConfiguration;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
-import com.liferay.portal.kernel.util.PropsKeys;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.spring.extender.internal.loader.ModuleResourceLoader;
-import com.liferay.portal.util.PortalInstances;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -50,17 +41,14 @@ public class ServiceConfigurationInitializer {
 
 	public ServiceConfigurationInitializer(
 		Bundle bundle, ClassLoader classLoader,
-		Configuration portletConfiguration, Configuration serviceConfiguration,
-		ResourceActions resourceActions,
+		Configuration serviceConfiguration,
 		ServiceComponentLocalService serviceComponentLocalService) {
 
 		_bundle = bundle;
 		_classLoader = classLoader;
-		_portletConfiguration = portletConfiguration;
 		_serviceConfiguration = serviceConfiguration;
 
 		_serviceComponentConfiguration = new ModuleResourceLoader(bundle);
-		_resourceActions = resourceActions;
 		_serviceComponentLocalService = serviceComponentLocalService;
 	}
 
@@ -79,15 +67,6 @@ public class ServiceConfigurationInitializer {
 
 	protected void start() {
 		BundleContext bundleContext = _bundle.getBundleContext();
-
-		if (_portletConfiguration != null) {
-			_reconfigureCaches();
-
-			_readResourceActions();
-
-			_registerConfiguration(
-				bundleContext, _portletConfiguration, "portlet");
-		}
 
 		if (_serviceConfiguration != null) {
 			_initServiceComponent();
@@ -131,92 +110,6 @@ public class ServiceConfigurationInitializer {
 		}
 	}
 
-	private void _readResourceActions() {
-		try {
-			String portlets = _portletConfiguration.get(
-				"service.configurator.portlet.ids");
-
-			String[] resourceActionConfigs = StringUtil.split(
-				_portletConfiguration.get(PropsKeys.RESOURCE_ACTIONS_CONFIGS));
-
-			Set<String> portletResources = new HashSet<>();
-			Set<String> modelResources = new HashSet<>();
-
-			for (String resourceActionConfig : resourceActionConfigs) {
-				_resourceActions.read(
-					null, _classLoader, resourceActionConfig, portletResources,
-					modelResources);
-			}
-
-			if (Validator.isNull(portlets)) {
-				for (String portletResourceName : portletResources) {
-					_resourceActions.check(portletResourceName);
-				}
-			}
-			else {
-				for (String portletId : StringUtil.split(portlets)) {
-					_resourceActions.check(portletId);
-				}
-			}
-
-			long[] companyIds = PortalInstances.getCompanyIds();
-
-			for (long companyId : companyIds) {
-				ResourcePermissionLocalServiceUtil.initModelDefaultPermissions(
-					companyId, modelResources);
-			}
-		}
-		catch (Exception e) {
-			_log.error(
-				"Unable to read resource actions config in " +
-					PropsKeys.RESOURCE_ACTIONS_CONFIGS,
-				e);
-		}
-	}
-
-	private void _reconfigureCaches() {
-		String singleVMConfigurationLocation = _portletConfiguration.get(
-			PropsKeys.EHCACHE_SINGLE_VM_CONFIG_LOCATION);
-		String multiVMConfigurationLocation = _portletConfiguration.get(
-			PropsKeys.EHCACHE_MULTI_VM_CONFIG_LOCATION);
-
-		if (Validator.isNull(singleVMConfigurationLocation) &&
-			Validator.isNull(multiVMConfigurationLocation)) {
-
-			return;
-		}
-
-		BundleContext bundleContext = _bundle.getBundleContext();
-
-		if (Validator.isNotNull(singleVMConfigurationLocation)) {
-			Dictionary<String, Object> properties = new HashMapDictionary<>();
-
-			properties.put(
-				"portal.cache.manager.name", PortalCacheManagerNames.SINGLE_VM);
-
-			_serviceRegistrations.add(
-				bundleContext.registerService(
-					PortalCacheConfiguratorSettings.class,
-					new PortalCacheConfiguratorSettings(
-						_classLoader, singleVMConfigurationLocation),
-					properties));
-		}
-
-		if (Validator.isNotNull(multiVMConfigurationLocation)) {
-			Dictionary<String, Object> properties = new HashMapDictionary<>();
-
-			properties.put(
-				"portal.cache.manager.name", PortalCacheManagerNames.MULTI_VM);
-
-			_serviceRegistrations.add(
-				bundleContext.registerService(
-					PortalCacheConfiguratorSettings.class,
-					new PortalCacheConfiguratorSettings(
-						_classLoader, multiVMConfigurationLocation),
-					properties));
-		}
-	}
-
 	private void _registerConfiguration(
 		BundleContext bundleContext, Configuration configuration, String name) {
 
@@ -236,8 +129,6 @@ public class ServiceConfigurationInitializer {
 
 	private final Bundle _bundle;
 	private final ClassLoader _classLoader;
-	private final Configuration _portletConfiguration;
-	private final ResourceActions _resourceActions;
 	private final ServiceComponentConfiguration _serviceComponentConfiguration;
 	private final ServiceComponentLocalService _serviceComponentLocalService;
 	private final Configuration _serviceConfiguration;
