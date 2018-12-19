@@ -91,18 +91,18 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 		String requireSchemaVersion = headers.get(
 			"Liferay-Require-SchemaVersion");
 
+		PortletConfigurationInitializer portletConfigurationInitializer =
+			new PortletConfigurationInitializer(
+				bundle, classLoader, portletConfiguration, _resourceActions);
+
 		ServiceConfigurationInitializer serviceConfigurationInitializer =
 			new ServiceConfigurationInitializer(
 				bundle, classLoader, serviceConfiguration,
 				_serviceComponentLocalService);
 
-		PortletConfigurationInitializer portletConfigurationInitializer =
-			new PortletConfigurationInitializer(
-				bundle, classLoader, portletConfiguration, _resourceActions);
-
 		return new ServiceConfigurationExtension(
-			bundle, requireSchemaVersion, serviceConfigurationInitializer,
-			portletConfigurationInitializer);
+			bundle, requireSchemaVersion, portletConfigurationInitializer,
+			serviceConfigurationInitializer);
 	}
 
 	@Override
@@ -145,21 +145,21 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 
 		private ServiceConfigurationExtension(
 			Bundle bundle, String requireSchemaVersion,
-			ServiceConfigurationInitializer serviceConfigurationInitializer,
-			PortletConfigurationInitializer portletConfigurationInitializer) {
+			PortletConfigurationInitializer portletConfigurationInitializer,
+			ServiceConfigurationInitializer serviceConfigurationInitializer) {
 
 			_dependencyManager = new DependencyManager(
 				bundle.getBundleContext());
-
-			_serviceComponent = _dependencyManager.createComponent();
-
-			_serviceComponent.setImplementation(
-				serviceConfigurationInitializer);
 
 			_portletComponent = _dependencyManager.createComponent();
 
 			_portletComponent.setImplementation(
 				portletConfigurationInitializer);
+
+			_serviceComponent = _dependencyManager.createComponent();
+
+			_serviceComponent.setImplementation(
+				serviceConfigurationInitializer);
 
 			if (requireSchemaVersion == null) {
 				return;
@@ -199,9 +199,9 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 					bundle.getSymbolicName(), ")", versionRangeFilter,
 					"(|(!(release.state=*))(release.state=0)))"));
 
-			_serviceComponent.add(serviceDependency);
-
 			_portletComponent.add(serviceDependency);
+
+			_serviceComponent.add(serviceDependency);
 		}
 
 		private String _getVersionRangerFilter(Version version) {
