@@ -790,6 +790,14 @@ public class ResourcePermissionLocalServiceWrapper
 	}
 
 	@Override
+	public void initModelDefaultPermissions(long companyId,
+		java.util.Collection<String> modelResources)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_resourcePermissionLocalService.initModelDefaultPermissions(companyId,
+			modelResources);
+	}
+
+	@Override
 	public void initPortletDefaultPermissions(
 		com.liferay.portal.kernel.model.Portlet portlet)
 		throws com.liferay.portal.kernel.exception.PortalException {

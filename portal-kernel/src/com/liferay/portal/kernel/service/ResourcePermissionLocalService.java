@@ -671,6 +671,9 @@ public interface ResourcePermissionLocalService extends BaseLocalService,
 	public boolean hasScopeResourcePermission(long companyId, String name,
 		int scope, long roleId, String actionId) throws PortalException;
 
+	public void initModelDefaultPermissions(long companyId,
+		Collection<String> modelResources) throws PortalException;
+
 	public void initPortletDefaultPermissions(Portlet portlet)
 		throws PortalException;
 
