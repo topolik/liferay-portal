@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceComponentLocalService;
 import com.liferay.portal.kernel.service.configuration.ServiceComponentConfiguration;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -29,11 +30,14 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.spring.extender.internal.loader.ModuleResourceLoader;
+import com.liferay.portal.util.PortalInstances;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -132,23 +136,34 @@ public class ServiceConfigurationInitializer {
 			String portlets = _portletConfiguration.get(
 				"service.configurator.portlet.ids");
 
+			String[] resourceActionConfigs = StringUtil.split(
+				_portletConfiguration.get(PropsKeys.RESOURCE_ACTIONS_CONFIGS));
+
+			Set<String> portletResources = new HashSet<>();
+			Set<String> modelResources = new HashSet<>();
+
+			for (String resourceActionConfig : resourceActionConfigs) {
+				_resourceActions.read(
+					null, _classLoader, resourceActionConfig, portletResources,
+					modelResources);
+			}
+
 			if (Validator.isNull(portlets)) {
-				_resourceActions.readAndCheck(
-					null, _classLoader,
-					StringUtil.split(
-						_portletConfiguration.get(
-							PropsKeys.RESOURCE_ACTIONS_CONFIGS)));
+				for (String portletResourceName : portletResources) {
+					_resourceActions.check(portletResourceName);
+				}
 			}
 			else {
-				_resourceActions.read(
-					null, _classLoader,
-					StringUtil.split(
-						_portletConfiguration.get(
-							PropsKeys.RESOURCE_ACTIONS_CONFIGS)));
-
 				for (String portletId : StringUtil.split(portlets)) {
 					_resourceActions.check(portletId);
 				}
+			}
+
+			long[] companyIds = PortalInstances.getCompanyIds();
+
+			for (long companyId : companyIds) {
+				ResourcePermissionLocalServiceUtil.initModelDefaultPermissions(
+					companyId, modelResources);
 			}
 		}
 		catch (Exception e) {

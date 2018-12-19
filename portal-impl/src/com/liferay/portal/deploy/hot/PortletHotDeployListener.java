@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.portlet.InvokerPortlet;
 import com.liferay.portal.kernel.portlet.PortletInstanceFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.DirectServletRegistryUtil;
 import com.liferay.portal.kernel.servlet.FileTimestampUtil;
 import com.liferay.portal.kernel.servlet.PortletServlet;
@@ -251,7 +252,7 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			}
 		}
 
-		processPortletProperties(servletContextName, classLoader);
+		processPortletProperties(servletContextName, classLoader, companyIds);
 
 		for (Portlet portlet : portlets) {
 			ResourceActionsUtil.check(portlet.getPortletId());
@@ -476,7 +477,8 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 	}
 
 	protected void processPortletProperties(
-			String servletContextName, ClassLoader classLoader)
+			String servletContextName, ClassLoader classLoader,
+			long[] companyIds)
 		throws Exception {
 
 		Configuration portletPropertiesConfiguration = null;
@@ -501,11 +503,21 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			return;
 		}
 
-		ResourceActionsUtil.read(
-			servletContextName, classLoader,
-			StringUtil.split(
-				portletProperties.getProperty(
-					PropsKeys.RESOURCE_ACTIONS_CONFIGS)));
+		Set<String> modelResourceNames = new HashSet<>();
+
+		String[] resourceActionConfigs = StringUtil.split(
+			portletProperties.getProperty(PropsKeys.RESOURCE_ACTIONS_CONFIGS));
+
+		for (String resourceActionConfig : resourceActionConfigs) {
+			ResourceActionsUtil.read(
+				servletContextName, classLoader, resourceActionConfig, null,
+				modelResourceNames);
+		}
+
+		for (long companyId : companyIds) {
+			ResourcePermissionLocalServiceUtil.initModelDefaultPermissions(
+				companyId, modelResourceNames);
+		}
 	}
 
 	protected void unbindDataSource(String servletContextName) {

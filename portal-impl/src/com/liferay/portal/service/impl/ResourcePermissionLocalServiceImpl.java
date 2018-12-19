@@ -1327,12 +1327,6 @@ public class ResourcePermissionLocalServiceImpl
 			portlet.getCompanyId(), portlet.getRootPortletId(), guestRole,
 			ownerRole, siteMemberRole, guestPortletActions,
 			ownerPortletActionIds, groupPortletActionIds);
-
-		List<String> modelResources =
-			ResourceActionsUtil.getPortletModelResources(
-				portlet.getRootPortletId());
-
-		initModelDefaultPermissions(portlet.getCompanyId(), modelResources);
 	}
 
 	/**
