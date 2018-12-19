@@ -1150,8 +1150,7 @@ public class ResourceActionsImpl implements ResourceActions {
 			if (modelNames != null) {
 				modelNames.add(modelName);
 			}
-
-			if (portletNames != null) {
+			else if (portletNames != null) {
 				ModelResourceActionsBag modelResourceActionsBag =
 					_getModelResourceActionsBag(modelName);
 
