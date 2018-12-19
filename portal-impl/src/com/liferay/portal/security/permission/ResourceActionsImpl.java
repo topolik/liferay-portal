@@ -624,7 +624,7 @@ public class ResourceActionsImpl implements ResourceActions {
 			String servletContextName, ClassLoader classLoader, String source)
 		throws Exception {
 
-		_read(servletContextName, classLoader, source, null);
+		_read(servletContextName, classLoader, source, null, null);
 	}
 
 	@Override
@@ -638,6 +638,16 @@ public class ResourceActionsImpl implements ResourceActions {
 		}
 	}
 
+	@Override
+	public void read(
+			String servletContextName, ClassLoader classLoader, String source,
+			Set<String> portletNames, Set<String> modelNames)
+		throws Exception {
+
+		_read(
+			servletContextName, classLoader, source, portletNames, modelNames);
+	}
+
 	/**
 	 * @deprecated As of Wilberforce (7.0.x)
 	 */
@@ -648,7 +658,7 @@ public class ResourceActionsImpl implements ResourceActions {
 
 		Document document = UnsecureSAXReaderUtil.read(inputStream, true);
 
-		_read(servletContextName, document, null);
+		_read(servletContextName, document, null, null);
 	}
 
 	@Override
@@ -660,7 +670,7 @@ public class ResourceActionsImpl implements ResourceActions {
 		Set<String> portletNames = new HashSet<>();
 
 		for (String source : sources) {
-			_read(servletContextName, classLoader, source, portletNames);
+			_read(servletContextName, classLoader, source, portletNames, null);
 		}
 
 		for (String portletName : portletNames) {
@@ -1049,7 +1059,7 @@ public class ResourceActionsImpl implements ResourceActions {
 
 	private void _read(
 			String servletContextName, ClassLoader classLoader, String source,
-			Set<String> portletNames)
+			Set<String> portletNames, Set<String> modelNames)
 		throws Exception {
 
 		InputStream inputStream = classLoader.getResourceAsStream(source);
@@ -1089,25 +1099,31 @@ public class ResourceActionsImpl implements ResourceActions {
 			String file = StringUtil.trim(
 				resourceElement.attributeValue("file"));
 
-			_read(servletContextName, classLoader, file, portletNames);
+			_read(
+				servletContextName, classLoader, file, portletNames,
+				modelNames);
 
 			String extFileName = StringUtil.replace(file, ".xml", "-ext.xml");
 
-			_read(servletContextName, classLoader, extFileName, portletNames);
+			_read(
+				servletContextName, classLoader, extFileName, portletNames,
+				modelNames);
 		}
 
-		_read(servletContextName, document, portletNames);
+		_read(servletContextName, document, portletNames, modelNames);
 
 		if (source.endsWith(".xml") && !source.endsWith("-ext.xml")) {
 			String extFileName = StringUtil.replace(source, ".xml", "-ext.xml");
 
-			_read(servletContextName, classLoader, extFileName, portletNames);
+			_read(
+				servletContextName, classLoader, extFileName, portletNames,
+				modelNames);
 		}
 	}
 
 	private void _read(
 			String servletContextName, Document document,
-			Set<String> portletNames)
+			Set<String> portletNames, Set<String> modelNames)
 		throws Exception {
 
 		Element rootElement = document.getRootElement();
@@ -1130,6 +1146,10 @@ public class ResourceActionsImpl implements ResourceActions {
 
 			String modelName = _readModelResource(
 				servletContextName, modelResourceElement);
+
+			if (modelNames != null) {
+				modelNames.add(modelName);
+			}
 
 			if (portletNames != null) {
 				ModelResourceActionsBag modelResourceActionsBag =

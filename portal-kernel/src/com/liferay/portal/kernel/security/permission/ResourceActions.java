@@ -25,6 +25,7 @@ import java.io.InputStream;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -142,6 +143,11 @@ public interface ResourceActions {
 	public void read(
 			String servletContextName, ClassLoader classLoader,
 			String... sources)
+		throws Exception;
+
+	public void read(
+			String servletContextName, ClassLoader classLoader, String source,
+			Set<String> portletNames, Set<String> modelNames)
 		throws Exception;
 
 	/**
