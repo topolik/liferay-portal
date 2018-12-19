@@ -185,11 +185,26 @@ public class ResourceActionLocalServiceImpl
 			return;
 		}
 
-		List<String> groupDefaultActions =
-			ResourceActionsUtil.getModelResourceGroupDefaultActions(name);
+		List<String> portletNames = ResourceActionsUtil.getPortletNames();
 
-		List<String> guestDefaultActions =
-			ResourceActionsUtil.getModelResourceGuestDefaultActions(name);
+		List<String> groupDefaultActions = null;
+
+		List<String> guestDefaultActions = null;
+
+		if (portletNames.contains(name)) {
+			groupDefaultActions =
+				ResourceActionsUtil.getPortletResourceGroupDefaultActions(name);
+
+			guestDefaultActions =
+				ResourceActionsUtil.getPortletResourceGuestDefaultActions(name);
+		}
+		else {
+			groupDefaultActions =
+				ResourceActionsUtil.getModelResourceGroupDefaultActions(name);
+
+			guestDefaultActions =
+				ResourceActionsUtil.getModelResourceGuestDefaultActions(name);
+		}
 
 		long guestBitwiseValue = 0;
 		long ownerBitwiseValue = 0;
