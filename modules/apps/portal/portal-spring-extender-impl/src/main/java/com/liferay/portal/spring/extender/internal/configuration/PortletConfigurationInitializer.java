@@ -19,13 +19,14 @@ import com.liferay.portal.kernel.cache.configurator.PortalCacheConfiguratorSetti
 import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
-import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
+import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.util.PortalInstances;
 
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -44,12 +45,16 @@ public class PortletConfigurationInitializer {
 
 	public PortletConfigurationInitializer(
 		Bundle bundle, ClassLoader classLoader,
-		Configuration portletConfiguration, ResourceActions resourceActions) {
+		CompanyLocalService companyLocalService,
+		Configuration portletConfiguration, ResourceActions resourceActions,
+		ResourcePermissionLocalService resourcePermissionLocalService) {
 
 		_bundle = bundle;
 		_classLoader = classLoader;
+		_companyLocalService = companyLocalService;
 		_portletConfiguration = portletConfiguration;
 		_resourceActions = resourceActions;
+		_resourcePermissionLocalService = resourcePermissionLocalService;
 	}
 
 	public void stop() {
@@ -103,11 +108,11 @@ public class PortletConfigurationInitializer {
 				}
 			}
 
-			long[] companyIds = PortalInstances.getCompanyIds();
+			List<Company> companies = _companyLocalService.getCompanies();
 
-			for (long companyId : companyIds) {
-				ResourcePermissionLocalServiceUtil.initModelDefaultPermissions(
-					companyId, modelResources);
+			for (Company company : companies) {
+				_resourcePermissionLocalService.initModelDefaultPermissions(
+					company.getCompanyId(), modelResources);
 			}
 		}
 		catch (Exception e) {
@@ -180,8 +185,11 @@ public class PortletConfigurationInitializer {
 
 	private final Bundle _bundle;
 	private final ClassLoader _classLoader;
+	private final CompanyLocalService _companyLocalService;
 	private final Configuration _portletConfiguration;
 	private final ResourceActions _resourceActions;
+	private final ResourcePermissionLocalService
+		_resourcePermissionLocalService;
 	private final List<ServiceRegistration<?>> _serviceRegistrations =
 		new ArrayList<>();
 
