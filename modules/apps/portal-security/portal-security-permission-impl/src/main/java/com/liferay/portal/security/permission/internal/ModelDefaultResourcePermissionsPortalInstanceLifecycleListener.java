@@ -18,6 +18,7 @@ import com.liferay.portal.instance.lifecycle.BasePortalInstanceLifecycleListener
 import com.liferay.portal.instance.lifecycle.PortalInstanceLifecycleListener;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
+import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 
 import java.util.List;
@@ -36,9 +37,17 @@ public class ModelDefaultResourcePermissionsPortalInstanceLifecycleListener
 	public void portalInstanceRegistered(Company company) throws Exception {
 		List<String> modelNames = _resourceActions.getModelNames();
 
+		for (String modelName : modelNames) {
+			_resourceActionLocalService.checkResourceActions(
+				modelName, _resourceActions.getModelResourceActions(modelName));
+		}
+
 		_resourcePermissionLocalService.initModelDefaultPermissions(
 			company.getCompanyId(), modelNames);
 	}
+
+	@Reference
+	private ResourceActionLocalService _resourceActionLocalService;
 
 	@Reference
 	private ResourceActions _resourceActions;

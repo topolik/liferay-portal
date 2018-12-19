@@ -22,6 +22,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.util.HashMapDictionary;
 import com.liferay.portal.kernel.util.PropsKeys;
@@ -46,13 +47,16 @@ public class PortletConfigurationInitializer {
 	public PortletConfigurationInitializer(
 		Bundle bundle, ClassLoader classLoader,
 		CompanyLocalService companyLocalService,
-		Configuration portletConfiguration, ResourceActions resourceActions,
+		Configuration portletConfiguration,
+		ResourceActionLocalService resourceActionLocalService,
+		ResourceActions resourceActions,
 		ResourcePermissionLocalService resourcePermissionLocalService) {
 
 		_bundle = bundle;
 		_classLoader = classLoader;
 		_companyLocalService = companyLocalService;
 		_portletConfiguration = portletConfiguration;
+		_resourceActionLocalService = resourceActionLocalService;
 		_resourceActions = resourceActions;
 		_resourcePermissionLocalService = resourcePermissionLocalService;
 	}
@@ -106,6 +110,12 @@ public class PortletConfigurationInitializer {
 				for (String portletId : StringUtil.split(portlets)) {
 					_resourceActions.check(portletId);
 				}
+			}
+
+			for (String modelResource : modelResources) {
+				_resourceActionLocalService.checkResourceActions(
+					modelResource,
+					_resourceActions.getModelResourceActions(modelResource));
 			}
 
 			List<Company> companies = _companyLocalService.getCompanies();
@@ -187,6 +197,7 @@ public class PortletConfigurationInitializer {
 	private final ClassLoader _classLoader;
 	private final CompanyLocalService _companyLocalService;
 	private final Configuration _portletConfiguration;
+	private final ResourceActionLocalService _resourceActionLocalService;
 	private final ResourceActions _resourceActions;
 	private final ResourcePermissionLocalService
 		_resourcePermissionLocalService;

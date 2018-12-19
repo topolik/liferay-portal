@@ -32,6 +32,7 @@ import com.liferay.portal.kernel.portlet.InvokerPortlet;
 import com.liferay.portal.kernel.portlet.PortletInstanceFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.servlet.DirectServletRegistryUtil;
 import com.liferay.portal.kernel.servlet.FileTimestampUtil;
@@ -512,6 +513,12 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 			ResourceActionsUtil.read(
 				servletContextName, classLoader, resourceActionConfig, null,
 				modelResourceNames);
+		}
+
+		for (String modelResourceName : modelResourceNames) {
+			ResourceActionLocalServiceUtil.checkResourceActions(
+				modelResourceName,
+				ResourceActionsUtil.getModelResourceActions(modelResourceName));
 		}
 
 		for (long companyId : companyIds) {
