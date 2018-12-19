@@ -96,8 +96,14 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 				bundle, classLoader, portletConfiguration, serviceConfiguration,
 				_resourceActions, _serviceComponentLocalService);
 
+		PortletConfigurationInitializer portletConfigurationInitializer =
+			new PortletConfigurationInitializer(
+				bundle, classLoader, portletConfiguration, serviceConfiguration,
+				_resourceActions, _serviceComponentLocalService);
+
 		return new ServiceConfigurationExtension(
-			bundle, requireSchemaVersion, serviceConfigurationInitializer);
+			bundle, requireSchemaVersion, serviceConfigurationInitializer,
+			portletConfigurationInitializer);
 	}
 
 	@Override
@@ -128,24 +134,33 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 
 		@Override
 		public void destroy() {
-			_dependencyManager.remove(_component);
+			_dependencyManager.remove(_portletComponent);
+			_dependencyManager.remove(_serviceComponent);
 		}
 
 		@Override
 		public void start() {
-			_dependencyManager.add(_component);
+			_dependencyManager.add(_portletComponent);
+			_dependencyManager.add(_serviceComponent);
 		}
 
 		private ServiceConfigurationExtension(
 			Bundle bundle, String requireSchemaVersion,
-			ServiceConfigurationInitializer serviceConfigurationInitializer) {
+			ServiceConfigurationInitializer serviceConfigurationInitializer,
+			PortletConfigurationInitializer portletConfigurationInitializer) {
 
 			_dependencyManager = new DependencyManager(
 				bundle.getBundleContext());
 
-			_component = _dependencyManager.createComponent();
+			_serviceComponent = _dependencyManager.createComponent();
 
-			_component.setImplementation(serviceConfigurationInitializer);
+			_serviceComponent.setImplementation(
+				serviceConfigurationInitializer);
+
+			_portletComponent = _dependencyManager.createComponent();
+
+			_portletComponent.setImplementation(
+				portletConfigurationInitializer);
 
 			if (requireSchemaVersion == null) {
 				return;
@@ -185,7 +200,9 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 					bundle.getSymbolicName(), ")", versionRangeFilter,
 					"(|(!(release.state=*))(release.state=0)))"));
 
-			_component.add(serviceDependency);
+			_serviceComponent.add(serviceDependency);
+
+			_portletComponent.add(serviceDependency);
 		}
 
 		private String _getVersionRangerFilter(Version version) {
@@ -204,8 +221,9 @@ public class ServiceConfigurationExtender extends AbstractExtender {
 			return sb.toString();
 		}
 
-		private final org.apache.felix.dm.Component _component;
 		private final DependencyManager _dependencyManager;
+		private final org.apache.felix.dm.Component _portletComponent;
+		private final org.apache.felix.dm.Component _serviceComponent;
 
 	}
 
