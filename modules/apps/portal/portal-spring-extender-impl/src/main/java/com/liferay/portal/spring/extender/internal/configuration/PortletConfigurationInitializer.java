@@ -20,8 +20,10 @@ import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.service.PortletLocalService;
 import com.liferay.portal.kernel.service.ResourceActionLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.util.HashMapDictionary;
@@ -48,6 +50,7 @@ public class PortletConfigurationInitializer {
 		Bundle bundle, ClassLoader classLoader,
 		CompanyLocalService companyLocalService,
 		Configuration portletConfiguration,
+		PortletLocalService portletLocalService,
 		ResourceActionLocalService resourceActionLocalService,
 		ResourceActions resourceActions,
 		ResourcePermissionLocalService resourcePermissionLocalService) {
@@ -56,6 +59,7 @@ public class PortletConfigurationInitializer {
 		_classLoader = classLoader;
 		_companyLocalService = companyLocalService;
 		_portletConfiguration = portletConfiguration;
+		_portletLocalService = portletLocalService;
 		_resourceActionLocalService = resourceActionLocalService;
 		_resourceActions = resourceActions;
 		_resourcePermissionLocalService = resourcePermissionLocalService;
@@ -103,7 +107,12 @@ public class PortletConfigurationInitializer {
 
 			if (Validator.isNull(portlets)) {
 				for (String portletResourceName : portletResources) {
-					_resourceActions.check(portletResourceName);
+					Portlet portlet = _portletLocalService.getPortletById(
+						portletResourceName);
+
+					if (portlet != null) {
+						_resourceActions.check(portlet);
+					}
 				}
 			}
 			else {
@@ -197,6 +206,7 @@ public class PortletConfigurationInitializer {
 	private final ClassLoader _classLoader;
 	private final CompanyLocalService _companyLocalService;
 	private final Configuration _portletConfiguration;
+	private final PortletLocalService _portletLocalService;
 	private final ResourceActionLocalService _resourceActionLocalService;
 	private final ResourceActions _resourceActions;
 	private final ResourcePermissionLocalService

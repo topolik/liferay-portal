@@ -256,7 +256,7 @@ public class PortletHotDeployListener extends BaseHotDeployListener {
 		processPortletProperties(servletContextName, classLoader, companyIds);
 
 		for (Portlet portlet : portlets) {
-			ResourceActionsUtil.check(portlet.getPortletId());
+			ResourceActionsUtil.check(portlet);
 
 			checkResourceBundles(classLoader, portlet);
 

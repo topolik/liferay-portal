@@ -313,7 +313,7 @@ public class ServiceTestUtil {
 			portlet.setPortletId(portletId);
 			portlet.setPortletModes(new HashMap<String, Set<String>>());
 
-			ResourceActionsUtil.check(portletId);
+			ResourceActionsUtil.check(portlet);
 		}
 	}
 
