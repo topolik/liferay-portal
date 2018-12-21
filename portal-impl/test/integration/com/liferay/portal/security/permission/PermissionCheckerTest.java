@@ -49,6 +49,7 @@ import com.liferay.portal.model.impl.PortletImpl;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -74,11 +75,19 @@ public class PermissionCheckerTest {
 	public static void setUpClass() throws Exception {
 		registerResourceActions();
 
+		ResourceActionsUtil.check(_NONSITE_PORTLET_RESOURCE_NAME);
 		ResourceActionsUtil.check(_PORTLET_RESOURCE_NAME);
+
+		ResourcePermissionLocalServiceUtil.initModelDefaultPermissions(
+			TestPropsValues.getCompanyId(),
+			Arrays.asList(
+				_MODEL_RESOURCE_NAME, _NONSITE_ROOT_MODEL_RESOURCE_NAME,
+				_ROOT_MODEL_RESOURCE_NAME));
 	}
 
 	@AfterClass
 	public static void tearDownClass() throws Exception {
+		removeResourceActions(_NONSITE_PORTLET_RESOURCE_NAME);
 		removeResourceActions(_PORTLET_RESOURCE_NAME);
 	}
 

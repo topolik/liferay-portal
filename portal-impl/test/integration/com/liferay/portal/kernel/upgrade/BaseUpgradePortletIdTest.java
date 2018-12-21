@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalServiceUtil;
-import com.liferay.portal.kernel.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.permission.PortletPermissionUtil;
@@ -76,6 +75,8 @@ public class BaseUpgradePortletIdTest extends BaseUpgradePortletId {
 		for (String portletId : _PORTLET_IDS) {
 			Portlet portlet = PortletLocalServiceUtil.getPortletById(
 				TestPropsValues.getCompanyId(), portletId);
+
+			ResourceActionsUtil.check(portlet);
 
 			_portlets.add(portlet);
 
@@ -245,11 +246,7 @@ public class BaseUpgradePortletIdTest extends BaseUpgradePortletId {
 			portlet.setCompanyId(TestPropsValues.getCompanyId());
 			portlet.setPortletId(newPortletId);
 
-			List<String> portletActions =
-				ResourceActionsUtil.getPortletResourceActions(newRootPortletId);
-
-			ResourceActionLocalServiceUtil.checkResourceActions(
-				newRootPortletId, portletActions);
+			ResourceActionsUtil.check(portlet);
 
 			PortletLocalServiceUtil.checkPortlet(portlet);
 
