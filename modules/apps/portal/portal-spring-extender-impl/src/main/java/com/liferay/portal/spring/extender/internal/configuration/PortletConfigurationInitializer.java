@@ -90,9 +90,6 @@ public class PortletConfigurationInitializer {
 
 	private void _readResourceActions() {
 		try {
-			String portlets = _portletConfiguration.get(
-				"service.configurator.portlet.ids");
-
 			String[] resourceActionConfigs = StringUtil.split(
 				_portletConfiguration.get(PropsKeys.RESOURCE_ACTIONS_CONFIGS));
 
@@ -105,19 +102,12 @@ public class PortletConfigurationInitializer {
 					modelResources);
 			}
 
-			if (Validator.isNull(portlets)) {
-				for (String portletResourceName : portletResources) {
-					Portlet portlet = _portletLocalService.getPortletById(
-						portletResourceName);
+			for (String portletResourceName : portletResources) {
+				Portlet portlet = _portletLocalService.getPortletById(
+					portletResourceName);
 
-					if (portlet != null) {
-						_resourceActions.check(portlet);
-					}
-				}
-			}
-			else {
-				for (String portletId : StringUtil.split(portlets)) {
-					_resourceActions.check(portletId);
+				if (portlet != null) {
+					_resourceActions.check(portlet);
 				}
 			}
 
