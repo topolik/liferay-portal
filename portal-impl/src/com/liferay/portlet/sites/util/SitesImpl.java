@@ -47,7 +47,9 @@ import com.liferay.portal.kernel.model.LayoutSetPrototype;
 import com.liferay.portal.kernel.model.LayoutType;
 import com.liferay.portal.kernel.model.LayoutTypePortlet;
 import com.liferay.portal.kernel.model.Organization;
+import com.liferay.portal.kernel.model.ResourceAction;
 import com.liferay.portal.kernel.model.ResourceConstants;
+import com.liferay.portal.kernel.model.ResourcePermission;
 import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.model.User;
@@ -73,6 +75,7 @@ import com.liferay.portal.kernel.service.LayoutSetServiceUtil;
 import com.liferay.portal.kernel.service.OrganizationLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.service.PortletPreferencesLocalServiceUtil;
+import com.liferay.portal.kernel.service.ResourceActionLocalServiceUtil;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -432,8 +435,14 @@ public class SitesImpl implements Sites {
 			String targetResourcePrimKey = PortletPermissionUtil.getPrimaryKey(
 				targetLayout.getPlid(), sourcePortletId);
 
-			List<String> actionIds =
-				ResourceActionsUtil.getPortletResourceActions(resourceName);
+			List<ResourceAction> resourceActions =
+				ResourceActionLocalServiceUtil.getResourceActions(resourceName);
+
+			List<String> actionIds = new ArrayList<>(resourceActions.size());
+
+			for (ResourceAction resourceAction : resourceActions) {
+				actionIds.add(resourceAction.getActionId());
+			}
 
 			for (Role role : roles) {
 				String roleName = role.getName();
