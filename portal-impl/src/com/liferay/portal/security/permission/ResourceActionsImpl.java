@@ -110,7 +110,8 @@ public class ResourceActionsImpl implements ResourceActions {
 
 	@Override
 	public void check(Portlet portlet) {
-		String portletName = portlet.getPortletId();
+		String portletName = PortletIdCodec.decodePortletName(
+			portlet.getPortletId());
 
 		PortletResourceActionsBag portletResourceActionsBag =
 			_getPortletResourceActionsBag(portletName);
@@ -424,7 +425,8 @@ public class ResourceActionsImpl implements ResourceActions {
 
 	@Override
 	public List<String> getPortletResourceActions(Portlet portlet) {
-		return _getPortletResourceActions(portlet.getPortletId());
+		return _getPortletResourceActions(
+			PortletIdCodec.decodePortletName(portlet.getPortletId()));
 	}
 
 	@Override
