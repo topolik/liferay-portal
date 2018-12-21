@@ -732,20 +732,6 @@ public class ResourceActionsImpl implements ResourceActions {
 	private void _check(
 		String portletName, List<String> portletResourceActions) {
 
-		if (portletResourceActions.isEmpty()) {
-			if (_log.isWarnEnabled()) {
-				_log.warn(
-					"Resource actions are not initialized for portlet " +
-						portletName);
-			}
-			else if (_log.isDebugEnabled()) {
-				_log.warn(
-					"Resource actions are not initialized for portlet " +
-						portletName,
-					new Exception());
-			}
-		}
-
 		ResourceActionLocalServiceUtil.checkResourceActions(
 			portletName, portletResourceActions);
 
@@ -939,6 +925,18 @@ public class ResourceActionsImpl implements ResourceActions {
 
 		Set<String> portletActions =
 			portletResourceActionsBag.getPortletActions();
+
+		if (portletActions.isEmpty()) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Resource actions are not initialized for portlet " + name);
+			}
+			else if (_log.isDebugEnabled()) {
+				_log.warn(
+					"Resource actions are not initialized for portlet " + name,
+					new Exception());
+			}
+		}
 
 		return new ArrayList<>(portletActions);
 	}
