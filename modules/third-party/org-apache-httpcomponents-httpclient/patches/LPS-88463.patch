@@ -1,9 +1,3 @@
-commit d18d7310157f96c0d9021d45f1184f4b1e7452ef
-Author: arthurchan35 <arthurchan35@gmail.com>
-Date:   Wed Dec 26 11:15:31 2018 +0800
-
-    LPS-88463 apply fix to CVE-2014-3577
-
 diff --git a/org/apache/http/conn/ssl/AbstractVerifier.java b/org/apache/http/conn/ssl/AbstractVerifier.java
 index d22bbe5..3697100 100644
 --- a/org/apache/http/conn/ssl/AbstractVerifier.java
