@@ -64,8 +64,10 @@ import java.lang.reflect.Method;
 
 import java.net.URL;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -277,6 +279,10 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 			_freeMarkerEngineConfiguration.localizedLookup());
 		_configuration.setNewBuiltinClassResolver(_templateClassResolver);
 
+		Map<String, List<String>> restrictedClassPropertiesMap =
+			_getRestrictedClassPropertiesMap(
+				_freeMarkerEngineConfiguration.restrictedClassProperties());
+
 		_configuration.setObjectWrapper(
 			new LiferayObjectWrapper(
 				_freeMarkerEngineConfiguration.allowedClasses(),
@@ -433,6 +439,33 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 	@Reference(unbind = "-")
 	protected void setSingleVMPool(SingleVMPool singleVMPool) {
 		_singleVMPool = singleVMPool;
+	}
+
+	private Map<String, List<String>> _getRestrictedClassPropertiesMap(
+		String[] restrictedClassProperties) {
+
+		Map<String, List<String>> restrictedClassPropertiesMap =
+			new HashMap<>();
+
+		for (String restrictedClassProperty : restrictedClassProperties) {
+			String className = StringUtil.extractFirst(
+				restrictedClassProperty.trim(), StringPool.EQUAL);
+			String propertyName = StringUtil.extractLast(
+				restrictedClassProperty.trim(), StringPool.EQUAL);
+
+			if (restrictedClassPropertiesMap.containsKey(className)) {
+				List<String> properties = restrictedClassPropertiesMap.get(
+					className);
+
+				properties.add(propertyName);
+			}
+			else {
+				restrictedClassPropertiesMap.put(
+					className.trim(), Arrays.asList(propertyName));
+			}
+		}
+
+		return restrictedClassPropertiesMap;
 	}
 
 	private static final Class<?>[] _INTERFACES = {ServletContext.class};
