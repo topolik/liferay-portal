@@ -41,11 +41,14 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +63,8 @@ import org.w3c.dom.Node;
 public class LiferayObjectWrapper extends DefaultObjectWrapper {
 
 	public LiferayObjectWrapper(
-		String[] allowedClassNames, String[] restrictedClassNames) {
+		String[] allowedClassNames, String[] restrictedClassNames,
+		Map<String, List<String>> restrictedClassProperties) {
 
 		super(Configuration.getVersion());
 
@@ -145,6 +149,24 @@ public class LiferayObjectWrapper extends DefaultObjectWrapper {
 				}
 			}
 		}
+
+		if ((restrictedClassProperties == null) ||
+			restrictedClassProperties.isEmpty()) {
+
+			_restrictedClassPropertiesMap = Collections.emptyMap();
+		}
+		else {
+			_restrictedClassPropertiesMap = new HashMap<>();
+
+			for (Map.Entry<String, List<String>> entry :
+					restrictedClassProperties.entrySet()) {
+
+				String className = entry.getKey();
+				List<String> properties = entry.getValue();
+
+				_restrictedClassPropertiesMap.put(className, properties);
+			}
+		}
 	}
 
 	@Override
@@ -163,6 +185,50 @@ public class LiferayObjectWrapper extends DefaultObjectWrapper {
 
 		if (!_allowAllClasses) {
 			_checkClassIsRestricted(clazz);
+		}
+
+		for (Map.Entry<String, List<String>> entry :
+				_restrictedClassPropertiesMap.entrySet()) {
+
+			String classKey = entry.getKey();
+
+			if (className.equals(classKey)) {
+				List<String> restrictedProperties = entry.getValue();
+
+				for (String restrictedProperty : restrictedProperties) {
+					try {
+						String setter = String.format(
+							"set%C%s", restrictedProperty.charAt(0),
+							restrictedProperty.substring(1));
+
+						Class<?> setterType = null;
+
+						for (Method method : clazz.getMethods()) {
+							String methodName = method.getName();
+
+							if ((method.getParameterCount() == 1) &&
+								methodName.equals(setter)) {
+
+								setterType = method.getParameterTypes()[0];
+
+								break;
+							}
+						}
+
+						Method method = clazz.getMethod(setter, setterType);
+
+						method.invoke(object, new Object[] {null});
+					}
+					catch (IllegalAccessException | InvocationTargetException |
+						NoSuchMethodException e) {
+
+						throw new TemplateModelException(
+							"Unexpected error processing unaccesible fields" +
+								"for templates of class: " + classKey,
+							e);
+					}
+				}
+			}
 		}
 
 		if (className.startsWith("com.liferay.")) {
@@ -348,6 +414,7 @@ public class LiferayObjectWrapper extends DefaultObjectWrapper {
 	private final Map<String, ClassRestrictionInformation>
 		_classRestrictionInformations = new ConcurrentHashMap<>();
 	private final List<Class<?>> _restrictedClasses;
+	private final Map<String, List<String>> _restrictedClassPropertiesMap;
 	private final List<String> _restrictedPackageNames;
 
 	private static class ClassRestrictionInformation {
