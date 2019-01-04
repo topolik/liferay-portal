@@ -181,55 +181,15 @@ public class LiferayObjectWrapper extends DefaultObjectWrapper {
 
 		Class<?> clazz = object.getClass();
 
-		String className = clazz.getName();
-
 		if (!_allowAllClasses) {
 			_checkClassIsRestricted(clazz);
 		}
 
-		for (Map.Entry<String, List<String>> entry :
-				_restrictedClassPropertiesMap.entrySet()) {
-
-			String classKey = entry.getKey();
-
-			if (className.equals(classKey)) {
-				List<String> restrictedProperties = entry.getValue();
-
-				for (String restrictedProperty : restrictedProperties) {
-					try {
-						String setter = String.format(
-							"set%C%s", restrictedProperty.charAt(0),
-							restrictedProperty.substring(1));
-
-						Class<?> setterType = null;
-
-						for (Method method : clazz.getMethods()) {
-							String methodName = method.getName();
-
-							if ((method.getParameterCount() == 1) &&
-								methodName.equals(setter)) {
-
-								setterType = method.getParameterTypes()[0];
-
-								break;
-							}
-						}
-
-						Method method = clazz.getMethod(setter, setterType);
-
-						method.invoke(object, new Object[] {null});
-					}
-					catch (IllegalAccessException | InvocationTargetException |
-						NoSuchMethodException e) {
-
-						throw new TemplateModelException(
-							"Unexpected error processing unaccesible fields" +
-								"for templates of class: " + classKey,
-							e);
-					}
-				}
-			}
+		if (!_restrictedClassPropertiesMap.isEmpty()) {
+			_checkClassPropertyIsRestricted(object, clazz);
 		}
+
+		String className = clazz.getName();
 
 		if (className.startsWith("com.liferay.")) {
 			if (object instanceof TemplateNode) {
@@ -329,6 +289,56 @@ public class LiferayObjectWrapper extends DefaultObjectWrapper {
 		if (classRestrictionInformation.isRestricted()) {
 			throw new TemplateModelException(
 				classRestrictionInformation.getDescription());
+		}
+	}
+
+	private void _checkClassPropertyIsRestricted(Object object, Class<?> clazz)
+		throws TemplateModelException {
+
+		String className = clazz.getName();
+
+		for (Map.Entry<String, List<String>> entry :
+				_restrictedClassPropertiesMap.entrySet()) {
+
+			String classKey = entry.getKey();
+
+			if (className.equals(classKey)) {
+				List<String> restrictedProperties = entry.getValue();
+
+				for (String restrictedProperty : restrictedProperties) {
+					try {
+						String setter = String.format(
+							"set%C%s", restrictedProperty.charAt(0),
+							restrictedProperty.substring(1));
+
+						Class<?> setterType = null;
+
+						for (Method method : clazz.getMethods()) {
+							String methodName = method.getName();
+
+							if ((method.getParameterCount() == 1) &&
+								methodName.equals(setter)) {
+
+								setterType = method.getParameterTypes()[0];
+
+								break;
+							}
+						}
+
+						Method method = clazz.getMethod(setter, setterType);
+
+						method.invoke(object, new Object[] {null});
+					}
+					catch (IllegalAccessException | InvocationTargetException |
+						NoSuchMethodException e) {
+
+						throw new TemplateModelException(
+							"Unexpected error processing inaccessible fields " +
+								"for templates of class: " + classKey,
+							e);
+					}
+				}
+			}
 		}
 	}
 
