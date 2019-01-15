@@ -27,6 +27,8 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 
+import jodd.util.Base32;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -59,10 +61,10 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	private byte[] _generateHMAC(String secret, String message, String hashAlg)
+	private byte[] _generateHMAC(byte[] decoded, String message, String hashAlg)
 		throws Exception {
 
-		SecretKeySpec keySpec = new SecretKeySpec(secret.getBytes(), hashAlg);
+		SecretKeySpec keySpec = new SecretKeySpec(decoded, hashAlg);
 		Mac mac = Mac.getInstance(hashAlg);
 
 		mac.init(keySpec);
@@ -82,7 +84,8 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		String message = String.valueOf(intervals);
 
-		byte[] hmac = _generateHMAC(totpSecret, message, shaAlgor);
+		byte[] hmac = _generateHMAC(
+			Base32.decode(totpSecret), message, shaAlgor);
 
 		int offset = hmac[hmac.length - 1] & 0xf;
 
