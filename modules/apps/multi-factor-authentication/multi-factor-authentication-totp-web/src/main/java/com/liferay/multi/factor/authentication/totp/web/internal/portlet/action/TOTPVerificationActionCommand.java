@@ -21,6 +21,8 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 
+import java.nio.ByteBuffer;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -61,15 +63,15 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	private byte[] _generateHMAC(byte[] decoded, String message, String hashAlg)
+	private byte[] _generateHMAC(byte[] key, byte[] message, String hashAlg)
 		throws Exception {
 
-		SecretKeySpec keySpec = new SecretKeySpec(decoded, hashAlg);
+		SecretKeySpec keySpec = new SecretKeySpec(key, hashAlg);
 		Mac mac = Mac.getInstance(hashAlg);
 
 		mac.init(keySpec);
 
-		return mac.doFinal(message.getBytes());
+		return mac.doFinal(message);
 	}
 
 	private String _generateTOTP(String totpSecret) throws Exception {
@@ -82,10 +84,12 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		long intervals = System.currentTimeMillis() / (1000 * (long)timeWindow);
 
-		String message = String.valueOf(intervals);
+		ByteBuffer messageBuffer = ByteBuffer.allocate(8);
+
+		messageBuffer = messageBuffer.putLong(intervals);
 
 		byte[] hmac = _generateHMAC(
-			Base32.decode(totpSecret), message, shaAlgor);
+			Base32.decode(totpSecret), messageBuffer.array(), shaAlgor);
 
 		int offset = hmac[hmac.length - 1] & 0xf;
 
