@@ -14,7 +14,7 @@
 
 package com.liferay.multi.factor.authentication.totp.web.internal.portlet.action;
 
-import com.liferay.multi.factor.authentication.totp.web.internal.util.HMACUtil;
+import com.liferay.multi.factor.authentication.totp.web.internal.util.OTPUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -22,12 +22,8 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 
-import java.nio.ByteBuffer;
-
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-
-import jodd.util.Base32;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -54,51 +50,11 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		String userInput = ParamUtil.getString(actionRequest, "totp");
 
-		String generated = _generateTOTP(user.getTotpSecret());
+		String generated = OTPUtil.generateTOTP(user.getTotpSecret(), 30, 6, "HmacSHA1");
 
 		if (userInput.equals(generated)) {
 			_userLocalService.updateTOTPVerified(user.getUserId(), true);
 		}
-	}
-
-	private String _generateTOTP(String totpSecret) throws Exception {
-
-		//start, these values should be configured according to authenticator
-		int timeWindow = 30;
-		int totpSize = 6; //cant be longer than 10,otherwise we need more bytes in binary, see below
-		String shaAlgor = "HmacSHA1";
-		//end
-
-		long intervals = System.currentTimeMillis() / (1000 * (long)timeWindow);
-
-		byte[] hmac = HMACUtil.generateHMAC(
-			Base32.decode(totpSecret), intervals, shaAlgor);
-
-		int offset = hmac[hmac.length - 1] & 0xf;
-
-		int binary = hmac[offset + 0x3] & 0xff;
-
-		binary |= (hmac[offset + 0x2] & 0xff) << 0x08;
-		binary |= (hmac[offset + 0x1] & 0xff) << 0x10;
-		binary |= (hmac[offset + 0x0] & 0x7f) << 0x18;
-
-		int modulo = binary % (int)Math.pow(10, totpSize);
-
-		StringBuilder sb = new StringBuilder(totpSize);
-
-		int moduloDigits = (int)(Math.log10(modulo) + 1);
-
-		if (modulo == 0) {
-			moduloDigits = 1;
-		}
-
-		for (int i = 0; i < totpSize - moduloDigits; ++i) {
-			sb.append('0');
-		}
-
-		sb.append(String.valueOf(modulo));
-
-		return sb.toString();
 	}
 
 	@Reference
