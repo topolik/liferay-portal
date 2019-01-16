@@ -101,7 +101,21 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		int modulo = binary % (int)Math.pow(10, totpSize);
 
-		return String.valueOf(modulo);
+		StringBuilder sb = new StringBuilder(totpSize);
+
+		int moduloDigits = (int)(Math.log10(modulo) + 1);
+
+		if (modulo == 0) {
+			moduloDigits = 1;
+		}
+
+		for (int i = 0; i < totpSize - moduloDigits; ++i) {
+			sb.append('0');
+		}
+
+		sb.append(String.valueOf(modulo));
+
+		return sb.toString();
 	}
 
 	@Reference
