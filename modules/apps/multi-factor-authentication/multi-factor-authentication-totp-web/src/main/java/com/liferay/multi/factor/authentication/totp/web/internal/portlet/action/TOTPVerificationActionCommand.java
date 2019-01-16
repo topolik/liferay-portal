@@ -14,6 +14,7 @@
 
 package com.liferay.multi.factor.authentication.totp.web.internal.portlet.action;
 
+import com.liferay.multi.factor.authentication.totp.web.internal.util.HMACUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -22,9 +23,6 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 
 import java.nio.ByteBuffer;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -63,17 +61,6 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 		}
 	}
 
-	private byte[] _generateHMAC(byte[] key, byte[] message, String hashAlg)
-		throws Exception {
-
-		SecretKeySpec keySpec = new SecretKeySpec(key, hashAlg);
-		Mac mac = Mac.getInstance(hashAlg);
-
-		mac.init(keySpec);
-
-		return mac.doFinal(message);
-	}
-
 	private String _generateTOTP(String totpSecret) throws Exception {
 
 		//start, these values should be configured according to authenticator
@@ -84,12 +71,8 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		long intervals = System.currentTimeMillis() / (1000 * (long)timeWindow);
 
-		ByteBuffer messageBuffer = ByteBuffer.allocate(8);
-
-		messageBuffer = messageBuffer.putLong(intervals);
-
-		byte[] hmac = _generateHMAC(
-			Base32.decode(totpSecret), messageBuffer.array(), shaAlgor);
+		byte[] hmac = HMACUtil.generateHMAC(
+			Base32.decode(totpSecret), intervals, shaAlgor);
 
 		int offset = hmac[hmac.length - 1] & 0xf;
 
