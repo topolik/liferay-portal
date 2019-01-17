@@ -254,6 +254,14 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 					locale);
 			}
 			catch (PortalException pe) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(
+						StringBundler.concat(
+							"Failed to import OpenSSO user '",
+							openSSOScreenName, "': ", pe.getMessage()),
+						pe);
+				}
+
 				if (pe instanceof ContactNameException) {
 					request.setAttribute(
 						OpenSSOWebKeys.OPEN_SSO_ERROR,
@@ -264,14 +272,6 @@ public class OpenSSOAutoLogin extends BaseAutoLogin {
 
 					request.setAttribute(
 						OpenSSOWebKeys.OPEN_SSO_ERROR, clazz.getSimpleName());
-				}
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						StringBundler.concat(
-							"Failed to import OpenSSO user '",
-							openSSOScreenName, "': ", pe.getMessage()),
-						pe);
 				}
 
 				request.setAttribute(
