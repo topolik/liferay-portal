@@ -14,11 +14,11 @@
 
 package com.liferay.multi.factor.authentication.totp.web.internal.portlet.action;
 
+import com.liferay.multi.factor.authentication.otp.model.TOTP;
+import com.liferay.multi.factor.authentication.otp.service.TOTPLocalService;
 import com.liferay.multi.factor.authentication.totp.web.internal.util.OTPUtil;
-import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
-import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 
@@ -46,14 +46,15 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		long userId = _portal.getUserId(actionRequest);
 
-		User user = _userLocalService.fetchUser(userId);
+		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
 
 		String userInput = ParamUtil.getString(actionRequest, "totp");
 
-		String generated = OTPUtil.generateTOTP(user.getTotpSecret(), 30, 6, "HmacSHA1");
+		String generated = OTPUtil.generateTOTP(
+			totp.getSharedSecret(), 30, 6, "HmacSHA1");
 
 		if (userInput.equals(generated)) {
-			_userLocalService.updateTOTPVerified(user.getUserId(), true);
+			_totpLocalService.updateVerified(totp.getTotpId(), true);
 		}
 	}
 
@@ -61,6 +62,6 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 	private Portal _portal;
 
 	@Reference
-	private UserLocalService _userLocalService;
+	private TOTPLocalService _totpLocalService;
 
 }
