@@ -16,9 +16,9 @@
 
 <%@ include file="/init.jsp" %>
 
-<portlet:actionURL name="/totp/verify" var="totpVerifyURL" />
+<portlet:actionURL name="/otp/verify" var="otpVerifyURL" />
 
-<aui:form action="<%= totpVerifyURL %>" cssClass="sign-in-form" method="post" name="fm">
+<aui:form action="<%= otpVerifyURL %>" cssClass="sign-in-form" method="post" name="fm">
 	<aui:input name="otp" showRequiredLabel="yes" />
 
 	<aui:button-row>

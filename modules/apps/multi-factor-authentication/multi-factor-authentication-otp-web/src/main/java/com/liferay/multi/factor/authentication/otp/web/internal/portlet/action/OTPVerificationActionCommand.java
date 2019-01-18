@@ -12,11 +12,11 @@
  * details.
  */
 
-package com.liferay.multi.factor.authentication.totp.web.internal.portlet.action;
+package com.liferay.multi.factor.authentication.otp.web.internal.portlet.action;
 
 import com.liferay.multi.factor.authentication.otp.model.TOTP;
 import com.liferay.multi.factor.authentication.otp.service.TOTPLocalService;
-import com.liferay.multi.factor.authentication.totp.web.internal.util.OTPUtil;
+import com.liferay.multi.factor.authentication.otp.web.internal.util.OTPUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -33,11 +33,11 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	property = {
-		"javax.portlet.name=TOTPPortlet", "mvc.command.name=/totp/verify"
+		"javax.portlet.name=OTPPortlet", "mvc.command.name=/otp/verify"
 	},
 	service = MVCActionCommand.class
 )
-public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
+public class OTPVerificationActionCommand extends BaseMVCActionCommand {
 
 	@Override
 	protected void doProcessAction(
@@ -48,7 +48,7 @@ public class TOTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
 
-		String userInput = ParamUtil.getString(actionRequest, "totp");
+		String userInput = ParamUtil.getString(actionRequest, "otp");
 
 		String generated = OTPUtil.generateTOTP(
 			totp.getSharedSecret(), 30, 6, "HmacSHA1");

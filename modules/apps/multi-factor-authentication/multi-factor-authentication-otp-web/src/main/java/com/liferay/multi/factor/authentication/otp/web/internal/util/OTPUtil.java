@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.multi.factor.authentication.totp.web.internal.util;
+package com.liferay.multi.factor.authentication.otp.web.internal.util;
 
 import jodd.util.Base32;
 

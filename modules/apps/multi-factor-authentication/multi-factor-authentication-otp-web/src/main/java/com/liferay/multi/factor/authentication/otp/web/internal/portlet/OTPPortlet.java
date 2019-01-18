@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.multi.factor.authentication.totp.web.internal.portlet;
+package com.liferay.multi.factor.authentication.otp.web.internal.portlet;
 
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 
@@ -28,15 +28,15 @@ import org.osgi.service.component.annotations.Component;
 	property = {
 		"com.liferay.portlet.display-category=category.sample",
 		"com.liferay.portlet.instanceable=true",
-		"javax.portlet.display-name=Time-based One Time Password",
+		"javax.portlet.display-name=One Time Password",
 		"javax.portlet.init-param.add-process-action-success-action=false",
 		"javax.portlet.init-param.template-path=/META-INF/resources/",
 		"javax.portlet.init-param.view-template=/view.jsp",
-		"javax.portlet.name=TOTPPortlet",
+		"javax.portlet.name=OTPPortlet",
 		"javax.portlet.resource-bundle=content.Language",
 		"javax.portlet.security-role-ref=power-user,user"
 	},
 	service = Portlet.class
 )
-public class TOTPPortlet extends MVCPortlet {
+public class OTPPortlet extends MVCPortlet {
 }
