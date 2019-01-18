@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<model-hints>
+	<model name="com.liferay.multi.factor.authentication.otp.model.TOTP">
+		<field name="totpId" type="long" />
+		<field name="userId" type="long" />
+		<field name="sharedSecret" type="String" />
+		<field name="verified" type="boolean" />
+	</model>
+</model-hints>
