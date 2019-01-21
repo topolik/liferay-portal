@@ -14,7 +14,9 @@
 
 package com.liferay.multi.factor.authentication.otp.web.internal.portlet.action;
 
+import com.liferay.multi.factor.authentication.otp.model.HOTP;
 import com.liferay.multi.factor.authentication.otp.model.TOTP;
+import com.liferay.multi.factor.authentication.otp.service.HOTPLocalService;
 import com.liferay.multi.factor.authentication.otp.service.TOTPLocalService;
 import com.liferay.multi.factor.authentication.otp.web.internal.util.OTPUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
@@ -46,17 +48,34 @@ public class OTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		long userId = _portal.getUserId(actionRequest);
 
-		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
+		String otpType = ParamUtil.getString(actionRequest, "otpType");
 
 		String userInput = ParamUtil.getString(actionRequest, "otp");
 
-		String generated = OTPUtil.generateTOTP(
-			totp.getSharedSecret(), 30, 6, "HmacSHA1");
+		if (otpType.equals("HOTP")) {
+			HOTP hotp = _hotpLocalService.fetchHOTPByUserId(userId);
 
-		if (userInput.equals(generated)) {
-			_totpLocalService.updateVerified(totp.getTotpId(), true);
+			String generated = OTPUtil.generateHOTP(
+				hotp.getSharedSecret(), hotp.getCount(), 6, "HmacSHA1");
+
+			if (userInput.equals(generated)) {
+				_hotpLocalService.updateVerified(hotp.getHotpId(), true);
+			}
+		}
+		else if (otpType.equals("TOTP")) {
+			TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
+
+			String generated = OTPUtil.generateTOTP(
+				totp.getSharedSecret(), 30, 6, "HmacSHA1");
+
+			if (userInput.equals(generated)) {
+				_totpLocalService.updateVerified(totp.getTotpId(), true);
+			}
 		}
 	}
+
+	@Reference
+	private HOTPLocalService _hotpLocalService;
 
 	@Reference
 	private Portal _portal;

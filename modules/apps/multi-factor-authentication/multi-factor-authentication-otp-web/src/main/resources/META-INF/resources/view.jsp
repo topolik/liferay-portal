@@ -19,6 +19,11 @@
 <portlet:actionURL name="/otp/verify" var="otpVerifyURL" />
 
 <aui:form action="<%= otpVerifyURL %>" cssClass="sign-in-form" method="post" name="fm">
+	<aui:select label="type" name="otpType">
+		<aui:option label="HOTP" />
+		<aui:option label="TOTP" />
+	</aui:select>
+
 	<aui:input name="otp" showRequiredLabel="yes" />
 
 	<aui:button-row>
