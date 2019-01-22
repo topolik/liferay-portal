@@ -85,4 +85,39 @@ public class OTPUtil {
 		return generateHOTP(key, intervals, digits, crypto);
 	}
 
+	/**
+	 * resync counter on server with counter in user token
+	 *
+	 * @param  key is the shared key between token and server, Base32 encoded
+	 * @param  count is used to generate message, stored in HOTP table
+	 * @param  digits is OTP digits, cant be longer than 10, configured by admin
+	 * @param  crypto is the hash used to generate message, configured by admin
+	 * @param  userInputs is an array of consective HOTPs from user input
+	 * @param  maxSync is max number of counter increase in one user attempt
+	 * @return the next counter if sucessfully resynced otherwise 0
+	 */
+	public static int resyncHOTPWithConsecHOTPs(
+			String key, long count, int digits, String crypto,
+			String[] userInputs, int maxSync)
+		throws Exception {
+
+		String[] generated = new String[maxSync + userInputs.length];
+
+		for (int i = 0; i < generated.length; ++i) {
+			generated[i] = generateHOTP(key, count + i, digits, crypto);
+		}
+
+		for (int i = 0; i < maxSync; ++i) {
+			for (int j = 0; j < userInputs.length; ++j) {
+				if ((j == userInputs.length - 1) &&
+					userInputs[j].equals(generated[i + j])) {
+
+					return i + userInputs.length;
+				}
+			}
+		}
+
+		return 0;
+	}
+
 }

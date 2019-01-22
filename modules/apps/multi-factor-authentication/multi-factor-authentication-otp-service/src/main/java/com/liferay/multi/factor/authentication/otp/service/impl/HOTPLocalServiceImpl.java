@@ -79,6 +79,18 @@ public class HOTPLocalServiceImpl extends HOTPLocalServiceBaseImpl {
 	}
 
 	@Override
+	public HOTP resync(long hotpId, int increment) throws PortalException {
+		HOTP hotp = hotpPersistence.findByPrimaryKey(hotpId);
+
+		hotp.setCount(hotp.getCount() + increment);
+		hotp.setVerified(true);
+
+		hotpPersistence.update(hotp);
+
+		return hotp;
+	}
+
+	@Override
 	public HOTP updateVerified(long hotpId, boolean verified)
 		throws PortalException {
 

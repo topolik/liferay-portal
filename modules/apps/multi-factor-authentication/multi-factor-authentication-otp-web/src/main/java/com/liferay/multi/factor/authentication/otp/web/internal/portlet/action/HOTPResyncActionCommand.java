@@ -15,9 +15,7 @@
 package com.liferay.multi.factor.authentication.otp.web.internal.portlet.action;
 
 import com.liferay.multi.factor.authentication.otp.model.HOTP;
-import com.liferay.multi.factor.authentication.otp.model.TOTP;
 import com.liferay.multi.factor.authentication.otp.service.HOTPLocalService;
-import com.liferay.multi.factor.authentication.otp.service.TOTPLocalService;
 import com.liferay.multi.factor.authentication.otp.web.internal.util.OTPUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -35,47 +33,34 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	property = {
-		"javax.portlet.name=OTPPortlet", "mvc.command.name=/otp/verify"
+		"javax.portlet.name=OTPPortlet", "mvc.command.name=/hotp/resync"
 	},
 	service = MVCActionCommand.class
 )
-public class OTPVerificationActionCommand extends BaseMVCActionCommand {
+public class HOTPResyncActionCommand extends BaseMVCActionCommand {
 
 	@Override
 	protected void doProcessAction(
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
+		String hotps = ParamUtil.getString(actionRequest, "hotps");
+
+		String[] hotpsArr = hotps.split(",");
+
 		long userId = _portal.getUserId(actionRequest);
 
-		String otpType = ParamUtil.getString(actionRequest, "otpType");
+		HOTP hotp = _hotpLocalService.fetchHOTPByUserId(userId);
 
-		String userInput = ParamUtil.getString(actionRequest, "otp");
+		int increment = OTPUtil.resyncHOTPWithConsecHOTPs(
+			hotp.getSharedSecret(), hotp.getCount(), 6, "HmacSHA1", hotpsArr,
+			10);
 
-		if (otpType.equals("HOTP")) {
-			HOTP hotp = _hotpLocalService.fetchHOTPByUserId(userId);
-
-			String generated = OTPUtil.generateHOTP(
-				hotp.getSharedSecret(), hotp.getCount(), 6, "HmacSHA1");
-
-			if (userInput.equals(generated)) {
-				_hotpLocalService.updateVerified(hotp.getHotpId(), true);
-			}
-			else {
-				actionResponse.setRenderParameter(
-					"mvcPath", "/hotp/resync.jsp");
-			}
+		if (increment > 0) {
+			_hotpLocalService.resync(hotp.getHotpId(), increment);
 		}
-		else if (otpType.equals("TOTP")) {
-			TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
 
-			String generated = OTPUtil.generateTOTP(
-				totp.getSharedSecret(), 30, 6, "HmacSHA1");
-
-			if (userInput.equals(generated)) {
-				_totpLocalService.updateVerified(totp.getTotpId(), true);
-			}
-		}
+		actionResponse.setRenderParameter("mvcPath", "/otp/verify");
 	}
 
 	@Reference
@@ -83,8 +68,5 @@ public class OTPVerificationActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private Portal _portal;
-
-	@Reference
-	private TOTPLocalService _totpLocalService;
 
 }
