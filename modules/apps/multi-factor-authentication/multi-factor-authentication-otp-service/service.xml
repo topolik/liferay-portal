@@ -15,6 +15,7 @@
 		<!-- Other fields -->
 
 		<column name="count" type="long" />
+		<column name="failedAttempts" type="int" />
 		<column name="sharedSecret" type="String" />
 		<column name="verified" type="boolean" />
 
@@ -36,6 +37,7 @@
 
 		<!-- Other fields -->
 
+		<column name="failedAttempts" type="int" />
 		<column name="sharedSecret" type="String" />
 		<column name="verified" type="boolean" />
 
