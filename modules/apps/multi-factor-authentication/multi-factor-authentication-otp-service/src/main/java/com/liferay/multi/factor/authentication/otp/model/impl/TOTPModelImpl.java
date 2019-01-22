@@ -71,6 +71,7 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 	public static final Object[][] TABLE_COLUMNS = {
 			{ "totpId", Types.BIGINT },
 			{ "userId", Types.BIGINT },
+			{ "failedAttempts", Types.INTEGER },
 			{ "sharedSecret", Types.VARCHAR },
 			{ "verified", Types.BOOLEAN }
 		};
@@ -79,11 +80,12 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 	static {
 		TABLE_COLUMNS_MAP.put("totpId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("userId", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("failedAttempts", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("sharedSecret", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("verified", Types.BOOLEAN);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table TOTP (totpId LONG not null primary key,userId LONG,sharedSecret VARCHAR(75) null,verified BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table TOTP (totpId LONG not null primary key,userId LONG,failedAttempts INTEGER,sharedSecret VARCHAR(75) null,verified BOOLEAN)";
 	public static final String TABLE_SQL_DROP = "drop table TOTP";
 	public static final String ORDER_BY_JPQL = " ORDER BY totp.totpId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY TOTP.totpId ASC";
@@ -117,6 +119,7 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 
 		model.setTotpId(soapModel.getTotpId());
 		model.setUserId(soapModel.getUserId());
+		model.setFailedAttempts(soapModel.getFailedAttempts());
 		model.setSharedSecret(soapModel.getSharedSecret());
 		model.setVerified(soapModel.isVerified());
 
@@ -185,6 +188,7 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 
 		attributes.put("totpId", getTotpId());
 		attributes.put("userId", getUserId());
+		attributes.put("failedAttempts", getFailedAttempts());
 		attributes.put("sharedSecret", getSharedSecret());
 		attributes.put("verified", isVerified());
 
@@ -206,6 +210,12 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 
 		if (userId != null) {
 			setUserId(userId);
+		}
+
+		Integer failedAttempts = (Integer)attributes.get("failedAttempts");
+
+		if (failedAttempts != null) {
+			setFailedAttempts(failedAttempts);
 		}
 
 		String sharedSecret = (String)attributes.get("sharedSecret");
@@ -269,6 +279,17 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 
 	public long getOriginalUserId() {
 		return _originalUserId;
+	}
+
+	@JSON
+	@Override
+	public int getFailedAttempts() {
+		return _failedAttempts;
+	}
+
+	@Override
+	public void setFailedAttempts(int failedAttempts) {
+		_failedAttempts = failedAttempts;
 	}
 
 	@JSON
@@ -337,6 +358,7 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 
 		totpImpl.setTotpId(getTotpId());
 		totpImpl.setUserId(getUserId());
+		totpImpl.setFailedAttempts(getFailedAttempts());
 		totpImpl.setSharedSecret(getSharedSecret());
 		totpImpl.setVerified(isVerified());
 
@@ -416,6 +438,8 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 
 		totpCacheModel.userId = getUserId();
 
+		totpCacheModel.failedAttempts = getFailedAttempts();
+
 		totpCacheModel.sharedSecret = getSharedSecret();
 
 		String sharedSecret = totpCacheModel.sharedSecret;
@@ -431,12 +455,14 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(9);
+		StringBundler sb = new StringBundler(11);
 
 		sb.append("{totpId=");
 		sb.append(getTotpId());
 		sb.append(", userId=");
 		sb.append(getUserId());
+		sb.append(", failedAttempts=");
+		sb.append(getFailedAttempts());
 		sb.append(", sharedSecret=");
 		sb.append(getSharedSecret());
 		sb.append(", verified=");
@@ -448,7 +474,7 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(16);
+		StringBundler sb = new StringBundler(19);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.multi.factor.authentication.otp.model.TOTP");
@@ -461,6 +487,10 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 		sb.append(
 			"<column><column-name>userId</column-name><column-value><![CDATA[");
 		sb.append(getUserId());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>failedAttempts</column-name><column-value><![CDATA[");
+		sb.append(getFailedAttempts());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>sharedSecret</column-name><column-value><![CDATA[");
@@ -484,6 +514,7 @@ public class TOTPModelImpl extends BaseModelImpl<TOTP> implements TOTPModel {
 	private long _userId;
 	private long _originalUserId;
 	private boolean _setOriginalUserId;
+	private int _failedAttempts;
 	private String _sharedSecret;
 	private boolean _verified;
 	private long _columnBitmask;

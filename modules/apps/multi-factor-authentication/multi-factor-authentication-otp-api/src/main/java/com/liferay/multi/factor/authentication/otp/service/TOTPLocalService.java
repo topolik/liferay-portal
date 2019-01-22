@@ -66,6 +66,8 @@ public interface TOTPLocalService extends BaseLocalService,
 	*
 	* Never reference this class directly. Always use {@link TOTPLocalServiceUtil} to access the totp local service.
 	*/
+	public TOTP addFailedAttempts(long totpId) throws PortalException;
+
 	public TOTP addTOTP(long userId, String sharedSecret)
 		throws PortalException;
 
@@ -233,6 +235,8 @@ public interface TOTPLocalService extends BaseLocalService,
 	*/
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getTOTPsCount();
+
+	public TOTP resetFailedAttempts(long totpId) throws PortalException;
 
 	/**
 	* Updates the totp in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.

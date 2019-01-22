@@ -63,7 +63,7 @@ public class HOTPCacheModel implements CacheModel<HOTP>, Externalizable {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(11);
+		StringBundler sb = new StringBundler(13);
 
 		sb.append("{hotpId=");
 		sb.append(hotpId);
@@ -71,6 +71,8 @@ public class HOTPCacheModel implements CacheModel<HOTP>, Externalizable {
 		sb.append(userId);
 		sb.append(", count=");
 		sb.append(count);
+		sb.append(", failedAttempts=");
+		sb.append(failedAttempts);
 		sb.append(", sharedSecret=");
 		sb.append(sharedSecret);
 		sb.append(", verified=");
@@ -87,6 +89,7 @@ public class HOTPCacheModel implements CacheModel<HOTP>, Externalizable {
 		hotpImpl.setHotpId(hotpId);
 		hotpImpl.setUserId(userId);
 		hotpImpl.setCount(count);
+		hotpImpl.setFailedAttempts(failedAttempts);
 
 		if (sharedSecret == null) {
 			hotpImpl.setSharedSecret("");
@@ -109,6 +112,8 @@ public class HOTPCacheModel implements CacheModel<HOTP>, Externalizable {
 		userId = objectInput.readLong();
 
 		count = objectInput.readLong();
+
+		failedAttempts = objectInput.readInt();
 		sharedSecret = objectInput.readUTF();
 
 		verified = objectInput.readBoolean();
@@ -123,6 +128,8 @@ public class HOTPCacheModel implements CacheModel<HOTP>, Externalizable {
 
 		objectOutput.writeLong(count);
 
+		objectOutput.writeInt(failedAttempts);
+
 		if (sharedSecret == null) {
 			objectOutput.writeUTF("");
 		}
@@ -136,6 +143,7 @@ public class HOTPCacheModel implements CacheModel<HOTP>, Externalizable {
 	public long hotpId;
 	public long userId;
 	public long count;
+	public int failedAttempts;
 	public String sharedSecret;
 	public boolean verified;
 }

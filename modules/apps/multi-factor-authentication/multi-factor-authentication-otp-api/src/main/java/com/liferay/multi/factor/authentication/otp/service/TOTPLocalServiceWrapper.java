@@ -38,6 +38,12 @@ public class TOTPLocalServiceWrapper implements TOTPLocalService,
 	* Never reference this class directly. Always use {@link TOTPLocalServiceUtil} to access the totp local service.
 	*/
 	@Override
+	public com.liferay.multi.factor.authentication.otp.model.TOTP addFailedAttempts(
+		long totpId) throws com.liferay.portal.kernel.exception.PortalException {
+		return _totpLocalService.addFailedAttempts(totpId);
+	}
+
+	@Override
 	public com.liferay.multi.factor.authentication.otp.model.TOTP addTOTP(
 		long userId, String sharedSecret)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -264,6 +270,12 @@ public class TOTPLocalServiceWrapper implements TOTPLocalService,
 	@Override
 	public int getTOTPsCount() {
 		return _totpLocalService.getTOTPsCount();
+	}
+
+	@Override
+	public com.liferay.multi.factor.authentication.otp.model.TOTP resetFailedAttempts(
+		long totpId) throws com.liferay.portal.kernel.exception.PortalException {
+		return _totpLocalService.resetFailedAttempts(totpId);
 	}
 
 	/**

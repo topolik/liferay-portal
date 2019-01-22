@@ -35,6 +35,7 @@ public class TOTPSoap implements Serializable {
 
 		soapModel.setTotpId(model.getTotpId());
 		soapModel.setUserId(model.getUserId());
+		soapModel.setFailedAttempts(model.getFailedAttempts());
 		soapModel.setSharedSecret(model.getSharedSecret());
 		soapModel.setVerified(model.isVerified());
 
@@ -105,6 +106,14 @@ public class TOTPSoap implements Serializable {
 		_userId = userId;
 	}
 
+	public int getFailedAttempts() {
+		return _failedAttempts;
+	}
+
+	public void setFailedAttempts(int failedAttempts) {
+		_failedAttempts = failedAttempts;
+	}
+
 	public String getSharedSecret() {
 		return _sharedSecret;
 	}
@@ -127,6 +136,7 @@ public class TOTPSoap implements Serializable {
 
 	private long _totpId;
 	private long _userId;
+	private int _failedAttempts;
 	private String _sharedSecret;
 	private boolean _verified;
 }

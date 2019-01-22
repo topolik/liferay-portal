@@ -48,6 +48,11 @@ public class TOTPLocalServiceUtil {
 	*
 	* Never reference this class directly. Always use {@link TOTPLocalServiceUtil} to access the totp local service.
 	*/
+	public static com.liferay.multi.factor.authentication.otp.model.TOTP addFailedAttempts(
+		long totpId) throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().addFailedAttempts(totpId);
+	}
+
 	public static com.liferay.multi.factor.authentication.otp.model.TOTP addTOTP(
 		long userId, String sharedSecret)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -254,6 +259,11 @@ public class TOTPLocalServiceUtil {
 	*/
 	public static int getTOTPsCount() {
 		return getService().getTOTPsCount();
+	}
+
+	public static com.liferay.multi.factor.authentication.otp.model.TOTP resetFailedAttempts(
+		long totpId) throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().resetFailedAttempts(totpId);
 	}
 
 	/**

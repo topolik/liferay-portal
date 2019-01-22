@@ -44,6 +44,16 @@ public class HOTPLocalServiceUtil {
 	 */
 
 	/**
+	* NOTE FOR DEVELOPERS:
+	*
+	* Never reference this class directly. Always use {@link HOTPLocalServiceUtil} to access the hotp local service.
+	*/
+	public static com.liferay.multi.factor.authentication.otp.model.HOTP addFailedAttempts(
+		long hotpId) throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().addFailedAttempts(hotpId);
+	}
+
+	/**
 	* Adds the hotp to the database. Also notifies the appropriate model listeners.
 	*
 	* @param hotp the hotp
@@ -54,11 +64,6 @@ public class HOTPLocalServiceUtil {
 		return getService().addHOTP(hotp);
 	}
 
-	/**
-	* NOTE FOR DEVELOPERS:
-	*
-	* Never reference this class directly. Always use {@link HOTPLocalServiceUtil} to access the hotp local service.
-	*/
 	public static com.liferay.multi.factor.authentication.otp.model.HOTP addHOTP(
 		long userId, String sharedSecret)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -254,6 +259,11 @@ public class HOTPLocalServiceUtil {
 		java.io.Serializable primaryKeyObj)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().getPersistedModel(primaryKeyObj);
+	}
+
+	public static com.liferay.multi.factor.authentication.otp.model.HOTP resetFailedAttempts(
+		long hotpId) throws com.liferay.portal.kernel.exception.PortalException {
+		return getService().resetFailedAttempts(hotpId);
 	}
 
 	public static com.liferay.multi.factor.authentication.otp.model.HOTP resync(

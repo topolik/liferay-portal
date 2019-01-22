@@ -45,6 +45,7 @@ public class HOTPWrapper extends BaseModelWrapper<HOTP> implements HOTP,
 		attributes.put("hotpId", getHotpId());
 		attributes.put("userId", getUserId());
 		attributes.put("count", getCount());
+		attributes.put("failedAttempts", getFailedAttempts());
 		attributes.put("sharedSecret", getSharedSecret());
 		attributes.put("verified", isVerified());
 
@@ -71,6 +72,12 @@ public class HOTPWrapper extends BaseModelWrapper<HOTP> implements HOTP,
 			setCount(count);
 		}
 
+		Integer failedAttempts = (Integer)attributes.get("failedAttempts");
+
+		if (failedAttempts != null) {
+			setFailedAttempts(failedAttempts);
+		}
+
 		String sharedSecret = (String)attributes.get("sharedSecret");
 
 		if (sharedSecret != null) {
@@ -92,6 +99,16 @@ public class HOTPWrapper extends BaseModelWrapper<HOTP> implements HOTP,
 	@Override
 	public long getCount() {
 		return model.getCount();
+	}
+
+	/**
+	* Returns the failed attempts of this hotp.
+	*
+	* @return the failed attempts of this hotp
+	*/
+	@Override
+	public int getFailedAttempts() {
+		return model.getFailedAttempts();
 	}
 
 	/**
@@ -177,6 +194,16 @@ public class HOTPWrapper extends BaseModelWrapper<HOTP> implements HOTP,
 	@Override
 	public void setCount(long count) {
 		model.setCount(count);
+	}
+
+	/**
+	* Sets the failed attempts of this hotp.
+	*
+	* @param failedAttempts the failed attempts of this hotp
+	*/
+	@Override
+	public void setFailedAttempts(int failedAttempts) {
+		model.setFailedAttempts(failedAttempts);
 	}
 
 	/**
