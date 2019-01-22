@@ -40,6 +40,17 @@ public class HOTPLocalServiceImpl extends HOTPLocalServiceBaseImpl {
 	 *
 	 * Never reference this class directly. Always use {@link com.liferay.multi.factor.authentication.otp.service.HOTPLocalServiceUtil} to access the hotp local service.
 	 */
+	@Override
+	public HOTP addFailedAttempts(long hotpId) throws PortalException {
+		HOTP hotp = hotpPersistence.findByPrimaryKey(hotpId);
+
+		hotp.setFailedAttempts(hotp.getFailedAttempts() + 1);
+
+		hotpPersistence.update(hotp);
+
+		return hotp;
+	}
+
 	public HOTP addHOTP(long userId, String sharedSecret)
 		throws PortalException {
 
@@ -79,10 +90,22 @@ public class HOTPLocalServiceImpl extends HOTPLocalServiceBaseImpl {
 	}
 
 	@Override
+	public HOTP resetFailedAttempts(long hotpId) throws PortalException {
+		HOTP hotp = hotpPersistence.findByPrimaryKey(hotpId);
+
+		hotp.setFailedAttempts(0);
+
+		hotpPersistence.update(hotp);
+
+		return hotp;
+	}
+
+	@Override
 	public HOTP resync(long hotpId, int increment) throws PortalException {
 		HOTP hotp = hotpPersistence.findByPrimaryKey(hotpId);
 
 		hotp.setCount(hotp.getCount() + increment);
+		hotp.setFailedAttempts(0);
 		hotp.setVerified(true);
 
 		hotpPersistence.update(hotp);
@@ -98,6 +121,11 @@ public class HOTPLocalServiceImpl extends HOTPLocalServiceBaseImpl {
 
 		if (verified != hotp.isVerified()) {
 			hotp.setCount(hotp.getCount() + 1);
+
+			if (verified) {
+				hotp.setFailedAttempts(0);
+			}
+
 			hotp.setVerified(verified);
 
 			hotpPersistence.update(hotp);

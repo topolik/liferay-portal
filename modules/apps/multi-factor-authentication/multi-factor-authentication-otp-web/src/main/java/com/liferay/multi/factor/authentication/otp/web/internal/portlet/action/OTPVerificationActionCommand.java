@@ -52,8 +52,15 @@ public class OTPVerificationActionCommand extends BaseMVCActionCommand {
 
 		String userInput = ParamUtil.getString(actionRequest, "otp");
 
+		HOTP hotp = _hotpLocalService.fetchHOTPByUserId(userId);
+		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
+
 		if (otpType.equals("HOTP")) {
-			HOTP hotp = _hotpLocalService.fetchHOTPByUserId(userId);
+			if (hotp.getFailedAttempts() > 5) {
+				actionResponse.setRenderParameter("mvcPath", "/error.jsp");
+
+				return;
+			}
 
 			String generated = OTPUtil.generateHOTP(
 				hotp.getSharedSecret(), hotp.getCount(), 6, "HmacSHA1");
@@ -62,18 +69,26 @@ public class OTPVerificationActionCommand extends BaseMVCActionCommand {
 				_hotpLocalService.updateVerified(hotp.getHotpId(), true);
 			}
 			else {
+				_hotpLocalService.addFailedAttempts(hotp.getHotpId());
 				actionResponse.setRenderParameter(
 					"mvcPath", "/hotp/resync.jsp");
 			}
 		}
 		else if (otpType.equals("TOTP")) {
-			TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
+			if (hotp.getFailedAttempts() > 5) {
+				actionResponse.setRenderParameter("mvcPath", "/error.jsp");
+
+				return;
+			}
 
 			String generated = OTPUtil.generateTOTP(
 				totp.getSharedSecret(), 30, 6, "HmacSHA1");
 
 			if (userInput.equals(generated)) {
 				_totpLocalService.updateVerified(totp.getTotpId(), true);
+			}
+			else {
+				_totpLocalService.addFailedAttempts(totp.getTotpId());
 			}
 		}
 	}

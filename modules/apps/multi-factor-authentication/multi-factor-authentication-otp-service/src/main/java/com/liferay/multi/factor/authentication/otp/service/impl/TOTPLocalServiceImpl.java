@@ -40,6 +40,17 @@ public class TOTPLocalServiceImpl extends TOTPLocalServiceBaseImpl {
 	 *
 	 * Never reference this class directly. Always use {@link com.liferay.multi.factor.authentication.otp.service.TOTPLocalServiceUtil} to access the totp local service.
 	 */
+	@Override
+	public TOTP addFailedAttempts(long totpId) throws PortalException {
+		TOTP totp = totpPersistence.findByPrimaryKey(totpId);
+
+		totp.setFailedAttempts(totp.getFailedAttempts() + 1);
+
+		totpPersistence.update(totp);
+
+		return totp;
+	}
+
 	public TOTP addTOTP(long userId, String sharedSecret)
 		throws PortalException {
 
@@ -77,12 +88,27 @@ public class TOTPLocalServiceImpl extends TOTPLocalServiceBaseImpl {
 	}
 
 	@Override
+	public TOTP resetFailedAttempts(long totpId) throws PortalException {
+		TOTP totp = totpPersistence.findByPrimaryKey(totpId);
+
+		totp.setFailedAttempts(0);
+
+		totpPersistence.update(totp);
+
+		return totp;
+	}
+
+	@Override
 	public TOTP updateVerified(long totpId, boolean verified)
 		throws PortalException {
 
 		TOTP totp = totpPersistence.findByPrimaryKey(totpId);
 
 		if (verified != totp.isVerified()) {
+			if (verified) {
+				totp.setFailedAttempts(0);
+			}
+
 			totp.setVerified(verified);
 
 			totpPersistence.update(totp);
