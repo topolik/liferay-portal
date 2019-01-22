@@ -266,6 +266,13 @@ public class HOTPLocalServiceWrapper implements HOTPLocalService,
 		return _hotpLocalService.getPersistedModel(primaryKeyObj);
 	}
 
+	@Override
+	public com.liferay.multi.factor.authentication.otp.model.HOTP resync(
+		long hotpId, int increment)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _hotpLocalService.resync(hotpId, increment);
+	}
+
 	/**
 	* Updates the hotp in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	*
