@@ -62,6 +62,13 @@ public interface HOTPLocalService extends BaseLocalService,
 	 */
 
 	/**
+	* NOTE FOR DEVELOPERS:
+	*
+	* Never reference this class directly. Always use {@link HOTPLocalServiceUtil} to access the hotp local service.
+	*/
+	public HOTP addFailedAttempts(long hotpId) throws PortalException;
+
+	/**
 	* Adds the hotp to the database. Also notifies the appropriate model listeners.
 	*
 	* @param hotp the hotp
@@ -70,11 +77,6 @@ public interface HOTPLocalService extends BaseLocalService,
 	@Indexable(type = IndexableType.REINDEX)
 	public HOTP addHOTP(HOTP hotp);
 
-	/**
-	* NOTE FOR DEVELOPERS:
-	*
-	* Never reference this class directly. Always use {@link HOTPLocalServiceUtil} to access the hotp local service.
-	*/
 	public HOTP addHOTP(long userId, String sharedSecret)
 		throws PortalException;
 
@@ -233,6 +235,8 @@ public interface HOTPLocalService extends BaseLocalService,
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
 		throws PortalException;
+
+	public HOTP resetFailedAttempts(long hotpId) throws PortalException;
 
 	public HOTP resync(long hotpId, int increment) throws PortalException;
 

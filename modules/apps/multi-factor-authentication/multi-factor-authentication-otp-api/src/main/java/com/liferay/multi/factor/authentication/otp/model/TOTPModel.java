@@ -97,6 +97,20 @@ public interface TOTPModel extends BaseModel<TOTP> {
 	public void setUserUuid(String userUuid);
 
 	/**
+	 * Returns the failed attempts of this totp.
+	 *
+	 * @return the failed attempts of this totp
+	 */
+	public int getFailedAttempts();
+
+	/**
+	 * Sets the failed attempts of this totp.
+	 *
+	 * @param failedAttempts the failed attempts of this totp
+	 */
+	public void setFailedAttempts(int failedAttempts);
+
+	/**
 	 * Returns the shared secret of this totp.
 	 *
 	 * @return the shared secret of this totp

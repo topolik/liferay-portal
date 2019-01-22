@@ -63,12 +63,14 @@ public class TOTPCacheModel implements CacheModel<TOTP>, Externalizable {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(9);
+		StringBundler sb = new StringBundler(11);
 
 		sb.append("{totpId=");
 		sb.append(totpId);
 		sb.append(", userId=");
 		sb.append(userId);
+		sb.append(", failedAttempts=");
+		sb.append(failedAttempts);
 		sb.append(", sharedSecret=");
 		sb.append(sharedSecret);
 		sb.append(", verified=");
@@ -84,6 +86,7 @@ public class TOTPCacheModel implements CacheModel<TOTP>, Externalizable {
 
 		totpImpl.setTotpId(totpId);
 		totpImpl.setUserId(userId);
+		totpImpl.setFailedAttempts(failedAttempts);
 
 		if (sharedSecret == null) {
 			totpImpl.setSharedSecret("");
@@ -104,6 +107,8 @@ public class TOTPCacheModel implements CacheModel<TOTP>, Externalizable {
 		totpId = objectInput.readLong();
 
 		userId = objectInput.readLong();
+
+		failedAttempts = objectInput.readInt();
 		sharedSecret = objectInput.readUTF();
 
 		verified = objectInput.readBoolean();
@@ -115,6 +120,8 @@ public class TOTPCacheModel implements CacheModel<TOTP>, Externalizable {
 		objectOutput.writeLong(totpId);
 
 		objectOutput.writeLong(userId);
+
+		objectOutput.writeInt(failedAttempts);
 
 		if (sharedSecret == null) {
 			objectOutput.writeUTF("");
@@ -128,6 +135,7 @@ public class TOTPCacheModel implements CacheModel<TOTP>, Externalizable {
 
 	public long totpId;
 	public long userId;
+	public int failedAttempts;
 	public String sharedSecret;
 	public boolean verified;
 }

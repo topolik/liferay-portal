@@ -36,6 +36,7 @@ public class HOTPSoap implements Serializable {
 		soapModel.setHotpId(model.getHotpId());
 		soapModel.setUserId(model.getUserId());
 		soapModel.setCount(model.getCount());
+		soapModel.setFailedAttempts(model.getFailedAttempts());
 		soapModel.setSharedSecret(model.getSharedSecret());
 		soapModel.setVerified(model.isVerified());
 
@@ -114,6 +115,14 @@ public class HOTPSoap implements Serializable {
 		_count = count;
 	}
 
+	public int getFailedAttempts() {
+		return _failedAttempts;
+	}
+
+	public void setFailedAttempts(int failedAttempts) {
+		_failedAttempts = failedAttempts;
+	}
+
 	public String getSharedSecret() {
 		return _sharedSecret;
 	}
@@ -137,6 +146,7 @@ public class HOTPSoap implements Serializable {
 	private long _hotpId;
 	private long _userId;
 	private long _count;
+	private int _failedAttempts;
 	private String _sharedSecret;
 	private boolean _verified;
 }

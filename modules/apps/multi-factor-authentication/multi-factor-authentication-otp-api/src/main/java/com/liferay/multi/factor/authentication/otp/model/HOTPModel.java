@@ -111,6 +111,20 @@ public interface HOTPModel extends BaseModel<HOTP> {
 	public void setCount(long count);
 
 	/**
+	 * Returns the failed attempts of this hotp.
+	 *
+	 * @return the failed attempts of this hotp
+	 */
+	public int getFailedAttempts();
+
+	/**
+	 * Sets the failed attempts of this hotp.
+	 *
+	 * @param failedAttempts the failed attempts of this hotp
+	 */
+	public void setFailedAttempts(int failedAttempts);
+
+	/**
 	 * Returns the shared secret of this hotp.
 	 *
 	 * @return the shared secret of this hotp

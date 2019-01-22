@@ -72,6 +72,7 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 			{ "hotpId", Types.BIGINT },
 			{ "userId", Types.BIGINT },
 			{ "count", Types.BIGINT },
+			{ "failedAttempts", Types.INTEGER },
 			{ "sharedSecret", Types.VARCHAR },
 			{ "verified", Types.BOOLEAN }
 		};
@@ -81,11 +82,12 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 		TABLE_COLUMNS_MAP.put("hotpId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("userId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("count", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("failedAttempts", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("sharedSecret", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("verified", Types.BOOLEAN);
 	}
 
-	public static final String TABLE_SQL_CREATE = "create table HOTP (hotpId LONG not null primary key,userId LONG,count LONG,sharedSecret VARCHAR(75) null,verified BOOLEAN)";
+	public static final String TABLE_SQL_CREATE = "create table HOTP (hotpId LONG not null primary key,userId LONG,count LONG,failedAttempts INTEGER,sharedSecret VARCHAR(75) null,verified BOOLEAN)";
 	public static final String TABLE_SQL_DROP = "drop table HOTP";
 	public static final String ORDER_BY_JPQL = " ORDER BY hotp.hotpId ASC";
 	public static final String ORDER_BY_SQL = " ORDER BY HOTP.hotpId ASC";
@@ -120,6 +122,7 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 		model.setHotpId(soapModel.getHotpId());
 		model.setUserId(soapModel.getUserId());
 		model.setCount(soapModel.getCount());
+		model.setFailedAttempts(soapModel.getFailedAttempts());
 		model.setSharedSecret(soapModel.getSharedSecret());
 		model.setVerified(soapModel.isVerified());
 
@@ -189,6 +192,7 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 		attributes.put("hotpId", getHotpId());
 		attributes.put("userId", getUserId());
 		attributes.put("count", getCount());
+		attributes.put("failedAttempts", getFailedAttempts());
 		attributes.put("sharedSecret", getSharedSecret());
 		attributes.put("verified", isVerified());
 
@@ -216,6 +220,12 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 
 		if (count != null) {
 			setCount(count);
+		}
+
+		Integer failedAttempts = (Integer)attributes.get("failedAttempts");
+
+		if (failedAttempts != null) {
+			setFailedAttempts(failedAttempts);
 		}
 
 		String sharedSecret = (String)attributes.get("sharedSecret");
@@ -294,6 +304,17 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 
 	@JSON
 	@Override
+	public int getFailedAttempts() {
+		return _failedAttempts;
+	}
+
+	@Override
+	public void setFailedAttempts(int failedAttempts) {
+		_failedAttempts = failedAttempts;
+	}
+
+	@JSON
+	@Override
 	public String getSharedSecret() {
 		if (_sharedSecret == null) {
 			return "";
@@ -359,6 +380,7 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 		hotpImpl.setHotpId(getHotpId());
 		hotpImpl.setUserId(getUserId());
 		hotpImpl.setCount(getCount());
+		hotpImpl.setFailedAttempts(getFailedAttempts());
 		hotpImpl.setSharedSecret(getSharedSecret());
 		hotpImpl.setVerified(isVerified());
 
@@ -440,6 +462,8 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 
 		hotpCacheModel.count = getCount();
 
+		hotpCacheModel.failedAttempts = getFailedAttempts();
+
 		hotpCacheModel.sharedSecret = getSharedSecret();
 
 		String sharedSecret = hotpCacheModel.sharedSecret;
@@ -455,7 +479,7 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(11);
+		StringBundler sb = new StringBundler(13);
 
 		sb.append("{hotpId=");
 		sb.append(getHotpId());
@@ -463,6 +487,8 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 		sb.append(getUserId());
 		sb.append(", count=");
 		sb.append(getCount());
+		sb.append(", failedAttempts=");
+		sb.append(getFailedAttempts());
 		sb.append(", sharedSecret=");
 		sb.append(getSharedSecret());
 		sb.append(", verified=");
@@ -474,7 +500,7 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 
 	@Override
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(19);
+		StringBundler sb = new StringBundler(22);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.multi.factor.authentication.otp.model.HOTP");
@@ -491,6 +517,10 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 		sb.append(
 			"<column><column-name>count</column-name><column-value><![CDATA[");
 		sb.append(getCount());
+		sb.append("]]></column-value></column>");
+		sb.append(
+			"<column><column-name>failedAttempts</column-name><column-value><![CDATA[");
+		sb.append(getFailedAttempts());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>sharedSecret</column-name><column-value><![CDATA[");
@@ -515,6 +545,7 @@ public class HOTPModelImpl extends BaseModelImpl<HOTP> implements HOTPModel {
 	private long _originalUserId;
 	private boolean _setOriginalUserId;
 	private long _count;
+	private int _failedAttempts;
 	private String _sharedSecret;
 	private boolean _verified;
 	private long _columnBitmask;

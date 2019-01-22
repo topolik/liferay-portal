@@ -44,6 +44,7 @@ public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
 
 		attributes.put("totpId", getTotpId());
 		attributes.put("userId", getUserId());
+		attributes.put("failedAttempts", getFailedAttempts());
 		attributes.put("sharedSecret", getSharedSecret());
 		attributes.put("verified", isVerified());
 
@@ -64,6 +65,12 @@ public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
 			setUserId(userId);
 		}
 
+		Integer failedAttempts = (Integer)attributes.get("failedAttempts");
+
+		if (failedAttempts != null) {
+			setFailedAttempts(failedAttempts);
+		}
+
 		String sharedSecret = (String)attributes.get("sharedSecret");
 
 		if (sharedSecret != null) {
@@ -75,6 +82,16 @@ public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
 		if (verified != null) {
 			setVerified(verified);
 		}
+	}
+
+	/**
+	* Returns the failed attempts of this totp.
+	*
+	* @return the failed attempts of this totp
+	*/
+	@Override
+	public int getFailedAttempts() {
+		return model.getFailedAttempts();
 	}
 
 	/**
@@ -150,6 +167,16 @@ public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
 	@Override
 	public void persist() {
 		model.persist();
+	}
+
+	/**
+	* Sets the failed attempts of this totp.
+	*
+	* @param failedAttempts the failed attempts of this totp
+	*/
+	@Override
+	public void setFailedAttempts(int failedAttempts) {
+		model.setFailedAttempts(failedAttempts);
 	}
 
 	/**
