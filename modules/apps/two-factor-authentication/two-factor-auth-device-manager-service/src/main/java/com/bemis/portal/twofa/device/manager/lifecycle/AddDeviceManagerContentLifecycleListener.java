@@ -1,6 +1,5 @@
 package com.bemis.portal.twofa.device.manager.lifecycle;
 
-import com.bemis.portal.commons.service.BemisPortalService;
 import com.bemis.portal.twofa.device.manager.constants.DeviceManagerConstants;
 import com.bemis.portal.twofa.device.manager.workflow.util.WorkflowDefinitionUploadUtil;
 
@@ -14,6 +13,7 @@ import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.workflow.kaleo.runtime.WorkflowEngine;
 
 import org.osgi.service.component.annotations.Component;
@@ -57,7 +57,7 @@ public class AddDeviceManagerContentLifecycleListener
 	}
 
 	protected void uploadWorkflow(long companyId) throws PortalException {
-		User defaultUser = _bemisPortalService.getDefaultUser();
+		User defaultUser = _userLocalService.getDefaultUser(companyId);
 
 		ServiceContext serviceContext = getServiceContext(
 			companyId, defaultUser);
@@ -106,7 +106,7 @@ public class AddDeviceManagerContentLifecycleListener
 		AddDeviceManagerContentLifecycleListener.class);
 
 	@Reference
-	private BemisPortalService _bemisPortalService;
+	private UserLocalService _userLocalService;
 
 	@Reference
 	private ClusterMasterExecutor _clusterMasterExecutor;

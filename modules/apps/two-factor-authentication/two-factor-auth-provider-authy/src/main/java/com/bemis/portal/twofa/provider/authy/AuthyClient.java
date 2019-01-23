@@ -75,7 +75,7 @@ public class AuthyClient {
 		return _authyApiClient.getUsers();
 	}
 
-	private static final String _API_KEY = "fC0X7j9irKPB2E5gmIblFbInM0E2tbAY";
+	private static final String _API_KEY = "XXXXXXX-fC0X7j9irKPB2E5gmIblFbInM0E2tbAY";
 
 	private AuthyApiClient _authyApiClient;
 

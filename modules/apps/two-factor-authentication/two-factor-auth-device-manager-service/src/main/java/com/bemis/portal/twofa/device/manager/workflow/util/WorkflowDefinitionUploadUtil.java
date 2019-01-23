@@ -31,11 +31,11 @@ public class WorkflowDefinitionUploadUtil {
 		Class<?> clazz = getClass();
 
 		try (InputStream inputStream = clazz.getResourceAsStream(filePath)) {
-			byte[] bytes = FileUtil.getBytes(inputStream);
+//			byte[] bytes = FileUtil.getBytes(inputStream);
 
 			return _workflowEngine.deployWorkflowDefinition(
-				WORKFLOW_DEF_TWO_FA_EMAIL_NOTIFICATION,
-				new UnsyncByteArrayInputStream(bytes), serviceContext);
+				WORKFLOW_DEF_TWO_FA_EMAIL_NOTIFICATION,WORKFLOW_DEF_TWO_FA_EMAIL_NOTIFICATION,
+				inputStream, serviceContext);
 		}
 		catch (Exception e) {
 			if (_log.isInfoEnabled()) {
@@ -51,7 +51,7 @@ public class WorkflowDefinitionUploadUtil {
 		throws PortalException {
 
 		KaleoDefinition definition =
-			_kaleoDefinitionLocalService.fetchLatestKaleoDefinition(
+			_kaleoDefinitionLocalService.fetchKaleoDefinition(
 				definitionName, context);
 
 		if (definition == null) {

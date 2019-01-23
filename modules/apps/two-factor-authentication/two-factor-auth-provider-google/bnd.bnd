@@ -2,10 +2,14 @@ Bundle-Name: Bemis - Two Factor Auth Provider Google
 Bundle-SymbolicName: com.bemis.portal.twofa.provider.google
 Bundle-Version: 1.0.0
 
-Conditional-Package:\
-	com.warrenstrange.googleauth.*,\
-	org.apache.http.client.*,\
-	org.apache.commons.codec.binary.*
+Import-Package:\
+	!com.warrenstrange.googleauth.*,\
+	\
+	!org.apache.http.client.*,\
+	\
+	!org.apache.commons.codec.binary.*,\
+	\
+	*
 
 -includeresource:\
 	@googleauth-0.5.0.jar,\

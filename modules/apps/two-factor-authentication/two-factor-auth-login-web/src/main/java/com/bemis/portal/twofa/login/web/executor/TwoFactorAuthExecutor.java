@@ -1,6 +1,5 @@
 package com.bemis.portal.twofa.login.web.executor;
 
-import com.bemis.portal.commons.service.BemisPortalService;
 import com.bemis.portal.twofa.device.manager.model.DeviceInfo;
 import com.bemis.portal.twofa.device.manager.service.DeviceLocalService;
 import com.bemis.portal.twofa.device.manager.service.DeviceManagerLocalService;
@@ -60,7 +59,9 @@ public class TwoFactorAuthExecutor {
 
 		User portalUser = deviceInfo.getUser();
 
-		if (deviceVerified || _bemisPortalService.isStaff(portalUser)) {
+		boolean isStaff = false; // _bemisPortalService.isStaff(portalUser)
+
+		if (deviceVerified || isStaff) {
 			return true;
 		}
 
@@ -150,8 +151,6 @@ public class TwoFactorAuthExecutor {
 	private static final Log _log = LogFactoryUtil.getLog(
 		TwoFactorAuthExecutor.class);
 
-	@Reference
-	private BemisPortalService _bemisPortalService;
 
 	@Reference
 	private DeviceLocalService _deviceLocalService;

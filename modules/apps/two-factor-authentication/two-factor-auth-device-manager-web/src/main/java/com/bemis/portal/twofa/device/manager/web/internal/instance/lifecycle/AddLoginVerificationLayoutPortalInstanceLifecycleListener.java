@@ -1,6 +1,5 @@
 package com.bemis.portal.twofa.device.manager.web.internal.instance.lifecycle;
 
-import com.bemis.portal.commons.service.BemisPortalService;
 import com.bemis.portal.twofa.device.manager.constants.DeviceManagerConstants;
 import com.bemis.portal.twofa.device.manager.web.constants.DeviceManagerPortletKeys;
 
@@ -20,6 +19,7 @@ import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -59,7 +59,7 @@ public class AddLoginVerificationLayoutPortalInstanceLifecycleListener
 	protected void addLoginVerificationLayout(long companyId)
 		throws PortalException {
 
-		User defaultUser = _bemisPortalService.getDefaultUser();
+		User defaultUser = _userLocalService.getDefaultUser(companyId);
 
 		long defaultUserId = defaultUser.getUserId();
 
@@ -137,7 +137,7 @@ public class AddLoginVerificationLayoutPortalInstanceLifecycleListener
 		AddLoginVerificationLayoutPortalInstanceLifecycleListener.class);
 
 	@Reference
-	private BemisPortalService _bemisPortalService;
+	private UserLocalService _userLocalService;
 
 	@Reference
 	private ClusterMasterExecutor _clusterMasterExecutor;
