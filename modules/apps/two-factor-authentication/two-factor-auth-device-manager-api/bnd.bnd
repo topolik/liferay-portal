@@ -1,0 +1,12 @@
+Bundle-Name: Bemis - Two Factor Auth Device Manager API
+Bundle-SymbolicName: com.bemis.portal.twofa.device.manager.api
+Bundle-Version: 1.0.0
+Export-Package:\
+	com.bemis.portal.twofa.device.manager.constants,\
+	com.bemis.portal.twofa.device.manager.exception,\
+	com.bemis.portal.twofa.device.manager.model,\
+	com.bemis.portal.twofa.device.manager.service,\
+	com.bemis.portal.twofa.device.manager.service.persistence,\
+	com.bemis.portal.twofa.device.manager.util
+
+-sources: true

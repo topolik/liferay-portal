@@ -1,0 +1,4 @@
+Bundle-Name: Bemis - Two Factor Auth Login Web
+Bundle-SymbolicName: com.bemis.portal.twofa.login.web
+Bundle-Version: 1.0.0
+Web-ContextPath=/two-factor-auth-login

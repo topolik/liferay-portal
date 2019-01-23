@@ -1,0 +1,8 @@
+Bundle-Name: Bemis - Two Factor Auth Provider
+Bundle-SymbolicName: com.bemis.portal.twofa.provider
+Bundle-Version: 1.0.0
+
+Export-Package:\
+	com.bemis.portal.twofa.provider.constants,\
+	com.bemis.portal.twofa.provider.internal,\
+	com.bemis.portal.twofa.provider.notification.configuration

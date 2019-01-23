@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<model-hints>
+	<model name="com.bemis.portal.twofa.device.manager.model.Device">
+		<field name="deviceId" type="long" />
+		<field name="groupId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="userName" type="String" />
+		<field name="createDate" type="Date" />
+		<field name="modifiedDate" type="Date" />
+		<field name="portalUserId" type="long" />
+		<field name="portalUserName" type="String" />
+		<field name="emailAddress" type="String" />
+		<field name="deviceIP" type="String" />
+		<field name="browserName" type="String" />
+		<field name="osName" type="String" />
+		<field name="verified" type="boolean" />
+		<field name="tempDevice" type="boolean" />
+	</model>
+	<model name="com.bemis.portal.twofa.device.manager.model.DeviceCode">
+		<field name="deviceCodeId" type="long" />
+		<field name="groupId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="userName" type="String" />
+		<field name="createDate" type="Date" />
+		<field name="modifiedDate" type="Date" />
+		<field name="portalUserId" type="long" />
+		<field name="portalUserName" type="String" />
+		<field name="emailAddress" type="String" />
+		<field name="deviceCode" type="String" />
+		<field name="deviceIP" type="String" />
+		<field name="validationCode" type="int" />
+	</model>
+</model-hints>

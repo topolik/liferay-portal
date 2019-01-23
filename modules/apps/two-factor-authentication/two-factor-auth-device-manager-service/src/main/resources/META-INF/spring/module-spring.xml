@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" default-destroy-method="destroy" default-init-method="afterPropertiesSet" xsi:schemaLocation=" http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean class="com.bemis.portal.twofa.device.manager.service.impl.DeviceLocalServiceImpl" id="com.bemis.portal.twofa.device.manager.service.DeviceLocalService" />
+	<bean class="com.bemis.portal.twofa.device.manager.service.persistence.impl.DevicePersistenceImpl" id="com.bemis.portal.twofa.device.manager.service.persistence.DevicePersistence" parent="basePersistence" />
+	<bean class="com.bemis.portal.twofa.device.manager.service.impl.DeviceCodeLocalServiceImpl" id="com.bemis.portal.twofa.device.manager.service.DeviceCodeLocalService" />
+	<bean class="com.bemis.portal.twofa.device.manager.service.persistence.impl.DeviceCodePersistenceImpl" id="com.bemis.portal.twofa.device.manager.service.persistence.DeviceCodePersistence" parent="basePersistence" />
+	<bean class="com.bemis.portal.twofa.device.manager.service.impl.DeviceManagerLocalServiceImpl" id="com.bemis.portal.twofa.device.manager.service.DeviceManagerLocalService" />
+	<bean class="com.bemis.portal.twofa.device.manager.service.impl.DeviceManagerServiceImpl" id="com.bemis.portal.twofa.device.manager.service.DeviceManagerService" />
+</beans>
