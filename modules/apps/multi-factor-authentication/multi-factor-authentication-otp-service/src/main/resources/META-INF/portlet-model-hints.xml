@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<model-hints>
+	<model name="com.liferay.multi.factor.authentication.otp.model.HOTP">
+		<field name="hotpId" type="long" />
+		<field name="userId" type="long" />
+		<field name="count" type="long" />
+		<field name="failedAttempts" type="int" />
+		<field name="sharedSecret" type="String" />
+		<field name="verified" type="boolean" />
+	</model>
+	<model name="com.liferay.multi.factor.authentication.otp.model.TOTP">
+		<field name="totpId" type="long" />
+		<field name="userId" type="long" />
+		<field name="failedAttempts" type="int" />
+		<field name="sharedSecret" type="String" />
+		<field name="verified" type="boolean" />
+	</model>
+</model-hints>

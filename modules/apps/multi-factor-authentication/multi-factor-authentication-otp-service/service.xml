@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.2.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_2_0.dtd">
+
+<service-builder auto-import-default-references="false" auto-namespace-tables="false" package-path="com.liferay.multi.factor.authentication.otp">
+	<entity local-service="true" name="HOTP" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="hotpId" primary="true" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="userId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="count" type="long" />
+		<column name="failedAttempts" type="int" />
+		<column name="sharedSecret" type="String" />
+		<column name="verified" type="boolean" />
+
+		<!-- Finder methods -->
+
+		<finder name="UserId" return-type="HOTP" unique="true">
+			<finder-column name="userId" />
+		</finder>
+	</entity>
+	<entity local-service="true" name="TOTP" remote-service="true">
+
+		<!-- PK fields -->
+
+		<column name="totpId" primary="true" type="long" />
+
+		<!-- Audit fields -->
+
+		<column name="userId" type="long" />
+
+		<!-- Other fields -->
+
+		<column name="failedAttempts" type="int" />
+		<column name="sharedSecret" type="String" />
+		<column name="verified" type="boolean" />
+
+		<!-- Finder methods -->
+
+		<finder name="UserId" return-type="TOTP" unique="true">
+			<finder-column name="userId" />
+		</finder>
+	</entity>
+	<author>arthurchan35</author>
+	<namespace>OTP</namespace>
+</service-builder>

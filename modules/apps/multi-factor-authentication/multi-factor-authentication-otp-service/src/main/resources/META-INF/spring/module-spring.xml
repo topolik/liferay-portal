@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<beans
+	default-destroy-method="destroy"
+	default-init-method="afterPropertiesSet"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+>
+	<bean class="com.liferay.multi.factor.authentication.otp.service.impl.HOTPLocalServiceImpl" id="com.liferay.multi.factor.authentication.otp.service.HOTPLocalService" />
+	<bean class="com.liferay.multi.factor.authentication.otp.service.impl.HOTPServiceImpl" id="com.liferay.multi.factor.authentication.otp.service.HOTPService" />
+	<bean class="com.liferay.multi.factor.authentication.otp.service.persistence.impl.HOTPPersistenceImpl" id="com.liferay.multi.factor.authentication.otp.service.persistence.HOTPPersistence" />
+	<bean class="com.liferay.multi.factor.authentication.otp.service.impl.TOTPLocalServiceImpl" id="com.liferay.multi.factor.authentication.otp.service.TOTPLocalService" />
+	<bean class="com.liferay.multi.factor.authentication.otp.service.impl.TOTPServiceImpl" id="com.liferay.multi.factor.authentication.otp.service.TOTPService" />
+	<bean class="com.liferay.multi.factor.authentication.otp.service.persistence.impl.TOTPPersistenceImpl" id="com.liferay.multi.factor.authentication.otp.service.persistence.TOTPPersistence" />
+</beans>
