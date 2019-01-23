@@ -16,7 +16,6 @@ package com.bemis.portal.twofa.device.manager.service.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.bemis.portal.commons.service.BemisPortalService;
 import com.bemis.portal.twofa.device.manager.model.Device;
 import com.bemis.portal.twofa.device.manager.model.DeviceCode;
 import com.bemis.portal.twofa.device.manager.model.DeviceInfo;
@@ -25,7 +24,12 @@ import com.bemis.portal.twofa.device.manager.service.base.DeviceLocalServiceBase
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
+import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.util.Date;
@@ -132,9 +136,11 @@ public class DeviceLocalServiceImpl extends DeviceLocalServiceBaseImpl {
 
 		long companyId = portalUser.getCompanyId();
 
-		long groupId = _bemisPortalService.getGlobalScopeGroupId();
+		Group companyGroup = _groupLocalService.getCompanyGroup(companyId);
 
-		User defaultUser = _bemisPortalService.getDefaultUser();
+		long groupId = companyGroup.getGroupId();
+
+		User defaultUser = userLocalService.getDefaultUser(companyId);
 
 		device.setCompanyId(companyId);
 		device.setGroupId(groupId);
@@ -164,7 +170,7 @@ public class DeviceLocalServiceImpl extends DeviceLocalServiceBaseImpl {
 	private static final Log _log = LogFactoryUtil.getLog(
 		DeviceLocalServiceImpl.class);
 
-	@ServiceReference(type = BemisPortalService.class)
-	private BemisPortalService _bemisPortalService;
+	@ServiceReference(type = GroupLocalService.class)
+	private GroupLocalService _groupLocalService;
 
 }

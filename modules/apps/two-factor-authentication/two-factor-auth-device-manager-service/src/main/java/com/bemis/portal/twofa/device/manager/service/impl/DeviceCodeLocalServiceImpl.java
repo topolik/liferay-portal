@@ -24,7 +24,6 @@ import static com.liferay.asset.kernel.model.AssetLinkConstants.TYPE_RELATED;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.bemis.portal.commons.service.BemisPortalService;
 import com.bemis.portal.twofa.device.manager.model.DeviceCode;
 import com.bemis.portal.twofa.device.manager.service.base.DeviceCodeLocalServiceBaseImpl;
 import com.bemis.portal.twofa.device.manager.util.WorkflowUtil;
@@ -33,7 +32,9 @@ import com.bemis.portal.twofa.provider.notification.configuration.TwoFactorAuthN
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.kernel.service.AssetLinkLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -100,12 +101,15 @@ public class DeviceCodeLocalServiceImpl extends DeviceCodeLocalServiceBaseImpl {
 			int validationCode, String verificationBaseURL)
 		throws PortalException {
 
-		long companyId = _bemisPortalService.getDefaultCompanyId();
-		long groupId = _bemisPortalService.getGlobalScopeGroupId();
-
-		User defaultUser = _bemisPortalService.getDefaultUser();
-
 		User portalUser = userLocalService.getUser(portalUserId);
+
+		long companyId = portalUser.getCompanyId();
+
+		Group companyGroup = _groupLocalService.getCompanyGroup(companyId);
+
+		long groupId = companyGroup.getGroupId();
+
+		User defaultUser = userLocalService.getDefaultUser(companyId);
 
 		DeviceCode deviceCode = deviceCodePersistence.fetchByPortalUserId(
 			portalUserId);
@@ -209,8 +213,8 @@ public class DeviceCodeLocalServiceImpl extends DeviceCodeLocalServiceBaseImpl {
 	@ServiceReference(type = AssetLinkLocalService.class)
 	private AssetLinkLocalService _assetLinkLocalService;
 
-	@ServiceReference(type = BemisPortalService.class)
-	private BemisPortalService _bemisPortalService;
+	@ServiceReference(type = GroupLocalService.class)
+	private GroupLocalService _groupLocalService;
 
 	@ServiceReference(type = TwoFactorAuthNotificationConfigurator.class)
 	private TwoFactorAuthNotificationConfigurator
