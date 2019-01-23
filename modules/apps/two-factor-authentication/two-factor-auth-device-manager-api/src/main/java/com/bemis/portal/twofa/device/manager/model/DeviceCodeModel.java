@@ -266,17 +266,17 @@ public interface DeviceCodeModel extends BaseModel<DeviceCode>, GroupedModel,
 	public void setDeviceCode(String deviceCode);
 
 	/**
-	 * Returns the device i p of this device code.
+	 * Returns the device ip of this device code.
 	 *
-	 * @return the device i p of this device code
+	 * @return the device ip of this device code
 	 */
 	@AutoEscape
 	public String getDeviceIP();
 
 	/**
-	 * Sets the device i p of this device code.
+	 * Sets the device ip of this device code.
 	 *
-	 * @param deviceIP the device i p of this device code
+	 * @param deviceIP the device ip of this device code
 	 */
 	public void setDeviceIP(String deviceIP);
 

@@ -18,15 +18,20 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.bemis.portal.twofa.device.manager.model.DeviceCode;
 
-import com.liferay.osgi.util.ServiceTrackerFactory;
-
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.OrderByComparator;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+
 import org.osgi.util.tracker.ServiceTracker;
 
+import java.io.Serializable;
+
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The persistence utility for the device code service. This utility wraps {@link com.bemis.portal.twofa.device.manager.service.persistence.impl.DeviceCodePersistenceImpl} and provides direct access to the database for CRUD operations. This utility should only be used by the service layer, as it must operate within a transaction. Never access this utility in a JSP, controller, model, or other front-end class.
@@ -67,6 +72,14 @@ public class DeviceCodeUtil {
 	 */
 	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#fetchByPrimaryKeys(Set)
+	 */
+	public static Map<Serializable, DeviceCode> fetchByPrimaryKeys(
+		Set<Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
@@ -174,7 +187,7 @@ public class DeviceCodeUtil {
 	* @return the matching device code
 	* @throws NoSuchDeviceCodeException if a matching device code could not be found
 	*/
-	public static DeviceCode findByEmailAddress(java.lang.String emailAddress)
+	public static DeviceCode findByEmailAddress(String emailAddress)
 		throws com.bemis.portal.twofa.device.manager.exception.NoSuchDeviceCodeException {
 		return getPersistence().findByEmailAddress(emailAddress);
 	}
@@ -185,7 +198,7 @@ public class DeviceCodeUtil {
 	* @param emailAddress the email address
 	* @return the matching device code, or <code>null</code> if a matching device code could not be found
 	*/
-	public static DeviceCode fetchByEmailAddress(java.lang.String emailAddress) {
+	public static DeviceCode fetchByEmailAddress(String emailAddress) {
 		return getPersistence().fetchByEmailAddress(emailAddress);
 	}
 
@@ -196,8 +209,8 @@ public class DeviceCodeUtil {
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching device code, or <code>null</code> if a matching device code could not be found
 	*/
-	public static DeviceCode fetchByEmailAddress(
-		java.lang.String emailAddress, boolean retrieveFromCache) {
+	public static DeviceCode fetchByEmailAddress(String emailAddress,
+		boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByEmailAddress(emailAddress, retrieveFromCache);
 	}
@@ -208,7 +221,7 @@ public class DeviceCodeUtil {
 	* @param emailAddress the email address
 	* @return the device code that was removed
 	*/
-	public static DeviceCode removeByEmailAddress(java.lang.String emailAddress)
+	public static DeviceCode removeByEmailAddress(String emailAddress)
 		throws com.bemis.portal.twofa.device.manager.exception.NoSuchDeviceCodeException {
 		return getPersistence().removeByEmailAddress(emailAddress);
 	}
@@ -219,7 +232,7 @@ public class DeviceCodeUtil {
 	* @param emailAddress the email address
 	* @return the number of matching device codes
 	*/
-	public static int countByEmailAddress(java.lang.String emailAddress) {
+	public static int countByEmailAddress(String emailAddress) {
 		return getPersistence().countByEmailAddress(emailAddress);
 	}
 
@@ -287,11 +300,6 @@ public class DeviceCodeUtil {
 	*/
 	public static DeviceCode fetchByPrimaryKey(long deviceCodeId) {
 		return getPersistence().fetchByPrimaryKey(deviceCodeId);
-	}
-
-	public static java.util.Map<java.io.Serializable, DeviceCode> fetchByPrimaryKeys(
-		java.util.Set<java.io.Serializable> primaryKeys) {
-		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
@@ -375,6 +383,17 @@ public class DeviceCodeUtil {
 		return _serviceTracker.getService();
 	}
 
-	private static ServiceTracker<DeviceCodePersistence, DeviceCodePersistence> _serviceTracker =
-		ServiceTrackerFactory.open(DeviceCodePersistence.class);
+	private static ServiceTracker<DeviceCodePersistence, DeviceCodePersistence> _serviceTracker;
+
+	static {
+		Bundle bundle = FrameworkUtil.getBundle(DeviceCodePersistence.class);
+
+		ServiceTracker<DeviceCodePersistence, DeviceCodePersistence> serviceTracker =
+			new ServiceTracker<DeviceCodePersistence, DeviceCodePersistence>(bundle.getBundleContext(),
+				DeviceCodePersistence.class, null);
+
+		serviceTracker.open();
+
+		_serviceTracker = serviceTracker;
+	}
 }

@@ -25,6 +25,7 @@ import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.ModelWrapper;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.impl.BaseModelImpl;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -32,7 +33,6 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Serializable;
 
@@ -108,13 +108,13 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 	public static final String DATA_SOURCE = "liferayDataSource";
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.bemis.portal.twofa.device.manager.service.util.PropsUtil.get(
+	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.com.bemis.portal.twofa.device.manager.service.util.ServiceProps.get(
 				"value.object.entity.cache.enabled.com.bemis.portal.twofa.device.manager.model.Device"),
 			true);
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.bemis.portal.twofa.device.manager.service.util.PropsUtil.get(
+	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.com.bemis.portal.twofa.device.manager.service.util.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.bemis.portal.twofa.device.manager.model.Device"),
 			true);
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.bemis.portal.twofa.device.manager.service.util.PropsUtil.get(
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.com.bemis.portal.twofa.device.manager.service.util.ServiceProps.get(
 				"value.object.column.bitmask.enabled.com.bemis.portal.twofa.device.manager.model.Device"),
 			true);
 	public static final long DEVICEIP_COLUMN_BITMASK = 1L;
@@ -122,7 +122,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 	public static final long TEMPDEVICE_COLUMN_BITMASK = 4L;
 	public static final long VERIFIED_COLUMN_BITMASK = 8L;
 	public static final long DEVICEID_COLUMN_BITMASK = 16L;
-	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.bemis.portal.twofa.device.manager.service.util.PropsUtil.get(
+	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.com.bemis.portal.twofa.device.manager.service.util.ServiceProps.get(
 				"lock.expiration.time.com.bemis.portal.twofa.device.manager.model.Device"));
 
 	public DeviceModelImpl() {
@@ -175,8 +175,8 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 		attributes.put("deviceIP", getDeviceIP());
 		attributes.put("browserName", getBrowserName());
 		attributes.put("osName", getOsName());
-		attributes.put("verified", getVerified());
-		attributes.put("tempDevice", getTempDevice());
+		attributes.put("verified", isVerified());
+		attributes.put("tempDevice", isTempDevice());
 
 		attributes.put("entityCacheEnabled", isEntityCacheEnabled());
 		attributes.put("finderCacheEnabled", isFinderCacheEnabled());
@@ -325,7 +325,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 			return user.getUuid();
 		}
 		catch (PortalException pe) {
-			return StringPool.BLANK;
+			return "";
 		}
 	}
 
@@ -336,7 +336,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 	@Override
 	public String getUserName() {
 		if (_userName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _userName;
@@ -400,7 +400,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 			return user.getUuid();
 		}
 		catch (PortalException pe) {
-			return StringPool.BLANK;
+			return "";
 		}
 	}
 
@@ -415,7 +415,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 	@Override
 	public String getPortalUserName() {
 		if (_portalUserName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _portalUserName;
@@ -430,7 +430,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 	@Override
 	public String getEmailAddress() {
 		if (_emailAddress == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _emailAddress;
@@ -445,7 +445,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 	@Override
 	public String getDeviceIP() {
 		if (_deviceIP == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _deviceIP;
@@ -470,7 +470,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 	@Override
 	public String getBrowserName() {
 		if (_browserName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _browserName;
@@ -485,7 +485,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 	@Override
 	public String getOsName() {
 		if (_osName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _osName;
@@ -595,8 +595,8 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 		deviceImpl.setDeviceIP(getDeviceIP());
 		deviceImpl.setBrowserName(getBrowserName());
 		deviceImpl.setOsName(getOsName());
-		deviceImpl.setVerified(getVerified());
-		deviceImpl.setTempDevice(getTempDevice());
+		deviceImpl.setVerified(isVerified());
+		deviceImpl.setTempDevice(isTempDevice());
 
 		deviceImpl.resetOriginalValues();
 
@@ -758,9 +758,9 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 			deviceCacheModel.osName = null;
 		}
 
-		deviceCacheModel.verified = getVerified();
+		deviceCacheModel.verified = isVerified();
 
-		deviceCacheModel.tempDevice = getTempDevice();
+		deviceCacheModel.tempDevice = isTempDevice();
 
 		return deviceCacheModel;
 	}
@@ -796,9 +796,9 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 		sb.append(", osName=");
 		sb.append(getOsName());
 		sb.append(", verified=");
-		sb.append(getVerified());
+		sb.append(isVerified());
 		sb.append(", tempDevice=");
-		sb.append(getTempDevice());
+		sb.append(isTempDevice());
 		sb.append("}");
 
 		return sb.toString();
@@ -866,11 +866,11 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>verified</column-name><column-value><![CDATA[");
-		sb.append(getVerified());
+		sb.append(isVerified());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>tempDevice</column-name><column-value><![CDATA[");
-		sb.append(getTempDevice());
+		sb.append(isTempDevice());
 		sb.append("]]></column-value></column>");
 
 		sb.append("</model>");
@@ -880,7 +880,7 @@ public class DeviceModelImpl extends BaseModelImpl<Device>
 
 	private static final ClassLoader _classLoader = Device.class.getClassLoader();
 	private static final Class<?>[] _escapedModelInterfaces = new Class[] {
-			Device.class
+			Device.class, ModelWrapper.class
 		};
 	private long _deviceId;
 	private long _groupId;

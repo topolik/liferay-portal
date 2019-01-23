@@ -16,7 +16,8 @@ package com.bemis.portal.twofa.device.manager.service;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.osgi.util.ServiceTrackerFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -47,7 +48,7 @@ public class DeviceManagerServiceUtil {
 	*
 	* @return the OSGi service identifier
 	*/
-	public static java.lang.String getOSGiServiceIdentifier() {
+	public static String getOSGiServiceIdentifier() {
 		return getService().getOSGiServiceIdentifier();
 	}
 
@@ -55,6 +56,17 @@ public class DeviceManagerServiceUtil {
 		return _serviceTracker.getService();
 	}
 
-	private static ServiceTracker<DeviceManagerService, DeviceManagerService> _serviceTracker =
-		ServiceTrackerFactory.open(DeviceManagerService.class);
+	private static ServiceTracker<DeviceManagerService, DeviceManagerService> _serviceTracker;
+
+	static {
+		Bundle bundle = FrameworkUtil.getBundle(DeviceManagerService.class);
+
+		ServiceTracker<DeviceManagerService, DeviceManagerService> serviceTracker =
+			new ServiceTracker<DeviceManagerService, DeviceManagerService>(bundle.getBundleContext(),
+				DeviceManagerService.class, null);
+
+		serviceTracker.open();
+
+		_serviceTracker = serviceTracker;
+	}
 }

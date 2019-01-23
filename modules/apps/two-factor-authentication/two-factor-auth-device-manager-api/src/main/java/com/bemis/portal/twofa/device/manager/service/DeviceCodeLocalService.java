@@ -76,6 +76,7 @@ public interface DeviceCodeLocalService extends BaseLocalService,
 	* @param deviceCodeId the primary key for the new device code
 	* @return the new device code
 	*/
+	@Transactional(enabled = false)
 	public DeviceCode createDeviceCode(long deviceCodeId);
 
 	/**
@@ -98,40 +99,6 @@ public interface DeviceCodeLocalService extends BaseLocalService,
 	public DeviceCode deleteDeviceCode(long deviceCodeId)
 		throws PortalException;
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public DeviceCode fetchDeviceCode(long deviceCodeId);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public DeviceCode fetchDeviceCodeByPortalUserId(long userId);
-
-	/**
-	* Returns the device code with the primary key.
-	*
-	* @param deviceCodeId the primary key of the device code
-	* @return the device code
-	* @throws PortalException if a device code with the primary key could not be found
-	*/
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public DeviceCode getDeviceCode(long deviceCodeId)
-		throws PortalException;
-
-	/**
-	* Updates the device code in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
-	*
-	* @param deviceCode the device code
-	* @return the device code that was updated
-	*/
-	@Indexable(type = IndexableType.REINDEX)
-	public DeviceCode updateDeviceCode(DeviceCode deviceCode);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public ActionableDynamicQuery getActionableDynamicQuery();
-
-	public DynamicQuery dynamicQuery();
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
-
 	/**
 	* @throws PortalException
 	*/
@@ -139,29 +106,8 @@ public interface DeviceCodeLocalService extends BaseLocalService,
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException;
 
-	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
-		throws PortalException;
-
-	/**
-	* Returns the number of device codes.
-	*
-	* @return the number of device codes
-	*/
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getDeviceCodesCount();
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	public java.lang.String getOSGiServiceIdentifier();
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public java.lang.String getVerificationURL(long portalUserId,
-		java.lang.String verificationBaseURL);
+	public DynamicQuery dynamicQuery();
 
 	/**
 	* Performs a dynamic query on the database and returns the matching rows.
@@ -169,6 +115,7 @@ public interface DeviceCodeLocalService extends BaseLocalService,
 	* @param dynamicQuery the dynamic query
 	* @return the matching rows
 	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery);
 
 	/**
@@ -183,6 +130,7 @@ public interface DeviceCodeLocalService extends BaseLocalService,
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @return the range of matching rows
 	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
 		int end);
 
@@ -199,8 +147,49 @@ public interface DeviceCodeLocalService extends BaseLocalService,
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching rows
 	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
 		int end, OrderByComparator<T> orderByComparator);
+
+	/**
+	* Returns the number of rows matching the dynamic query.
+	*
+	* @param dynamicQuery the dynamic query
+	* @return the number of rows matching the dynamic query
+	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long dynamicQueryCount(DynamicQuery dynamicQuery);
+
+	/**
+	* Returns the number of rows matching the dynamic query.
+	*
+	* @param dynamicQuery the dynamic query
+	* @param projection the projection to apply to the query
+	* @return the number of rows matching the dynamic query
+	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long dynamicQueryCount(DynamicQuery dynamicQuery,
+		Projection projection);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public DeviceCode fetchDeviceCode(long deviceCodeId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public DeviceCode fetchDeviceCodeByPortalUserId(long userId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public ActionableDynamicQuery getActionableDynamicQuery();
+
+	/**
+	* Returns the device code with the primary key.
+	*
+	* @param deviceCodeId the primary key of the device code
+	* @return the device code
+	* @throws PortalException if a device code with the primary key could not be found
+	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public DeviceCode getDeviceCode(long deviceCodeId)
+		throws PortalException;
 
 	/**
 	* Returns a range of all the device codes.
@@ -217,27 +206,44 @@ public interface DeviceCodeLocalService extends BaseLocalService,
 	public List<DeviceCode> getDeviceCodes(int start, int end);
 
 	/**
-	* Returns the number of rows matching the dynamic query.
+	* Returns the number of device codes.
 	*
-	* @param dynamicQuery the dynamic query
-	* @return the number of rows matching the dynamic query
+	* @return the number of device codes
 	*/
-	public long dynamicQueryCount(DynamicQuery dynamicQuery);
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getDeviceCodesCount();
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
 
 	/**
-	* Returns the number of rows matching the dynamic query.
+	* Returns the OSGi service identifier.
 	*
-	* @param dynamicQuery the dynamic query
-	* @param projection the projection to apply to the query
-	* @return the number of rows matching the dynamic query
+	* @return the OSGi service identifier
 	*/
-	public long dynamicQueryCount(DynamicQuery dynamicQuery,
-		Projection projection);
+	public String getOSGiServiceIdentifier();
+
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public String getVerificationURL(long portalUserId,
+		String verificationBaseURL);
 
 	public void removeDeviceCode(long userId);
 
 	public void storeDeviceCodeAndSendNotification(long portalUserId,
-		java.lang.String deviceIP, java.lang.String secretKey,
-		int validationCode, java.lang.String verificationBaseURL)
-		throws PortalException;
+		String deviceIP, String secretKey, int validationCode,
+		String verificationBaseURL) throws PortalException;
+
+	/**
+	* Updates the device code in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param deviceCode the device code
+	* @return the device code that was updated
+	*/
+	@Indexable(type = IndexableType.REINDEX)
+	public DeviceCode updateDeviceCode(DeviceCode deviceCode);
 }

@@ -47,9 +47,30 @@ public interface DeviceManagerLocalService extends BaseLocalService {
 	 *
 	 * Never modify or reference this interface directly. Always use {@link DeviceManagerLocalServiceUtil} to access the device manager local service. Add custom service methods to {@link com.bemis.portal.twofa.device.manager.service.impl.DeviceManagerLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
+	public void createAndSendVerificationCode(User portalUser,
+		String currentDeviceIP, String verificationBaseURL)
+		throws PortalException;
+
+	/**
+	* Returns the OSGi service identifier.
+	*
+	* @return the OSGi service identifier
+	*/
+	public String getOSGiServiceIdentifier();
+
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public boolean isDeviceVerifiedForUser(DeviceInfo deviceInfo)
 		throws PortalException;
+
+	/**
+	* Sets Device as Verified or Temp based on Users decision
+	* Removes the generated device code
+	*
+	* @param portalUserId
+	* @param registerAsVerified
+	*/
+	public void registerDeviceAsVerifiedOrTemp(long portalUserId,
+		boolean registerAsVerified);
 
 	public boolean twoFactorAuthenticationEnabled();
 
@@ -64,27 +85,6 @@ public interface DeviceManagerLocalService extends BaseLocalService {
 	* @return
 	* @throws PortalException
 	*/
-	public boolean verifyDeviceCode(long userId,
-		java.lang.String verificationCode) throws PortalException;
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	public java.lang.String getOSGiServiceIdentifier();
-
-	public void createAndSendVerificationCode(User portalUser,
-		java.lang.String currentDeviceIP, java.lang.String verificationBaseURL)
+	public boolean verifyDeviceCode(long userId, String verificationCode)
 		throws PortalException;
-
-	/**
-	* Sets Device as Verified or Temp based on Users decision
-	* Removes the generated device code
-	*
-	* @param portalUserId
-	* @param registerAsVerified
-	*/
-	public void registerDeviceAsVerifiedOrTemp(long portalUserId,
-		boolean registerAsVerified);
 }

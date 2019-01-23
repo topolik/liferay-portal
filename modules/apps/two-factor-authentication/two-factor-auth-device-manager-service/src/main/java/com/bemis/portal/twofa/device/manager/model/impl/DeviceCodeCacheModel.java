@@ -21,7 +21,6 @@ import com.bemis.portal.twofa.device.manager.model.DeviceCode;
 import com.liferay.portal.kernel.model.CacheModel;
 import com.liferay.portal.kernel.util.HashUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -109,7 +108,7 @@ public class DeviceCodeCacheModel implements CacheModel<DeviceCode>,
 		deviceCodeImpl.setUserId(userId);
 
 		if (userName == null) {
-			deviceCodeImpl.setUserName(StringPool.BLANK);
+			deviceCodeImpl.setUserName("");
 		}
 		else {
 			deviceCodeImpl.setUserName(userName);
@@ -132,28 +131,28 @@ public class DeviceCodeCacheModel implements CacheModel<DeviceCode>,
 		deviceCodeImpl.setPortalUserId(portalUserId);
 
 		if (portalUserName == null) {
-			deviceCodeImpl.setPortalUserName(StringPool.BLANK);
+			deviceCodeImpl.setPortalUserName("");
 		}
 		else {
 			deviceCodeImpl.setPortalUserName(portalUserName);
 		}
 
 		if (emailAddress == null) {
-			deviceCodeImpl.setEmailAddress(StringPool.BLANK);
+			deviceCodeImpl.setEmailAddress("");
 		}
 		else {
 			deviceCodeImpl.setEmailAddress(emailAddress);
 		}
 
 		if (deviceCode == null) {
-			deviceCodeImpl.setDeviceCode(StringPool.BLANK);
+			deviceCodeImpl.setDeviceCode("");
 		}
 		else {
 			deviceCodeImpl.setDeviceCode(deviceCode);
 		}
 
 		if (deviceIP == null) {
-			deviceCodeImpl.setDeviceIP(StringPool.BLANK);
+			deviceCodeImpl.setDeviceIP("");
 		}
 		else {
 			deviceCodeImpl.setDeviceIP(deviceIP);
@@ -200,7 +199,7 @@ public class DeviceCodeCacheModel implements CacheModel<DeviceCode>,
 		objectOutput.writeLong(userId);
 
 		if (userName == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
+			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(userName);
@@ -212,28 +211,28 @@ public class DeviceCodeCacheModel implements CacheModel<DeviceCode>,
 		objectOutput.writeLong(portalUserId);
 
 		if (portalUserName == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
+			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(portalUserName);
 		}
 
 		if (emailAddress == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
+			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(emailAddress);
 		}
 
 		if (deviceCode == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
+			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(deviceCode);
 		}
 
 		if (deviceIP == null) {
-			objectOutput.writeUTF(StringPool.BLANK);
+			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(deviceIP);

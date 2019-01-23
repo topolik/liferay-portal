@@ -46,8 +46,8 @@ public class DeviceSoap implements Serializable {
 		soapModel.setDeviceIP(model.getDeviceIP());
 		soapModel.setBrowserName(model.getBrowserName());
 		soapModel.setOsName(model.getOsName());
-		soapModel.setVerified(model.getVerified());
-		soapModel.setTempDevice(model.getTempDevice());
+		soapModel.setVerified(model.isVerified());
+		soapModel.setTempDevice(model.isTempDevice());
 
 		return soapModel;
 	}

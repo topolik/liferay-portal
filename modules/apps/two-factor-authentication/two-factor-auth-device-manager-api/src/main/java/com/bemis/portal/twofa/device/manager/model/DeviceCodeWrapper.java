@@ -156,28 +156,73 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	}
 
 	@Override
-	public DeviceCode toEscapedModel() {
-		return new DeviceCodeWrapper(_deviceCode.toEscapedModel());
+	public Object clone() {
+		return new DeviceCodeWrapper((DeviceCode)_deviceCode.clone());
 	}
 
 	@Override
-	public DeviceCode toUnescapedModel() {
-		return new DeviceCodeWrapper(_deviceCode.toUnescapedModel());
+	public int compareTo(DeviceCode deviceCode) {
+		return _deviceCode.compareTo(deviceCode);
 	}
 
+	/**
+	* Returns the company ID of this device code.
+	*
+	* @return the company ID of this device code
+	*/
 	@Override
-	public boolean isCachedModel() {
-		return _deviceCode.isCachedModel();
+	public long getCompanyId() {
+		return _deviceCode.getCompanyId();
 	}
 
+	/**
+	* Returns the create date of this device code.
+	*
+	* @return the create date of this device code
+	*/
 	@Override
-	public boolean isEscapedModel() {
-		return _deviceCode.isEscapedModel();
+	public Date getCreateDate() {
+		return _deviceCode.getCreateDate();
 	}
 
+	/**
+	* Returns the device code of this device code.
+	*
+	* @return the device code of this device code
+	*/
 	@Override
-	public boolean isNew() {
-		return _deviceCode.isNew();
+	public String getDeviceCode() {
+		return _deviceCode.getDeviceCode();
+	}
+
+	/**
+	* Returns the device code ID of this device code.
+	*
+	* @return the device code ID of this device code
+	*/
+	@Override
+	public long getDeviceCodeId() {
+		return _deviceCode.getDeviceCodeId();
+	}
+
+	/**
+	* Returns the device ip of this device code.
+	*
+	* @return the device ip of this device code
+	*/
+	@Override
+	public String getDeviceIP() {
+		return _deviceCode.getDeviceIP();
+	}
+
+	/**
+	* Returns the email address of this device code.
+	*
+	* @return the email address of this device code
+	*/
+	@Override
+	public String getEmailAddress() {
+		return _deviceCode.getEmailAddress();
 	}
 
 	@Override
@@ -185,14 +230,99 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 		return _deviceCode.getExpandoBridge();
 	}
 
+	/**
+	* Returns the group ID of this device code.
+	*
+	* @return the group ID of this device code
+	*/
 	@Override
-	public com.liferay.portal.kernel.model.CacheModel<DeviceCode> toCacheModel() {
-		return _deviceCode.toCacheModel();
+	public long getGroupId() {
+		return _deviceCode.getGroupId();
+	}
+
+	/**
+	* Returns the modified date of this device code.
+	*
+	* @return the modified date of this device code
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _deviceCode.getModifiedDate();
+	}
+
+	/**
+	* Returns the portal user ID of this device code.
+	*
+	* @return the portal user ID of this device code
+	*/
+	@Override
+	public long getPortalUserId() {
+		return _deviceCode.getPortalUserId();
+	}
+
+	/**
+	* Returns the portal user name of this device code.
+	*
+	* @return the portal user name of this device code
+	*/
+	@Override
+	public String getPortalUserName() {
+		return _deviceCode.getPortalUserName();
+	}
+
+	/**
+	* Returns the portal user uuid of this device code.
+	*
+	* @return the portal user uuid of this device code
+	*/
+	@Override
+	public String getPortalUserUuid() {
+		return _deviceCode.getPortalUserUuid();
+	}
+
+	/**
+	* Returns the primary key of this device code.
+	*
+	* @return the primary key of this device code
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _deviceCode.getPrimaryKey();
 	}
 
 	@Override
-	public int compareTo(DeviceCode deviceCode) {
-		return _deviceCode.compareTo(deviceCode);
+	public Serializable getPrimaryKeyObj() {
+		return _deviceCode.getPrimaryKeyObj();
+	}
+
+	/**
+	* Returns the user ID of this device code.
+	*
+	* @return the user ID of this device code
+	*/
+	@Override
+	public long getUserId() {
+		return _deviceCode.getUserId();
+	}
+
+	/**
+	* Returns the user name of this device code.
+	*
+	* @return the user name of this device code
+	*/
+	@Override
+	public String getUserName() {
+		return _deviceCode.getUserName();
+	}
+
+	/**
+	* Returns the user uuid of this device code.
+	*
+	* @return the user uuid of this device code
+	*/
+	@Override
+	public String getUserUuid() {
+		return _deviceCode.getUserUuid();
 	}
 
 	/**
@@ -211,173 +341,18 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	}
 
 	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _deviceCode.getPrimaryKeyObj();
+	public boolean isCachedModel() {
+		return _deviceCode.isCachedModel();
 	}
 
 	@Override
-	public java.lang.Object clone() {
-		return new DeviceCodeWrapper((DeviceCode)_deviceCode.clone());
-	}
-
-	/**
-	* Returns the device code of this device code.
-	*
-	* @return the device code of this device code
-	*/
-	@Override
-	public java.lang.String getDeviceCode() {
-		return _deviceCode.getDeviceCode();
-	}
-
-	/**
-	* Returns the device i p of this device code.
-	*
-	* @return the device i p of this device code
-	*/
-	@Override
-	public java.lang.String getDeviceIP() {
-		return _deviceCode.getDeviceIP();
-	}
-
-	/**
-	* Returns the email address of this device code.
-	*
-	* @return the email address of this device code
-	*/
-	@Override
-	public java.lang.String getEmailAddress() {
-		return _deviceCode.getEmailAddress();
-	}
-
-	/**
-	* Returns the portal user name of this device code.
-	*
-	* @return the portal user name of this device code
-	*/
-	@Override
-	public java.lang.String getPortalUserName() {
-		return _deviceCode.getPortalUserName();
-	}
-
-	/**
-	* Returns the portal user uuid of this device code.
-	*
-	* @return the portal user uuid of this device code
-	*/
-	@Override
-	public java.lang.String getPortalUserUuid() {
-		return _deviceCode.getPortalUserUuid();
-	}
-
-	/**
-	* Returns the user name of this device code.
-	*
-	* @return the user name of this device code
-	*/
-	@Override
-	public java.lang.String getUserName() {
-		return _deviceCode.getUserName();
-	}
-
-	/**
-	* Returns the user uuid of this device code.
-	*
-	* @return the user uuid of this device code
-	*/
-	@Override
-	public java.lang.String getUserUuid() {
-		return _deviceCode.getUserUuid();
+	public boolean isEscapedModel() {
+		return _deviceCode.isEscapedModel();
 	}
 
 	@Override
-	public java.lang.String toString() {
-		return _deviceCode.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _deviceCode.toXmlString();
-	}
-
-	/**
-	* Returns the create date of this device code.
-	*
-	* @return the create date of this device code
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _deviceCode.getCreateDate();
-	}
-
-	/**
-	* Returns the modified date of this device code.
-	*
-	* @return the modified date of this device code
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _deviceCode.getModifiedDate();
-	}
-
-	/**
-	* Returns the company ID of this device code.
-	*
-	* @return the company ID of this device code
-	*/
-	@Override
-	public long getCompanyId() {
-		return _deviceCode.getCompanyId();
-	}
-
-	/**
-	* Returns the device code ID of this device code.
-	*
-	* @return the device code ID of this device code
-	*/
-	@Override
-	public long getDeviceCodeId() {
-		return _deviceCode.getDeviceCodeId();
-	}
-
-	/**
-	* Returns the group ID of this device code.
-	*
-	* @return the group ID of this device code
-	*/
-	@Override
-	public long getGroupId() {
-		return _deviceCode.getGroupId();
-	}
-
-	/**
-	* Returns the portal user ID of this device code.
-	*
-	* @return the portal user ID of this device code
-	*/
-	@Override
-	public long getPortalUserId() {
-		return _deviceCode.getPortalUserId();
-	}
-
-	/**
-	* Returns the primary key of this device code.
-	*
-	* @return the primary key of this device code
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _deviceCode.getPrimaryKey();
-	}
-
-	/**
-	* Returns the user ID of this device code.
-	*
-	* @return the user ID of this device code
-	*/
-	@Override
-	public long getUserId() {
-		return _deviceCode.getUserId();
+	public boolean isNew() {
+		return _deviceCode.isNew();
 	}
 
 	@Override
@@ -416,7 +391,7 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	* @param deviceCode the device code of this device code
 	*/
 	@Override
-	public void setDeviceCode(java.lang.String deviceCode) {
+	public void setDeviceCode(String deviceCode) {
 		_deviceCode.setDeviceCode(deviceCode);
 	}
 
@@ -431,12 +406,12 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	}
 
 	/**
-	* Sets the device i p of this device code.
+	* Sets the device ip of this device code.
 	*
-	* @param deviceIP the device i p of this device code
+	* @param deviceIP the device ip of this device code
 	*/
 	@Override
-	public void setDeviceIP(java.lang.String deviceIP) {
+	public void setDeviceIP(String deviceIP) {
 		_deviceCode.setDeviceIP(deviceIP);
 	}
 
@@ -446,19 +421,19 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	* @param emailAddress the email address of this device code
 	*/
 	@Override
-	public void setEmailAddress(java.lang.String emailAddress) {
+	public void setEmailAddress(String emailAddress) {
 		_deviceCode.setEmailAddress(emailAddress);
-	}
-
-	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_deviceCode.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.kernel.model.BaseModel<?> baseModel) {
 		_deviceCode.setExpandoBridgeAttributes(baseModel);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_deviceCode.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -507,7 +482,7 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	* @param portalUserName the portal user name of this device code
 	*/
 	@Override
-	public void setPortalUserName(java.lang.String portalUserName) {
+	public void setPortalUserName(String portalUserName) {
 		_deviceCode.setPortalUserName(portalUserName);
 	}
 
@@ -517,7 +492,7 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	* @param portalUserUuid the portal user uuid of this device code
 	*/
 	@Override
-	public void setPortalUserUuid(java.lang.String portalUserUuid) {
+	public void setPortalUserUuid(String portalUserUuid) {
 		_deviceCode.setPortalUserUuid(portalUserUuid);
 	}
 
@@ -552,7 +527,7 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	* @param userName the user name of this device code
 	*/
 	@Override
-	public void setUserName(java.lang.String userName) {
+	public void setUserName(String userName) {
 		_deviceCode.setUserName(userName);
 	}
 
@@ -562,7 +537,7 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	* @param userUuid the user uuid of this device code
 	*/
 	@Override
-	public void setUserUuid(java.lang.String userUuid) {
+	public void setUserUuid(String userUuid) {
 		_deviceCode.setUserUuid(userUuid);
 	}
 
@@ -574,6 +549,31 @@ public class DeviceCodeWrapper implements DeviceCode, ModelWrapper<DeviceCode> {
 	@Override
 	public void setValidationCode(int validationCode) {
 		_deviceCode.setValidationCode(validationCode);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<DeviceCode> toCacheModel() {
+		return _deviceCode.toCacheModel();
+	}
+
+	@Override
+	public DeviceCode toEscapedModel() {
+		return new DeviceCodeWrapper(_deviceCode.toEscapedModel());
+	}
+
+	@Override
+	public String toString() {
+		return _deviceCode.toString();
+	}
+
+	@Override
+	public DeviceCode toUnescapedModel() {
+		return new DeviceCodeWrapper(_deviceCode.toUnescapedModel());
+	}
+
+	@Override
+	public String toXmlString() {
+		return _deviceCode.toXmlString();
 	}
 
 	@Override

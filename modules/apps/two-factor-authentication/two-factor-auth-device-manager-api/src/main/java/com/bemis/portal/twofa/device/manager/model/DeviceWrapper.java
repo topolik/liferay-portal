@@ -70,8 +70,8 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 		attributes.put("deviceIP", getDeviceIP());
 		attributes.put("browserName", getBrowserName());
 		attributes.put("osName", getOsName());
-		attributes.put("verified", getVerified());
-		attributes.put("tempDevice", getTempDevice());
+		attributes.put("verified", isVerified());
+		attributes.put("tempDevice", isTempDevice());
 
 		return attributes;
 	}
@@ -170,13 +170,153 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	}
 
 	@Override
-	public Device toEscapedModel() {
-		return new DeviceWrapper(_device.toEscapedModel());
+	public Object clone() {
+		return new DeviceWrapper((Device)_device.clone());
 	}
 
 	@Override
-	public Device toUnescapedModel() {
-		return new DeviceWrapper(_device.toUnescapedModel());
+	public int compareTo(Device device) {
+		return _device.compareTo(device);
+	}
+
+	/**
+	* Returns the browser name of this device.
+	*
+	* @return the browser name of this device
+	*/
+	@Override
+	public String getBrowserName() {
+		return _device.getBrowserName();
+	}
+
+	/**
+	* Returns the company ID of this device.
+	*
+	* @return the company ID of this device
+	*/
+	@Override
+	public long getCompanyId() {
+		return _device.getCompanyId();
+	}
+
+	/**
+	* Returns the create date of this device.
+	*
+	* @return the create date of this device
+	*/
+	@Override
+	public Date getCreateDate() {
+		return _device.getCreateDate();
+	}
+
+	/**
+	* Returns the device ID of this device.
+	*
+	* @return the device ID of this device
+	*/
+	@Override
+	public long getDeviceId() {
+		return _device.getDeviceId();
+	}
+
+	/**
+	* Returns the device ip of this device.
+	*
+	* @return the device ip of this device
+	*/
+	@Override
+	public String getDeviceIP() {
+		return _device.getDeviceIP();
+	}
+
+	/**
+	* Returns the email address of this device.
+	*
+	* @return the email address of this device
+	*/
+	@Override
+	public String getEmailAddress() {
+		return _device.getEmailAddress();
+	}
+
+	@Override
+	public ExpandoBridge getExpandoBridge() {
+		return _device.getExpandoBridge();
+	}
+
+	/**
+	* Returns the group ID of this device.
+	*
+	* @return the group ID of this device
+	*/
+	@Override
+	public long getGroupId() {
+		return _device.getGroupId();
+	}
+
+	/**
+	* Returns the modified date of this device.
+	*
+	* @return the modified date of this device
+	*/
+	@Override
+	public Date getModifiedDate() {
+		return _device.getModifiedDate();
+	}
+
+	/**
+	* Returns the os name of this device.
+	*
+	* @return the os name of this device
+	*/
+	@Override
+	public String getOsName() {
+		return _device.getOsName();
+	}
+
+	/**
+	* Returns the portal user ID of this device.
+	*
+	* @return the portal user ID of this device
+	*/
+	@Override
+	public long getPortalUserId() {
+		return _device.getPortalUserId();
+	}
+
+	/**
+	* Returns the portal user name of this device.
+	*
+	* @return the portal user name of this device
+	*/
+	@Override
+	public String getPortalUserName() {
+		return _device.getPortalUserName();
+	}
+
+	/**
+	* Returns the portal user uuid of this device.
+	*
+	* @return the portal user uuid of this device
+	*/
+	@Override
+	public String getPortalUserUuid() {
+		return _device.getPortalUserUuid();
+	}
+
+	/**
+	* Returns the primary key of this device.
+	*
+	* @return the primary key of this device
+	*/
+	@Override
+	public long getPrimaryKey() {
+		return _device.getPrimaryKey();
+	}
+
+	@Override
+	public Serializable getPrimaryKeyObj() {
+		return _device.getPrimaryKeyObj();
 	}
 
 	/**
@@ -190,6 +330,36 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	}
 
 	/**
+	* Returns the user ID of this device.
+	*
+	* @return the user ID of this device
+	*/
+	@Override
+	public long getUserId() {
+		return _device.getUserId();
+	}
+
+	/**
+	* Returns the user name of this device.
+	*
+	* @return the user name of this device
+	*/
+	@Override
+	public String getUserName() {
+		return _device.getUserName();
+	}
+
+	/**
+	* Returns the user uuid of this device.
+	*
+	* @return the user uuid of this device
+	*/
+	@Override
+	public String getUserUuid() {
+		return _device.getUserUuid();
+	}
+
+	/**
 	* Returns the verified of this device.
 	*
 	* @return the verified of this device
@@ -197,6 +367,11 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	@Override
 	public boolean getVerified() {
 		return _device.getVerified();
+	}
+
+	@Override
+	public int hashCode() {
+		return _device.hashCode();
 	}
 
 	@Override
@@ -235,206 +410,6 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	}
 
 	@Override
-	public ExpandoBridge getExpandoBridge() {
-		return _device.getExpandoBridge();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.model.CacheModel<Device> toCacheModel() {
-		return _device.toCacheModel();
-	}
-
-	@Override
-	public int compareTo(Device device) {
-		return _device.compareTo(device);
-	}
-
-	@Override
-	public int hashCode() {
-		return _device.hashCode();
-	}
-
-	@Override
-	public Serializable getPrimaryKeyObj() {
-		return _device.getPrimaryKeyObj();
-	}
-
-	@Override
-	public java.lang.Object clone() {
-		return new DeviceWrapper((Device)_device.clone());
-	}
-
-	/**
-	* Returns the browser name of this device.
-	*
-	* @return the browser name of this device
-	*/
-	@Override
-	public java.lang.String getBrowserName() {
-		return _device.getBrowserName();
-	}
-
-	/**
-	* Returns the device i p of this device.
-	*
-	* @return the device i p of this device
-	*/
-	@Override
-	public java.lang.String getDeviceIP() {
-		return _device.getDeviceIP();
-	}
-
-	/**
-	* Returns the email address of this device.
-	*
-	* @return the email address of this device
-	*/
-	@Override
-	public java.lang.String getEmailAddress() {
-		return _device.getEmailAddress();
-	}
-
-	/**
-	* Returns the os name of this device.
-	*
-	* @return the os name of this device
-	*/
-	@Override
-	public java.lang.String getOsName() {
-		return _device.getOsName();
-	}
-
-	/**
-	* Returns the portal user name of this device.
-	*
-	* @return the portal user name of this device
-	*/
-	@Override
-	public java.lang.String getPortalUserName() {
-		return _device.getPortalUserName();
-	}
-
-	/**
-	* Returns the portal user uuid of this device.
-	*
-	* @return the portal user uuid of this device
-	*/
-	@Override
-	public java.lang.String getPortalUserUuid() {
-		return _device.getPortalUserUuid();
-	}
-
-	/**
-	* Returns the user name of this device.
-	*
-	* @return the user name of this device
-	*/
-	@Override
-	public java.lang.String getUserName() {
-		return _device.getUserName();
-	}
-
-	/**
-	* Returns the user uuid of this device.
-	*
-	* @return the user uuid of this device
-	*/
-	@Override
-	public java.lang.String getUserUuid() {
-		return _device.getUserUuid();
-	}
-
-	@Override
-	public java.lang.String toString() {
-		return _device.toString();
-	}
-
-	@Override
-	public java.lang.String toXmlString() {
-		return _device.toXmlString();
-	}
-
-	/**
-	* Returns the create date of this device.
-	*
-	* @return the create date of this device
-	*/
-	@Override
-	public Date getCreateDate() {
-		return _device.getCreateDate();
-	}
-
-	/**
-	* Returns the modified date of this device.
-	*
-	* @return the modified date of this device
-	*/
-	@Override
-	public Date getModifiedDate() {
-		return _device.getModifiedDate();
-	}
-
-	/**
-	* Returns the company ID of this device.
-	*
-	* @return the company ID of this device
-	*/
-	@Override
-	public long getCompanyId() {
-		return _device.getCompanyId();
-	}
-
-	/**
-	* Returns the device ID of this device.
-	*
-	* @return the device ID of this device
-	*/
-	@Override
-	public long getDeviceId() {
-		return _device.getDeviceId();
-	}
-
-	/**
-	* Returns the group ID of this device.
-	*
-	* @return the group ID of this device
-	*/
-	@Override
-	public long getGroupId() {
-		return _device.getGroupId();
-	}
-
-	/**
-	* Returns the portal user ID of this device.
-	*
-	* @return the portal user ID of this device
-	*/
-	@Override
-	public long getPortalUserId() {
-		return _device.getPortalUserId();
-	}
-
-	/**
-	* Returns the primary key of this device.
-	*
-	* @return the primary key of this device
-	*/
-	@Override
-	public long getPrimaryKey() {
-		return _device.getPrimaryKey();
-	}
-
-	/**
-	* Returns the user ID of this device.
-	*
-	* @return the user ID of this device
-	*/
-	@Override
-	public long getUserId() {
-		return _device.getUserId();
-	}
-
-	@Override
 	public void persist() {
 		_device.persist();
 	}
@@ -445,7 +420,7 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	* @param browserName the browser name of this device
 	*/
 	@Override
-	public void setBrowserName(java.lang.String browserName) {
+	public void setBrowserName(String browserName) {
 		_device.setBrowserName(browserName);
 	}
 
@@ -475,16 +450,6 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	}
 
 	/**
-	* Sets the device i p of this device.
-	*
-	* @param deviceIP the device i p of this device
-	*/
-	@Override
-	public void setDeviceIP(java.lang.String deviceIP) {
-		_device.setDeviceIP(deviceIP);
-	}
-
-	/**
 	* Sets the device ID of this device.
 	*
 	* @param deviceId the device ID of this device
@@ -495,24 +460,34 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	}
 
 	/**
+	* Sets the device ip of this device.
+	*
+	* @param deviceIP the device ip of this device
+	*/
+	@Override
+	public void setDeviceIP(String deviceIP) {
+		_device.setDeviceIP(deviceIP);
+	}
+
+	/**
 	* Sets the email address of this device.
 	*
 	* @param emailAddress the email address of this device
 	*/
 	@Override
-	public void setEmailAddress(java.lang.String emailAddress) {
+	public void setEmailAddress(String emailAddress) {
 		_device.setEmailAddress(emailAddress);
-	}
-
-	@Override
-	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
-		_device.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
 	public void setExpandoBridgeAttributes(
 		com.liferay.portal.kernel.model.BaseModel<?> baseModel) {
 		_device.setExpandoBridgeAttributes(baseModel);
+	}
+
+	@Override
+	public void setExpandoBridgeAttributes(ExpandoBridge expandoBridge) {
+		_device.setExpandoBridgeAttributes(expandoBridge);
 	}
 
 	@Override
@@ -551,7 +526,7 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	* @param osName the os name of this device
 	*/
 	@Override
-	public void setOsName(java.lang.String osName) {
+	public void setOsName(String osName) {
 		_device.setOsName(osName);
 	}
 
@@ -571,7 +546,7 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	* @param portalUserName the portal user name of this device
 	*/
 	@Override
-	public void setPortalUserName(java.lang.String portalUserName) {
+	public void setPortalUserName(String portalUserName) {
 		_device.setPortalUserName(portalUserName);
 	}
 
@@ -581,7 +556,7 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	* @param portalUserUuid the portal user uuid of this device
 	*/
 	@Override
-	public void setPortalUserUuid(java.lang.String portalUserUuid) {
+	public void setPortalUserUuid(String portalUserUuid) {
 		_device.setPortalUserUuid(portalUserUuid);
 	}
 
@@ -626,7 +601,7 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	* @param userName the user name of this device
 	*/
 	@Override
-	public void setUserName(java.lang.String userName) {
+	public void setUserName(String userName) {
 		_device.setUserName(userName);
 	}
 
@@ -636,7 +611,7 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	* @param userUuid the user uuid of this device
 	*/
 	@Override
-	public void setUserUuid(java.lang.String userUuid) {
+	public void setUserUuid(String userUuid) {
 		_device.setUserUuid(userUuid);
 	}
 
@@ -648,6 +623,31 @@ public class DeviceWrapper implements Device, ModelWrapper<Device> {
 	@Override
 	public void setVerified(boolean verified) {
 		_device.setVerified(verified);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.CacheModel<Device> toCacheModel() {
+		return _device.toCacheModel();
+	}
+
+	@Override
+	public Device toEscapedModel() {
+		return new DeviceWrapper(_device.toEscapedModel());
+	}
+
+	@Override
+	public String toString() {
+		return _device.toString();
+	}
+
+	@Override
+	public Device toUnescapedModel() {
+		return new DeviceWrapper(_device.toUnescapedModel());
+	}
+
+	@Override
+	public String toXmlString() {
+		return _device.toXmlString();
 	}
 
 	@Override

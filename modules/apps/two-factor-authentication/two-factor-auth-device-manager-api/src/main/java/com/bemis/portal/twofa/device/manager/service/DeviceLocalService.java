@@ -61,8 +61,6 @@ public interface DeviceLocalService extends BaseLocalService,
 	 *
 	 * Never modify or reference this interface directly. Always use {@link DeviceLocalServiceUtil} to access the device local service. Add custom service methods to {@link com.bemis.portal.twofa.device.manager.service.impl.DeviceLocalServiceImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
-	public boolean checkDeviceExistsForThisUser(long userId,
-		java.lang.String deviceIP);
 
 	/**
 	* Adds the device to the database. Also notifies the appropriate model listeners.
@@ -73,12 +71,15 @@ public interface DeviceLocalService extends BaseLocalService,
 	@Indexable(type = IndexableType.REINDEX)
 	public Device addDevice(Device device);
 
+	public boolean checkDeviceExistsForThisUser(long userId, String deviceIP);
+
 	/**
 	* Creates a new device with the primary key. Does not add the device to the database.
 	*
 	* @param deviceId the primary key for the new device
 	* @return the new device
 	*/
+	@Transactional(enabled = false)
 	public Device createDevice(long deviceId);
 
 	/**
@@ -100,43 +101,6 @@ public interface DeviceLocalService extends BaseLocalService,
 	@Indexable(type = IndexableType.DELETE)
 	public Device deleteDevice(long deviceId) throws PortalException;
 
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public Device fetchDevice(long deviceId);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public Device fetchDeviceByUserAndDeviceIP(long userId,
-		java.lang.String deviceIP);
-
-	/**
-	* Returns the device with the primary key.
-	*
-	* @param deviceId the primary key of the device
-	* @return the device
-	* @throws PortalException if a device with the primary key could not be found
-	*/
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public Device getDevice(long deviceId) throws PortalException;
-
-	public Device registerDevice(DeviceInfo deviceInfo)
-		throws PortalException;
-
-	/**
-	* Updates the device in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
-	*
-	* @param device the device
-	* @return the device that was updated
-	*/
-	@Indexable(type = IndexableType.REINDEX)
-	public Device updateDevice(Device device);
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public ActionableDynamicQuery getActionableDynamicQuery();
-
-	public DynamicQuery dynamicQuery();
-
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
-
 	/**
 	* @throws PortalException
 	*/
@@ -144,25 +108,10 @@ public interface DeviceLocalService extends BaseLocalService,
 	public PersistedModel deletePersistedModel(PersistedModel persistedModel)
 		throws PortalException;
 
-	@Override
-	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
-		throws PortalException;
+	public void deleteUnauthorizedDevice(long userId);
 
-	/**
-	* Returns the number of devices.
-	*
-	* @return the number of devices
-	*/
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-	public int getDevicesCount();
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	public java.lang.String getOSGiServiceIdentifier();
+	public DynamicQuery dynamicQuery();
 
 	/**
 	* Performs a dynamic query on the database and returns the matching rows.
@@ -170,6 +119,7 @@ public interface DeviceLocalService extends BaseLocalService,
 	* @param dynamicQuery the dynamic query
 	* @return the matching rows
 	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery);
 
 	/**
@@ -184,6 +134,7 @@ public interface DeviceLocalService extends BaseLocalService,
 	* @param end the upper bound of the range of model instances (not inclusive)
 	* @return the range of matching rows
 	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
 		int end);
 
@@ -200,8 +151,48 @@ public interface DeviceLocalService extends BaseLocalService,
 	* @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	* @return the ordered range of matching rows
 	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public <T> List<T> dynamicQuery(DynamicQuery dynamicQuery, int start,
 		int end, OrderByComparator<T> orderByComparator);
+
+	/**
+	* Returns the number of rows matching the dynamic query.
+	*
+	* @param dynamicQuery the dynamic query
+	* @return the number of rows matching the dynamic query
+	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long dynamicQueryCount(DynamicQuery dynamicQuery);
+
+	/**
+	* Returns the number of rows matching the dynamic query.
+	*
+	* @param dynamicQuery the dynamic query
+	* @param projection the projection to apply to the query
+	* @return the number of rows matching the dynamic query
+	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public long dynamicQueryCount(DynamicQuery dynamicQuery,
+		Projection projection);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Device fetchDevice(long deviceId);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Device fetchDeviceByUserAndDeviceIP(long userId, String deviceIP);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public ActionableDynamicQuery getActionableDynamicQuery();
+
+	/**
+	* Returns the device with the primary key.
+	*
+	* @param deviceId the primary key of the device
+	* @return the device
+	* @throws PortalException if a device with the primary key could not be found
+	*/
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public Device getDevice(long deviceId) throws PortalException;
 
 	/**
 	* Returns a range of all the devices.
@@ -218,24 +209,27 @@ public interface DeviceLocalService extends BaseLocalService,
 	public List<Device> getDevices(int start, int end);
 
 	/**
-	* Returns the number of rows matching the dynamic query.
+	* Returns the number of devices.
 	*
-	* @param dynamicQuery the dynamic query
-	* @return the number of rows matching the dynamic query
+	* @return the number of devices
 	*/
-	public long dynamicQueryCount(DynamicQuery dynamicQuery);
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getDevicesCount();
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public IndexableActionableDynamicQuery getIndexableActionableDynamicQuery();
 
 	/**
-	* Returns the number of rows matching the dynamic query.
+	* Returns the OSGi service identifier.
 	*
-	* @param dynamicQuery the dynamic query
-	* @param projection the projection to apply to the query
-	* @return the number of rows matching the dynamic query
+	* @return the OSGi service identifier
 	*/
-	public long dynamicQueryCount(DynamicQuery dynamicQuery,
-		Projection projection);
+	public String getOSGiServiceIdentifier();
 
-	public void deleteUnauthorizedDevice(long userId);
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
+		throws PortalException;
 
 	/**
 	* Sets registered device as verified
@@ -250,4 +244,16 @@ public interface DeviceLocalService extends BaseLocalService,
 	* @param userId
 	*/
 	public void registerAsVerifiedDevice(long userId);
+
+	public Device registerDevice(DeviceInfo deviceInfo)
+		throws PortalException;
+
+	/**
+	* Updates the device in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param device the device
+	* @return the device that was updated
+	*/
+	@Indexable(type = IndexableType.REINDEX)
+	public Device updateDevice(Device device);
 }

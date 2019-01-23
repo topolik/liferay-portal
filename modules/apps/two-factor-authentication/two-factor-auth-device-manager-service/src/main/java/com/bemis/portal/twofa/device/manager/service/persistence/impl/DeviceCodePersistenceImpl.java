@@ -37,12 +37,14 @@ import com.liferay.portal.kernel.service.persistence.CompanyProvider;
 import com.liferay.portal.kernel.service.persistence.CompanyProviderWrapper;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
+
+import java.lang.reflect.InvocationHandler;
 
 import java.util.Collections;
 import java.util.Date;
@@ -118,7 +120,7 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 			msg.append("portalUserId=");
 			msg.append(portalUserId);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -211,11 +213,6 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 					result = deviceCode;
 
 					cacheResult(deviceCode);
-
-					if ((deviceCode.getPortalUserId() != portalUserId)) {
-						finderCache.putResult(FINDER_PATH_FETCH_BY_PORTALUSERID,
-							finderArgs, deviceCode);
-					}
 				}
 			}
 			catch (Exception e) {
@@ -333,7 +330,7 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 			msg.append("emailAddress=");
 			msg.append(emailAddress);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -366,6 +363,8 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 	@Override
 	public DeviceCode fetchByEmailAddress(String emailAddress,
 		boolean retrieveFromCache) {
+		emailAddress = Objects.toString(emailAddress, "");
+
 		Object[] finderArgs = new Object[] { emailAddress };
 
 		Object result = null;
@@ -390,10 +389,7 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 
 			boolean bindEmailAddress = false;
 
-			if (emailAddress == null) {
-				query.append(_FINDER_COLUMN_EMAILADDRESS_EMAILADDRESS_1);
-			}
-			else if (emailAddress.equals(StringPool.BLANK)) {
+			if (emailAddress.isEmpty()) {
 				query.append(_FINDER_COLUMN_EMAILADDRESS_EMAILADDRESS_3);
 			}
 			else {
@@ -440,12 +436,6 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 					result = deviceCode;
 
 					cacheResult(deviceCode);
-
-					if ((deviceCode.getEmailAddress() == null) ||
-							!deviceCode.getEmailAddress().equals(emailAddress)) {
-						finderCache.putResult(FINDER_PATH_FETCH_BY_EMAILADDRESS,
-							finderArgs, deviceCode);
-					}
 				}
 			}
 			catch (Exception e) {
@@ -489,6 +479,8 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 	 */
 	@Override
 	public int countByEmailAddress(String emailAddress) {
+		emailAddress = Objects.toString(emailAddress, "");
+
 		FinderPath finderPath = FINDER_PATH_COUNT_BY_EMAILADDRESS;
 
 		Object[] finderArgs = new Object[] { emailAddress };
@@ -502,10 +494,7 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 
 			boolean bindEmailAddress = false;
 
-			if (emailAddress == null) {
-				query.append(_FINDER_COLUMN_EMAILADDRESS_EMAILADDRESS_1);
-			}
-			else if (emailAddress.equals(StringPool.BLANK)) {
+			if (emailAddress.isEmpty()) {
 				query.append(_FINDER_COLUMN_EMAILADDRESS_EMAILADDRESS_3);
 			}
 			else {
@@ -546,7 +535,6 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 		return count.intValue();
 	}
 
-	private static final String _FINDER_COLUMN_EMAILADDRESS_EMAILADDRESS_1 = "deviceCode.emailAddress IS NULL";
 	private static final String _FINDER_COLUMN_EMAILADDRESS_EMAILADDRESS_2 = "deviceCode.emailAddress = ?";
 	private static final String _FINDER_COLUMN_EMAILADDRESS_EMAILADDRESS_3 = "(deviceCode.emailAddress IS NULL OR deviceCode.emailAddress = '')";
 
@@ -623,7 +611,7 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((DeviceCodeModelImpl)deviceCode);
+		clearUniqueFindersCache((DeviceCodeModelImpl)deviceCode, true);
 	}
 
 	@Override
@@ -635,77 +623,58 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 			entityCache.removeResult(DeviceCodeModelImpl.ENTITY_CACHE_ENABLED,
 				DeviceCodeImpl.class, deviceCode.getPrimaryKey());
 
-			clearUniqueFindersCache((DeviceCodeModelImpl)deviceCode);
+			clearUniqueFindersCache((DeviceCodeModelImpl)deviceCode, true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(
-		DeviceCodeModelImpl deviceCodeModelImpl, boolean isNew) {
-		if (isNew) {
-			Object[] args = new Object[] { deviceCodeModelImpl.getPortalUserId() };
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_PORTALUSERID, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_PORTALUSERID, args,
-				deviceCodeModelImpl);
-
-			args = new Object[] { deviceCodeModelImpl.getEmailAddress() };
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_EMAILADDRESS, args,
-				Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_EMAILADDRESS, args,
-				deviceCodeModelImpl);
-		}
-		else {
-			if ((deviceCodeModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_PORTALUSERID.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						deviceCodeModelImpl.getPortalUserId()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_PORTALUSERID, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_PORTALUSERID, args,
-					deviceCodeModelImpl);
-			}
-
-			if ((deviceCodeModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_EMAILADDRESS.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						deviceCodeModelImpl.getEmailAddress()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_EMAILADDRESS, args,
-					Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_EMAILADDRESS, args,
-					deviceCodeModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(
 		DeviceCodeModelImpl deviceCodeModelImpl) {
 		Object[] args = new Object[] { deviceCodeModelImpl.getPortalUserId() };
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_PORTALUSERID, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_PORTALUSERID, args);
+		finderCache.putResult(FINDER_PATH_COUNT_BY_PORTALUSERID, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_PORTALUSERID, args,
+			deviceCodeModelImpl, false);
 
-		if ((deviceCodeModelImpl.getColumnBitmask() &
-				FINDER_PATH_FETCH_BY_PORTALUSERID.getColumnBitmask()) != 0) {
-			args = new Object[] { deviceCodeModelImpl.getOriginalPortalUserId() };
+		args = new Object[] { deviceCodeModelImpl.getEmailAddress() };
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_EMAILADDRESS, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_EMAILADDRESS, args,
+			deviceCodeModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(
+		DeviceCodeModelImpl deviceCodeModelImpl, boolean clearCurrent) {
+		if (clearCurrent) {
+			Object[] args = new Object[] { deviceCodeModelImpl.getPortalUserId() };
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_PORTALUSERID, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_PORTALUSERID, args);
 		}
 
-		args = new Object[] { deviceCodeModelImpl.getEmailAddress() };
+		if ((deviceCodeModelImpl.getColumnBitmask() &
+				FINDER_PATH_FETCH_BY_PORTALUSERID.getColumnBitmask()) != 0) {
+			Object[] args = new Object[] {
+					deviceCodeModelImpl.getOriginalPortalUserId()
+				};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_EMAILADDRESS, args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_EMAILADDRESS, args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_PORTALUSERID, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_PORTALUSERID, args);
+		}
+
+		if (clearCurrent) {
+			Object[] args = new Object[] { deviceCodeModelImpl.getEmailAddress() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_EMAILADDRESS, args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_EMAILADDRESS, args);
+		}
 
 		if ((deviceCodeModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_EMAILADDRESS.getColumnBitmask()) != 0) {
-			args = new Object[] { deviceCodeModelImpl.getOriginalEmailAddress() };
+			Object[] args = new Object[] {
+					deviceCodeModelImpl.getOriginalEmailAddress()
+				};
 
 			finderCache.removeResult(FINDER_PATH_COUNT_BY_EMAILADDRESS, args);
 			finderCache.removeResult(FINDER_PATH_FETCH_BY_EMAILADDRESS, args);
@@ -785,8 +754,6 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 
 	@Override
 	protected DeviceCode removeImpl(DeviceCode deviceCode) {
-		deviceCode = toUnwrappedModel(deviceCode);
-
 		Session session = null;
 
 		try {
@@ -817,9 +784,23 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 
 	@Override
 	public DeviceCode updateImpl(DeviceCode deviceCode) {
-		deviceCode = toUnwrappedModel(deviceCode);
-
 		boolean isNew = deviceCode.isNew();
+
+		if (!(deviceCode instanceof DeviceCodeModelImpl)) {
+			InvocationHandler invocationHandler = null;
+
+			if (ProxyUtil.isProxyClass(deviceCode.getClass())) {
+				invocationHandler = ProxyUtil.getInvocationHandler(deviceCode);
+
+				throw new IllegalArgumentException(
+					"Implement ModelWrapper in deviceCode proxy " +
+					invocationHandler.getClass());
+			}
+
+			throw new IllegalArgumentException(
+				"Implement ModelWrapper in custom DeviceCode implementation " +
+				deviceCode.getClass());
+		}
 
 		DeviceCodeModelImpl deviceCodeModelImpl = (DeviceCodeModelImpl)deviceCode;
 
@@ -868,46 +849,25 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !DeviceCodeModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!DeviceCodeModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		entityCache.putResult(DeviceCodeModelImpl.ENTITY_CACHE_ENABLED,
 			DeviceCodeImpl.class, deviceCode.getPrimaryKey(), deviceCode, false);
 
-		clearUniqueFindersCache(deviceCodeModelImpl);
-		cacheUniqueFindersCache(deviceCodeModelImpl, isNew);
+		clearUniqueFindersCache(deviceCodeModelImpl, false);
+		cacheUniqueFindersCache(deviceCodeModelImpl);
 
 		deviceCode.resetOriginalValues();
 
 		return deviceCode;
-	}
-
-	protected DeviceCode toUnwrappedModel(DeviceCode deviceCode) {
-		if (deviceCode instanceof DeviceCodeImpl) {
-			return deviceCode;
-		}
-
-		DeviceCodeImpl deviceCodeImpl = new DeviceCodeImpl();
-
-		deviceCodeImpl.setNew(deviceCode.isNew());
-		deviceCodeImpl.setPrimaryKey(deviceCode.getPrimaryKey());
-
-		deviceCodeImpl.setDeviceCodeId(deviceCode.getDeviceCodeId());
-		deviceCodeImpl.setGroupId(deviceCode.getGroupId());
-		deviceCodeImpl.setCompanyId(deviceCode.getCompanyId());
-		deviceCodeImpl.setUserId(deviceCode.getUserId());
-		deviceCodeImpl.setUserName(deviceCode.getUserName());
-		deviceCodeImpl.setCreateDate(deviceCode.getCreateDate());
-		deviceCodeImpl.setModifiedDate(deviceCode.getModifiedDate());
-		deviceCodeImpl.setPortalUserId(deviceCode.getPortalUserId());
-		deviceCodeImpl.setPortalUserName(deviceCode.getPortalUserName());
-		deviceCodeImpl.setEmailAddress(deviceCode.getEmailAddress());
-		deviceCodeImpl.setDeviceCode(deviceCode.getDeviceCode());
-		deviceCodeImpl.setDeviceIP(deviceCode.getDeviceIP());
-		deviceCodeImpl.setValidationCode(deviceCode.getValidationCode());
-
-		return deviceCodeImpl;
 	}
 
 	/**
@@ -1059,14 +1019,14 @@ public class DeviceCodePersistenceImpl extends BasePersistenceImpl<DeviceCode>
 		query.append(_SQL_SELECT_DEVICECODE_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 

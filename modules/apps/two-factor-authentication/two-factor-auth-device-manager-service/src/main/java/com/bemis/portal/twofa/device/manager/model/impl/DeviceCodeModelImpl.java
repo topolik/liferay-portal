@@ -25,6 +25,7 @@ import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.CacheModel;
+import com.liferay.portal.kernel.model.ModelWrapper;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.impl.BaseModelImpl;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -32,7 +33,6 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 
 import java.io.Serializable;
 
@@ -104,19 +104,19 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 	public static final String DATA_SOURCE = "liferayDataSource";
 	public static final String SESSION_FACTORY = "liferaySessionFactory";
 	public static final String TX_MANAGER = "liferayTransactionManager";
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.bemis.portal.twofa.device.manager.service.util.PropsUtil.get(
+	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.com.bemis.portal.twofa.device.manager.service.util.ServiceProps.get(
 				"value.object.entity.cache.enabled.com.bemis.portal.twofa.device.manager.model.DeviceCode"),
 			true);
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.bemis.portal.twofa.device.manager.service.util.PropsUtil.get(
+	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.com.bemis.portal.twofa.device.manager.service.util.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.bemis.portal.twofa.device.manager.model.DeviceCode"),
 			true);
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.bemis.portal.twofa.device.manager.service.util.PropsUtil.get(
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.com.bemis.portal.twofa.device.manager.service.util.ServiceProps.get(
 				"value.object.column.bitmask.enabled.com.bemis.portal.twofa.device.manager.model.DeviceCode"),
 			true);
 	public static final long EMAILADDRESS_COLUMN_BITMASK = 1L;
 	public static final long PORTALUSERID_COLUMN_BITMASK = 2L;
 	public static final long DEVICECODEID_COLUMN_BITMASK = 4L;
-	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.bemis.portal.twofa.device.manager.service.util.PropsUtil.get(
+	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.com.bemis.portal.twofa.device.manager.service.util.ServiceProps.get(
 				"lock.expiration.time.com.bemis.portal.twofa.device.manager.model.DeviceCode"));
 
 	public DeviceCodeModelImpl() {
@@ -305,7 +305,7 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 			return user.getUuid();
 		}
 		catch (PortalException pe) {
-			return StringPool.BLANK;
+			return "";
 		}
 	}
 
@@ -316,7 +316,7 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 	@Override
 	public String getUserName() {
 		if (_userName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _userName;
@@ -380,7 +380,7 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 			return user.getUuid();
 		}
 		catch (PortalException pe) {
-			return StringPool.BLANK;
+			return "";
 		}
 	}
 
@@ -395,7 +395,7 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 	@Override
 	public String getPortalUserName() {
 		if (_portalUserName == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _portalUserName;
@@ -410,7 +410,7 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 	@Override
 	public String getEmailAddress() {
 		if (_emailAddress == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _emailAddress;
@@ -435,7 +435,7 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 	@Override
 	public String getDeviceCode() {
 		if (_deviceCode == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _deviceCode;
@@ -450,7 +450,7 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 	@Override
 	public String getDeviceIP() {
 		if (_deviceIP == null) {
-			return StringPool.BLANK;
+			return "";
 		}
 		else {
 			return _deviceIP;
@@ -769,7 +769,7 @@ public class DeviceCodeModelImpl extends BaseModelImpl<DeviceCode>
 
 	private static final ClassLoader _classLoader = DeviceCode.class.getClassLoader();
 	private static final Class<?>[] _escapedModelInterfaces = new Class[] {
-			DeviceCode.class
+			DeviceCode.class, ModelWrapper.class
 		};
 	private long _deviceCodeId;
 	private long _groupId;

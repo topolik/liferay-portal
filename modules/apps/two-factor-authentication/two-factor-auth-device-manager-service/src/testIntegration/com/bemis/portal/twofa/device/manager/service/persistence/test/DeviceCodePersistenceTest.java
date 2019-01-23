@@ -35,7 +35,6 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
@@ -69,7 +68,8 @@ public class DeviceCodePersistenceTest {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
-			new TransactionalTestRule(Propagation.REQUIRED));
+			new TransactionalTestRule(Propagation.REQUIRED,
+				"com.bemis.portal.twofa.device.manager.service"));
 
 	@Before
 	public void setUp() {
@@ -191,9 +191,9 @@ public class DeviceCodePersistenceTest {
 
 	@Test
 	public void testCountByEmailAddress() throws Exception {
-		_persistence.countByEmailAddress(StringPool.BLANK);
+		_persistence.countByEmailAddress("");
 
-		_persistence.countByEmailAddress(StringPool.NULL);
+		_persistence.countByEmailAddress("null");
 
 		_persistence.countByEmailAddress((String)null);
 	}

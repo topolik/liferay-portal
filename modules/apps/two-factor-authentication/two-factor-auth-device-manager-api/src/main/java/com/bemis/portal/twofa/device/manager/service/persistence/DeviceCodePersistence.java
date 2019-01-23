@@ -21,6 +21,11 @@ import com.bemis.portal.twofa.device.manager.model.DeviceCode;
 
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
 
+import java.io.Serializable;
+
+import java.util.Map;
+import java.util.Set;
+
 /**
  * The persistence interface for the device code service.
  *
@@ -40,6 +45,9 @@ public interface DeviceCodePersistence extends BasePersistence<DeviceCode> {
 	 *
 	 * Never modify or reference this interface directly. Always use {@link DeviceCodeUtil} to access the device code persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this interface.
 	 */
+	@Override
+	public Map<Serializable, DeviceCode> fetchByPrimaryKeys(
+		Set<Serializable> primaryKeys);
 
 	/**
 	* Returns the device code where portalUserId = &#63; or throws a {@link NoSuchDeviceCodeException} if it could not be found.
@@ -93,7 +101,7 @@ public interface DeviceCodePersistence extends BasePersistence<DeviceCode> {
 	* @return the matching device code
 	* @throws NoSuchDeviceCodeException if a matching device code could not be found
 	*/
-	public DeviceCode findByEmailAddress(java.lang.String emailAddress)
+	public DeviceCode findByEmailAddress(String emailAddress)
 		throws NoSuchDeviceCodeException;
 
 	/**
@@ -102,7 +110,7 @@ public interface DeviceCodePersistence extends BasePersistence<DeviceCode> {
 	* @param emailAddress the email address
 	* @return the matching device code, or <code>null</code> if a matching device code could not be found
 	*/
-	public DeviceCode fetchByEmailAddress(java.lang.String emailAddress);
+	public DeviceCode fetchByEmailAddress(String emailAddress);
 
 	/**
 	* Returns the device code where emailAddress = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
@@ -111,7 +119,7 @@ public interface DeviceCodePersistence extends BasePersistence<DeviceCode> {
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching device code, or <code>null</code> if a matching device code could not be found
 	*/
-	public DeviceCode fetchByEmailAddress(java.lang.String emailAddress,
+	public DeviceCode fetchByEmailAddress(String emailAddress,
 		boolean retrieveFromCache);
 
 	/**
@@ -120,7 +128,7 @@ public interface DeviceCodePersistence extends BasePersistence<DeviceCode> {
 	* @param emailAddress the email address
 	* @return the device code that was removed
 	*/
-	public DeviceCode removeByEmailAddress(java.lang.String emailAddress)
+	public DeviceCode removeByEmailAddress(String emailAddress)
 		throws NoSuchDeviceCodeException;
 
 	/**
@@ -129,7 +137,7 @@ public interface DeviceCodePersistence extends BasePersistence<DeviceCode> {
 	* @param emailAddress the email address
 	* @return the number of matching device codes
 	*/
-	public int countByEmailAddress(java.lang.String emailAddress);
+	public int countByEmailAddress(String emailAddress);
 
 	/**
 	* Caches the device code in the entity cache if it is enabled.
@@ -182,10 +190,6 @@ public interface DeviceCodePersistence extends BasePersistence<DeviceCode> {
 	* @return the device code, or <code>null</code> if a device code with the primary key could not be found
 	*/
 	public DeviceCode fetchByPrimaryKey(long deviceCodeId);
-
-	@Override
-	public java.util.Map<java.io.Serializable, DeviceCode> fetchByPrimaryKeys(
-		java.util.Set<java.io.Serializable> primaryKeys);
 
 	/**
 	* Returns all the device codes.

@@ -35,7 +35,6 @@ import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.util.IntegerWrapper;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.portal.test.rule.PersistenceTestRule;
@@ -69,7 +68,8 @@ public class DevicePersistenceTest {
 	@Rule
 	public static final AggregateTestRule aggregateTestRule = new AggregateTestRule(new LiferayIntegrationTestRule(),
 			PersistenceTestRule.INSTANCE,
-			new TransactionalTestRule(Propagation.REQUIRED));
+			new TransactionalTestRule(Propagation.REQUIRED,
+				"com.bemis.portal.twofa.device.manager.service"));
 
 	@Before
 	public void setUp() {
@@ -181,10 +181,9 @@ public class DevicePersistenceTest {
 		Assert.assertEquals(existingDevice.getBrowserName(),
 			newDevice.getBrowserName());
 		Assert.assertEquals(existingDevice.getOsName(), newDevice.getOsName());
-		Assert.assertEquals(existingDevice.getVerified(),
-			newDevice.getVerified());
-		Assert.assertEquals(existingDevice.getTempDevice(),
-			newDevice.getTempDevice());
+		Assert.assertEquals(existingDevice.isVerified(), newDevice.isVerified());
+		Assert.assertEquals(existingDevice.isTempDevice(),
+			newDevice.isTempDevice());
 	}
 
 	@Test
@@ -196,10 +195,9 @@ public class DevicePersistenceTest {
 
 	@Test
 	public void testCountByPortalUserId_DeviceIP() throws Exception {
-		_persistence.countByPortalUserId_DeviceIP(RandomTestUtil.nextLong(),
-			StringPool.BLANK);
+		_persistence.countByPortalUserId_DeviceIP(RandomTestUtil.nextLong(), "");
 
-		_persistence.countByPortalUserId_DeviceIP(0L, StringPool.NULL);
+		_persistence.countByPortalUserId_DeviceIP(0L, "null");
 
 		_persistence.countByPortalUserId_DeviceIP(0L, (String)null);
 	}
@@ -217,10 +215,10 @@ public class DevicePersistenceTest {
 	public void testCountByVerified_PortalUserId_DeviceIP()
 		throws Exception {
 		_persistence.countByVerified_PortalUserId_DeviceIP(RandomTestUtil.randomBoolean(),
-			RandomTestUtil.nextLong(), StringPool.BLANK);
+			RandomTestUtil.nextLong(), "");
 
 		_persistence.countByVerified_PortalUserId_DeviceIP(RandomTestUtil.randomBoolean(),
-			0L, StringPool.NULL);
+			0L, "null");
 
 		_persistence.countByVerified_PortalUserId_DeviceIP(RandomTestUtil.randomBoolean(),
 			0L, (String)null);
@@ -230,10 +228,10 @@ public class DevicePersistenceTest {
 	public void testCountByTempDevice_PortalUserId_DeviceIP()
 		throws Exception {
 		_persistence.countByTempDevice_PortalUserId_DeviceIP(RandomTestUtil.randomBoolean(),
-			RandomTestUtil.nextLong(), StringPool.BLANK);
+			RandomTestUtil.nextLong(), "");
 
 		_persistence.countByTempDevice_PortalUserId_DeviceIP(RandomTestUtil.randomBoolean(),
-			0L, StringPool.NULL);
+			0L, "null");
 
 		_persistence.countByTempDevice_PortalUserId_DeviceIP(RandomTestUtil.randomBoolean(),
 			0L, (String)null);

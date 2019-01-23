@@ -21,6 +21,11 @@ import com.bemis.portal.twofa.device.manager.model.Device;
 
 import com.liferay.portal.kernel.service.persistence.BasePersistence;
 
+import java.io.Serializable;
+
+import java.util.Map;
+import java.util.Set;
+
 /**
  * The persistence interface for the device service.
  *
@@ -40,6 +45,9 @@ public interface DevicePersistence extends BasePersistence<Device> {
 	 *
 	 * Never modify or reference this interface directly. Always use {@link DeviceUtil} to access the device persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this interface.
 	 */
+	@Override
+	public Map<Serializable, Device> fetchByPrimaryKeys(
+		Set<Serializable> primaryKeys);
 
 	/**
 	* Returns all the devices where portalUserId = &#63;.
@@ -177,53 +185,52 @@ public interface DevicePersistence extends BasePersistence<Device> {
 	* Returns the device where portalUserId = &#63; and deviceIP = &#63; or throws a {@link NoSuchDeviceException} if it could not be found.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device
 	* @throws NoSuchDeviceException if a matching device could not be found
 	*/
-	public Device findByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP) throws NoSuchDeviceException;
+	public Device findByPortalUserId_DeviceIP(long portalUserId, String deviceIP)
+		throws NoSuchDeviceException;
 
 	/**
 	* Returns the device where portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public Device fetchByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP);
+		String deviceIP);
 
 	/**
 	* Returns the device where portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public Device fetchByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP, boolean retrieveFromCache);
+		String deviceIP, boolean retrieveFromCache);
 
 	/**
 	* Removes the device where portalUserId = &#63; and deviceIP = &#63; from the database.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the device that was removed
 	*/
 	public Device removeByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP) throws NoSuchDeviceException;
+		String deviceIP) throws NoSuchDeviceException;
 
 	/**
 	* Returns the number of devices where portalUserId = &#63; and deviceIP = &#63;.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the number of matching devices
 	*/
-	public int countByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP);
+	public int countByPortalUserId_DeviceIP(long portalUserId, String deviceIP);
 
 	/**
 	* Returns all the devices where verified = &#63; and portalUserId = &#63;.
@@ -379,118 +386,114 @@ public interface DevicePersistence extends BasePersistence<Device> {
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device
 	* @throws NoSuchDeviceException if a matching device could not be found
 	*/
 	public Device findByVerified_PortalUserId_DeviceIP(boolean verified,
-		long portalUserId, java.lang.String deviceIP)
-		throws NoSuchDeviceException;
+		long portalUserId, String deviceIP) throws NoSuchDeviceException;
 
 	/**
 	* Returns the device where verified = &#63; and portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public Device fetchByVerified_PortalUserId_DeviceIP(boolean verified,
-		long portalUserId, java.lang.String deviceIP);
+		long portalUserId, String deviceIP);
 
 	/**
 	* Returns the device where verified = &#63; and portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public Device fetchByVerified_PortalUserId_DeviceIP(boolean verified,
-		long portalUserId, java.lang.String deviceIP, boolean retrieveFromCache);
+		long portalUserId, String deviceIP, boolean retrieveFromCache);
 
 	/**
 	* Removes the device where verified = &#63; and portalUserId = &#63; and deviceIP = &#63; from the database.
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the device that was removed
 	*/
 	public Device removeByVerified_PortalUserId_DeviceIP(boolean verified,
-		long portalUserId, java.lang.String deviceIP)
-		throws NoSuchDeviceException;
+		long portalUserId, String deviceIP) throws NoSuchDeviceException;
 
 	/**
 	* Returns the number of devices where verified = &#63; and portalUserId = &#63; and deviceIP = &#63;.
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the number of matching devices
 	*/
 	public int countByVerified_PortalUserId_DeviceIP(boolean verified,
-		long portalUserId, java.lang.String deviceIP);
+		long portalUserId, String deviceIP);
 
 	/**
 	* Returns the device where tempDevice = &#63; and portalUserId = &#63; and deviceIP = &#63; or throws a {@link NoSuchDeviceException} if it could not be found.
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device
 	* @throws NoSuchDeviceException if a matching device could not be found
 	*/
 	public Device findByTempDevice_PortalUserId_DeviceIP(boolean tempDevice,
-		long portalUserId, java.lang.String deviceIP)
-		throws NoSuchDeviceException;
+		long portalUserId, String deviceIP) throws NoSuchDeviceException;
 
 	/**
 	* Returns the device where tempDevice = &#63; and portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public Device fetchByTempDevice_PortalUserId_DeviceIP(boolean tempDevice,
-		long portalUserId, java.lang.String deviceIP);
+		long portalUserId, String deviceIP);
 
 	/**
 	* Returns the device where tempDevice = &#63; and portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public Device fetchByTempDevice_PortalUserId_DeviceIP(boolean tempDevice,
-		long portalUserId, java.lang.String deviceIP, boolean retrieveFromCache);
+		long portalUserId, String deviceIP, boolean retrieveFromCache);
 
 	/**
 	* Removes the device where tempDevice = &#63; and portalUserId = &#63; and deviceIP = &#63; from the database.
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the device that was removed
 	*/
 	public Device removeByTempDevice_PortalUserId_DeviceIP(boolean tempDevice,
-		long portalUserId, java.lang.String deviceIP)
-		throws NoSuchDeviceException;
+		long portalUserId, String deviceIP) throws NoSuchDeviceException;
 
 	/**
 	* Returns the number of devices where tempDevice = &#63; and portalUserId = &#63; and deviceIP = &#63;.
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the number of matching devices
 	*/
 	public int countByTempDevice_PortalUserId_DeviceIP(boolean tempDevice,
-		long portalUserId, java.lang.String deviceIP);
+		long portalUserId, String deviceIP);
 
 	/**
 	* Caches the device in the entity cache if it is enabled.
@@ -541,10 +544,6 @@ public interface DevicePersistence extends BasePersistence<Device> {
 	* @return the device, or <code>null</code> if a device with the primary key could not be found
 	*/
 	public Device fetchByPrimaryKey(long deviceId);
-
-	@Override
-	public java.util.Map<java.io.Serializable, Device> fetchByPrimaryKeys(
-		java.util.Set<java.io.Serializable> primaryKeys);
 
 	/**
 	* Returns all the devices.

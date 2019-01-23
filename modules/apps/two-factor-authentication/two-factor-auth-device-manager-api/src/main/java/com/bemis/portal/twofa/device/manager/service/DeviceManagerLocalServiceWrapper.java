@@ -35,10 +35,43 @@ public class DeviceManagerLocalServiceWrapper
 	}
 
 	@Override
+	public void createAndSendVerificationCode(
+		com.liferay.portal.kernel.model.User portalUser,
+		String currentDeviceIP, String verificationBaseURL)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		_deviceManagerLocalService.createAndSendVerificationCode(portalUser,
+			currentDeviceIP, verificationBaseURL);
+	}
+
+	/**
+	* Returns the OSGi service identifier.
+	*
+	* @return the OSGi service identifier
+	*/
+	@Override
+	public String getOSGiServiceIdentifier() {
+		return _deviceManagerLocalService.getOSGiServiceIdentifier();
+	}
+
+	@Override
 	public boolean isDeviceVerifiedForUser(
 		com.bemis.portal.twofa.device.manager.model.DeviceInfo deviceInfo)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _deviceManagerLocalService.isDeviceVerifiedForUser(deviceInfo);
+	}
+
+	/**
+	* Sets Device as Verified or Temp based on Users decision
+	* Removes the generated device code
+	*
+	* @param portalUserId
+	* @param registerAsVerified
+	*/
+	@Override
+	public void registerDeviceAsVerifiedOrTemp(long portalUserId,
+		boolean registerAsVerified) {
+		_deviceManagerLocalService.registerDeviceAsVerifiedOrTemp(portalUserId,
+			registerAsVerified);
 	}
 
 	@Override
@@ -58,44 +91,10 @@ public class DeviceManagerLocalServiceWrapper
 	* @throws PortalException
 	*/
 	@Override
-	public boolean verifyDeviceCode(long userId,
-		java.lang.String verificationCode)
+	public boolean verifyDeviceCode(long userId, String verificationCode)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return _deviceManagerLocalService.verifyDeviceCode(userId,
 			verificationCode);
-	}
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	@Override
-	public java.lang.String getOSGiServiceIdentifier() {
-		return _deviceManagerLocalService.getOSGiServiceIdentifier();
-	}
-
-	@Override
-	public void createAndSendVerificationCode(
-		com.liferay.portal.kernel.model.User portalUser,
-		java.lang.String currentDeviceIP, java.lang.String verificationBaseURL)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		_deviceManagerLocalService.createAndSendVerificationCode(portalUser,
-			currentDeviceIP, verificationBaseURL);
-	}
-
-	/**
-	* Sets Device as Verified or Temp based on Users decision
-	* Removes the generated device code
-	*
-	* @param portalUserId
-	* @param registerAsVerified
-	*/
-	@Override
-	public void registerDeviceAsVerifiedOrTemp(long portalUserId,
-		boolean registerAsVerified) {
-		_deviceManagerLocalService.registerDeviceAsVerifiedOrTemp(portalUserId,
-			registerAsVerified);
 	}
 
 	@Override

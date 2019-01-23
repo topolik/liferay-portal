@@ -18,15 +18,20 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.bemis.portal.twofa.device.manager.model.Device;
 
-import com.liferay.osgi.util.ServiceTrackerFactory;
-
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.OrderByComparator;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+
 import org.osgi.util.tracker.ServiceTracker;
 
+import java.io.Serializable;
+
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The persistence utility for the device service. This utility wraps {@link com.bemis.portal.twofa.device.manager.service.persistence.impl.DevicePersistenceImpl} and provides direct access to the database for CRUD operations. This utility should only be used by the service layer, as it must operate within a transaction. Never access this utility in a JSP, controller, model, or other front-end class.
@@ -67,6 +72,14 @@ public class DeviceUtil {
 	 */
 	public static long countWithDynamicQuery(DynamicQuery dynamicQuery) {
 		return getPersistence().countWithDynamicQuery(dynamicQuery);
+	}
+
+	/**
+	 * @see com.liferay.portal.kernel.service.persistence.BasePersistence#fetchByPrimaryKeys(Set)
+	 */
+	public static Map<Serializable, Device> fetchByPrimaryKeys(
+		Set<Serializable> primaryKeys) {
+		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
@@ -273,12 +286,12 @@ public class DeviceUtil {
 	* Returns the device where portalUserId = &#63; and deviceIP = &#63; or throws a {@link NoSuchDeviceException} if it could not be found.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device
 	* @throws NoSuchDeviceException if a matching device could not be found
 	*/
 	public static Device findByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP)
+		String deviceIP)
 		throws com.bemis.portal.twofa.device.manager.exception.NoSuchDeviceException {
 		return getPersistence()
 				   .findByPortalUserId_DeviceIP(portalUserId, deviceIP);
@@ -288,11 +301,11 @@ public class DeviceUtil {
 	* Returns the device where portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public static Device fetchByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP) {
+		String deviceIP) {
 		return getPersistence()
 				   .fetchByPortalUserId_DeviceIP(portalUserId, deviceIP);
 	}
@@ -301,12 +314,12 @@ public class DeviceUtil {
 	* Returns the device where portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public static Device fetchByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP, boolean retrieveFromCache) {
+		String deviceIP, boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByPortalUserId_DeviceIP(portalUserId, deviceIP,
 			retrieveFromCache);
@@ -316,11 +329,11 @@ public class DeviceUtil {
 	* Removes the device where portalUserId = &#63; and deviceIP = &#63; from the database.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the device that was removed
 	*/
 	public static Device removeByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP)
+		String deviceIP)
 		throws com.bemis.portal.twofa.device.manager.exception.NoSuchDeviceException {
 		return getPersistence()
 				   .removeByPortalUserId_DeviceIP(portalUserId, deviceIP);
@@ -330,11 +343,11 @@ public class DeviceUtil {
 	* Returns the number of devices where portalUserId = &#63; and deviceIP = &#63;.
 	*
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the number of matching devices
 	*/
 	public static int countByPortalUserId_DeviceIP(long portalUserId,
-		java.lang.String deviceIP) {
+		String deviceIP) {
 		return getPersistence()
 				   .countByPortalUserId_DeviceIP(portalUserId, deviceIP);
 	}
@@ -529,12 +542,12 @@ public class DeviceUtil {
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device
 	* @throws NoSuchDeviceException if a matching device could not be found
 	*/
 	public static Device findByVerified_PortalUserId_DeviceIP(
-		boolean verified, long portalUserId, java.lang.String deviceIP)
+		boolean verified, long portalUserId, String deviceIP)
 		throws com.bemis.portal.twofa.device.manager.exception.NoSuchDeviceException {
 		return getPersistence()
 				   .findByVerified_PortalUserId_DeviceIP(verified,
@@ -546,11 +559,11 @@ public class DeviceUtil {
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public static Device fetchByVerified_PortalUserId_DeviceIP(
-		boolean verified, long portalUserId, java.lang.String deviceIP) {
+		boolean verified, long portalUserId, String deviceIP) {
 		return getPersistence()
 				   .fetchByVerified_PortalUserId_DeviceIP(verified,
 			portalUserId, deviceIP);
@@ -561,12 +574,12 @@ public class DeviceUtil {
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public static Device fetchByVerified_PortalUserId_DeviceIP(
-		boolean verified, long portalUserId, java.lang.String deviceIP,
+		boolean verified, long portalUserId, String deviceIP,
 		boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByVerified_PortalUserId_DeviceIP(verified,
@@ -578,11 +591,11 @@ public class DeviceUtil {
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the device that was removed
 	*/
 	public static Device removeByVerified_PortalUserId_DeviceIP(
-		boolean verified, long portalUserId, java.lang.String deviceIP)
+		boolean verified, long portalUserId, String deviceIP)
 		throws com.bemis.portal.twofa.device.manager.exception.NoSuchDeviceException {
 		return getPersistence()
 				   .removeByVerified_PortalUserId_DeviceIP(verified,
@@ -594,11 +607,11 @@ public class DeviceUtil {
 	*
 	* @param verified the verified
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the number of matching devices
 	*/
 	public static int countByVerified_PortalUserId_DeviceIP(boolean verified,
-		long portalUserId, java.lang.String deviceIP) {
+		long portalUserId, String deviceIP) {
 		return getPersistence()
 				   .countByVerified_PortalUserId_DeviceIP(verified,
 			portalUserId, deviceIP);
@@ -609,12 +622,12 @@ public class DeviceUtil {
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device
 	* @throws NoSuchDeviceException if a matching device could not be found
 	*/
 	public static Device findByTempDevice_PortalUserId_DeviceIP(
-		boolean tempDevice, long portalUserId, java.lang.String deviceIP)
+		boolean tempDevice, long portalUserId, String deviceIP)
 		throws com.bemis.portal.twofa.device.manager.exception.NoSuchDeviceException {
 		return getPersistence()
 				   .findByTempDevice_PortalUserId_DeviceIP(tempDevice,
@@ -626,11 +639,11 @@ public class DeviceUtil {
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public static Device fetchByTempDevice_PortalUserId_DeviceIP(
-		boolean tempDevice, long portalUserId, java.lang.String deviceIP) {
+		boolean tempDevice, long portalUserId, String deviceIP) {
 		return getPersistence()
 				   .fetchByTempDevice_PortalUserId_DeviceIP(tempDevice,
 			portalUserId, deviceIP);
@@ -641,12 +654,12 @@ public class DeviceUtil {
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @param retrieveFromCache whether to retrieve from the finder cache
 	* @return the matching device, or <code>null</code> if a matching device could not be found
 	*/
 	public static Device fetchByTempDevice_PortalUserId_DeviceIP(
-		boolean tempDevice, long portalUserId, java.lang.String deviceIP,
+		boolean tempDevice, long portalUserId, String deviceIP,
 		boolean retrieveFromCache) {
 		return getPersistence()
 				   .fetchByTempDevice_PortalUserId_DeviceIP(tempDevice,
@@ -658,11 +671,11 @@ public class DeviceUtil {
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the device that was removed
 	*/
 	public static Device removeByTempDevice_PortalUserId_DeviceIP(
-		boolean tempDevice, long portalUserId, java.lang.String deviceIP)
+		boolean tempDevice, long portalUserId, String deviceIP)
 		throws com.bemis.portal.twofa.device.manager.exception.NoSuchDeviceException {
 		return getPersistence()
 				   .removeByTempDevice_PortalUserId_DeviceIP(tempDevice,
@@ -674,11 +687,11 @@ public class DeviceUtil {
 	*
 	* @param tempDevice the temp device
 	* @param portalUserId the portal user ID
-	* @param deviceIP the device i p
+	* @param deviceIP the device ip
 	* @return the number of matching devices
 	*/
 	public static int countByTempDevice_PortalUserId_DeviceIP(
-		boolean tempDevice, long portalUserId, java.lang.String deviceIP) {
+		boolean tempDevice, long portalUserId, String deviceIP) {
 		return getPersistence()
 				   .countByTempDevice_PortalUserId_DeviceIP(tempDevice,
 			portalUserId, deviceIP);
@@ -748,11 +761,6 @@ public class DeviceUtil {
 	*/
 	public static Device fetchByPrimaryKey(long deviceId) {
 		return getPersistence().fetchByPrimaryKey(deviceId);
-	}
-
-	public static java.util.Map<java.io.Serializable, Device> fetchByPrimaryKeys(
-		java.util.Set<java.io.Serializable> primaryKeys) {
-		return getPersistence().fetchByPrimaryKeys(primaryKeys);
 	}
 
 	/**
@@ -835,6 +843,16 @@ public class DeviceUtil {
 		return _serviceTracker.getService();
 	}
 
-	private static ServiceTracker<DevicePersistence, DevicePersistence> _serviceTracker =
-		ServiceTrackerFactory.open(DevicePersistence.class);
+	private static ServiceTracker<DevicePersistence, DevicePersistence> _serviceTracker;
+
+	static {
+		Bundle bundle = FrameworkUtil.getBundle(DevicePersistence.class);
+
+		ServiceTracker<DevicePersistence, DevicePersistence> serviceTracker = new ServiceTracker<DevicePersistence, DevicePersistence>(bundle.getBundleContext(),
+				DevicePersistence.class, null);
+
+		serviceTracker.open();
+
+		_serviceTracker = serviceTracker;
+	}
 }

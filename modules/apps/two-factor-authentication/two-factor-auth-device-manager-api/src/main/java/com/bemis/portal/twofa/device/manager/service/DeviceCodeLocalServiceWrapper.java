@@ -83,59 +83,6 @@ public class DeviceCodeLocalServiceWrapper implements DeviceCodeLocalService,
 		return _deviceCodeLocalService.deleteDeviceCode(deviceCodeId);
 	}
 
-	@Override
-	public com.bemis.portal.twofa.device.manager.model.DeviceCode fetchDeviceCode(
-		long deviceCodeId) {
-		return _deviceCodeLocalService.fetchDeviceCode(deviceCodeId);
-	}
-
-	@Override
-	public com.bemis.portal.twofa.device.manager.model.DeviceCode fetchDeviceCodeByPortalUserId(
-		long userId) {
-		return _deviceCodeLocalService.fetchDeviceCodeByPortalUserId(userId);
-	}
-
-	/**
-	* Returns the device code with the primary key.
-	*
-	* @param deviceCodeId the primary key of the device code
-	* @return the device code
-	* @throws PortalException if a device code with the primary key could not be found
-	*/
-	@Override
-	public com.bemis.portal.twofa.device.manager.model.DeviceCode getDeviceCode(
-		long deviceCodeId)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _deviceCodeLocalService.getDeviceCode(deviceCodeId);
-	}
-
-	/**
-	* Updates the device code in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
-	*
-	* @param deviceCode the device code
-	* @return the device code that was updated
-	*/
-	@Override
-	public com.bemis.portal.twofa.device.manager.model.DeviceCode updateDeviceCode(
-		com.bemis.portal.twofa.device.manager.model.DeviceCode deviceCode) {
-		return _deviceCodeLocalService.updateDeviceCode(deviceCode);
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
-		return _deviceCodeLocalService.getActionableDynamicQuery();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery() {
-		return _deviceCodeLocalService.dynamicQuery();
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery getIndexableActionableDynamicQuery() {
-		return _deviceCodeLocalService.getIndexableActionableDynamicQuery();
-	}
-
 	/**
 	* @throws PortalException
 	*/
@@ -147,37 +94,8 @@ public class DeviceCodeLocalServiceWrapper implements DeviceCodeLocalService,
 	}
 
 	@Override
-	public com.liferay.portal.kernel.model.PersistedModel getPersistedModel(
-		java.io.Serializable primaryKeyObj)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		return _deviceCodeLocalService.getPersistedModel(primaryKeyObj);
-	}
-
-	/**
-	* Returns the number of device codes.
-	*
-	* @return the number of device codes
-	*/
-	@Override
-	public int getDeviceCodesCount() {
-		return _deviceCodeLocalService.getDeviceCodesCount();
-	}
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	@Override
-	public java.lang.String getOSGiServiceIdentifier() {
-		return _deviceCodeLocalService.getOSGiServiceIdentifier();
-	}
-
-	@Override
-	public java.lang.String getVerificationURL(long portalUserId,
-		java.lang.String verificationBaseURL) {
-		return _deviceCodeLocalService.getVerificationURL(portalUserId,
-			verificationBaseURL);
+	public com.liferay.portal.kernel.dao.orm.DynamicQuery dynamicQuery() {
+		return _deviceCodeLocalService.dynamicQuery();
 	}
 
 	/**
@@ -234,23 +152,6 @@ public class DeviceCodeLocalServiceWrapper implements DeviceCodeLocalService,
 	}
 
 	/**
-	* Returns a range of all the device codes.
-	*
-	* <p>
-	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.bemis.portal.twofa.device.manager.model.impl.DeviceCodeModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	* </p>
-	*
-	* @param start the lower bound of the range of device codes
-	* @param end the upper bound of the range of device codes (not inclusive)
-	* @return the range of device codes
-	*/
-	@Override
-	public java.util.List<com.bemis.portal.twofa.device.manager.model.DeviceCode> getDeviceCodes(
-		int start, int end) {
-		return _deviceCodeLocalService.getDeviceCodes(start, end);
-	}
-
-	/**
 	* Returns the number of rows matching the dynamic query.
 	*
 	* @param dynamicQuery the dynamic query
@@ -278,17 +179,116 @@ public class DeviceCodeLocalServiceWrapper implements DeviceCodeLocalService,
 	}
 
 	@Override
+	public com.bemis.portal.twofa.device.manager.model.DeviceCode fetchDeviceCode(
+		long deviceCodeId) {
+		return _deviceCodeLocalService.fetchDeviceCode(deviceCodeId);
+	}
+
+	@Override
+	public com.bemis.portal.twofa.device.manager.model.DeviceCode fetchDeviceCodeByPortalUserId(
+		long userId) {
+		return _deviceCodeLocalService.fetchDeviceCodeByPortalUserId(userId);
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery getActionableDynamicQuery() {
+		return _deviceCodeLocalService.getActionableDynamicQuery();
+	}
+
+	/**
+	* Returns the device code with the primary key.
+	*
+	* @param deviceCodeId the primary key of the device code
+	* @return the device code
+	* @throws PortalException if a device code with the primary key could not be found
+	*/
+	@Override
+	public com.bemis.portal.twofa.device.manager.model.DeviceCode getDeviceCode(
+		long deviceCodeId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _deviceCodeLocalService.getDeviceCode(deviceCodeId);
+	}
+
+	/**
+	* Returns a range of all the device codes.
+	*
+	* <p>
+	* Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link com.liferay.portal.kernel.dao.orm.QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link com.bemis.portal.twofa.device.manager.model.impl.DeviceCodeModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	* </p>
+	*
+	* @param start the lower bound of the range of device codes
+	* @param end the upper bound of the range of device codes (not inclusive)
+	* @return the range of device codes
+	*/
+	@Override
+	public java.util.List<com.bemis.portal.twofa.device.manager.model.DeviceCode> getDeviceCodes(
+		int start, int end) {
+		return _deviceCodeLocalService.getDeviceCodes(start, end);
+	}
+
+	/**
+	* Returns the number of device codes.
+	*
+	* @return the number of device codes
+	*/
+	@Override
+	public int getDeviceCodesCount() {
+		return _deviceCodeLocalService.getDeviceCodesCount();
+	}
+
+	@Override
+	public com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery getIndexableActionableDynamicQuery() {
+		return _deviceCodeLocalService.getIndexableActionableDynamicQuery();
+	}
+
+	/**
+	* Returns the OSGi service identifier.
+	*
+	* @return the OSGi service identifier
+	*/
+	@Override
+	public String getOSGiServiceIdentifier() {
+		return _deviceCodeLocalService.getOSGiServiceIdentifier();
+	}
+
+	@Override
+	public com.liferay.portal.kernel.model.PersistedModel getPersistedModel(
+		java.io.Serializable primaryKeyObj)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		return _deviceCodeLocalService.getPersistedModel(primaryKeyObj);
+	}
+
+	@Override
+	public String getVerificationURL(long portalUserId,
+		String verificationBaseURL) {
+		return _deviceCodeLocalService.getVerificationURL(portalUserId,
+			verificationBaseURL);
+	}
+
+	@Override
 	public void removeDeviceCode(long userId) {
 		_deviceCodeLocalService.removeDeviceCode(userId);
 	}
 
 	@Override
 	public void storeDeviceCodeAndSendNotification(long portalUserId,
-		java.lang.String deviceIP, java.lang.String secretKey,
-		int validationCode, java.lang.String verificationBaseURL)
+		String deviceIP, String secretKey, int validationCode,
+		String verificationBaseURL)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		_deviceCodeLocalService.storeDeviceCodeAndSendNotification(portalUserId,
 			deviceIP, secretKey, validationCode, verificationBaseURL);
+	}
+
+	/**
+	* Updates the device code in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
+	*
+	* @param deviceCode the device code
+	* @return the device code that was updated
+	*/
+	@Override
+	public com.bemis.portal.twofa.device.manager.model.DeviceCode updateDeviceCode(
+		com.bemis.portal.twofa.device.manager.model.DeviceCode deviceCode) {
+		return _deviceCodeLocalService.updateDeviceCode(deviceCode);
 	}
 
 	@Override

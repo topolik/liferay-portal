@@ -16,7 +16,8 @@ package com.bemis.portal.twofa.device.manager.service;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.osgi.util.ServiceTrackerFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -41,10 +42,41 @@ public class DeviceManagerLocalServiceUtil {
 	 *
 	 * Never modify this class directly. Add custom service methods to {@link com.bemis.portal.twofa.device.manager.service.impl.DeviceManagerLocalServiceImpl} and rerun ServiceBuilder to regenerate this class.
 	 */
+	public static void createAndSendVerificationCode(
+		com.liferay.portal.kernel.model.User portalUser,
+		String currentDeviceIP, String verificationBaseURL)
+		throws com.liferay.portal.kernel.exception.PortalException {
+		getService()
+			.createAndSendVerificationCode(portalUser, currentDeviceIP,
+			verificationBaseURL);
+	}
+
+	/**
+	* Returns the OSGi service identifier.
+	*
+	* @return the OSGi service identifier
+	*/
+	public static String getOSGiServiceIdentifier() {
+		return getService().getOSGiServiceIdentifier();
+	}
+
 	public static boolean isDeviceVerifiedForUser(
 		com.bemis.portal.twofa.device.manager.model.DeviceInfo deviceInfo)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().isDeviceVerifiedForUser(deviceInfo);
+	}
+
+	/**
+	* Sets Device as Verified or Temp based on Users decision
+	* Removes the generated device code
+	*
+	* @param portalUserId
+	* @param registerAsVerified
+	*/
+	public static void registerDeviceAsVerifiedOrTemp(long portalUserId,
+		boolean registerAsVerified) {
+		getService()
+			.registerDeviceAsVerifiedOrTemp(portalUserId, registerAsVerified);
 	}
 
 	public static boolean twoFactorAuthenticationEnabled() {
@@ -62,47 +94,26 @@ public class DeviceManagerLocalServiceUtil {
 	* @return
 	* @throws PortalException
 	*/
-	public static boolean verifyDeviceCode(long userId,
-		java.lang.String verificationCode)
+	public static boolean verifyDeviceCode(long userId, String verificationCode)
 		throws com.liferay.portal.kernel.exception.PortalException {
 		return getService().verifyDeviceCode(userId, verificationCode);
-	}
-
-	/**
-	* Returns the OSGi service identifier.
-	*
-	* @return the OSGi service identifier
-	*/
-	public static java.lang.String getOSGiServiceIdentifier() {
-		return getService().getOSGiServiceIdentifier();
-	}
-
-	public static void createAndSendVerificationCode(
-		com.liferay.portal.kernel.model.User portalUser,
-		java.lang.String currentDeviceIP, java.lang.String verificationBaseURL)
-		throws com.liferay.portal.kernel.exception.PortalException {
-		getService()
-			.createAndSendVerificationCode(portalUser, currentDeviceIP,
-			verificationBaseURL);
-	}
-
-	/**
-	* Sets Device as Verified or Temp based on Users decision
-	* Removes the generated device code
-	*
-	* @param portalUserId
-	* @param registerAsVerified
-	*/
-	public static void registerDeviceAsVerifiedOrTemp(long portalUserId,
-		boolean registerAsVerified) {
-		getService()
-			.registerDeviceAsVerifiedOrTemp(portalUserId, registerAsVerified);
 	}
 
 	public static DeviceManagerLocalService getService() {
 		return _serviceTracker.getService();
 	}
 
-	private static ServiceTracker<DeviceManagerLocalService, DeviceManagerLocalService> _serviceTracker =
-		ServiceTrackerFactory.open(DeviceManagerLocalService.class);
+	private static ServiceTracker<DeviceManagerLocalService, DeviceManagerLocalService> _serviceTracker;
+
+	static {
+		Bundle bundle = FrameworkUtil.getBundle(DeviceManagerLocalService.class);
+
+		ServiceTracker<DeviceManagerLocalService, DeviceManagerLocalService> serviceTracker =
+			new ServiceTracker<DeviceManagerLocalService, DeviceManagerLocalService>(bundle.getBundleContext(),
+				DeviceManagerLocalService.class, null);
+
+		serviceTracker.open();
+
+		_serviceTracker = serviceTracker;
+	}
 }

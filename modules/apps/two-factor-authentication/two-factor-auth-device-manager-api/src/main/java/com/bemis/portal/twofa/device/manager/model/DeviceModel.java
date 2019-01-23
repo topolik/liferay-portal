@@ -251,17 +251,17 @@ public interface DeviceModel extends BaseModel<Device>, GroupedModel,
 	public void setEmailAddress(String emailAddress);
 
 	/**
-	 * Returns the device i p of this device.
+	 * Returns the device ip of this device.
 	 *
-	 * @return the device i p of this device
+	 * @return the device ip of this device
 	 */
 	@AutoEscape
 	public String getDeviceIP();
 
 	/**
-	 * Sets the device i p of this device.
+	 * Sets the device ip of this device.
 	 *
-	 * @param deviceIP the device i p of this device
+	 * @param deviceIP the device ip of this device
 	 */
 	public void setDeviceIP(String deviceIP);
 

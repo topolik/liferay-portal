@@ -37,12 +37,14 @@ import com.liferay.portal.kernel.service.persistence.CompanyProvider;
 import com.liferay.portal.kernel.service.persistence.CompanyProviderWrapper;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
 import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
-import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
+
+import java.lang.reflect.InvocationHandler;
 
 import java.util.Collections;
 import java.util.Date;
@@ -305,7 +307,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		msg.append("portalUserId=");
 		msg.append(portalUserId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchDeviceException(msg.toString());
 	}
@@ -355,7 +357,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		msg.append("portalUserId=");
 		msg.append(portalUserId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchDeviceException(msg.toString());
 	}
@@ -515,10 +517,9 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		qPos.add(portalUserId);
 
 		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByConditionValues(device);
-
-			for (Object value : values) {
-				qPos.add(value);
+			for (Object orderByConditionValue : orderByComparator.getOrderByConditionValues(
+					device)) {
+				qPos.add(orderByConditionValue);
 			}
 		}
 
@@ -613,7 +614,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 * Returns the device where portalUserId = &#63; and deviceIP = &#63; or throws a {@link NoSuchDeviceException} if it could not be found.
 	 *
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the matching device
 	 * @throws NoSuchDeviceException if a matching device could not be found
 	 */
@@ -633,7 +634,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 			msg.append(", deviceIP=");
 			msg.append(deviceIP);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -649,7 +650,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 * Returns the device where portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the matching device, or <code>null</code> if a matching device could not be found
 	 */
 	@Override
@@ -662,13 +663,15 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 * Returns the device where portalUserId = &#63; and deviceIP = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching device, or <code>null</code> if a matching device could not be found
 	 */
 	@Override
 	public Device fetchByPortalUserId_DeviceIP(long portalUserId,
 		String deviceIP, boolean retrieveFromCache) {
+		deviceIP = Objects.toString(deviceIP, "");
+
 		Object[] finderArgs = new Object[] { portalUserId, deviceIP };
 
 		Object result = null;
@@ -696,10 +699,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 			boolean bindDeviceIP = false;
 
-			if (deviceIP == null) {
-				query.append(_FINDER_COLUMN_PORTALUSERID_DEVICEIP_DEVICEIP_1);
-			}
-			else if (deviceIP.equals(StringPool.BLANK)) {
+			if (deviceIP.isEmpty()) {
 				query.append(_FINDER_COLUMN_PORTALUSERID_DEVICEIP_DEVICEIP_3);
 			}
 			else {
@@ -748,13 +748,6 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 					result = device;
 
 					cacheResult(device);
-
-					if ((device.getPortalUserId() != portalUserId) ||
-							(device.getDeviceIP() == null) ||
-							!device.getDeviceIP().equals(deviceIP)) {
-						finderCache.putResult(FINDER_PATH_FETCH_BY_PORTALUSERID_DEVICEIP,
-							finderArgs, device);
-					}
 				}
 			}
 			catch (Exception e) {
@@ -780,7 +773,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 * Removes the device where portalUserId = &#63; and deviceIP = &#63; from the database.
 	 *
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the device that was removed
 	 */
 	@Override
@@ -795,11 +788,13 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 * Returns the number of devices where portalUserId = &#63; and deviceIP = &#63;.
 	 *
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the number of matching devices
 	 */
 	@Override
 	public int countByPortalUserId_DeviceIP(long portalUserId, String deviceIP) {
+		deviceIP = Objects.toString(deviceIP, "");
+
 		FinderPath finderPath = FINDER_PATH_COUNT_BY_PORTALUSERID_DEVICEIP;
 
 		Object[] finderArgs = new Object[] { portalUserId, deviceIP };
@@ -815,10 +810,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 			boolean bindDeviceIP = false;
 
-			if (deviceIP == null) {
-				query.append(_FINDER_COLUMN_PORTALUSERID_DEVICEIP_DEVICEIP_1);
-			}
-			else if (deviceIP.equals(StringPool.BLANK)) {
+			if (deviceIP.isEmpty()) {
 				query.append(_FINDER_COLUMN_PORTALUSERID_DEVICEIP_DEVICEIP_3);
 			}
 			else {
@@ -863,7 +855,6 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 	private static final String _FINDER_COLUMN_PORTALUSERID_DEVICEIP_PORTALUSERID_2 =
 		"device.portalUserId = ? AND ";
-	private static final String _FINDER_COLUMN_PORTALUSERID_DEVICEIP_DEVICEIP_1 = "device.deviceIP IS NULL";
 	private static final String _FINDER_COLUMN_PORTALUSERID_DEVICEIP_DEVICEIP_2 = "device.deviceIP = ?";
 	private static final String _FINDER_COLUMN_PORTALUSERID_DEVICEIP_DEVICEIP_3 = "(device.deviceIP IS NULL OR device.deviceIP = '')";
 	public static final FinderPath FINDER_PATH_WITH_PAGINATION_FIND_BY_VERIFIED_PORTALUSERID =
@@ -993,7 +984,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 			if ((list != null) && !list.isEmpty()) {
 				for (Device device : list) {
-					if ((verified != device.getVerified()) ||
+					if ((verified != device.isVerified()) ||
 							(portalUserId != device.getPortalUserId())) {
 						list = null;
 
@@ -1104,7 +1095,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		msg.append(", portalUserId=");
 		msg.append(portalUserId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchDeviceException(msg.toString());
 	}
@@ -1160,7 +1151,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		msg.append(", portalUserId=");
 		msg.append(portalUserId);
 
-		msg.append(StringPool.CLOSE_CURLY_BRACE);
+		msg.append("}");
 
 		throw new NoSuchDeviceException(msg.toString());
 	}
@@ -1327,10 +1318,9 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		qPos.add(portalUserId);
 
 		if (orderByComparator != null) {
-			Object[] values = orderByComparator.getOrderByConditionValues(device);
-
-			for (Object value : values) {
-				qPos.add(value);
+			for (Object orderByConditionValue : orderByComparator.getOrderByConditionValues(
+					device)) {
+				qPos.add(orderByConditionValue);
 			}
 		}
 
@@ -1444,7 +1434,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param verified the verified
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the matching device
 	 * @throws NoSuchDeviceException if a matching device could not be found
 	 */
@@ -1468,7 +1458,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 			msg.append(", deviceIP=");
 			msg.append(deviceIP);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -1485,7 +1475,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param verified the verified
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the matching device, or <code>null</code> if a matching device could not be found
 	 */
 	@Override
@@ -1500,13 +1490,15 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param verified the verified
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching device, or <code>null</code> if a matching device could not be found
 	 */
 	@Override
 	public Device fetchByVerified_PortalUserId_DeviceIP(boolean verified,
 		long portalUserId, String deviceIP, boolean retrieveFromCache) {
+		deviceIP = Objects.toString(deviceIP, "");
+
 		Object[] finderArgs = new Object[] { verified, portalUserId, deviceIP };
 
 		Object result = null;
@@ -1519,7 +1511,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		if (result instanceof Device) {
 			Device device = (Device)result;
 
-			if ((verified != device.getVerified()) ||
+			if ((verified != device.isVerified()) ||
 					(portalUserId != device.getPortalUserId()) ||
 					!Objects.equals(deviceIP, device.getDeviceIP())) {
 				result = null;
@@ -1537,10 +1529,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 			boolean bindDeviceIP = false;
 
-			if (deviceIP == null) {
-				query.append(_FINDER_COLUMN_VERIFIED_PORTALUSERID_DEVICEIP_DEVICEIP_1);
-			}
-			else if (deviceIP.equals(StringPool.BLANK)) {
+			if (deviceIP.isEmpty()) {
 				query.append(_FINDER_COLUMN_VERIFIED_PORTALUSERID_DEVICEIP_DEVICEIP_3);
 			}
 			else {
@@ -1591,14 +1580,6 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 					result = device;
 
 					cacheResult(device);
-
-					if ((device.getVerified() != verified) ||
-							(device.getPortalUserId() != portalUserId) ||
-							(device.getDeviceIP() == null) ||
-							!device.getDeviceIP().equals(deviceIP)) {
-						finderCache.putResult(FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP,
-							finderArgs, device);
-					}
 				}
 			}
 			catch (Exception e) {
@@ -1625,7 +1606,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param verified the verified
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the device that was removed
 	 */
 	@Override
@@ -1642,12 +1623,14 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param verified the verified
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the number of matching devices
 	 */
 	@Override
 	public int countByVerified_PortalUserId_DeviceIP(boolean verified,
 		long portalUserId, String deviceIP) {
+		deviceIP = Objects.toString(deviceIP, "");
+
 		FinderPath finderPath = FINDER_PATH_COUNT_BY_VERIFIED_PORTALUSERID_DEVICEIP;
 
 		Object[] finderArgs = new Object[] { verified, portalUserId, deviceIP };
@@ -1665,10 +1648,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 			boolean bindDeviceIP = false;
 
-			if (deviceIP == null) {
-				query.append(_FINDER_COLUMN_VERIFIED_PORTALUSERID_DEVICEIP_DEVICEIP_1);
-			}
-			else if (deviceIP.equals(StringPool.BLANK)) {
+			if (deviceIP.isEmpty()) {
 				query.append(_FINDER_COLUMN_VERIFIED_PORTALUSERID_DEVICEIP_DEVICEIP_3);
 			}
 			else {
@@ -1717,8 +1697,6 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		"device.verified = ? AND ";
 	private static final String _FINDER_COLUMN_VERIFIED_PORTALUSERID_DEVICEIP_PORTALUSERID_2 =
 		"device.portalUserId = ? AND ";
-	private static final String _FINDER_COLUMN_VERIFIED_PORTALUSERID_DEVICEIP_DEVICEIP_1 =
-		"device.deviceIP IS NULL";
 	private static final String _FINDER_COLUMN_VERIFIED_PORTALUSERID_DEVICEIP_DEVICEIP_2 =
 		"device.deviceIP = ?";
 	private static final String _FINDER_COLUMN_VERIFIED_PORTALUSERID_DEVICEIP_DEVICEIP_3 =
@@ -1750,7 +1728,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param tempDevice the temp device
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the matching device
 	 * @throws NoSuchDeviceException if a matching device could not be found
 	 */
@@ -1774,7 +1752,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 			msg.append(", deviceIP=");
 			msg.append(deviceIP);
 
-			msg.append(StringPool.CLOSE_CURLY_BRACE);
+			msg.append("}");
 
 			if (_log.isDebugEnabled()) {
 				_log.debug(msg.toString());
@@ -1791,7 +1769,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param tempDevice the temp device
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the matching device, or <code>null</code> if a matching device could not be found
 	 */
 	@Override
@@ -1806,13 +1784,15 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param tempDevice the temp device
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching device, or <code>null</code> if a matching device could not be found
 	 */
 	@Override
 	public Device fetchByTempDevice_PortalUserId_DeviceIP(boolean tempDevice,
 		long portalUserId, String deviceIP, boolean retrieveFromCache) {
+		deviceIP = Objects.toString(deviceIP, "");
+
 		Object[] finderArgs = new Object[] { tempDevice, portalUserId, deviceIP };
 
 		Object result = null;
@@ -1825,7 +1805,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		if (result instanceof Device) {
 			Device device = (Device)result;
 
-			if ((tempDevice != device.getTempDevice()) ||
+			if ((tempDevice != device.isTempDevice()) ||
 					(portalUserId != device.getPortalUserId()) ||
 					!Objects.equals(deviceIP, device.getDeviceIP())) {
 				result = null;
@@ -1843,10 +1823,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 			boolean bindDeviceIP = false;
 
-			if (deviceIP == null) {
-				query.append(_FINDER_COLUMN_TEMPDEVICE_PORTALUSERID_DEVICEIP_DEVICEIP_1);
-			}
-			else if (deviceIP.equals(StringPool.BLANK)) {
+			if (deviceIP.isEmpty()) {
 				query.append(_FINDER_COLUMN_TEMPDEVICE_PORTALUSERID_DEVICEIP_DEVICEIP_3);
 			}
 			else {
@@ -1897,14 +1874,6 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 					result = device;
 
 					cacheResult(device);
-
-					if ((device.getTempDevice() != tempDevice) ||
-							(device.getPortalUserId() != portalUserId) ||
-							(device.getDeviceIP() == null) ||
-							!device.getDeviceIP().equals(deviceIP)) {
-						finderCache.putResult(FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
-							finderArgs, device);
-					}
 				}
 			}
 			catch (Exception e) {
@@ -1931,7 +1900,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param tempDevice the temp device
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the device that was removed
 	 */
 	@Override
@@ -1948,12 +1917,14 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 	 *
 	 * @param tempDevice the temp device
 	 * @param portalUserId the portal user ID
-	 * @param deviceIP the device i p
+	 * @param deviceIP the device ip
 	 * @return the number of matching devices
 	 */
 	@Override
 	public int countByTempDevice_PortalUserId_DeviceIP(boolean tempDevice,
 		long portalUserId, String deviceIP) {
+		deviceIP = Objects.toString(deviceIP, "");
+
 		FinderPath finderPath = FINDER_PATH_COUNT_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP;
 
 		Object[] finderArgs = new Object[] { tempDevice, portalUserId, deviceIP };
@@ -1971,10 +1942,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 			boolean bindDeviceIP = false;
 
-			if (deviceIP == null) {
-				query.append(_FINDER_COLUMN_TEMPDEVICE_PORTALUSERID_DEVICEIP_DEVICEIP_1);
-			}
-			else if (deviceIP.equals(StringPool.BLANK)) {
+			if (deviceIP.isEmpty()) {
 				query.append(_FINDER_COLUMN_TEMPDEVICE_PORTALUSERID_DEVICEIP_DEVICEIP_3);
 			}
 			else {
@@ -2023,8 +1991,6 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		"device.tempDevice = ? AND ";
 	private static final String _FINDER_COLUMN_TEMPDEVICE_PORTALUSERID_DEVICEIP_PORTALUSERID_2 =
 		"device.portalUserId = ? AND ";
-	private static final String _FINDER_COLUMN_TEMPDEVICE_PORTALUSERID_DEVICEIP_DEVICEIP_1 =
-		"device.deviceIP IS NULL";
 	private static final String _FINDER_COLUMN_TEMPDEVICE_PORTALUSERID_DEVICEIP_DEVICEIP_2 =
 		"device.deviceIP = ?";
 	private static final String _FINDER_COLUMN_TEMPDEVICE_PORTALUSERID_DEVICEIP_DEVICEIP_3 =
@@ -2050,13 +2016,13 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 		finderCache.putResult(FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP,
 			new Object[] {
-				device.getVerified(), device.getPortalUserId(),
+				device.isVerified(), device.getPortalUserId(),
 				device.getDeviceIP()
 			}, device);
 
 		finderCache.putResult(FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
 			new Object[] {
-				device.getTempDevice(), device.getPortalUserId(),
+				device.isTempDevice(), device.getPortalUserId(),
 				device.getDeviceIP()
 			}, device);
 
@@ -2112,7 +2078,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
-		clearUniqueFindersCache((DeviceModelImpl)device);
+		clearUniqueFindersCache((DeviceModelImpl)device, true);
 	}
 
 	@Override
@@ -2124,102 +2090,58 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 			entityCache.removeResult(DeviceModelImpl.ENTITY_CACHE_ENABLED,
 				DeviceImpl.class, device.getPrimaryKey());
 
-			clearUniqueFindersCache((DeviceModelImpl)device);
+			clearUniqueFindersCache((DeviceModelImpl)device, true);
 		}
 	}
 
-	protected void cacheUniqueFindersCache(DeviceModelImpl deviceModelImpl,
-		boolean isNew) {
-		if (isNew) {
+	protected void cacheUniqueFindersCache(DeviceModelImpl deviceModelImpl) {
+		Object[] args = new Object[] {
+				deviceModelImpl.getPortalUserId(), deviceModelImpl.getDeviceIP()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_PORTALUSERID_DEVICEIP, args,
+			Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_PORTALUSERID_DEVICEIP, args,
+			deviceModelImpl, false);
+
+		args = new Object[] {
+				deviceModelImpl.isVerified(), deviceModelImpl.getPortalUserId(),
+				deviceModelImpl.getDeviceIP()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_VERIFIED_PORTALUSERID_DEVICEIP,
+			args, Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP,
+			args, deviceModelImpl, false);
+
+		args = new Object[] {
+				deviceModelImpl.isTempDevice(),
+				deviceModelImpl.getPortalUserId(), deviceModelImpl.getDeviceIP()
+			};
+
+		finderCache.putResult(FINDER_PATH_COUNT_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
+			args, Long.valueOf(1), false);
+		finderCache.putResult(FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
+			args, deviceModelImpl, false);
+	}
+
+	protected void clearUniqueFindersCache(DeviceModelImpl deviceModelImpl,
+		boolean clearCurrent) {
+		if (clearCurrent) {
 			Object[] args = new Object[] {
 					deviceModelImpl.getPortalUserId(),
 					deviceModelImpl.getDeviceIP()
 				};
 
-			finderCache.putResult(FINDER_PATH_COUNT_BY_PORTALUSERID_DEVICEIP,
-				args, Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_PORTALUSERID_DEVICEIP,
-				args, deviceModelImpl);
-
-			args = new Object[] {
-					deviceModelImpl.getVerified(),
-					deviceModelImpl.getPortalUserId(),
-					deviceModelImpl.getDeviceIP()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_VERIFIED_PORTALUSERID_DEVICEIP,
-				args, Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP,
-				args, deviceModelImpl);
-
-			args = new Object[] {
-					deviceModelImpl.getTempDevice(),
-					deviceModelImpl.getPortalUserId(),
-					deviceModelImpl.getDeviceIP()
-				};
-
-			finderCache.putResult(FINDER_PATH_COUNT_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
-				args, Long.valueOf(1));
-			finderCache.putResult(FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
-				args, deviceModelImpl);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_PORTALUSERID_DEVICEIP,
+				args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_PORTALUSERID_DEVICEIP,
+				args);
 		}
-		else {
-			if ((deviceModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_PORTALUSERID_DEVICEIP.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						deviceModelImpl.getPortalUserId(),
-						deviceModelImpl.getDeviceIP()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_PORTALUSERID_DEVICEIP,
-					args, Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_PORTALUSERID_DEVICEIP,
-					args, deviceModelImpl);
-			}
-
-			if ((deviceModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						deviceModelImpl.getVerified(),
-						deviceModelImpl.getPortalUserId(),
-						deviceModelImpl.getDeviceIP()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_VERIFIED_PORTALUSERID_DEVICEIP,
-					args, Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP,
-					args, deviceModelImpl);
-			}
-
-			if ((deviceModelImpl.getColumnBitmask() &
-					FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP.getColumnBitmask()) != 0) {
-				Object[] args = new Object[] {
-						deviceModelImpl.getTempDevice(),
-						deviceModelImpl.getPortalUserId(),
-						deviceModelImpl.getDeviceIP()
-					};
-
-				finderCache.putResult(FINDER_PATH_COUNT_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
-					args, Long.valueOf(1));
-				finderCache.putResult(FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
-					args, deviceModelImpl);
-			}
-		}
-	}
-
-	protected void clearUniqueFindersCache(DeviceModelImpl deviceModelImpl) {
-		Object[] args = new Object[] {
-				deviceModelImpl.getPortalUserId(), deviceModelImpl.getDeviceIP()
-			};
-
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_PORTALUSERID_DEVICEIP,
-			args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_PORTALUSERID_DEVICEIP,
-			args);
 
 		if ((deviceModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_PORTALUSERID_DEVICEIP.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					deviceModelImpl.getOriginalPortalUserId(),
 					deviceModelImpl.getOriginalDeviceIP()
 				};
@@ -2230,19 +2152,22 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 				args);
 		}
 
-		args = new Object[] {
-				deviceModelImpl.getVerified(), deviceModelImpl.getPortalUserId(),
-				deviceModelImpl.getDeviceIP()
-			};
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					deviceModelImpl.isVerified(),
+					deviceModelImpl.getPortalUserId(),
+					deviceModelImpl.getDeviceIP()
+				};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_VERIFIED_PORTALUSERID_DEVICEIP,
-			args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP,
-			args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_VERIFIED_PORTALUSERID_DEVICEIP,
+				args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP,
+				args);
+		}
 
 		if ((deviceModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_VERIFIED_PORTALUSERID_DEVICEIP.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					deviceModelImpl.getOriginalVerified(),
 					deviceModelImpl.getOriginalPortalUserId(),
 					deviceModelImpl.getOriginalDeviceIP()
@@ -2254,19 +2179,22 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 				args);
 		}
 
-		args = new Object[] {
-				deviceModelImpl.getTempDevice(),
-				deviceModelImpl.getPortalUserId(), deviceModelImpl.getDeviceIP()
-			};
+		if (clearCurrent) {
+			Object[] args = new Object[] {
+					deviceModelImpl.isTempDevice(),
+					deviceModelImpl.getPortalUserId(),
+					deviceModelImpl.getDeviceIP()
+				};
 
-		finderCache.removeResult(FINDER_PATH_COUNT_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
-			args);
-		finderCache.removeResult(FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
-			args);
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
+				args);
+			finderCache.removeResult(FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP,
+				args);
+		}
 
 		if ((deviceModelImpl.getColumnBitmask() &
 				FINDER_PATH_FETCH_BY_TEMPDEVICE_PORTALUSERID_DEVICEIP.getColumnBitmask()) != 0) {
-			args = new Object[] {
+			Object[] args = new Object[] {
 					deviceModelImpl.getOriginalTempDevice(),
 					deviceModelImpl.getOriginalPortalUserId(),
 					deviceModelImpl.getOriginalDeviceIP()
@@ -2349,8 +2277,6 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 	@Override
 	protected Device removeImpl(Device device) {
-		device = toUnwrappedModel(device);
-
 		Session session = null;
 
 		try {
@@ -2381,9 +2307,23 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 	@Override
 	public Device updateImpl(Device device) {
-		device = toUnwrappedModel(device);
-
 		boolean isNew = device.isNew();
+
+		if (!(device instanceof DeviceModelImpl)) {
+			InvocationHandler invocationHandler = null;
+
+			if (ProxyUtil.isProxyClass(device.getClass())) {
+				invocationHandler = ProxyUtil.getInvocationHandler(device);
+
+				throw new IllegalArgumentException(
+					"Implement ModelWrapper in device proxy " +
+					invocationHandler.getClass());
+			}
+
+			throw new IllegalArgumentException(
+				"Implement ModelWrapper in custom Device implementation " +
+				device.getClass());
+		}
 
 		DeviceModelImpl deviceModelImpl = (DeviceModelImpl)device;
 
@@ -2432,8 +2372,30 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (isNew || !DeviceModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!DeviceModelImpl.COLUMN_BITMASK_ENABLED) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
+		}
+		else
+		 if (isNew) {
+			Object[] args = new Object[] { deviceModelImpl.getPortalUserId() };
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_PORTALUSERID, args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_PORTALUSERID,
+				args);
+
+			args = new Object[] {
+					deviceModelImpl.isVerified(),
+					deviceModelImpl.getPortalUserId()
+				};
+
+			finderCache.removeResult(FINDER_PATH_COUNT_BY_VERIFIED_PORTALUSERID,
+				args);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_BY_VERIFIED_PORTALUSERID,
+				args);
+
+			finderCache.removeResult(FINDER_PATH_COUNT_ALL, FINDER_ARGS_EMPTY);
+			finderCache.removeResult(FINDER_PATH_WITHOUT_PAGINATION_FIND_ALL,
+				FINDER_ARGS_EMPTY);
 		}
 
 		else {
@@ -2467,7 +2429,7 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 					args);
 
 				args = new Object[] {
-						deviceModelImpl.getVerified(),
+						deviceModelImpl.isVerified(),
 						deviceModelImpl.getPortalUserId()
 					};
 
@@ -2481,41 +2443,12 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		entityCache.putResult(DeviceModelImpl.ENTITY_CACHE_ENABLED,
 			DeviceImpl.class, device.getPrimaryKey(), device, false);
 
-		clearUniqueFindersCache(deviceModelImpl);
-		cacheUniqueFindersCache(deviceModelImpl, isNew);
+		clearUniqueFindersCache(deviceModelImpl, false);
+		cacheUniqueFindersCache(deviceModelImpl);
 
 		device.resetOriginalValues();
 
 		return device;
-	}
-
-	protected Device toUnwrappedModel(Device device) {
-		if (device instanceof DeviceImpl) {
-			return device;
-		}
-
-		DeviceImpl deviceImpl = new DeviceImpl();
-
-		deviceImpl.setNew(device.isNew());
-		deviceImpl.setPrimaryKey(device.getPrimaryKey());
-
-		deviceImpl.setDeviceId(device.getDeviceId());
-		deviceImpl.setGroupId(device.getGroupId());
-		deviceImpl.setCompanyId(device.getCompanyId());
-		deviceImpl.setUserId(device.getUserId());
-		deviceImpl.setUserName(device.getUserName());
-		deviceImpl.setCreateDate(device.getCreateDate());
-		deviceImpl.setModifiedDate(device.getModifiedDate());
-		deviceImpl.setPortalUserId(device.getPortalUserId());
-		deviceImpl.setPortalUserName(device.getPortalUserName());
-		deviceImpl.setEmailAddress(device.getEmailAddress());
-		deviceImpl.setDeviceIP(device.getDeviceIP());
-		deviceImpl.setBrowserName(device.getBrowserName());
-		deviceImpl.setOsName(device.getOsName());
-		deviceImpl.setVerified(device.isVerified());
-		deviceImpl.setTempDevice(device.isTempDevice());
-
-		return deviceImpl;
 	}
 
 	/**
@@ -2665,14 +2598,14 @@ public class DevicePersistenceImpl extends BasePersistenceImpl<Device>
 		query.append(_SQL_SELECT_DEVICE_WHERE_PKS_IN);
 
 		for (Serializable primaryKey : uncachedPrimaryKeys) {
-			query.append(String.valueOf(primaryKey));
+			query.append((long)primaryKey);
 
-			query.append(StringPool.COMMA);
+			query.append(",");
 		}
 
 		query.setIndex(query.index() - 1);
 
-		query.append(StringPool.CLOSE_PARENTHESIS);
+		query.append(")");
 
 		String sql = query.toString();
 
