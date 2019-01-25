@@ -14,8 +14,6 @@
 
 package com.liferay.oauth2.provider.rest.internal.cors.servlet.filters;
 
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.servlet.HttpMethods;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -41,12 +39,7 @@ public class OAuth2CORSPreflightServletFilter
 	}
 
 	@Override
-	protected Log getLog() {
-		return _log;
-	}
-
-	@Override
-	protected void processFilter(
+	public void processFilter(
 			HttpServletRequest request, HttpServletResponse response,
 			FilterChain filterChain)
 		throws Exception {
@@ -60,8 +53,5 @@ public class OAuth2CORSPreflightServletFilter
 
 		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		OAuth2CORSPreflightServletFilter.class);
 
 }

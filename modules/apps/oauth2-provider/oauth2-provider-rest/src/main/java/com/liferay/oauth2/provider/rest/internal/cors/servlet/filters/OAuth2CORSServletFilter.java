@@ -16,8 +16,6 @@ package com.liferay.oauth2.provider.rest.internal.cors.servlet.filters;
 
 import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.rest.spi.bearer.token.provider.BearerTokenProvider;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.access.control.AccessControlUtil;
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifierResult;
@@ -34,8 +32,31 @@ import javax.servlet.http.HttpServletResponse;
 public class OAuth2CORSServletFilter extends OAuth2CORSServletBaseFilter {
 
 	@Override
-	protected Log getLog() {
-		return _log;
+	public void processFilter(
+			HttpServletRequest request, HttpServletResponse response,
+			FilterChain filterChain)
+		throws Exception {
+
+		OAuth2Application oAuth2Application = getOAuth2Application();
+
+		if (oAuth2Application == null) {
+			filterChain.doFilter(request, response);
+
+			return;
+		}
+
+		if (!corsSupport.isValidCORSRequest(
+				request::getHeader, oAuth2Application)) {
+
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+			return;
+		}
+
+		corsSupport.writeResponseHeaders(
+			request::getHeader, response::setHeader);
+
+		filterChain.doFilter(request, response);
 	}
 
 	protected OAuth2Application getOAuth2Application() {
@@ -67,36 +88,5 @@ public class OAuth2CORSServletFilter extends OAuth2CORSServletBaseFilter {
 
 		return accessToken.getOAuth2Application();
 	}
-
-	@Override
-	protected void processFilter(
-			HttpServletRequest request, HttpServletResponse response,
-			FilterChain filterChain)
-		throws Exception {
-
-		OAuth2Application oAuth2Application = getOAuth2Application();
-
-		if (oAuth2Application == null) {
-			super.processFilter(request, response, filterChain);
-
-			return;
-		}
-
-		if (!corsSupport.isValidCORSRequest(
-				request::getHeader, oAuth2Application)) {
-
-			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-
-			return;
-		}
-
-		corsSupport.writeResponseHeaders(
-			request::getHeader, response::setHeader);
-
-		super.processFilter(request, response, filterChain);
-	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		OAuth2CORSServletFilter.class);
 
 }
