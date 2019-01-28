@@ -17,6 +17,7 @@ package com.liferay.oauth2.provider.rest.internal.cors;
 import com.liferay.oauth2.provider.rest.internal.cors.servlet.filters.OAuth2CORSServletFilter;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,12 +73,23 @@ public class CORSFeature implements Feature {
 			applicationProperties, "osgi.jaxrs.name",
 			applicationClass.getName());
 
+		String defaultValue = StringBundler.concat(
+			"(", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
+			"=context.for", osgiJAXRSName, ")");
+
+		if (Validator.isBlank(osgiJAXRSName)) {
+			String serviceId = MapUtil.getString(
+				applicationProperties, "serviceId");
+
+			defaultValue = StringBundler.concat(
+				"(", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
+				"=.generated.for.", serviceId, ")");
+		}
+
 		String contextSelect = MapUtil.getString(
 			applicationProperties,
 			HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-			StringBundler.concat(
-				"(", HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME,
-				"=context.for", osgiJAXRSName, ")"));
+			defaultValue);
 
 		Dictionary<String, Object> properties = new Hashtable<>();
 
