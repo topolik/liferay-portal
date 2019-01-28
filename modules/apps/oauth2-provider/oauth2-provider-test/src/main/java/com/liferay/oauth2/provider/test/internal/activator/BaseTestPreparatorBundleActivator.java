@@ -288,6 +288,40 @@ public abstract class BaseTestPreparatorBundleActivator
 		}
 	}
 
+	protected OAuth2Application createOAuth2Application(
+			long companyId, User user, String clientId, String clientSecret,
+			List<String> featuresList, List<GrantType> availableGrants,
+			List<String> availableScopes, List<String> redirectUris)
+		throws PortalException {
+
+		ServiceReference<OAuth2ApplicationLocalService> serviceReference =
+			bundleContext.getServiceReference(
+				OAuth2ApplicationLocalService.class);
+
+		_oAuth2ApplicationLocalService = bundleContext.getService(
+			serviceReference);
+
+		try {
+			OAuth2Application oAuth2Application =
+				_oAuth2ApplicationLocalService.addOAuth2Application(
+					companyId, user.getUserId(), user.getLogin(),
+					availableGrants, clientId, 0, clientSecret,
+					"test oauth application", featuresList,
+					"http://localhost:8080", 0, "test application",
+					"http://localhost:8080", redirectUris, availableScopes,
+					new ServiceContext());
+
+			autoCloseables.add(
+				() -> _oAuth2ApplicationLocalService.deleteOAuth2Application(
+					oAuth2Application.getOAuth2ApplicationId()));
+
+			return oAuth2Application;
+		}
+		finally {
+			bundleContext.ungetService(serviceReference);
+		}
+	}
+
 	protected void deleteConfiguration(
 		BundleContext bundleContext, String pid) {
 
