@@ -1,0 +1,25 @@
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
+package com.liferay.multi.factor.authentication.integration.spi.verifier;
+
+import java.util.function.Consumer;
+
+/**
+ * @author Tomas Polesovsky
+ */
+// TODO: relict, refactor into remote API MFAVerifier and separate module
+public interface StringMFAVerifier extends MFAVerifier {
+	public boolean isVerified(String scope, String verifier, long userId);
+}

@@ -1,0 +1,3 @@
+Bundle-Name: Liferay Multi Factor Authentication Integration Login Web SPI
+Bundle-SymbolicName: com.liferay.multi.factor.authentication.integration.login.web.spi
+Bundle-Version: 1.0.0
