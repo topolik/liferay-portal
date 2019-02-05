@@ -16,12 +16,15 @@
 
 <%@ include file="/init.jsp" %>
 
-<portlet:actionURL name="/login/verify_mfa" var="verifyMFAActionURL" />
+<portlet:actionURL name="/login/verify_mfa" var="verifyMFAActionURL">
+	<portlet:param name="mvcRenderCommandName" value="/login/verify_mfa" />
+</portlet:actionURL>
 
-<liferay-ui:error key="mfaFailed" message="multi-factor-authentication-failed" />
+<aui:form action="<%= verifyMFAActionURL %>" cssClass="sign-in-form container-fluid-1280" method="post" name="fm">
+	<aui:input name="encryptedParameterMapJSON" type="hidden" value="<%= ParamUtil.getString(renderRequest, "encryptedParameterMapJSON")%>" />
+	<aui:input name="redirect" type="hidden" value="<%= ParamUtil.getString(renderRequest, "redirect") %>" />
 
-<aui:form action="verifyMFAActionURL" cssClass="sign-in-form" method="post" name="fm">
-	<aui:input name="encodedKey" type="hidden" value="<%= ParamUtil.getString(renderRequest, "encodedKey")%>" />
+	<liferay-ui:error key="mfaFailed" message="multi-factor-authentication-failed" />
 
 	<liferay-util:dynamic-include key="com.liferay.multi.factor.authentication.integration.login.web#/verify_mfa.jsp" />
 

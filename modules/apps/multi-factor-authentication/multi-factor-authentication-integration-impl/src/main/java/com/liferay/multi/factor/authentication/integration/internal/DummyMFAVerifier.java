@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.multi.factor.authentication.integration.login.web.internal;
+package com.liferay.multi.factor.authentication.integration.internal;
 
 import com.liferay.multi.factor.authentication.integration.spi.verifier.StringMFAVerifier;
 import org.osgi.service.component.annotations.Component;
@@ -21,6 +21,7 @@ import org.osgi.service.component.annotations.Component;
  * @author Tomas Polesovsky
  */
 @Component(
+	immediate = true,
 	service = StringMFAVerifier.class
 )
 public class DummyMFAVerifier implements StringMFAVerifier {

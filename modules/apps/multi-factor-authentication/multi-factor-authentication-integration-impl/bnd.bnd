@@ -1,0 +1,3 @@
+Bundle-Name: Liferay Multi Factor Authentication Integration Impl
+Bundle-SymbolicName: com.liferay.multi.factor.authentication.integration.impl
+Bundle-Version: 1.0.0

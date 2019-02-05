@@ -18,23 +18,30 @@ import com.liferay.multi.factor.authentication.integration.login.web.internal.co
 import com.liferay.multi.factor.authentication.integration.login.web.spi.LoginWebMFAVerifier;
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
 import com.liferay.petra.encryptor.Encryptor;
+import com.liferay.petra.encryptor.EncryptorException;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.PortletSession;
+import javax.portlet.PortletException;
 import javax.portlet.filter.ActionRequestWrapper;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.security.Key;
 import java.util.Map;
 
@@ -57,32 +64,50 @@ public class VerifyMFAMVCActionCommand extends BaseMVCActionCommand {
 		throws Exception {
 
 		LoginWebMFAVerifier loginWebMFAVerifier =
-			_mfaVerifierRegistry.getMFAVerifier(
-				LoginWebMFAVerifier.class);
+			_mfaVerifierRegistry.getMFAVerifier(LoginWebMFAVerifier.class);
 
 		if (loginWebMFAVerifier == null) {
 			return;
 		}
 
-		PortletSession portletSession =
-			actionRequest.getPortletSession();
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
-		long userId = (Long)portletSession.getAttribute("userid");
+		if (themeDisplay.isSignedIn()) {
+			_verifyAuthenticatedUser(actionRequest, actionResponse, loginWebMFAVerifier, themeDisplay);
+		}
+		else {
+			_verifyGuestUser(actionRequest, actionResponse, loginWebMFAVerifier);
+		}
 
-		String encodedKey = ParamUtil.getString(actionRequest, "encodedKey");
-		String encodedKeyDigest = (String) portletSession.getAttribute("encodedKeyDigest");
+	}
 
-		if (StringUtil.equals(DigesterUtil.digest(encodedKey), encodedKeyDigest)) {
+	private void _verifyGuestUser(
+		ActionRequest actionRequest, ActionResponse actionResponse,
+		LoginWebMFAVerifier loginWebMFAVerifier)
+		throws PrincipalException, EncryptorException, PortletException {
+
+		HttpServletRequest httpServletRequest =
+			_portal.getOriginalServletRequest(
+				_portal.getHttpServletRequest(actionRequest));
+
+		HttpSession session = httpServletRequest.getSession();
+
+		long userId = (Long)session.getAttribute("userid");
+
+		String digest = (String)session.getAttribute("digest");
+		String encryptedParameterMapJSON = ParamUtil.getString(
+			actionRequest, "encryptedParameterMapJSON");
+
+		if (!StringUtil.equals(
+			DigesterUtil.digest(encryptedParameterMapJSON), digest)) {
+
 			throw new PrincipalException(
-				StringBundler.concat("User ", userId, " sent a forged key!"));
+				StringBundler.concat("User ", userId, " sent unverified data"));
 		}
 
 		if (loginWebMFAVerifier.verifyChallenge(userId, actionRequest, actionResponse)) {
-			Key key = Encryptor.deserializeKey(encodedKey);
-
-			String encryptedParameterMapJSON =
-				(String)portletSession.getAttribute(
-					"encryptedParameterMapJSON");
+			Key key = (Key)session.getAttribute("key");
 
 			String parameterMapJSON = Encryptor.decrypt(
 				key, encryptedParameterMapJSON);
@@ -100,12 +125,34 @@ public class VerifyMFAMVCActionCommand extends BaseMVCActionCommand {
 			_loginMVCActionCommand.processAction(
 				actionRequestWrapper, actionResponse);
 
-			loginWebMFAVerifier.setupNewSessionAfterVerify(actionRequest);
+			loginWebMFAVerifier.setupSessionAfterVerify(actionRequest);
 
 			return;
 		}
 
 		SessionErrors.add(actionRequest, "mfaFailed");
+	}
+
+	private void _verifyAuthenticatedUser(
+			ActionRequest actionRequest, ActionResponse actionResponse,
+			LoginWebMFAVerifier loginWebMFAVerifier, ThemeDisplay themeDisplay)
+		throws IOException {
+
+
+		if (loginWebMFAVerifier.verifyChallenge(themeDisplay.getUserId(), actionRequest, actionResponse)) {
+			loginWebMFAVerifier.setupSessionAfterVerify(actionRequest);
+
+			String redirect = ParamUtil.getString(actionRequest, "redirect");
+
+			if (!Validator.isBlank(redirect)) {
+				actionResponse.sendRedirect(_portal.escapeRedirect(redirect));
+			}
+
+			return;
+		}
+
+		SessionErrors.add(actionRequest, "mfaFailed");
+
 	}
 
 	@Reference

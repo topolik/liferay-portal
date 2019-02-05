@@ -39,8 +39,7 @@ public class SetupMFADynamicInclude implements DynamicInclude {
 		throws IOException {
 
 		LoginWebMFAVerifier loginWebMFAVerifier =
-			_mfaVerifierRegistry.getMFAVerifier(
-				LoginWebMFAVerifier.class);
+			_mfaVerifierRegistry.getMFAVerifier(LoginWebMFAVerifier.class);
 
 		if (loginWebMFAVerifier == null) {
 			return;

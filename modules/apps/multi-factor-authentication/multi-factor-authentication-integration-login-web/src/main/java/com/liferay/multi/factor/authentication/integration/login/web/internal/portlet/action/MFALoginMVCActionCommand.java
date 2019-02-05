@@ -18,9 +18,7 @@ import com.liferay.multi.factor.authentication.integration.login.web.internal.co
 import com.liferay.multi.factor.authentication.integration.login.web.spi.LoginWebMFAVerifier;
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
 import com.liferay.petra.encryptor.Encryptor;
-import com.liferay.petra.encryptor.EncryptorException;
 import com.liferay.portal.kernel.json.JSONFactory;
-import com.liferay.portal.kernel.model.UserConstants;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -35,7 +33,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import javax.portlet.ActionRequest;
@@ -43,8 +40,10 @@ import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
 import javax.portlet.PortletSession;
 import javax.portlet.PortletURL;
+import javax.portlet.WindowState;
 import javax.portlet.filter.ActionResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Key;
 import java.util.Enumeration;
@@ -71,8 +70,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 		throws Exception {
 
 		LoginWebMFAVerifier loginWebMFAVerifier =
-			_mfaVerifierRegistry.getMFAVerifier(
-				LoginWebMFAVerifier.class);
+			_mfaVerifierRegistry.getMFAVerifier(LoginWebMFAVerifier.class);
 
 		if (loginWebMFAVerifier == null) {
 			_loginMVCActionCommand.processAction(actionRequest, actionResponse);
@@ -87,8 +85,8 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 			String login = ParamUtil.getString(actionRequest, "login");
 			String password = actionRequest.getParameter("password");
 
-			HttpServletRequest request = PortalUtil.getOriginalServletRequest(
-				PortalUtil.getHttpServletRequest(actionRequest));
+			HttpServletRequest request = _portal.getOriginalServletRequest(
+				_portal.getHttpServletRequest(actionRequest));
 
 			long userId =
 				AuthenticatedSessionManagerUtil.getAuthenticatedUserId(
@@ -101,7 +99,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 					return;
 				}
 
-				if (loginWebMFAVerifier.needsVerify(userId)) {
+				if (loginWebMFAVerifier.needsVerify(request, userId)) {
 					_verifyMFA(userId, actionRequest, actionResponse);
 
 					return;
@@ -148,6 +146,8 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 			renderURL.setParameter("redirect", responseRedirect[0]);
 		}
 
+		renderURL.setWindowState(WindowState.MAXIMIZED);
+
 		actionRequest.setAttribute(
 			WebKeys.REDIRECT, renderURL.toString());
 
@@ -159,14 +159,12 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 			ActionResponse actionResponse)
 		throws Exception {
 
-		Enumeration<String> parameterNames =
-			actionRequest.getParameterNames();
-
 		Map<String, String> parameterMap = new HashMap<>();
 
-		for (
-			String name = parameterNames.nextElement();
-			parameterNames.hasMoreElements();) {
+		for (Enumeration<String> names = actionRequest.getParameterNames();
+				names.hasMoreElements(); ) {
+
+			String name = names.nextElement();
 
 			parameterMap.put(
 				name, ParamUtil.getString(actionRequest, name));
@@ -175,21 +173,21 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 		String parameterMapJSON = _jsonFactory.looseSerialize(
 			parameterMap);
 
-		PortletSession portletSession =
-			actionRequest.getPortletSession();
+		HttpServletRequest httpServletRequest =
+			_portal.getOriginalServletRequest(
+				_portal.getHttpServletRequest(actionRequest));
 
-		portletSession.setAttribute("userid", userId);
+		HttpSession session = httpServletRequest.getSession();
 
 		Key key = Encryptor.generateKey();
 
-		portletSession.setAttribute(
-			"encryptedParameterMapJSON",
-			Encryptor.encrypt(key, parameterMapJSON));
+		String encryptedParameterMapJSON = Encryptor.encrypt(
+			key, parameterMapJSON);
 
-		String encodedKey = Base64.encode(key.getEncoded());
-
-		portletSession.setAttribute(
-			"encodedKeyDigest", DigesterUtil.digest(encodedKey));
+		session.setAttribute(
+			"digest", DigesterUtil.digest(encryptedParameterMapJSON));
+		session.setAttribute("key", key);
+		session.setAttribute("userid", userId);
 
 		LiferayPortletResponse liferayPortletResponse =
 			_portal.getLiferayPortletResponse(actionResponse);
@@ -199,7 +197,10 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 		renderURL.setParameter(
 			"mvcRenderCommandName", "/login/verify_mfa");
 
-		renderURL.setParameter("encodedKey", encodedKey);
+		renderURL.setParameter(
+			"encryptedParameterMapJSON", encryptedParameterMapJSON);
+
+		renderURL.setWindowState(WindowState.MAXIMIZED);
 
 		actionRequest.setAttribute(
 			WebKeys.REDIRECT, renderURL.toString());

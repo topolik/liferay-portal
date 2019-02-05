@@ -1,3 +1,4 @@
+<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -11,16 +12,12 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+--%>
 
-package com.liferay.multi.factor.authentication.integration.spi.verifier;
+<%@ include file="/init.jsp" %>
 
-import java.util.Map;
-import java.util.Set;
+<h1>
+	<liferay-ui:message key="please-enter-your-2-factor-verification-code" />
+</h1>
 
-/**
- * @author Tomas Polesovsky
- */
-public interface MFAVerifierRegistry {
-
-	public <T extends MFAVerifier > T getMFAVerifier(Class<T> mfaVerifierClass);
-}
+<aui:input name="otp" showRequiredLabel="yes" maxlength="6"/>

@@ -18,6 +18,7 @@ import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerif
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -47,7 +48,8 @@ public interface LoginWebMFAVerifier extends MFAVerifier {
 
 	public boolean needsSetup(long userId);
 
-	public boolean needsVerify(long userId);
+	public boolean needsVerify(
+		HttpServletRequest request, long userId);
 
-	public void setupNewSessionAfterVerify(ActionRequest actionRequest);
+	public void setupSessionAfterVerify(ActionRequest actionRequest);
 }

@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,21 +11,17 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ include file="/init.jsp" %>
+package com.liferay.multi.factor.authentication.integration.login.web.internal.constants;
 
-<portlet:actionURL name="/otp/verify" var="otpVerifyURL" />
+/**
+ * @author Tomas Polesovsky
+ */
+public class MFAPortletKeys {
 
-<aui:form action="<%= otpVerifyURL %>" cssClass="sign-in-form" method="post" name="fm">
-	<aui:select label="type" name="otpType">
-		<aui:option label="HOTP" />
-		<aui:option label="TOTP" />
-	</aui:select>
+	public static final String FAST_LOGIN =
+		"com_liferay_login_web_portlet_FastLoginPortlet";
 
-	<aui:input name="otp" showRequiredLabel="yes" />
-
-	<aui:button-row>
-		<aui:button type="submit" value="submit" />
-	</aui:button-row>
-</aui:form>
+	public static final String LOGIN =
+		"com_liferay_login_web_portlet_LoginPortlet";
+}

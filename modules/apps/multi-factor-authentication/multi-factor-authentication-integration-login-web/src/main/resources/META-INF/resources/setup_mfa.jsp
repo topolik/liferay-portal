@@ -18,10 +18,10 @@
 
 <portlet:actionURL name="/login/setup_mfa" var="setupMFAActionURL" />
 
-<liferay-ui:error key="mfaFailed" message="multi-factor-authentication-setup-failed" />
-
-<aui:form action="setupMFAActionURL" cssClass="sign-in-form" method="post" name="fm">
+<aui:form action="${setupMFAActionURL}" cssClass="sign-in-form container-fluid-1280" method="post" name="fm">
 	<aui:input name="redirect" type="hidden" value="<%= ParamUtil.getString(renderRequest, "redirect")%>" />
+
+	<liferay-ui:error key="mfaFailed" message="multi-factor-authentication-setup-failed" />
 
 	<liferay-util:dynamic-include key="com.liferay.multi.factor.authentication.integration.login.web#/setup_mfa.jsp" />
 

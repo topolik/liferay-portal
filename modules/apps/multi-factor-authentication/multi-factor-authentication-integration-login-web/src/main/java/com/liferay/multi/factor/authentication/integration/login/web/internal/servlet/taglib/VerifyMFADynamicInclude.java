@@ -17,6 +17,8 @@ package com.liferay.multi.factor.authentication.integration.login.web.internal.s
 import com.liferay.multi.factor.authentication.integration.login.web.spi.LoginWebMFAVerifier;
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortalUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -38,16 +40,26 @@ public class VerifyMFADynamicInclude implements DynamicInclude {
 		throws IOException {
 
 		LoginWebMFAVerifier loginWebMFAVerifier =
-			_mfaVerifierRegistry.getMFAVerifier(
-				LoginWebMFAVerifier.class);
+			_mfaVerifierRegistry.getMFAVerifier(LoginWebMFAVerifier.class);
+
 
 		if (loginWebMFAVerifier == null) {
 			return;
 		}
 
-		HttpSession session = request.getSession();
+		HttpServletRequest httpServletRequest =
+			_portal.getOriginalServletRequest(request);
 
-		long userId = (Long)session.getAttribute("userid");
+		HttpSession session = httpServletRequest.getSession();
+
+		long userId = _portal.getUserId(request);
+
+		if (userId == 0) {
+			Object userid = session.getAttribute("userid");
+			if (userid != null) {
+				userId = (Long)userid;
+			}
+		}
 
 		loginWebMFAVerifier.includeUserChallenge(userId, request, response);
 	}
@@ -68,5 +80,8 @@ public class VerifyMFADynamicInclude implements DynamicInclude {
 
 	@Reference
 	private MFAVerifierRegistry _mfaVerifierRegistry;
+
+	@Reference
+	private Portal _portal;
 
 }

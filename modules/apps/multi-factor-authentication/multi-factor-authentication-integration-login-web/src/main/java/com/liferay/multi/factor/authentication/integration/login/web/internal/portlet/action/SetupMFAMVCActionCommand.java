@@ -63,8 +63,8 @@ public class SetupMFAMVCActionCommand extends BaseMVCActionCommand {
 		throws Exception {
 
 		LoginWebMFAVerifier loginWebMFAVerifier =
-			_mfaVerifierRegistry.getMFAVerifier(
-				LoginWebMFAVerifier.class);
+			_mfaVerifierRegistry.getMFAVerifier(LoginWebMFAVerifier.class);
+
 
 		if (loginWebMFAVerifier == null) {
 			return;
