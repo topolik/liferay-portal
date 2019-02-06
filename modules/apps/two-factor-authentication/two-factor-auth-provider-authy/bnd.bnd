@@ -1,5 +1,0 @@
-Bundle-Name: Bemis - Two Factor Auth Provider Authy
-Bundle-SymbolicName: com.bemis.portal.twofa.provider.authy
-Bundle-Version: 1.0.0
-
--includeresource: @authy-java-1.1.0.jar
