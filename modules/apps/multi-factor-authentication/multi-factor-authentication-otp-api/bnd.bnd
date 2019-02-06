@@ -1,8 +1,0 @@
-Bundle-Name: Liferay Multi Factor Authentication OTP API
-Bundle-SymbolicName: com.liferay.multi.factor.authentication.otp.api
-Bundle-Version: 1.0.0
-Export-Package:\
-	com.liferay.multi.factor.authentication.otp.exception,\
-	com.liferay.multi.factor.authentication.otp.model,\
-	com.liferay.multi.factor.authentication.otp.service,\
-	com.liferay.multi.factor.authentication.otp.service.persistence

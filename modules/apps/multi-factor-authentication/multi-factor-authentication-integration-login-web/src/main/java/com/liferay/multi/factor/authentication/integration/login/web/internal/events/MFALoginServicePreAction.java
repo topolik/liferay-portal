@@ -57,14 +57,16 @@ public class MFALoginServicePreAction extends Action {
 			return;
 		}
 
-		long userId = _portal.getUserId(request);
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
-		if (userId == 0) {
+		if ((themeDisplay == null) || !themeDisplay.isSignedIn() ||
+			themeDisplay.isImpersonated()) {
+
 			return;
 		}
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		long userId = themeDisplay.getUserId();
 
 		if (loginWebMFAVerifier.needsSetup(userId)) {
 			if (PortletKeys.LOGIN.equals(themeDisplay.getPpid())) {

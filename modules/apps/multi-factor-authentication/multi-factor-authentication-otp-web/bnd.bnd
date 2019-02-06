@@ -1,4 +1,0 @@
-Bundle-Name: Liferay Multi Factor Authentication OTP Web
-Bundle-SymbolicName: com.liferay.multi.factor.authentication.otp.web
-Bundle-Version: 1.0.0
-Web-ContextPath: /multi-factor-authentication-otp-web

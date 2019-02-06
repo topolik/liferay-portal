@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<model-hints>
+	<model name="com.liferay.multi.factor.authentication.provider.totp.model.TOTP">
+		<field name="totpId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="userId" type="long" />
+		<field name="userName" type="String" />
+		<field name="createDate" type="Date" />
+		<field name="modifiedDate" type="Date" />
+		<field name="backupCodes" type="String">
+			<hint name="max-length">255</hint>
+		</field>
+		<field name="lastLoginDate" type="Date" />
+		<field name="lastLoginIP" type="String" />
+		<field name="lastFailedLoginDate" type="Date" />
+		<field name="failedLoginAttempts" type="int" />
+		<field name="sharedSecret" type="String">
+			<hint name="max-length">255</hint>
+		</field>
+		<field name="verified" type="boolean" />
+	</model>
+</model-hints>

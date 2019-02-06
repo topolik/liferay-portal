@@ -64,11 +64,16 @@ public class SetupMFAMVCActionCommand extends BaseMVCActionCommand {
 		if (loginWebMFAVerifier.setup(
 				themeDisplay.getUserId(), actionRequest, actionResponse)) {
 
-			String redirect = ParamUtil.getString(actionRequest, "redirect");
+			loginWebMFAVerifier.setupSessionAfterVerification(actionRequest);
 
-			if (Validator.isNotNull(redirect)) {
-				actionResponse.sendRedirect(redirect);
+			String redirect = _portal.escapeRedirect(
+				ParamUtil.getString(actionRequest, "redirect"));
+
+			if (Validator.isBlank(redirect)) {
+				redirect = themeDisplay.getPortalURL();
 			}
+
+			actionResponse.sendRedirect(redirect);
 
 			return;
 		}
