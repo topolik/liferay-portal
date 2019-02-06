@@ -14,13 +14,11 @@
 
 package com.liferay.multi.factor.authentication.integration.spi.verifier;
 
-import java.util.Map;
-import java.util.Set;
-
 /**
  * @author Tomas Polesovsky
  */
 public interface MFAVerifierRegistry {
 
-	public <T extends MFAVerifier > T getMFAVerifier(Class<T> mfaVerifierClass);
+	public <T extends MFAVerifier> T getMFAVerifier(Class<T> mfaVerifierClass);
+
 }

@@ -14,35 +14,24 @@
 
 package com.liferay.multi.factor.authentication.integration.login.web.internal.portlet.action;
 
-import com.liferay.multi.factor.authentication.integration.login.web.internal.constants.MFAPortletKeys;
 import com.liferay.multi.factor.authentication.integration.login.web.spi.LoginWebMFAVerifier;
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
-import com.liferay.petra.encryptor.Encryptor;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
-import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.portlet.PortletSession;
-import javax.portlet.filter.ActionRequestWrapper;
-import java.security.Key;
-import java.util.Map;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
@@ -65,7 +54,6 @@ public class SetupMFAMVCActionCommand extends BaseMVCActionCommand {
 		LoginWebMFAVerifier loginWebMFAVerifier =
 			_mfaVerifierRegistry.getMFAVerifier(LoginWebMFAVerifier.class);
 
-
 		if (loginWebMFAVerifier == null) {
 			return;
 		}
@@ -73,8 +61,8 @@ public class SetupMFAMVCActionCommand extends BaseMVCActionCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		if (loginWebMFAVerifier.verifySetup(
-			themeDisplay.getUserId(), actionRequest, actionResponse)) {
+		if (loginWebMFAVerifier.setup(
+				themeDisplay.getUserId(), actionRequest, actionResponse)) {
 
 			String redirect = ParamUtil.getString(actionRequest, "redirect");
 
@@ -89,11 +77,12 @@ public class SetupMFAMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	@Reference
+	private JSONFactory _jsonFactory;
+
+	@Reference
 	private MFAVerifierRegistry _mfaVerifierRegistry;
 
 	@Reference
 	private Portal _portal;
 
-	@Reference
-	private JSONFactory _jsonFactory;
 }

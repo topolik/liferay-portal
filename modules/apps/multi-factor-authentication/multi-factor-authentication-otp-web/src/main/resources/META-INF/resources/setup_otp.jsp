@@ -27,10 +27,10 @@ User mfaUser = (User)request.getAttribute("mfaUser");
 
 <aui:select label="type" name="otpType" onChange="<portlet:namespace/>refreshQRCode()">
 	<aui:option label="HOTP" />
-	<aui:option label="TOTP" selected="<%= true %>"/>
+	<aui:option label="TOTP" selected="<%= true %>" />
 </aui:select>
 
-<aui:input name="sharedSecret" disabled="disabled" showRequiredLabel="yes" value="<%= sharedSecret %>"/>
+<aui:input disabled="disabled" name="sharedSecret" showRequiredLabel="yes" value="<%= sharedSecret %>" />
 
 <aui:input name="otp" showRequiredLabel="yes" />
 

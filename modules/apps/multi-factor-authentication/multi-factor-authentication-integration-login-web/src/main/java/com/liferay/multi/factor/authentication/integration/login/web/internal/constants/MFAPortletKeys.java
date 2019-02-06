@@ -24,4 +24,5 @@ public class MFAPortletKeys {
 
 	public static final String LOGIN =
 		"com_liferay_login_web_portlet_LoginPortlet";
+
 }

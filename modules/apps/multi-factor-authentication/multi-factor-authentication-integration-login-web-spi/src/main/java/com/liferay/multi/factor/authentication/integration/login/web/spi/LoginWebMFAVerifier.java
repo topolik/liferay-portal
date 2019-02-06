@@ -16,40 +16,41 @@ package com.liferay.multi.factor.authentication.integration.login.web.spi;
 
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifier;
 
+import java.io.IOException;
+
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
-import javax.servlet.ServletException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * @author Tomas Polesovsky
  */
 public interface LoginWebMFAVerifier extends MFAVerifier {
 
-	public void includeUserChallenge(
+	public void includeSetup(
 			long userId, HttpServletRequest request,
 			HttpServletResponse response)
 		throws IOException;
 
-	public void includeSetup(
-		long userId, HttpServletRequest request,
-		HttpServletResponse response)
+	public void includeVerification(
+			long userId, HttpServletRequest request,
+			HttpServletResponse response)
 		throws IOException;
-
-	public boolean verifyChallenge(
-		long userId, ActionRequest actionRequest,
-		ActionResponse actionResponse);
-
-	public boolean verifySetup(
-		long userId, ActionRequest actionRequest,
-		ActionResponse actionResponse);
 
 	public boolean needsSetup(long userId);
 
-	public boolean needsVerify(
-		HttpServletRequest request, long userId);
+	public boolean needsVerification(HttpServletRequest request, long userId);
 
-	public void setupSessionAfterVerify(ActionRequest actionRequest);
+	public boolean setup(
+		long userId, ActionRequest actionRequest,
+		ActionResponse actionResponse);
+
+	public void setupSessionAfterVerification(ActionRequest actionRequest);
+
+	public boolean verify(
+		long userId, ActionRequest actionRequest,
+		ActionResponse actionResponse);
+
 }

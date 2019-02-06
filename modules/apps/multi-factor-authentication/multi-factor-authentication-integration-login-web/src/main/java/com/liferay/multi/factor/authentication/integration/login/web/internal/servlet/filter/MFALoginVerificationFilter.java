@@ -19,34 +19,37 @@ import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerif
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.auth.session.AuthenticatedSessionManager;
 import com.liferay.portal.kernel.servlet.BaseFilter;
-import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Tomas Polesovsky
  */
 @Component(
-	enabled = false,
-	immediate = true,
+	enabled = false, immediate = true,
 	property = {
 		"after-filter=Auto Login Filter", "servlet-context-name=",
-		"servlet-filter-name=MFA Login Check Filter", "url-pattern=/",
+		"servlet-filter-name=MFA Login Verification Filter", "url-pattern=/",
 		"url-pattern=/*"
 	},
 	service = Filter.class
 )
-public class MFALoginCheckFilter extends BaseFilter {
+public class MFALoginVerificationFilter extends BaseFilter {
+
+	@Override
+	protected Log getLog() {
+		return _log;
+	}
 
 	@Override
 	protected void processFilter(
@@ -71,27 +74,23 @@ public class MFALoginCheckFilter extends BaseFilter {
 			return;
 		}
 
-		if (loginWebMFAVerifier.needsVerify(request, userId)) {
+		if (loginWebMFAVerifier.needsVerification(request, userId)) {
 			_authenticatedSessionManager.logout(request, response);
 
 			String redirect = _portal.getPathMain() + "/portal/login";
 
 			String currentURL = _portal.getCurrentURL(request);
 
-			redirect = HttpUtil.addParameter(redirect, "redirect", currentURL);
+			redirect = _http.addParameter(redirect, "redirect", currentURL);
 
 			response.sendRedirect(redirect);
 
-			_log.error(
-				"User " + userId +
-				" must be verified using Multi Factor Authentication!");
-
-//			_portal.sendError(
-//				new PrincipalException(
-//					StringBundler.concat(
-//					"User ", userId, " must be verified using ",
-//					 "Multi Factor Authentication!")),
-//				request, response);
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					StringBundler.concat(
+						"User ", userId, " must be verified using Multi ",
+						"Factor Authentication!"));
+			}
 
 			return;
 		}
@@ -99,21 +98,19 @@ public class MFALoginCheckFilter extends BaseFilter {
 		super.processFilter(request, response, filterChain);
 	}
 
-	@Override
-	protected Log getLog() {
-		return _log;
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
-		MFALoginCheckFilter.class);
+		MFALoginVerificationFilter.class);
+
+	@Reference
+	private AuthenticatedSessionManager _authenticatedSessionManager;
+
+	@Reference
+	private Http _http;
 
 	@Reference
 	private MFAVerifierRegistry _mfaVerifierRegistry;
 
-
 	@Reference
 	private Portal _portal;
 
-	@Reference
-	private AuthenticatedSessionManager _authenticatedSessionManager;
 }

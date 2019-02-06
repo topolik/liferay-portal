@@ -19,18 +19,19 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderConstants;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
@@ -45,6 +46,7 @@ import javax.servlet.http.HttpServletResponse;
 	service = MVCRenderCommand.class
 )
 public class VerifyMFAMVCRenderCommand implements MVCRenderCommand {
+
 	@Override
 	public String render(
 			RenderRequest renderRequest, RenderResponse renderResponse)
@@ -66,25 +68,23 @@ public class VerifyMFAMVCRenderCommand implements MVCRenderCommand {
 				_log.warn("Unable to include JSP " + _JSP_PATH, e);
 			}
 
-			throw new PortletException(
-				"Unable to include JSP " + _JSP_PATH, e);
+			throw new PortletException("Unable to include JSP " + _JSP_PATH, e);
 		}
 
 		return MVCRenderConstants.MVC_PATH_VALUE_SKIP_DISPATCH;
 	}
 
+	private static final String _JSP_PATH = "/verify_mfa.jsp";
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		VerifyMFAMVCRenderCommand.class);
+
+	@Reference
+	private Portal _portal;
 
 	@Reference(
 		target = "(osgi.web.symbolicname=com.liferay.multi.factor.authentication.integration.login.web)"
 	)
 	private ServletContext _servletContext;
 
-
-	@Reference
-	private Portal _portal;
-
-	private static final String _JSP_PATH = "/verify_mfa.jsp";
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		VerifyMFAMVCRenderCommand.class);
 }

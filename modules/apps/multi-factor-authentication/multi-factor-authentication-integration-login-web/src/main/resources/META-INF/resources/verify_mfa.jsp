@@ -20,9 +20,9 @@
 	<portlet:param name="mvcRenderCommandName" value="/login/verify_mfa" />
 </portlet:actionURL>
 
-<aui:form action="<%= verifyMFAActionURL %>" cssClass="sign-in-form container-fluid-1280" method="post" name="fm">
-	<aui:input name="encryptedParameterMapJSON" type="hidden" value="<%= ParamUtil.getString(renderRequest, "encryptedParameterMapJSON")%>" />
-	<aui:input name="redirect" type="hidden" value="<%= ParamUtil.getString(renderRequest, "redirect") %>" />
+<aui:form action="<%= verifyMFAActionURL %>" cssClass="container-fluid-1280 sign-in-form" method="post" name="fm">
+	<aui:input name="encryptedParameterMapJSON" type="hidden" value='<%= ParamUtil.getString(renderRequest, "encryptedParameterMapJSON") %>' />
+	<aui:input name="redirect" type="hidden" value='<%= ParamUtil.getString(renderRequest, "redirect") %>' />
 
 	<liferay-ui:error key="mfaFailed" message="multi-factor-authentication-failed" />
 

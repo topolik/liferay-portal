@@ -20,4 +20,4 @@
 	<liferay-ui:message key="please-enter-your-2-factor-verification-code" />
 </h1>
 
-<aui:input name="otp" showRequiredLabel="yes" maxlength="6"/>
+<aui:input maxlength="6" name="otp" showRequiredLabel="yes" />

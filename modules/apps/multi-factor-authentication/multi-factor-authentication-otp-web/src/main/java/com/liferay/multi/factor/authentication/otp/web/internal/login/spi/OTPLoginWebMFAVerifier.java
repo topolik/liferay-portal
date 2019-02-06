@@ -16,7 +16,6 @@ package com.liferay.multi.factor.authentication.otp.web.internal.login.spi;
 
 import com.liferay.multi.factor.authentication.integration.login.web.spi.LoginWebMFAVerifier;
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifier;
-import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
 import com.liferay.multi.factor.authentication.otp.model.HOTP;
 import com.liferay.multi.factor.authentication.otp.model.TOTP;
 import com.liferay.multi.factor.authentication.otp.service.HOTPLocalService;
@@ -33,51 +32,37 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
-import jodd.util.Base32;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+
+import java.io.IOException;
+import java.io.Serializable;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
+
+import jodd.util.Base32;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
  */
 @Component(
-	immediate = true,
-	service = {MFAVerifier.class, LoginWebMFAVerifier.class}
+	immediate = true, service = {MFAVerifier.class, LoginWebMFAVerifier.class}
 )
 public class OTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 
 	@Override
-	public void includeUserChallenge(
-		long userId, HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
-
-		RequestDispatcher requestDispatcher =
-			_servletContext.getRequestDispatcher("/challenge_otp.jsp");
-
-		try {
-			requestDispatcher.include(request, response);
-		}
-		catch (ServletException e) {
-			throw new IOException(
-				"Unable to include /challenge_otp.jsp: " + e.getMessage(), e);
-		}
-	}
-
-	@Override
 	public void includeSetup(
-		long userId, HttpServletRequest request, HttpServletResponse response)
+			long userId, HttpServletRequest request,
+			HttpServletResponse response)
 		throws IOException {
 
 		try {
@@ -101,19 +86,18 @@ public class OTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 				_hotpLocalService.deleteHOTP(userId);
 			}
 		}
-		catch (PortalException e) {
-			_log.error("Unable to delete totp: " + e.getMessage(), e);
+		catch (PortalException pe) {
+			_log.error("Unable to delete totp: " + pe.getMessage(), pe);
 		}
 
 		int keySize = 20;
 
-		int count = (int) Math.ceil((double) keySize / 8);
+		int count = (int)Math.ceil((double)keySize / 8);
 
 		byte[] buffer = new byte[count * 8];
 
 		for (int i = 0; i < count; i++) {
-			BigEndianCodec.putLong(
-				buffer, i * 8, SecureRandomUtil.nextLong());
+			BigEndianCodec.putLong(buffer, i * 8, SecureRandomUtil.nextLong());
 		}
 
 		byte[] secret = new byte[keySize];
@@ -127,10 +111,11 @@ public class OTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 
 		HttpSession session = originalServletRequest.getSession();
 
-		session.setAttribute("sharedSecret", sharedSecret);
-		request.setAttribute("sharedSecret", sharedSecret);
-		request.setAttribute(
+		session.setAttribute(
 			"mfaUser", _userLocalService.fetchUserById(userId));
+
+		request.setAttribute("sharedSecret", sharedSecret);
+		request.setAttribute("sharedSecret", sharedSecret);
 
 		RequestDispatcher requestDispatcher =
 			_servletContext.getRequestDispatcher("/setup_otp.jsp");
@@ -138,146 +123,28 @@ public class OTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 		try {
 			requestDispatcher.include(request, response);
 		}
-		catch (ServletException e) {
+		catch (ServletException se) {
 			throw new IOException(
-				"Unable to include /setup_otp.jsp: " + e.getMessage(), e);
+				"Unable to include /setup_otp.jsp: " + se, se);
 		}
 	}
 
 	@Override
-	public boolean verifyChallenge(
-		long userId, ActionRequest actionRequest,
-		ActionResponse actionResponse) {
+	public void includeVerification(
+			long userId, HttpServletRequest request,
+			HttpServletResponse response)
+		throws IOException {
 
-		if (needsSetup(userId)) {
-			return false;
+		RequestDispatcher requestDispatcher =
+			_servletContext.getRequestDispatcher("/verify_otp.jsp");
+
+		try {
+			requestDispatcher.include(request, response);
 		}
-
-		String otpValue = ParamUtil.getString(actionRequest, "otp");
-
-		if (Validator.isBlank(otpValue)) {
-			return false;
+		catch (ServletException se) {
+			throw new IOException(
+				"Unable to include /verify_otp.jsp: " + se, se);
 		}
-
-		HOTP hotp = _hotpLocalService.fetchHOTPByUserId(userId);
-
-		if ((hotp != null) && hotp.isVerified()) {
-			try {
-				String generatedOtpValue = OTPUtil.generateHOTP(
-					hotp.getSharedSecret(), hotp.getCount(), 6, "HmacSHA1");
-
-				if (generatedOtpValue.equals(otpValue)) {
-					return true;
-				}
-				else {
-					return false;
-				}
-			}
-			catch (Exception e) {
-				_log.error(
-					StringBundler.concat(
-						"Unable to generate HOTP value for user " , userId,
-						": ", e.getMessage()),
-					e);
-
-				return false;
-			}
-		}
-
-		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
-
-		if ((totp != null) && totp.isVerified()) {
-			try {
-				String generatedOtpValue = OTPUtil.generateTOTP(
-					totp.getSharedSecret(), 30, 6, "HmacSHA1");
-
-				if (generatedOtpValue.equals(otpValue)) {
-					return true;
-				}
-				else {
-					return false;
-				}
-			}
-			catch (Exception e) {
-				_log.error(
-					StringBundler.concat(
-						"Unable to generate TOTP value for user " , userId,
-						": ", e.getMessage()),
-					e);
-
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	@Override
-	public boolean verifySetup(
-		long userId, ActionRequest actionRequest,
-		ActionResponse actionResponse) {
-
-		HttpServletRequest originalServletRequest =
-			_portal.getOriginalServletRequest(
-				_portal.getHttpServletRequest(actionRequest));
-
-		HttpSession session = originalServletRequest.getSession();
-
-		String sharedSecret = (String)session.getAttribute("sharedSecret");
-		String otpType = ParamUtil.getString(actionRequest, "otpType");
-		String otpValue = ParamUtil.getString(actionRequest, "otp");
-
-		if ("TOTP".equals(otpType)) {
-			try {
-				String generatedOtpValue = OTPUtil.generateTOTP(
-					sharedSecret, 30, 6, "HmacSHA1");
-
-				if (generatedOtpValue.equals(otpValue)) {
-					TOTP totp = _totpLocalService.addTOTP(userId, sharedSecret);
-					_totpLocalService.updateVerified(totp.getTotpId(), true);
-					return true;
-				}
-				else {
-					_log.error("TOTP mismatch");
-				}
-			}
-			catch (Exception e) {
-				_log.error(
-					StringBundler.concat(
-						"Unable to generate TOTP value for user " , userId,
-						": ", e.getMessage()),
-					e);
-			}
-
-		}
-		else if ("HOTP".equals(otpType)) {
-			try {
-				int count = 1;
-				int digits = 6;
-
-				String generatedOtpValue = OTPUtil.generateHOTP(
-					sharedSecret, count, digits, "HmacSHA1");
-
-				if (generatedOtpValue.equals(otpValue)) {
-					HOTP hotp = _hotpLocalService.addHOTP(userId, sharedSecret);
-					_hotpLocalService.updateVerified(hotp.getHotpId(), true);
-					return true;
-				}
-				else {
-					_log.error("HOTP mismatch");
-				}
-			}
-			catch (Exception e) {
-				_log.error(
-					StringBundler.concat(
-						"Unable to generate HOTP value for user " , userId,
-						": ", e.getMessage()),
-					e);
-
-			}
-		}
-
-		return false;
 	}
 
 	@Override
@@ -298,7 +165,7 @@ public class OTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 	}
 
 	@Override
-	public boolean needsVerify(HttpServletRequest request, long userId) {
+	public boolean needsVerification(HttpServletRequest request, long userId) {
 		if (needsSetup(userId)) {
 			return false;
 		}
@@ -329,7 +196,76 @@ public class OTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 	}
 
 	@Override
-	public void setupSessionAfterVerify(ActionRequest actionRequest) {
+	public boolean setup(
+		long userId, ActionRequest actionRequest,
+		ActionResponse actionResponse) {
+
+		HttpServletRequest originalServletRequest =
+			_portal.getOriginalServletRequest(
+				_portal.getHttpServletRequest(actionRequest));
+
+		HttpSession session = originalServletRequest.getSession();
+
+		String sharedSecret = (String)session.getAttribute("sharedSecret");
+
+		String otpType = ParamUtil.getString(actionRequest, "otpType");
+		String otpValue = ParamUtil.getString(actionRequest, "otp");
+
+		if ("TOTP".equals(otpType)) {
+			try {
+				String generatedOtpValue = OTPUtil.generateTOTP(
+					sharedSecret, 30, 6, "HmacSHA1");
+
+				if (generatedOtpValue.equals(otpValue)) {
+					TOTP totp = _totpLocalService.addTOTP(userId, sharedSecret);
+
+					_totpLocalService.updateVerified(totp.getTotpId(), true);
+
+					return true;
+				}
+
+				_log.error("TOTP mismatch");
+			}
+			catch (Exception e) {
+				_log.error(
+					StringBundler.concat(
+						"Unable to generate TOTP value for user ", userId, ": ",
+						e.getMessage()),
+					e);
+			}
+		}
+		else if ("HOTP".equals(otpType)) {
+			try {
+				int count = 1;
+				int digits = 6;
+
+				String generatedOtpValue = OTPUtil.generateHOTP(
+					sharedSecret, count, digits, "HmacSHA1");
+
+				if (generatedOtpValue.equals(otpValue)) {
+					HOTP hotp = _hotpLocalService.addHOTP(userId, sharedSecret);
+
+					_hotpLocalService.updateVerified(hotp.getHotpId(), true);
+
+					return true;
+				}
+
+				_log.error("HOTP mismatch");
+			}
+			catch (Exception e) {
+				_log.error(
+					StringBundler.concat(
+						"Unable to generate HOTP value for user ", userId, ": ",
+						e.getMessage()),
+					e);
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public void setupSessionAfterVerification(ActionRequest actionRequest) {
 		HttpServletRequest originalServletRequest =
 			_portal.getOriginalServletRequest(
 				_portal.getHttpServletRequest(actionRequest));
@@ -337,43 +273,114 @@ public class OTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 		HttpSession session = originalServletRequest.getSession();
 
 		MFAContext mfaContext = new MFAContext();
-		mfaContext.expiresAt = System.currentTimeMillis() + 10*60*1000;
+
+		long oneDay = 24 * 60 * 60 * 1000;
+
+		mfaContext._expiresAt = System.currentTimeMillis() + oneDay;
 
 		session.setAttribute(MFAContext.class.getName(), mfaContext);
 	}
 
-	@Reference
-	private Portal _portal;
+	@Override
+	public boolean verify(
+		long userId, ActionRequest actionRequest,
+		ActionResponse actionResponse) {
+
+		if (needsSetup(userId)) {
+			return false;
+		}
+
+		String otpValue = ParamUtil.getString(actionRequest, "otp");
+
+		if (Validator.isBlank(otpValue)) {
+			return false;
+		}
+
+		HOTP hotp = _hotpLocalService.fetchHOTPByUserId(userId);
+
+		if ((hotp != null) && hotp.isVerified()) {
+			try {
+				String generatedOtpValue = OTPUtil.generateHOTP(
+					hotp.getSharedSecret(), hotp.getCount(), 6, "HmacSHA1");
+
+				if (generatedOtpValue.equals(otpValue)) {
+					return true;
+				}
+
+				return false;
+			}
+			catch (Exception e) {
+				_log.error(
+					StringBundler.concat(
+						"Unable to generate HOTP value for user ", userId, ": ",
+						e.getMessage()),
+					e);
+
+				return false;
+			}
+		}
+
+		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
+
+		if ((totp != null) && totp.isVerified()) {
+			try {
+				String generatedOtpValue = OTPUtil.generateTOTP(
+					totp.getSharedSecret(), 30, 6, "HmacSHA1");
+
+				if (generatedOtpValue.equals(otpValue)) {
+					return true;
+				}
+
+				return false;
+			}
+			catch (Exception e) {
+				_log.error(
+					StringBundler.concat(
+						"Unable to generate TOTP value for user ", userId, ": ",
+						e.getMessage()),
+					e);
+
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		OTPLoginWebMFAVerifier.class);
 
 	@Reference
 	private HOTPLocalService _hotpLocalService;
 
 	@Reference
-	private TOTPLocalService _totpLocalService;
-
+	private Portal _portal;
 
 	@Reference(
 		target = "(osgi.web.symbolicname=com.liferay.multi.factor.authentication.otp.web)"
 	)
 	private ServletContext _servletContext;
 
+	@Reference
+	private TOTPLocalService _totpLocalService;
 
 	@Reference
 	private UserLocalService _userLocalService;
 
 	private class MFAContext implements Serializable {
-		private long expiresAt;
-		private static final long serialVersionUID = 1L;
 
 		public boolean isValid() {
-			if (System.currentTimeMillis() < expiresAt) {
+			if (System.currentTimeMillis() < _expiresAt) {
 				return true;
 			}
 
 			return false;
 		}
+
+		private static final long serialVersionUID = 1L;
+
+		private long _expiresAt;
+
 	}
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		OTPLoginWebMFAVerifier.class);
 }

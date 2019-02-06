@@ -16,63 +16,65 @@ package com.liferay.multi.factor.authentication.integration.internal;
 
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
-import com.liferay.osgi.service.tracker.collections.map.ServiceReferenceMapperFactory;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.osgi.util.StringPlus;
-import com.liferay.portal.kernel.util.GetterUtil;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 /**
  * @author Tomas Polesovsky
  */
-@Component(
-	immediate = true,
-	service = MFAVerifierRegistry.class
-)
+@Component(immediate = true, service = MFAVerifierRegistry.class)
 public class MFAVerifierRegistryImpl implements MFAVerifierRegistry {
-
-	@Activate
-	protected void activate(BundleContext bundleContext) {
-		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, MFAVerifier.class, null, (serviceReference, emitter) -> {
-				List<String> objectClass = StringPlus.asList(
-					serviceReference.getProperty("objectClass"));
-
-				Bundle bundle = serviceReference.getBundle();
-
-				objectClass.stream().map( s -> {
-					try {
-						return (Class<? extends MFAVerifier>)bundle.loadClass(s);
-					}
-					catch (ClassNotFoundException e) {
-						return null;
-					}
-				}).filter(
-					Objects::nonNull
-				).filter(
-					c -> !c.equals(MFAVerifier.class)
-				).filter(
-					c -> MFAVerifier.class.isAssignableFrom(c)
-				)
-				.forEach(emitter::emit);
-			});
-
-	}
 
 	@Override
 	public <T extends MFAVerifier> T getMFAVerifier(Class<T> mfaVerifierClass) {
 		return (T)_serviceTrackerMap.getService(mfaVerifierClass);
 	}
 
+	@Activate
+	protected void activate(BundleContext bundleContext) {
+		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
+			bundleContext, MFAVerifier.class, null,
+			(serviceReference, emitter) -> {
+				Bundle bundle = serviceReference.getBundle();
 
-	private ServiceTrackerMap<Class<? extends MFAVerifier>, MFAVerifier> _serviceTrackerMap;
+				List<String> objectClassList = StringPlus.asList(
+					serviceReference.getProperty("objectClass"));
+
+				Stream<String> stream = objectClassList.stream();
+
+				stream.map(
+					s -> {
+						try {
+							return (Class<? extends MFAVerifier>)
+								bundle.loadClass(s);
+						}
+						catch (ClassNotFoundException cnfe) {
+							return null;
+						}
+					}
+				).filter(
+					Objects::nonNull
+				).filter(
+					c -> !c.equals(MFAVerifier.class)
+				).filter(
+					c -> MFAVerifier.class.isAssignableFrom(c)
+				).forEach(
+					emitter::emit
+				);
+			});
+	}
+
+	private ServiceTrackerMap<Class<? extends MFAVerifier>, MFAVerifier>
+		_serviceTrackerMap;
 
 }

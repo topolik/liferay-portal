@@ -18,21 +18,21 @@ import com.liferay.multi.factor.authentication.integration.spi.verifier.StringMF
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.AuthException;
 import com.liferay.portal.kernel.security.auth.session.AuthenticatedSessionManager;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
+
 /**
  * @author Tomas Polesovsky
  */
 @Component(
-	enabled = false,
-	property = {"service.ranking:Integer=1"},
+	enabled = false, property = "service.ranking:Integer=1",
 	service = AuthenticatedSessionManager.class
 )
 public class MFAAuthenticatedSessionManager
@@ -40,8 +40,9 @@ public class MFAAuthenticatedSessionManager
 
 	@Override
 	public long getAuthenticatedUserId(
-		HttpServletRequest request, String login, String password,
-		String authType) throws PortalException {
+			HttpServletRequest request, String login, String password,
+			String authType)
+		throws PortalException {
 
 		return _authenticatedSessionManager.getAuthenticatedUserId(
 			request, login, password, authType);
@@ -49,8 +50,9 @@ public class MFAAuthenticatedSessionManager
 
 	@Override
 	public void login(
-		HttpServletRequest request, HttpServletResponse response, String login,
-		String password, boolean rememberMe, String authType) throws Exception {
+			HttpServletRequest request, HttpServletResponse response,
+			String login, String password, boolean rememberMe, String authType)
+		throws Exception {
 
 		long userId = _authenticatedSessionManager.getAuthenticatedUserId(
 			request, login, password, authType);
@@ -67,8 +69,7 @@ public class MFAAuthenticatedSessionManager
 	}
 
 	@Override
-	public void logout(
-		HttpServletRequest request, HttpServletResponse response)
+	public void logout(HttpServletRequest request, HttpServletResponse response)
 		throws Exception {
 
 		_authenticatedSessionManager.logout(request, response);
@@ -76,7 +77,9 @@ public class MFAAuthenticatedSessionManager
 
 	@Override
 	public HttpSession renewSession(
-		HttpServletRequest request, HttpSession session) throws Exception {
+			HttpServletRequest request, HttpSession session)
+		throws Exception {
+
 		return _authenticatedSessionManager.renewSession(request, session);
 	}
 
@@ -85,12 +88,15 @@ public class MFAAuthenticatedSessionManager
 		_authenticatedSessionManager.signOutSimultaneousLogins(userId);
 	}
 
-	@Reference(target="(|(!(service.ranking=*))(service.ranking=0))")
+	@Reference(
+		target = "(!(component.name=com.liferay.multi.factor.authentication.integration.login.web.internal.security.auth.session.MFAAuthenticatedSessionManager))"
+	)
 	private AuthenticatedSessionManager _authenticatedSessionManager;
 
 	@Reference(
 		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY
 	)
-	private volatile StringMFAVerifier _stringMFAVerifier = null;
+	private volatile StringMFAVerifier _stringMFAVerifier;
+
 }

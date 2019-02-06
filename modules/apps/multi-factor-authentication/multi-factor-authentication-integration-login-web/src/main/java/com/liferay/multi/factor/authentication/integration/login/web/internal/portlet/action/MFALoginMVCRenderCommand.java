@@ -20,12 +20,13 @@ import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerif
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
 import javax.portlet.PortletException;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Peter Fellwock
@@ -34,8 +35,7 @@ import javax.portlet.RenderResponse;
 	property = {
 		"javax.portlet.name=" + MFAPortletKeys.FAST_LOGIN,
 		"javax.portlet.name=" + MFAPortletKeys.LOGIN,
-		"mvc.command.name=/login/login",
-		"service.ranking:Integer=1"
+		"mvc.command.name=/login/login", "service.ranking:Integer=1"
 	},
 	service = MVCRenderCommand.class
 )
@@ -51,8 +51,7 @@ public class MFALoginMVCRenderCommand implements MVCRenderCommand {
 
 		if (loginWebMFAVerifier != null) {
 			ThemeDisplay themeDisplay =
-				(ThemeDisplay) renderRequest.getAttribute(
-					WebKeys.THEME_DISPLAY);
+				(ThemeDisplay)renderRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
 			if (themeDisplay.isSignedIn() &&
 				loginWebMFAVerifier.needsSetup(themeDisplay.getUserId())) {
@@ -70,11 +69,10 @@ public class MFALoginMVCRenderCommand implements MVCRenderCommand {
 	)
 	private MVCRenderCommand _loginMVCRenderCommand;
 
+	@Reference
+	private MFAVerifierRegistry _mfaVerifierRegistry;
 
 	@Reference
 	private SetupMFAMVCRenderCommand _setupMFAMVCRenderCommand;
 
-
-	@Reference
-	private MFAVerifierRegistry _mfaVerifierRegistry;
 }

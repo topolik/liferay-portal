@@ -14,12 +14,12 @@
 
 package com.liferay.multi.factor.authentication.integration.spi.verifier;
 
-import java.util.function.Consumer;
-
 /**
  * @author Tomas Polesovsky
  */
 // TODO: relict, refactor into remote API MFAVerifier and separate module
 public interface StringMFAVerifier extends MFAVerifier {
+
 	public boolean isVerified(String scope, String verifier, long userId);
+
 }

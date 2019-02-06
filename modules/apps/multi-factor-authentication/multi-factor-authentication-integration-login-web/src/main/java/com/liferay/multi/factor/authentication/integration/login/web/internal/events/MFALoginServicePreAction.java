@@ -14,37 +14,29 @@
 
 package com.liferay.multi.factor.authentication.integration.login.web.internal.events;
 
-import com.liferay.multi.factor.authentication.integration.login.web.internal.servlet.filter.MFALoginCheckFilter;
 import com.liferay.multi.factor.authentication.integration.login.web.spi.LoginWebMFAVerifier;
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.events.Action;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.LifecycleAction;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
-import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.auth.session.AuthenticatedSessionManager;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.kernel.util.Props;
-import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.WebKeys;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
 
-import javax.portlet.PortletMode;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
-import javax.portlet.WindowStateException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
@@ -53,9 +45,9 @@ import java.io.IOException;
 	property = "key=servlet.service.events.pre", service = LifecycleAction.class
 )
 public class MFALoginServicePreAction extends Action {
+
 	@Override
-	public void run(
-			HttpServletRequest request, HttpServletResponse response)
+	public void run(HttpServletRequest request, HttpServletResponse response)
 		throws ActionException {
 
 		LoginWebMFAVerifier loginWebMFAVerifier =
@@ -71,8 +63,8 @@ public class MFALoginServicePreAction extends Action {
 			return;
 		}
 
-		ThemeDisplay themeDisplay =
-			(ThemeDisplay)request.getAttribute(WebKeys.THEME_DISPLAY);
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
 		if (loginWebMFAVerifier.needsSetup(userId)) {
 			if (PortletKeys.LOGIN.equals(themeDisplay.getPpid())) {
@@ -83,8 +75,10 @@ public class MFALoginServicePreAction extends Action {
 				PortletURL portletURL = PortletURLFactoryUtil.create(
 					request, PortletKeys.LOGIN, PortletRequest.RENDER_PHASE);
 
-				portletURL.setParameter("mvcRenderCommandName", "/login/setup_mfa");
-				portletURL.setParameter("redirect", themeDisplay.getURLCurrent());
+				portletURL.setParameter(
+					"mvcRenderCommandName", "/login/setup_mfa");
+				portletURL.setParameter(
+					"redirect", themeDisplay.getURLCurrent());
 				portletURL.setWindowState(WindowState.MAXIMIZED);
 
 				response.sendRedirect(portletURL.toString());
@@ -97,8 +91,10 @@ public class MFALoginServicePreAction extends Action {
 			return;
 		}
 
-		if (loginWebMFAVerifier.needsVerify(request, userId)) {
-			if (PortletKeys.LOGIN.equals(themeDisplay.getPpid()) && LiferayWindowState.isExclusive(request)) {
+		if (loginWebMFAVerifier.needsVerification(request, userId)) {
+			if (PortletKeys.LOGIN.equals(themeDisplay.getPpid()) &&
+				LiferayWindowState.isExclusive(request)) {
+
 				return;
 			}
 
@@ -106,8 +102,10 @@ public class MFALoginServicePreAction extends Action {
 				PortletURL portletURL = PortletURLFactoryUtil.create(
 					request, PortletKeys.LOGIN, PortletRequest.RENDER_PHASE);
 
-				portletURL.setParameter("mvcRenderCommandName", "/login/verify_mfa");
-				portletURL.setParameter("redirect", themeDisplay.getURLCurrent());
+				portletURL.setParameter(
+					"mvcRenderCommandName", "/login/verify_mfa");
+				portletURL.setParameter(
+					"redirect", themeDisplay.getURLCurrent());
 				portletURL.setWindowState(LiferayWindowState.EXCLUSIVE);
 
 				response.sendRedirect(portletURL.toString());
@@ -121,36 +119,16 @@ public class MFALoginServicePreAction extends Action {
 		}
 	}
 
-	private boolean isLoginURL(
-		HttpServletRequest request, ThemeDisplay themeDisplay) {
-
-		request = _portal.getOriginalServletRequest(request);
-
-		if(request.getRequestURI().contains("/portal/login")) {
-			return true;
-		}
-
-
-		if (themeDisplay.getPpid().startsWith(_props.get(PropsKeys.AUTH_LOGIN_PORTLET_NAME))) {
-			return true;
-		}
-
-		return false;
-	}
-
-	private static final Log _log = LogFactoryUtil.getLog(
-		MFALoginServicePreAction.class);
+	@Reference
+	private AuthenticatedSessionManager _authenticatedSessionManager;
 
 	@Reference
 	private MFAVerifierRegistry _mfaVerifierRegistry;
-
 
 	@Reference
 	private Portal _portal;
 
 	@Reference
-	private AuthenticatedSessionManager _authenticatedSessionManager;
-
-	@Reference
 	private Props _props;
+
 }

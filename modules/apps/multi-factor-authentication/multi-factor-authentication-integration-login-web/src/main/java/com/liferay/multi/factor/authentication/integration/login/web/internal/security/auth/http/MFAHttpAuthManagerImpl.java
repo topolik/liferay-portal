@@ -18,25 +18,24 @@ import com.liferay.multi.factor.authentication.integration.spi.verifier.StringMF
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.http.HttpAuthManager;
 import com.liferay.portal.kernel.security.auth.http.HttpAuthorizationHeader;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
-
 /**
  * @author Tomas Polesovsky
  */
 @Component(
 	enabled = false,
-	property = {
-		"service.ranking:Integer=1",
-		"request.header.name=X-2FA-Token"
-	},
+	property = {"request.header.name=X-2FA-Token", "service.ranking:Integer=1"},
 	service = HttpAuthManager.class
 )
 public class MFAHttpAuthManagerImpl implements HttpAuthManager {
@@ -52,20 +51,19 @@ public class MFAHttpAuthManagerImpl implements HttpAuthManager {
 		HttpServletResponse httpServletResponse,
 		HttpAuthorizationHeader httpAuthorizationHeader) {
 
-		_httpAuthManager.generateChallenge(httpServletRequest,
-			httpServletResponse,
-			httpAuthorizationHeader);
+		_httpAuthManager.generateChallenge(
+			httpServletRequest, httpServletResponse, httpAuthorizationHeader);
 	}
 
 	@Override
-	public long getBasicUserId(
-		HttpServletRequest httpServletRequest) throws PortalException {
+	public long getBasicUserId(HttpServletRequest httpServletRequest)
+		throws PortalException {
 
 		long userId = _httpAuthManager.getBasicUserId(httpServletRequest);
 
 		if (!_stringMFAVerifier.isVerified(
-			HttpAuthManager.class.getName(),
-			httpServletRequest.getHeader(_requestHeaderName), userId)) {
+				HttpAuthManager.class.getName(),
+				httpServletRequest.getHeader(_requestHeaderName), userId)) {
 
 			return 0;
 		}
@@ -74,14 +72,14 @@ public class MFAHttpAuthManagerImpl implements HttpAuthManager {
 	}
 
 	@Override
-	public long getDigestUserId(
-		HttpServletRequest httpServletRequest) throws PortalException {
+	public long getDigestUserId(HttpServletRequest httpServletRequest)
+		throws PortalException {
 
 		long userId = _httpAuthManager.getDigestUserId(httpServletRequest);
 
 		if (!_stringMFAVerifier.isVerified(
-			HttpAuthManager.class.getName(),
-			httpServletRequest.getHeader(_requestHeaderName), userId)) {
+				HttpAuthManager.class.getName(),
+				httpServletRequest.getHeader(_requestHeaderName), userId)) {
 
 			return 0;
 		}
@@ -91,16 +89,16 @@ public class MFAHttpAuthManagerImpl implements HttpAuthManager {
 
 	@Override
 	public long getUserId(
-		HttpServletRequest httpServletRequest,
-		HttpAuthorizationHeader httpAuthorizationHeader)
+			HttpServletRequest httpServletRequest,
+			HttpAuthorizationHeader httpAuthorizationHeader)
 		throws PortalException {
 
 		long userId = _httpAuthManager.getUserId(
 			httpServletRequest, httpAuthorizationHeader);
 
 		if (!_stringMFAVerifier.isVerified(
-			HttpAuthManager.class.getName(),
-			httpServletRequest.getHeader(_requestHeaderName), userId)) {
+				HttpAuthManager.class.getName(),
+				httpServletRequest.getHeader(_requestHeaderName), userId)) {
 
 			return 0;
 		}
@@ -115,16 +113,17 @@ public class MFAHttpAuthManagerImpl implements HttpAuthManager {
 		return _httpAuthManager.parse(httpServletRequest);
 	}
 
-
-	@Reference(target="(|(!(service.ranking=*))(service.ranking=0))")
+	@Reference(
+		target = "(!(component.name=com.liferay.multi.factor.authentication.integration.login.web.internal.security.auth.http.MFAHttpAuthManagerImpl))"
+	)
 	private HttpAuthManager _httpAuthManager;
+
+	private String _requestHeaderName;
 
 	@Reference(
 		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY
 	)
-	private volatile StringMFAVerifier _stringMFAVerifier = null;
-
-	private String _requestHeaderName;
+	private volatile StringMFAVerifier _stringMFAVerifier;
 
 }

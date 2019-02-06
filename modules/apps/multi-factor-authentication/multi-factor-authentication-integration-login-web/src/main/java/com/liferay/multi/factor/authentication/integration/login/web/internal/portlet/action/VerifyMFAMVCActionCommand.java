@@ -32,18 +32,23 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+
+import java.io.IOException;
+
+import java.security.Key;
+
+import java.util.Map;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletException;
 import javax.portlet.filter.ActionRequestWrapper;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.security.Key;
-import java.util.Map;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
@@ -74,63 +79,14 @@ public class VerifyMFAMVCActionCommand extends BaseMVCActionCommand {
 			WebKeys.THEME_DISPLAY);
 
 		if (themeDisplay.isSignedIn()) {
-			_verifyAuthenticatedUser(actionRequest, actionResponse, loginWebMFAVerifier, themeDisplay);
+			_verifyAuthenticatedUser(
+				actionRequest, actionResponse, loginWebMFAVerifier,
+				themeDisplay);
 		}
 		else {
-			_verifyGuestUser(actionRequest, actionResponse, loginWebMFAVerifier);
+			_verifyGuestUser(
+				actionRequest, actionResponse, loginWebMFAVerifier);
 		}
-
-	}
-
-	private void _verifyGuestUser(
-		ActionRequest actionRequest, ActionResponse actionResponse,
-		LoginWebMFAVerifier loginWebMFAVerifier)
-		throws PrincipalException, EncryptorException, PortletException {
-
-		HttpServletRequest httpServletRequest =
-			_portal.getOriginalServletRequest(
-				_portal.getHttpServletRequest(actionRequest));
-
-		HttpSession session = httpServletRequest.getSession();
-
-		long userId = (Long)session.getAttribute("userid");
-
-		String digest = (String)session.getAttribute("digest");
-		String encryptedParameterMapJSON = ParamUtil.getString(
-			actionRequest, "encryptedParameterMapJSON");
-
-		if (!StringUtil.equals(
-			DigesterUtil.digest(encryptedParameterMapJSON), digest)) {
-
-			throw new PrincipalException(
-				StringBundler.concat("User ", userId, " sent unverified data"));
-		}
-
-		if (loginWebMFAVerifier.verifyChallenge(userId, actionRequest, actionResponse)) {
-			Key key = (Key)session.getAttribute("key");
-
-			String parameterMapJSON = Encryptor.decrypt(
-				key, encryptedParameterMapJSON);
-
-			Map<String, String> parameterMap = _jsonFactory.looseDeserialize(
-				parameterMapJSON, Map.class);
-
-			ActionRequestWrapper actionRequestWrapper =
-				new ActionRequestWrapper(actionRequest) {
-					public String getParameter(String name) {
-						return parameterMap.get(name);
-					}
-				};
-
-			_loginMVCActionCommand.processAction(
-				actionRequestWrapper, actionResponse);
-
-			loginWebMFAVerifier.setupSessionAfterVerify(actionRequest);
-
-			return;
-		}
-
-		SessionErrors.add(actionRequest, "mfaFailed");
 	}
 
 	private void _verifyAuthenticatedUser(
@@ -138,9 +94,10 @@ public class VerifyMFAMVCActionCommand extends BaseMVCActionCommand {
 			LoginWebMFAVerifier loginWebMFAVerifier, ThemeDisplay themeDisplay)
 		throws IOException {
 
+		if (loginWebMFAVerifier.verify(
+				themeDisplay.getUserId(), actionRequest, actionResponse)) {
 
-		if (loginWebMFAVerifier.verifyChallenge(themeDisplay.getUserId(), actionRequest, actionResponse)) {
-			loginWebMFAVerifier.setupSessionAfterVerify(actionRequest);
+			loginWebMFAVerifier.setupSessionAfterVerification(actionRequest);
 
 			String redirect = ParamUtil.getString(actionRequest, "redirect");
 
@@ -152,11 +109,63 @@ public class VerifyMFAMVCActionCommand extends BaseMVCActionCommand {
 		}
 
 		SessionErrors.add(actionRequest, "mfaFailed");
+	}
 
+	private void _verifyGuestUser(
+			ActionRequest actionRequest, ActionResponse actionResponse,
+			LoginWebMFAVerifier loginWebMFAVerifier)
+		throws EncryptorException, PortletException, PrincipalException {
+
+		HttpServletRequest httpServletRequest =
+			_portal.getOriginalServletRequest(
+				_portal.getHttpServletRequest(actionRequest));
+
+		HttpSession session = httpServletRequest.getSession();
+
+		long userId = (Long)session.getAttribute("userid");
+		String digest = (String)session.getAttribute("digest");
+
+		String encryptedParameterMapJSON = ParamUtil.getString(
+			actionRequest, "encryptedParameterMapJSON");
+
+		if (!StringUtil.equals(
+				DigesterUtil.digest(encryptedParameterMapJSON), digest)) {
+
+			throw new PrincipalException(
+				StringBundler.concat("User ", userId, " sent unverified data"));
+		}
+
+		if (loginWebMFAVerifier.verify(userId, actionRequest, actionResponse)) {
+			Key key = (Key)session.getAttribute("key");
+
+			String parameterMapJSON = Encryptor.decrypt(
+				key, encryptedParameterMapJSON);
+
+			Map<String, String> parameterMap = _jsonFactory.looseDeserialize(
+				parameterMapJSON, Map.class);
+
+			ActionRequestWrapper actionRequestWrapper =
+				new ActionRequestWrapper(actionRequest) {
+
+					public String getParameter(String name) {
+						return parameterMap.get(name);
+					}
+
+				};
+
+			_loginMVCActionCommand.processAction(
+				actionRequestWrapper, actionResponse);
+
+			loginWebMFAVerifier.setupSessionAfterVerification(actionRequest);
+
+			return;
+		}
+
+		SessionErrors.add(actionRequest, "mfaFailed");
 	}
 
 	@Reference
-	private MFAVerifierRegistry _mfaVerifierRegistry;
+	private JSONFactory _jsonFactory;
 
 	@Reference(
 		target = "(component.name=com.liferay.login.web.internal.portlet.action.LoginMVCActionCommand)"
@@ -164,8 +173,9 @@ public class VerifyMFAMVCActionCommand extends BaseMVCActionCommand {
 	private MVCActionCommand _loginMVCActionCommand;
 
 	@Reference
-	private Portal _portal;
+	private MFAVerifierRegistry _mfaVerifierRegistry;
 
 	@Reference
-	private JSONFactory _jsonFactory;
+	private Portal _portal;
+
 }

@@ -18,8 +18,8 @@
 
 <portlet:actionURL name="/login/setup_mfa" var="setupMFAActionURL" />
 
-<aui:form action="${setupMFAActionURL}" cssClass="sign-in-form container-fluid-1280" method="post" name="fm">
-	<aui:input name="redirect" type="hidden" value="<%= ParamUtil.getString(renderRequest, "redirect")%>" />
+<aui:form action="${setupMFAActionURL}" cssClass="container-fluid-1280 sign-in-form" method="post" name="fm">
+	<aui:input name="redirect" type="hidden" value='<%= ParamUtil.getString(renderRequest, "redirect") %>' />
 
 	<liferay-ui:error key="mfaFailed" message="multi-factor-authentication-setup-failed" />
 

@@ -19,23 +19,26 @@ import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerif
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+
+import java.io.IOException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
  */
 @Component(service = DynamicInclude.class)
 public class SetupMFADynamicInclude implements DynamicInclude {
+
 	@Override
 	public void include(
-		HttpServletRequest request, HttpServletResponse response, String key)
+			HttpServletRequest request, HttpServletResponse response,
+			String key)
 		throws IOException {
 
 		LoginWebMFAVerifier loginWebMFAVerifier =
@@ -53,21 +56,18 @@ public class SetupMFADynamicInclude implements DynamicInclude {
 	}
 
 	@Override
-	public void register(
-		DynamicIncludeRegistry dynamicIncludeRegistry) {
-
+	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
 		dynamicIncludeRegistry.register(
 			"com.liferay.multi.factor.authentication.integration.login.web#" +
 				"/setup_mfa.jsp");
 	}
 
+	@Reference
+	private MFAVerifierRegistry _mfaVerifierRegistry;
+
 	@Reference(
 		target = "(osgi.web.symbolicname=com.liferay.multi.factor.authentication.integration.login.web)"
 	)
 	private ServletContext _servletContext;
-
-	@Reference
-	private MFAVerifierRegistry _mfaVerifierRegistry;
-
 
 }

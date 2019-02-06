@@ -18,15 +18,16 @@ import com.liferay.multi.factor.authentication.integration.login.web.spi.LoginWe
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
+
+import java.io.IOException;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
@@ -36,12 +37,12 @@ public class VerifyMFADynamicInclude implements DynamicInclude {
 
 	@Override
 	public void include(
-		HttpServletRequest request, HttpServletResponse response, String key)
+			HttpServletRequest request, HttpServletResponse response,
+			String key)
 		throws IOException {
 
 		LoginWebMFAVerifier loginWebMFAVerifier =
 			_mfaVerifierRegistry.getMFAVerifier(LoginWebMFAVerifier.class);
-
 
 		if (loginWebMFAVerifier == null) {
 			return;
@@ -56,32 +57,31 @@ public class VerifyMFADynamicInclude implements DynamicInclude {
 
 		if (userId == 0) {
 			Object userid = session.getAttribute("userid");
+
 			if (userid != null) {
 				userId = (Long)userid;
 			}
 		}
 
-		loginWebMFAVerifier.includeUserChallenge(userId, request, response);
+		loginWebMFAVerifier.includeVerification(userId, request, response);
 	}
 
 	@Override
-	public void register(
-		DynamicIncludeRegistry dynamicIncludeRegistry) {
-
+	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
 		dynamicIncludeRegistry.register(
 			"com.liferay.multi.factor.authentication.integration.login.web#" +
 				"/verify_mfa.jsp");
 	}
-
-	@Reference(
-		target = "(osgi.web.symbolicname=com.liferay.multi.factor.authentication.integration.login.web)"
-	)
-	private ServletContext _servletContext;
 
 	@Reference
 	private MFAVerifierRegistry _mfaVerifierRegistry;
 
 	@Reference
 	private Portal _portal;
+
+	@Reference(
+		target = "(osgi.web.symbolicname=com.liferay.multi.factor.authentication.integration.login.web)"
+	)
+	private ServletContext _servletContext;
 
 }
