@@ -1,0 +1,3 @@
+Bundle-Name: Liferay Multi Factor Authentication Integration Auto Login
+Bundle-SymbolicName: com.liferay.multi.factor.authentication.integration.auto.login
+Bundle-Version: 1.0.0

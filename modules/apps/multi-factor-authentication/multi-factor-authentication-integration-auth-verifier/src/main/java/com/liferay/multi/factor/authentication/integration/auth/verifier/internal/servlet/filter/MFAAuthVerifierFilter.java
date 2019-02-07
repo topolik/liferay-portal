@@ -14,8 +14,9 @@
 
 package com.liferay.multi.factor.authentication.integration.auth.verifier.internal.servlet.filter;
 
-import com.liferay.multi.factor.authentication.integration.auth.verifier.spi.AuthVerifierMFAVerifier;
-import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifierRegistry;
+import com.liferay.multi.factor.authentication.integration.auth.verifier.internal.spi.integration.AuthVerifierMFAIntegration;
+import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
+import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -49,10 +50,8 @@ import org.osgi.service.component.annotations.Reference;
 public class MFAAuthVerifierFilter extends BaseFilter {
 
 	@Reference(unbind = "-")
-	public void setMfaVerifierRegistry(
-		MFAVerifierRegistry mfaVerifierRegistry) {
-
-		_mfaVerifierRegistry = mfaVerifierRegistry;
+	public void setMfaRegistry(MFARegistry mfaRegistry) {
+		_mfaRegistry = mfaRegistry;
 	}
 
 	@Override
@@ -94,10 +93,11 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 			return;
 		}
 
-		AuthVerifierMFAVerifier apiClientMFAVerifier =
-			_mfaVerifierRegistry.getMFAVerifier(AuthVerifierMFAVerifier.class);
+		HeadlessMFAVerifier headlessMFAVerifier =
+			(HeadlessMFAVerifier)_mfaRegistry.getMFAVerifier(
+				AuthVerifierMFAIntegration.NAME);
 
-		if (apiClientMFAVerifier == null) {
+		if (headlessMFAVerifier == null) {
 			super.processFilter(request, response, filterChain);
 
 			return;
@@ -105,8 +105,8 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 
 		long userId = authVerifierResult.getUserId();
 
-		if (apiClientMFAVerifier.needsVerification(request, userId)) {
-			if (!apiClientMFAVerifier.verify(userId, request, response)) {
+		if (headlessMFAVerifier.needsVerification(request, userId)) {
+			if (!headlessMFAVerifier.verify(request, userId)) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
 						StringBundler.concat(
@@ -127,6 +127,6 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 	private static final Log _log = LogFactoryUtil.getLog(
 		MFAAuthVerifierFilter.class);
 
-	private MFAVerifierRegistry _mfaVerifierRegistry;
+	private MFARegistry _mfaRegistry;
 
 }
