@@ -18,7 +18,7 @@ import com.liferay.multi.factor.authentication.integration.login.web.spi.LoginWe
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.provider.totp.model.TOTP;
 import com.liferay.multi.factor.authentication.provider.totp.service.TOTPLocalService;
-import com.liferay.multi.factor.authentication.provider.totp.web.internal.util.OTPUtil;
+import com.liferay.multi.factor.authentication.provider.totp.web.internal.util.TOTPUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.io.BigEndianCodec;
@@ -194,10 +194,15 @@ public class TOTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 		String totpValue = ParamUtil.getString(actionRequest, "totp");
 
 		try {
-			String generatedTotpValue = OTPUtil.generateTOTP(
-				sharedSecret, 30, 6, "HmacSHA1");
+			long clockSkew = 3 * 1000;
+			long timeWindow = 30 * 1000;
+			int digitsCount = 6;
+			String algorithm = "HmacSHA1";
 
-			if (generatedTotpValue.equals(totpValue)) {
+			if (TOTPUtil.checkTOTP(
+					Base32.decode(sharedSecret), totpValue, clockSkew,
+					timeWindow, digitsCount, algorithm)) {
+
 				TOTP totp = _totpLocalService.addTOTP(userId, sharedSecret);
 
 				_totpLocalService.updateVerified(totp.getTotpId(), true);
@@ -252,10 +257,15 @@ public class TOTPLoginWebMFAVerifier implements LoginWebMFAVerifier {
 
 		if ((totp != null) && totp.isVerified()) {
 			try {
-				String generatedTotpValue = OTPUtil.generateTOTP(
-					totp.getSharedSecret(), 30, 6, "HmacSHA1");
+				long clockSkew = 3 * 1000;
+				long timeWindow = 30 * 1000;
+				int digitsCount = 6;
+				String algorithm = "HmacSHA1";
 
-				if (generatedTotpValue.equals(totpValue)) {
+				if (TOTPUtil.checkTOTP(
+						Base32.decode(totp.getSharedSecret()), totpValue,
+						clockSkew, timeWindow, digitsCount, algorithm)) {
+
 					return true;
 				}
 

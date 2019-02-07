@@ -18,7 +18,7 @@ import com.liferay.multi.factor.authentication.integration.auth.verifier.spi.Aut
 import com.liferay.multi.factor.authentication.integration.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.provider.totp.model.TOTP;
 import com.liferay.multi.factor.authentication.provider.totp.service.TOTPLocalService;
-import com.liferay.multi.factor.authentication.provider.totp.web.internal.util.OTPUtil;
+import com.liferay.multi.factor.authentication.provider.totp.web.internal.util.TOTPUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -26,6 +26,8 @@ import com.liferay.portal.kernel.util.Validator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import jodd.util.Base32;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -64,10 +66,15 @@ public class TOTPAuthVerifierMFAVerifier implements AuthVerifierMFAVerifier {
 
 		if ((totp != null) && totp.isVerified()) {
 			try {
-				String generatedTotpValue = OTPUtil.generateTOTP(
-					totp.getSharedSecret(), 30, 6, "HmacSHA1");
+				long clockSkew = 3 * 1000;
+				long timeWindow = 30 * 1000;
+				int digitsCount = 6;
+				String algorithm = "HmacSHA1";
 
-				if (generatedTotpValue.equals(totpValue)) {
+				if (TOTPUtil.checkTOTP(
+						Base32.decode(totp.getSharedSecret()), totpValue,
+						clockSkew, timeWindow, digitsCount, algorithm)) {
+
 					return true;
 				}
 
