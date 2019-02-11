@@ -31,7 +31,13 @@ public class IgnoreAutoLoginFilterHttpServletRequestWrapper
 
 	@Override
 	public String getRemoteUser() {
-		return _TEMP_REMOTE_USER;
+		String remoteUser = super.getRemoteUser();
+
+		if (remoteUser == null) {
+			return _TEMP_REMOTE_USER;
+		}
+
+		return remoteUser;
 	}
 
 	private static final String _TEMP_REMOTE_USER = "TEMP_REMOTE_USER";

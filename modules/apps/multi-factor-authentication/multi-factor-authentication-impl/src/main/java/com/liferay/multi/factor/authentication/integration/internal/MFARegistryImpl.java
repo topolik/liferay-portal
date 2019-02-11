@@ -23,8 +23,10 @@ import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory
 import com.liferay.osgi.util.StringPlus;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.osgi.framework.Bundle;
@@ -41,13 +43,8 @@ public class MFARegistryImpl implements MFARegistry {
 	private ServiceTrackerMap<String, MFAIntegration>
 		_mfaIntegrationServiceTrackerMap;
 
-	private ServiceTrackerMap<Class<? extends MFAVerifier>, List<MFAVerifier>>
+	private ServiceTrackerMap<String, MFAVerifier>
 		_mfaVerifiersServiceTrackerMap;
-
-	@Override
-	public <T extends MFAVerifier> List<T> getMFAVerifier(Class<T> mfaVerifierClass){
-		return (List<T>) _mfaVerifiersServiceTrackerMap.getService(mfaVerifierClass);
-	}
 
 	@Override
 	public List<MFAVerifier> getMFAVerifiers() {
@@ -56,24 +53,22 @@ public class MFARegistryImpl implements MFARegistry {
 
 	@Override
 	public MFAVerifier getMFAVerifier(String mfaIntegrationName) {
-		MFAIntegration<?> mfaIntegration =
-			getMFAIntegration(mfaIntegrationName);
+		MFAIntegration mfaIntegration = getMFAIntegration(mfaIntegrationName);
 
-		return getMFAVerifier(mfaIntegration);
-	}
+		Set<MFAVerifier> mfaVerifiers = new HashSet<>();
 
-	@Override
-	public <T extends MFAVerifier> T getMFAVerifier(
-		MFAIntegration<T> mfaIntegration) {
+		for (MFAVerifier mfaVerifier : getMFAVerifiers()) {
+			if ((mfaIntegration.supportsHeadless() &&
+				 	mfaVerifier.supportsHeadless()) ||
+				(mfaIntegration.supportsBrowser() &&
+				 	mfaVerifier.supportsBrowser())) {
 
-		Class<T> supportedMFAVerifierClass =
-			mfaIntegration.getSupportedMFAVerifierClass();
-
-		List<T> mfaVerifiers = getMFAVerifier(supportedMFAVerifierClass);
-
-		// TODO: now, based on the integration point configuration, we could
-		// return selected verifier implementation
-		// Or we can return all with AND/OR logic.
+				mfaVerifiers.add(mfaVerifier);
+			}
+		}
+		// TODO: based on the integration point configuration we could
+		// return selected verifier implementation.
+		//
 		// AND logic = chain of verifiers, all must setup+verify
 		// OR logic = just one can succeed
 
@@ -81,7 +76,11 @@ public class MFARegistryImpl implements MFARegistry {
 			return null;
 		}
 
-		return mfaVerifiers.get(0);
+		if (mfaVerifiers.size() == 1) {
+			return mfaVerifiers.iterator().next();
+		}
+
+		return new OptionalCompositeMFAVerifier(mfaVerifiers);
 	}
 
 	@Activate
@@ -95,45 +94,20 @@ public class MFARegistryImpl implements MFARegistry {
 
 
 		_mfaVerifiersServiceTrackerMap =
-			ServiceTrackerMapFactory.openMultiValueMap(
+			ServiceTrackerMapFactory.openSingleValueMap(
 				bundleContext, MFAVerifier.class, null,
-				(serviceReference, emitter) -> {
-					Bundle bundle = serviceReference.getBundle();
-
-					List<String> objectClassList = StringPlus.asList(
-						serviceReference.getProperty("objectClass"));
-
-					Stream<String> stream = objectClassList.stream();
-
-					stream.map(
-						s -> {
-							try {
-								return (Class<? extends MFAVerifier>)
-									bundle.loadClass(s);
-							}
-							catch (ClassNotFoundException cnfe) {
-								return null;
-							}
-						}
-					).filter(
-						Objects::nonNull
-					).filter(
-						c -> !c.equals(MFAVerifier.class)
-					).filter(
-						c -> MFAVerifier.class.isAssignableFrom(c)
-					).forEach(
-						emitter::emit
-					);
-				});
+				ServiceReferenceMapperFactory.create(
+					bundleContext,
+					(service, emitter) -> emitter.emit(service.getName())));
 	}
 
 	@Override
-	public MFAIntegration<?> getMFAIntegration(String name) {
+	public MFAIntegration getMFAIntegration(String name) {
 		return _mfaIntegrationServiceTrackerMap.getService(name);
 	}
 
 	@Override
-	public List<MFAIntegration<?>> getMFAIntegrations() {
+	public List<MFAIntegration> getMFAIntegrations() {
 		return new ArrayList(_mfaIntegrationServiceTrackerMap.values());
 	}
 

@@ -29,7 +29,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class TOTPUtil {
 
-	public static boolean checkTOTP(
+	public static boolean verifyTOTP(
 		byte[] key, String totp, long clockSkewMs, long timeWindowMs,
 		int digits, String algorithm) {
 

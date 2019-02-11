@@ -15,17 +15,16 @@
 package com.liferay.multi.factor.authentication.spi.verifier;
 
 import javax.portlet.ActionRequest;
+import javax.portlet.ActionResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
  * @author Tomas Polesovsky
  */
-public interface BrowserMFAVerifier extends MFAVerifier {
-
-	public void setupSessionAfterVerification(
-		HttpServletRequest request, long userId);
+public interface BrowserMFAVerifier {
 
 	public void includeSetup(
 			long userId, HttpServletRequest request,
@@ -37,10 +36,10 @@ public interface BrowserMFAVerifier extends MFAVerifier {
 			HttpServletResponse response)
 		throws IOException;
 
-	public boolean needsSetup(long userId);
-
 	public boolean setup(ActionRequest actionRequest, long userId);
 
-	public boolean verify(ActionRequest actionRequest, long userId);
+	public boolean verify(
+		ActionRequest actionRequest, ActionResponse actionResponse,
+		long userId);
 
 }

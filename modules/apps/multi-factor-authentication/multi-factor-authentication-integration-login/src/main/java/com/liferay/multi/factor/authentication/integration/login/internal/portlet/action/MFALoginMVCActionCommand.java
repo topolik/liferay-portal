@@ -19,12 +19,15 @@ import com.liferay.multi.factor.authentication.integration.login.internal.consta
 import com.liferay.multi.factor.authentication.integration.login.internal.spi.integration.LoginMFAIntegration;
 import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.petra.encryptor.Encryptor;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
+import com.liferay.portal.kernel.security.auth.AuthException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.auth.session.AuthenticatedSessionManagerUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -48,6 +51,7 @@ import javax.portlet.PortletURL;
 import javax.portlet.filter.ActionRequestWrapper;
 import javax.portlet.filter.ActionResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Key;
@@ -75,10 +79,10 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		BrowserMFAVerifier browserMFAVerifier =
-			_mfaVerifierRegistry.getMFAVerifier(_loginMFAIntegration);
+		MFAVerifier mfaVerifier =
+			_mfaVerifierRegistry.getMFAVerifier(LoginMFAIntegration.NAME);
 
-		if (browserMFAVerifier == null) {
+		if (mfaVerifier == null) {
 			_loginMVCActionCommand.processAction(actionRequest, actionResponse);
 
 			return;
@@ -106,22 +110,41 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 					request, login, password, null);
 
 			if (userId > 0) {
-				if (browserMFAVerifier.needsSetup(userId)) {
-					_setupMFA(actionRequest, actionResponse);
+				if (mfaVerifier.needsSetup(userId)) {
+					redirectToSetup(actionRequest, actionResponse);
 
 					return;
 				}
 
-				if (browserMFAVerifier.needsVerification(request, userId)) {
-					_verifyMFA(userId, actionRequest, actionResponse);
+				if (mfaVerifier.needsVerification(request, userId)) {
+					if (mfaVerifier.supportsHeadless()) {
+						HeadlessMFAVerifier headlessMFAVerifier =
+							(HeadlessMFAVerifier) mfaVerifier;
+
+						if (headlessMFAVerifier.verify(request, userId)) {
+							_loginMVCActionCommand.processAction(
+								actionRequest, actionResponse);
+
+							return;
+						}
+					}
+
+					if (!mfaVerifier.supportsBrowser()) {
+						throw new AuthException(
+							"Multi Factor Authentication failed");
+					}
+
+					_redirectToVerify(userId, actionRequest, actionResponse);
 
 					return;
 				}
 
-				if (!Validator.isBlank(state)) {
-					browserMFAVerifier.setupSessionAfterVerification(
-						request, userId);
+				if (mfaVerifier.supportsBrowser()) {
+					_loginMVCActionCommand.processAction(
+						actionRequest, actionResponse);
 				}
+
+				return;
 			}
 		}
 
@@ -170,7 +193,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 		return actionRequestWrapper;
 	}
 
-	private void _setupMFA(
+	private void redirectToSetup(
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws PortletException {
 
@@ -197,16 +220,12 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 
 		PortletURL renderURL = _mfaPortletURLFactory.createSetupURL(
 			_portal.getHttpServletRequest(actionRequest),
-			_loginMFAIntegration.getName(), responseRedirect[0]);
-
-//		renderURL.setWindowState(WindowState.MAXIMIZED);
+			LoginMFAIntegration.NAME, responseRedirect[0]);
 
 		actionRequest.setAttribute(WebKeys.REDIRECT, renderURL.toString());
-
-		return;
 	}
 
-	private void _verifyMFA(
+	private void _redirectToVerify(
 			long userId, ActionRequest actionRequest,
 			ActionResponse actionResponse)
 		throws Exception {
@@ -225,24 +244,22 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 			_portal.getLiferayPortletResponse(actionResponse);
 
 		ActionURL actionURL = liferayPortletResponse.createActionURL();
-
+		actionURL.setParameter(ActionRequest.ACTION_NAME, "/login/login");
 		actionURL.setParameter("state", state);
 
 		LiferayPortletURL verifyURL =
 			_mfaPortletURLFactory.createVerifyURL(
-				httpServletRequest, _loginMFAIntegration.getName(),
+				httpServletRequest, LoginMFAIntegration.NAME,
 				actionURL.toString(), userId);
 
 		actionRequest.setAttribute(WebKeys.REDIRECT, verifyURL.toString());
-
-		return;
 	}
 
 	private String _encrypt(
 		HttpSession session, Map<String, Object> stateMap)
 		throws Exception {
 
-		String stateMapJSON = _jsonFactory.looseSerialize(stateMap);
+		String stateMapJSON = _jsonFactory.looseSerializeDeep(stateMap);
 
 		Key key = Encryptor.generateKey();
 
@@ -319,9 +336,6 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private MFARegistry _mfaVerifierRegistry;
-
-	@Reference
-	private LoginMFAIntegration _loginMFAIntegration;
 
 	@Reference
 	private MFAPortletURLFactory _mfaPortletURLFactory;

@@ -17,6 +17,7 @@ package com.liferay.multi.factor.authentication.integration.auth.verifier.intern
 import com.liferay.multi.factor.authentication.integration.auth.verifier.internal.spi.integration.AuthVerifierMFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
 import com.liferay.multi.factor.authentication.api.MFARegistry;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -93,11 +94,10 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 			return;
 		}
 
-		HeadlessMFAVerifier headlessMFAVerifier =
-			(HeadlessMFAVerifier)_mfaRegistry.getMFAVerifier(
+		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(
 				AuthVerifierMFAIntegration.NAME);
 
-		if (headlessMFAVerifier == null) {
+		if (mfaVerifier == null) {
 			super.processFilter(request, response, filterChain);
 
 			return;
@@ -105,7 +105,12 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 
 		long userId = authVerifierResult.getUserId();
 
-		if (headlessMFAVerifier.needsVerification(request, userId)) {
+		if (mfaVerifier.supportsHeadless() &&
+				mfaVerifier.needsVerification(request, userId)) {
+
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier)mfaVerifier;
+
 			if (!headlessMFAVerifier.verify(request, userId)) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(

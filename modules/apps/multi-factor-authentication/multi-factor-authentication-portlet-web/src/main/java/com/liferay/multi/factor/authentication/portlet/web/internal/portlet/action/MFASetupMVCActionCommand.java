@@ -52,21 +52,13 @@ public class MFASetupMVCActionCommand extends BaseMVCActionCommand {
 		String integrationName = ParamUtil.getString(
 			actionRequest, "integrationName");
 
-		MFAIntegration mfaIntegration =
-			_mfaRegistry.getMFAIntegration(integrationName);
-
-		BrowserMFAVerifier browserMFAVerifier = _mfaRegistry.getMFAVerifier(
-			(MFAIntegration<BrowserMFAVerifier>)mfaIntegration);
+		BrowserMFAVerifier browserMFAVerifier =
+			(BrowserMFAVerifier)_mfaRegistry.getMFAVerifier(integrationName);
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
 		if (browserMFAVerifier.setup(actionRequest, themeDisplay.getUserId())) {
-			browserMFAVerifier.setupSessionAfterVerification(
-				_portal.getOriginalServletRequest(
-					_portal.getHttpServletRequest(actionRequest)),
-				themeDisplay.getUserId());
-
 			String redirect = _portal.escapeRedirect(
 				ParamUtil.getString(actionRequest, "redirect"));
 

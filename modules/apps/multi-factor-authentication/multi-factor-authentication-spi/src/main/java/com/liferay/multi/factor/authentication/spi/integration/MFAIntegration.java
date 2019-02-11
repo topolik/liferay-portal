@@ -16,13 +16,13 @@ package com.liferay.multi.factor.authentication.spi.integration;
 
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 
-import java.util.Set;
-
 /**
  * @author Tomas Polesovsky
  */
-public interface MFAIntegration<T extends MFAVerifier> {
+public interface MFAIntegration {
 	public String getName();
 
-	public Class<T> getSupportedMFAVerifierClass();
+	public boolean supportsHeadless();
+
+	public boolean supportsBrowser();
 }

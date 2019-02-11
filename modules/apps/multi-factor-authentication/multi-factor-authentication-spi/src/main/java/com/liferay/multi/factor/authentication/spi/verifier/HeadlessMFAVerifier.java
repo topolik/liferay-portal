@@ -19,6 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Tomas Polesovsky
  */
-public interface HeadlessMFAVerifier extends MFAVerifier {
+public interface HeadlessMFAVerifier {
 	public boolean verify(HttpServletRequest request, long userId);
 }

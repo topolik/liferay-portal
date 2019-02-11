@@ -20,7 +20,9 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.PortletURLFactory;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.WebKeys;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -35,6 +37,7 @@ import javax.servlet.http.HttpSession;
  */
 @Component(immediate = true, service = MFAPortletURLFactory.class)
 public class MFAPortletURLFactoryImpl implements MFAPortletURLFactory {
+
 	@Override
 	public LiferayPortletURL createVerifyURL(
 		HttpServletRequest request, String integrationName,
@@ -46,12 +49,23 @@ public class MFAPortletURLFactoryImpl implements MFAPortletURLFactory {
 
 		session.setAttribute(MFA_USER_ID + integrationName, userId);
 
+		long plid = 0;
+
+		ThemeDisplay themeDisplay =
+			(ThemeDisplay) request.getAttribute(WebKeys.THEME_DISPLAY);
+
+		if (themeDisplay != null) {
+			plid = themeDisplay.getPlid();
+		}
+
 		LiferayPortletURL liferayPortletURL =
 			_portletURLFactory.create(
-				request, MFAPortletKeys.MFA_VERIFY,
+				request, MFAPortletKeys.MFA_VERIFY, plid,
 				PortletRequest.RENDER_PHASE);
 
 		liferayPortletURL.setParameter("integrationName", integrationName);
+		liferayPortletURL.setParameter(
+			"saveLastPath", Boolean.FALSE.toString());
 		liferayPortletURL.setParameter(
 			"mvcRenderCommandName", "/mfa_verify/verify");
 		liferayPortletURL.setParameter("redirect", redirectURL);

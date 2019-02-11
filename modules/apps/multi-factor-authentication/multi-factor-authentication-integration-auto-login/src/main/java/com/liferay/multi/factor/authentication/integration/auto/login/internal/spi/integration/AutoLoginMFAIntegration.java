@@ -16,14 +16,14 @@ package com.liferay.multi.factor.authentication.integration.auto.login.internal.
 
 import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
 import org.osgi.service.component.annotations.Component;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(service = {MFAIntegration.class, AutoLoginMFAIntegration.class})
-public class AutoLoginMFAIntegration
-	implements MFAIntegration<BrowserMFAVerifier> {
+@Component(service = MFAIntegration.class)
+public class AutoLoginMFAIntegration implements MFAIntegration {
 
 	public static final String NAME = "auto-login";
 
@@ -33,7 +33,13 @@ public class AutoLoginMFAIntegration
 	}
 
 	@Override
-	public Class<BrowserMFAVerifier> getSupportedMFAVerifierClass() {
-		return BrowserMFAVerifier.class;
+	public boolean supportsHeadless() {
+		return true;
 	}
+
+	@Override
+	public boolean supportsBrowser() {
+		return true;
+	}
+
 }
