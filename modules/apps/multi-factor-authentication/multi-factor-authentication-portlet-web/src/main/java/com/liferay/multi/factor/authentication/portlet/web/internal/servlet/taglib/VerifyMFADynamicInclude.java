@@ -45,11 +45,8 @@ public class VerifyMFADynamicInclude implements DynamicInclude {
 		String integrationName = ParamUtil.getString(
 			request, "integrationName");
 
-		MFAIntegration mfaIntegration =
-			_mfaRegistry.getMFAIntegration(integrationName);
-
-		BrowserMFAVerifier browserMFAVerifier = _mfaRegistry.getMFAVerifier(
-			(MFAIntegration<BrowserMFAVerifier>)mfaIntegration);
+		BrowserMFAVerifier browserMFAVerifier =
+			(BrowserMFAVerifier)_mfaRegistry.getMFAVerifier(integrationName);
 
 		HttpServletRequest httpServletRequest =
 			_portal.getOriginalServletRequest(request);

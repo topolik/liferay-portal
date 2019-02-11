@@ -24,16 +24,12 @@ import java.util.List;
  */
 public interface MFARegistry {
 
-	public MFAIntegration<?> getMFAIntegration(String name);
+	public MFAIntegration getMFAIntegration(String name);
 
-	public List<MFAIntegration<?>> getMFAIntegrations();
-
-	public <T extends MFAVerifier> List<T> getMFAVerifier(Class<T> mfaVerifierClass);
+	public List<MFAIntegration> getMFAIntegrations();
 
 	public List<MFAVerifier> getMFAVerifiers();
 
 	public MFAVerifier getMFAVerifier(String mfaIntegrationName);
 
-	public <T extends MFAVerifier> T getMFAVerifier(
-		MFAIntegration<T> mfaIntegration);
 }

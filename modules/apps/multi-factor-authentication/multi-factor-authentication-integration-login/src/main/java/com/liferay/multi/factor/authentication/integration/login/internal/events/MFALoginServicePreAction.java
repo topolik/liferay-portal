@@ -18,11 +18,14 @@ import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.integration.login.internal.spi.integration.LoginMFAIntegration;
 import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.portal.kernel.events.Action;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.LifecycleAction;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
 import org.osgi.service.component.annotations.Component;
@@ -44,10 +47,10 @@ public class MFALoginServicePreAction extends Action {
 	public void run(HttpServletRequest request, HttpServletResponse response)
 		throws ActionException {
 
-		BrowserMFAVerifier browserMFAVerifier =
-			_mfaRegistry.getMFAVerifier(_loginMFAIntegration);
+		MFAVerifier mfaVerifier =
+			_mfaRegistry.getMFAVerifier(LoginMFAIntegration.NAME);
 
-		if (browserMFAVerifier == null) {
+		if (mfaVerifier == null) {
 			return;
 		}
 
@@ -62,13 +65,13 @@ public class MFALoginServicePreAction extends Action {
 
 		long userId = themeDisplay.getUserId();
 
-		if (browserMFAVerifier.needsSetup(userId)) {
+		if (mfaVerifier.needsSetup(userId)) {
 			LiferayPortletURL liferayPortletURL =
 				_mfaPortletURLFactory.createSetupURL(
-					request, _loginMFAIntegration.getName(),
+					request, LoginMFAIntegration.NAME,
 					themeDisplay.getURLCurrent());
 
-			if (Objects.equals(
+			if (themeDisplay.isStateMaximized() && Objects.equals(
 				liferayPortletURL.getPortletId(), themeDisplay.getPpid())) {
 
 				return;
@@ -85,12 +88,26 @@ public class MFALoginServicePreAction extends Action {
 			return;
 		}
 
-		if (browserMFAVerifier.needsVerification(request, userId)) {
+		if (mfaVerifier.needsVerification(request, userId)) {
+			if (mfaVerifier.supportsHeadless()) {
+				HeadlessMFAVerifier headlessMFAVerifier =
+					(HeadlessMFAVerifier)mfaVerifier;
+
+				if (headlessMFAVerifier.verify(request, userId)) {
+					return;
+				}
+			}
+
+			if (!mfaVerifier.supportsBrowser()) {
+				throw new ActionException(
+					new PrincipalException.MustBeAuthenticated(
+						"Unable to verify MFA"));
+			}
+
 			LiferayPortletURL liferayPortletURL =
 				_mfaPortletURLFactory.createVerifyURL(
-					request, _loginMFAIntegration.getName(),
+					request, LoginMFAIntegration.NAME,
 					themeDisplay.getURLCurrent(), userId);
-
 
 			if (Objects.equals(
 				liferayPortletURL.getPortletId(), themeDisplay.getPpid()) &&
@@ -115,9 +132,6 @@ public class MFALoginServicePreAction extends Action {
 
 	@Reference
 	private MFARegistry _mfaRegistry;
-
-	@Reference
-	private LoginMFAIntegration _loginMFAIntegration;
 
 	@Reference
 	private MFAPortletURLFactory _mfaPortletURLFactory;

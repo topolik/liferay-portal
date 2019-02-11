@@ -47,11 +47,8 @@ public class SetupMFADynamicInclude implements DynamicInclude {
 		String integrationName = ParamUtil.getString(
 			request, "integrationName");
 
-		MFAIntegration mfaIntegration =
-			_mfaRegistry.getMFAIntegration(integrationName);
-
-		BrowserMFAVerifier browserMFAVerifier = _mfaRegistry.getMFAVerifier(
-			(MFAIntegration<BrowserMFAVerifier>)mfaIntegration);
+		BrowserMFAVerifier browserMFAVerifier =
+			(BrowserMFAVerifier)_mfaRegistry.getMFAVerifier(integrationName);
 
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)request.getAttribute(WebKeys.THEME_DISPLAY);

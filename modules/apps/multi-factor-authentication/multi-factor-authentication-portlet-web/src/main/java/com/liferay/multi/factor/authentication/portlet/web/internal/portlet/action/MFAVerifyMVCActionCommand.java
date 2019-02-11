@@ -19,6 +19,7 @@ import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
 import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.servlet.SessionErrors;
@@ -87,17 +88,10 @@ public class MFAVerifyMVCActionCommand extends BaseMVCActionCommand {
 		String integrationName = ParamUtil.getString(
 			actionRequest, "integrationName");
 
-		MFAIntegration mfaIntegration =
-			_mfaRegistry.getMFAIntegration(integrationName);
+		BrowserMFAVerifier browserMFAVerifier =
+			(BrowserMFAVerifier)_mfaRegistry.getMFAVerifier(integrationName);
 
-		BrowserMFAVerifier browserMFAVerifier = _mfaRegistry.getMFAVerifier(
-			(MFAIntegration<BrowserMFAVerifier>)mfaIntegration);
-
-		if (browserMFAVerifier.verify(actionRequest, userId)) {
-			browserMFAVerifier.setupSessionAfterVerification(
-				_portal.getOriginalServletRequest(
-					_portal.getHttpServletRequest(actionRequest)), userId);
-
+		if (browserMFAVerifier.verify(actionRequest, actionResponse, userId)) {
 			sendRedirect(actionRequest, actionResponse);
 
 			return;

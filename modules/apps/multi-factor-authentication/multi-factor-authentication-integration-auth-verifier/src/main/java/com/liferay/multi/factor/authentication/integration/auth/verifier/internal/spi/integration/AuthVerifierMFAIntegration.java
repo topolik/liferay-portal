@@ -15,19 +15,17 @@
 package com.liferay.multi.factor.authentication.integration.auth.verifier.internal.spi.integration;
 
 import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
+import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
-import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import org.osgi.service.component.annotations.Component;
 
 import java.util.Collections;
-import java.util.Set;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(service = {MFAIntegration.class, AuthVerifierMFAIntegration.class})
-public class AuthVerifierMFAIntegration
-	implements MFAIntegration<HeadlessMFAVerifier> {
+@Component(service = MFAIntegration.class)
+public class AuthVerifierMFAIntegration implements MFAIntegration {
 
 	public static String NAME = "auth-verifier";
 
@@ -37,7 +35,13 @@ public class AuthVerifierMFAIntegration
 	}
 
 	@Override
-	public Class<HeadlessMFAVerifier> getSupportedMFAVerifierClass() {
-		return HeadlessMFAVerifier.class;
+	public boolean supportsHeadless() {
+		return true;
 	}
+
+	@Override
+	public boolean supportsBrowser() {
+		return false;
+	}
+
 }

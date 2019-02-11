@@ -12,9 +12,10 @@
  * details.
  */
 
-package com.liferay.multi.factor.authentication.provider.totp.web.internal.login.web.spi;
+package com.liferay.multi.factor.authentication.provider.totp.web.internal.spi.verifier;
 
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.provider.totp.model.TOTP;
 import com.liferay.multi.factor.authentication.provider.totp.service.TOTPLocalService;
@@ -31,11 +32,8 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
 
-import java.io.IOException;
-import java.io.Serializable;
-
 import javax.portlet.ActionRequest;
-
+import javax.portlet.ActionResponse;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,23 +41,75 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.liferay.portal.util.PropsValues;
 import jodd.util.Base32;
 
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * @author Tomas Polesovsky
  */
 @Component(
-	immediate = true, service = {MFAVerifier.class, BrowserMFAVerifier.class}
+	immediate = true,
+	service = MFAVerifier.class
 )
-public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
+public class TOTPMFAVerifier
+	implements BrowserMFAVerifier, HeadlessMFAVerifier, MFAVerifier {
+
+	@Activate
+	protected void activate() {
+		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
+			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
+				Arrays.asList(
+					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
+
+			sessionPhishingProtectedAttributesList.add(
+				MFAContext.class.getName());
+
+			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
+				sessionPhishingProtectedAttributesList.toArray(
+					new String[sessionPhishingProtectedAttributesList.size()]);
+		}
+	}
+
+
+	@Override
+	public boolean supportsBrowser(){
+		return true;
+	}
+
+	@Override
+	public boolean supportsHeadless() {
+		return true;
+	}
+
+	@Override
+	public boolean verify(HttpServletRequest request, long userId) {
+		String totpValue = request.getHeader("X-2FA-Token");
+
+		if (Validator.isBlank(totpValue)) {
+			return false;
+		}
+
+		return verify(totpValue, userId);
+	}
 
 	@Override
 	public void includeSetup(
-			long userId, HttpServletRequest request,
-			HttpServletResponse response)
+		long userId, HttpServletRequest request,
+		HttpServletResponse response)
 		throws IOException {
 
 		try {
@@ -77,21 +127,7 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 			_log.error("Unable to delete totp: " + pe.getMessage(), pe);
 		}
 
-		int keySize = 20;
-
-		int count = (int)Math.ceil((double)keySize / 8);
-
-		byte[] buffer = new byte[count * 8];
-
-		for (int i = 0; i < count; i++) {
-			BigEndianCodec.putLong(buffer, i * 8, SecureRandomUtil.nextLong());
-		}
-
-		byte[] secret = new byte[keySize];
-
-		System.arraycopy(buffer, 0, secret, 0, keySize);
-
-		String sharedSecret = Base32.encode(secret);
+		String sharedSecret = generateSharedSecret();
 
 		request.setAttribute(
 			"mfaUser", _userLocalService.fetchUserById(userId));
@@ -117,10 +153,26 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 		}
 	}
 
+	private String generateSharedSecret() {
+		int count = (int)Math.ceil((double)_algorithmKeySize / 8);
+
+		byte[] buffer = new byte[count * 8];
+
+		for (int i = 0; i < count; i++) {
+			BigEndianCodec.putLong(buffer, i * 8, SecureRandomUtil.nextLong());
+		}
+
+		byte[] secret = new byte[_algorithmKeySize];
+
+		System.arraycopy(buffer, 0, secret, 0, _algorithmKeySize);
+
+		return Base32.encode(secret);
+	}
+
 	@Override
 	public void includeVerification(
-			long userId, HttpServletRequest request,
-			HttpServletResponse response)
+		long userId, HttpServletRequest request,
+		HttpServletResponse response)
 		throws IOException {
 
 		RequestDispatcher requestDispatcher =
@@ -147,6 +199,11 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 	}
 
 	@Override
+	public String getName() {
+		return "time-based-one-time-password";
+	}
+
+	@Override
 	public boolean needsVerification(HttpServletRequest request, long userId) {
 		if (needsSetup(userId)) {
 			return false;
@@ -157,20 +214,23 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 
 		HttpSession session = originalServletRequest.getSession(false);
 
-		if (session == null) {
-			return true;
+		if (session != null) {
+			MFAContext mfaContext = (MFAContext)session.getAttribute(
+				MFAContext.class.getName());
+
+			if (mfaContext != null) {
+				if (mfaContext.isValid()) {
+					return false;
+				}
+				else {
+					session.removeAttribute(MFAContext.class.getName());
+				}
+			}
 		}
 
-		MFAContext mfaContext = (MFAContext)session.getAttribute(
-			MFAContext.class.getName());
+		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
 
-		if (mfaContext == null) {
-			return true;
-		}
-
-		if (!mfaContext.isValid()) {
-			session.removeAttribute(MFAContext.class.getName());
-
+		if ((totp != null) && totp.isVerified()) {
 			return true;
 		}
 
@@ -190,14 +250,9 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 		String totpValue = ParamUtil.getString(actionRequest, "totp");
 
 		try {
-			long clockSkew = 3 * 1000;
-			long timeWindow = 30 * 1000;
-			int digitsCount = 6;
-			String algorithm = "HmacSHA1";
-
-			if (TOTPUtil.checkTOTP(
-					Base32.decode(sharedSecret), totpValue, clockSkew,
-					timeWindow, digitsCount, algorithm)) {
+			if (TOTPUtil.verifyTOTP(
+				Base32.decode(sharedSecret), totpValue, _clockSkew, _timeWindow,
+				_digitsCount, _algorithm)) {
 
 				TOTP totp = _totpLocalService.addTOTP(userId, sharedSecret);
 
@@ -218,22 +273,10 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 	}
 
 	@Override
-	public void setupSessionAfterVerification(
-		HttpServletRequest request, long userId) {
+	public boolean verify(
+		ActionRequest actionRequest, ActionResponse actionResponse,
+		long userId) {
 
-		HttpSession session = request.getSession();
-
-		MFAContext mfaContext = new MFAContext();
-
-		long oneDay = 24 * 60 * 60 * 1000;
-
-		mfaContext._expiresAt = System.currentTimeMillis() + oneDay;
-
-		session.setAttribute(MFAContext.class.getName(), mfaContext);
-	}
-
-	@Override
-	public boolean verify(ActionRequest actionRequest, long userId) {
 		if (needsSetup(userId)) {
 			return false;
 		}
@@ -244,23 +287,38 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 			return false;
 		}
 
+		boolean verified = verify(totpValue, userId);
+
+		if (verified) {
+			MFAContext mfaContext = new MFAContext();
+
+			long oneDay = 24 * 60 * 60 * 1000;
+
+			mfaContext._expiresAt = System.currentTimeMillis() + oneDay;
+
+			HttpServletRequest request =
+				_portal.getOriginalServletRequest(
+					_portal.getHttpServletRequest(actionRequest));
+
+			HttpSession session = request.getSession();
+
+			session.setAttribute(MFAContext.class.getName(), mfaContext);
+
+			_httpSessionsSet.add(session);
+		}
+
+		return verified;
+	}
+
+	protected boolean verify(String totpValue, long userId) {
 		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
 
 		if ((totp != null) && totp.isVerified()) {
 			try {
-				long clockSkew = 3 * 1000;
-				long timeWindow = 30 * 1000;
-				int digitsCount = 6;
-				String algorithm = "HmacSHA1";
-
-				if (TOTPUtil.checkTOTP(
-						Base32.decode(totp.getSharedSecret()), totpValue,
-						clockSkew, timeWindow, digitsCount, algorithm)) {
-
-					return true;
-				}
-
-				return false;
+				return TOTPUtil.verifyTOTP(
+					Base32.decode(totp.getSharedSecret()), totpValue,
+					_clockSkew,
+					_timeWindow, _digitsCount, _algorithm);
 			}
 			catch (Exception e) {
 				_log.error(
@@ -276,8 +334,34 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 		return false;
 	}
 
+	@Deactivate
+	protected void deactivate() {
+		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
+			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
+				Arrays.asList(
+					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
+
+			sessionPhishingProtectedAttributesList.remove(
+				MFAContext.class.getName());
+
+			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
+				sessionPhishingProtectedAttributesList.toArray(
+					new String[sessionPhishingProtectedAttributesList.size()]);
+		}
+
+
+		for (HttpSession httpSession : _httpSessionsSet) {
+			httpSession.removeAttribute(MFAContext.class.getName());
+		}
+
+		_httpSessionsSet.clear();;
+	}
+
 	private static final Log _log = LogFactoryUtil.getLog(
-		TOTPBrowserMFAVerifier.class);
+		TOTPMFAVerifier.class);
+
+	@Reference
+	private TOTPLocalService _totpLocalService;
 
 	@Reference
 	private Portal _portal;
@@ -286,9 +370,6 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 		target = "(osgi.web.symbolicname=com.liferay.multi.factor.authentication.provider.totp.web)"
 	)
 	private ServletContext _servletContext;
-
-	@Reference
-	private TOTPLocalService _totpLocalService;
 
 	@Reference
 	private UserLocalService _userLocalService;
@@ -308,5 +389,15 @@ public class TOTPBrowserMFAVerifier implements BrowserMFAVerifier {
 		private long _expiresAt;
 
 	}
+
+	private long _clockSkew = 3 * 1000;
+	private long _timeWindow = 30 * 1000;
+	private int _digitsCount = 6;
+	private String _algorithm = "HmacSHA1";
+	private int _algorithmKeySize = 20;
+
+	private Set<HttpSession> _httpSessionsSet =
+		Collections.newSetFromMap(
+			Collections.synchronizedMap(new WeakHashMap<>()));
 
 }

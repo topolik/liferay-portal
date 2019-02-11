@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringBundler;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -82,17 +83,11 @@ public class MFAVerifyPortlet extends MVCPortlet {
 			return;
 		}
 
-		Class supportedMFAVerifierClass =
-			mfaIntegration.getSupportedMFAVerifierClass();
+		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(integrationName);
 
-		if (!BrowserMFAVerifier.class.isAssignableFrom(
-			supportedMFAVerifierClass)) {
-
-			_log.error(
-				"Unsupported MFAVerifier: " +
-				supportedMFAVerifierClass.getName());
-
-			SessionErrors.add(actionRequest, "unsupportedIntegrationVerifier");
+		if (mfaVerifier == null) {
+			SessionErrors.add(
+				actionRequest, "noVerifierConfigured", integrationName);
 
 			actionResponse.setRenderParameter("mvcRenderCommandName", "/");
 			actionResponse.setRenderParameter("mvcPath", "/error.jsp");
@@ -100,12 +95,16 @@ public class MFAVerifyPortlet extends MVCPortlet {
 			return;
 		}
 
-		BrowserMFAVerifier browserMFAVerifier = _mfaRegistry.getMFAVerifier(
-			(MFAIntegration<BrowserMFAVerifier>) mfaIntegration);
+		if (!mfaVerifier.supportsBrowser() ||
+			!(mfaVerifier instanceof BrowserMFAVerifier)) {
 
-		if (browserMFAVerifier == null) {
-			SessionErrors.add(
-				actionRequest, "noVerifierConfigured", integrationName);
+			_log.error(
+				StringBundler.concat(
+				"Unsupported MFAVerifier: ",
+					mfaVerifier.getClass().getName(), " for integration ",
+					integrationName));
+
+			SessionErrors.add(actionRequest, "unsupportedIntegrationVerifier");
 
 			actionResponse.setRenderParameter("mvcRenderCommandName", "/");
 			actionResponse.setRenderParameter("mvcPath", "/error.jsp");
@@ -141,17 +140,11 @@ public class MFAVerifyPortlet extends MVCPortlet {
 			return;
 		}
 
-		Class supportedMFAVerifierClass =
-			mfaIntegration.getSupportedMFAVerifierClass();
+		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(integrationName);
 
-		if (!BrowserMFAVerifier.class.isAssignableFrom(
-			supportedMFAVerifierClass)) {
-
-			_log.error(
-				"Unsupported MFAVerifier: " +
-				supportedMFAVerifierClass.getName());
-
-			SessionErrors.add(renderRequest, "unsupportedIntegrationVerifier");
+		if (mfaVerifier == null) {
+			SessionErrors.add(
+				renderRequest, "noVerifierConfigured", integrationName);
 
 			PortletContext portletContext = getPortletContext();
 
@@ -163,11 +156,18 @@ public class MFAVerifyPortlet extends MVCPortlet {
 			return;
 		}
 
-		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(mfaIntegration);
 
-		if (mfaVerifier == null) {
-			SessionErrors.add(
-				renderRequest, "noVerifierConfigured", integrationName);
+
+		if (!mfaVerifier.supportsBrowser() ||
+			!(mfaVerifier instanceof BrowserMFAVerifier)) {
+
+			_log.error(
+				StringBundler.concat(
+					"Unsupported MFAVerifier: ",
+					mfaVerifier.getClass().getName(), " for integration ",
+					integrationName));
+
+			SessionErrors.add(renderRequest, "unsupportedIntegrationVerifier");
 
 			PortletContext portletContext = getPortletContext();
 

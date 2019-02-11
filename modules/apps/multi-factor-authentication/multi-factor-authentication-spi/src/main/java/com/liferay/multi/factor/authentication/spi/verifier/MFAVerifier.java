@@ -20,5 +20,15 @@ import javax.servlet.http.HttpServletRequest;
  * @author Tomas Polesovsky
  */
 public interface MFAVerifier {
+
+	public String getName();
+
 	public boolean needsVerification(HttpServletRequest request, long userId);
+
+	public boolean needsSetup(long userId);
+
+	public boolean supportsHeadless();
+
+	public boolean supportsBrowser();
+
 }
