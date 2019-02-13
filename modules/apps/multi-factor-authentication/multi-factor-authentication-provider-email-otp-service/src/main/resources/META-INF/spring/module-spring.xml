@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<beans
+	default-destroy-method="destroy"
+	default-init-method="afterPropertiesSet"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd"
+>
+	<bean class="com.liferay.multi.factor.authentication.provider.email.otp.service.impl.EmailOTPLocalServiceImpl" id="com.liferay.multi.factor.authentication.provider.email.otp.service.EmailOTPLocalService" />
+	<bean class="com.liferay.multi.factor.authentication.provider.email.otp.service.persistence.impl.EmailOTPPersistenceImpl" id="com.liferay.multi.factor.authentication.provider.email.otp.service.persistence.EmailOTPPersistence" />
+</beans>

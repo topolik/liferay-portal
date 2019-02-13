@@ -1,0 +1,1 @@
+create unique index IX_3CA3854F on EmailOTP (userId);
