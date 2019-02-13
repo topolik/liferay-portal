@@ -1,0 +1,1 @@
+create unique index IX_4C29574B on OTP (userId);
