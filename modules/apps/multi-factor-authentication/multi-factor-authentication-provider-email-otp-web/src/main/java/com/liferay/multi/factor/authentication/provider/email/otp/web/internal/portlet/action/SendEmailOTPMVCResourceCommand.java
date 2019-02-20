@@ -17,8 +17,11 @@ package com.liferay.multi.factor.authentication.provider.email.otp.web.internal.
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.mail.kernel.service.MailService;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
+import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP;
+import com.liferay.multi.factor.authentication.provider.email.otp.service.EmailOTPLocalService;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -52,25 +55,42 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 	public boolean serveResource(
 		ResourceRequest request, ResourceResponse response) {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		User user = themeDisplay.getUser();
-
 		HttpServletRequest originalRequest = _portal.getOriginalServletRequest(
 			_portal.getHttpServletRequest(request));
 
 		HttpSession session = originalRequest.getSession();
 
 		try {
-			String email = ParamUtil.getString(request, "email");
+			User user = null;
+			String email = null;
+			String otpPhase = (String)session.getAttribute("otpPhase");
+
+			if (otpPhase.equals("verify")) {
+				long userId = (Long)session.getAttribute("userId");
+
+				user = _userLocalService.fetchUserById(userId);
+				EmailOTP emailOTP = _emailOTPLocalService.fetchEmailOTPByUserId(
+					userId);
+
+				email = emailOTP.getEmailAddress();
+			}
+			else if (otpPhase.equals("setup")) {
+				ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+					WebKeys.THEME_DISPLAY);
+
+				user = themeDisplay.getUser();
+
+				email = ParamUtil.getString(request, "email");
+			}
+			else {
+				return false;
+			}
 
 			String generatedOTP = StringUtil.randomString(_LENGTH);
 
 			session.setAttribute("otp", generatedOTP);
 
 			session.setAttribute("otpSetAt", System.currentTimeMillis());
-
 			MailMessage mailMessage = new MailMessage(
 				new InternetAddress("test@liferay.com", "admin"),
 				new InternetAddress(email, user.getFullName()),
@@ -89,9 +109,15 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 	private static final int _LENGTH = 6;
 
 	@Reference
+	private EmailOTPLocalService _emailOTPLocalService;
+
+	@Reference
 	private MailService _mailService;
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }
