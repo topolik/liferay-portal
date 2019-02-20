@@ -74,6 +74,12 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 
 		try {
 			requestDispatcher.include(request, response);
+			HttpServletRequest originalRequest =
+				_portal.getOriginalServletRequest(request);
+
+			HttpSession session = originalRequest.getSession();
+
+			session.setAttribute("otpPhase", "setup");
 		}
 		catch (ServletException se) {
 			throw new IOException(
@@ -96,6 +102,13 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 
 		try {
 			requestDispatcher.include(request, response);
+			HttpServletRequest originalRequest =
+				_portal.getOriginalServletRequest(request);
+
+			HttpSession session = originalRequest.getSession();
+
+			session.setAttribute("otpPhase", "verify");
+			session.setAttribute("userId", userId);
 		}
 		catch (ServletException se) {
 			throw new IOException(
@@ -212,6 +225,8 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 			if (expected.equals(userInput)) {
 				session.removeAttribute("otp");
 				session.removeAttribute("otpSetAt");
+				session.removeAttribute("otpPhase");
+				session.removeAttribute("userId");
 
 				return true;
 			}

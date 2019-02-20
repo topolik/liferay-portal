@@ -33,14 +33,8 @@ String sendToEmail = (String)request.getAttribute("sendToEmail");
 <aui:script>
 	function <portlet:namespace />send(sendOTPURL) {
 
-		var email = '<%= sendToEmail %>';
 		AUI.$.ajax(
-			sendOTPURL,
-			{
-				data: {
-					<portlet:namespace />email:email
-				}
-			}
+			sendOTPURL
 		)
 
 	}
