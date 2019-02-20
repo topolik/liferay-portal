@@ -75,6 +75,13 @@ public class OTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 			_log.error("Unable to delete otp: " + pe.getMessage(), pe);
 		}
 
+		HttpServletRequest originalServletRequest =
+			_portal.getOriginalServletRequest(request);
+
+		HttpSession session = originalServletRequest.getSession();
+
+		session.setAttribute("otpPhase", "setup");
+
 		RequestDispatcher requestDispatcher =
 			_servletContext.getRequestDispatcher("/setup_otp.jsp");
 
@@ -92,6 +99,15 @@ public class OTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 			long userId, HttpServletRequest request,
 			HttpServletResponse response)
 		throws IOException {
+
+		HttpServletRequest originalServletRequest =
+			_portal.getOriginalServletRequest(request);
+
+		HttpSession session = originalServletRequest.getSession();
+
+		session.setAttribute("otpPhase", "verify");
+
+		session.setAttribute("userId", userId);
 
 		OTP otp = _otpLocalService.fetchOTPByUserId(userId);
 
@@ -217,6 +233,8 @@ public class OTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 			if (expected.equals(userInput)) {
 				session.removeAttribute("otp");
 				session.removeAttribute("otpSetAt");
+				session.removeAttribute("otpPhase");
+				session.removeAttribute("userId");
 
 				return true;
 			}
