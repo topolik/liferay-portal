@@ -17,15 +17,14 @@ package com.liferay.multi.factor.authentication.provider.otp.web.internal.portle
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.mail.kernel.service.MailService;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
+import com.liferay.multi.factor.authentication.provider.otp.model.OTP;
+import com.liferay.multi.factor.authentication.provider.otp.service.OTPLocalService;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.WebKeys;
-
-import java.io.UnsupportedEncodingException;
 
 import javax.mail.internet.InternetAddress;
 
@@ -54,26 +53,39 @@ public class SendOTPMVCResourceCommand implements MVCResourceCommand {
 	public boolean serveResource(
 		ResourceRequest resourceRequest, ResourceResponse resourceResponse) {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		User user = themeDisplay.getUser();
-
 		HttpServletRequest originalServletRequest =
 			_portal.getOriginalServletRequest(
 				_portal.getHttpServletRequest(resourceRequest));
 
 		HttpSession session = originalServletRequest.getSession();
 
-		String email = ParamUtil.getString(resourceRequest, "email");
-
-		String generatedOTP = StringUtil.randomString(_LENGTH);
-
-		session.setAttribute("otp", generatedOTP);
-
-		session.setAttribute("otpSetAt", System.currentTimeMillis());
-
 		try {
+			long userId = (Long)session.getAttribute("userId");
+
+			User user = _userLocalService.fetchUserById(userId);
+
+			String otpPhase = (String)session.getAttribute("otpPhase");
+
+			String email = null;
+
+			if (otpPhase.equals("verify")) {
+				OTP otp = _otpLocalService.fetchOTPByUserId(userId);
+
+				email = otp.getEmailAddress();
+			}
+			else if (otpPhase.equals("setup")) {
+				email = ParamUtil.getString(resourceRequest, "email");
+			}
+			else {
+				return false;
+			}
+
+			String generatedOTP = StringUtil.randomString(_LENGTH);
+
+			session.setAttribute("otp", generatedOTP);
+
+			session.setAttribute("otpSetAt", System.currentTimeMillis());
+
 			MailMessage mailMessage = new MailMessage(
 				new InternetAddress("test@liferay.com", "admin"),
 				new InternetAddress(email, user.getFullName()),
@@ -84,7 +96,7 @@ public class SendOTPMVCResourceCommand implements MVCResourceCommand {
 
 			return true;
 		}
-		catch (UnsupportedEncodingException uee) {
+		catch (Exception e) {
 			return false;
 		}
 	}
@@ -95,6 +107,12 @@ public class SendOTPMVCResourceCommand implements MVCResourceCommand {
 	private MailService _mailService;
 
 	@Reference
+	private OTPLocalService _otpLocalService;
+
+	@Reference
 	private Portal _portal;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }
