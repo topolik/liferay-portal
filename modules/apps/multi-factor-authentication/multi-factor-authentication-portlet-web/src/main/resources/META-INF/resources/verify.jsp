@@ -17,7 +17,7 @@
 <%@ include file="/init.jsp" %>
 
 <portlet:actionURL name="/mfa_verify/verify" var="verifyActionURL">
-	<portlet:param name="mvcRenderCommandName" value="/mfa_verify/view" />
+	<portlet:param name="mvcRenderCommandName" value="/mfa_verify/verify" />
 </portlet:actionURL>
 
 <aui:form action="<%= verifyActionURL %>" cssClass="container-fluid-1280 sign-in-form" method="post" name="fm">
