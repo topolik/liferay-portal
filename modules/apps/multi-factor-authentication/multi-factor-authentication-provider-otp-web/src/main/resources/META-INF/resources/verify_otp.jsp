@@ -26,21 +26,15 @@ String sendToEmail = (String)request.getAttribute("sendToEmail");
 	<liferay-ui:message key="your-one-time-password-will-be-sent-to" />
 </h1>
 
-<aui:input disabled="true" id="sendToEmail" name="sendToEmail" showRequiredLabel="yes" value="<%= sendToEmail %>" />
+<aui:input disabled="<%= true %>" id="sendToEmail" name="sendToEmail" showRequiredLabel="yes" value="<%= sendToEmail %>" />
 
 <aui:button onclick='<%= liferayPortletResponse.getNamespace() + "send('" + sendOTPURL + "');" %>' value="send" />
 
 <aui:script>
 	function <portlet:namespace />send(sendOTPURL) {
 
-		var email = '<%= sendToEmail %>';
 		AUI.$.ajax(
-			sendOTPURL,
-			{
-				data: {
-					<portlet:namespace />email:email
-				}
-			}
+			sendOTPURL
 		)
 
 	}
