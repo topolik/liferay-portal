@@ -75,6 +75,8 @@ public class OTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 			_log.error("Unable to delete otp: " + pe.getMessage(), pe);
 		}
 
+		request.setAttribute("resendDuration", _DURATION / 1000);
+
 		HttpServletRequest originalServletRequest =
 			_portal.getOriginalServletRequest(request);
 
@@ -110,6 +112,8 @@ public class OTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 		session.setAttribute("userId", userId);
 
 		OTP otp = _otpLocalService.fetchOTPByUserId(userId);
+
+		request.setAttribute("resendDuration", _DURATION / 1000);
 
 		request.setAttribute("sendToEmail", otp.getEmailAddress());
 

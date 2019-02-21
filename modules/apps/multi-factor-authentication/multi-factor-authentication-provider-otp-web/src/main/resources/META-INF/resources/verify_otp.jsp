@@ -17,6 +17,7 @@
 <%@ include file="/init.jsp" %>
 
 <%
+int resendDuration = (Integer)request.getAttribute("resendDuration");
 String sendToEmail = (String)request.getAttribute("sendToEmail");
 %>
 
@@ -28,10 +29,33 @@ String sendToEmail = (String)request.getAttribute("sendToEmail");
 
 <aui:input disabled="<%= true %>" id="sendToEmail" name="sendToEmail" showRequiredLabel="yes" value="<%= sendToEmail %>" />
 
-<aui:button onclick='<%= liferayPortletResponse.getNamespace() + "send('" + sendOTPURL + "');" %>' value="send" />
+<aui:button id="sendButton" onclick='<%= liferayPortletResponse.getNamespace() + "send('" + sendOTPURL + "');" %>' value="send" />
 
 <aui:script>
 	function <portlet:namespace />send(sendOTPURL) {
+
+		var button = document.getElementById('<portlet:namespace />sendButton');
+
+		var buttonText = button.innerText;
+
+		button.disabled = true;
+
+		var resendDuration = '<%= resendDuration %>';
+
+		window.setInterval(
+			function() {
+				if (sec === 0) {
+					button.innerText = buttonText;
+					button.disabled = false;
+					window.clearInterval(resendDuration);
+				}
+				else {
+					button.innerText = --resendDuration;
+				}
+
+			},
+			1000
+		);
 
 		AUI.$.ajax(
 			sendOTPURL
