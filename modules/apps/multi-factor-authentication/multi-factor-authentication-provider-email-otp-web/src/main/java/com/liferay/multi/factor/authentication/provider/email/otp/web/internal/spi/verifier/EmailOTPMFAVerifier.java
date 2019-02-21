@@ -73,7 +73,10 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 			_servletContext.getRequestDispatcher("/setup_otp.jsp");
 
 		try {
+			request.setAttribute("resendDuration", _DURATION / 1000);
+
 			requestDispatcher.include(request, response);
+
 			HttpServletRequest originalRequest =
 				_portal.getOriginalServletRequest(request);
 
@@ -101,7 +104,10 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 			_servletContext.getRequestDispatcher("/verify_otp.jsp");
 
 		try {
+			request.setAttribute("resendDuration", _DURATION / 1000);
+
 			requestDispatcher.include(request, response);
+
 			HttpServletRequest originalRequest =
 				_portal.getOriginalServletRequest(request);
 
@@ -219,20 +225,27 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 
 		long otpSetAt = (Long)session.getAttribute("otpSetAt");
 
-		if (otpSetAt + _DURATION > System.currentTimeMillis()) {
-			String expected = (String)session.getAttribute("otp");
+		if (otpSetAt + _DURATION < System.currentTimeMillis()) {
+			session.removeAttribute("otp");
+			session.removeAttribute("otpSetAt");
 
-			if (expected.equals(userInput)) {
-				session.removeAttribute("otp");
-				session.removeAttribute("otpSetAt");
-				session.removeAttribute("otpPhase");
-				session.removeAttribute("userId");
-
-				return true;
-			}
+			return false;
 		}
 
-		return false;
+		String expected = (String)session.getAttribute("otp");
+
+		// user may make typo, not removing attributes to allow retry
+
+		if (!expected.equals(userInput)) {
+			return false;
+		}
+
+		session.removeAttribute("otp");
+		session.removeAttribute("otpSetAt");
+		session.removeAttribute("otpPhase");
+		session.removeAttribute("userId");
+
+		return true;
 	}
 
 	private static final long _DURATION = 60 * 1000;

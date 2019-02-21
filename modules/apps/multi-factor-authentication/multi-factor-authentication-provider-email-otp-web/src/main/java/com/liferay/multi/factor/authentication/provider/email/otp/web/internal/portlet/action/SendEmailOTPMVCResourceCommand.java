@@ -60,6 +60,18 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 
 		HttpSession session = originalRequest.getSession();
 
+		Object otpSetAtObj = session.getAttribute("otpSetAt");
+
+		long currentTime = System.currentTimeMillis();
+
+		if (otpSetAtObj != null) {
+			long otpSetAt = (Long)otpSetAtObj;
+
+			if (otpSetAt + _DURATION > currentTime) {
+				return false;
+			}
+		}
+
 		try {
 			User user = null;
 			String email = null;
@@ -90,7 +102,8 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 
 			session.setAttribute("otp", generatedOTP);
 
-			session.setAttribute("otpSetAt", System.currentTimeMillis());
+			session.setAttribute("otpSetAt", currentTime);
+
 			MailMessage mailMessage = new MailMessage(
 				new InternetAddress("test@liferay.com", "admin"),
 				new InternetAddress(email, user.getFullName()),
@@ -105,6 +118,10 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 			return false;
 		}
 	}
+
+	//this should be configured by admin
+
+	private static final long _DURATION = 60 * 1000;
 
 	private static final int _LENGTH = 6;
 
