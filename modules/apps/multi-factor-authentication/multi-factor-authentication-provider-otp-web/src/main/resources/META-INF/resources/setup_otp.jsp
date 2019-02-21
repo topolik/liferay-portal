@@ -16,6 +16,10 @@
 
 <%@ include file="/init.jsp" %>
 
+<%
+int resendDuration = (Integer)request.getAttribute("resendDuration");
+%>
+
 <h1>
 	<liferay-ui:message key="your-one-time-password-will-be-sent-to" />
 </h1>
@@ -24,10 +28,33 @@
 
 <portlet:resourceURL id="/mfa_verify/sendotp" var="sendOTPURL" />
 
-<aui:button onclick='<%= liferayPortletResponse.getNamespace() + "send('" + sendOTPURL + "');" %>' value="send" />
+<aui:button id="sendButton" onclick='<%= liferayPortletResponse.getNamespace() + "send('" + sendOTPURL + "');" %>' value="send" />
 
 <aui:script>
 	function <portlet:namespace />send(sendOTPURL) {
+
+		var button = document.getElementById('<portlet:namespace />sendButton');
+
+		var buttonText = button.innerText;
+
+		button.disabled = true;
+
+		var resendDuration = '<%= resendDuration %>';
+
+		window.setInterval(
+			function() {
+				if (sec === 0) {
+					button.innerText = buttonText;
+					button.disabled = false;
+					window.clearInterval(resendDuration);
+				}
+				else {
+					button.innerText = --resendDuration;
+				}
+
+			},
+			1000
+		);
 
 		var email = document.getElementById('<portlet:namespace />setupEmail').value;
 
