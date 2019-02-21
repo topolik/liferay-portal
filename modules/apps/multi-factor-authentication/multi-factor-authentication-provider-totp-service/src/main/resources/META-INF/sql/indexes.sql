@@ -1,0 +1,1 @@
+create unique index IX_68EF7F77 on TOTP (userId);
