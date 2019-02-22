@@ -24,8 +24,17 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.util.PropsValues;
 
 import java.io.IOException;
+import java.io.Serializable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -139,6 +148,24 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 			return false;
 		}
 
+		HttpServletRequest originalServletRequest =
+			_portal.getOriginalServletRequest(request);
+
+		HttpSession session = originalServletRequest.getSession(false);
+
+		if (session != null) {
+			MFAContext mfaContext = (MFAContext)session.getAttribute(
+				MFAContext.class.getName());
+
+			if (mfaContext != null) {
+				if (mfaContext.isValid()) {
+					return false;
+				}
+
+				session.removeAttribute(MFAContext.class.getName());
+			}
+		}
+
 		return true;
 	}
 
@@ -214,10 +241,40 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 
 	@Activate
 	protected void activate() {
+		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
+			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
+				Arrays.asList(
+					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
+
+			sessionPhishingProtectedAttributesList.add(
+				MFAContext.class.getName());
+
+			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
+				sessionPhishingProtectedAttributesList.toArray(
+					new String[sessionPhishingProtectedAttributesList.size()]);
+		}
 	}
 
 	@Deactivate
 	protected void deactivate() {
+		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
+			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
+				Arrays.asList(
+					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
+
+			sessionPhishingProtectedAttributesList.remove(
+				MFAContext.class.getName());
+
+			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
+				sessionPhishingProtectedAttributesList.toArray(
+					new String[sessionPhishingProtectedAttributesList.size()]);
+		}
+
+		for (HttpSession httpSession : _httpSessionsSet) {
+			httpSession.removeAttribute(MFAContext.class.getName());
+		}
+
+		_httpSessionsSet.clear();
 	}
 
 	private boolean _verify(HttpSession session, String userInput)
@@ -245,6 +302,16 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 		session.removeAttribute("otpPhase");
 		session.removeAttribute("userId");
 
+		MFAContext mfaContext = new MFAContext();
+
+		long oneDay = 24 * 60 * 60 * 1000;
+
+		mfaContext._expiresAt = System.currentTimeMillis() + oneDay;
+
+		session.setAttribute(MFAContext.class.getName(), mfaContext);
+
+		_httpSessionsSet.add(session);
+
 		return true;
 	}
 
@@ -256,6 +323,9 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 	@Reference
 	private EmailOTPLocalService _emailOTPLocalService;
 
+	private final Set<HttpSession> _httpSessionsSet = Collections.newSetFromMap(
+		Collections.synchronizedMap(new WeakHashMap<>()));
+
 	@Reference
 	private Portal _portal;
 
@@ -266,5 +336,21 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 
 	@Reference
 	private UserLocalService _userLocalService;
+
+	private class MFAContext implements Serializable {
+
+		public boolean isValid() {
+			if (System.currentTimeMillis() < _expiresAt) {
+				return true;
+			}
+
+			return false;
+		}
+
+		private static final long serialVersionUID = 1L;
+
+		private long _expiresAt;
+
+	}
 
 }
