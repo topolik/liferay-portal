@@ -509,12 +509,19 @@ public class PortletPreferencesLocalServiceImpl
 				ownerId = PortletIdCodec.decodeUserId(portletId);
 				ownerType = PortletKeys.PREFS_OWNER_TYPE_USER;
 
-				PortletPreferences portletPreferences =
-					portletPreferencesPersistence.fetchByO_O_P_P(
-						ownerId, ownerType, plid, portletId);
+				PortletPreferences portletPreferences = null;
 
-				if (portletPreferences != null) {
-					preferences = portletPreferences.getPreferences();
+				if (portlet.isUndeployedPortlet()) {
+					preferences = PortletConstants.DEFAULT_PREFERENCES;
+				}
+				else {
+					portletPreferences =
+						portletPreferencesPersistence.fetchByO_O_P_P(
+							ownerId, ownerType, plid, portletId);
+
+					if (portletPreferences != null) {
+						preferences = portletPreferences.getPreferences();
+					}
 				}
 			}
 			else {
@@ -546,6 +553,15 @@ public class PortletPreferencesLocalServiceImpl
 		long companyId, long ownerId, int ownerType, long plid,
 		String portletId) {
 
+		Portlet portlet = portletLocalService.fetchPortletById(
+			companyId, portletId);
+
+		if (portlet == null) {
+			return PortletPreferencesFactoryUtil.strictFromXML(
+				companyId, ownerId, ownerType, plid, portletId,
+				PortletConstants.DEFAULT_PREFERENCES);
+		}
+
 		plid = _swapPlidForPreferences(plid);
 
 		PortletPreferences portletPreferences =
@@ -554,9 +570,6 @@ public class PortletPreferencesLocalServiceImpl
 
 		if (portletPreferences == null) {
 			String defaultPreferences = PortletConstants.DEFAULT_PREFERENCES;
-
-			Portlet portlet = portletLocalService.fetchPortletById(
-				companyId, portletId);
 
 			if (portlet != null) {
 				defaultPreferences = portlet.getDefaultPreferences();
