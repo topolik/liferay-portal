@@ -21,4 +21,7 @@ public class MFAPortletKeys {
 	public static final String MFA_VERIFY =
 		"com_liferay_multi_factor_authentication_portlet_web_internal_" +
 			"portlet_MFAVerifyPortlet";
+
+	public static final String CATEGORY_KEY_MFA = "multi-factor-authentication";
+
 }
