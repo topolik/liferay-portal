@@ -1,6 +1,7 @@
 dependencies {
 	compileInclude group: "org.jodd", name: "jodd-core", version: "5.0.6"
 
+	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "3.1.0"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "default"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.util.taglib", version: "default"
@@ -12,5 +13,6 @@ dependencies {
 	compileOnly project(":apps:multi-factor-authentication:multi-factor-authentication-spi")
 	compileOnly project(":apps:multi-factor-authentication:multi-factor-authentication-portlet-api")
 	compileOnly project(":apps:petra:petra-encryptor")
+	compileOnly project(":apps:static:portal-configuration:portal-configuration-metatype-api")
 	compileOnly project(":core:petra:petra-string")
 }

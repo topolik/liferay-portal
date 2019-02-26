@@ -14,24 +14,47 @@
 
 package com.liferay.multi.factor.authentication.integration.auth.verifier.internal.spi.integration;
 
+import com.liferay.multi.factor.authentication.integration.auth.verifier.internal.configuration.AuthVerifierMFAIntegrationConfiguration;
 import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
-import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
-import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 
-import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(service = MFAIntegration.class)
+@Component(
+	configurationPid = "com.liferay.multi.factor.authentication.integration.auth.verifier.internal.configuration.AuthVerifierMFAIntegrationConfiguration",
+	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	service = {MFAIntegration.class, AuthVerifierMFAIntegration.class}
+)
 public class AuthVerifierMFAIntegration implements MFAIntegration {
 
-	public static String NAME = "auth-verifier";
+	private String _name;
+	private boolean _enabled;
+
+	@Activate
+	protected void activate(Map<String, Object> properties) {
+		AuthVerifierMFAIntegrationConfiguration
+			authVerifierMFAIntegrationConfiguration =
+				ConfigurableUtil.createConfigurable(
+					AuthVerifierMFAIntegrationConfiguration.class, properties);
+
+		_enabled = authVerifierMFAIntegrationConfiguration.enabled();
+		_name = authVerifierMFAIntegrationConfiguration.name();
+	}
 
 	@Override
 	public String getName() {
-		return NAME;
+		return _name;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return _enabled;
 	}
 
 	@Override

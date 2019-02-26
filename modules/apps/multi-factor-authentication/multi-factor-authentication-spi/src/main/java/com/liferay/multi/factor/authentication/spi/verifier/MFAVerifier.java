@@ -25,13 +25,17 @@ public interface MFAVerifier {
 
 	public String getProviderName();
 
-	public boolean needsVerification(HttpServletRequest request, long userId);
+	public default boolean supportsHeadless() {
+		return HeadlessMFAVerifier.class.isAssignableFrom(getClass());
+	}
 
-	public boolean needsSetup(long userId);
+	public default boolean supportsBrowser() {
+		return BrowserMFAVerifier.class.isAssignableFrom(getClass());
+	}
 
-	public boolean supportsHeadless();
-
-	public boolean supportsBrowser();
+	public default boolean supportsUserAccountSetup() {
+		return UserAccountSetupMFAVerifier.class.isAssignableFrom(getClass());
+	}
 
 	public boolean isEnabled();
 

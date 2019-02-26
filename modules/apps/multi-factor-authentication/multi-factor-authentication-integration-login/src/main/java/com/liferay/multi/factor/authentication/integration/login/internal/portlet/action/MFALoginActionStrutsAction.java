@@ -17,7 +17,6 @@ package com.liferay.multi.factor.authentication.integration.login.internal.portl
 import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.integration.login.internal.spi.integration.LoginMFAIntegration;
 import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
-import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.portal.action.LoginAction;
 import com.liferay.portal.kernel.struts.StrutsAction;
@@ -46,7 +45,7 @@ public class MFALoginActionStrutsAction implements StrutsAction {
 		throws Exception {
 
 		MFAVerifier mfaVerifier =
-			_mfaRegistry.getMFAVerifier(LoginMFAIntegration.NAME);
+			_mfaRegistry.getIntegrationVerifier(_loginMFAIntegration.getName());
 
 		if (mfaVerifier == null) {
 			ActionForward actionForward =
@@ -67,6 +66,9 @@ public class MFALoginActionStrutsAction implements StrutsAction {
 
 	@Reference
 	private Portal _portal;
+
+	@Reference
+	private LoginMFAIntegration _loginMFAIntegration;
 
 	private LoginAction _loginAction = new LoginAction();
 }

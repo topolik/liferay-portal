@@ -48,9 +48,17 @@ public class MFALoginServicePreAction extends Action {
 		throws ActionException {
 
 		MFAVerifier mfaVerifier =
-			_mfaRegistry.getMFAVerifier(LoginMFAIntegration.NAME);
+			_mfaRegistry.getIntegrationVerifier(_loginMFAIntegration.getName());
 
 		if (mfaVerifier == null) {
+			return;
+		}
+
+		if (!mfaVerifier.isEnabled()) {
+			return;
+		}
+
+		if (!mfaVerifier.supportsBrowser() && !mfaVerifier.supportsHeadless()) {
 			return;
 		}
 
@@ -65,10 +73,33 @@ public class MFALoginServicePreAction extends Action {
 
 		long userId = themeDisplay.getUserId();
 
-		if (mfaVerifier.needsSetup(userId)) {
+		if (mfaVerifier.supportsHeadless()) {
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier)mfaVerifier;
+
+			if (!headlessMFAVerifier.requiresHeadlessVerification(
+				request, userId)) {
+
+				return;
+			}
+
+			if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
+				return;
+			}
+		}
+
+		if (!mfaVerifier.supportsBrowser()) {
+			throw new ActionException(
+				new PrincipalException.MustBeAuthenticated(
+					"Unable to verify Multi Factor Authentication"));
+		}
+
+		BrowserMFAVerifier browserMFAVerifier = (BrowserMFAVerifier)mfaVerifier;
+
+		if (browserMFAVerifier.requiresSetup(userId)) {
 			LiferayPortletURL liferayPortletURL =
 				_mfaPortletURLFactory.createSetupURL(
-					request, LoginMFAIntegration.NAME,
+					request, _loginMFAIntegration.getName(),
 					themeDisplay.getURLCurrent());
 
 			if (themeDisplay.isStateMaximized() && Objects.equals(
@@ -88,25 +119,10 @@ public class MFALoginServicePreAction extends Action {
 			return;
 		}
 
-		if (mfaVerifier.needsVerification(request, userId)) {
-			if (mfaVerifier.supportsHeadless()) {
-				HeadlessMFAVerifier headlessMFAVerifier =
-					(HeadlessMFAVerifier)mfaVerifier;
-
-				if (headlessMFAVerifier.verify(request, userId)) {
-					return;
-				}
-			}
-
-			if (!mfaVerifier.supportsBrowser()) {
-				throw new ActionException(
-					new PrincipalException.MustBeAuthenticated(
-						"Unable to verify MFA"));
-			}
-
+		if (browserMFAVerifier.requiresBrowserVerification(request, userId)) {
 			LiferayPortletURL liferayPortletURL =
 				_mfaPortletURLFactory.createVerifyURL(
-					request, LoginMFAIntegration.NAME,
+					request, _loginMFAIntegration.getName(),
 					themeDisplay.getURLCurrent(), userId);
 
 			if (Objects.equals(
@@ -135,5 +151,8 @@ public class MFALoginServicePreAction extends Action {
 
 	@Reference
 	private MFAPortletURLFactory _mfaPortletURLFactory;
+
+	@Reference
+	private LoginMFAIntegration _loginMFAIntegration;
 
 }

@@ -55,6 +55,13 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 		_mfaRegistry = mfaRegistry;
 	}
 
+	@Reference(unbind = "-")
+	public void setAuthVerifierMFAIntegration(
+		AuthVerifierMFAIntegration authVerifierMFAIntegration) {
+
+		_authVerifierMFAIntegration = authVerifierMFAIntegration;
+	}
+
 	@Override
 	protected Log getLog() {
 		return _log;
@@ -94,29 +101,30 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 			return;
 		}
 
-		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(
-				AuthVerifierMFAIntegration.NAME);
+		MFAVerifier mfaVerifier = _mfaRegistry.getIntegrationVerifier(
+				_authVerifierMFAIntegration.getName());
 
-		if (mfaVerifier == null) {
+		if ((mfaVerifier == null) || !mfaVerifier.supportsHeadless() ||
+			!mfaVerifier.isEnabled()) {
+
 			super.processFilter(request, response, filterChain);
 
 			return;
 		}
 
+		HeadlessMFAVerifier headlessMFAVerifier =
+			(HeadlessMFAVerifier)mfaVerifier;
+
 		long userId = authVerifierResult.getUserId();
 
-		if (mfaVerifier.supportsHeadless() &&
-				mfaVerifier.needsVerification(request, userId)) {
-
-			HeadlessMFAVerifier headlessMFAVerifier =
-				(HeadlessMFAVerifier)mfaVerifier;
-
-			if (!headlessMFAVerifier.verify(request, userId)) {
+		if (headlessMFAVerifier.requiresHeadlessVerification(request, userId)) {
+			if (!headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
 						StringBundler.concat(
-							"Unable to verify Multi Factor Authentication ",
-							"token for ", request.getPathInfo()));
+							"Unable to verifyHeadlessRequest Multi Factor " +
+							"Authentication token for ",
+							request.getPathInfo()));
 				}
 
 				response.sendError(
@@ -133,5 +141,7 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 		MFAAuthVerifierFilter.class);
 
 	private MFARegistry _mfaRegistry;
+
+	private AuthVerifierMFAIntegration _authVerifierMFAIntegration;
 
 }

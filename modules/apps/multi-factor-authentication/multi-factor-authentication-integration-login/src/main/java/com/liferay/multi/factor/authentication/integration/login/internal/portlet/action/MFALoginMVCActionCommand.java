@@ -51,7 +51,6 @@ import javax.portlet.PortletURL;
 import javax.portlet.filter.ActionRequestWrapper;
 import javax.portlet.filter.ActionResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.Key;
@@ -80,9 +79,22 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 		throws Exception {
 
 		MFAVerifier mfaVerifier =
-			_mfaVerifierRegistry.getMFAVerifier(LoginMFAIntegration.NAME);
+			_mfaVerifierRegistry.getIntegrationVerifier(
+				_loginMFAIntegration.getName());
 
 		if (mfaVerifier == null) {
+			_loginMVCActionCommand.processAction(actionRequest, actionResponse);
+
+			return;
+		}
+
+		if (!mfaVerifier.isEnabled()) {
+			_loginMVCActionCommand.processAction(actionRequest, actionResponse);
+
+			return;
+		}
+
+		if (!mfaVerifier.supportsBrowser() && !mfaVerifier.supportsHeadless()) {
 			_loginMVCActionCommand.processAction(actionRequest, actionResponse);
 
 			return;
@@ -91,8 +103,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 		String state = ParamUtil.getString(actionRequest, "state");
 
 		if (!Validator.isBlank(state)) {
-			actionRequest = _loadRequestFromState(
-				actionRequest, actionResponse, state);
+			actionRequest = _loadRequestFromState(actionRequest, state);
 		}
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
@@ -110,41 +121,50 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 					request, login, password, null);
 
 			if (userId > 0) {
-				if (mfaVerifier.needsSetup(userId)) {
+				if (mfaVerifier.supportsHeadless()) {
+					HeadlessMFAVerifier headlessMFAVerifier =
+						(HeadlessMFAVerifier) mfaVerifier;
+
+					if (!headlessMFAVerifier.requiresHeadlessVerification(
+						request, userId)){
+
+						_loginMVCActionCommand.processAction(
+							actionRequest, actionResponse);
+
+						return;
+					}
+
+					if (headlessMFAVerifier.verifyHeadlessRequest(
+						request, userId)) {
+
+						_loginMVCActionCommand.processAction(
+							actionRequest, actionResponse);
+
+						return;
+					}
+				}
+
+				BrowserMFAVerifier browserMFAVerifier =
+					(BrowserMFAVerifier)mfaVerifier;
+
+				if (browserMFAVerifier.requiresSetup(userId)) {
 					redirectToSetup(actionRequest, actionResponse);
 
 					return;
 				}
 
-				if (mfaVerifier.needsVerification(request, userId)) {
-					if (mfaVerifier.supportsHeadless()) {
-						HeadlessMFAVerifier headlessMFAVerifier =
-							(HeadlessMFAVerifier) mfaVerifier;
-
-						if (headlessMFAVerifier.verify(request, userId)) {
-							_loginMVCActionCommand.processAction(
-								actionRequest, actionResponse);
-
-							return;
-						}
-					}
-
-					if (!mfaVerifier.supportsBrowser()) {
-						throw new AuthException(
-							"Multi Factor Authentication failed");
-					}
+				if (browserMFAVerifier.requiresBrowserVerification(
+					request, userId)) {
 
 					_redirectToVerify(userId, actionRequest, actionResponse);
 
 					return;
 				}
-
-				if (mfaVerifier.supportsBrowser()) {
+				else {
 					_loginMVCActionCommand.processAction(
 						actionRequest, actionResponse);
+					return;
 				}
-
-				return;
 			}
 		}
 
@@ -152,8 +172,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	private ActionRequest _loadRequestFromState(
-			ActionRequest actionRequest, ActionResponse actionResponse,
-			String encryptedStateMap)
+			ActionRequest actionRequest, String encryptedStateMap)
 		throws Exception {
 
 		HttpServletRequest httpServletRequest =
@@ -220,7 +239,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 
 		PortletURL renderURL = _mfaPortletURLFactory.createSetupURL(
 			_portal.getHttpServletRequest(actionRequest),
-			LoginMFAIntegration.NAME, responseRedirect[0]);
+			_loginMFAIntegration.getName(), responseRedirect[0]);
 
 		actionRequest.setAttribute(WebKeys.REDIRECT, renderURL.toString());
 	}
@@ -249,7 +268,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 
 		LiferayPortletURL verifyURL =
 			_mfaPortletURLFactory.createVerifyURL(
-				httpServletRequest, LoginMFAIntegration.NAME,
+				httpServletRequest, _loginMFAIntegration.getName(),
 				actionURL.toString(), userId);
 
 		actionRequest.setAttribute(WebKeys.REDIRECT, verifyURL.toString());
@@ -343,4 +362,6 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 	@Reference
 	private Portal _portal;
 
+	@Reference
+	private LoginMFAIntegration _loginMFAIntegration;
 }

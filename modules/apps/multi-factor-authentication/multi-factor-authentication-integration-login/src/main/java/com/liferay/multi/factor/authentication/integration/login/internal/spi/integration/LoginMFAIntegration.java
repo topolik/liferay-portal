@@ -14,23 +14,50 @@
 
 package com.liferay.multi.factor.authentication.integration.login.internal.spi.integration;
 
+import com.liferay.multi.factor.authentication.integration.login.internal.configuration.LoginMFAIntegrationConfiguration;
 import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+
+import java.util.Map;
 
 /**
  * @author Tomas Polesovsky
  */
 @Component(
-	service = MFAIntegration.class)
+	configurationPid = "com.liferay.multi.factor.authentication.integration.login.internal.configuration.LoginMFAIntegrationConfiguration",
+	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	service = {MFAIntegration.class, LoginMFAIntegration.class}
+)
 public class LoginMFAIntegration implements MFAIntegration {
 
-	public static final String NAME = "login-web";
+
+	private String _name;
+	private boolean _enabled;
+
+	@Activate
+	protected void activate(Map<String, Object> properties) {
+		LoginMFAIntegrationConfiguration
+			loginMFAIntegrationConfiguration =
+			ConfigurableUtil.createConfigurable(
+				LoginMFAIntegrationConfiguration.class, properties);
+
+		_enabled = loginMFAIntegrationConfiguration.enabled();
+		_name = loginMFAIntegrationConfiguration.name();
+	}
 
 	@Override
 	public String getName() {
-		return NAME;
+		return _name;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return _enabled;
 	}
 
 	@Override

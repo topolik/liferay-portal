@@ -55,9 +55,9 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author arthurchan35
  */
-@Component(immediate = true, service = {MFAVerifier.class, UserAccountSetupMFAVerifier.class})
-public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier,
-	UserAccountSetupMFAVerifier {
+@Component(immediate = true, service = MFAVerifier.class)
+public class EmailOTPMFAVerifier
+	implements BrowserMFAVerifier, MFAVerifier, UserAccountSetupMFAVerifier {
 
 	@Override
 	public String getProviderName() {
@@ -73,7 +73,7 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier,
 	}
 
 	@Override
-	public boolean userAccountSetup(ActionRequest actionRequest, long userId) {
+	public boolean setupUserAccount(ActionRequest actionRequest, long userId) {
 		return setup(actionRequest, userId);
 	}
 
@@ -124,7 +124,7 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier,
 	}
 
 	@Override
-	public void includeVerification(
+	public void includeBrowserVerification(
 			long userId, HttpServletRequest request,
 			HttpServletResponse response)
 		throws IOException {
@@ -156,7 +156,7 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier,
 	}
 
 	@Override
-	public boolean needsSetup(long userId) {
+	public boolean requiresSetup(long userId) {
 		return false;
 	}
 
@@ -171,7 +171,7 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier,
 	}
 
 	@Override
-	public boolean needsVerification(HttpServletRequest request, long userId) {
+	public boolean requiresBrowserVerification(HttpServletRequest request, long userId) {
 		if (!isUserSetUp(userId)) {
 			return false;
 		}
@@ -239,7 +239,7 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier,
 	}
 
 	@Override
-	public boolean verify(
+	public boolean verifyBrowserRequest(
 		ActionRequest request, ActionResponse response, long userId) {
 
 		String userInput = ParamUtil.getString(request, "otp");

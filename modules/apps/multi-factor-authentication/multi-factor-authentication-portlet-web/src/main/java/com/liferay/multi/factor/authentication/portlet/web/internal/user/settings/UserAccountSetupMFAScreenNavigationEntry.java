@@ -16,6 +16,7 @@ package com.liferay.multi.factor.authentication.portlet.web.internal.user.settin
 
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -44,7 +45,13 @@ public class UserAccountSetupMFAScreenNavigationEntry
 
 	public UserAccountSetupMFAScreenNavigationEntry(
 		UserAccountSetupMFAVerifier userAccountSetupMFAVerifier) {
+
 		_userAccountSetupMFAVerifier = userAccountSetupMFAVerifier;
+	}
+
+	@Override
+	public boolean isVisible(User user, User context) {
+		return ((MFAVerifier)_userAccountSetupMFAVerifier).isEnabled();
 	}
 
 	@Override
@@ -54,7 +61,7 @@ public class UserAccountSetupMFAScreenNavigationEntry
 
 	@Override
 	public String getEntryKey() {
-		return _userAccountSetupMFAVerifier.getProviderName();
+		return ((MFAVerifier)_userAccountSetupMFAVerifier).getProviderName();
 	}
 
 	@Override
@@ -74,7 +81,10 @@ public class UserAccountSetupMFAScreenNavigationEntry
 	public void render(HttpServletRequest request, HttpServletResponse response)
 		throws IOException {
 
-		request.setAttribute(UserAccountSetupMFAVerifier.class.getName(), _userAccountSetupMFAVerifier);
+		request.setAttribute(
+			UserAccountSetupMFAVerifier.class.getName(),
+			_userAccountSetupMFAVerifier);
+
 		request.setAttribute("label", getLabel(request.getLocale()));
 		request.setAttribute("screenNavigationCategoryKey", getCategoryKey());
 		request.setAttribute("screenNavigationEntryKey", getEntryKey());
@@ -89,9 +99,9 @@ public class UserAccountSetupMFAScreenNavigationEntry
 		catch (ServletException se) {
 			_log.error("Unable to render JSP " + "/user_account_setup.jsp", se);
 
-			throw new IOException("Unable to render " + "/user_account_setup.jsp", se);
+			throw new IOException(
+				"Unable to render " + "/user_account_setup.jsp", se);
 		}
-
 	}
 
 	public void setServletContext(ServletContext servletContext) {

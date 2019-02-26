@@ -24,16 +24,12 @@ import java.io.IOException;
  */
 public interface UserAccountSetupMFAVerifier {
 
-	public String getProviderName();
-
-	public String getName();
-
 	public void includeUserAccountSetup(
 		long userId, HttpServletRequest request,
 		HttpServletResponse response)
 		throws IOException;
 
 
-	public boolean userAccountSetup(ActionRequest actionRequest, long userId);
+	public boolean setupUserAccount(ActionRequest actionRequest, long userId);
 
 }

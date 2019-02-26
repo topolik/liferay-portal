@@ -14,6 +14,7 @@
 
 package com.liferay.multi.factor.authentication.provider.totp.web.internal.spi.verifier;
 
+import com.liferay.multi.factor.authentication.provider.totp.web.internal.configuration.TOTPConfiguration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
@@ -22,6 +23,7 @@ import com.liferay.multi.factor.authentication.provider.totp.service.TOTPLocalSe
 import com.liferay.multi.factor.authentication.provider.totp.web.internal.util.TOTPUtil;
 import com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.io.BigEndianCodec;
 import com.liferay.portal.kernel.log.Log;
@@ -47,15 +49,16 @@ import jodd.util.Base32;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -63,12 +66,40 @@ import java.util.WeakHashMap;
  * @author Tomas Polesovsky
  */
 @Component(
+	configurationPid = "com.liferay.multi.factor.authentication.provider.totp.web.internal.configuration.TOTPConfiguration",
+	configurationPolicy = ConfigurationPolicy.OPTIONAL,
 	immediate = true,
-	service = {MFAVerifier.class, UserAccountSetupMFAVerifier.class}
+	service = MFAVerifier.class
 )
 public class TOTPMFAVerifier
 	implements BrowserMFAVerifier, HeadlessMFAVerifier, MFAVerifier,
-	UserAccountSetupMFAVerifier {
+		UserAccountSetupMFAVerifier {
+
+	private static final String _VALIDATED_AT =
+		TOTPMFAVerifier.class.getName() + "#VALIDATED_AT";
+
+	private String _name;
+	private boolean _enabled;
+	private String _headlessHeaderName;
+	private boolean _forceUserSetup;
+	private long _validationExpirationTime;
+
+	@Activate
+	protected void activate(Map<String, Object> properties) {
+		TOTPConfiguration totpConfiguration = ConfigurableUtil.createConfigurable(
+			TOTPConfiguration.class, properties);
+
+		_algorithm = totpConfiguration.algorithm();
+		_algorithmKeySize = totpConfiguration.algorithmKeySize();
+		_clockSkew = totpConfiguration.clockSkew();
+		_digitsCount = totpConfiguration.digitsCount();
+		_enabled = totpConfiguration.enabled();
+		_forceUserSetup = totpConfiguration.forceUserSetup();
+		_headlessHeaderName = totpConfiguration.headlessHeaderName();
+		_name = totpConfiguration.name();
+		_timeWindow = totpConfiguration.timeWindow();
+		_validationExpirationTime = totpConfiguration.validationExpirationTime();
+	}
 
 	@Override
 	public void includeUserAccountSetup(
@@ -79,24 +110,23 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
-	public boolean userAccountSetup(ActionRequest actionRequest, long userId) {
+	public boolean setupUserAccount(ActionRequest actionRequest, long userId) {
 		return setup(actionRequest, userId);
 	}
 
 	@Override
 	public String getProviderName() {
-		return getName();
+		return "time-based-one-time-password";
 	}
 
 	@Activate
-	protected void activate() {
+	public void activate() {
 		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
 			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
 				Arrays.asList(
 					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
 
-			sessionPhishingProtectedAttributesList.add(
-				MFAContext.class.getName());
+			sessionPhishingProtectedAttributesList.add(_VALIDATED_AT);
 
 			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
 				sessionPhishingProtectedAttributesList.toArray(
@@ -104,25 +134,18 @@ public class TOTPMFAVerifier
 		}
 	}
 
-
 	@Override
 	public boolean isEnabled() {
-		return true;
+		return _enabled;
 	}
 
 	@Override
-	public boolean supportsBrowser(){
-		return true;
-	}
+	public boolean verifyHeadlessRequest(HttpServletRequest request, long userId) {
+		if (!isUserSetUp(userId)) {
+			return false;
+		}
 
-	@Override
-	public boolean supportsHeadless() {
-		return true;
-	}
-
-	@Override
-	public boolean verify(HttpServletRequest request, long userId) {
-		String totpValue = request.getHeader("X-2FA-Token");
+		String totpValue = request.getHeader(_headlessHeaderName);
 
 		if (Validator.isBlank(totpValue)) {
 			return false;
@@ -195,7 +218,7 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
-	public void includeVerification(
+	public void includeBrowserVerification(
 		long userId, HttpServletRequest request,
 		HttpServletResponse response)
 		throws IOException {
@@ -213,7 +236,19 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
-	public boolean needsSetup(long userId) {
+	public boolean requiresSetup(long userId) {
+		if (isUserSetUp(userId)) {
+			return false;
+		}
+
+		if (_forceUserSetup) {
+			return true;
+		}
+
+		return false;
+	}
+
+	protected boolean isUserSetUp(long userId) {
 		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
 
 		if ((totp != null) && totp.isVerified()) {
@@ -225,17 +260,27 @@ public class TOTPMFAVerifier
 
 	@Override
 	public String getName() {
-		return "time-based-one-time-password";
+		return _name;
 	}
 
 	@Override
-	public String getProviderName() {
-		return getName();
+	public boolean requiresBrowserVerification(
+		HttpServletRequest request, long userId) {
+
+		return requiresVerification(request, userId);
 	}
 
 	@Override
-	public boolean needsVerification(HttpServletRequest request, long userId) {
-		if (needsSetup(userId)) {
+	public boolean requiresHeadlessVerification(
+		HttpServletRequest request, long userId) {
+
+		return requiresVerification(request, userId);
+	}
+
+	protected boolean requiresVerification(
+		HttpServletRequest request, long userId) {
+
+		if (!isUserSetUp(userId)) {
 			return false;
 		}
 
@@ -244,27 +289,11 @@ public class TOTPMFAVerifier
 
 		HttpSession session = originalServletRequest.getSession(false);
 
-		if (session != null) {
-			MFAContext mfaContext = (MFAContext)session.getAttribute(
-				MFAContext.class.getName());
-
-			if (mfaContext != null) {
-				if (mfaContext.isValid()) {
-					return false;
-				}
-				else {
-					session.removeAttribute(MFAContext.class.getName());
-				}
-			}
+		if (isValid(session)) {
+			return false;
 		}
 
-		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
-
-		if ((totp != null) && totp.isVerified()) {
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 
 	@Override
@@ -303,11 +332,11 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
-	public boolean verify(
+	public boolean verifyBrowserRequest(
 		ActionRequest actionRequest, ActionResponse actionResponse,
 		long userId) {
 
-		if (needsSetup(userId)) {
+		if (!isUserSetUp(userId)) {
 			return false;
 		}
 
@@ -320,11 +349,7 @@ public class TOTPMFAVerifier
 		boolean verified = verify(totpValue, userId);
 
 		if (verified) {
-			MFAContext mfaContext = new MFAContext();
-
-			long oneDay = 24 * 60 * 60 * 1000;
-
-			mfaContext._expiresAt = System.currentTimeMillis() + oneDay;
+			long validatedAt = System.currentTimeMillis();
 
 			HttpServletRequest request =
 				_portal.getOriginalServletRequest(
@@ -332,9 +357,7 @@ public class TOTPMFAVerifier
 
 			HttpSession session = request.getSession();
 
-			session.setAttribute(MFAContext.class.getName(), mfaContext);
-
-			_httpSessionsSet.add(session);
+			session.setAttribute(_VALIDATED_AT, validatedAt);
 		}
 
 		return verified;
@@ -347,8 +370,7 @@ public class TOTPMFAVerifier
 			try {
 				return TOTPUtil.verifyTOTP(
 					Base32.decode(totp.getSharedSecret()), totpValue,
-					_clockSkew,
-					_timeWindow, _digitsCount, _algorithm);
+					_clockSkew, _timeWindow, _digitsCount, _algorithm);
 			}
 			catch (Exception e) {
 				_log.error(
@@ -371,20 +393,12 @@ public class TOTPMFAVerifier
 				Arrays.asList(
 					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
 
-			sessionPhishingProtectedAttributesList.remove(
-				MFAContext.class.getName());
+			sessionPhishingProtectedAttributesList.remove(_VALIDATED_AT);
 
 			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
 				sessionPhishingProtectedAttributesList.toArray(
 					new String[sessionPhishingProtectedAttributesList.size()]);
 		}
-
-
-		for (HttpSession httpSession : _httpSessionsSet) {
-			httpSession.removeAttribute(MFAContext.class.getName());
-		}
-
-		_httpSessionsSet.clear();;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -404,20 +418,28 @@ public class TOTPMFAVerifier
 	@Reference
 	private UserLocalService _userLocalService;
 
-	private class MFAContext implements Serializable {
-
-		public boolean isValid() {
-			if (System.currentTimeMillis() < _expiresAt) {
-				return true;
-			}
-
+	protected boolean isValid(HttpSession httpSession) {
+		if (httpSession == null) {
 			return false;
 		}
 
-		private static final long serialVersionUID = 1L;
+		Object validatedAtObject = httpSession.getAttribute(_VALIDATED_AT);
 
-		private long _expiresAt;
+		if (validatedAtObject != null) {
+			if (_validationExpirationTime < 0) {
+				return true;
+			}
 
+			long validatedAt = (Long)validatedAtObject;
+
+			if (validatedAt + _validationExpirationTime * 1000 >
+					System.currentTimeMillis()) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private long _clockSkew = 3 * 1000;
@@ -425,9 +447,5 @@ public class TOTPMFAVerifier
 	private int _digitsCount = 6;
 	private String _algorithm = "HmacSHA1";
 	private int _algorithmKeySize = 20;
-
-	private Set<HttpSession> _httpSessionsSet =
-		Collections.newSetFromMap(
-			Collections.synchronizedMap(new WeakHashMap<>()));
 
 }

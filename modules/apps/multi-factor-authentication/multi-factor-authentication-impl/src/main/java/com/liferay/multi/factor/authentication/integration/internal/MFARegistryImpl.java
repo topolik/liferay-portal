@@ -46,41 +46,58 @@ public class MFARegistryImpl implements MFARegistry {
 	private ServiceTrackerMap<String, MFAVerifier>
 		_mfaVerifiersServiceTrackerMap;
 
+	private ServiceTrackerMap<String, MFAIntegrationVerification>
+		_mfaIntegrationVerificationServiceTrackerMap;
+
 	@Override
 	public List<MFAVerifier> getMFAVerifiers() {
 		return new ArrayList(_mfaVerifiersServiceTrackerMap.values());
 	}
 
 	@Override
-	public MFAVerifier getMFAVerifier(String mfaIntegrationName) {
-		MFAIntegration mfaIntegration = getMFAIntegration(mfaIntegrationName);
+	public MFAVerifier getMFAVerifier(String name) {
+		return _mfaVerifiersServiceTrackerMap.getService(name);
+	}
 
-		Set<MFAVerifier> mfaVerifiers = new HashSet<>();
+	@Override
+	public MFAVerifier getIntegrationVerifier(String mfaIntegrationName) {
+		MFAIntegrationVerification mfaIntegrationVerification =
+			_mfaIntegrationVerificationServiceTrackerMap.getService(
+				mfaIntegrationName);
 
-		for (MFAVerifier mfaVerifier : getMFAVerifiers()) {
-			if ((mfaIntegration.supportsHeadless() &&
-				 	mfaVerifier.supportsHeadless()) ||
-				(mfaIntegration.supportsBrowser() &&
-				 	mfaVerifier.supportsBrowser())) {
-
-				mfaVerifiers.add(mfaVerifier);
-			}
-		}
-		// TODO: based on the integration point configuration we could
-		// return selected verifier implementation.
-		//
-		// AND logic = chain of verifiers, all must setup+verify
-		// OR logic = just one can succeed
-
-		if ((mfaVerifiers == null) || mfaVerifiers.size() == 0) {
+		if (mfaIntegrationVerification == null) {
 			return null;
 		}
 
-		if (mfaVerifiers.size() == 1) {
-			return mfaVerifiers.iterator().next();
+		List<List<MFAVerifier>> mfaVerifiersList =
+			mfaIntegrationVerification.getMFAVerifiersList();
+
+		List<MFAVerifier> mandatoryMFAVerifiers =
+			new ArrayList<>(mfaVerifiersList.size());
+
+		for (List<MFAVerifier> mfaVerifiers : mfaVerifiersList) {
+			if (mfaVerifiers.isEmpty()) {
+				continue;
+			}
+
+			if (mfaVerifiers.size() == 1) {
+				mandatoryMFAVerifiers.add(mfaVerifiers.get(0));
+			}
+			else {
+				mandatoryMFAVerifiers.add(
+					new OptionalCompositeMFAVerifier(mfaVerifiers));
+			}
 		}
 
-		return new OptionalCompositeMFAVerifier(mfaVerifiers);
+		if (mandatoryMFAVerifiers.isEmpty()) {
+			return null;
+		}
+		else if (mandatoryMFAVerifiers.size() == 1) {
+			return mandatoryMFAVerifiers.get(0);
+		}
+		else {
+			return new MandatoryCompositeMFAVerifier(mandatoryMFAVerifiers);
+		}
 	}
 
 	@Activate
@@ -92,6 +109,13 @@ public class MFARegistryImpl implements MFARegistry {
 					bundleContext,
 					(service, emitter) -> emitter.emit(service.getName())));
 
+		_mfaIntegrationVerificationServiceTrackerMap =
+			ServiceTrackerMapFactory.openSingleValueMap(
+				bundleContext, MFAIntegrationVerification.class, null,
+				ServiceReferenceMapperFactory.create(
+					bundleContext,
+					(service, emitter) -> emitter.emit(
+						service.getIntegrationName())));
 
 		_mfaVerifiersServiceTrackerMap =
 			ServiceTrackerMapFactory.openSingleValueMap(

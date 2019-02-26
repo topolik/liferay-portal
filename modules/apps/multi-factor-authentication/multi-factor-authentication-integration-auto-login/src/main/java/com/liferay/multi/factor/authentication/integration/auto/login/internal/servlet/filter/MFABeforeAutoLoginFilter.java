@@ -18,6 +18,7 @@ import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.integration.auto.login.internal.servlet.http.IgnoreAutoLoginFilterHttpServletRequestWrapper;
 import com.liferay.multi.factor.authentication.integration.auto.login.internal.spi.integration.AutoLoginMFAIntegration;
 import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
+import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.petra.encryptor.Encryptor;
@@ -87,9 +88,18 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 	@Override
 	public boolean isFilterEnabled() {
 		MFAVerifier mfaVerifier =
-			_mfaRegistry.getMFAVerifier(AutoLoginMFAIntegration.NAME);
+			_mfaRegistry.getIntegrationVerifier(
+				_autoLoginMFAIntegration.getName());
 
 		if (mfaVerifier == null) {
+			return false;
+		}
+
+		if (!mfaVerifier.isEnabled()) {
+			return false;
+		}
+
+		if(!mfaVerifier.supportsBrowser() && !mfaVerifier.supportsHeadless()){
 			return false;
 		}
 
@@ -131,28 +141,42 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 		}
 
 		MFAVerifier mfaVerifier =
-			_mfaRegistry.getMFAVerifier(AutoLoginMFAIntegration.NAME);
-
-		if (!mfaVerifier.needsVerification(request, userId)){
-			return super.getLoginRemoteUser(
-				request, response, session, credentials);
-		}
+			_mfaRegistry.getIntegrationVerifier(
+				_autoLoginMFAIntegration.getName());
 
 		if (mfaVerifier.supportsHeadless()) {
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
-			if (headlessMFAVerifier.verify(request, userId)) {
+			if (!headlessMFAVerifier.requiresHeadlessVerification(
+					request, userId)){
+
+				return super.getLoginRemoteUser(
+					request, response, session, credentials);
+			}
+
+			if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
 				return super.getLoginRemoteUser(
 					request, response, session, credentials);
 			}
 		}
+		else if (mfaVerifier.supportsBrowser()) {
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier) mfaVerifier;
 
-		if (!mfaVerifier.supportsBrowser()) {
+			if (!browserMFAVerifier.requiresBrowserVerification(
+				request, userId)){
+
+				return super.getLoginRemoteUser(
+					request, response, session, credentials);
+			}
+		}
+		else {
 			if (_log.isDebugEnabled()) {
 				_log.debug(
 					StringBundler.concat(
-						"Unable to verify user ", userId, " using MFA"));
+						"Unable to verifyHeadlessRequest user ", userId,
+						" using MFA"));
 			}
 
 			return null;
@@ -183,7 +207,8 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 
 		LiferayPortletURL verificationURL =
 			_mfaPortletURLFactory.createVerifyURL(
-				request, AutoLoginMFAIntegration.NAME, callbackURL, userId);
+				request, _autoLoginMFAIntegration.getName(), callbackURL,
+				userId);
 
 		request.setAttribute(
 			AutoLogin.AUTO_LOGIN_REDIRECT_AND_CONTINUE,
@@ -377,4 +402,7 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 
 	@Reference
 	private Http _http;
+
+	@Reference
+	private AutoLoginMFAIntegration _autoLoginMFAIntegration;
 }

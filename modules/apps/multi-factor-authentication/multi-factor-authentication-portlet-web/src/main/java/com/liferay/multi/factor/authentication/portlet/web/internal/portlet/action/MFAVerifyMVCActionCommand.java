@@ -17,9 +17,7 @@ package com.liferay.multi.factor.authentication.portlet.web.internal.portlet.act
 import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
-import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
-import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.servlet.SessionErrors;
@@ -41,7 +39,7 @@ import javax.servlet.http.HttpSession;
 @Component(
 	property = {
 		"javax.portlet.name=" + MFAPortletKeys.MFA_VERIFY,
-		"mvc.command.name=/mfa_verify/verify"
+		"mvc.command.name=/mfa_verify/verifyHeadlessRequest"
 	},
 	service = MVCActionCommand.class
 )
@@ -89,9 +87,9 @@ public class MFAVerifyMVCActionCommand extends BaseMVCActionCommand {
 			actionRequest, "integrationName");
 
 		BrowserMFAVerifier browserMFAVerifier =
-			(BrowserMFAVerifier)_mfaRegistry.getMFAVerifier(integrationName);
+			(BrowserMFAVerifier)_mfaRegistry.getIntegrationVerifier(integrationName);
 
-		if (browserMFAVerifier.verify(actionRequest, actionResponse, userId)) {
+		if (browserMFAVerifier.verifyBrowserRequest(actionRequest, actionResponse, userId)) {
 			sendRedirect(actionRequest, actionResponse);
 
 			return;

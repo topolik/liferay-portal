@@ -15,9 +15,7 @@
 package com.liferay.multi.factor.authentication.portlet.web.internal.portlet.action;
 
 import com.liferay.multi.factor.authentication.api.MFARegistry;
-import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
-import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
-import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier;
 import com.liferay.osgi.service.tracker.collections.map.ServiceReferenceMapperFactory;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
@@ -51,20 +49,6 @@ import javax.portlet.ActionResponse;
 )
 public class MFAUserAccountSetupMVCActionCommand extends BaseMVCActionCommand {
 
-
-	private ServiceTrackerMap<Object, UserAccountSetupMFAVerifier>
-		_userAccountSetupMFAVerifierServiceTrackerMap;
-
-	@Activate
-	protected void activate(BundleContext bundleContext) {
-		_userAccountSetupMFAVerifierServiceTrackerMap =
-			ServiceTrackerMapFactory.openSingleValueMap(
-				bundleContext, UserAccountSetupMFAVerifier.class, null,
-				ServiceReferenceMapperFactory.create(
-					bundleContext,
-					(service, emitter) -> emitter.emit(service.getName())));
-	}
-
 		@Override
 	protected void doProcessAction(
 			ActionRequest actionRequest, ActionResponse actionResponse)
@@ -73,14 +57,22 @@ public class MFAUserAccountSetupMVCActionCommand extends BaseMVCActionCommand {
 		String userAccountSetupMFAVerifierName = ParamUtil.getString(
 			actionRequest, "userAccountSetupMFAVerifierName");
 
+		MFAVerifier mfaVerifier =
+			_mfaRegistry.getMFAVerifier(userAccountSetupMFAVerifierName);
+
+		if ((mfaVerifier == null) || !mfaVerifier.supportsUserAccountSetup()) {
+			SessionErrors.add(actionRequest, "userAccountSetupFailed");
+
+			return;
+		}
+
 		UserAccountSetupMFAVerifier userAccountSetupMFAVerifier =
-			_userAccountSetupMFAVerifierServiceTrackerMap.getService(
-				userAccountSetupMFAVerifierName);
+			(UserAccountSetupMFAVerifier)mfaVerifier;
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		if (userAccountSetupMFAVerifier.userAccountSetup(
+		if (userAccountSetupMFAVerifier.setupUserAccount(
 				actionRequest, themeDisplay.getUserId())) {
 
 			String redirect = _portal.escapeRedirect(
