@@ -1,4 +1,5 @@
-<%--
+<%@ page
+	import="com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys" %><%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -21,7 +22,7 @@ long resendDuration = (Long)request.getAttribute("resendDuration");
 String sendToEmail = (String)request.getAttribute("sendToEmail");
 %>
 
-<portlet:resourceURL id="/mfa_verify/sendemailotp" var="sendOTPURL" />
+<liferay-portlet:resourceURL id="/mfa_verify/sendemailotp" var="sendOTPURL" portletName="<%= MFAPortletKeys.MFA_VERIFY %>" />
 
 <h1>
 	<liferay-ui:message key="your-one-time-password-will-be-sent-to" />

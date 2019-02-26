@@ -20,6 +20,7 @@ import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.provider.totp.model.TOTP;
 import com.liferay.multi.factor.authentication.provider.totp.service.TOTPLocalService;
 import com.liferay.multi.factor.authentication.provider.totp.web.internal.util.TOTPUtil;
+import com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.io.BigEndianCodec;
@@ -63,10 +64,29 @@ import java.util.WeakHashMap;
  */
 @Component(
 	immediate = true,
-	service = MFAVerifier.class
+	service = {MFAVerifier.class, UserAccountSetupMFAVerifier.class}
 )
 public class TOTPMFAVerifier
-	implements BrowserMFAVerifier, HeadlessMFAVerifier, MFAVerifier {
+	implements BrowserMFAVerifier, HeadlessMFAVerifier, MFAVerifier,
+	UserAccountSetupMFAVerifier {
+
+	@Override
+	public void includeUserAccountSetup(
+		long userId, HttpServletRequest request, HttpServletResponse response)
+		throws IOException {
+
+		includeSetup(userId, request, response);
+	}
+
+	@Override
+	public boolean userAccountSetup(ActionRequest actionRequest, long userId) {
+		return setup(actionRequest, userId);
+	}
+
+	@Override
+	public String getProviderName() {
+		return getName();
+	}
 
 	@Activate
 	protected void activate() {
@@ -84,6 +104,11 @@ public class TOTPMFAVerifier
 		}
 	}
 
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 
 	@Override
 	public boolean supportsBrowser(){
