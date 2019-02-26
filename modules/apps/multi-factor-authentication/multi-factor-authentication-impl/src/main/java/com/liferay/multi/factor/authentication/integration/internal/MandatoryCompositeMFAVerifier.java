@@ -35,6 +35,68 @@ public class MandatoryCompositeMFAVerifier
 	}
 
 	@Override
+	public boolean requiresHeadlessVerification(
+		HttpServletRequest request, long userId) {
+
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsHeadless()) {
+				continue;
+			}
+
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier)mfaVerifier;
+
+			if (headlessMFAVerifier.requiresHeadlessVerification(
+					request, userId)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean requiresBrowserVerification(
+		HttpServletRequest request, long userId) {
+
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsBrowser()) {
+				continue;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if (browserMFAVerifier.requiresBrowserVerification(
+				request, userId)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean requiresSetup(long userId) {
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsBrowser()) {
+				continue;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if (browserMFAVerifier.requiresSetup(userId)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public boolean setup(ActionRequest actionRequest, long userId) {
 		if (mfaVerifiers.size() == 0) {
 			return false;
@@ -47,12 +109,12 @@ public class MandatoryCompositeMFAVerifier
 				continue;
 			}
 
-			if(!mfaVerifier.needsSetup(userId)) {
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if(!browserMFAVerifier.requiresSetup(userId)) {
 				continue;
 			}
-
-			BrowserMFAVerifier browserMFAVerifier =
-				(BrowserMFAVerifier) mfaVerifier;
 
 			setup &= browserMFAVerifier.setup(actionRequest, userId);
 		}
@@ -61,7 +123,7 @@ public class MandatoryCompositeMFAVerifier
 	}
 
 	@Override
-	public boolean verify(
+	public boolean verifyBrowserRequest(
 		ActionRequest actionRequest, ActionResponse actionResponse,
 		long userId) {
 
@@ -81,14 +143,16 @@ public class MandatoryCompositeMFAVerifier
 				continue;
 			}
 
-			if(!mfaVerifier.needsVerification(originalServletRequest, userId)) {
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if(!browserMFAVerifier.requiresBrowserVerification(
+				originalServletRequest, userId)) {
+
 				continue;
 			}
 
-			BrowserMFAVerifier browserMFAVerifier =
-				(BrowserMFAVerifier) mfaVerifier;
-
-			verified &= browserMFAVerifier.verify(
+			verified &= browserMFAVerifier.verifyBrowserRequest(
 				actionRequest, actionResponse, userId);
 		}
 
@@ -96,7 +160,9 @@ public class MandatoryCompositeMFAVerifier
 	}
 
 	@Override
-	public boolean verify(HttpServletRequest request, long userId) {
+	public boolean verifyHeadlessRequest(
+		HttpServletRequest request, long userId) {
+
 		if (mfaVerifiers.size() == 0) {
 			return false;
 		}
@@ -108,14 +174,18 @@ public class MandatoryCompositeMFAVerifier
 				continue;
 			}
 
-			if(!mfaVerifier.needsVerification(request, userId)) {
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier)mfaVerifier;
+
+
+			if(!headlessMFAVerifier.requiresHeadlessVerification(
+				request, userId)) {
+
 				continue;
 			}
 
-			HeadlessMFAVerifier headlessMFAVerifier =
-				(HeadlessMFAVerifier) mfaVerifier;
-
-			verified &= headlessMFAVerifier.verify(request, userId);
+			verified &= headlessMFAVerifier.verifyHeadlessRequest(
+				request, userId);
 		}
 
 		return verified;

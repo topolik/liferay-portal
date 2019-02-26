@@ -40,12 +40,12 @@ page import="com.liferay.portal.kernel.util.PortalUtil" %>
 	<aui:input name="screenNavigationEntryKey" type="hidden" value="<%= screenNavigationEntryKey %>" />
 	<aui:input name="userAccountSetupMFAVerifierName" type="hidden" value="<%= userAccountSetupMFAVerifier.getName()%>" />
 
-	<liferay-ui:error key="userAccountSetupFailed" message="user-account-setup-failed" />
-
 	<div class="sheet sheet-lg">
 			<div class="sheet-header">
 				<h2 class="sheet-title"><liferay-ui:message key="<%= userAccountSetupMFAVerifier.getName() %>" escapeAttribute="<%= true %>"/></h2>
 			</div>
+
+		<liferay-ui:error key="userAccountSetupFailed" message="user-account-setup-failed" />
 
 		<div class="sheet-section">
 			<%

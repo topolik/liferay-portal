@@ -41,7 +41,7 @@ import javax.servlet.http.HttpSession;
 @Component(
 	property = {
 		"javax.portlet.name=" + MFAPortletKeys.MFA_VERIFY,
-		"mvc.command.name=/mfa_verify/verify"
+		"mvc.command.name=/mfa_verify/verifyHeadlessRequest"
 	},
 	service = MVCRenderCommand.class
 )
@@ -69,7 +69,7 @@ public class MFAVerifyMVCRenderCommand implements MVCRenderCommand {
 			return "/error.jsp";
 		}
 
-		return "/verify.jsp";
+		return "/verifyHeadlessRequest.jsp";
 	}
 
 	@Reference

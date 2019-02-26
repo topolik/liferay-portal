@@ -20,6 +20,8 @@ import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
  * @author Tomas Polesovsky
  */
 public interface MFAIntegration {
+	public boolean isEnabled();
+
 	public String getName();
 
 	public boolean supportsHeadless();

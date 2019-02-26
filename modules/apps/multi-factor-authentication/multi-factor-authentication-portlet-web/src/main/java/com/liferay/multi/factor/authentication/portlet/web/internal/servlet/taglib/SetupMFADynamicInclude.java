@@ -15,8 +15,6 @@
 package com.liferay.multi.factor.authentication.portlet.web.internal.servlet.taglib;
 
 import com.liferay.multi.factor.authentication.api.MFARegistry;
-import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
-import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -26,10 +24,8 @@ import com.liferay.portal.kernel.util.WebKeys;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -48,7 +44,7 @@ public class SetupMFADynamicInclude implements DynamicInclude {
 			request, "integrationName");
 
 		BrowserMFAVerifier browserMFAVerifier =
-			(BrowserMFAVerifier)_mfaRegistry.getMFAVerifier(integrationName);
+			(BrowserMFAVerifier)_mfaRegistry.getIntegrationVerifier(integrationName);
 
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)request.getAttribute(WebKeys.THEME_DISPLAY);

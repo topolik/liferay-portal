@@ -46,12 +46,12 @@ import java.io.IOException;
 	property = {
 		"com.liferay.portlet.add-default-resource=true",
 		"com.liferay.portlet.application-type=full-page-application",
-		"com.liferay.portlet.css-class-wrapper=portlet-mfa-verify",
+		"com.liferay.portlet.css-class-wrapper=portlet-mfa-verifyHeadlessRequest",
 		"com.liferay.portlet.display-category=category.hidden",
 		"com.liferay.portlet.header-portlet-css=/css/main.css",
 		"com.liferay.portlet.preferences-company-wide=true",
 		"javax.portlet.display-name=Multi Factor Authentication Verify Portlet",
-		"javax.portlet.init-param.mvc-command-names-default-views=/mfa_verify/verify",
+		"javax.portlet.init-param.mvc-command-names-default-views=/mfa_verify/verifyHeadlessRequest",
 		"javax.portlet.init-param.portlet-title-based-navigation=true",
 		"javax.portlet.init-param.template-path=/",
 		"javax.portlet.name=" + MFAPortletKeys.MFA_VERIFY,
@@ -83,7 +83,7 @@ public class MFAVerifyPortlet extends MVCPortlet {
 			return;
 		}
 
-		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(integrationName);
+		MFAVerifier mfaVerifier = _mfaRegistry.getIntegrationVerifier(integrationName);
 
 		if (mfaVerifier == null) {
 			SessionErrors.add(
@@ -140,7 +140,7 @@ public class MFAVerifyPortlet extends MVCPortlet {
 			return;
 		}
 
-		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(integrationName);
+		MFAVerifier mfaVerifier = _mfaRegistry.getIntegrationVerifier(integrationName);
 
 		if (mfaVerifier == null) {
 			SessionErrors.add(

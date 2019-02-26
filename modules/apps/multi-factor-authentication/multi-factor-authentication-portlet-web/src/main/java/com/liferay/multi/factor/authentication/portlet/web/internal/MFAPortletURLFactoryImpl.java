@@ -67,7 +67,7 @@ public class MFAPortletURLFactoryImpl implements MFAPortletURLFactory {
 		liferayPortletURL.setParameter(
 			"saveLastPath", Boolean.FALSE.toString());
 		liferayPortletURL.setParameter(
-			"mvcRenderCommandName", "/mfa_verify/verify");
+			"mvcRenderCommandName", "/mfa_verify/verifyHeadlessRequest");
 		liferayPortletURL.setParameter("redirect", redirectURL);
 
 		try {

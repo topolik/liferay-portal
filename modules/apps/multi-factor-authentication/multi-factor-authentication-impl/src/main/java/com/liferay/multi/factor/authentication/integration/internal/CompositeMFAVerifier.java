@@ -22,10 +22,8 @@ import com.liferay.petra.string.StringPool;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Tomas Polesovsky
@@ -34,8 +32,19 @@ public abstract class CompositeMFAVerifier
 	implements MFAVerifier, BrowserMFAVerifier, HeadlessMFAVerifier {
 
 	@Override
+	public boolean supportsUserAccountSetup() {
+		return false;
+	}
+
+	@Override
 	public boolean isEnabled() {
-		return true;
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (mfaVerifier.isEnabled()) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override
@@ -57,7 +66,19 @@ public abstract class CompositeMFAVerifier
 
 	@Override
 	public String getProviderName() {
-		return getName();
+		if (mfaVerifiers.isEmpty()) {
+			return StringPool.BLANK;
+		}
+
+		StringBundler sb = new StringBundler(mfaVerifiers.size() * 2 - 1);
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (sb.length() > 0) {
+				sb.append(StringPool.COMMA);
+			}
+			sb.append(mfaVerifier.getProviderName());
+		}
+
+		return sb.toString();
 	}
 
 	public CompositeMFAVerifier(Collection<MFAVerifier> mfaVerifiers) {
@@ -96,19 +117,19 @@ public abstract class CompositeMFAVerifier
 				continue;
 			}
 
-			if (!mfaVerifier.needsSetup(userId)) {
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if (!browserMFAVerifier.requiresSetup(userId)) {
 				continue;
 			}
-
-			BrowserMFAVerifier browserMFAVerifier =
-				(BrowserMFAVerifier) mfaVerifier;
 
 			browserMFAVerifier.includeSetup(userId, request, response);
 		}
 	}
 
 	@Override
-	public void includeVerification(
+	public void includeBrowserVerification(
 		long userId, HttpServletRequest request, HttpServletResponse response)
 		throws IOException {
 
@@ -117,37 +138,18 @@ public abstract class CompositeMFAVerifier
 				continue;
 			}
 
-			if (!mfaVerifier.needsVerification(request, userId)) {
-				continue;
-			}
-
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			browserMFAVerifier.includeVerification(userId, request, response);
-		}
-	}
+			if (!browserMFAVerifier.requiresBrowserVerification(
+					request, userId)) {
 
-	@Override
-	public boolean needsVerification(HttpServletRequest request, long userId) {
-		for (MFAVerifier mfaVerifier : mfaVerifiers) {
-			if (mfaVerifier.needsVerification(request, userId)) {
-				return true;
+				continue;
 			}
+
+			browserMFAVerifier.includeBrowserVerification(
+				userId, request, response);
 		}
-
-		return false;
-	}
-
-	@Override
-	public boolean needsSetup(long userId) {
-		for (MFAVerifier mfaVerifier : mfaVerifiers) {
-			if (mfaVerifier.needsSetup(userId)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	protected Collection<MFAVerifier> mfaVerifiers;

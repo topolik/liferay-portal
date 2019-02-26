@@ -14,22 +14,48 @@
 
 package com.liferay.multi.factor.authentication.integration.auto.login.internal.spi.integration;
 
+import com.liferay.multi.factor.authentication.integration.auto.login.internal.configuration.AutoLoginMFAIntegrationConfiguration;
 import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
+import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+
+import java.util.Map;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(service = MFAIntegration.class)
+@Component(
+	configurationPid = "com.liferay.multi.factor.authentication.integration.auto.login.internal.configuration.AutoLoginMFAIntegrationConfiguration",
+	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	service = {MFAIntegration.class, AutoLoginMFAIntegration.class}
+)
 public class AutoLoginMFAIntegration implements MFAIntegration {
+	private String _name;
+	private boolean _enabled;
 
-	public static final String NAME = "auto-login";
+	@Activate
+	protected void activate(Map<String, Object> properties) {
+		AutoLoginMFAIntegrationConfiguration
+			autoLoginMFAIntegrationConfiguration =
+				ConfigurableUtil.createConfigurable(
+					AutoLoginMFAIntegrationConfiguration.class, properties);
+
+		_enabled = autoLoginMFAIntegrationConfiguration.enabled();
+		_name = autoLoginMFAIntegrationConfiguration.name();
+	}
 
 	@Override
 	public String getName() {
-		return NAME;
+		return _name;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return _enabled;
 	}
 
 	@Override

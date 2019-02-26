@@ -15,6 +15,7 @@
 package com.liferay.multi.factor.authentication.portlet.web.internal.user.settings;
 
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier;
 import com.liferay.osgi.util.ServiceTrackerFactory;
 import com.liferay.portal.kernel.util.HashMapDictionary;
@@ -42,7 +43,7 @@ import java.util.Map;
 @Component(immediate = true)
 public class UserAccountSetupMFAVerifierTracker {
 
-	private ServiceTracker<UserAccountSetupMFAVerifier, ServiceRegistration<ScreenNavigationEntry>> _serviceTracker;
+	private ServiceTracker<MFAVerifier, ServiceRegistration<ScreenNavigationEntry>> _serviceTracker;
 	private BundleContext _bundleContext;
 
 	@Activate
@@ -50,41 +51,48 @@ public class UserAccountSetupMFAVerifierTracker {
 		_bundleContext = bundleContext;
 
 		_serviceTracker = ServiceTrackerFactory.open(
-			bundleContext, UserAccountSetupMFAVerifier.class,
+			bundleContext, MFAVerifier.class,
 			new UserAccountSetupMFAVerifierServiceTrackerCustomizer());
 	}
 
 	@Deactivate
 	protected void deactivate() {
 		_serviceTracker.close();
-
-		for (ServiceRegistration<ScreenNavigationEntry> serviceRegistration :
-				_serviceRegistrationsMap.values()) {
-
-			serviceRegistration.unregister();
-		}
 	}
 
 	class UserAccountSetupMFAVerifierServiceTrackerCustomizer
-		implements ServiceTrackerCustomizer<UserAccountSetupMFAVerifier, ServiceRegistration<ScreenNavigationEntry>> {
+		implements ServiceTrackerCustomizer<MFAVerifier, ServiceRegistration<ScreenNavigationEntry>> {
 
 		@Override
 		public ServiceRegistration<ScreenNavigationEntry> addingService(
-			ServiceReference<UserAccountSetupMFAVerifier> reference) {
+			ServiceReference<MFAVerifier> reference) {
+
+			MFAVerifier mfaVerifier =
+				_bundleContext.getService(reference);
+
+			if (!mfaVerifier.supportsUserAccountSetup()) {
+				_bundleContext.ungetService(reference);
+
+				return null;
+			}
 
 			UserAccountSetupMFAVerifier userAccountSetupMFAVerifier =
-				_bundleContext.getService(reference);
+				(UserAccountSetupMFAVerifier)mfaVerifier;
 
 			Dictionary<String, Object> dictionary = new HashMapDictionary<>();
 
-			dictionary.put("screen.navigation.entry.order", userAccountSetupMFAVerifier.hashCode());
+			String name = mfaVerifier.getName();
+
+			dictionary.put(
+				"screen.navigation.entry.order", name.hashCode());
 
 			UserAccountSetupMFAScreenNavigationEntry
 				userAccountSetupMFAScreenNavigationEntry =
 				new UserAccountSetupMFAScreenNavigationEntry(
 					userAccountSetupMFAVerifier);
 
-			userAccountSetupMFAScreenNavigationEntry.setServletContext(_servletContext);
+			userAccountSetupMFAScreenNavigationEntry.setServletContext(
+				_servletContext);
 
 			return _bundleContext.registerService(
 				ScreenNavigationEntry.class,
@@ -95,14 +103,17 @@ public class UserAccountSetupMFAVerifierTracker {
 
 		@Override
 		public void modifiedService(
-			ServiceReference<UserAccountSetupMFAVerifier> reference,
+			ServiceReference<MFAVerifier> reference,
 			ServiceRegistration<ScreenNavigationEntry> service) {
 
+			removedService(reference, service);
+
+			addingService(reference);
 		}
 
 		@Override
 		public void removedService(
-			ServiceReference<UserAccountSetupMFAVerifier> reference,
+			ServiceReference<MFAVerifier> reference,
 			ServiceRegistration<ScreenNavigationEntry> service) {
 
 			service.unregister();
@@ -110,52 +121,6 @@ public class UserAccountSetupMFAVerifierTracker {
 			_bundleContext.ungetService(reference);
 		}
 	}
-
-//	@Reference(
-//		policy = ReferencePolicy.DYNAMIC,
-//		policyOption = ReferencePolicyOption.GREEDY
-//	)
-	public void setUserAccountSetupMFAVerifier(
-		UserAccountSetupMFAVerifier userAccountSetupMFAVerifier) {
-
-		Bundle bundle = FrameworkUtil.getBundle(getClass());
-
-		BundleContext bundleContext = bundle.getBundleContext();
-
-		Dictionary<String, Object> dictionary = new HashMapDictionary<>();
-
-		String providerName = userAccountSetupMFAVerifier.getProviderName();
-
-		dictionary.put("screen.navigation.entry.order", providerName.hashCode());
-
-		UserAccountSetupMFAScreenNavigationEntry
-			userAccountSetupMFAScreenNavigationEntry =
-			new UserAccountSetupMFAScreenNavigationEntry(
-				userAccountSetupMFAVerifier);
-
-		userAccountSetupMFAScreenNavigationEntry.setServletContext(_servletContext);
-
-		_serviceRegistrationsMap.put(
-			providerName,
-			bundleContext.registerService(
-				ScreenNavigationEntry.class,
-				userAccountSetupMFAScreenNavigationEntry, dictionary));
-
-	}
-
-	public void unsetUserAccountSetupMFAVerifier(
-		UserAccountSetupMFAVerifier userAccountSetupMFAVerifier) {
-
-		ServiceRegistration<ScreenNavigationEntry> serviceRegistration =
-			_serviceRegistrationsMap.remove(
-				userAccountSetupMFAVerifier.getProviderName());
-
-		serviceRegistration.unregister();
-	}
-
-	private Map<String, ServiceRegistration<ScreenNavigationEntry>>
-		_serviceRegistrationsMap = Collections.synchronizedMap(new HashMap<>());
-
 
 	@Reference(
 		target = "(osgi.web.symbolicname=com.liferay.multi.factor.authentication.portlet.web)"

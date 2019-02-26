@@ -26,19 +26,24 @@ import java.io.IOException;
  */
 public interface BrowserMFAVerifier {
 
+	public boolean requiresBrowserVerification(
+		HttpServletRequest request, long userId);
+
+	public boolean requiresSetup(long userId);
+
 	public void includeSetup(
 			long userId, HttpServletRequest request,
 			HttpServletResponse response)
 		throws IOException;
 
-	public void includeVerification(
+	public void includeBrowserVerification(
 			long userId, HttpServletRequest request,
 			HttpServletResponse response)
 		throws IOException;
 
 	public boolean setup(ActionRequest actionRequest, long userId);
 
-	public boolean verify(
+	public boolean verifyBrowserRequest(
 		ActionRequest actionRequest, ActionResponse actionResponse,
 		long userId);
 

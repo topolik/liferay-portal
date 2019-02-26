@@ -30,6 +30,7 @@ public interface MFARegistry {
 
 	public List<MFAVerifier> getMFAVerifiers();
 
-	public MFAVerifier getMFAVerifier(String mfaIntegrationName);
+	public MFAVerifier getMFAVerifier(String name);
 
+	public MFAVerifier getIntegrationVerifier(String mfaIntegrationName);
 }

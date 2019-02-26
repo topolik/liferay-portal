@@ -16,7 +16,6 @@ package com.liferay.multi.factor.authentication.portlet.web.internal.servlet.tag
 
 import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
-import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -24,7 +23,6 @@ import com.liferay.portal.kernel.util.Portal;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -46,7 +44,7 @@ public class VerifyMFADynamicInclude implements DynamicInclude {
 			request, "integrationName");
 
 		BrowserMFAVerifier browserMFAVerifier =
-			(BrowserMFAVerifier)_mfaRegistry.getMFAVerifier(integrationName);
+			(BrowserMFAVerifier)_mfaRegistry.getIntegrationVerifier(integrationName);
 
 		HttpServletRequest httpServletRequest =
 			_portal.getOriginalServletRequest(request);
@@ -64,13 +62,13 @@ public class VerifyMFADynamicInclude implements DynamicInclude {
 			}
 		}
 
-		browserMFAVerifier.includeVerification(userId, request, response);
+		browserMFAVerifier.includeBrowserVerification(userId, request, response);
 	}
 
 	@Override
 	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
 		dynamicIncludeRegistry.register(
-			"com.liferay.multi.factor.authentication.portlet.web#/verify.jsp");
+			"com.liferay.multi.factor.authentication.portlet.web#/verifyHeadlessRequest.jsp");
 	}
 
 	@Reference
