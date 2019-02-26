@@ -1,6 +1,7 @@
-
 <%@ page import="com.liferay.portal.kernel.model.User" %><%@
 page import="com.liferay.portal.kernel.util.PortalUtil" %>
+<%@ page
+	import="com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier" %>
 
 <%--
 /**
@@ -21,41 +22,40 @@ page import="com.liferay.portal.kernel.util.PortalUtil" %>
 <%@ include file="/init.jsp" %>
 
 <%
-	User selUser = PortalUtil.getSelectedUser(request);
-
-	if (selUser != null) {
-		PortalUtil.setPageSubtitle(selUser.getFullName(), request);
-	}
-
-	long selUserId = (selUser != null) ? selUser.getUserId() : 0;
+	long userId = user.getUserId();
 
 	String screenNavigationCategoryKey = ParamUtil.getString(request, "screenNavigationCategoryKey");
 	String screenNavigationEntryKey = ParamUtil.getString(request, "screenNavigationEntryKey");
 
-	String label = ParamUtil.getString(request, "label");
+	UserAccountSetupMFAVerifier userAccountSetupMFAVerifier = (UserAccountSetupMFAVerifier)request.getAttribute(UserAccountSetupMFAVerifier.class.getName());
 %>
 
-<portlet:renderURL var="redirect">
+<portlet:actionURL name="/my_account/setup_mfa" var="actionURL">
 	<portlet:param name="mvcRenderCommandName" value="/users_admin/edit_user" />
-	<portlet:param name="p_u_i_d" value="<%= String.valueOf(selUserId) %>" />
-	<portlet:param name="screenNavigationCategoryKey" value="<%= screenNavigationCategoryKey %>" />
-	<portlet:param name="screenNavigationEntryKey" value="<%= screenNavigationEntryKey %>" />
-</portlet:renderURL>
+</portlet:actionURL>
 
-<aui:form action="" cssClass="portlet-users-admin-edit-user" data-senna-off="true" method="post" name="fm">
-	<aui:input name="redirect" type="hidden" value="<%= redirect.toString() %>" />
-	<aui:input name="p_u_i_d" type="hidden" value="<%= selUserId %>" />
+<aui:form action="<%= actionURL %>" cssClass="portlet-users-admin-edit-user" data-senna-off="true" method="post" name="fm">
+	<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 	<aui:input name="screenNavigationCategoryKey" type="hidden" value="<%= screenNavigationCategoryKey %>" />
 	<aui:input name="screenNavigationEntryKey" type="hidden" value="<%= screenNavigationEntryKey %>" />
+	<aui:input name="userAccountSetupMFAVerifierName" type="hidden" value="<%= userAccountSetupMFAVerifier.getName()%>" />
+
+	<liferay-ui:error key="userAccountSetupFailed" message="user-account-setup-failed" />
 
 	<div class="sheet sheet-lg">
 			<div class="sheet-header">
-				<h2 class="sheet-title"><%= label %></h2>
+				<h2 class="sheet-title"><liferay-ui:message key="<%= userAccountSetupMFAVerifier.getName() %>" escapeAttribute="<%= true %>"/></h2>
 			</div>
 
 		<div class="sheet-section">
-
+			<%
+				userAccountSetupMFAVerifier.includeUserAccountSetup(userId, request, response);
+			%>
 		</div>
 
 	</div>
+
+	<aui:button-row>
+		<aui:button type="submit" value="submit" />
+	</aui:button-row>
 </aui:form>

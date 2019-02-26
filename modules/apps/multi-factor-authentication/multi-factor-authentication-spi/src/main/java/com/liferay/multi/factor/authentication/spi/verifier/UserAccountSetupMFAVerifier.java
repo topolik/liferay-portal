@@ -1,4 +1,3 @@
-<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -12,18 +11,29 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
---%>
 
-<%@ taglib uri="http://java.sun.com/portlet_2_0" prefix="portlet" %>
+package com.liferay.multi.factor.authentication.spi.verifier;
 
-<%@ taglib uri="http://liferay.com/tld/aui" prefix="aui" %><%@
-taglib uri="http://liferay.com/tld/frontend" prefix="liferay-frontend" %><%@
-taglib uri="http://liferay.com/tld/portlet" prefix="liferay-portlet" %><%@
-taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %><%@
-taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
+import javax.portlet.ActionRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-<liferay-frontend:defineObjects />
+/**
+ * @author Tomas Polesovsky
+ */
+public interface UserAccountSetupMFAVerifier {
 
-<liferay-theme:defineObjects />
+	public String getProviderName();
 
-<portlet:defineObjects />
+	public String getName();
+
+	public void includeUserAccountSetup(
+		long userId, HttpServletRequest request,
+		HttpServletResponse response)
+		throws IOException;
+
+
+	public boolean userAccountSetup(ActionRequest actionRequest, long userId);
+
+}

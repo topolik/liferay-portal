@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -92,13 +93,13 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 
 				user = themeDisplay.getUser();
 
-				email = ParamUtil.getString(request, "email");
+				email = ParamUtil.getString(originalRequest, "email");
 			}
 			else {
 				return false;
 			}
 
-			String generatedOTP = StringUtil.randomString(_LENGTH);
+			String generatedOTP = PwdGenerator.getPassword(_LENGTH);
 
 			session.setAttribute("otp", generatedOTP);
 

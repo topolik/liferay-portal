@@ -34,6 +34,11 @@ public abstract class CompositeMFAVerifier
 	implements MFAVerifier, BrowserMFAVerifier, HeadlessMFAVerifier {
 
 	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
+	@Override
 	public String getName() {
 		if (mfaVerifiers.isEmpty()) {
 			return StringPool.BLANK;

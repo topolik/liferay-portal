@@ -71,7 +71,7 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 			}
 
 			if(!mfaVerifier.needsVerification(originalServletRequest, userId)) {
-				return true;
+				continue;
 			}
 
 			BrowserMFAVerifier browserMFAVerifier =

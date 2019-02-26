@@ -18,6 +18,7 @@ import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP
 import com.liferay.multi.factor.authentication.provider.email.otp.service.EmailOTPLocalService;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.UserLocalService;
@@ -54,8 +55,31 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author arthurchan35
  */
-@Component(immediate = true, service = MFAVerifier.class)
-public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
+@Component(immediate = true, service = {MFAVerifier.class, UserAccountSetupMFAVerifier.class})
+public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier,
+	UserAccountSetupMFAVerifier {
+
+	@Override
+	public String getProviderName() {
+		return getName();
+	}
+
+	@Override
+	public void includeUserAccountSetup(
+		long userId, HttpServletRequest request, HttpServletResponse response)
+		throws IOException {
+
+		includeSetup(userId, request, response);
+	}
+
+	@Override
+	public boolean userAccountSetup(ActionRequest actionRequest, long userId) {
+		return setup(actionRequest, userId);
+	}
+
+	public boolean isEnabled() {
+		return true;
+	}
 
 	@Override
 	public String getName() {
@@ -133,18 +157,22 @@ public class EmailOTPMFAVerifier implements BrowserMFAVerifier, MFAVerifier {
 
 	@Override
 	public boolean needsSetup(long userId) {
+		return false;
+	}
+
+	private boolean isUserSetUp(long userId) {
 		EmailOTP emailOTP = _emailOTPLocalService.fetchEmailOTPByUserId(userId);
 
 		if (emailOTP != null) {
-			return false;
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean needsVerification(HttpServletRequest request, long userId) {
-		if (needsSetup(userId)) {
+		if (!isUserSetUp(userId)) {
 			return false;
 		}
 
