@@ -204,6 +204,11 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
+	public String getProviderName() {
+		return getName();
+	}
+
+	@Override
 	public boolean needsVerification(HttpServletRequest request, long userId) {
 		if (needsSetup(userId)) {
 			return false;

@@ -50,6 +50,11 @@ public abstract class CompositeMFAVerifier
 		return sb.toString();
 	}
 
+	@Override
+	public String getProviderName() {
+		return getName();
+	}
+
 	public CompositeMFAVerifier(Collection<MFAVerifier> mfaVerifiers) {
 		this.mfaVerifiers = mfaVerifiers;
 	}

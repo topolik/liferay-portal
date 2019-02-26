@@ -23,6 +23,8 @@ public interface MFAVerifier {
 
 	public String getName();
 
+	public String getProviderName();
+
 	public boolean needsVerification(HttpServletRequest request, long userId);
 
 	public boolean needsSetup(long userId);
