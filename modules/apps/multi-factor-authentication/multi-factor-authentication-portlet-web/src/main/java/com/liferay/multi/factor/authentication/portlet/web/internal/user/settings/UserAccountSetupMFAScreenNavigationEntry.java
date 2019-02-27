@@ -15,6 +15,7 @@
 package com.liferay.multi.factor.authentication.portlet.web.internal.user.settings;
 
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
+import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier;
@@ -34,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  * @author Marta Medio
@@ -42,6 +44,7 @@ public class UserAccountSetupMFAScreenNavigationEntry
 	implements ScreenNavigationEntry<User> {
 
 	private final UserAccountSetupMFAVerifier _userAccountSetupMFAVerifier;
+	private MFARegistry _mfaRegistry;
 
 	public UserAccountSetupMFAScreenNavigationEntry(
 		UserAccountSetupMFAVerifier userAccountSetupMFAVerifier) {
@@ -51,7 +54,20 @@ public class UserAccountSetupMFAScreenNavigationEntry
 
 	@Override
 	public boolean isVisible(User user, User context) {
-		return ((MFAVerifier)_userAccountSetupMFAVerifier).isEnabled();
+		MFAVerifier mfaVerifier = (MFAVerifier)_userAccountSetupMFAVerifier;
+
+		if (!mfaVerifier.isEnabled()) {
+			return false;
+		}
+
+		Set<String> verifierIntegrationNames =
+			_mfaRegistry.getVerifierIntegrationNames(mfaVerifier.getName());
+
+		if (verifierIntegrationNames.isEmpty()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override
@@ -113,4 +129,7 @@ public class UserAccountSetupMFAScreenNavigationEntry
 	private static Log _log = LogFactoryUtil.getLog(
 		UserAccountSetupMFAScreenNavigationEntry.class);
 
+	public void setMFARegistry(MFARegistry mfaRegistry) {
+		_mfaRegistry = mfaRegistry;
+	}
 }

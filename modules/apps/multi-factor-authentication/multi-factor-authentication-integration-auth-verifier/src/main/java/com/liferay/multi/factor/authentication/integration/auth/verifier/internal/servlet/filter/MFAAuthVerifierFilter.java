@@ -122,7 +122,7 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 				if (_log.isWarnEnabled()) {
 					_log.warn(
 						StringBundler.concat(
-							"Unable to verifyHeadlessRequest Multi Factor " +
+							"Unable to verify Multi Factor " +
 							"Authentication token for ",
 							request.getPathInfo()));
 				}

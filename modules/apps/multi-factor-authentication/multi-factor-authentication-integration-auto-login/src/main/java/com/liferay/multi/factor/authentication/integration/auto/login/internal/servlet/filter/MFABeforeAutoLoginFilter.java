@@ -175,7 +175,7 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 			if (_log.isDebugEnabled()) {
 				_log.debug(
 					StringBundler.concat(
-						"Unable to verifyHeadlessRequest user ", userId,
+						"Unable to verify user ", userId,
 						" using MFA"));
 			}
 

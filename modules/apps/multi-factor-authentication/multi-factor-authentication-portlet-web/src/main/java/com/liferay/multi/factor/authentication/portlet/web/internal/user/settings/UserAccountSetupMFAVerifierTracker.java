@@ -15,6 +15,7 @@
 package com.liferay.multi.factor.authentication.portlet.web.internal.user.settings;
 
 import com.liferay.frontend.taglib.servlet.taglib.ScreenNavigationEntry;
+import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier;
 import com.liferay.osgi.util.ServiceTrackerFactory;
@@ -36,6 +37,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Tomas Polesovsky
@@ -94,6 +96,8 @@ public class UserAccountSetupMFAVerifierTracker {
 			userAccountSetupMFAScreenNavigationEntry.setServletContext(
 				_servletContext);
 
+			userAccountSetupMFAScreenNavigationEntry.setMFARegistry(_mfaRegistry);
+
 			return _bundleContext.registerService(
 				ScreenNavigationEntry.class,
 				userAccountSetupMFAScreenNavigationEntry,
@@ -126,5 +130,8 @@ public class UserAccountSetupMFAVerifierTracker {
 		target = "(osgi.web.symbolicname=com.liferay.multi.factor.authentication.portlet.web)"
 	)
 	private ServletContext _servletContext;
+
+	@Reference
+	private MFARegistry _mfaRegistry;
 
 }
