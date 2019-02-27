@@ -20,16 +20,12 @@ import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.osgi.service.tracker.collections.map.ServiceReferenceMapperFactory;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
-import com.liferay.osgi.util.StringPlus;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -98,6 +94,24 @@ public class MFARegistryImpl implements MFARegistry {
 		else {
 			return new MandatoryCompositeMFAVerifier(mandatoryMFAVerifiers);
 		}
+	}
+
+	@Override
+	public Set<String> getVerifierIntegrationNames(
+		String mfaVerifierName) {
+
+		Set<String> verifierIntegrationNames = new HashSet<>();
+
+		for (MFAIntegrationVerification mfaIntegrationVerification :
+			_mfaIntegrationVerificationServiceTrackerMap.values()) {
+
+			if (mfaIntegrationVerification.hasMFAVerifier(mfaVerifierName)) {
+				verifierIntegrationNames.add(
+					mfaIntegrationVerification.getIntegrationName());
+			}
+		}
+
+		return verifierIntegrationNames;
 	}
 
 	@Activate

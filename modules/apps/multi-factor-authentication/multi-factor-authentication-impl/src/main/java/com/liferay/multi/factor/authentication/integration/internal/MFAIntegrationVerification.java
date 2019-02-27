@@ -29,8 +29,10 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Tomas Polesovsky
@@ -75,6 +77,8 @@ public class MFAIntegrationVerification {
 					 mfaVerifier.supportsBrowser())) {
 
 					mfaVerifierList.add(mfaVerifier);
+
+					_mfaVerifiersNames.add(mfaVerifier.getName());
 				}
 				else {
 					String mfaIntegrationSupports = "headless";
@@ -112,10 +116,12 @@ public class MFAIntegrationVerification {
 		return _mfaVerifiersList;
 	}
 
-	@Reference
-	private MFARegistry _mfaRegistry;
+	public boolean hasMFAVerifier(String mfaVerifierName) {
+		return mfaVerifierName.contains(mfaVerifierName);
+	}
 
 	private List<List<MFAVerifier>> _mfaVerifiersList;
+	private Set<String> _mfaVerifiersNames = new HashSet<>();
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		MFAIntegrationVerification.class);

@@ -67,7 +67,7 @@ import java.util.WeakHashMap;
  */
 @Component(
 	configurationPid = "com.liferay.multi.factor.authentication.provider.totp.web.internal.configuration.TOTPConfiguration",
-	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	configurationPolicy = ConfigurationPolicy.REQUIRE,
 	immediate = true,
 	service = MFAVerifier.class
 )
@@ -252,10 +252,10 @@ public class TOTPMFAVerifier
 		TOTP totp = _totpLocalService.fetchTOTPByUserId(userId);
 
 		if ((totp != null) && totp.isVerified()) {
-			return false;
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	@Override

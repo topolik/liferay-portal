@@ -2,6 +2,8 @@
 page import="com.liferay.portal.kernel.util.PortalUtil" %>
 <%@ page
 	import="com.liferay.multi.factor.authentication.spi.verifier.UserAccountSetupMFAVerifier" %>
+<%@ page
+	import="com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier" %>
 
 <%--
 /**
@@ -28,6 +30,7 @@ page import="com.liferay.portal.kernel.util.PortalUtil" %>
 	String screenNavigationEntryKey = ParamUtil.getString(request, "screenNavigationEntryKey");
 
 	UserAccountSetupMFAVerifier userAccountSetupMFAVerifier = (UserAccountSetupMFAVerifier)request.getAttribute(UserAccountSetupMFAVerifier.class.getName());
+	MFAVerifier mfaVerifier = (MFAVerifier)userAccountSetupMFAVerifier;
 %>
 
 <portlet:actionURL name="/my_account/setup_mfa" var="actionURL">
@@ -38,11 +41,11 @@ page import="com.liferay.portal.kernel.util.PortalUtil" %>
 	<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 	<aui:input name="screenNavigationCategoryKey" type="hidden" value="<%= screenNavigationCategoryKey %>" />
 	<aui:input name="screenNavigationEntryKey" type="hidden" value="<%= screenNavigationEntryKey %>" />
-	<aui:input name="userAccountSetupMFAVerifierName" type="hidden" value="<%= userAccountSetupMFAVerifier.getName()%>" />
+	<aui:input name="userAccountSetupMFAVerifierName" type="hidden" value="<%= mfaVerifier.getName()%>" />
 
 	<div class="sheet sheet-lg">
 			<div class="sheet-header">
-				<h2 class="sheet-title"><liferay-ui:message key="<%= userAccountSetupMFAVerifier.getName() %>" escapeAttribute="<%= true %>"/></h2>
+				<h2 class="sheet-title"><liferay-ui:message key="<%= mfaVerifier.getName() %>" escapeAttribute="<%= true %>"/></h2>
 			</div>
 
 		<liferay-ui:error key="userAccountSetupFailed" message="user-account-setup-failed" />

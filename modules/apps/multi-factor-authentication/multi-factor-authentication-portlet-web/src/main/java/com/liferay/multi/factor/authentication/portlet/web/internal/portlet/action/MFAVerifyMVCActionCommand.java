@@ -39,7 +39,7 @@ import javax.servlet.http.HttpSession;
 @Component(
 	property = {
 		"javax.portlet.name=" + MFAPortletKeys.MFA_VERIFY,
-		"mvc.command.name=/mfa_verify/verifyHeadlessRequest"
+		"mvc.command.name=/mfa_verify/verify"
 	},
 	service = MVCActionCommand.class
 )

@@ -68,7 +68,7 @@ public class VerifyMFADynamicInclude implements DynamicInclude {
 	@Override
 	public void register(DynamicIncludeRegistry dynamicIncludeRegistry) {
 		dynamicIncludeRegistry.register(
-			"com.liferay.multi.factor.authentication.portlet.web#/verifyHeadlessRequest.jsp");
+			"com.liferay.multi.factor.authentication.portlet.web#/verify.jsp");
 	}
 
 	@Reference

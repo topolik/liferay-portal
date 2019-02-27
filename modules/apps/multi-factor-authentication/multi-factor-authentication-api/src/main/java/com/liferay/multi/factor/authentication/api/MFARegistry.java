@@ -18,6 +18,7 @@ import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Tomas Polesovsky
@@ -33,4 +34,6 @@ public interface MFARegistry {
 	public MFAVerifier getMFAVerifier(String name);
 
 	public MFAVerifier getIntegrationVerifier(String mfaIntegrationName);
+
+	public Set<String> getVerifierIntegrationNames(String mfaVerifierName);
 }
