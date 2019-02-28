@@ -52,8 +52,10 @@ public class MFAIntegrationVerification {
 		_mfaIntegrationVerificationConfiguration =
 			ConfigurableUtil.createConfigurable(
 				MFAIntegrationVerificationConfiguration.class, properties);
+	}
 
-		MFAIntegration mfaIntegration = _mfaRegistry.getMFAIntegration(
+	public void init(MFARegistry mfaRegistry) {
+		MFAIntegration mfaIntegration = mfaRegistry.getMFAIntegration(
 			_mfaIntegrationVerificationConfiguration.integrationName());
 
 		String[] verifierNamesArray =
@@ -68,7 +70,7 @@ public class MFAIntegrationVerification {
 				verifierNamesList.size());
 
 			for (String verifierName : verifierNamesList) {
-				MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(
+				MFAVerifier mfaVerifier = mfaRegistry.getMFAVerifier(
 					verifierName);
 
 				if ((mfaIntegration.supportsHeadless() &&
