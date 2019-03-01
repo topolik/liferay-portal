@@ -73,77 +73,100 @@ public class MFALoginServicePreAction extends Action {
 
 		long userId = themeDisplay.getUserId();
 
-		if (mfaVerifier.supportsHeadless()) {
-			HeadlessMFAVerifier headlessMFAVerifier =
-				(HeadlessMFAVerifier)mfaVerifier;
+		if (mfaVerifier.supportsBrowser()) {
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
 
-			if (!headlessMFAVerifier.requiresHeadlessVerification(
-				request, userId)) {
+			if (browserMFAVerifier.requiresSetup(userId)) {
+				redirectToSetup(request, response, themeDisplay, userId);
 
 				return;
 			}
+		}
+
+		if (mfaVerifier.supportsHeadless()) {
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier)mfaVerifier;
 
 			if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
 				return;
 			}
 		}
 
-		if (!mfaVerifier.supportsBrowser()) {
+		if (mfaVerifier.supportsBrowser()) {
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier) mfaVerifier;
+
+			if (!browserMFAVerifier.requiresBrowserVerification(
+					request, userId)) {
+
+				return;
+			}
+
+			redirectToVerifyBrowserRequest(
+				request, response, themeDisplay, userId);
+
+			return;
+		}
+
+		throw new ActionException(
+			new PrincipalException.MustBeAuthenticated(
+				"Unable to verify Multi Factor Authentication"));
+	}
+
+	protected void redirectToVerifyBrowserRequest(
+			HttpServletRequest request, HttpServletResponse response,
+			ThemeDisplay themeDisplay, long userId)
+		throws ActionException {
+
+		LiferayPortletURL liferayPortletURL =
+			_mfaPortletURLFactory.createVerifyURL(
+				request, _loginMFAIntegration.getName(),
+				themeDisplay.getURLCurrent(), userId);
+
+		if (Objects.equals(
+			liferayPortletURL.getPortletId(), themeDisplay.getPpid()) &&
+			LiferayWindowState.isExclusive(request)) {
+
+			return;
+		}
+
+		try {
+			liferayPortletURL.setWindowState(
+				LiferayWindowState.EXCLUSIVE);
+
+			response.sendRedirect(liferayPortletURL.toString());
+		}
+		catch (Exception e) {
 			throw new ActionException(
-				new PrincipalException.MustBeAuthenticated(
-					"Unable to verify Multi Factor Authentication"));
+				"Unable to send login redirect: " + e.getMessage(), e);
 		}
+	}
 
-		BrowserMFAVerifier browserMFAVerifier = (BrowserMFAVerifier)mfaVerifier;
+	protected void redirectToSetup(
+			HttpServletRequest request, HttpServletResponse response,
+			ThemeDisplay themeDisplay, long userId)
+		throws ActionException {
 
-		if (browserMFAVerifier.requiresSetup(userId)) {
-			LiferayPortletURL liferayPortletURL =
-				_mfaPortletURLFactory.createSetupURL(
-					request, _loginMFAIntegration.getName(),
-					themeDisplay.getURLCurrent());
+		LiferayPortletURL liferayPortletURL =
+			_mfaPortletURLFactory.createSetupURL(
+				request, _loginMFAIntegration.getName(),
+				themeDisplay.getURLCurrent());
 
-			if (themeDisplay.isStateMaximized() && Objects.equals(
-				liferayPortletURL.getPortletId(), themeDisplay.getPpid())) {
-
-				return;
-			}
-
-			try {
-				response.sendRedirect(liferayPortletURL.toString());
-			}
-			catch (Exception e) {
-				throw new ActionException(
-					"Unable to send login redirect: " + e.getMessage(), e);
-			}
+		if (themeDisplay.isStateMaximized() && Objects.equals(
+			liferayPortletURL.getPortletId(), themeDisplay.getPpid())) {
 
 			return;
 		}
 
-		if (browserMFAVerifier.requiresBrowserVerification(request, userId)) {
-			LiferayPortletURL liferayPortletURL =
-				_mfaPortletURLFactory.createVerifyURL(
-					request, _loginMFAIntegration.getName(),
-					themeDisplay.getURLCurrent(), userId);
-
-			if (Objects.equals(
-				liferayPortletURL.getPortletId(), themeDisplay.getPpid()) &&
-				LiferayWindowState.isExclusive(request)) {
-
-				return;
-			}
-
-			try {
-				liferayPortletURL.setWindowState(LiferayWindowState.EXCLUSIVE);
-
-				response.sendRedirect(liferayPortletURL.toString());
-			}
-			catch (Exception e) {
-				throw new ActionException(
-					"Unable to send login redirect: " + e.getMessage(), e);
-			}
-
-			return;
+		try {
+			response.sendRedirect(liferayPortletURL.toString());
 		}
+		catch (Exception e) {
+			throw new ActionException(
+				"Unable to send login redirect: " + e.getMessage(), e);
+		}
+
 	}
 
 	@Reference

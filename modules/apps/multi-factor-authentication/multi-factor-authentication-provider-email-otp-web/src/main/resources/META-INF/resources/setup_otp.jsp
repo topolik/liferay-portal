@@ -1,5 +1,4 @@
-<%@ page
-	import="com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys" %><%--
+<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -18,61 +17,110 @@
 <%@ include file="/init.jsp" %>
 
 <%
-long resendDuration = (Long)request.getAttribute("resendDuration");
+EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.getAttribute("emailOTPConfiguration");
 %>
-
 <h1>
-	<liferay-ui:message key="your-one-time-password-will-be-sent-to" />
+	<liferay-ui:message key="<%= HtmlUtil.escape(emailOTPConfiguration.name()) %>"/>
 </h1>
 
-<aui:input id="setupEmail" name="setupEmail" showRequiredLabel="yes" />
+<div id="<portlet:namespace/>phaseOne">
+	<c:choose>
+		<c:when test="<%= emailOTPConfiguration.allowCustomEmail() %>">
+			<h2>
+				<liferay-ui:message key="your-one-time-password-will-be-sent-to" />
+			</h2>
 
-<liferay-portlet:resourceURL id="/mfa_verify/sendemailotp" var="sendOTPURL" portletName="<%= MFAPortletKeys.MFA_VERIFY %>" />
+			<aui:input id="setupEmail" name="setupEmail" showRequiredLabel="yes" />
+		</c:when>
+		<c:otherwise>
+			<h2>
+				<liferay-ui:message key="your-one-time-password-will-be-sent-to-your-email-address" />
+			</h2>
 
-<aui:button id="sendButton" onclick='<%= liferayPortletResponse.getNamespace() + "send('" + sendOTPURL + "');" %>' value="send" />
+		</c:otherwise>
+	</c:choose>
 
-<aui:script>
-	function <portlet:namespace />send(sendOTPURL) {
+	<aui:button id="sendEmailButton" onclick='<%= liferayPortletResponse.getNamespace() + "sendEmail();" %>' value="send" />
+</div>
 
-		var button = document.getElementById('<portlet:namespace />sendButton');
+<div id="<portlet:namespace/>messageContainer"></div>
 
-		var buttonText = button.innerText;
+<div id="<portlet:namespace/>phaseTwo">
+	<h2>
+		<liferay-ui:message key="please-enter-the-one-time-password-from-the-email" />
+	</h2>
 
-		button.disabled = true;
+	<aui:input name="otp" showRequiredLabel="yes" />
 
-		var resendDuration = '<%= resendDuration %>';
+	<aui:button id="sendButton" onclick='<%= liferayPortletResponse.getNamespace() + "send();" %>' value="send" />
+</div>
 
-		window.setInterval(
+
+<aui:script use="aui-base,aui-io-request">
+	<liferay-portlet:resourceURL id="/mfa_verify/sendemailotp" var="sendOTPURL" portletName="<%= MFAPortletKeys.MFA_VERIFY %>">
+		<portlet:param name="mfaVerifierName" value="<%= emailOTPConfiguration.name() %>" />
+	</liferay-portlet:resourceURL>
+
+	var sendOTPURL = '<%= HtmlUtil.escapeJS(sendOTPURL) %>';
+
+	function <portlet:namespace />sendEmail() {
+		var sendEmailButton = A.one('#<portlet:namespace />sendEmailButton');
+
+		sendEmailButton.disabled = true;
+
+		var buttonText = sendEmailButton.innerText;
+
+		var resendDuration = <%= emailOTPConfiguration.resendEmailTimeout() %>;
+
+		var interval = A.setInterval(
 			function() {
 				if (resendDuration === 0) {
-					button.innerText = buttonText;
-					button.disabled = false;
-					window.clearInterval(resendDuration);
+					sendEmailButton.innerText = buttonText;
+					sendEmailButton.disabled = false;
+					window.clearInterval(interval);
 				}
 				else {
-					button.innerText = --resendDuration;
+					sendEmailButton.innerText = --resendDuration;
 				}
 
 			},
 			1000
 		);
 
-		var email = document.getElementById('<portlet:namespace />setupEmail').value;
+		var data = {
+			p_auth: Liferay.authToken
+		};
 
-		AUI.$.ajax(
+		var setupEmail = A.one('#<portlet:namespace />setupEmail');
+
+		if (setupEmail) {
+			data["email"] = setupEmail.value;
+		}
+
+		A.io.request(
 			sendOTPURL,
 			{
-				data: {
-					email:email
+				dataType: 'JSON',
+				form: data,
+				method: 'POST',
+				on: {
+					failure: function(event, id, obj) {
+						var messageContainer = A.one('#<portlet:namespace />messageContainer');
+						messageContainer.html('<span class="alert alert-danger"><liferay-ui:message key="unable-to-send-email" /></span>');
+
+						sendEmailButton.innerText = buttonText;
+						sendEmailButton.disabled = false;
+						window.clearInterval(interval);
+					},
+					success: function(event, id, obj) {
+						var messageContainer = A.one('#<portlet:namespace />messageContainer');
+						messageContainer.html('<span class="alert alert-success"><liferay-ui:message key="email-sent-please-click-on-the-email-link-or-type-" /></span>');
+
+						var phaseTwo = A.one('#<portlet:namespace />phaseTwo');
+						phaseTwo.show()
+					}
 				}
 			}
-		)
-
+		);
 	}
 </aui:script>
-
-<h1>
-	<liferay-ui:message key="please-setup-your-2-factor-verification" />
-</h1>
-
-<aui:input name="otp" showRequiredLabel="yes" />

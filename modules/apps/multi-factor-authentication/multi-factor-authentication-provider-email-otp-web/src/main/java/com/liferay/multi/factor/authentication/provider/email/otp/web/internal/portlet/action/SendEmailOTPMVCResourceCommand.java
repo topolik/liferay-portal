@@ -16,21 +16,39 @@ package com.liferay.multi.factor.authentication.provider.email.otp.web.internal.
 
 import com.liferay.mail.kernel.model.MailMessage;
 import com.liferay.mail.kernel.service.MailService;
+import com.liferay.mail.kernel.template.MailTemplate;
+import com.liferay.mail.kernel.template.MailTemplateContext;
+import com.liferay.mail.kernel.template.MailTemplateContextBuilder;
+import com.liferay.mail.kernel.template.MailTemplateFactoryUtil;
+import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
 import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP;
 import com.liferay.multi.factor.authentication.provider.email.otp.service.EmailOTPLocalService;
+import com.liferay.multi.factor.authentication.provider.email.otp.web.internal.configuration.EmailOTPConfiguration;
+import com.liferay.multi.factor.authentication.provider.email.otp.web.internal.spi.verifier.EmailOTPMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
+import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.security.auth.AuthToken;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PwdGenerator;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import javax.mail.internet.InternetAddress;
 
+import javax.portlet.PortletException;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
 
@@ -39,6 +57,8 @@ import javax.servlet.http.HttpSession;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+
+import java.io.IOException;
 
 /**
  * @author arthurchan35
@@ -54,23 +74,32 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 
 	@Override
 	public boolean serveResource(
-		ResourceRequest request, ResourceResponse response) {
+			ResourceRequest request, ResourceResponse response)
+		throws PortletException {
 
 		HttpServletRequest originalRequest = _portal.getOriginalServletRequest(
 			_portal.getHttpServletRequest(request));
 
+		try {
+			_authToken.checkCSRFToken(
+				originalRequest,
+				SendEmailOTPMVCResourceCommand.class.getName());
+		}
+		catch (PrincipalException pe) {
+			throw new PortletException(pe);
+		}
+
+		EmailOTPConfiguration emailOTPConfiguration =
+			getEmailOTPConfiguration(request);
+
+		if (emailOTPConfiguration == null) {
+			return false;
+		}
+
 		HttpSession session = originalRequest.getSession();
 
-		Object otpSetAtObj = session.getAttribute("otpSetAt");
-
-		long currentTime = System.currentTimeMillis();
-
-		if (otpSetAtObj != null) {
-			long otpSetAt = (Long)otpSetAtObj;
-
-			if (otpSetAt + _DURATION > currentTime) {
-				return false;
-			}
+		if (!verifyEmailResendTimedOut(emailOTPConfiguration, session)) {
+			return false;
 		}
 
 		try {
@@ -82,10 +111,13 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 				long userId = (Long)session.getAttribute("userId");
 
 				user = _userLocalService.fetchUserById(userId);
+
 				EmailOTP emailOTP = _emailOTPLocalService.fetchEmailOTPByUserId(
 					userId);
 
 				email = emailOTP.getEmailAddress();
+
+				session.setAttribute("otpEmail", email);
 			}
 			else if (otpPhase.equals("setup")) {
 				ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
@@ -93,7 +125,11 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 
 				user = themeDisplay.getUser();
 
-				email = ParamUtil.getString(originalRequest, "email");
+				email = user.getEmailAddress();
+
+				if (emailOTPConfiguration.allowCustomEmail()) {
+					email = ParamUtil.getString(originalRequest, "setupEmail");
+				}
 			}
 			else {
 				return false;
@@ -102,22 +138,123 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 			String generatedOTP = PwdGenerator.getPassword(_LENGTH);
 
 			session.setAttribute("otp", generatedOTP);
+			session.setAttribute("otpSetAt", System.currentTimeMillis());
 
-			session.setAttribute("otpSetAt", currentTime);
+			MailTemplateContextBuilder mailTemplateContextBuilder =
+				MailTemplateFactoryUtil.createMailTemplateContextBuilder();
 
-			MailMessage mailMessage = new MailMessage(
-				new InternetAddress("test@liferay.com", "admin"),
-				new InternetAddress(email, user.getFullName()),
-				"Your One Time Password",
-				"Your One Time Password is" + generatedOTP, true);
+			mailTemplateContextBuilder.put(
+				"[$FROM_ADDRESS$]", emailOTPConfiguration.emailTemplateFrom());
+			mailTemplateContextBuilder.put(
+				"[$FROM_NAME$]",
+				HtmlUtil.escape(emailOTPConfiguration.emailTemplateFromName()));
+			mailTemplateContextBuilder.put(
+				"[$ONE_TIME_PASSWORD$]", HtmlUtil.escape(generatedOTP));
+			mailTemplateContextBuilder.put(
+				"[$PORTAL_URL$]", _portal.getPortalURL(originalRequest));
+			mailTemplateContextBuilder.put(
+				"[$REMOTE_ADDRESS$]", originalRequest.getRemoteAddr());
+			mailTemplateContextBuilder.put(
+				"[$REMOTE_HOST$]",
+				HtmlUtil.escape(originalRequest.getRemoteHost()));
+			mailTemplateContextBuilder.put(
+				"[$TO_NAME$]", HtmlUtil.escape(user.getFullName()));
 
-			_mailService.sendEmail(mailMessage);
+			MailTemplateContext mailTemplateContext =
+				mailTemplateContextBuilder.build();
 
-			return true;
+			return _sendNotificationEmail(
+				emailOTPConfiguration.emailTemplateFrom(),
+				emailOTPConfiguration.emailTemplateFromName(), email, user,
+				emailOTPConfiguration.emailTemplateSubject(),
+				emailOTPConfiguration.emailTemplateBody(), mailTemplateContext);
 		}
 		catch (Exception e) {
 			return false;
 		}
+	}
+
+	private boolean _sendNotificationEmail(
+			String fromAddress, String fromName, String toAddress, User toUser,
+			String subject, String body,
+			MailTemplateContext mailTemplateContext)
+		throws PortalException, IOException {
+
+		MailTemplate subjectTemplate =
+			MailTemplateFactoryUtil.createMailTemplate(subject, false);
+
+		MailTemplate bodyTemplate =
+			MailTemplateFactoryUtil.createMailTemplate(body, true);
+
+		MailMessage mailMessage = new MailMessage(
+			new InternetAddress(fromAddress, fromName),
+			new InternetAddress(toAddress, toUser.getFullName()),
+			subjectTemplate.renderAsString(
+				toUser.getLocale(), mailTemplateContext),
+			bodyTemplate.renderAsString(
+				toUser.getLocale(), mailTemplateContext),
+			true);
+
+		Company company = _companyLocalService.getCompany(
+			toUser.getCompanyId());
+
+		mailMessage.setMessageId(
+			PortalUtil.getMailId(
+				company.getMx(), "user", toUser.getUserId()));
+
+		_mailService.sendEmail(mailMessage);
+
+		return true;
+	}
+
+	private boolean verifyEmailResendTimedOut(
+		EmailOTPConfiguration emailOTPConfiguration, HttpSession session) {
+
+		Object otpSetAtObj = session.getAttribute("otpSetAt");
+
+		if (otpSetAtObj == null) {
+			return true;
+		}
+
+		long otpSetAt = (Long)otpSetAtObj;
+
+		long timedOut =
+			otpSetAt + emailOTPConfiguration.resendEmailTimeout() * 1000;
+
+		if (System.currentTimeMillis() > timedOut) {
+			return true;
+		}
+
+		return false;
+	}
+
+	protected EmailOTPConfiguration getEmailOTPConfiguration(
+		ResourceRequest request) {
+
+		String mfaVerifierName =
+			ParamUtil.getString(request, "mfaVerifierName");
+
+		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(mfaVerifierName);
+
+		if (mfaVerifier == null) {
+			_log.error("Unable to find MFAVerifier " + mfaVerifierName);
+
+			return null;
+		}
+
+		if (!(mfaVerifier instanceof EmailOTPMFAVerifier)) {
+			_log.error(
+				StringBundler.concat(
+					"MFAVerifier", mfaVerifierName,
+					" is not EmailOTPMFAVerifier!"));
+
+			return null;
+		}
+
+		EmailOTPMFAVerifier emailOTPMFAVerifier =
+			(EmailOTPMFAVerifier)mfaVerifier;
+
+		return emailOTPMFAVerifier.getEmailOTPConfiguration();
 	}
 
 	//this should be configured by admin
@@ -125,6 +262,9 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 	private static final long _DURATION = 60 * 1000;
 
 	private static final int _LENGTH = 6;
+
+	private static Log _log = LogFactoryUtil.getLog(
+		SendEmailOTPMVCResourceCommand.class);
 
 	@Reference
 	private EmailOTPLocalService _emailOTPLocalService;
@@ -137,5 +277,14 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 
 	@Reference
 	private UserLocalService _userLocalService;
+
+	@Reference
+	private MFARegistry _mfaRegistry;
+
+	@Reference
+	private AuthToken _authToken;
+
+	@Reference
+	private CompanyLocalService _companyLocalService;
 
 }

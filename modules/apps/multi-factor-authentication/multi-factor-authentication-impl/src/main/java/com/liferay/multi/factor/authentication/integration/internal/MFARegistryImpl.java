@@ -130,16 +130,15 @@ public class MFARegistryImpl implements MFARegistry {
 					bundleContext,
 					(service, emitter) -> emitter.emit(service.getName())));
 
-
 		_mfaIntegrationVerificationServiceTrackerMap =
 			ServiceTrackerMapFactory.openSingleValueMap(
 				bundleContext, MFAIntegrationVerification.class, null,
 				ServiceReferenceMapperFactory.create(
 					bundleContext,
 					(service, emitter) -> {
-						emitter.emit(service.getIntegrationName());
-
-						service.init(this);
+						if (service.isValid(this)) {
+							emitter.emit(service.getIntegrationName());
+						}
 					}));
 	}
 

@@ -99,6 +99,18 @@ public class TOTPMFAVerifier
 		_name = totpConfiguration.name();
 		_timeWindow = totpConfiguration.timeWindow();
 		_validationExpirationTime = totpConfiguration.validationExpirationTime();
+
+		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
+			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
+				Arrays.asList(
+					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
+
+			sessionPhishingProtectedAttributesList.add(_VALIDATED_AT);
+
+			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
+				sessionPhishingProtectedAttributesList.toArray(
+					new String[sessionPhishingProtectedAttributesList.size()]);
+		}
 	}
 
 	@Override
@@ -117,21 +129,6 @@ public class TOTPMFAVerifier
 	@Override
 	public String getProviderName() {
 		return "time-based-one-time-password";
-	}
-
-	@Activate
-	public void activate() {
-		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
-			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
-				Arrays.asList(
-					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
-
-			sessionPhishingProtectedAttributesList.add(_VALIDATED_AT);
-
-			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
-				sessionPhishingProtectedAttributesList.toArray(
-					new String[sessionPhishingProtectedAttributesList.size()]);
-		}
 	}
 
 	@Override

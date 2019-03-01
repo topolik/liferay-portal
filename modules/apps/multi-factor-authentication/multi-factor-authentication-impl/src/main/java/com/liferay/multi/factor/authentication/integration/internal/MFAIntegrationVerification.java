@@ -19,10 +19,10 @@ import com.liferay.multi.factor.authentication.integration.internal.configuratio
 import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -54,9 +54,21 @@ public class MFAIntegrationVerification {
 				MFAIntegrationVerificationConfiguration.class, properties);
 	}
 
-	public void init(MFARegistry mfaRegistry) {
+	public boolean isValid(MFARegistry mfaRegistry) {
+		String integrationName =
+			StringUtil.trim(
+				_mfaIntegrationVerificationConfiguration.integrationName());
+
 		MFAIntegration mfaIntegration = mfaRegistry.getMFAIntegration(
-			_mfaIntegrationVerificationConfiguration.integrationName());
+			integrationName);
+
+		if (mfaIntegration == null) {
+			_log.error(
+				StringBundler.concat(
+					"MFA Integration ", integrationName, " is unknown!"));
+
+			return false;
+		}
 
 		String[] verifierNamesArray =
 			_mfaIntegrationVerificationConfiguration.verifierNames();
@@ -64,14 +76,25 @@ public class MFAIntegrationVerification {
 		_mfaVerifiersList = new ArrayList(verifierNamesArray.length);
 
 		for (String verifierNames : verifierNamesArray) {
-			List<String> verifierNamesList = StringUtil.split(verifierNames);
+			String[] verifierNamesList = StringUtil.split(verifierNames);
 
 			List<MFAVerifier> mfaVerifierList = new ArrayList<>(
-				verifierNamesList.size());
+				verifierNamesList.length);
 
 			for (String verifierName : verifierNamesList) {
+				verifierName = StringUtil.trim(verifierName);
+
 				MFAVerifier mfaVerifier = mfaRegistry.getMFAVerifier(
 					verifierName);
+
+				if (mfaVerifier == null) {
+					_log.error(
+						StringBundler.concat(
+							"MFA Verifier ", verifierName, " in ",
+							integrationName, " is unknown!"));
+
+					return false;
+				}
 
 				if ((mfaIntegration.supportsHeadless() &&
 					 mfaVerifier.supportsHeadless()) ||
@@ -96,11 +119,13 @@ public class MFAIntegrationVerification {
 					_log.error(
 						StringBundler.concat(
 							"MFA Verifier ", verifierName,
-							" is not compatible with interation ",
+							" is not compatible with integration ",
 							mfaIntegration.getName(),
 							". The integration supports ",
 							mfaIntegrationSupports, " but verifier supports ",
 							mfaVerifierSupports));
+
+					return false;
 				}
 			}
 
@@ -108,6 +133,8 @@ public class MFAIntegrationVerification {
 				_mfaVerifiersList.add(mfaVerifierList);
 			}
 		}
+
+		return true;
 	}
 
 	public String getIntegrationName() {
@@ -119,7 +146,7 @@ public class MFAIntegrationVerification {
 	}
 
 	public boolean hasMFAVerifier(String mfaVerifierName) {
-		return mfaVerifierName.contains(mfaVerifierName);
+		return _mfaVerifiersNames.contains(mfaVerifierName);
 	}
 
 	private List<List<MFAVerifier>> _mfaVerifiersList;

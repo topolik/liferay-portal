@@ -87,12 +87,6 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 
 	@Override
 	public boolean requiresSetup(long userId) {
-		if (mfaVerifiers.isEmpty()) {
-			return false;
-		}
-
-		boolean requiresSetup = true;
-
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsBrowser()) {
 				continue;
@@ -101,11 +95,12 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			requiresSetup &= browserMFAVerifier.requiresSetup(userId);
-
+			if(browserMFAVerifier.requiresSetup(userId)) {
+				return true;
+			}
 		}
 
-		return requiresSetup;
+		return false;
 	}
 
 	@Override
