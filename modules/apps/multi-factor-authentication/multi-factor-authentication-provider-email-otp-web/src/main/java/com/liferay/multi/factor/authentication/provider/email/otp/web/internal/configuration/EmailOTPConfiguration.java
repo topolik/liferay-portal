@@ -16,6 +16,7 @@ package com.liferay.multi.factor.authentication.provider.email.otp.web.internal.
 
 import aQute.bnd.annotation.metatype.Meta;
 import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
+import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 
 /**
  * @author Tomas Polesovsky
@@ -88,13 +89,13 @@ public interface EmailOTPConfiguration {
 		description = "email-template-subject-description",
 		name = "email-template-subject", required = false
 	)
-	public String emailTemplateSubject();
+	public LocalizedValuesMap emailTemplateSubject();
 
 	@Meta.AD(
 		deflt = "${resource:com/liferay/multi/factor/authentication/provider/email/otp/web/internal/configuration/email_body.tmpl}",
 		description = "email-template-body-description",
 		name = "email-template-body", required = false
 	)
-	public String emailTemplateBody();
+	public LocalizedValuesMap emailTemplateBody();
 
 }

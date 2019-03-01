@@ -26,6 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -62,6 +65,17 @@ public class MFARegistryImpl implements MFARegistry {
 				mfaIntegrationName);
 
 		if (mfaIntegrationVerification == null) {
+			return null;
+		}
+
+		// TODO: performance hit?
+		if (!mfaIntegrationVerification.isValid(this)) {
+			_log.error(
+				StringBundler.concat(
+					"Unable to continue with MFA verification for ",
+					mfaIntegrationName, ", integration verification is ",
+					"misconfigured."));
+
 			return null;
 		}
 
@@ -123,23 +137,20 @@ public class MFARegistryImpl implements MFARegistry {
 					bundleContext,
 					(service, emitter) -> emitter.emit(service.getName())));
 
+		_mfaIntegrationVerificationServiceTrackerMap =
+			ServiceTrackerMapFactory.openSingleValueMap(
+				bundleContext, MFAIntegrationVerification.class, null,
+				ServiceReferenceMapperFactory.create(
+					bundleContext,
+					(service, emitter) ->
+						emitter.emit(service.getIntegrationName())));
+
 		_mfaVerifiersServiceTrackerMap =
 			ServiceTrackerMapFactory.openSingleValueMap(
 				bundleContext, MFAVerifier.class, null,
 				ServiceReferenceMapperFactory.create(
 					bundleContext,
 					(service, emitter) -> emitter.emit(service.getName())));
-
-		_mfaIntegrationVerificationServiceTrackerMap =
-			ServiceTrackerMapFactory.openSingleValueMap(
-				bundleContext, MFAIntegrationVerification.class, null,
-				ServiceReferenceMapperFactory.create(
-					bundleContext,
-					(service, emitter) -> {
-						if (service.isValid(this)) {
-							emitter.emit(service.getIntegrationName());
-						}
-					}));
 	}
 
 	@Override
@@ -151,5 +162,9 @@ public class MFARegistryImpl implements MFARegistry {
 	public List<MFAIntegration> getMFAIntegrations() {
 		return new ArrayList(_mfaIntegrationServiceTrackerMap.values());
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		MFARegistryImpl.class);
+
 
 }

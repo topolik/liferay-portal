@@ -40,7 +40,7 @@ EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.get
 		</c:otherwise>
 	</c:choose>
 
-	<aui:button id="sendEmailButton" onclick='<%= liferayPortletResponse.getNamespace() + "sendEmail();" %>' value="send" />
+	<aui:button id="sendEmailButton" value="send" />
 </div>
 
 <div id="<portlet:namespace/>messageContainer"></div>
@@ -61,66 +61,71 @@ EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.get
 		<portlet:param name="mfaVerifierName" value="<%= emailOTPConfiguration.name() %>" />
 	</liferay-portlet:resourceURL>
 
-	var sendOTPURL = '<%= HtmlUtil.escapeJS(sendOTPURL) %>';
+	A.one('#<portlet:namespace />sendEmailButton').on(
+		'click',
+		function(event) {
+			var sendEmailButton = A.one('#<portlet:namespace />sendEmailButton');
 
-	function <portlet:namespace />sendEmail() {
-		var sendEmailButton = A.one('#<portlet:namespace />sendEmailButton');
+			sendEmailButton.disabled = true;
 
-		sendEmailButton.disabled = true;
+			var buttonText = sendEmailButton.innerText;
 
-		var buttonText = sendEmailButton.innerText;
+			var resendDuration = <%= emailOTPConfiguration.resendEmailTimeout() %>;
 
-		var resendDuration = <%= emailOTPConfiguration.resendEmailTimeout() %>;
-
-		var interval = A.setInterval(
-			function() {
-				if (resendDuration === 0) {
-					sendEmailButton.innerText = buttonText;
-					sendEmailButton.disabled = false;
-					window.clearInterval(interval);
-				}
-				else {
-					sendEmailButton.innerText = --resendDuration;
-				}
-
-			},
-			1000
-		);
-
-		var data = {
-			p_auth: Liferay.authToken
-		};
-
-		var setupEmail = A.one('#<portlet:namespace />setupEmail');
-
-		if (setupEmail) {
-			data["email"] = setupEmail.value;
-		}
-
-		A.io.request(
-			sendOTPURL,
-			{
-				dataType: 'JSON',
-				form: data,
-				method: 'POST',
-				on: {
-					failure: function(event, id, obj) {
-						var messageContainer = A.one('#<portlet:namespace />messageContainer');
-						messageContainer.html('<span class="alert alert-danger"><liferay-ui:message key="unable-to-send-email" /></span>');
-
+			var interval = setInterval(
+				function() {
+					if (resendDuration === 0) {
 						sendEmailButton.innerText = buttonText;
 						sendEmailButton.disabled = false;
-						window.clearInterval(interval);
-					},
-					success: function(event, id, obj) {
-						var messageContainer = A.one('#<portlet:namespace />messageContainer');
-						messageContainer.html('<span class="alert alert-success"><liferay-ui:message key="email-sent-please-click-on-the-email-link-or-type-" /></span>');
 
-						var phaseTwo = A.one('#<portlet:namespace />phaseTwo');
-						phaseTwo.show()
+						clearInterval(interval);
+					}
+					else {
+						sendEmailButton.innerText = --resendDuration;
+					}
+
+				},
+				1000
+			);
+
+			var data = {
+				p_auth: Liferay.authToken
+			};
+
+			var setupEmail = A.one('#<portlet:namespace />setupEmail');
+
+			if (setupEmail) {
+				data["email"] = setupEmail.value;
+			}
+
+			var sendOTPURL = '<%= HtmlUtil.escapeJS(sendOTPURL) %>';
+
+			A.io.request(
+				sendOTPURL,
+				{
+					dataType: 'JSON',
+					data: data,
+					method: 'POST',
+					on: {
+						failure: function(event, id, obj) {
+							var messageContainer = A.one('#<portlet:namespace />messageContainer');
+							messageContainer.html('<span class="alert alert-danger"><liferay-ui:message key="unable-to-send-email" /></span>');
+
+							sendEmailButton.innerText = buttonText;
+							sendEmailButton.disabled = false;
+
+							clearInterval(interval);
+						},
+						success: function(event, id, obj) {
+							var messageContainer = A.one('#<portlet:namespace />messageContainer');
+							messageContainer.html('<span class="alert alert-success"><liferay-ui:message key="email-sent-please-enter-the-received-code" /></span>');
+
+							var phaseTwo = A.one('#<portlet:namespace />phaseTwo');
+							phaseTwo.disabled = false;
+						}
 					}
 				}
-			}
-		);
-	}
+			);
+		}
+	);
 </aui:script>

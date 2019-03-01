@@ -33,11 +33,13 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.security.auth.AuthToken;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -59,6 +61,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import java.io.IOException;
+import java.util.Locale;
 
 /**
  * @author arthurchan35
@@ -163,11 +166,17 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 			MailTemplateContext mailTemplateContext =
 				mailTemplateContextBuilder.build();
 
+			LocalizedValuesMap emailTemplateSubject =
+				emailOTPConfiguration.emailTemplateSubject();
+
+			LocalizedValuesMap emailTemplateBody =
+				emailOTPConfiguration.emailTemplateBody();
+
 			return _sendNotificationEmail(
 				emailOTPConfiguration.emailTemplateFrom(),
 				emailOTPConfiguration.emailTemplateFromName(), email, user,
-				emailOTPConfiguration.emailTemplateSubject(),
-				emailOTPConfiguration.emailTemplateBody(), mailTemplateContext);
+				emailTemplateSubject.get(user.getLocale()),
+				emailTemplateBody.get(user.getLocale()), mailTemplateContext);
 		}
 		catch (Exception e) {
 			return false;

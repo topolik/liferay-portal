@@ -50,19 +50,18 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class IPAddressMFAVerifier implements HeadlessMFAVerifier, MFAVerifier {
 
+	private IPAddressConfiguration _ipAddressConfiguration;
+
 	@Activate
-	public void activate() {
-		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
-			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
-				Arrays.asList(
-					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
+	protected void activate(Map<String, Object> properties) {
+		_ipAddressConfiguration =
+			ConfigurableUtil.createConfigurable(
+				IPAddressConfiguration.class, properties);
 
-			sessionPhishingProtectedAttributesList.add(_VALIDATED_AT);
-
-			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
-				sessionPhishingProtectedAttributesList.toArray(
-					new String[sessionPhishingProtectedAttributesList.size()]);
-		}
+		_enabled = _ipAddressConfiguration.enabled();
+		_name = _ipAddressConfiguration.name();
+		_allowedIPsWithMasks = new HashSet<>(
+			Arrays.asList(_ipAddressConfiguration.allowedIPsWithMasks()));
 	}
 
 	@Override
@@ -77,21 +76,12 @@ public class IPAddressMFAVerifier implements HeadlessMFAVerifier, MFAVerifier {
 
 	@Override
 	public boolean isEnabled() {
-		return true;
+		return _enabled;
 	}
 
 	@Override
 	public boolean requiresHeadlessVerification(
 		HttpServletRequest request, long userId) {
-
-		HttpServletRequest originalServletRequest =
-			_portal.getOriginalServletRequest(request);
-
-		HttpSession session = originalServletRequest.getSession(false);
-
-		if (isValid(session)) {
-			return false;
-		}
 
 		return true;
 	}
@@ -101,57 +91,6 @@ public class IPAddressMFAVerifier implements HeadlessMFAVerifier, MFAVerifier {
 		HttpServletRequest request, long userId) {
 
 		return AccessControlUtil.isAccessAllowed(request, _allowedIPsWithMasks);
-	}
-
-	@Activate
-	protected void activate(Map<String, Object> properties) {
-		IPAddressConfiguration config = ConfigurableUtil.createConfigurable(
-			IPAddressConfiguration.class, properties);
-
-		_enabled = config.enabled();
-		_name = config.name();
-		_allowedIPsWithMasks = new HashSet<>(
-			Arrays.asList(config.allowedIPsWithMasks()));
-
-	}
-
-	@Deactivate
-	protected void deactivate() {
-		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
-			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
-				Arrays.asList(
-					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
-
-			sessionPhishingProtectedAttributesList.remove(_VALIDATED_AT);
-
-			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
-				sessionPhishingProtectedAttributesList.toArray(
-					new String[sessionPhishingProtectedAttributesList.size()]);
-		}
-	}
-
-	protected boolean isValid(HttpSession httpSession) {
-		if (httpSession == null) {
-			return false;
-		}
-
-		Object validatedAtObject = httpSession.getAttribute(_VALIDATED_AT);
-
-		if (validatedAtObject != null) {
-			if (_validationExpirationTime < 0) {
-				return true;
-			}
-
-			long validatedAt = (Long)validatedAtObject;
-
-			if (validatedAt + _validationExpirationTime * 1000 >
-					System.currentTimeMillis()) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	private Set<String> _allowedIPsWithMasks;
