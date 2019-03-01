@@ -15,8 +15,10 @@
 package com.liferay.multi.factor.authentication.portlet.web.internal.portlet.action;
 
 import com.liferay.multi.factor.authentication.api.MFARegistry;
+import com.liferay.multi.factor.authentication.api.verifier.CompositeMFAVerifier;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.servlet.SessionErrors;
@@ -30,6 +32,10 @@ import org.osgi.service.component.annotations.Reference;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
+import javax.portlet.PortletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Tomas Polesovsky
@@ -54,6 +60,19 @@ public class MFASetupMVCActionCommand extends BaseMVCActionCommand {
 		BrowserMFAVerifier browserMFAVerifier =
 			(BrowserMFAVerifier)_mfaRegistry.getIntegrationVerifier(integrationName);
 
+		int setupMFAVerifierIndex =
+			ParamUtil.getInteger(actionRequest, "setupMFAVerifierIndex", -1);
+
+		if (setupMFAVerifierIndex > 1) {
+			List<BrowserMFAVerifier> setupMFAVerifiers =
+				_getSetupMFAVerifiers(browserMFAVerifier, actionRequest);
+
+			if (setupMFAVerifierIndex < setupMFAVerifiers.size()) {
+				browserMFAVerifier = setupMFAVerifiers.get(
+					setupMFAVerifierIndex);
+			}
+		}
+
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
@@ -71,6 +90,42 @@ public class MFASetupMVCActionCommand extends BaseMVCActionCommand {
 		}
 
 		SessionErrors.add(actionRequest, "mfaFailed");
+	}
+
+	private List<BrowserMFAVerifier> _getSetupMFAVerifiers(
+		BrowserMFAVerifier mfaVerifier, PortletRequest portletRequest) {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (!(mfaVerifier instanceof CompositeMFAVerifier)) {
+			return Collections.singletonList(mfaVerifier);
+		}
+
+		List<MFAVerifier> optionalMFAVerifiers =
+			((CompositeMFAVerifier)mfaVerifier).getOptionalMFAVerifiers();
+
+		List<BrowserMFAVerifier> setupMFAVerifiers = new ArrayList<>(
+			optionalMFAVerifiers.size());
+
+		for (MFAVerifier optionalMFAVerifier : optionalMFAVerifiers) {
+			if (!optionalMFAVerifier.supportsBrowser()) {
+				continue;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)optionalMFAVerifier;
+
+			if (!browserMFAVerifier.requiresSetup(
+				themeDisplay.getUserId())) {
+
+				continue;
+			}
+
+			setupMFAVerifiers.add(browserMFAVerifier);
+		}
+
+		return setupMFAVerifiers;
 	}
 
 	@Reference

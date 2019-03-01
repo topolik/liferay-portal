@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.SecureRandomUtil;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
@@ -56,11 +57,9 @@ import org.osgi.service.component.annotations.Reference;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 /**
  * @author Tomas Polesovsky
@@ -75,8 +74,8 @@ public class TOTPMFAVerifier
 	implements BrowserMFAVerifier, HeadlessMFAVerifier, MFAVerifier,
 		UserAccountSetupMFAVerifier {
 
-	private static final String _VALIDATED_AT =
-		TOTPMFAVerifier.class.getName() + "#VALIDATED_AT";
+	private static final String _VALIDATED =
+		TOTPMFAVerifier.class.getName() + "#VALIDATED";
 
 	private String _name;
 	private boolean _enabled;
@@ -105,7 +104,7 @@ public class TOTPMFAVerifier
 				Arrays.asList(
 					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
 
-			sessionPhishingProtectedAttributesList.add(_VALIDATED_AT);
+			sessionPhishingProtectedAttributesList.add(_VALIDATED);
 
 			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
 				sessionPhishingProtectedAttributesList.toArray(
@@ -137,7 +136,9 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
-	public boolean verifyHeadlessRequest(HttpServletRequest request, long userId) {
+	public boolean verifyHeadlessRequest(
+		HttpServletRequest request, long userId) {
+
 		if (!isUserSetUp(userId)) {
 			return false;
 		}
@@ -196,6 +197,25 @@ public class TOTPMFAVerifier
 			throw new IOException(
 				"Unable to include /setup_totp.jsp: " + se, se);
 		}
+	}
+
+	@Override
+	public boolean isBrowserVerified(HttpServletRequest request, long userId) {
+		HttpServletRequest originalServletRequest =
+			_portal.getOriginalServletRequest(request);
+
+		HttpSession session = originalServletRequest.getSession(false);
+
+		if (isValid(session, userId)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean isHeadlessVerified(HttpServletRequest request, long userId) {
+		return false;
 	}
 
 	private String generateSharedSecret() {
@@ -261,32 +281,21 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
-	public boolean requiresBrowserVerification(
+	public boolean canVerifyBrowser(
 		HttpServletRequest request, long userId) {
 
-		return requiresVerification(request, userId);
+		return canVerify(request, userId);
 	}
 
 	@Override
-	public boolean requiresHeadlessVerification(
+	public boolean canVerifyHeadless(
 		HttpServletRequest request, long userId) {
 
-		return requiresVerification(request, userId);
+		return canVerify(request, userId);
 	}
 
-	protected boolean requiresVerification(
-		HttpServletRequest request, long userId) {
-
+	protected boolean canVerify(HttpServletRequest request, long userId) {
 		if (!isUserSetUp(userId)) {
-			return false;
-		}
-
-		HttpServletRequest originalServletRequest =
-			_portal.getOriginalServletRequest(request);
-
-		HttpSession session = originalServletRequest.getSession(false);
-
-		if (isValid(session)) {
 			return false;
 		}
 
@@ -354,7 +363,12 @@ public class TOTPMFAVerifier
 
 			HttpSession session = request.getSession();
 
-			session.setAttribute(_VALIDATED_AT, validatedAt);
+			Map<String, Object> validatedMap = new HashMap(2);
+
+			validatedMap.put("validatedAt", validatedAt);
+			validatedMap.put("userId", userId);
+
+			session.setAttribute(_VALIDATED, validatedMap);
 		}
 
 		return verified;
@@ -390,7 +404,7 @@ public class TOTPMFAVerifier
 				Arrays.asList(
 					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
 
-			sessionPhishingProtectedAttributesList.remove(_VALIDATED_AT);
+			sessionPhishingProtectedAttributesList.remove(_VALIDATED);
 
 			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
 				sessionPhishingProtectedAttributesList.toArray(
@@ -415,19 +429,24 @@ public class TOTPMFAVerifier
 	@Reference
 	private UserLocalService _userLocalService;
 
-	protected boolean isValid(HttpSession httpSession) {
+	protected boolean isValid(HttpSession httpSession, long userId) {
 		if (httpSession == null) {
 			return false;
 		}
 
-		Object validatedAtObject = httpSession.getAttribute(_VALIDATED_AT);
+		Map<String, Object> validatedMap = (Map)httpSession.getAttribute(
+			_VALIDATED);
 
-		if (validatedAtObject != null) {
+		if (validatedMap != null) {
+			if (userId != MapUtil.getLong(validatedMap, "userId")) {
+				return false;
+			}
+
 			if (_validationExpirationTime < 0) {
 				return true;
 			}
 
-			long validatedAt = (Long)validatedAtObject;
+			long validatedAt = MapUtil.getLong(validatedMap, "validatedAt");
 
 			if (validatedAt + _validationExpirationTime * 1000 >
 					System.currentTimeMillis()) {

@@ -50,7 +50,7 @@ public interface EmailOTPConfiguration {
 	public boolean forceUserSetup();
 
 	@Meta.AD(
-		deflt = "300",
+		deflt = "30",
 		description = "resend-email-timeout-description",
 		name = "resend-email-timeout", required = false
 	)
@@ -89,13 +89,19 @@ public interface EmailOTPConfiguration {
 		description = "email-template-subject-description",
 		name = "email-template-subject", required = false
 	)
-	public LocalizedValuesMap emailTemplateSubject();
+	public String emailTemplateSubject();
 
 	@Meta.AD(
 		deflt = "${resource:com/liferay/multi/factor/authentication/provider/email/otp/web/internal/configuration/email_body.tmpl}",
 		description = "email-template-body-description",
 		name = "email-template-body", required = false
 	)
-	public LocalizedValuesMap emailTemplateBody();
+	public String emailTemplateBody();
 
+	@Meta.AD(
+		deflt = "6",
+		description = "otp-size-description",
+		name = "otp-size", required = false
+	)
+	public int otpSize();
 }

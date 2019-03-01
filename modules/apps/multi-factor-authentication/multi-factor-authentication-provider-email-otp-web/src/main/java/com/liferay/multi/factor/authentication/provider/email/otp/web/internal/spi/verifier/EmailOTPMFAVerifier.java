@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.util.PropsValues;
@@ -33,6 +34,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +59,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	configurationPid = "com.liferay.multi.factor.authentication.provider.email.otp.web.internal.configuration.EmailOTPConfiguration",
-	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	configurationPolicy = ConfigurationPolicy.REQUIRE,
 	service = MFAVerifier.class
 )
 public class EmailOTPMFAVerifier
@@ -70,6 +72,7 @@ public class EmailOTPMFAVerifier
 	private long _validationExpirationTime;
 	private boolean _allowCustomEmail;
 	private EmailOTPConfiguration _emailOTPConfiguration;
+	private String _emailOTPConfigurationPid;
 
 	@Activate
 	protected void activate(Map<String, Object> properties) {
@@ -77,11 +80,13 @@ public class EmailOTPMFAVerifier
 			ConfigurableUtil.createConfigurable(
 				EmailOTPConfiguration.class, properties);
 
+		_emailOTPConfigurationPid = (String)properties.getOrDefault(
+			"pid", EmailOTPConfiguration.class.getName());
+
 		_allowCustomEmail = _emailOTPConfiguration.allowCustomEmail();
 		_enabled = _emailOTPConfiguration.enabled();
 		_forceUserSetup = _emailOTPConfiguration.forceUserSetup();
 		_name = _emailOTPConfiguration.name();
-		_resendEmailTimeout = _emailOTPConfiguration.resendEmailTimeout();
 		_validationExpirationTime = _emailOTPConfiguration.validationExpirationTime();
 
 		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
@@ -89,7 +94,7 @@ public class EmailOTPMFAVerifier
 				Arrays.asList(
 					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
 
-			sessionPhishingProtectedAttributesList.add(_VALIDATED_AT);
+			sessionPhishingProtectedAttributesList.add(_VALIDATED);
 
 			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
 				sessionPhishingProtectedAttributesList.toArray(
@@ -104,7 +109,7 @@ public class EmailOTPMFAVerifier
 				Arrays.asList(
 					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
 
-			sessionPhishingProtectedAttributesList.remove(_VALIDATED_AT);
+			sessionPhishingProtectedAttributesList.remove(_VALIDATED);
 
 			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
 				sessionPhishingProtectedAttributesList.toArray(
@@ -215,6 +220,20 @@ public class EmailOTPMFAVerifier
 	}
 
 	@Override
+	public boolean isBrowserVerified(HttpServletRequest request, long userId) {
+		HttpServletRequest originalServletRequest =
+			_portal.getOriginalServletRequest(request);
+
+		HttpSession session = originalServletRequest.getSession(false);
+
+		if (isValid(session, userId)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
 	public boolean requiresSetup(long userId) {
 		if (isUserSetUp(userId)) {
 			return false;
@@ -234,19 +253,10 @@ public class EmailOTPMFAVerifier
 	}
 
 	@Override
-	public boolean requiresBrowserVerification(
+	public boolean canVerifyBrowser(
 		HttpServletRequest request, long userId) {
 
 		if (!isUserSetUp(userId)) {
-			return false;
-		}
-
-		HttpServletRequest originalServletRequest =
-			_portal.getOriginalServletRequest(request);
-
-		HttpSession session = originalServletRequest.getSession(false);
-
-		if (isValid(session)) {
 			return false;
 		}
 
@@ -275,6 +285,15 @@ public class EmailOTPMFAVerifier
 
 			if (_verify(session, userInput)) {
 				_emailOTPLocalService.addEmailOTP(userId, email, userIP);
+
+				long validatedAt = System.currentTimeMillis();
+
+				Map<String, Object> validatedMap = new HashMap(2);
+
+				validatedMap.put("validatedAt", validatedAt);
+				validatedMap.put("userId", userId);
+
+				session.setAttribute(_VALIDATED, validatedMap);
 
 				_emailOTPLocalService.updateAttempts(userId, true, userIP);
 
@@ -319,7 +338,12 @@ public class EmailOTPMFAVerifier
 			if (verified) {
 				long validatedAt = System.currentTimeMillis();
 
-				session.setAttribute(_VALIDATED_AT, validatedAt);
+				Map<String, Object> validatedMap = new HashMap(2);
+
+				validatedMap.put("validatedAt", validatedAt);
+				validatedMap.put("userId", userId);
+
+				session.setAttribute(_VALIDATED, validatedMap);
 
 				_emailOTPLocalService.updateAttempts(userId, true, userIP);
 
@@ -342,7 +366,7 @@ public class EmailOTPMFAVerifier
 
 		// user may make typo, not removing attributes to allow retry
 
-		if (!expected.equals(userInput)) {
+		if ((expected == null) || !expected.equals(userInput)) {
 			return false;
 		}
 
@@ -354,19 +378,24 @@ public class EmailOTPMFAVerifier
 		return true;
 	}
 
-	protected boolean isValid(HttpSession httpSession) {
+	protected boolean isValid(HttpSession httpSession, long userId) {
 		if (httpSession == null) {
 			return false;
 		}
 
-		Object validatedAtObject = httpSession.getAttribute(_VALIDATED_AT);
+		Map<String, Object> validatedMap = (Map)httpSession.getAttribute(
+			_VALIDATED);
 
-		if (validatedAtObject != null) {
+		if (validatedMap != null) {
+			if (userId != MapUtil.getLong(validatedMap, "userId")) {
+				return false;
+			}
+
 			if (_validationExpirationTime < 0) {
 				return true;
 			}
 
-			long validatedAt = (Long)validatedAtObject;
+			long validatedAt = MapUtil.getLong(validatedMap, "validatedAt");
 
 			if (validatedAt + _validationExpirationTime * 1000 >
 				System.currentTimeMillis()) {
@@ -395,8 +424,12 @@ public class EmailOTPMFAVerifier
 	@Reference
 	private UserLocalService _userLocalService;
 
-	private static final String _VALIDATED_AT =
-		EmailOTPMFAVerifier.class.getName() + "#VALIDATED_AT";
+	private static final String _VALIDATED =
+		EmailOTPMFAVerifier.class.getName() + "#VALIDATED";
 
+
+	public String getEmailOTPConfigurationPid() {
+		return _emailOTPConfigurationPid;
+	}
 
 }

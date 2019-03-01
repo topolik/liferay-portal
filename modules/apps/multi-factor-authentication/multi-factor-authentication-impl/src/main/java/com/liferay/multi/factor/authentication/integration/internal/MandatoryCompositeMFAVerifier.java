@@ -22,104 +22,114 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Tomas Polesovsky
  */
 public class MandatoryCompositeMFAVerifier
-	extends CompositeMFAVerifier {
+	extends CompositeMFAVerifierImpl {
 
 	public MandatoryCompositeMFAVerifier(List<MFAVerifier> mfaVerifiers) {
 		super(mfaVerifiers);
 	}
 
 	@Override
-	public boolean requiresHeadlessVerification(
-		HttpServletRequest request, long userId) {
-
-		for (MFAVerifier mfaVerifier : mfaVerifiers) {
-			if (!mfaVerifier.supportsHeadless()) {
-				continue;
-			}
-
-			HeadlessMFAVerifier headlessMFAVerifier =
-				(HeadlessMFAVerifier)mfaVerifier;
-
-			if (headlessMFAVerifier.requiresHeadlessVerification(
-					request, userId)) {
-
-				return true;
-			}
-		}
-
-		return false;
+	public List<MFAVerifier> getOptionalMFAVerifiers() {
+		return Collections.singletonList(this);
 	}
 
 	@Override
-	public boolean requiresBrowserVerification(
-		HttpServletRequest request, long userId) {
-
-		for (MFAVerifier mfaVerifier : mfaVerifiers) {
-			if (!mfaVerifier.supportsBrowser()) {
-				continue;
-			}
-
-			BrowserMFAVerifier browserMFAVerifier =
-				(BrowserMFAVerifier)mfaVerifier;
-
-			if (browserMFAVerifier.requiresBrowserVerification(
-				request, userId)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	@Override
-	public boolean requiresSetup(long userId) {
-		for (MFAVerifier mfaVerifier : mfaVerifiers) {
-			if (!mfaVerifier.supportsBrowser()) {
-				continue;
-			}
-
-			BrowserMFAVerifier browserMFAVerifier =
-				(BrowserMFAVerifier)mfaVerifier;
-
-			if (browserMFAVerifier.requiresSetup(userId)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	@Override
-	public boolean setup(ActionRequest actionRequest, long userId) {
+	public boolean isBrowserVerified(HttpServletRequest request, long userId) {
 		if (mfaVerifiers.size() == 0) {
 			return false;
 		}
 
-		boolean setup = true;
-
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsBrowser()) {
-				continue;
+				return false;
 			}
 
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if(!browserMFAVerifier.requiresSetup(userId)) {
-				continue;
+			if (!browserMFAVerifier.isBrowserVerified(request, userId)) {
+				return false;
 			}
-
-			setup &= browserMFAVerifier.setup(actionRequest, userId);
 		}
 
-		return setup;
+		return true;
+	}
+
+	@Override
+	public boolean isHeadlessVerified(HttpServletRequest request, long userId) {
+		if (mfaVerifiers.size() == 0) {
+			return false;
+		}
+
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsHeadless()) {
+				return false;
+			}
+
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier) mfaVerifier;
+
+			if (!headlessMFAVerifier.isHeadlessVerified(request, userId)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean canVerifyHeadless(
+		HttpServletRequest request, long userId) {
+
+		if (mfaVerifiers.size() == 0) {
+			return false;
+		}
+
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsHeadless()) {
+				return false;
+			}
+
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier) mfaVerifier;
+
+			if (!headlessMFAVerifier.canVerifyHeadless(request, userId)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean canVerifyBrowser(
+		HttpServletRequest request, long userId) {
+
+		if (mfaVerifiers.size() == 0) {
+			return false;
+		}
+
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsBrowser()) {
+				return false;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if (!browserMFAVerifier.canVerifyBrowser(request, userId)) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	@Override
@@ -140,14 +150,20 @@ public class MandatoryCompositeMFAVerifier
 
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsBrowser()) {
-				continue;
+				return false;
 			}
 
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if(!browserMFAVerifier.requiresBrowserVerification(
+			if(!browserMFAVerifier.canVerifyBrowser(
 				originalServletRequest, userId)) {
+
+				return false;
+			}
+
+			if (browserMFAVerifier.isBrowserVerified(
+					originalServletRequest, userId)) {
 
 				continue;
 			}
@@ -171,16 +187,20 @@ public class MandatoryCompositeMFAVerifier
 
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsHeadless()) {
-				continue;
+				return false;
 			}
 
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
 
-			if(!headlessMFAVerifier.requiresHeadlessVerification(
+			if(!headlessMFAVerifier.canVerifyHeadless(
 				request, userId)) {
 
+				return false;
+			}
+
+			if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
 				continue;
 			}
 

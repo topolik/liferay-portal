@@ -15,25 +15,24 @@
 package com.liferay.multi.factor.authentication.portlet.web.internal.portlet.action;
 
 import com.liferay.multi.factor.authentication.api.MFARegistry;
-import com.liferay.multi.factor.authentication.portlet.api.MFAPortletURLFactory;
+import com.liferay.multi.factor.authentication.api.verifier.CompositeMFAVerifier;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
-import com.liferay.multi.factor.authentication.spi.integration.MFAIntegration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
-import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.WebKeys;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import javax.portlet.PortletException;
+import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Tomas Polesovsky
@@ -51,6 +50,61 @@ public class MFASetupMVCRenderCommand implements MVCRenderCommand {
 			RenderRequest renderRequest, RenderResponse renderResponse)
 		throws PortletException {
 
+		String integrationName = ParamUtil.getString(
+			renderRequest, "integrationName");
+
+		BrowserMFAVerifier browserMFAVerifier =
+			(BrowserMFAVerifier) _mfaRegistry.getIntegrationVerifier(
+				integrationName);
+
+		renderRequest.setAttribute(
+			BrowserMFAVerifier.class.getName(), browserMFAVerifier);
+
+		List<BrowserMFAVerifier> setupMFAVerifiers = _getSetupMFAVerifiers(
+			browserMFAVerifier, renderRequest);
+
+		renderRequest.setAttribute("setupMFAVerifiers", setupMFAVerifiers);
+
 		return "/setup.jsp";
 	}
+
+	private List<BrowserMFAVerifier> _getSetupMFAVerifiers(
+		BrowserMFAVerifier mfaVerifier, PortletRequest portletRequest) {
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (!(mfaVerifier instanceof CompositeMFAVerifier)) {
+			return Collections.singletonList(mfaVerifier);
+		}
+
+		List<MFAVerifier> optionalMFAVerifiers =
+			((CompositeMFAVerifier)mfaVerifier).getOptionalMFAVerifiers();
+
+		List<BrowserMFAVerifier> setupMFAVerifiers = new ArrayList<>(
+			optionalMFAVerifiers.size());
+
+		for (MFAVerifier optionalMFAVerifier : optionalMFAVerifiers) {
+			if (!optionalMFAVerifier.supportsBrowser()) {
+				continue;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)optionalMFAVerifier;
+
+			if (!browserMFAVerifier.requiresSetup(
+				themeDisplay.getUserId())) {
+
+				continue;
+			}
+
+			setupMFAVerifiers.add(browserMFAVerifier);
+		}
+
+		return setupMFAVerifiers;
+	}
+
+	@Reference
+	private MFARegistry _mfaRegistry;
+
 }

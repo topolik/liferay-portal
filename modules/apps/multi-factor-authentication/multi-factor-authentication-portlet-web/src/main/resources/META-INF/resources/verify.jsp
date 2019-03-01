@@ -15,7 +15,20 @@
 --%>
 
 <%@ include file="/init.jsp" %>
+<%
+BrowserMFAVerifier browserMFAVerifier = (BrowserMFAVerifier)request.getAttribute(BrowserMFAVerifier.class.getName());
 
+List<BrowserMFAVerifier> verifyMFAVerifiers = (List<BrowserMFAVerifier>)request.getAttribute("verifyMFAVerifiers");
+
+long mfaUserId = (Long)request.getAttribute("mfaUserId");
+
+int mfaVerifierIndex = ParamUtil.getInteger(request, "mfaVerifierIndex", 0);
+
+if ((mfaVerifierIndex > -1) && (mfaVerifierIndex < verifyMFAVerifiers.size())) {
+	browserMFAVerifier = verifyMFAVerifiers.get(mfaVerifierIndex);
+}
+
+%>
 <portlet:actionURL name="/mfa_verify/verify" var="verifyActionURL">
 	<portlet:param name="mvcRenderCommandName" value="/mfa_verify/verify" />
 </portlet:actionURL>
@@ -23,10 +36,25 @@
 <aui:form action="<%= verifyActionURL %>" cssClass="container-fluid-1280 sign-in-form" method="post" name="fm">
 	<aui:input name="integrationName" type="hidden" value='<%= ParamUtil.getString(request, "integrationName") %>' />
 	<aui:input name="redirect" type="hidden" value='<%= ParamUtil.getString(request, "redirect") %>' />
+	<aui:input name="saveLastPath" type="hidden" value="<%= false %>" />
 
 	<liferay-ui:error key="mfaFailed" message="multi-factor-authentication-failed" />
 
-	<liferay-util:dynamic-include key="com.liferay.multi.factor.authentication.portlet.web#/verify.jsp" />
+	<%
+		browserMFAVerifier.includeBrowserVerification(mfaUserId, request, response);
+	%>
+
+	<c:if test="<%= verifyMFAVerifiers.size() > 1 %>">
+		<portlet:renderURL var="useAnotherMFAVerifier" copyCurrentRenderParameters="<%= true %>">
+			<portlet:param name="integrationName" value='<%= ParamUtil.getString(request, "integrationName") %>' />
+			<portlet:param name="mfaVerifierIndex" value="<%= mfaVerifierIndex + 1 < verifyMFAVerifiers.size() ?  String.valueOf(mfaVerifierIndex + 1) : "0" %>"/>
+			<portlet:param name="mvcRenderCommandName" value="/mfa_verify/verify" />
+			<portlet:param name="redirect" value='<%= ParamUtil.getString(request, "redirect") %>' />
+			<portlet:param name="saveLastPath" value="<%= Boolean.FALSE.toString() %>" />
+		</portlet:renderURL>
+
+		<a href="<%= HtmlUtil.escapeAttribute(useAnotherMFAVerifier) %>"><liferay-ui:message key="use-another-verifier" /></a>
+	</c:if>
 
 	<aui:button-row>
 		<aui:button type="submit" value="submit" />

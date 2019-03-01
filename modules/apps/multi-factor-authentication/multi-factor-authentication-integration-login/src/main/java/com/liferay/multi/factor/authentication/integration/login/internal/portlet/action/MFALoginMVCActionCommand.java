@@ -121,50 +121,69 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 					request, login, password, null);
 
 			if (userId > 0) {
+				if (mfaVerifier.supportsBrowser()) {
+					BrowserMFAVerifier browserMFAVerifier =
+						(BrowserMFAVerifier)mfaVerifier;
+
+					if (browserMFAVerifier.requiresSetup(userId)) {
+						redirectToSetup(actionRequest, actionResponse);
+
+						return;
+					}
+				}
+
 				if (mfaVerifier.supportsHeadless()) {
 					HeadlessMFAVerifier headlessMFAVerifier =
 						(HeadlessMFAVerifier) mfaVerifier;
 
-					if (!headlessMFAVerifier.requiresHeadlessVerification(
-						request, userId)){
-
-						_loginMVCActionCommand.processAction(
-							actionRequest, actionResponse);
-
-						return;
-					}
-
-					if (headlessMFAVerifier.verifyHeadlessRequest(
+					if (headlessMFAVerifier.canVerifyHeadless(
 						request, userId)) {
 
-						_loginMVCActionCommand.processAction(
-							actionRequest, actionResponse);
+						if (headlessMFAVerifier.isHeadlessVerified(
+							request, userId)) {
+
+							_loginMVCActionCommand.processAction(
+								actionRequest, actionResponse);
+
+							return;
+						}
+
+						if (headlessMFAVerifier.verifyHeadlessRequest(
+							request, userId)) {
+
+							_loginMVCActionCommand.processAction(
+								actionRequest, actionResponse);
+
+							return;
+						}
+					}
+				}
+
+				if (mfaVerifier.supportsBrowser()) {
+					BrowserMFAVerifier browserMFAVerifier =
+						(BrowserMFAVerifier) mfaVerifier;
+
+					if (browserMFAVerifier.canVerifyBrowser(
+						request, userId)) {
+
+						if (browserMFAVerifier.isBrowserVerified(
+							request, userId)){
+
+							_loginMVCActionCommand.processAction(
+								actionRequest, actionResponse);
+
+							return;
+						}
+
+						_redirectToVerify(
+							userId, actionRequest, actionResponse);
 
 						return;
 					}
 				}
 
-				BrowserMFAVerifier browserMFAVerifier =
-					(BrowserMFAVerifier)mfaVerifier;
-
-				if (browserMFAVerifier.requiresSetup(userId)) {
-					redirectToSetup(actionRequest, actionResponse);
-
-					return;
-				}
-
-				if (browserMFAVerifier.requiresBrowserVerification(
-					request, userId)) {
-
-					_redirectToVerify(userId, actionRequest, actionResponse);
-
-					return;
-				}
-				else {
-					_loginMVCActionCommand.processAction(
-						actionRequest, actionResponse);
-					return;
-				}
+				throw new AuthException(
+					"Multi Factor Authentication failed");
 			}
 		}
 

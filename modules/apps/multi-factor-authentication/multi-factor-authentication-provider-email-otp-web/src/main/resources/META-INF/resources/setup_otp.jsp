@@ -19,9 +19,6 @@
 <%
 EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.getAttribute("emailOTPConfiguration");
 %>
-<h1>
-	<liferay-ui:message key="<%= HtmlUtil.escape(emailOTPConfiguration.name()) %>"/>
-</h1>
 
 <div id="<portlet:namespace/>phaseOne">
 	<c:choose>
@@ -51,8 +48,6 @@ EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.get
 	</h2>
 
 	<aui:input name="otp" showRequiredLabel="yes" />
-
-	<aui:button id="sendButton" onclick='<%= liferayPortletResponse.getNamespace() + "send();" %>' value="send" />
 </div>
 
 
@@ -74,14 +69,14 @@ EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.get
 
 			var interval = setInterval(
 				function() {
-					if (resendDuration === 0) {
-						sendEmailButton.innerText = buttonText;
-						sendEmailButton.disabled = false;
+					if (this.resendDuration === 0) {
+						this.sendEmailButton.innerText = buttonText;
+						this.sendEmailButton.disabled = false;
 
-						clearInterval(interval);
+						clearInterval(this.interval);
 					}
 					else {
-						sendEmailButton.innerText = --resendDuration;
+						this.sendEmailButton.innerText = --this.resendDuration;
 					}
 
 				},

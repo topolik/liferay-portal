@@ -26,7 +26,7 @@ import java.io.IOException;
  */
 public interface BrowserMFAVerifier {
 
-	public boolean requiresBrowserVerification(
+	public boolean canVerifyBrowser(
 		HttpServletRequest request, long userId);
 
 	public boolean requiresSetup(long userId);
@@ -47,4 +47,6 @@ public interface BrowserMFAVerifier {
 		ActionRequest actionRequest, ActionResponse actionResponse,
 		long userId);
 
+	public boolean isBrowserVerified(
+		HttpServletRequest request, long userId);
 }

@@ -156,8 +156,6 @@ public class MFAVerifyPortlet extends MVCPortlet {
 			return;
 		}
 
-
-
 		if (!mfaVerifier.supportsBrowser() ||
 			!(mfaVerifier instanceof BrowserMFAVerifier)) {
 

@@ -22,53 +22,26 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Tomas Polesovsky
  */
-public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
+public class OptionalCompositeMFAVerifier extends CompositeMFAVerifierImpl {
 
-	public OptionalCompositeMFAVerifier(Collection<MFAVerifier> mfaVerifiers) {
+	public OptionalCompositeMFAVerifier(List<MFAVerifier> mfaVerifiers) {
 		super(mfaVerifiers);
 	}
 
+
 	@Override
-	public boolean requiresHeadlessVerification(
-		HttpServletRequest request, long userId) {
-
-		if (mfaVerifiers.isEmpty()) {
-			return false;
-		}
-
-		boolean requiresVerification = true;
-
-		for (MFAVerifier mfaVerifier : mfaVerifiers) {
-			if (!mfaVerifier.supportsHeadless()) {
-				continue;
-			}
-
-			HeadlessMFAVerifier headlessMFAVerifier =
-				(HeadlessMFAVerifier)mfaVerifier;
-
-			requiresVerification &=
-				headlessMFAVerifier.requiresHeadlessVerification(
-					request, userId);
-		}
-
-		return requiresVerification;
+	public List<MFAVerifier> getOptionalMFAVerifiers() {
+		return mfaVerifiers;
 	}
 
 	@Override
-	public boolean requiresBrowserVerification(
-		HttpServletRequest request, long userId) {
-
-		if (mfaVerifiers.isEmpty()) {
-			return false;
-		}
-
-		boolean requiresVerification = true;
-
+	public boolean isBrowserVerified(HttpServletRequest request, long userId) {
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsBrowser()) {
 				continue;
@@ -77,25 +50,7 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			requiresVerification &=
-				browserMFAVerifier.requiresBrowserVerification(
-					request, userId);
-		}
-
-		return requiresVerification;
-	}
-
-	@Override
-	public boolean requiresSetup(long userId) {
-		for (MFAVerifier mfaVerifier : mfaVerifiers) {
-			if (!mfaVerifier.supportsBrowser()) {
-				continue;
-			}
-
-			BrowserMFAVerifier browserMFAVerifier =
-				(BrowserMFAVerifier)mfaVerifier;
-
-			if(browserMFAVerifier.requiresSetup(userId)) {
+			if(browserMFAVerifier.isBrowserVerified(request, userId)) {
 				return true;
 			}
 		}
@@ -104,9 +59,43 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 	}
 
 	@Override
-	public boolean setup(ActionRequest actionRequest, long userId) {
-		boolean setup = false;
+	public boolean isHeadlessVerified(HttpServletRequest request, long userId) {
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsHeadless()) {
+				continue;
+			}
 
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier)mfaVerifier;
+
+			if(headlessMFAVerifier.isHeadlessVerified(request, userId)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean canVerifyHeadless(HttpServletRequest request, long userId) {
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsHeadless()) {
+				continue;
+			}
+
+			HeadlessMFAVerifier headlessMFAVerifier =
+				(HeadlessMFAVerifier)mfaVerifier;
+
+			if(headlessMFAVerifier.canVerifyHeadless(request, userId)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean canVerifyBrowser(HttpServletRequest request, long userId) {
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsBrowser()) {
 				continue;
@@ -115,14 +104,12 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if(!browserMFAVerifier.requiresSetup(userId)) {
-				continue;
+			if(browserMFAVerifier.canVerifyBrowser(request, userId)) {
+				return true;
 			}
-
-			setup |= browserMFAVerifier.setup(actionRequest, userId);
 		}
 
-		return setup;
+		return false;
 	}
 
 	@Override
@@ -142,8 +129,14 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if(!browserMFAVerifier.requiresBrowserVerification(
+			if(!browserMFAVerifier.canVerifyBrowser(
 					originalServletRequest, userId)) {
+
+				continue;
+			}
+
+			if (browserMFAVerifier.isBrowserVerified(
+				originalServletRequest, userId)) {
 
 				continue;
 			}
@@ -159,7 +152,9 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 	}
 
 	@Override
-	public boolean verifyHeadlessRequest(HttpServletRequest request, long userId) {
+	public boolean verifyHeadlessRequest(
+		HttpServletRequest request, long userId) {
+
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsHeadless()) {
 				continue;
@@ -168,10 +163,14 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifier {
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
-			if(!headlessMFAVerifier.requiresHeadlessVerification(
+			if(!headlessMFAVerifier.canVerifyHeadless(
 				request, userId)) {
 
-				return true;
+				continue;
+			}
+
+			if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
+				continue;
 			}
 
 			if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {

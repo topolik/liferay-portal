@@ -56,9 +56,8 @@ page import="com.liferay.portal.kernel.util.PortalUtil" %>
 			%>
 		</div>
 
+		<aui:button-row>
+			<aui:button type="submit" value="submit" />
+		</aui:button-row>
 	</div>
-
-	<aui:button-row>
-		<aui:button type="submit" value="submit" />
-	</aui:button-row>
 </aui:form>

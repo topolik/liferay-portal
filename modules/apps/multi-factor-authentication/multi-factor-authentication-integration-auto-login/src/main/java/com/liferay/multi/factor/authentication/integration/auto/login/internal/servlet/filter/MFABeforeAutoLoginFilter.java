@@ -148,39 +148,51 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
-			if (!headlessMFAVerifier.requiresHeadlessVerification(
+			if (headlessMFAVerifier.canVerifyHeadless(
 					request, userId)){
 
-				return super.getLoginRemoteUser(
-					request, response, session, credentials);
-			}
+				if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
+					return super.getLoginRemoteUser(
+						request, response, session, credentials);
+				}
 
-			if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
-				return super.getLoginRemoteUser(
-					request, response, session, credentials);
+				if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
+					return super.getLoginRemoteUser(
+						request, response, session, credentials);
+				}
 			}
 		}
-		else if (mfaVerifier.supportsBrowser()) {
+
+		if (mfaVerifier.supportsBrowser()) {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier) mfaVerifier;
 
-			if (!browserMFAVerifier.requiresBrowserVerification(
-				request, userId)){
+			if (browserMFAVerifier.canVerifyBrowser(request, userId)){
+				if (browserMFAVerifier.isBrowserVerified(request, userId)) {
+					return super.getLoginRemoteUser(
+						request, response, session, credentials);
+				}
 
-				return super.getLoginRemoteUser(
-					request, response, session, credentials);
+				_redirectToVerify(credentials, request, session, userId);
+
+				return jUsername;
 			}
 		}
-		else {
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					StringBundler.concat(
-						"Unable to verify user ", userId,
-						" using MFA"));
-			}
 
-			return null;
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				StringBundler.concat(
+					"Unable to verify user ", userId,
+					" using MFA"));
 		}
+
+		return null;
+	}
+
+	private void _redirectToVerify(
+			String[] credentials, HttpServletRequest request,
+			HttpSession session, long userId)
+		throws Exception {
 
 		Map<String, Object> stateMap = new HashMap<>();
 
@@ -213,8 +225,6 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 		request.setAttribute(
 			AutoLogin.AUTO_LOGIN_REDIRECT_AND_CONTINUE,
 			verificationURL.toString());
-
-		return jUsername;
 	}
 
 	@Override

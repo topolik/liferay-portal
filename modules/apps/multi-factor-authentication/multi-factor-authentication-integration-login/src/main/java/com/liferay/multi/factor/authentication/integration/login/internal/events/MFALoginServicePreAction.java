@@ -88,8 +88,16 @@ public class MFALoginServicePreAction extends Action {
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
-			if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
-				return;
+			if (headlessMFAVerifier.canVerifyHeadless(request, userId)) {
+				if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
+					return;
+				}
+
+				if (headlessMFAVerifier.verifyHeadlessRequest(
+					request, userId)) {
+
+					return;
+				}
 			}
 		}
 
@@ -97,16 +105,17 @@ public class MFALoginServicePreAction extends Action {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier) mfaVerifier;
 
-			if (!browserMFAVerifier.requiresBrowserVerification(
-					request, userId)) {
+			if (browserMFAVerifier.canVerifyBrowser(request, userId)) {
+				if (browserMFAVerifier.isBrowserVerified(request, userId)) {
+					return;
+
+				}
+
+				redirectToVerifyBrowserRequest(
+					request, response, themeDisplay, userId);
 
 				return;
 			}
-
-			redirectToVerifyBrowserRequest(
-				request, response, themeDisplay, userId);
-
-			return;
 		}
 
 		throw new ActionException(

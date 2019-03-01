@@ -117,24 +117,30 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 
 		long userId = authVerifierResult.getUserId();
 
-		if (headlessMFAVerifier.requiresHeadlessVerification(request, userId)) {
-			if (!headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(
-						StringBundler.concat(
-							"Unable to verify Multi Factor " +
-							"Authentication token for ",
-							request.getPathInfo()));
-				}
+		if (headlessMFAVerifier.canVerifyHeadless(request, userId)) {
+			if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
+				super.processFilter(request, response, filterChain);
 
-				response.sendError(
-					HttpServletResponse.SC_FORBIDDEN, "Two Factor Required");
+				return;
+			}
+
+			if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
+				super.processFilter(request, response, filterChain);
 
 				return;
 			}
 		}
 
-		super.processFilter(request, response, filterChain);
+		if (_log.isWarnEnabled()) {
+			_log.warn(
+				StringBundler.concat(
+					"Unable to verify Multi Factor " +
+					"Authentication token for ",
+					request.getPathInfo()));
+		}
+
+		response.sendError(
+			HttpServletResponse.SC_FORBIDDEN, "Two Factor Required");
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

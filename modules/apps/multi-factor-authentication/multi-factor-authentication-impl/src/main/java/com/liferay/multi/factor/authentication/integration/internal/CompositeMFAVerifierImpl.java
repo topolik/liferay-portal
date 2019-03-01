@@ -14,22 +14,26 @@
 
 package com.liferay.multi.factor.authentication.integration.internal;
 
+import com.liferay.multi.factor.authentication.api.verifier.CompositeMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 
+import javax.portlet.ActionRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Tomas Polesovsky
  */
-public abstract class CompositeMFAVerifier
-	implements MFAVerifier, BrowserMFAVerifier, HeadlessMFAVerifier {
+public abstract class CompositeMFAVerifierImpl
+	implements BrowserMFAVerifier, CompositeMFAVerifier, HeadlessMFAVerifier,
+		MFAVerifier {
 
 	@Override
 	public boolean supportsUserAccountSetup() {
@@ -81,7 +85,7 @@ public abstract class CompositeMFAVerifier
 		return sb.toString();
 	}
 
-	public CompositeMFAVerifier(Collection<MFAVerifier> mfaVerifiers) {
+	public CompositeMFAVerifierImpl(List<MFAVerifier> mfaVerifiers) {
 		this.mfaVerifiers = mfaVerifiers;
 	}
 
@@ -125,6 +129,8 @@ public abstract class CompositeMFAVerifier
 			}
 
 			browserMFAVerifier.includeSetup(userId, request, response);
+
+			return;
 		}
 	}
 
@@ -141,17 +147,64 @@ public abstract class CompositeMFAVerifier
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if (!browserMFAVerifier.requiresBrowserVerification(
-					request, userId)) {
+			if (!browserMFAVerifier.canVerifyBrowser(
+				request, userId)) {
 
+				continue;
+			}
+
+			if (browserMFAVerifier.isBrowserVerified(request, userId)) {
 				continue;
 			}
 
 			browserMFAVerifier.includeBrowserVerification(
 				userId, request, response);
+
+			return;
 		}
 	}
 
-	protected Collection<MFAVerifier> mfaVerifiers;
+
+	@Override
+	public boolean requiresSetup(long userId) {
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsBrowser()) {
+				continue;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if (browserMFAVerifier.requiresSetup(userId)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean setup(ActionRequest actionRequest, long userId) {
+		boolean setup = false;
+
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsBrowser()) {
+				continue;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if(!browserMFAVerifier.requiresSetup(userId)) {
+				continue;
+			}
+
+			setup |= browserMFAVerifier.setup(actionRequest, userId);
+		}
+
+		return setup;
+	}
+
+	protected List<MFAVerifier> mfaVerifiers;
 
 }

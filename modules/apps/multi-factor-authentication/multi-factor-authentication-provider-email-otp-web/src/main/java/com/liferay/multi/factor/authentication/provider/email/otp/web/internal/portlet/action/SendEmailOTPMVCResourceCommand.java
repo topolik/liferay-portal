@@ -33,13 +33,20 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.module.configuration.ConfigurationException;
+import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.resource.manager.ClassLoaderResourceManager;
 import com.liferay.portal.kernel.security.auth.AuthToken;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
+import com.liferay.portal.kernel.settings.LocationVariableResolver;
+import com.liferay.portal.kernel.settings.SettingsLocatorHelper;
+import com.liferay.portal.kernel.settings.SystemSettingsLocator;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -138,7 +145,8 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 				return false;
 			}
 
-			String generatedOTP = PwdGenerator.getPassword(_LENGTH);
+			String generatedOTP = PwdGenerator.getPassword(
+				emailOTPConfiguration.otpSize());
 
 			session.setAttribute("otp", generatedOTP);
 			session.setAttribute("otpSetAt", System.currentTimeMillis());
@@ -166,17 +174,18 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 			MailTemplateContext mailTemplateContext =
 				mailTemplateContextBuilder.build();
 
-			LocalizedValuesMap emailTemplateSubject =
-				emailOTPConfiguration.emailTemplateSubject();
+			String emailTemplateSubject =
+				_locationVariableResolver.resolve(
+					emailOTPConfiguration.emailTemplateSubject());
 
-			LocalizedValuesMap emailTemplateBody =
-				emailOTPConfiguration.emailTemplateBody();
+			String emailTemplateBody =
+				_locationVariableResolver.resolve(
+					emailOTPConfiguration.emailTemplateBody());
 
 			return _sendNotificationEmail(
 				emailOTPConfiguration.emailTemplateFrom(),
 				emailOTPConfiguration.emailTemplateFromName(), email, user,
-				emailTemplateSubject.get(user.getLocale()),
-				emailTemplateBody.get(user.getLocale()), mailTemplateContext);
+				emailTemplateSubject, emailTemplateBody, mailTemplateContext);
 		}
 		catch (Exception e) {
 			return false;
@@ -296,4 +305,12 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 	@Reference
 	private CompanyLocalService _companyLocalService;
 
+	@Reference
+	private ConfigurationProvider _configurationProvider;
+
+	private LocationVariableResolver _locationVariableResolver =
+		new LocationVariableResolver(
+			new ClassLoaderResourceManager(
+				SendEmailOTPMVCResourceCommand.class.getClassLoader()),
+			(SettingsLocatorHelper)null);
 }

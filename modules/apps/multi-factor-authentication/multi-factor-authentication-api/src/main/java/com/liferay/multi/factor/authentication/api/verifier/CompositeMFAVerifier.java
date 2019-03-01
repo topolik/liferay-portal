@@ -12,17 +12,17 @@
  * details.
  */
 
-package com.liferay.multi.factor.authentication.spi.verifier;
+package com.liferay.multi.factor.authentication.api.verifier;
 
-import javax.servlet.http.HttpServletRequest;
+import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
+
+import java.util.List;
 
 /**
  * @author Tomas Polesovsky
  */
-public interface HeadlessMFAVerifier {
-	public boolean canVerifyHeadless(HttpServletRequest request, long userId);
+public interface CompositeMFAVerifier {
 
-	public boolean verifyHeadlessRequest(HttpServletRequest request, long userId);
+	public List<MFAVerifier> getOptionalMFAVerifiers();
 
-	public boolean isHeadlessVerified(HttpServletRequest request, long userId);
 }
