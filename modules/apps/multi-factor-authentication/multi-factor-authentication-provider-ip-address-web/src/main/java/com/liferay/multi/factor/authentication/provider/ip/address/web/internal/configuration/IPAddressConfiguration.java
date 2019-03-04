@@ -48,7 +48,7 @@ public interface IPAddressConfiguration {
 	 * @return allowed IPs and their network masks.
 	 */
 	@Meta.AD(
-		deflt = "127.0.0.1/255.0.0.0|127.0.0.1/255.0.0.0|127.0.0.1/255.0.0.0",
+		deflt = "127.0.0.1/255.0.0.0|::1/128",
 		description = "allowed-ips-with-masks-description",
 		name = "allowed-ips-with-masks-name", required = false
 	)
