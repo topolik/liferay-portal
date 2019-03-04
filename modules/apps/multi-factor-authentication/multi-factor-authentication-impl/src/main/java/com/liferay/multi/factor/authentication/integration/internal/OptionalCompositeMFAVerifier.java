@@ -14,6 +14,7 @@
 
 package com.liferay.multi.factor.authentication.integration.internal;
 
+import com.liferay.multi.factor.authentication.api.verifier.CompositeMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.HeadlessMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
@@ -22,6 +23,7 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,10 +35,80 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifierImpl {
 		super(mfaVerifiers);
 	}
 
+	@Override
+	public List<BrowserMFAVerifier> getMFAVerifiersAvailableForSetup(long userId) {
+		List<BrowserMFAVerifier> availableMFAVerifiers = new ArrayList<>(
+			mfaVerifiers.size());
+
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsBrowser()) {
+				continue;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if (!browserMFAVerifier.forceUserSetup(userId)) {
+				continue;
+			}
+
+			if (mfaVerifier instanceof CompositeMFAVerifier) {
+				CompositeMFAVerifier compositeMFAVerifier =
+					(CompositeMFAVerifier)mfaVerifier;
+
+				availableMFAVerifiers.addAll(
+					compositeMFAVerifier.getMFAVerifiersAvailableForSetup(
+						userId));
+			}
+			else {
+				availableMFAVerifiers.add(browserMFAVerifier);
+			}
+		}
+
+		return availableMFAVerifiers;
+	}
 
 	@Override
-	public List<MFAVerifier> getOptionalMFAVerifiers() {
-		return mfaVerifiers;
+	public List<BrowserMFAVerifier> getMFAVerifiersAvailableForVerify(
+		HttpServletRequest httpServletRequest, long userId) {
+
+		List<BrowserMFAVerifier> availableMFAVerifiers = new ArrayList<>(
+			mfaVerifiers.size());
+
+		for (MFAVerifier mfaVerifier : mfaVerifiers) {
+			if (!mfaVerifier.supportsBrowser()) {
+				continue;
+			}
+
+			BrowserMFAVerifier browserMFAVerifier =
+				(BrowserMFAVerifier)mfaVerifier;
+
+			if (!browserMFAVerifier.isBrowserSetupComplete(
+				httpServletRequest, userId)) {
+
+				continue;
+			}
+
+			if (browserMFAVerifier.isBrowserVerified(
+				httpServletRequest, userId)){
+
+				continue;
+			}
+
+			if (mfaVerifier instanceof CompositeMFAVerifier) {
+				CompositeMFAVerifier compositeMFAVerifier =
+					(CompositeMFAVerifier)mfaVerifier;
+
+				availableMFAVerifiers.addAll(
+					compositeMFAVerifier.getMFAVerifiersAvailableForVerify(
+						httpServletRequest, userId));
+			}
+			else {
+				availableMFAVerifiers.add(browserMFAVerifier);
+			}
+		}
+
+		return availableMFAVerifiers;
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -68,6 +69,10 @@ public class MFALoginServicePreAction extends Action {
 		if ((themeDisplay == null) || !themeDisplay.isSignedIn() ||
 			themeDisplay.isImpersonated()) {
 
+			return;
+		}
+
+		if (StringUtil.equals("/c/portal/logout", request.getRequestURI())) {
 			return;
 		}
 

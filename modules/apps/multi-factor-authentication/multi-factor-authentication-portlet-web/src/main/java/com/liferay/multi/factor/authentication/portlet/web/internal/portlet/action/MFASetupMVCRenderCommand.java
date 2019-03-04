@@ -30,6 +30,7 @@ import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,30 +79,11 @@ public class MFASetupMVCRenderCommand implements MVCRenderCommand {
 			return Collections.singletonList(mfaVerifier);
 		}
 
-		List<MFAVerifier> optionalMFAVerifiers =
-			((CompositeMFAVerifier)mfaVerifier).getOptionalMFAVerifiers();
+		CompositeMFAVerifier compositeMFAVerifier =
+			(CompositeMFAVerifier)mfaVerifier;
 
-		List<BrowserMFAVerifier> setupMFAVerifiers = new ArrayList<>(
-			optionalMFAVerifiers.size());
-
-		for (MFAVerifier optionalMFAVerifier : optionalMFAVerifiers) {
-			if (!optionalMFAVerifier.supportsBrowser()) {
-				continue;
-			}
-
-			BrowserMFAVerifier browserMFAVerifier =
-				(BrowserMFAVerifier)optionalMFAVerifier;
-
-			if (!browserMFAVerifier.forceUserSetup(
-				themeDisplay.getUserId())) {
-
-				continue;
-			}
-
-			setupMFAVerifiers.add(browserMFAVerifier);
-		}
-
-		return setupMFAVerifiers;
+		return compositeMFAVerifier.getMFAVerifiersAvailableForSetup(
+			themeDisplay.getUserId());
 	}
 
 	@Reference

@@ -126,36 +126,11 @@ public class MFAVerifyMVCRenderCommand implements MVCRenderCommand {
 			_portal.getOriginalServletRequest(
 				_portal.getHttpServletRequest(portletRequest));
 
-		List<MFAVerifier> optionalMFAVerifiers =
-			((CompositeMFAVerifier)mfaVerifier).getOptionalMFAVerifiers();
+		CompositeMFAVerifier compositeMFAVerifier =
+			(CompositeMFAVerifier)mfaVerifier;
 
-		List<BrowserMFAVerifier> verifyMFAVerifiers = new ArrayList<>(
-			optionalMFAVerifiers.size());
-
-		for (MFAVerifier optionalMFAVerifier : optionalMFAVerifiers) {
-			if (!optionalMFAVerifier.supportsBrowser()) {
-				continue;
-			}
-
-			BrowserMFAVerifier browserMFAVerifier =
-				(BrowserMFAVerifier)optionalMFAVerifier;
-
-			if (!browserMFAVerifier.isBrowserSetupComplete(
-					httpServletRequest, userId)) {
-
-				continue;
-			}
-
-			if (browserMFAVerifier.isBrowserVerified(
-				httpServletRequest, userId)){
-
-				continue;
-			}
-
-			verifyMFAVerifiers.add(browserMFAVerifier);
-		}
-
-		return verifyMFAVerifiers;
+		return compositeMFAVerifier.getMFAVerifiersAvailableForVerify(
+			httpServletRequest, userId);
 	}
 
 	@Reference
