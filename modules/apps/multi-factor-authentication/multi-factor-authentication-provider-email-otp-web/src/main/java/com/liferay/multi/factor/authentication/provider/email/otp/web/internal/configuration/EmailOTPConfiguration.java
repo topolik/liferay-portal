@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 	factoryInstanceLabelAttribute = "name"
 )
 @Meta.OCD(
+	factory = true,
 	id = "com.liferay.multi.factor.authentication.provider.email.otp.web.internal.configuration.EmailOTPConfiguration",
 	localization = "content/Language",
 	name = "email-otp-configuration-name"
