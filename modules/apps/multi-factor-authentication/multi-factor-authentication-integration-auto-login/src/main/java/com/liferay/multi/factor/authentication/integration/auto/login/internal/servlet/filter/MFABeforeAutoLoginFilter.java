@@ -148,7 +148,7 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
-			if (headlessMFAVerifier.canVerifyHeadless(
+			if (headlessMFAVerifier.isHeadlessSetupComplete(
 					request, userId)){
 
 				if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
@@ -167,7 +167,7 @@ public class MFABeforeAutoLoginFilter extends AutoLoginFilter {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier) mfaVerifier;
 
-			if (browserMFAVerifier.canVerifyBrowser(request, userId)){
+			if (browserMFAVerifier.isBrowserSetupComplete(request, userId)){
 				if (browserMFAVerifier.isBrowserVerified(request, userId)) {
 					return super.getLoginRemoteUser(
 						request, response, session, credentials);

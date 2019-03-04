@@ -253,7 +253,7 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
-	public boolean requiresSetup(long userId) {
+	public boolean forceUserSetup(long userId) {
 		if (isUserSetUp(userId)) {
 			return false;
 		}
@@ -281,14 +281,14 @@ public class TOTPMFAVerifier
 	}
 
 	@Override
-	public boolean canVerifyBrowser(
+	public boolean isBrowserSetupComplete(
 		HttpServletRequest request, long userId) {
 
 		return canVerify(request, userId);
 	}
 
 	@Override
-	public boolean canVerifyHeadless(
+	public boolean isHeadlessSetupComplete(
 		HttpServletRequest request, long userId) {
 
 		return canVerify(request, userId);

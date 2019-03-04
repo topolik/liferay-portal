@@ -77,7 +77,7 @@ public class MFALoginServicePreAction extends Action {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if (browserMFAVerifier.requiresSetup(userId)) {
+			if (browserMFAVerifier.forceUserSetup(userId)) {
 				redirectToSetup(request, response, themeDisplay, userId);
 
 				return;
@@ -88,7 +88,7 @@ public class MFALoginServicePreAction extends Action {
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
-			if (headlessMFAVerifier.canVerifyHeadless(request, userId)) {
+			if (headlessMFAVerifier.isHeadlessSetupComplete(request, userId)) {
 				if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
 					return;
 				}
@@ -105,7 +105,7 @@ public class MFALoginServicePreAction extends Action {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier) mfaVerifier;
 
-			if (browserMFAVerifier.canVerifyBrowser(request, userId)) {
+			if (browserMFAVerifier.isBrowserSetupComplete(request, userId)) {
 				if (browserMFAVerifier.isBrowserVerified(request, userId)) {
 					return;
 
@@ -117,10 +117,11 @@ public class MFALoginServicePreAction extends Action {
 				return;
 			}
 		}
-
-		throw new ActionException(
-			new PrincipalException.MustBeAuthenticated(
-				"Unable to verify Multi Factor Authentication"));
+		else {
+			throw new ActionException(
+				new PrincipalException.MustBeAuthenticated(
+					"Unable to verify Multi Factor Authentication"));
+		}
 	}
 
 	protected void redirectToVerifyBrowserRequest(

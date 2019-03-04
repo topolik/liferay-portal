@@ -85,7 +85,7 @@ public class IPAddressMFAVerifier implements HeadlessMFAVerifier, MFAVerifier {
 	}
 
 	@Override
-	public boolean canVerifyHeadless(
+	public boolean isHeadlessSetupComplete(
 		HttpServletRequest request, long userId) {
 
 		return true;

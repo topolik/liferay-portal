@@ -85,7 +85,7 @@ public class MandatoryCompositeMFAVerifier
 	}
 
 	@Override
-	public boolean canVerifyHeadless(
+	public boolean isHeadlessSetupComplete(
 		HttpServletRequest request, long userId) {
 
 		if (mfaVerifiers.size() == 0) {
@@ -100,7 +100,7 @@ public class MandatoryCompositeMFAVerifier
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier) mfaVerifier;
 
-			if (!headlessMFAVerifier.canVerifyHeadless(request, userId)) {
+			if (!headlessMFAVerifier.isHeadlessSetupComplete(request, userId)) {
 				return false;
 			}
 		}
@@ -109,7 +109,7 @@ public class MandatoryCompositeMFAVerifier
 	}
 
 	@Override
-	public boolean canVerifyBrowser(
+	public boolean isBrowserSetupComplete(
 		HttpServletRequest request, long userId) {
 
 		if (mfaVerifiers.size() == 0) {
@@ -124,7 +124,7 @@ public class MandatoryCompositeMFAVerifier
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if (!browserMFAVerifier.canVerifyBrowser(request, userId)) {
+			if (!browserMFAVerifier.isBrowserSetupComplete(request, userId)) {
 				return false;
 			}
 		}
@@ -156,7 +156,7 @@ public class MandatoryCompositeMFAVerifier
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if(!browserMFAVerifier.canVerifyBrowser(
+			if(!browserMFAVerifier.isBrowserSetupComplete(
 				originalServletRequest, userId)) {
 
 				return false;
@@ -194,7 +194,7 @@ public class MandatoryCompositeMFAVerifier
 				(HeadlessMFAVerifier)mfaVerifier;
 
 
-			if(!headlessMFAVerifier.canVerifyHeadless(
+			if(!headlessMFAVerifier.isHeadlessSetupComplete(
 				request, userId)) {
 
 				return false;

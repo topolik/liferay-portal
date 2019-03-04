@@ -155,7 +155,7 @@ public class MFAVerifyMVCActionCommand extends BaseMVCActionCommand {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)optionalMFAVerifier;
 
-			if (!browserMFAVerifier.canVerifyBrowser(
+			if (!browserMFAVerifier.isBrowserSetupComplete(
 					httpServletRequest, userId)) {
 
 				continue;

@@ -25,7 +25,6 @@ import javax.portlet.ActionRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -124,7 +123,7 @@ public abstract class CompositeMFAVerifierImpl
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if (!browserMFAVerifier.requiresSetup(userId)) {
+			if (!browserMFAVerifier.forceUserSetup(userId)) {
 				continue;
 			}
 
@@ -147,7 +146,7 @@ public abstract class CompositeMFAVerifierImpl
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if (!browserMFAVerifier.canVerifyBrowser(
+			if (!browserMFAVerifier.isBrowserSetupComplete(
 				request, userId)) {
 
 				continue;
@@ -166,7 +165,7 @@ public abstract class CompositeMFAVerifierImpl
 
 
 	@Override
-	public boolean requiresSetup(long userId) {
+	public boolean forceUserSetup(long userId) {
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsBrowser()) {
 				continue;
@@ -175,7 +174,7 @@ public abstract class CompositeMFAVerifierImpl
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if (browserMFAVerifier.requiresSetup(userId)) {
+			if (browserMFAVerifier.forceUserSetup(userId)) {
 				return true;
 			}
 		}
@@ -195,7 +194,7 @@ public abstract class CompositeMFAVerifierImpl
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if(!browserMFAVerifier.requiresSetup(userId)) {
+			if(!browserMFAVerifier.forceUserSetup(userId)) {
 				continue;
 			}
 

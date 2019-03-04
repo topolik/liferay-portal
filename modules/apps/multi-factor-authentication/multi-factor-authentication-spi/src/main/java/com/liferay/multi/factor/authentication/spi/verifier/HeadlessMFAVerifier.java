@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Tomas Polesovsky
  */
 public interface HeadlessMFAVerifier {
-	public boolean canVerifyHeadless(HttpServletRequest request, long userId);
+	public boolean isHeadlessSetupComplete(HttpServletRequest request, long userId);
 
 	public boolean verifyHeadlessRequest(HttpServletRequest request, long userId);
 

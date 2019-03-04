@@ -117,18 +117,22 @@ public class MFAAuthVerifierFilter extends BaseFilter {
 
 		long userId = authVerifierResult.getUserId();
 
-		if (headlessMFAVerifier.canVerifyHeadless(request, userId)) {
-			if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
-				super.processFilter(request, response, filterChain);
+		if (!headlessMFAVerifier.isHeadlessSetupComplete(request, userId)) {
+			super.processFilter(request, response, filterChain);
 
-				return;
-			}
+			return;
+		}
 
-			if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
-				super.processFilter(request, response, filterChain);
+		if (headlessMFAVerifier.isHeadlessVerified(request, userId)) {
+			super.processFilter(request, response, filterChain);
 
-				return;
-			}
+			return;
+		}
+
+		if (headlessMFAVerifier.verifyHeadlessRequest(request, userId)) {
+			super.processFilter(request, response, filterChain);
+
+			return;
 		}
 
 		if (_log.isWarnEnabled()) {

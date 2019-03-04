@@ -92,7 +92,7 @@ public class MFASetupMVCRenderCommand implements MVCRenderCommand {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)optionalMFAVerifier;
 
-			if (!browserMFAVerifier.requiresSetup(
+			if (!browserMFAVerifier.forceUserSetup(
 				themeDisplay.getUserId())) {
 
 				continue;

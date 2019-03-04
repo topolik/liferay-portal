@@ -26,10 +26,10 @@ import java.io.IOException;
  */
 public interface BrowserMFAVerifier {
 
-	public boolean canVerifyBrowser(
+	public boolean isBrowserSetupComplete(
 		HttpServletRequest request, long userId);
 
-	public boolean requiresSetup(long userId);
+	public boolean forceUserSetup(long userId);
 
 	public void includeSetup(
 			long userId, HttpServletRequest request,

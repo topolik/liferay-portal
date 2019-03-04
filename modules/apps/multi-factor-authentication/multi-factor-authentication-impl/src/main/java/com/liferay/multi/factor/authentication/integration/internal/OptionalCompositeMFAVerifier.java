@@ -22,7 +22,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -77,7 +76,7 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifierImpl {
 	}
 
 	@Override
-	public boolean canVerifyHeadless(HttpServletRequest request, long userId) {
+	public boolean isHeadlessSetupComplete(HttpServletRequest request, long userId) {
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsHeadless()) {
 				continue;
@@ -86,7 +85,7 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifierImpl {
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
-			if(headlessMFAVerifier.canVerifyHeadless(request, userId)) {
+			if(headlessMFAVerifier.isHeadlessSetupComplete(request, userId)) {
 				return true;
 			}
 		}
@@ -95,7 +94,7 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifierImpl {
 	}
 
 	@Override
-	public boolean canVerifyBrowser(HttpServletRequest request, long userId) {
+	public boolean isBrowserSetupComplete(HttpServletRequest request, long userId) {
 		for (MFAVerifier mfaVerifier : mfaVerifiers) {
 			if (!mfaVerifier.supportsBrowser()) {
 				continue;
@@ -104,7 +103,7 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifierImpl {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if(browserMFAVerifier.canVerifyBrowser(request, userId)) {
+			if(browserMFAVerifier.isBrowserSetupComplete(request, userId)) {
 				return true;
 			}
 		}
@@ -129,7 +128,7 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifierImpl {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)mfaVerifier;
 
-			if(!browserMFAVerifier.canVerifyBrowser(
+			if(!browserMFAVerifier.isBrowserSetupComplete(
 					originalServletRequest, userId)) {
 
 				continue;
@@ -163,7 +162,7 @@ public class OptionalCompositeMFAVerifier extends CompositeMFAVerifierImpl {
 			HeadlessMFAVerifier headlessMFAVerifier =
 				(HeadlessMFAVerifier)mfaVerifier;
 
-			if(!headlessMFAVerifier.canVerifyHeadless(
+			if(!headlessMFAVerifier.isHeadlessSetupComplete(
 				request, userId)) {
 
 				continue;

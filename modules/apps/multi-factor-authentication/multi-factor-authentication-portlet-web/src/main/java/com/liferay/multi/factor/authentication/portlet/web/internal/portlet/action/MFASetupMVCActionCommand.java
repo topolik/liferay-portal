@@ -116,7 +116,7 @@ public class MFASetupMVCActionCommand extends BaseMVCActionCommand {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)optionalMFAVerifier;
 
-			if (!browserMFAVerifier.requiresSetup(
+			if (!browserMFAVerifier.forceUserSetup(
 				themeDisplay.getUserId())) {
 
 				continue;

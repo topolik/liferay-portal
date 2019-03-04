@@ -140,7 +140,7 @@ public class MFAVerifyMVCRenderCommand implements MVCRenderCommand {
 			BrowserMFAVerifier browserMFAVerifier =
 				(BrowserMFAVerifier)optionalMFAVerifier;
 
-			if (!browserMFAVerifier.canVerifyBrowser(
+			if (!browserMFAVerifier.isBrowserSetupComplete(
 					httpServletRequest, userId)) {
 
 				continue;

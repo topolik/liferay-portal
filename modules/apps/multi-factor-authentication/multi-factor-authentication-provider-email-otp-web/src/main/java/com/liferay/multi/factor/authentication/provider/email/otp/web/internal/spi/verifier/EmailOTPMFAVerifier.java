@@ -234,7 +234,7 @@ public class EmailOTPMFAVerifier
 	}
 
 	@Override
-	public boolean requiresSetup(long userId) {
+	public boolean forceUserSetup(long userId) {
 		if (isUserSetUp(userId)) {
 			return false;
 		}
@@ -253,7 +253,7 @@ public class EmailOTPMFAVerifier
 	}
 
 	@Override
-	public boolean canVerifyBrowser(
+	public boolean isBrowserSetupComplete(
 		HttpServletRequest request, long userId) {
 
 		if (!isUserSetUp(userId)) {

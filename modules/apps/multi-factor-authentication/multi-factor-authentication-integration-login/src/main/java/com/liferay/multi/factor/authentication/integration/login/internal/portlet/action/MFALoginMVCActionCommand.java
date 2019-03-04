@@ -125,7 +125,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 					BrowserMFAVerifier browserMFAVerifier =
 						(BrowserMFAVerifier)mfaVerifier;
 
-					if (browserMFAVerifier.requiresSetup(userId)) {
+					if (browserMFAVerifier.forceUserSetup(userId)) {
 						redirectToSetup(actionRequest, actionResponse);
 
 						return;
@@ -136,7 +136,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 					HeadlessMFAVerifier headlessMFAVerifier =
 						(HeadlessMFAVerifier) mfaVerifier;
 
-					if (headlessMFAVerifier.canVerifyHeadless(
+					if (headlessMFAVerifier.isHeadlessSetupComplete(
 						request, userId)) {
 
 						if (headlessMFAVerifier.isHeadlessVerified(
@@ -163,7 +163,7 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 					BrowserMFAVerifier browserMFAVerifier =
 						(BrowserMFAVerifier) mfaVerifier;
 
-					if (browserMFAVerifier.canVerifyBrowser(
+					if (browserMFAVerifier.isBrowserSetupComplete(
 						request, userId)) {
 
 						if (browserMFAVerifier.isBrowserVerified(
@@ -181,9 +181,10 @@ public class MFALoginMVCActionCommand extends BaseMVCActionCommand {
 						return;
 					}
 				}
-
-				throw new AuthException(
-					"Multi Factor Authentication failed");
+				else {
+					throw new AuthException(
+						"Multi Factor Authentication failed");
+				}
 			}
 		}
 
