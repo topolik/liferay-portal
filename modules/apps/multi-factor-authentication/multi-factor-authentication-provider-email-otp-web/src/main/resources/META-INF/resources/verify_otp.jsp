@@ -47,7 +47,7 @@ EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.get
 	A.one('#<portlet:namespace />sendEmailButton').on(
 		'click',
 		function(event) {
-			var sendEmailButton = A.one('#<portlet:namespace />sendEmailButton');
+			var sendEmailButton = A.one('#<portlet:namespace />sendEmailButton')._node;
 
 			sendEmailButton.disabled = true;
 
@@ -57,14 +57,14 @@ EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.get
 
 			var interval = setInterval(
 				function() {
-					if (this.resendDuration === 0) {
-						this.sendEmailButton.innerText = buttonText;
-						this.sendEmailButton.disabled = false;
+					if (resendDuration === 0) {
+						sendEmailButton.innerText = buttonText;
+						sendEmailButton.disabled = false;
 
-						clearInterval(this.interval);
+						clearInterval(interval);
 					}
 					else {
-						this.sendEmailButton.innerText = --this.resendDuration;
+						sendEmailButton.innerText = --resendDuration;
 					}
 
 				},
