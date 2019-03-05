@@ -33,7 +33,6 @@ EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.get
 			<h2>
 				<liferay-ui:message key="your-one-time-password-will-be-sent-to-your-email-address" />
 			</h2>
-
 		</c:otherwise>
 	</c:choose>
 
@@ -50,9 +49,8 @@ EmailOTPConfiguration emailOTPConfiguration = (EmailOTPConfiguration)request.get
 	<aui:input name="otp" showRequiredLabel="yes" />
 </div>
 
-
 <aui:script use="aui-base,aui-io-request">
-	<liferay-portlet:resourceURL id="/mfa_verify/sendemailotp" var="sendOTPURL" portletName="<%= MFAPortletKeys.MFA_VERIFY %>">
+	<liferay-portlet:resourceURL id="/mfa_verify/sendemailotp" portletName="<%= MFAPortletKeys.MFA_VERIFY %>" var="sendOTPURL">
 		<portlet:param name="mfaVerifierName" value="<%= emailOTPConfiguration.name() %>" />
 	</liferay-portlet:resourceURL>
 

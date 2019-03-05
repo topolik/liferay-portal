@@ -15,8 +15,8 @@
 package com.liferay.multi.factor.authentication.provider.email.otp.web.internal.configuration;
 
 import aQute.bnd.annotation.metatype.Meta;
+
 import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
-import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 
 /**
  * @author Tomas Polesovsky
@@ -28,8 +28,7 @@ import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 @Meta.OCD(
 	factory = true,
 	id = "com.liferay.multi.factor.authentication.provider.email.otp.web.internal.configuration.EmailOTPConfiguration",
-	localization = "content/Language",
-	name = "email-otp-configuration-name"
+	localization = "content/Language", name = "email-otp-configuration-name"
 )
 public interface EmailOTPConfiguration {
 
@@ -38,35 +37,31 @@ public interface EmailOTPConfiguration {
 
 	@Meta.AD(
 		deflt = "email-one-time-password",
-		description = "email-otp-name-description",
-		name = "email-otp-name", required = false
+		description = "email-otp-name-description", name = "email-otp-name",
+		required = false
 	)
 	public String name();
 
 	@Meta.AD(
-		deflt = "false",
-		description = "force-user-setup-description",
+		deflt = "false", description = "force-user-setup-description",
 		name = "force-user-setup", required = false
 	)
 	public boolean forceUserSetup();
 
 	@Meta.AD(
-		deflt = "30",
-		description = "resend-email-timeout-description",
+		deflt = "30", description = "resend-email-timeout-description",
 		name = "resend-email-timeout", required = false
 	)
 	public long resendEmailTimeout();
 
 	@Meta.AD(
-		deflt = "-1",
-		description = "validation-expiration-time-description",
+		deflt = "-1", description = "validation-expiration-time-description",
 		name = "validation-expiration-time", required = false
 	)
 	public long validationExpirationTime();
 
 	@Meta.AD(
-		deflt = "false",
-		description = "allow-custom-email-description",
+		deflt = "false", description = "allow-custom-email-description",
 		name = "allow-custom-email", required = false
 	)
 	public boolean allowCustomEmail();
@@ -100,9 +95,9 @@ public interface EmailOTPConfiguration {
 	public String emailTemplateBody();
 
 	@Meta.AD(
-		deflt = "6",
-		description = "otp-size-description",
-		name = "otp-size", required = false
+		deflt = "6", description = "otp-size-description", name = "otp-size",
+		required = false
 	)
 	public int otpSize();
+
 }

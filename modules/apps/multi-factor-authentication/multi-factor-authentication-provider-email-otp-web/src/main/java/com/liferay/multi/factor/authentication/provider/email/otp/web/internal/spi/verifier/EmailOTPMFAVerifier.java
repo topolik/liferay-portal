@@ -14,8 +14,8 @@
 
 package com.liferay.multi.factor.authentication.provider.email.otp.web.internal.spi.verifier;
 
-import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP;
-import com.liferay.multi.factor.authentication.provider.email.otp.service.EmailOTPLocalService;
+import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTPEntry;
+import com.liferay.multi.factor.authentication.provider.email.otp.service.EmailOTPEntryLocalService;
 import com.liferay.multi.factor.authentication.provider.email.otp.web.internal.configuration.EmailOTPConfiguration;
 import com.liferay.multi.factor.authentication.spi.verifier.BrowserMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
@@ -65,82 +65,21 @@ import org.osgi.service.component.annotations.Reference;
 public class EmailOTPMFAVerifier
 	implements BrowserMFAVerifier, MFAVerifier, UserAccountSetupMFAVerifier {
 
-	private boolean _enabled;
-	private String _name;
-	private boolean _forceUserSetup;
-	private long _resendEmailTimeout;
-	private long _validationExpirationTime;
-	private boolean _allowCustomEmail;
-	private EmailOTPConfiguration _emailOTPConfiguration;
-	private String _emailOTPConfigurationPid;
-
-	@Activate
-	protected void activate(Map<String, Object> properties) {
-		_emailOTPConfiguration =
-			ConfigurableUtil.createConfigurable(
-				EmailOTPConfiguration.class, properties);
-
-		_emailOTPConfigurationPid = (String)properties.getOrDefault(
-			"pid", EmailOTPConfiguration.class.getName());
-
-		_allowCustomEmail = _emailOTPConfiguration.allowCustomEmail();
-		_enabled = _emailOTPConfiguration.enabled();
-		_forceUserSetup = _emailOTPConfiguration.forceUserSetup();
-		_name = _emailOTPConfiguration.name();
-		_validationExpirationTime = _emailOTPConfiguration.validationExpirationTime();
-
-		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
-			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
-				Arrays.asList(
-					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
-
-			sessionPhishingProtectedAttributesList.add(_VALIDATED);
-
-			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
-				sessionPhishingProtectedAttributesList.toArray(
-					new String[sessionPhishingProtectedAttributesList.size()]);
+	@Override
+	public boolean forceUserSetup(long userId) {
+		if (_isUserSetUp(userId)) {
+			return false;
 		}
-	}
 
-	@Deactivate
-	protected void deactivate() {
-		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
-			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
-				Arrays.asList(
-					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
-
-			sessionPhishingProtectedAttributesList.remove(_VALIDATED);
-
-			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
-				sessionPhishingProtectedAttributesList.toArray(
-					new String[sessionPhishingProtectedAttributesList.size()]);
-		}
+		return _forceUserSetup;
 	}
 
 	public EmailOTPConfiguration getEmailOTPConfiguration() {
 		return _emailOTPConfiguration;
 	}
 
-	@Override
-	public String getProviderName() {
-		return "email-one-time-password";
-	}
-
-	@Override
-	public void includeUserAccountSetup(
-		long userId, HttpServletRequest request, HttpServletResponse response)
-		throws IOException {
-
-		includeSetup(userId, request, response);
-	}
-
-	@Override
-	public boolean setupUserAccount(ActionRequest actionRequest, long userId) {
-		return setup(actionRequest, userId);
-	}
-
-	public boolean isEnabled() {
-		return _enabled;
+	public String getEmailOTPConfigurationPid() {
+		return _emailOTPConfigurationPid;
 	}
 
 	@Override
@@ -149,16 +88,56 @@ public class EmailOTPMFAVerifier
 	}
 
 	@Override
+	public String getProviderName() {
+		return "email-one-time-password";
+	}
+
+	@Override
+	public void includeBrowserVerification(
+			long userId, HttpServletRequest request,
+			HttpServletResponse response)
+		throws IOException {
+
+		EmailOTPEntry entry = _emailOTPEntryLocalService.fetchEntryByUserId(
+			userId);
+
+		request.setAttribute("sendToEmail", entry.getEmailAddress());
+
+		RequestDispatcher requestDispatcher =
+			_servletContext.getRequestDispatcher("/verify_otp.jsp");
+
+		try {
+			request.setAttribute(
+				"emailOTPConfiguration", _emailOTPConfiguration);
+
+			requestDispatcher.include(request, response);
+
+			HttpServletRequest originalRequest =
+				_portal.getOriginalServletRequest(request);
+
+			HttpSession session = originalRequest.getSession();
+
+			session.setAttribute("otpPhase", "verify");
+			session.setAttribute("userId", userId);
+		}
+		catch (ServletException se) {
+			throw new IOException(
+				"Unable to include /verify_otp.jsp: " + se, se);
+		}
+	}
+
+	@Override
 	public void includeSetup(
 			long userId, HttpServletRequest request,
 			HttpServletResponse response)
 		throws IOException {
 
-		EmailOTP emailOTP = _emailOTPLocalService.fetchEmailOTPByUserId(userId);
+		EmailOTPEntry entry = _emailOTPEntryLocalService.fetchEntryByUserId(
+			userId);
 
 		//todo: include some parameter so we can allow user to re-setup
 
-		if (emailOTP != null) {
+		if (entry != null) {
 			_log.error("Setup is already finished for user: " + userId);
 
 			return;
@@ -187,36 +166,23 @@ public class EmailOTPMFAVerifier
 	}
 
 	@Override
-	public void includeBrowserVerification(
+	public void includeUserAccountSetup(
 			long userId, HttpServletRequest request,
 			HttpServletResponse response)
 		throws IOException {
 
-		EmailOTP emailOTP = _emailOTPLocalService.fetchEmailOTPByUserId(userId);
+		includeSetup(userId, request, response);
+	}
 
-		request.setAttribute("sendToEmail", emailOTP.getEmailAddress());
+	@Override
+	public boolean isBrowserSetupComplete(
+		HttpServletRequest request, long userId) {
 
-		RequestDispatcher requestDispatcher =
-			_servletContext.getRequestDispatcher("/verify_otp.jsp");
-
-		try {
-			request.setAttribute(
-				"emailOTPConfiguration", _emailOTPConfiguration);
-
-			requestDispatcher.include(request, response);
-
-			HttpServletRequest originalRequest =
-				_portal.getOriginalServletRequest(request);
-
-			HttpSession session = originalRequest.getSession();
-
-			session.setAttribute("otpPhase", "verify");
-			session.setAttribute("userId", userId);
+		if (!_isUserSetUp(userId)) {
+			return false;
 		}
-		catch (ServletException se) {
-			throw new IOException(
-				"Unable to include /verify_otp.jsp: " + se, se);
-		}
+
+		return true;
 	}
 
 	@Override
@@ -233,34 +199,8 @@ public class EmailOTPMFAVerifier
 		return false;
 	}
 
-	@Override
-	public boolean forceUserSetup(long userId) {
-		if (isUserSetUp(userId)) {
-			return false;
-		}
-
-		return _forceUserSetup;
-	}
-
-	private boolean isUserSetUp(long userId) {
-		EmailOTP emailOTP = _emailOTPLocalService.fetchEmailOTPByUserId(userId);
-
-		if (emailOTP != null) {
-			return true;
-		}
-
-		return false;
-	}
-
-	@Override
-	public boolean isBrowserSetupComplete(
-		HttpServletRequest request, long userId) {
-
-		if (!isUserSetUp(userId)) {
-			return false;
-		}
-
-		return true;
+	public boolean isEnabled() {
+		return _enabled;
 	}
 
 	@Override
@@ -284,7 +224,7 @@ public class EmailOTPMFAVerifier
 			String userIP = originalRequest.getRemoteAddr();
 
 			if (_verify(session, userInput)) {
-				_emailOTPLocalService.addEmailOTP(userId, email, userIP);
+				_emailOTPEntryLocalService.addEntry(userId, email, userIP);
 
 				long validatedAt = System.currentTimeMillis();
 
@@ -295,7 +235,7 @@ public class EmailOTPMFAVerifier
 
 				session.setAttribute(_VALIDATED, validatedMap);
 
-				_emailOTPLocalService.updateAttempts(userId, true, userIP);
+				_emailOTPEntryLocalService.updateAttempts(userId, true, userIP);
 
 				return true;
 			}
@@ -307,6 +247,11 @@ public class EmailOTPMFAVerifier
 		}
 
 		return false;
+	}
+
+	@Override
+	public boolean setupUserAccount(ActionRequest actionRequest, long userId) {
+		return setup(actionRequest, userId);
 	}
 
 	@Override
@@ -345,15 +290,98 @@ public class EmailOTPMFAVerifier
 
 				session.setAttribute(_VALIDATED, validatedMap);
 
-				_emailOTPLocalService.updateAttempts(userId, true, userIP);
+				_emailOTPEntryLocalService.updateAttempts(userId, true, userIP);
 
 				return true;
 			}
 
-			_emailOTPLocalService.updateAttempts(userId, false, userIP);
+			_emailOTPEntryLocalService.updateAttempts(userId, false, userIP);
 		}
 		catch (Exception e) {
 			_log.error(e.getMessage(), e);
+		}
+
+		return false;
+	}
+
+	@Activate
+	protected void activate(Map<String, Object> properties) {
+		_emailOTPConfiguration = ConfigurableUtil.createConfigurable(
+			EmailOTPConfiguration.class, properties);
+
+		_emailOTPConfigurationPid = (String)properties.getOrDefault(
+			"pid", EmailOTPConfiguration.class.getName());
+
+		_allowCustomEmail = _emailOTPConfiguration.allowCustomEmail();
+		_enabled = _emailOTPConfiguration.enabled();
+		_forceUserSetup = _emailOTPConfiguration.forceUserSetup();
+		_name = _emailOTPConfiguration.name();
+		_validationExpirationTime =
+			_emailOTPConfiguration.validationExpirationTime();
+
+		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
+			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
+				Arrays.asList(
+					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
+
+			sessionPhishingProtectedAttributesList.add(_VALIDATED);
+
+			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
+				sessionPhishingProtectedAttributesList.toArray(
+					new String[sessionPhishingProtectedAttributesList.size()]);
+		}
+	}
+
+	@Deactivate
+	protected void deactivate() {
+		if (PropsValues.SESSION_ENABLE_PHISHING_PROTECTION) {
+			List<String> sessionPhishingProtectedAttributesList = new ArrayList(
+				Arrays.asList(
+					PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES));
+
+			sessionPhishingProtectedAttributesList.remove(_VALIDATED);
+
+			PropsValues.SESSION_PHISHING_PROTECTED_ATTRIBUTES =
+				sessionPhishingProtectedAttributesList.toArray(
+					new String[sessionPhishingProtectedAttributesList.size()]);
+		}
+	}
+
+	protected boolean isValid(HttpSession httpSession, long userId) {
+		if (httpSession == null) {
+			return false;
+		}
+
+		Map<String, Object> validatedMap = (Map)httpSession.getAttribute(
+			_VALIDATED);
+
+		if (validatedMap != null) {
+			if (userId != MapUtil.getLong(validatedMap, "userId")) {
+				return false;
+			}
+
+			if (_validationExpirationTime < 0) {
+				return true;
+			}
+
+			long validatedAt = MapUtil.getLong(validatedMap, "validatedAt");
+
+			if (validatedAt + _validationExpirationTime * 1000 >
+					System.currentTimeMillis()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean _isUserSetUp(long userId) {
+		EmailOTPEntry entry = _emailOTPEntryLocalService.fetchEntryByUserId(
+			userId);
+
+		if (entry != null) {
+			return true;
 		}
 
 		return false;
@@ -378,40 +406,22 @@ public class EmailOTPMFAVerifier
 		return true;
 	}
 
-	protected boolean isValid(HttpSession httpSession, long userId) {
-		if (httpSession == null) {
-			return false;
-		}
-
-		Map<String, Object> validatedMap = (Map)httpSession.getAttribute(
-			_VALIDATED);
-
-		if (validatedMap != null) {
-			if (userId != MapUtil.getLong(validatedMap, "userId")) {
-				return false;
-			}
-
-			if (_validationExpirationTime < 0) {
-				return true;
-			}
-
-			long validatedAt = MapUtil.getLong(validatedMap, "validatedAt");
-
-			if (validatedAt + _validationExpirationTime * 1000 >
-				System.currentTimeMillis()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
+	private static final String _VALIDATED =
+		EmailOTPMFAVerifier.class.getName() + "#VALIDATED";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		EmailOTPMFAVerifier.class);
 
+	private boolean _allowCustomEmail;
+	private EmailOTPConfiguration _emailOTPConfiguration;
+	private String _emailOTPConfigurationPid;
+
 	@Reference
-	private EmailOTPLocalService _emailOTPLocalService;
+	private EmailOTPEntryLocalService _emailOTPEntryLocalService;
+
+	private boolean _enabled;
+	private boolean _forceUserSetup;
+	private String _name;
 
 	@Reference
 	private Portal _portal;
@@ -424,12 +434,6 @@ public class EmailOTPMFAVerifier
 	@Reference
 	private UserLocalService _userLocalService;
 
-	private static final String _VALIDATED =
-		EmailOTPMFAVerifier.class.getName() + "#VALIDATED";
-
-
-	public String getEmailOTPConfigurationPid() {
-		return _emailOTPConfigurationPid;
-	}
+	private long _validationExpirationTime;
 
 }

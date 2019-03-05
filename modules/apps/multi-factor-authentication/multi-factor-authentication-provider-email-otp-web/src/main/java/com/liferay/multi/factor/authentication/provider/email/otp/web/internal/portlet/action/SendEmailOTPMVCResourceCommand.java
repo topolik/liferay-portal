@@ -22,8 +22,8 @@ import com.liferay.mail.kernel.template.MailTemplateContextBuilder;
 import com.liferay.mail.kernel.template.MailTemplateFactoryUtil;
 import com.liferay.multi.factor.authentication.api.MFARegistry;
 import com.liferay.multi.factor.authentication.portlet.api.constants.MFAPortletKeys;
-import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP;
-import com.liferay.multi.factor.authentication.provider.email.otp.service.EmailOTPLocalService;
+import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTPEntry;
+import com.liferay.multi.factor.authentication.provider.email.otp.service.EmailOTPEntryLocalService;
 import com.liferay.multi.factor.authentication.provider.email.otp.web.internal.configuration.EmailOTPConfiguration;
 import com.liferay.multi.factor.authentication.provider.email.otp.web.internal.spi.verifier.EmailOTPMFAVerifier;
 import com.liferay.multi.factor.authentication.spi.verifier.MFAVerifier;
@@ -33,27 +33,23 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.module.configuration.ConfigurationException;
 import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
-import com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
 import com.liferay.portal.kernel.resource.manager.ClassLoaderResourceManager;
 import com.liferay.portal.kernel.security.auth.AuthToken;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
-import com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator;
-import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.settings.LocationVariableResolver;
 import com.liferay.portal.kernel.settings.SettingsLocatorHelper;
-import com.liferay.portal.kernel.settings.SystemSettingsLocator;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.WebKeys;
+
+import java.io.IOException;
 
 import javax.mail.internet.InternetAddress;
 
@@ -66,9 +62,6 @@ import javax.servlet.http.HttpSession;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-
-import java.io.IOException;
-import java.util.Locale;
 
 /**
  * @author arthurchan35
@@ -99,8 +92,8 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 			throw new PortletException(pe);
 		}
 
-		EmailOTPConfiguration emailOTPConfiguration =
-			getEmailOTPConfiguration(request);
+		EmailOTPConfiguration emailOTPConfiguration = getEmailOTPConfiguration(
+			request);
 
 		if (emailOTPConfiguration == null) {
 			return false;
@@ -108,7 +101,7 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 
 		HttpSession session = originalRequest.getSession();
 
-		if (!verifyEmailResendTimedOut(emailOTPConfiguration, session)) {
+		if (!_verifyEmailResendTimedOut(emailOTPConfiguration, session)) {
 			return false;
 		}
 
@@ -122,10 +115,10 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 
 				user = _userLocalService.fetchUserById(userId);
 
-				EmailOTP emailOTP = _emailOTPLocalService.fetchEmailOTPByUserId(
-					userId);
+				EmailOTPEntry entry =
+					_emailOTPEntryLocalService.fetchEntryByUserId(userId);
 
-				email = emailOTP.getEmailAddress();
+				email = entry.getEmailAddress();
 
 				session.setAttribute("otpEmail", email);
 			}
@@ -149,6 +142,7 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 				emailOTPConfiguration.otpSize());
 
 			session.setAttribute("otp", generatedOTP);
+
 			session.setAttribute("otpSetAt", System.currentTimeMillis());
 
 			MailTemplateContextBuilder mailTemplateContextBuilder =
@@ -174,13 +168,11 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 			MailTemplateContext mailTemplateContext =
 				mailTemplateContextBuilder.build();
 
-			String emailTemplateSubject =
-				_locationVariableResolver.resolve(
-					emailOTPConfiguration.emailTemplateSubject());
+			String emailTemplateSubject = _locationVariableResolver.resolve(
+				emailOTPConfiguration.emailTemplateSubject());
 
-			String emailTemplateBody =
-				_locationVariableResolver.resolve(
-					emailOTPConfiguration.emailTemplateBody());
+			String emailTemplateBody = _locationVariableResolver.resolve(
+				emailOTPConfiguration.emailTemplateBody());
 
 			return _sendNotificationEmail(
 				emailOTPConfiguration.emailTemplateFrom(),
@@ -192,65 +184,11 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 		}
 	}
 
-	private boolean _sendNotificationEmail(
-			String fromAddress, String fromName, String toAddress, User toUser,
-			String subject, String body,
-			MailTemplateContext mailTemplateContext)
-		throws PortalException, IOException {
-
-		MailTemplate subjectTemplate =
-			MailTemplateFactoryUtil.createMailTemplate(subject, false);
-
-		MailTemplate bodyTemplate =
-			MailTemplateFactoryUtil.createMailTemplate(body, true);
-
-		MailMessage mailMessage = new MailMessage(
-			new InternetAddress(fromAddress, fromName),
-			new InternetAddress(toAddress, toUser.getFullName()),
-			subjectTemplate.renderAsString(
-				toUser.getLocale(), mailTemplateContext),
-			bodyTemplate.renderAsString(
-				toUser.getLocale(), mailTemplateContext),
-			true);
-
-		Company company = _companyLocalService.getCompany(
-			toUser.getCompanyId());
-
-		mailMessage.setMessageId(
-			PortalUtil.getMailId(
-				company.getMx(), "user", toUser.getUserId()));
-
-		_mailService.sendEmail(mailMessage);
-
-		return true;
-	}
-
-	private boolean verifyEmailResendTimedOut(
-		EmailOTPConfiguration emailOTPConfiguration, HttpSession session) {
-
-		Object otpSetAtObj = session.getAttribute("otpSetAt");
-
-		if (otpSetAtObj == null) {
-			return true;
-		}
-
-		long otpSetAt = (Long)otpSetAtObj;
-
-		long timedOut =
-			otpSetAt + emailOTPConfiguration.resendEmailTimeout() * 1000;
-
-		if (System.currentTimeMillis() > timedOut) {
-			return true;
-		}
-
-		return false;
-	}
-
 	protected EmailOTPConfiguration getEmailOTPConfiguration(
 		ResourceRequest request) {
 
-		String mfaVerifierName =
-			ParamUtil.getString(request, "mfaVerifierName");
+		String mfaVerifierName = ParamUtil.getString(
+			request, "mfaVerifierName");
 
 		MFAVerifier mfaVerifier = _mfaRegistry.getMFAVerifier(mfaVerifierName);
 
@@ -275,29 +213,61 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 		return emailOTPMFAVerifier.getEmailOTPConfiguration();
 	}
 
-	//this should be configured by admin
+	private boolean _sendNotificationEmail(
+			String fromAddress, String fromName, String toAddress, User toUser,
+			String subject, String body,
+			MailTemplateContext mailTemplateContext)
+		throws IOException, PortalException {
 
-	private static final long _DURATION = 60 * 1000;
+		MailTemplate subjectTemplate =
+			MailTemplateFactoryUtil.createMailTemplate(subject, false);
 
-	private static final int _LENGTH = 6;
+		MailTemplate bodyTemplate = MailTemplateFactoryUtil.createMailTemplate(
+			body, true);
 
-	private static Log _log = LogFactoryUtil.getLog(
+		MailMessage mailMessage = new MailMessage(
+			new InternetAddress(fromAddress, fromName),
+			new InternetAddress(toAddress, toUser.getFullName()),
+			subjectTemplate.renderAsString(
+				toUser.getLocale(), mailTemplateContext),
+			bodyTemplate.renderAsString(
+				toUser.getLocale(), mailTemplateContext),
+			true);
+
+		Company company = _companyLocalService.getCompany(
+			toUser.getCompanyId());
+
+		mailMessage.setMessageId(
+			_portal.getMailId(company.getMx(), "user", toUser.getUserId()));
+
+		_mailService.sendEmail(mailMessage);
+
+		return true;
+	}
+
+	private boolean _verifyEmailResendTimedOut(
+		EmailOTPConfiguration emailOTPConfiguration, HttpSession session) {
+
+		Object otpSetAtObj = session.getAttribute("otpSetAt");
+
+		if (otpSetAtObj == null) {
+			return true;
+		}
+
+		long otpSetAt = (Long)otpSetAtObj;
+
+		long timedOut =
+			otpSetAt + emailOTPConfiguration.resendEmailTimeout() * 1000;
+
+		if (System.currentTimeMillis() > timedOut) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
 		SendEmailOTPMVCResourceCommand.class);
-
-	@Reference
-	private EmailOTPLocalService _emailOTPLocalService;
-
-	@Reference
-	private MailService _mailService;
-
-	@Reference
-	private Portal _portal;
-
-	@Reference
-	private UserLocalService _userLocalService;
-
-	@Reference
-	private MFARegistry _mfaRegistry;
 
 	@Reference
 	private AuthToken _authToken;
@@ -308,9 +278,25 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 	@Reference
 	private ConfigurationProvider _configurationProvider;
 
-	private LocationVariableResolver _locationVariableResolver =
+	@Reference
+	private EmailOTPEntryLocalService _emailOTPEntryLocalService;
+
+	private final LocationVariableResolver _locationVariableResolver =
 		new LocationVariableResolver(
 			new ClassLoaderResourceManager(
 				SendEmailOTPMVCResourceCommand.class.getClassLoader()),
 			(SettingsLocatorHelper)null);
+
+	@Reference
+	private MailService _mailService;
+
+	@Reference
+	private MFARegistry _mfaRegistry;
+
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private UserLocalService _userLocalService;
+
 }
