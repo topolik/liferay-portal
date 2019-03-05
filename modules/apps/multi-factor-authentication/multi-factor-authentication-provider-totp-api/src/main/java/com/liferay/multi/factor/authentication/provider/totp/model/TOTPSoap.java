@@ -30,6 +30,7 @@ import java.util.List;
  */
 @ProviderType
 public class TOTPSoap implements Serializable {
+
 	public static TOTPSoap toSoapModel(TOTP model) {
 		TOTPSoap soapModel = new TOTPSoap();
 
@@ -219,4 +220,5 @@ public class TOTPSoap implements Serializable {
 	private int _failedLoginAttempts;
 	private String _sharedSecret;
 	private boolean _verified;
+
 }

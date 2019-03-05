@@ -25,19 +25,22 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author arthurchan35
  * @see TOTPModel
- * @see com.liferay.multi.factor.authentication.provider.totp.model.impl.TOTPImpl
- * @see com.liferay.multi.factor.authentication.provider.totp.model.impl.TOTPModelImpl
  * @generated
  */
-@ImplementationClassName("com.liferay.multi.factor.authentication.provider.totp.model.impl.TOTPImpl")
+@ImplementationClassName(
+	"com.liferay.multi.factor.authentication.provider.totp.model.impl.TOTPImpl"
+)
 @ProviderType
 public interface TOTP extends TOTPModel, PersistedModel {
+
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.multi.factor.authentication.provider.totp.model.impl.TOTPImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.multi.factor.authentication.provider.totp.model.impl.TOTPImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
-	public static final Accessor<TOTP, Long> TOTP_ID_ACCESSOR = new Accessor<TOTP, Long>() {
+	public static final Accessor<TOTP, Long> TOTP_ID_ACCESSOR =
+		new Accessor<TOTP, Long>() {
+
 			@Override
 			public Long get(TOTP totp) {
 				return totp.getTotpId();
@@ -52,5 +55,7 @@ public interface TOTP extends TOTPModel, PersistedModel {
 			public Class<TOTP> getTypeClass() {
 				return TOTP.class;
 			}
+
 		};
+
 }

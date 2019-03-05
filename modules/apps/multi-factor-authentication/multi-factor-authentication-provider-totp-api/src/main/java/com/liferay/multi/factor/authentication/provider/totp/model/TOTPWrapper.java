@@ -33,8 +33,9 @@ import java.util.Map;
  * @generated
  */
 @ProviderType
-public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
-	ModelWrapper<TOTP> {
+public class TOTPWrapper
+	extends BaseModelWrapper<TOTP> implements TOTP, ModelWrapper<TOTP> {
+
 	public TOTPWrapper(TOTP totp) {
 		super(totp);
 	}
@@ -123,7 +124,7 @@ public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
 		}
 
 		Integer failedLoginAttempts = (Integer)attributes.get(
-				"failedLoginAttempts");
+			"failedLoginAttempts");
 
 		if (failedLoginAttempts != null) {
 			setFailedLoginAttempts(failedLoginAttempts);
@@ -143,160 +144,160 @@ public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
 	}
 
 	/**
-	* Returns the backup codes of this totp.
-	*
-	* @return the backup codes of this totp
-	*/
+	 * Returns the backup codes of this totp.
+	 *
+	 * @return the backup codes of this totp
+	 */
 	@Override
 	public String getBackupCodes() {
 		return model.getBackupCodes();
 	}
 
 	/**
-	* Returns the company ID of this totp.
-	*
-	* @return the company ID of this totp
-	*/
+	 * Returns the company ID of this totp.
+	 *
+	 * @return the company ID of this totp
+	 */
 	@Override
 	public long getCompanyId() {
 		return model.getCompanyId();
 	}
 
 	/**
-	* Returns the create date of this totp.
-	*
-	* @return the create date of this totp
-	*/
+	 * Returns the create date of this totp.
+	 *
+	 * @return the create date of this totp
+	 */
 	@Override
 	public Date getCreateDate() {
 		return model.getCreateDate();
 	}
 
 	/**
-	* Returns the failed login attempts of this totp.
-	*
-	* @return the failed login attempts of this totp
-	*/
+	 * Returns the failed login attempts of this totp.
+	 *
+	 * @return the failed login attempts of this totp
+	 */
 	@Override
 	public int getFailedLoginAttempts() {
 		return model.getFailedLoginAttempts();
 	}
 
 	/**
-	* Returns the last failed login date of this totp.
-	*
-	* @return the last failed login date of this totp
-	*/
+	 * Returns the last failed login date of this totp.
+	 *
+	 * @return the last failed login date of this totp
+	 */
 	@Override
 	public Date getLastFailedLoginDate() {
 		return model.getLastFailedLoginDate();
 	}
 
 	/**
-	* Returns the last login date of this totp.
-	*
-	* @return the last login date of this totp
-	*/
+	 * Returns the last login date of this totp.
+	 *
+	 * @return the last login date of this totp
+	 */
 	@Override
 	public Date getLastLoginDate() {
 		return model.getLastLoginDate();
 	}
 
 	/**
-	* Returns the last login ip of this totp.
-	*
-	* @return the last login ip of this totp
-	*/
+	 * Returns the last login ip of this totp.
+	 *
+	 * @return the last login ip of this totp
+	 */
 	@Override
 	public String getLastLoginIP() {
 		return model.getLastLoginIP();
 	}
 
 	/**
-	* Returns the modified date of this totp.
-	*
-	* @return the modified date of this totp
-	*/
+	 * Returns the modified date of this totp.
+	 *
+	 * @return the modified date of this totp
+	 */
 	@Override
 	public Date getModifiedDate() {
 		return model.getModifiedDate();
 	}
 
 	/**
-	* Returns the primary key of this totp.
-	*
-	* @return the primary key of this totp
-	*/
+	 * Returns the primary key of this totp.
+	 *
+	 * @return the primary key of this totp
+	 */
 	@Override
 	public long getPrimaryKey() {
 		return model.getPrimaryKey();
 	}
 
 	/**
-	* Returns the shared secret of this totp.
-	*
-	* @return the shared secret of this totp
-	*/
+	 * Returns the shared secret of this totp.
+	 *
+	 * @return the shared secret of this totp
+	 */
 	@Override
 	public String getSharedSecret() {
 		return model.getSharedSecret();
 	}
 
 	/**
-	* Returns the totp ID of this totp.
-	*
-	* @return the totp ID of this totp
-	*/
+	 * Returns the totp ID of this totp.
+	 *
+	 * @return the totp ID of this totp
+	 */
 	@Override
 	public long getTotpId() {
 		return model.getTotpId();
 	}
 
 	/**
-	* Returns the user ID of this totp.
-	*
-	* @return the user ID of this totp
-	*/
+	 * Returns the user ID of this totp.
+	 *
+	 * @return the user ID of this totp
+	 */
 	@Override
 	public long getUserId() {
 		return model.getUserId();
 	}
 
 	/**
-	* Returns the user name of this totp.
-	*
-	* @return the user name of this totp
-	*/
+	 * Returns the user name of this totp.
+	 *
+	 * @return the user name of this totp
+	 */
 	@Override
 	public String getUserName() {
 		return model.getUserName();
 	}
 
 	/**
-	* Returns the user uuid of this totp.
-	*
-	* @return the user uuid of this totp
-	*/
+	 * Returns the user uuid of this totp.
+	 *
+	 * @return the user uuid of this totp
+	 */
 	@Override
 	public String getUserUuid() {
 		return model.getUserUuid();
 	}
 
 	/**
-	* Returns the verified of this totp.
-	*
-	* @return the verified of this totp
-	*/
+	 * Returns the verified of this totp.
+	 *
+	 * @return the verified of this totp
+	 */
 	@Override
 	public boolean getVerified() {
 		return model.getVerified();
 	}
 
 	/**
-	* Returns <code>true</code> if this totp is verified.
-	*
-	* @return <code>true</code> if this totp is verified; <code>false</code> otherwise
-	*/
+	 * Returns <code>true</code> if this totp is verified.
+	 *
+	 * @return <code>true</code> if this totp is verified; <code>false</code> otherwise
+	 */
 	@Override
 	public boolean isVerified() {
 		return model.isVerified();
@@ -308,150 +309,150 @@ public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
 	}
 
 	/**
-	* Sets the backup codes of this totp.
-	*
-	* @param backupCodes the backup codes of this totp
-	*/
+	 * Sets the backup codes of this totp.
+	 *
+	 * @param backupCodes the backup codes of this totp
+	 */
 	@Override
 	public void setBackupCodes(String backupCodes) {
 		model.setBackupCodes(backupCodes);
 	}
 
 	/**
-	* Sets the company ID of this totp.
-	*
-	* @param companyId the company ID of this totp
-	*/
+	 * Sets the company ID of this totp.
+	 *
+	 * @param companyId the company ID of this totp
+	 */
 	@Override
 	public void setCompanyId(long companyId) {
 		model.setCompanyId(companyId);
 	}
 
 	/**
-	* Sets the create date of this totp.
-	*
-	* @param createDate the create date of this totp
-	*/
+	 * Sets the create date of this totp.
+	 *
+	 * @param createDate the create date of this totp
+	 */
 	@Override
 	public void setCreateDate(Date createDate) {
 		model.setCreateDate(createDate);
 	}
 
 	/**
-	* Sets the failed login attempts of this totp.
-	*
-	* @param failedLoginAttempts the failed login attempts of this totp
-	*/
+	 * Sets the failed login attempts of this totp.
+	 *
+	 * @param failedLoginAttempts the failed login attempts of this totp
+	 */
 	@Override
 	public void setFailedLoginAttempts(int failedLoginAttempts) {
 		model.setFailedLoginAttempts(failedLoginAttempts);
 	}
 
 	/**
-	* Sets the last failed login date of this totp.
-	*
-	* @param lastFailedLoginDate the last failed login date of this totp
-	*/
+	 * Sets the last failed login date of this totp.
+	 *
+	 * @param lastFailedLoginDate the last failed login date of this totp
+	 */
 	@Override
 	public void setLastFailedLoginDate(Date lastFailedLoginDate) {
 		model.setLastFailedLoginDate(lastFailedLoginDate);
 	}
 
 	/**
-	* Sets the last login date of this totp.
-	*
-	* @param lastLoginDate the last login date of this totp
-	*/
+	 * Sets the last login date of this totp.
+	 *
+	 * @param lastLoginDate the last login date of this totp
+	 */
 	@Override
 	public void setLastLoginDate(Date lastLoginDate) {
 		model.setLastLoginDate(lastLoginDate);
 	}
 
 	/**
-	* Sets the last login ip of this totp.
-	*
-	* @param lastLoginIP the last login ip of this totp
-	*/
+	 * Sets the last login ip of this totp.
+	 *
+	 * @param lastLoginIP the last login ip of this totp
+	 */
 	@Override
 	public void setLastLoginIP(String lastLoginIP) {
 		model.setLastLoginIP(lastLoginIP);
 	}
 
 	/**
-	* Sets the modified date of this totp.
-	*
-	* @param modifiedDate the modified date of this totp
-	*/
+	 * Sets the modified date of this totp.
+	 *
+	 * @param modifiedDate the modified date of this totp
+	 */
 	@Override
 	public void setModifiedDate(Date modifiedDate) {
 		model.setModifiedDate(modifiedDate);
 	}
 
 	/**
-	* Sets the primary key of this totp.
-	*
-	* @param primaryKey the primary key of this totp
-	*/
+	 * Sets the primary key of this totp.
+	 *
+	 * @param primaryKey the primary key of this totp
+	 */
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		model.setPrimaryKey(primaryKey);
 	}
 
 	/**
-	* Sets the shared secret of this totp.
-	*
-	* @param sharedSecret the shared secret of this totp
-	*/
+	 * Sets the shared secret of this totp.
+	 *
+	 * @param sharedSecret the shared secret of this totp
+	 */
 	@Override
 	public void setSharedSecret(String sharedSecret) {
 		model.setSharedSecret(sharedSecret);
 	}
 
 	/**
-	* Sets the totp ID of this totp.
-	*
-	* @param totpId the totp ID of this totp
-	*/
+	 * Sets the totp ID of this totp.
+	 *
+	 * @param totpId the totp ID of this totp
+	 */
 	@Override
 	public void setTotpId(long totpId) {
 		model.setTotpId(totpId);
 	}
 
 	/**
-	* Sets the user ID of this totp.
-	*
-	* @param userId the user ID of this totp
-	*/
+	 * Sets the user ID of this totp.
+	 *
+	 * @param userId the user ID of this totp
+	 */
 	@Override
 	public void setUserId(long userId) {
 		model.setUserId(userId);
 	}
 
 	/**
-	* Sets the user name of this totp.
-	*
-	* @param userName the user name of this totp
-	*/
+	 * Sets the user name of this totp.
+	 *
+	 * @param userName the user name of this totp
+	 */
 	@Override
 	public void setUserName(String userName) {
 		model.setUserName(userName);
 	}
 
 	/**
-	* Sets the user uuid of this totp.
-	*
-	* @param userUuid the user uuid of this totp
-	*/
+	 * Sets the user uuid of this totp.
+	 *
+	 * @param userUuid the user uuid of this totp
+	 */
 	@Override
 	public void setUserUuid(String userUuid) {
 		model.setUserUuid(userUuid);
 	}
 
 	/**
-	* Sets whether this totp is verified.
-	*
-	* @param verified the verified of this totp
-	*/
+	 * Sets whether this totp is verified.
+	 *
+	 * @param verified the verified of this totp
+	 */
 	@Override
 	public void setVerified(boolean verified) {
 		model.setVerified(verified);
@@ -461,4 +462,5 @@ public class TOTPWrapper extends BaseModelWrapper<TOTP> implements TOTP,
 	protected TOTPWrapper wrap(TOTP totp) {
 		return new TOTPWrapper(totp);
 	}
+
 }

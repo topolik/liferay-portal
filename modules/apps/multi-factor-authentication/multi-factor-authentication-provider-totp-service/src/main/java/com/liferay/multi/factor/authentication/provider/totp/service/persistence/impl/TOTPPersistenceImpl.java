@@ -21,9 +21,9 @@ import com.liferay.multi.factor.authentication.provider.totp.model.TOTP;
 import com.liferay.multi.factor.authentication.provider.totp.model.impl.TOTPImpl;
 import com.liferay.multi.factor.authentication.provider.totp.model.impl.TOTPModelImpl;
 import com.liferay.multi.factor.authentication.provider.totp.service.persistence.TOTPPersistence;
-
+import com.liferay.multi.factor.authentication.provider.totp.service.persistence.impl.constants.TOTPPersistenceConstants;
 import com.liferay.petra.string.StringBundler;
-
+import com.liferay.portal.kernel.configuration.Configuration;
 import com.liferay.portal.kernel.dao.orm.EntityCache;
 import com.liferay.portal.kernel.dao.orm.FinderCache;
 import com.liferay.portal.kernel.dao.orm.FinderPath;
@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.dao.orm.Query;
 import com.liferay.portal.kernel.dao.orm.QueryPos;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.Session;
+import com.liferay.portal.kernel.dao.orm.SessionFactory;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -38,9 +39,9 @@ import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
 import com.liferay.portal.kernel.service.persistence.CompanyProvider;
 import com.liferay.portal.kernel.service.persistence.CompanyProviderWrapper;
 import com.liferay.portal.kernel.service.persistence.impl.BasePersistenceImpl;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
 
@@ -51,6 +52,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * The persistence implementation for the totp service.
  *
@@ -59,23 +67,27 @@ import java.util.Map;
  * </p>
  *
  * @author arthurchan35
- * @see TOTPPersistence
- * @see com.liferay.multi.factor.authentication.provider.totp.service.persistence.TOTPUtil
  * @generated
  */
+@Component(service = TOTPPersistence.class)
 @ProviderType
-public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
-	implements TOTPPersistence {
+public class TOTPPersistenceImpl
+	extends BasePersistenceImpl<TOTP> implements TOTPPersistence {
+
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. Always use {@link TOTPUtil} to access the totp persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
+	 * Never modify or reference this class directly. Always use <code>TOTPUtil</code> to access the totp persistence. Modify <code>service.xml</code> and rerun ServiceBuilder to regenerate this class.
 	 */
-	public static final String FINDER_CLASS_NAME_ENTITY = TOTPImpl.class.getName();
-	public static final String FINDER_CLASS_NAME_LIST_WITH_PAGINATION = FINDER_CLASS_NAME_ENTITY +
-		".List1";
-	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION = FINDER_CLASS_NAME_ENTITY +
-		".List2";
+	public static final String FINDER_CLASS_NAME_ENTITY =
+		TOTPImpl.class.getName();
+
+	public static final String FINDER_CLASS_NAME_LIST_WITH_PAGINATION =
+		FINDER_CLASS_NAME_ENTITY + ".List1";
+
+	public static final String FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION =
+		FINDER_CLASS_NAME_ENTITY + ".List2";
+
 	private FinderPath _finderPathWithPaginationFindAll;
 	private FinderPath _finderPathWithoutPaginationFindAll;
 	private FinderPath _finderPathCountAll;
@@ -83,7 +95,7 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	private FinderPath _finderPathCountByUserId;
 
 	/**
-	 * Returns the totp where userId = &#63; or throws a {@link NoSuchTOTPException} if it could not be found.
+	 * Returns the totp where userId = &#63; or throws a <code>NoSuchTOTPException</code> if it could not be found.
 	 *
 	 * @param userId the user ID
 	 * @return the matching totp
@@ -133,13 +145,13 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 */
 	@Override
 	public TOTP fetchByUserId(long userId, boolean retrieveFromCache) {
-		Object[] finderArgs = new Object[] { userId };
+		Object[] finderArgs = new Object[] {userId};
 
 		Object result = null;
 
 		if (retrieveFromCache) {
-			result = finderCache.getResult(_finderPathFetchByUserId,
-					finderArgs, this);
+			result = finderCache.getResult(
+				_finderPathFetchByUserId, finderArgs, this);
 		}
 
 		if (result instanceof TOTP) {
@@ -173,8 +185,8 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 				List<TOTP> list = q.list();
 
 				if (list.isEmpty()) {
-					finderCache.putResult(_finderPathFetchByUserId, finderArgs,
-						list);
+					finderCache.putResult(
+						_finderPathFetchByUserId, finderArgs, list);
 				}
 				else {
 					TOTP totp = list.get(0);
@@ -225,7 +237,7 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	public int countByUserId(long userId) {
 		FinderPath finderPath = _finderPathCountByUserId;
 
-		Object[] finderArgs = new Object[] { userId };
+		Object[] finderArgs = new Object[] {userId};
 
 		Long count = (Long)finderCache.getResult(finderPath, finderArgs, this);
 
@@ -266,14 +278,14 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 		return count.intValue();
 	}
 
-	private static final String _FINDER_COLUMN_USERID_USERID_2 = "totp.userId = ?";
+	private static final String _FINDER_COLUMN_USERID_USERID_2 =
+		"totp.userId = ?";
 
 	public TOTPPersistenceImpl() {
 		setModelClass(TOTP.class);
 
 		setModelImplClass(TOTPImpl.class);
 		setModelPKClass(long.class);
-		setEntityCacheEnabled(TOTPModelImpl.ENTITY_CACHE_ENABLED);
 	}
 
 	/**
@@ -283,11 +295,11 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 */
 	@Override
 	public void cacheResult(TOTP totp) {
-		entityCache.putResult(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-			TOTPImpl.class, totp.getPrimaryKey(), totp);
+		entityCache.putResult(
+			entityCacheEnabled, TOTPImpl.class, totp.getPrimaryKey(), totp);
 
-		finderCache.putResult(_finderPathFetchByUserId,
-			new Object[] { totp.getUserId() }, totp);
+		finderCache.putResult(
+			_finderPathFetchByUserId, new Object[] {totp.getUserId()}, totp);
 
 		totp.resetOriginalValues();
 	}
@@ -300,8 +312,10 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	@Override
 	public void cacheResult(List<TOTP> totps) {
 		for (TOTP totp : totps) {
-			if (entityCache.getResult(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-						TOTPImpl.class, totp.getPrimaryKey()) == null) {
+			if (entityCache.getResult(
+					entityCacheEnabled, TOTPImpl.class, totp.getPrimaryKey()) ==
+						null) {
+
 				cacheResult(totp);
 			}
 			else {
@@ -314,7 +328,7 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 * Clears the cache for all totps.
 	 *
 	 * <p>
-	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
+	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
 	 * </p>
 	 */
 	@Override
@@ -330,13 +344,13 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 * Clears the cache for the totp.
 	 *
 	 * <p>
-	 * The {@link EntityCache} and {@link FinderCache} are both cleared by this method.
+	 * The <code>EntityCache</code> and <code>FinderCache</code> are both cleared by this method.
 	 * </p>
 	 */
 	@Override
 	public void clearCache(TOTP totp) {
-		entityCache.removeResult(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-			TOTPImpl.class, totp.getPrimaryKey());
+		entityCache.removeResult(
+			entityCacheEnabled, TOTPImpl.class, totp.getPrimaryKey());
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
@@ -350,34 +364,36 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 
 		for (TOTP totp : totps) {
-			entityCache.removeResult(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-				TOTPImpl.class, totp.getPrimaryKey());
+			entityCache.removeResult(
+				entityCacheEnabled, TOTPImpl.class, totp.getPrimaryKey());
 
 			clearUniqueFindersCache((TOTPModelImpl)totp, true);
 		}
 	}
 
 	protected void cacheUniqueFindersCache(TOTPModelImpl totpModelImpl) {
-		Object[] args = new Object[] { totpModelImpl.getUserId() };
+		Object[] args = new Object[] {totpModelImpl.getUserId()};
 
-		finderCache.putResult(_finderPathCountByUserId, args, Long.valueOf(1),
-			false);
-		finderCache.putResult(_finderPathFetchByUserId, args, totpModelImpl,
-			false);
+		finderCache.putResult(
+			_finderPathCountByUserId, args, Long.valueOf(1), false);
+		finderCache.putResult(
+			_finderPathFetchByUserId, args, totpModelImpl, false);
 	}
 
-	protected void clearUniqueFindersCache(TOTPModelImpl totpModelImpl,
-		boolean clearCurrent) {
+	protected void clearUniqueFindersCache(
+		TOTPModelImpl totpModelImpl, boolean clearCurrent) {
+
 		if (clearCurrent) {
-			Object[] args = new Object[] { totpModelImpl.getUserId() };
+			Object[] args = new Object[] {totpModelImpl.getUserId()};
 
 			finderCache.removeResult(_finderPathCountByUserId, args);
 			finderCache.removeResult(_finderPathFetchByUserId, args);
 		}
 
 		if ((totpModelImpl.getColumnBitmask() &
-				_finderPathFetchByUserId.getColumnBitmask()) != 0) {
-			Object[] args = new Object[] { totpModelImpl.getOriginalUserId() };
+			 _finderPathFetchByUserId.getColumnBitmask()) != 0) {
+
+			Object[] args = new Object[] {totpModelImpl.getOriginalUserId()};
 
 			finderCache.removeResult(_finderPathCountByUserId, args);
 			finderCache.removeResult(_finderPathFetchByUserId, args);
@@ -435,8 +451,8 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 					_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
 				}
 
-				throw new NoSuchTOTPException(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY +
-					primaryKey);
+				throw new NoSuchTOTPException(
+					_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
 			}
 
 			return remove(totp);
@@ -460,7 +476,8 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 			session = openSession();
 
 			if (!session.contains(totp)) {
-				totp = (TOTP)session.get(TOTPImpl.class, totp.getPrimaryKeyObj());
+				totp = (TOTP)session.get(
+					TOTPImpl.class, totp.getPrimaryKeyObj());
 			}
 
 			if (totp != null) {
@@ -493,17 +510,18 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 
 				throw new IllegalArgumentException(
 					"Implement ModelWrapper in totp proxy " +
-					invocationHandler.getClass());
+						invocationHandler.getClass());
 			}
 
 			throw new IllegalArgumentException(
 				"Implement ModelWrapper in custom TOTP implementation " +
-				totp.getClass());
+					totp.getClass());
 		}
 
 		TOTPModelImpl totpModelImpl = (TOTPModelImpl)totp;
 
-		ServiceContext serviceContext = ServiceContextThreadLocal.getServiceContext();
+		ServiceContext serviceContext =
+			ServiceContextThreadLocal.getServiceContext();
 
 		Date now = new Date();
 
@@ -548,18 +566,18 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 
 		finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 
-		if (!TOTPModelImpl.COLUMN_BITMASK_ENABLED) {
+		if (!_columnBitmaskEnabled) {
 			finderCache.clearCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 		}
-		else
-		 if (isNew) {
+		else if (isNew) {
 			finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
-			finderCache.removeResult(_finderPathWithoutPaginationFindAll,
-				FINDER_ARGS_EMPTY);
+			finderCache.removeResult(
+				_finderPathWithoutPaginationFindAll, FINDER_ARGS_EMPTY);
 		}
 
-		entityCache.putResult(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-			TOTPImpl.class, totp.getPrimaryKey(), totp, false);
+		entityCache.putResult(
+			entityCacheEnabled, TOTPImpl.class, totp.getPrimaryKey(), totp,
+			false);
 
 		clearUniqueFindersCache(totpModelImpl, false);
 		cacheUniqueFindersCache(totpModelImpl);
@@ -570,7 +588,7 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	}
 
 	/**
-	 * Returns the totp with the primary key or throws a {@link com.liferay.portal.kernel.exception.NoSuchModelException} if it could not be found.
+	 * Returns the totp with the primary key or throws a <code>com.liferay.portal.kernel.exception.NoSuchModelException</code> if it could not be found.
 	 *
 	 * @param primaryKey the primary key of the totp
 	 * @return the totp
@@ -579,6 +597,7 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	@Override
 	public TOTP findByPrimaryKey(Serializable primaryKey)
 		throws NoSuchTOTPException {
+
 		TOTP totp = fetchByPrimaryKey(primaryKey);
 
 		if (totp == null) {
@@ -586,15 +605,15 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 				_log.debug(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
 			}
 
-			throw new NoSuchTOTPException(_NO_SUCH_ENTITY_WITH_PRIMARY_KEY +
-				primaryKey);
+			throw new NoSuchTOTPException(
+				_NO_SUCH_ENTITY_WITH_PRIMARY_KEY + primaryKey);
 		}
 
 		return totp;
 	}
 
 	/**
-	 * Returns the totp with the primary key or throws a {@link NoSuchTOTPException} if it could not be found.
+	 * Returns the totp with the primary key or throws a <code>NoSuchTOTPException</code> if it could not be found.
 	 *
 	 * @param totpId the primary key of the totp
 	 * @return the totp
@@ -630,7 +649,7 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 * Returns a range of all the totps.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link TOTPModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>TOTPModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param start the lower bound of the range of totps
@@ -646,7 +665,7 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 * Returns an ordered range of all the totps.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link TOTPModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>TOTPModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param start the lower bound of the range of totps
@@ -655,8 +674,9 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 * @return the ordered range of totps
 	 */
 	@Override
-	public List<TOTP> findAll(int start, int end,
-		OrderByComparator<TOTP> orderByComparator) {
+	public List<TOTP> findAll(
+		int start, int end, OrderByComparator<TOTP> orderByComparator) {
+
 		return findAll(start, end, orderByComparator, true);
 	}
 
@@ -664,7 +684,7 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 * Returns an ordered range of all the totps.
 	 *
 	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to {@link QueryUtil#ALL_POS} will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not {@link QueryUtil#ALL_POS}), then the query will include the default ORDER BY logic from {@link TOTPModelImpl}. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>TOTPModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param start the lower bound of the range of totps
@@ -674,28 +694,31 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 * @return the ordered range of totps
 	 */
 	@Override
-	public List<TOTP> findAll(int start, int end,
-		OrderByComparator<TOTP> orderByComparator, boolean retrieveFromCache) {
+	public List<TOTP> findAll(
+		int start, int end, OrderByComparator<TOTP> orderByComparator,
+		boolean retrieveFromCache) {
+
 		boolean pagination = true;
 		FinderPath finderPath = null;
 		Object[] finderArgs = null;
 
 		if ((start == QueryUtil.ALL_POS) && (end == QueryUtil.ALL_POS) &&
-				(orderByComparator == null)) {
+			(orderByComparator == null)) {
+
 			pagination = false;
 			finderPath = _finderPathWithoutPaginationFindAll;
 			finderArgs = FINDER_ARGS_EMPTY;
 		}
 		else {
 			finderPath = _finderPathWithPaginationFindAll;
-			finderArgs = new Object[] { start, end, orderByComparator };
+			finderArgs = new Object[] {start, end, orderByComparator};
 		}
 
 		List<TOTP> list = null;
 
 		if (retrieveFromCache) {
-			list = (List<TOTP>)finderCache.getResult(finderPath, finderArgs,
-					this);
+			list = (List<TOTP>)finderCache.getResult(
+				finderPath, finderArgs, this);
 		}
 
 		if (list == null) {
@@ -703,13 +726,13 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 			String sql = null;
 
 			if (orderByComparator != null) {
-				query = new StringBundler(2 +
-						(orderByComparator.getOrderByFields().length * 2));
+				query = new StringBundler(
+					2 + (orderByComparator.getOrderByFields().length * 2));
 
 				query.append(_SQL_SELECT_TOTP);
 
-				appendOrderByComparator(query, _ORDER_BY_ENTITY_ALIAS,
-					orderByComparator);
+				appendOrderByComparator(
+					query, _ORDER_BY_ENTITY_ALIAS, orderByComparator);
 
 				sql = query.toString();
 			}
@@ -729,16 +752,16 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 				Query q = session.createQuery(sql);
 
 				if (!pagination) {
-					list = (List<TOTP>)QueryUtil.list(q, getDialect(), start,
-							end, false);
+					list = (List<TOTP>)QueryUtil.list(
+						q, getDialect(), start, end, false);
 
 					Collections.sort(list);
 
 					list = Collections.unmodifiableList(list);
 				}
 				else {
-					list = (List<TOTP>)QueryUtil.list(q, getDialect(), start,
-							end);
+					list = (List<TOTP>)QueryUtil.list(
+						q, getDialect(), start, end);
 				}
 
 				cacheResult(list);
@@ -776,8 +799,8 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	 */
 	@Override
 	public int countAll() {
-		Long count = (Long)finderCache.getResult(_finderPathCountAll,
-				FINDER_ARGS_EMPTY, this);
+		Long count = (Long)finderCache.getResult(
+			_finderPathCountAll, FINDER_ARGS_EMPTY, this);
 
 		if (count == null) {
 			Session session = null;
@@ -789,11 +812,12 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 
 				count = (Long)q.uniqueResult();
 
-				finderCache.putResult(_finderPathCountAll, FINDER_ARGS_EMPTY,
-					count);
+				finderCache.putResult(
+					_finderPathCountAll, FINDER_ARGS_EMPTY, count);
 			}
 			catch (Exception e) {
-				finderCache.removeResult(_finderPathCountAll, FINDER_ARGS_EMPTY);
+				finderCache.removeResult(
+					_finderPathCountAll, FINDER_ARGS_EMPTY);
 
 				throw processException(e);
 			}
@@ -828,52 +852,108 @@ public class TOTPPersistenceImpl extends BasePersistenceImpl<TOTP>
 	/**
 	 * Initializes the totp persistence.
 	 */
-	public void afterPropertiesSet() {
-		_finderPathWithPaginationFindAll = new FinderPath(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-				TOTPModelImpl.FINDER_CACHE_ENABLED, TOTPImpl.class,
-				FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
+	@Activate
+	public void activate() {
+		TOTPModelImpl.setEntityCacheEnabled(entityCacheEnabled);
+		TOTPModelImpl.setFinderCacheEnabled(finderCacheEnabled);
 
-		_finderPathWithoutPaginationFindAll = new FinderPath(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-				TOTPModelImpl.FINDER_CACHE_ENABLED, TOTPImpl.class,
-				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
-				new String[0]);
+		_finderPathWithPaginationFindAll = new FinderPath(
+			entityCacheEnabled, finderCacheEnabled, TOTPImpl.class,
+			FINDER_CLASS_NAME_LIST_WITH_PAGINATION, "findAll", new String[0]);
 
-		_finderPathCountAll = new FinderPath(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-				TOTPModelImpl.FINDER_CACHE_ENABLED, Long.class,
-				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
-				new String[0]);
+		_finderPathWithoutPaginationFindAll = new FinderPath(
+			entityCacheEnabled, finderCacheEnabled, TOTPImpl.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "findAll",
+			new String[0]);
 
-		_finderPathFetchByUserId = new FinderPath(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-				TOTPModelImpl.FINDER_CACHE_ENABLED, TOTPImpl.class,
-				FINDER_CLASS_NAME_ENTITY, "fetchByUserId",
-				new String[] { Long.class.getName() },
-				TOTPModelImpl.USERID_COLUMN_BITMASK);
+		_finderPathCountAll = new FinderPath(
+			entityCacheEnabled, finderCacheEnabled, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countAll",
+			new String[0]);
 
-		_finderPathCountByUserId = new FinderPath(TOTPModelImpl.ENTITY_CACHE_ENABLED,
-				TOTPModelImpl.FINDER_CACHE_ENABLED, Long.class,
-				FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUserId",
-				new String[] { Long.class.getName() });
+		_finderPathFetchByUserId = new FinderPath(
+			entityCacheEnabled, finderCacheEnabled, TOTPImpl.class,
+			FINDER_CLASS_NAME_ENTITY, "fetchByUserId",
+			new String[] {Long.class.getName()},
+			TOTPModelImpl.USERID_COLUMN_BITMASK);
+
+		_finderPathCountByUserId = new FinderPath(
+			entityCacheEnabled, finderCacheEnabled, Long.class,
+			FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION, "countByUserId",
+			new String[] {Long.class.getName()});
 	}
 
-	public void destroy() {
+	@Deactivate
+	public void deactivate() {
 		entityCache.removeCache(TOTPImpl.class.getName());
 		finderCache.removeCache(FINDER_CLASS_NAME_ENTITY);
 		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITH_PAGINATION);
 		finderCache.removeCache(FINDER_CLASS_NAME_LIST_WITHOUT_PAGINATION);
 	}
 
-	@ServiceReference(type = CompanyProviderWrapper.class)
+	@Override
+	@Reference(
+		target = TOTPPersistenceConstants.ORIGIN_BUNDLE_SYMBOLIC_NAME_FILTER,
+		unbind = "-"
+	)
+	public void setConfiguration(Configuration configuration) {
+		super.setConfiguration(configuration);
+
+		_columnBitmaskEnabled = GetterUtil.getBoolean(
+			configuration.get(
+				"value.object.column.bitmask.enabled.com.liferay.multi.factor.authentication.provider.totp.model.TOTP"),
+			true);
+	}
+
+	@Override
+	@Reference(
+		target = TOTPPersistenceConstants.ORIGIN_BUNDLE_SYMBOLIC_NAME_FILTER,
+		unbind = "-"
+	)
+	public void setDataSource(DataSource dataSource) {
+		super.setDataSource(dataSource);
+	}
+
+	@Override
+	@Reference(
+		target = TOTPPersistenceConstants.ORIGIN_BUNDLE_SYMBOLIC_NAME_FILTER,
+		unbind = "-"
+	)
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		super.setSessionFactory(sessionFactory);
+	}
+
+	private boolean _columnBitmaskEnabled;
+
+	@Reference(service = CompanyProviderWrapper.class)
 	protected CompanyProvider companyProvider;
-	@ServiceReference(type = EntityCache.class)
+
+	@Reference
 	protected EntityCache entityCache;
-	@ServiceReference(type = FinderCache.class)
+
+	@Reference
 	protected FinderCache finderCache;
+
 	private static final String _SQL_SELECT_TOTP = "SELECT totp FROM TOTP totp";
-	private static final String _SQL_SELECT_TOTP_WHERE = "SELECT totp FROM TOTP totp WHERE ";
-	private static final String _SQL_COUNT_TOTP = "SELECT COUNT(totp) FROM TOTP totp";
-	private static final String _SQL_COUNT_TOTP_WHERE = "SELECT COUNT(totp) FROM TOTP totp WHERE ";
+
+	private static final String _SQL_SELECT_TOTP_WHERE =
+		"SELECT totp FROM TOTP totp WHERE ";
+
+	private static final String _SQL_COUNT_TOTP =
+		"SELECT COUNT(totp) FROM TOTP totp";
+
+	private static final String _SQL_COUNT_TOTP_WHERE =
+		"SELECT COUNT(totp) FROM TOTP totp WHERE ";
+
 	private static final String _ORDER_BY_ENTITY_ALIAS = "totp.";
-	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY = "No TOTP exists with the primary key ";
-	private static final String _NO_SUCH_ENTITY_WITH_KEY = "No TOTP exists with the key {";
-	private static final Log _log = LogFactoryUtil.getLog(TOTPPersistenceImpl.class);
+
+	private static final String _NO_SUCH_ENTITY_WITH_PRIMARY_KEY =
+		"No TOTP exists with the primary key ";
+
+	private static final String _NO_SUCH_ENTITY_WITH_KEY =
+		"No TOTP exists with the key {";
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		TOTPPersistenceImpl.class);
+
 }

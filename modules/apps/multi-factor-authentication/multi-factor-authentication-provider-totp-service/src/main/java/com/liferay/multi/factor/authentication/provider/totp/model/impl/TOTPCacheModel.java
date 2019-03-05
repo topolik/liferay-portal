@@ -17,10 +17,8 @@ package com.liferay.multi.factor.authentication.provider.totp.model.impl;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.multi.factor.authentication.provider.totp.model.TOTP;
-
 import com.liferay.petra.lang.HashUtil;
 import com.liferay.petra.string.StringBundler;
-
 import com.liferay.portal.kernel.model.CacheModel;
 
 import java.io.Externalizable;
@@ -34,11 +32,11 @@ import java.util.Date;
  * The cache model class for representing TOTP in entity cache.
  *
  * @author arthurchan35
- * @see TOTP
  * @generated
  */
 @ProviderType
 public class TOTPCacheModel implements CacheModel<TOTP>, Externalizable {
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -193,8 +191,7 @@ public class TOTPCacheModel implements CacheModel<TOTP>, Externalizable {
 	}
 
 	@Override
-	public void writeExternal(ObjectOutput objectOutput)
-		throws IOException {
+	public void writeExternal(ObjectOutput objectOutput) throws IOException {
 		objectOutput.writeLong(totpId);
 
 		objectOutput.writeLong(companyId);
@@ -254,4 +251,5 @@ public class TOTPCacheModel implements CacheModel<TOTP>, Externalizable {
 	public int failedLoginAttempts;
 	public String sharedSecret;
 	public boolean verified;
+
 }

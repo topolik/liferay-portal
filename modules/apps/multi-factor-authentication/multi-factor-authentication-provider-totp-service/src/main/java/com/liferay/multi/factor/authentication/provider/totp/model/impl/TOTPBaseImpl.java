@@ -33,10 +33,11 @@ import com.liferay.multi.factor.authentication.provider.totp.service.TOTPLocalSe
  */
 @ProviderType
 public abstract class TOTPBaseImpl extends TOTPModelImpl implements TOTP {
+
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a totp model instance should use the {@link TOTP} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a totp model instance should use the <code>TOTP</code> interface instead.
 	 */
 	@Override
 	public void persist() {
@@ -47,4 +48,5 @@ public abstract class TOTPBaseImpl extends TOTPModelImpl implements TOTP {
 			TOTPLocalServiceUtil.updateTOTP(this);
 		}
 	}
+
 }

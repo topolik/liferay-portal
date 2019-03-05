@@ -20,7 +20,7 @@ import aQute.bnd.annotation.ProviderType;
  * The extended model implementation for the TOTP service. Represents a row in the &quot;TOTP&quot; database table, with each column mapped to a property of this class.
  *
  * <p>
- * Helper methods and all application logic should be put in this class. Whenever methods are added, rerun ServiceBuilder to copy their definitions into the {@link com.liferay.multi.factor.authentication.provider.totp.model.TOTP} interface.
+ * Helper methods and all application logic should be put in this class. Whenever methods are added, rerun ServiceBuilder to copy their definitions into the <code>com.liferay.multi.factor.authentication.provider.totp.model.TOTP</code> interface.
  * </p>
  *
  * @author arthurchan35

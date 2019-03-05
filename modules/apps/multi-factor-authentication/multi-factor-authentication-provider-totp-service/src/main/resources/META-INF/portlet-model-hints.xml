@@ -8,16 +8,12 @@
 		<field name="userName" type="String" />
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
-		<field name="backupCodes" type="String">
-			<hint name="max-length">255</hint>
-		</field>
+		<field name="backupCodes" type="String" />
 		<field name="lastLoginDate" type="Date" />
 		<field name="lastLoginIP" type="String" />
 		<field name="lastFailedLoginDate" type="Date" />
 		<field name="failedLoginAttempts" type="int" />
-		<field name="sharedSecret" type="String">
-			<hint name="max-length">255</hint>
-		</field>
+		<field name="sharedSecret" type="String" />
 		<field name="verified" type="boolean" />
 	</model>
 </model-hints>

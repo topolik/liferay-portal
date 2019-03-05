@@ -11,7 +11,6 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
-
 package com.liferay.multi.factor.authentication.provider.totp.exception;
 
 import aQute.bnd.annotation.ProviderType;
