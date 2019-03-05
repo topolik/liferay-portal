@@ -16,7 +16,7 @@ package com.liferay.multi.factor.authentication.provider.email.otp.model.impl;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP;
+import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTPEntry;
 import com.liferay.petra.lang.HashUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.model.CacheModel;
@@ -29,14 +29,14 @@ import java.io.ObjectOutput;
 import java.util.Date;
 
 /**
- * The cache model class for representing EmailOTP in entity cache.
+ * The cache model class for representing EmailOTPEntry in entity cache.
  *
  * @author arthurchan35
  * @generated
  */
 @ProviderType
-public class EmailOTPCacheModel
-	implements CacheModel<EmailOTP>, Externalizable {
+public class EmailOTPEntryCacheModel
+	implements CacheModel<EmailOTPEntry>, Externalizable {
 
 	@Override
 	public boolean equals(Object obj) {
@@ -44,13 +44,14 @@ public class EmailOTPCacheModel
 			return true;
 		}
 
-		if (!(obj instanceof EmailOTPCacheModel)) {
+		if (!(obj instanceof EmailOTPEntryCacheModel)) {
 			return false;
 		}
 
-		EmailOTPCacheModel emailOTPCacheModel = (EmailOTPCacheModel)obj;
+		EmailOTPEntryCacheModel emailOTPEntryCacheModel =
+			(EmailOTPEntryCacheModel)obj;
 
-		if (emailOTPId == emailOTPCacheModel.emailOTPId) {
+		if (entryId == emailOTPEntryCacheModel.entryId) {
 			return true;
 		}
 
@@ -59,15 +60,15 @@ public class EmailOTPCacheModel
 
 	@Override
 	public int hashCode() {
-		return HashUtil.hash(0, emailOTPId);
+		return HashUtil.hash(0, entryId);
 	}
 
 	@Override
 	public String toString() {
 		StringBundler sb = new StringBundler(25);
 
-		sb.append("{emailOTPId=");
-		sb.append(emailOTPId);
+		sb.append("{entryId=");
+		sb.append(entryId);
 		sb.append(", companyId=");
 		sb.append(companyId);
 		sb.append(", userId=");
@@ -96,79 +97,79 @@ public class EmailOTPCacheModel
 	}
 
 	@Override
-	public EmailOTP toEntityModel() {
-		EmailOTPImpl emailOTPImpl = new EmailOTPImpl();
+	public EmailOTPEntry toEntityModel() {
+		EmailOTPEntryImpl emailOTPEntryImpl = new EmailOTPEntryImpl();
 
-		emailOTPImpl.setEmailOTPId(emailOTPId);
-		emailOTPImpl.setCompanyId(companyId);
-		emailOTPImpl.setUserId(userId);
+		emailOTPEntryImpl.setEntryId(entryId);
+		emailOTPEntryImpl.setCompanyId(companyId);
+		emailOTPEntryImpl.setUserId(userId);
 
 		if (userName == null) {
-			emailOTPImpl.setUserName("");
+			emailOTPEntryImpl.setUserName("");
 		}
 		else {
-			emailOTPImpl.setUserName(userName);
+			emailOTPEntryImpl.setUserName(userName);
 		}
 
 		if (createDate == Long.MIN_VALUE) {
-			emailOTPImpl.setCreateDate(null);
+			emailOTPEntryImpl.setCreateDate(null);
 		}
 		else {
-			emailOTPImpl.setCreateDate(new Date(createDate));
+			emailOTPEntryImpl.setCreateDate(new Date(createDate));
 		}
 
 		if (modifiedDate == Long.MIN_VALUE) {
-			emailOTPImpl.setModifiedDate(null);
+			emailOTPEntryImpl.setModifiedDate(null);
 		}
 		else {
-			emailOTPImpl.setModifiedDate(new Date(modifiedDate));
+			emailOTPEntryImpl.setModifiedDate(new Date(modifiedDate));
 		}
 
 		if (emailAddress == null) {
-			emailOTPImpl.setEmailAddress("");
+			emailOTPEntryImpl.setEmailAddress("");
 		}
 		else {
-			emailOTPImpl.setEmailAddress(emailAddress);
+			emailOTPEntryImpl.setEmailAddress(emailAddress);
 		}
 
 		if (lastSuccessDate == Long.MIN_VALUE) {
-			emailOTPImpl.setLastSuccessDate(null);
+			emailOTPEntryImpl.setLastSuccessDate(null);
 		}
 		else {
-			emailOTPImpl.setLastSuccessDate(new Date(lastSuccessDate));
+			emailOTPEntryImpl.setLastSuccessDate(new Date(lastSuccessDate));
 		}
 
 		if (lastSuccessIP == null) {
-			emailOTPImpl.setLastSuccessIP("");
+			emailOTPEntryImpl.setLastSuccessIP("");
 		}
 		else {
-			emailOTPImpl.setLastSuccessIP(lastSuccessIP);
+			emailOTPEntryImpl.setLastSuccessIP(lastSuccessIP);
 		}
 
 		if (lastFailDate == Long.MIN_VALUE) {
-			emailOTPImpl.setLastFailDate(null);
+			emailOTPEntryImpl.setLastFailDate(null);
 		}
 		else {
-			emailOTPImpl.setLastFailDate(new Date(lastFailDate));
+			emailOTPEntryImpl.setLastFailDate(new Date(lastFailDate));
 		}
 
 		if (lastFailIP == null) {
-			emailOTPImpl.setLastFailIP("");
+			emailOTPEntryImpl.setLastFailIP("");
 		}
 		else {
-			emailOTPImpl.setLastFailIP(lastFailIP);
+			emailOTPEntryImpl.setLastFailIP(lastFailIP);
 		}
 
-		emailOTPImpl.setFailedAttempts(failedAttempts);
+		emailOTPEntryImpl.setFailedAttempts(failedAttempts);
 
-		emailOTPImpl.resetOriginalValues();
+		emailOTPEntryImpl.resetOriginalValues();
 
-		return emailOTPImpl;
+		return emailOTPEntryImpl;
 	}
 
 	@Override
 	public void readExternal(ObjectInput objectInput) throws IOException {
-		emailOTPId = objectInput.readLong();
+		entryId = objectInput.readLong();
 
 		companyId = objectInput.readLong();
 
@@ -187,7 +188,7 @@ public class EmailOTPCacheModel
 
 	@Override
 	public void writeExternal(ObjectOutput objectOutput) throws IOException {
-		objectOutput.writeLong(emailOTPId);
+		objectOutput.writeLong(entryId);
 
 		objectOutput.writeLong(companyId);
 
@@ -231,7 +232,7 @@ public class EmailOTPCacheModel
 		objectOutput.writeInt(failedAttempts);
 	}
 
-	public long emailOTPId;
+	public long entryId;
 	public long companyId;
 	public long userId;
 	public String userName;

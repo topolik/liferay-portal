@@ -1,1 +1,1 @@
-create unique index IX_3CA3854F on EmailOTP (userId);
+create unique index IX_39D879E3 on EmailOTPEntry (userId);

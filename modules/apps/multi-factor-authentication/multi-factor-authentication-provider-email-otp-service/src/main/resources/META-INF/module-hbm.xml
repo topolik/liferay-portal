@@ -2,9 +2,9 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false" default-lazy="false">
-	<import class="com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP" />
-	<class name="com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPImpl" table="EmailOTP">
-		<id access="com.liferay.portal.dao.orm.hibernate.LiferayPropertyAccessor" name="emailOTPId" type="long">
+	<import class="com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTPEntry" />
+	<class name="com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPEntryImpl" table="EmailOTPEntry">
+		<id access="com.liferay.portal.dao.orm.hibernate.LiferayPropertyAccessor" name="entryId" type="long">
 			<generator class="assigned" />
 		</id>
 		<property access="com.liferay.portal.dao.orm.hibernate.LiferayPropertyAccessor" name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />

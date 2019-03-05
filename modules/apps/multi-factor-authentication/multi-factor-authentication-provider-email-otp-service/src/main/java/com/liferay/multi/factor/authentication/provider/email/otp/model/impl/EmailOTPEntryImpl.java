@@ -17,23 +17,23 @@ package com.liferay.multi.factor.authentication.provider.email.otp.model.impl;
 import aQute.bnd.annotation.ProviderType;
 
 /**
- * The extended model implementation for the EmailOTP service. Represents a row in the &quot;EmailOTP&quot; database table, with each column mapped to a property of this class.
+ * The extended model implementation for the EmailOTPEntry service. Represents a row in the &quot;EmailOTPEntry&quot; database table, with each column mapped to a property of this class.
  *
  * <p>
- * Helper methods and all application logic should be put in this class. Whenever methods are added, rerun ServiceBuilder to copy their definitions into the {@link com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP} interface.
+ * Helper methods and all application logic should be put in this class. Whenever methods are added, rerun ServiceBuilder to copy their definitions into the <code>com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTPEntry</code> interface.
  * </p>
  *
  * @author arthurchan35
  */
 @ProviderType
-public class EmailOTPImpl extends EmailOTPBaseImpl {
+public class EmailOTPEntryImpl extends EmailOTPEntryBaseImpl {
 
 	/**
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never reference this class directly. All methods that expect a email otp model instance should use the {@link com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP} interface instead.
+	 * Never reference this class directly. All methods that expect a email otp entry model instance should use the {@link com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTPEntry} interface instead.
 	 */
-	public EmailOTPImpl() {
+	public EmailOTPEntryImpl() {
 	}
 
 }

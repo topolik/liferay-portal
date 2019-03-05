@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
 <model-hints>
-	<model name="com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP">
-		<field name="emailOTPId" type="long" />
+	<model name="com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTPEntry">
+		<field name="entryId" type="long" />
 		<field name="companyId" type="long" />
 		<field name="userId" type="long" />
 		<field name="userName" type="String" />

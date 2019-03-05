@@ -21,29 +21,29 @@ import com.liferay.portal.kernel.model.PersistedModel;
 import com.liferay.portal.kernel.util.Accessor;
 
 /**
- * The extended model interface for the EmailOTP service. Represents a row in the &quot;EmailOTP&quot; database table, with each column mapped to a property of this class.
+ * The extended model interface for the EmailOTPEntry service. Represents a row in the &quot;EmailOTPEntry&quot; database table, with each column mapped to a property of this class.
  *
  * @author arthurchan35
- * @see EmailOTPModel
+ * @see EmailOTPEntryModel
  * @generated
  */
 @ImplementationClassName(
-	"com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPImpl"
+	"com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPEntryImpl"
 )
 @ProviderType
-public interface EmailOTP extends EmailOTPModel, PersistedModel {
+public interface EmailOTPEntry extends EmailOTPEntryModel, PersistedModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to <code>com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPEntryImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
-	public static final Accessor<EmailOTP, Long> EMAIL_OTP_ID_ACCESSOR =
-		new Accessor<EmailOTP, Long>() {
+	public static final Accessor<EmailOTPEntry, Long> ENTRY_ID_ACCESSOR =
+		new Accessor<EmailOTPEntry, Long>() {
 
 			@Override
-			public Long get(EmailOTP emailOTP) {
-				return emailOTP.getEmailOTPId();
+			public Long get(EmailOTPEntry emailOTPEntry) {
+				return emailOTPEntry.getEntryId();
 			}
 
 			@Override
@@ -52,8 +52,8 @@ public interface EmailOTP extends EmailOTPModel, PersistedModel {
 			}
 
 			@Override
-			public Class<EmailOTP> getTypeClass() {
-				return EmailOTP.class;
+			public Class<EmailOTPEntry> getTypeClass() {
+				return EmailOTPEntry.class;
 			}
 
 		};

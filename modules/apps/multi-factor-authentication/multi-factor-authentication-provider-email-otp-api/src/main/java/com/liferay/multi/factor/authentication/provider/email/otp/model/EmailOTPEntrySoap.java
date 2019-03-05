@@ -29,12 +29,12 @@ import java.util.List;
  * @generated
  */
 @ProviderType
-public class EmailOTPSoap implements Serializable {
+public class EmailOTPEntrySoap implements Serializable {
 
-	public static EmailOTPSoap toSoapModel(EmailOTP model) {
-		EmailOTPSoap soapModel = new EmailOTPSoap();
+	public static EmailOTPEntrySoap toSoapModel(EmailOTPEntry model) {
+		EmailOTPEntrySoap soapModel = new EmailOTPEntrySoap();
 
-		soapModel.setEmailOTPId(model.getEmailOTPId());
+		soapModel.setEntryId(model.getEntryId());
 		soapModel.setCompanyId(model.getCompanyId());
 		soapModel.setUserId(model.getUserId());
 		soapModel.setUserName(model.getUserName());
@@ -50,8 +50,8 @@ public class EmailOTPSoap implements Serializable {
 		return soapModel;
 	}
 
-	public static EmailOTPSoap[] toSoapModels(EmailOTP[] models) {
-		EmailOTPSoap[] soapModels = new EmailOTPSoap[models.length];
+	public static EmailOTPEntrySoap[] toSoapModels(EmailOTPEntry[] models) {
+		EmailOTPEntrySoap[] soapModels = new EmailOTPEntrySoap[models.length];
 
 		for (int i = 0; i < models.length; i++) {
 			soapModels[i] = toSoapModel(models[i]);
@@ -60,14 +60,14 @@ public class EmailOTPSoap implements Serializable {
 		return soapModels;
 	}
 
-	public static EmailOTPSoap[][] toSoapModels(EmailOTP[][] models) {
-		EmailOTPSoap[][] soapModels = null;
+	public static EmailOTPEntrySoap[][] toSoapModels(EmailOTPEntry[][] models) {
+		EmailOTPEntrySoap[][] soapModels = null;
 
 		if (models.length > 0) {
-			soapModels = new EmailOTPSoap[models.length][models[0].length];
+			soapModels = new EmailOTPEntrySoap[models.length][models[0].length];
 		}
 		else {
-			soapModels = new EmailOTPSoap[0][0];
+			soapModels = new EmailOTPEntrySoap[0][0];
 		}
 
 		for (int i = 0; i < models.length; i++) {
@@ -77,34 +77,34 @@ public class EmailOTPSoap implements Serializable {
 		return soapModels;
 	}
 
-	public static EmailOTPSoap[] toSoapModels(List<EmailOTP> models) {
-		List<EmailOTPSoap> soapModels = new ArrayList<EmailOTPSoap>(
+	public static EmailOTPEntrySoap[] toSoapModels(List<EmailOTPEntry> models) {
+		List<EmailOTPEntrySoap> soapModels = new ArrayList<EmailOTPEntrySoap>(
 			models.size());
 
-		for (EmailOTP model : models) {
+		for (EmailOTPEntry model : models) {
 			soapModels.add(toSoapModel(model));
 		}
 
-		return soapModels.toArray(new EmailOTPSoap[soapModels.size()]);
+		return soapModels.toArray(new EmailOTPEntrySoap[soapModels.size()]);
 	}
 
-	public EmailOTPSoap() {
+	public EmailOTPEntrySoap() {
 	}
 
 	public long getPrimaryKey() {
-		return _emailOTPId;
+		return _entryId;
 	}
 
 	public void setPrimaryKey(long pk) {
-		setEmailOTPId(pk);
+		setEntryId(pk);
 	}
 
-	public long getEmailOTPId() {
-		return _emailOTPId;
+	public long getEntryId() {
+		return _entryId;
 	}
 
-	public void setEmailOTPId(long emailOTPId) {
-		_emailOTPId = emailOTPId;
+	public void setEntryId(long entryId) {
+		_entryId = entryId;
 	}
 
 	public long getCompanyId() {
@@ -195,7 +195,7 @@ public class EmailOTPSoap implements Serializable {
 		_failedAttempts = failedAttempts;
 	}
 
-	private long _emailOTPId;
+	private long _entryId;
 	private long _companyId;
 	private long _userId;
 	private String _userName;

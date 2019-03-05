@@ -1,5 +1,5 @@
-create table EmailOTP (
-	emailOTPId LONG not null primary key,
+create table EmailOTPEntry (
+	entryId LONG not null primary key,
 	companyId LONG,
 	userId LONG,
 	userName VARCHAR(75) null,
