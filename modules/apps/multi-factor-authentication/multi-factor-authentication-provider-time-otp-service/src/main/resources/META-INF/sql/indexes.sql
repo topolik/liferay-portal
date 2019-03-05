@@ -1,0 +1,1 @@
+create unique index IX_7B114B14 on TimeOTPEntry (userId);
