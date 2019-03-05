@@ -29,7 +29,7 @@
 
 		<!-- Finder methods -->
 
-		<finder name="UserId" return-type="OTP" unique="true">
+		<finder name="UserId" return-type="EmailOTP" unique="true">
 			<finder-column name="userId" />
 		</finder>
 

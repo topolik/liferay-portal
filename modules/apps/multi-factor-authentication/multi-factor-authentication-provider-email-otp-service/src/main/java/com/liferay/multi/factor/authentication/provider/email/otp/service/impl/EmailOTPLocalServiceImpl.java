@@ -64,7 +64,7 @@ public class EmailOTPLocalServiceImpl extends EmailOTPLocalServiceBaseImpl {
 		emailOTP.setCompanyId(user.getCompanyId());
 		emailOTP.setUserId(userId);
 		emailOTP.setUserName(user.getFullName());
-		emailOTP.setCreateDate(new Date());
+		emailOTP.setCreateDate(date);
 		emailOTP.setModifiedDate(date);
 		emailOTP.setEmailAddress(email);
 		emailOTP.setLastSuccessDate(date);
