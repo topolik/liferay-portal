@@ -12,9 +12,10 @@
  * details.
  */
 
-package com.liferay.multi.factor.authentication.provider.totp.web.internal.configuration;
+package com.liferay.multi.factor.authentication.provider.time.otp.web.internal.configuration;
 
 import aQute.bnd.annotation.metatype.Meta;
+
 import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
 
 /**
@@ -26,75 +27,67 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 @Meta.OCD(
 	factory = true,
-	id = "com.liferay.multi.factor.authentication.provider.totp.web.internal.configuration.TOTPConfiguration",
-	localization = "content/Language",
-	name = "totp-configuration-name"
+	id = "com.liferay.multi.factor.authentication.provider.time.otp.web.internal.configuration.TimeOTPConfiguration",
+	localization = "content/Language", name = "time-otp-configuration-name"
 )
-public interface TOTPConfiguration {
+public interface TimeOTPConfiguration {
 
 	@Meta.AD(deflt = "true", name = "enabled", required = false)
 	public boolean enabled();
 
 	@Meta.AD(
 		deflt = "time-based-one-time-password",
-		description = "totp-name-description",
-		name = "totp-name", required = false
+		description = "time-otp-name-description", name = "time-otp-name",
+		required = false
 	)
 	public String name();
 
 	@Meta.AD(
-		deflt = "3000",
-		description = "clock-skew-description",
+		deflt = "3000", description = "clock-skew-description",
 		name = "clock-skew", required = false
 	)
 	public long clockSkew();
 
 	@Meta.AD(
-		deflt = "30000",
-		description = "time-window-description",
+		deflt = "30000", description = "time-window-description",
 		name = "time-window", required = false
 	)
 	public long timeWindow();
 
 	@Meta.AD(
-		deflt = "6",
-		description = "digits-count-description",
+		deflt = "6", description = "digits-count-description",
 		name = "digits-count", required = false
 	)
 	public int digitsCount();
 
 	@Meta.AD(
-		deflt = "HmacSHA1",
-		description = "algorithm-description",
+		deflt = "HmacSHA1", description = "algorithm-description",
 		name = "algorithm", required = false
 	)
 	public String algorithm();
 
 	@Meta.AD(
-		deflt = "20",
-		description = "algorithm-key-size-description",
+		deflt = "20", description = "algorithm-key-size-description",
 		name = "algorithm-key-size", required = false
 	)
 	public int algorithmKeySize();
 
 	@Meta.AD(
-		deflt = "X-2FA-Token",
-		description = "headless-header-name-description",
+		deflt = "X-2FA-Token", description = "headless-header-name-description",
 		name = "headless-header-name", required = false
 	)
 	public String headlessHeaderName();
 
 	@Meta.AD(
-		deflt = "false",
-		description = "force-user-setup-description",
+		deflt = "false", description = "force-user-setup-description",
 		name = "force-user-setup", required = false
 	)
 	public boolean forceUserSetup();
 
 	@Meta.AD(
-		deflt = "-1",
-		description = "validation-expiration-time-description",
+		deflt = "-1", description = "validation-expiration-time-description",
 		name = "validation-expiration-time", required = false
 	)
 	public long validationExpirationTime();
+
 }

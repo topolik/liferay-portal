@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.multi.factor.authentication.provider.totp.web.internal.util;
+package com.liferay.multi.factor.authentication.provider.time.otp.web.internal.util;
 
 import com.liferay.petra.string.StringBundler;
 
@@ -27,25 +27,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * @author arthurhan35
  */
-public class TOTPUtil {
-
-	public static boolean verifyTOTP(
-		byte[] key, String totp, long clockSkewMs, long timeWindowMs,
-		int digits, String algorithm) {
-
-		long min = (System.currentTimeMillis() - clockSkewMs) / timeWindowMs;
-		long max = (System.currentTimeMillis() + clockSkewMs) / timeWindowMs;
-
-		for (long i = min; i <= max; i++) {
-			String generatedTotp = generateHOTP(key, i, digits, algorithm);
-
-			if (generatedTotp.equals(totp)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
+public class TimeOTPUtil {
 
 	public static String generateHOTP(
 		byte[] key, long count, int digits, String algorithm) {
@@ -82,14 +64,31 @@ public class TOTPUtil {
 		int offset = hmac[hmac.length - 1] & 0xf;
 
 		int binary =
-			(hmac[offset + 0x3] & 0xff) |
-			(hmac[offset + 0x2] & 0xff) << 8 |
+			(hmac[offset + 0x3] & 0xff) | (hmac[offset + 0x2] & 0xff) << 8 |
 			(hmac[offset + 0x1] & 0xff) << 16 |
 			(hmac[offset + 0x0] & 0x7f) << 24;
 
 		int otp = binary % (int)Math.pow(10, digits);
 
 		return String.format(StringBundler.concat("%0", digits, "d"), otp);
+	}
+
+	public static boolean verifyTOTP(
+		byte[] key, String totp, long clockSkewMs, long timeWindowMs,
+		int digits, String algorithm) {
+
+		long min = (System.currentTimeMillis() - clockSkewMs) / timeWindowMs;
+		long max = (System.currentTimeMillis() + clockSkewMs) / timeWindowMs;
+
+		for (long i = min; i <= max; i++) {
+			String generatedTotp = generateHOTP(key, i, digits, algorithm);
+
+			if (generatedTotp.equals(totp)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 }

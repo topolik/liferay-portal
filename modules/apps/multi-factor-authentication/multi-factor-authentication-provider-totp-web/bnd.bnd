@@ -1,4 +1,0 @@
-Bundle-Name: Liferay Multi Factor Authentication Provider TOTP Web
-Bundle-SymbolicName: com.liferay.multi.factor.authentication.provider.totp.web
-Bundle-Version: 1.0.0
-Web-ContextPath: /multi-factor-authentication-provider-totp-web
