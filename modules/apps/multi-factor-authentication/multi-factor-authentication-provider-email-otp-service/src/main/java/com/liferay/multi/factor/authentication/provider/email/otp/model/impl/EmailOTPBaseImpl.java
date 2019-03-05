@@ -32,12 +32,13 @@ import com.liferay.multi.factor.authentication.provider.email.otp.service.EmailO
  * @generated
  */
 @ProviderType
-public abstract class EmailOTPBaseImpl extends EmailOTPModelImpl
-	implements EmailOTP {
+public abstract class EmailOTPBaseImpl
+	extends EmailOTPModelImpl implements EmailOTP {
+
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify or reference this class directly. All methods that expect a email otp model instance should use the {@link EmailOTP} interface instead.
+	 * Never modify or reference this class directly. All methods that expect a email otp model instance should use the <code>EmailOTP</code> interface instead.
 	 */
 	@Override
 	public void persist() {
@@ -48,4 +49,5 @@ public abstract class EmailOTPBaseImpl extends EmailOTPModelImpl
 			EmailOTPLocalServiceUtil.updateEmailOTP(this);
 		}
 	}
+
 }

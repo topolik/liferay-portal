@@ -30,6 +30,7 @@ import java.util.List;
  */
 @ProviderType
 public class EmailOTPSoap implements Serializable {
+
 	public static EmailOTPSoap toSoapModel(EmailOTP model) {
 		EmailOTPSoap soapModel = new EmailOTPSoap();
 
@@ -77,7 +78,8 @@ public class EmailOTPSoap implements Serializable {
 	}
 
 	public static EmailOTPSoap[] toSoapModels(List<EmailOTP> models) {
-		List<EmailOTPSoap> soapModels = new ArrayList<EmailOTPSoap>(models.size());
+		List<EmailOTPSoap> soapModels = new ArrayList<EmailOTPSoap>(
+			models.size());
 
 		for (EmailOTP model : models) {
 			soapModels.add(toSoapModel(model));
@@ -205,4 +207,5 @@ public class EmailOTPSoap implements Serializable {
 	private Date _lastFailDate;
 	private String _lastFailIP;
 	private int _failedAttempts;
+
 }

@@ -33,8 +33,10 @@ import java.util.Map;
  * @generated
  */
 @ProviderType
-public class EmailOTPWrapper extends BaseModelWrapper<EmailOTP>
+public class EmailOTPWrapper
+	extends BaseModelWrapper<EmailOTP>
 	implements EmailOTP, ModelWrapper<EmailOTP> {
+
 	public EmailOTPWrapper(EmailOTP emailOTP) {
 		super(emailOTP);
 	}
@@ -135,140 +137,140 @@ public class EmailOTPWrapper extends BaseModelWrapper<EmailOTP>
 	}
 
 	/**
-	* Returns the company ID of this email otp.
-	*
-	* @return the company ID of this email otp
-	*/
+	 * Returns the company ID of this email otp.
+	 *
+	 * @return the company ID of this email otp
+	 */
 	@Override
 	public long getCompanyId() {
 		return model.getCompanyId();
 	}
 
 	/**
-	* Returns the create date of this email otp.
-	*
-	* @return the create date of this email otp
-	*/
+	 * Returns the create date of this email otp.
+	 *
+	 * @return the create date of this email otp
+	 */
 	@Override
 	public Date getCreateDate() {
 		return model.getCreateDate();
 	}
 
 	/**
-	* Returns the email address of this email otp.
-	*
-	* @return the email address of this email otp
-	*/
+	 * Returns the email address of this email otp.
+	 *
+	 * @return the email address of this email otp
+	 */
 	@Override
 	public String getEmailAddress() {
 		return model.getEmailAddress();
 	}
 
 	/**
-	* Returns the email otp ID of this email otp.
-	*
-	* @return the email otp ID of this email otp
-	*/
+	 * Returns the email otp ID of this email otp.
+	 *
+	 * @return the email otp ID of this email otp
+	 */
 	@Override
 	public long getEmailOTPId() {
 		return model.getEmailOTPId();
 	}
 
 	/**
-	* Returns the failed attempts of this email otp.
-	*
-	* @return the failed attempts of this email otp
-	*/
+	 * Returns the failed attempts of this email otp.
+	 *
+	 * @return the failed attempts of this email otp
+	 */
 	@Override
 	public int getFailedAttempts() {
 		return model.getFailedAttempts();
 	}
 
 	/**
-	* Returns the last fail date of this email otp.
-	*
-	* @return the last fail date of this email otp
-	*/
+	 * Returns the last fail date of this email otp.
+	 *
+	 * @return the last fail date of this email otp
+	 */
 	@Override
 	public Date getLastFailDate() {
 		return model.getLastFailDate();
 	}
 
 	/**
-	* Returns the last fail ip of this email otp.
-	*
-	* @return the last fail ip of this email otp
-	*/
+	 * Returns the last fail ip of this email otp.
+	 *
+	 * @return the last fail ip of this email otp
+	 */
 	@Override
 	public String getLastFailIP() {
 		return model.getLastFailIP();
 	}
 
 	/**
-	* Returns the last success date of this email otp.
-	*
-	* @return the last success date of this email otp
-	*/
+	 * Returns the last success date of this email otp.
+	 *
+	 * @return the last success date of this email otp
+	 */
 	@Override
 	public Date getLastSuccessDate() {
 		return model.getLastSuccessDate();
 	}
 
 	/**
-	* Returns the last success ip of this email otp.
-	*
-	* @return the last success ip of this email otp
-	*/
+	 * Returns the last success ip of this email otp.
+	 *
+	 * @return the last success ip of this email otp
+	 */
 	@Override
 	public String getLastSuccessIP() {
 		return model.getLastSuccessIP();
 	}
 
 	/**
-	* Returns the modified date of this email otp.
-	*
-	* @return the modified date of this email otp
-	*/
+	 * Returns the modified date of this email otp.
+	 *
+	 * @return the modified date of this email otp
+	 */
 	@Override
 	public Date getModifiedDate() {
 		return model.getModifiedDate();
 	}
 
 	/**
-	* Returns the primary key of this email otp.
-	*
-	* @return the primary key of this email otp
-	*/
+	 * Returns the primary key of this email otp.
+	 *
+	 * @return the primary key of this email otp
+	 */
 	@Override
 	public long getPrimaryKey() {
 		return model.getPrimaryKey();
 	}
 
 	/**
-	* Returns the user ID of this email otp.
-	*
-	* @return the user ID of this email otp
-	*/
+	 * Returns the user ID of this email otp.
+	 *
+	 * @return the user ID of this email otp
+	 */
 	@Override
 	public long getUserId() {
 		return model.getUserId();
 	}
 
 	/**
-	* Returns the user name of this email otp.
-	*
-	* @return the user name of this email otp
-	*/
+	 * Returns the user name of this email otp.
+	 *
+	 * @return the user name of this email otp
+	 */
 	@Override
 	public String getUserName() {
 		return model.getUserName();
 	}
 
 	/**
-	* Returns the user uuid of this email otp.
-	*
-	* @return the user uuid of this email otp
-	*/
+	 * Returns the user uuid of this email otp.
+	 *
+	 * @return the user uuid of this email otp
+	 */
 	@Override
 	public String getUserUuid() {
 		return model.getUserUuid();
@@ -280,140 +282,140 @@ public class EmailOTPWrapper extends BaseModelWrapper<EmailOTP>
 	}
 
 	/**
-	* Sets the company ID of this email otp.
-	*
-	* @param companyId the company ID of this email otp
-	*/
+	 * Sets the company ID of this email otp.
+	 *
+	 * @param companyId the company ID of this email otp
+	 */
 	@Override
 	public void setCompanyId(long companyId) {
 		model.setCompanyId(companyId);
 	}
 
 	/**
-	* Sets the create date of this email otp.
-	*
-	* @param createDate the create date of this email otp
-	*/
+	 * Sets the create date of this email otp.
+	 *
+	 * @param createDate the create date of this email otp
+	 */
 	@Override
 	public void setCreateDate(Date createDate) {
 		model.setCreateDate(createDate);
 	}
 
 	/**
-	* Sets the email address of this email otp.
-	*
-	* @param emailAddress the email address of this email otp
-	*/
+	 * Sets the email address of this email otp.
+	 *
+	 * @param emailAddress the email address of this email otp
+	 */
 	@Override
 	public void setEmailAddress(String emailAddress) {
 		model.setEmailAddress(emailAddress);
 	}
 
 	/**
-	* Sets the email otp ID of this email otp.
-	*
-	* @param emailOTPId the email otp ID of this email otp
-	*/
+	 * Sets the email otp ID of this email otp.
+	 *
+	 * @param emailOTPId the email otp ID of this email otp
+	 */
 	@Override
 	public void setEmailOTPId(long emailOTPId) {
 		model.setEmailOTPId(emailOTPId);
 	}
 
 	/**
-	* Sets the failed attempts of this email otp.
-	*
-	* @param failedAttempts the failed attempts of this email otp
-	*/
+	 * Sets the failed attempts of this email otp.
+	 *
+	 * @param failedAttempts the failed attempts of this email otp
+	 */
 	@Override
 	public void setFailedAttempts(int failedAttempts) {
 		model.setFailedAttempts(failedAttempts);
 	}
 
 	/**
-	* Sets the last fail date of this email otp.
-	*
-	* @param lastFailDate the last fail date of this email otp
-	*/
+	 * Sets the last fail date of this email otp.
+	 *
+	 * @param lastFailDate the last fail date of this email otp
+	 */
 	@Override
 	public void setLastFailDate(Date lastFailDate) {
 		model.setLastFailDate(lastFailDate);
 	}
 
 	/**
-	* Sets the last fail ip of this email otp.
-	*
-	* @param lastFailIP the last fail ip of this email otp
-	*/
+	 * Sets the last fail ip of this email otp.
+	 *
+	 * @param lastFailIP the last fail ip of this email otp
+	 */
 	@Override
 	public void setLastFailIP(String lastFailIP) {
 		model.setLastFailIP(lastFailIP);
 	}
 
 	/**
-	* Sets the last success date of this email otp.
-	*
-	* @param lastSuccessDate the last success date of this email otp
-	*/
+	 * Sets the last success date of this email otp.
+	 *
+	 * @param lastSuccessDate the last success date of this email otp
+	 */
 	@Override
 	public void setLastSuccessDate(Date lastSuccessDate) {
 		model.setLastSuccessDate(lastSuccessDate);
 	}
 
 	/**
-	* Sets the last success ip of this email otp.
-	*
-	* @param lastSuccessIP the last success ip of this email otp
-	*/
+	 * Sets the last success ip of this email otp.
+	 *
+	 * @param lastSuccessIP the last success ip of this email otp
+	 */
 	@Override
 	public void setLastSuccessIP(String lastSuccessIP) {
 		model.setLastSuccessIP(lastSuccessIP);
 	}
 
 	/**
-	* Sets the modified date of this email otp.
-	*
-	* @param modifiedDate the modified date of this email otp
-	*/
+	 * Sets the modified date of this email otp.
+	 *
+	 * @param modifiedDate the modified date of this email otp
+	 */
 	@Override
 	public void setModifiedDate(Date modifiedDate) {
 		model.setModifiedDate(modifiedDate);
 	}
 
 	/**
-	* Sets the primary key of this email otp.
-	*
-	* @param primaryKey the primary key of this email otp
-	*/
+	 * Sets the primary key of this email otp.
+	 *
+	 * @param primaryKey the primary key of this email otp
+	 */
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		model.setPrimaryKey(primaryKey);
 	}
 
 	/**
-	* Sets the user ID of this email otp.
-	*
-	* @param userId the user ID of this email otp
-	*/
+	 * Sets the user ID of this email otp.
+	 *
+	 * @param userId the user ID of this email otp
+	 */
 	@Override
 	public void setUserId(long userId) {
 		model.setUserId(userId);
 	}
 
 	/**
-	* Sets the user name of this email otp.
-	*
-	* @param userName the user name of this email otp
-	*/
+	 * Sets the user name of this email otp.
+	 *
+	 * @param userName the user name of this email otp
+	 */
 	@Override
 	public void setUserName(String userName) {
 		model.setUserName(userName);
 	}
 
 	/**
-	* Sets the user uuid of this email otp.
-	*
-	* @param userUuid the user uuid of this email otp
-	*/
+	 * Sets the user uuid of this email otp.
+	 *
+	 * @param userUuid the user uuid of this email otp
+	 */
 	@Override
 	public void setUserUuid(String userUuid) {
 		model.setUserUuid(userUuid);
@@ -423,4 +425,5 @@ public class EmailOTPWrapper extends BaseModelWrapper<EmailOTP>
 	protected EmailOTPWrapper wrap(EmailOTP emailOTP) {
 		return new EmailOTPWrapper(emailOTP);
 	}
+
 }

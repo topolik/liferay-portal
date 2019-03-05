@@ -17,10 +17,8 @@ package com.liferay.multi.factor.authentication.provider.email.otp.model.impl;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.multi.factor.authentication.provider.email.otp.model.EmailOTP;
-
 import com.liferay.petra.lang.HashUtil;
 import com.liferay.petra.string.StringBundler;
-
 import com.liferay.portal.kernel.model.CacheModel;
 
 import java.io.Externalizable;
@@ -34,11 +32,12 @@ import java.util.Date;
  * The cache model class for representing EmailOTP in entity cache.
  *
  * @author arthurchan35
- * @see EmailOTP
  * @generated
  */
 @ProviderType
-public class EmailOTPCacheModel implements CacheModel<EmailOTP>, Externalizable {
+public class EmailOTPCacheModel
+	implements CacheModel<EmailOTP>, Externalizable {
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -187,8 +186,7 @@ public class EmailOTPCacheModel implements CacheModel<EmailOTP>, Externalizable 
 	}
 
 	@Override
-	public void writeExternal(ObjectOutput objectOutput)
-		throws IOException {
+	public void writeExternal(ObjectOutput objectOutput) throws IOException {
 		objectOutput.writeLong(emailOTPId);
 
 		objectOutput.writeLong(companyId);
@@ -245,4 +243,5 @@ public class EmailOTPCacheModel implements CacheModel<EmailOTP>, Externalizable 
 	public long lastFailDate;
 	public String lastFailIP;
 	public int failedAttempts;
+
 }

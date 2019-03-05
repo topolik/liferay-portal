@@ -25,19 +25,22 @@ import com.liferay.portal.kernel.util.Accessor;
  *
  * @author arthurchan35
  * @see EmailOTPModel
- * @see com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPImpl
- * @see com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPModelImpl
  * @generated
  */
-@ImplementationClassName("com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPImpl")
+@ImplementationClassName(
+	"com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPImpl"
+)
 @ProviderType
 public interface EmailOTP extends EmailOTPModel, PersistedModel {
+
 	/*
 	 * NOTE FOR DEVELOPERS:
 	 *
-	 * Never modify this interface directly. Add methods to {@link com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPImpl} and rerun ServiceBuilder to automatically copy the method declarations to this interface.
+	 * Never modify this interface directly. Add methods to <code>com.liferay.multi.factor.authentication.provider.email.otp.model.impl.EmailOTPImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
-	public static final Accessor<EmailOTP, Long> EMAIL_OTP_ID_ACCESSOR = new Accessor<EmailOTP, Long>() {
+	public static final Accessor<EmailOTP, Long> EMAIL_OTP_ID_ACCESSOR =
+		new Accessor<EmailOTP, Long>() {
+
 			@Override
 			public Long get(EmailOTP emailOTP) {
 				return emailOTP.getEmailOTPId();
@@ -52,5 +55,7 @@ public interface EmailOTP extends EmailOTPModel, PersistedModel {
 			public Class<EmailOTP> getTypeClass() {
 				return EmailOTP.class;
 			}
+
 		};
+
 }
