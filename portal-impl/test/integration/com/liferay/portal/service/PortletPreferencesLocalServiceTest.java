@@ -1541,7 +1541,6 @@ public class PortletPreferencesLocalServiceTest {
 
 	private Layout _layout;
 
-	@DeleteAfterTestRun
 	private Portlet _portlet;
 
 	private ServiceBag<PortletPreferencesLocalService> _serviceBag;
