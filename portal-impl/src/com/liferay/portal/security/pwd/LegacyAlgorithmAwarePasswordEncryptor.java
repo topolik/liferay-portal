@@ -65,31 +65,80 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 		}
 
 		boolean prependAlgorithm = true;
+		boolean doubleHash = false;
 
-		if (Validator.isNotNull(encryptedPassword) &&
-			(encryptedPassword.charAt(0) != CharPool.OPEN_CURLY_BRACE)) {
+		if (Validator.isNotNull(encryptedPassword)) {
+			if (encryptedPassword.charAt(0) != CharPool.OPEN_CURLY_BRACE) {
 
-			algorithm = PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY;
+				// If only happens when admin tries to hash passwords in legacy
+				// hashing, else is for user with a password in legacy hashing
+				// tries to login before admin has done hashing
 
-			prependAlgorithm = false;
+				if (plainTextPassword.equals(encryptedPassword)) {
+					doubleHash = true;
+					encryptedPassword = null;
+				}
+				else {
+					algorithm =
+						PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY;
 
-			if (_log.isDebugEnabled()) {
-				_log.debug("Using legacy algorithm " + algorithm);
+					prependAlgorithm = false;
+
+					if (_log.isDebugEnabled()) {
+						_log.debug("Using legacy algorithm " + algorithm);
+					}
+				}
 			}
-		}
-		else if (Validator.isNotNull(encryptedPassword) &&
-				 (encryptedPassword.charAt(0) == CharPool.OPEN_CURLY_BRACE)) {
+			else {
+				int index = encryptedPassword.indexOf(
+					CharPool.CLOSE_CURLY_BRACE);
 
-			int index = encryptedPassword.indexOf(CharPool.CLOSE_CURLY_BRACE);
+				if (index > 0) {
+					String algorithms = encryptedPassword.substring(1, index);
 
-			if (index > 0) {
-				algorithm = encryptedPassword.substring(1, index);
+					String[] algrsArr = algorithms.split(StringPool.COMMA);
 
-				encryptedPassword = encryptedPassword.substring(index + 1);
-			}
+					encryptedPassword = encryptedPassword.substring(index + 1);
 
-			if (_log.isDebugEnabled()) {
-				_log.debug("Upgraded password to use algorithm " + algorithm);
+					// When length is 2, meaning user with a password in legacy
+					// hashing tries to login after admin has done hashing.
+
+					if (algrsArr.length == 2) {
+						plainTextPassword = _parentPasswordEncryptor.encrypt(
+							algrsArr[0], plainTextPassword, encryptedPassword);
+
+						algorithm = algrsArr[1];
+						doubleHash = true;
+
+						if (_log.isDebugEnabled()) {
+							StringBundler sb = new StringBundler(5);
+
+							sb.append("Upgraded password to use algorithms ");
+							sb.append(algrsArr[0]);
+							sb.append(StringPool.COMMA);
+							sb.append(StringPool.SPACE);
+							sb.append(algrsArr[1]);
+
+							_log.debug(sb.toString());
+						}
+					}
+					else if (algrsArr.length == 1) {
+						algorithm = algrsArr[0];
+
+						if (_log.isDebugEnabled()) {
+							StringBundler sb = new StringBundler(2);
+
+							sb.append("Upgraded password to use algorithm ");
+							sb.append(algrsArr[0]);
+
+							_log.debug(sb.toString());
+						}
+					}
+					else {
+						throw new PwdEncryptorException(
+							"Password contains illegal number of algorithms");
+					}
+				}
 			}
 		}
 
@@ -106,15 +155,25 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 			return newEncryptedPassword;
 		}
 
+		StringBundler algrsSB = new StringBundler(3);
+
+		if (doubleHash) {
+			algrsSB.append(PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY);
+			algrsSB.append(StringPool.COMMA);
+		}
+
+		algrsSB.append(getAlgorithmName(algorithm));
+
 		if (_log.isDebugEnabled()) {
 			_log.debug(
-				"Generated password with algorithm prefix using " + algorithm);
+				"Generated password with algorithm(s) prefix using " +
+					algrsSB.toString());
 		}
 
 		StringBundler sb = new StringBundler(4);
 
 		sb.append(StringPool.OPEN_CURLY_BRACE);
-		sb.append(getAlgorithmName(algorithm));
+		sb.append(algrsSB);
 		sb.append(StringPool.CLOSE_CURLY_BRACE);
 		sb.append(newEncryptedPassword);
 
