@@ -25,6 +25,11 @@ import com.liferay.portal.convert.ConvertProcess;
 import com.liferay.portal.kernel.cache.CacheRegistryUtil;
 import com.liferay.portal.kernel.cache.MultiVMPool;
 import com.liferay.portal.kernel.cache.SingleVMPool;
+import com.liferay.portal.kernel.dao.orm.Criterion;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ProjectionList;
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.image.GhostscriptUtil;
 import com.liferay.portal.kernel.image.ImageMagickUtil;
 import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayOutputStream;
@@ -50,7 +55,9 @@ import com.liferay.portal.kernel.security.membershippolicy.SiteMembershipPolicyF
 import com.liferay.portal.kernel.security.membershippolicy.UserGroupMembershipPolicy;
 import com.liferay.portal.kernel.security.membershippolicy.UserGroupMembershipPolicyFactory;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.security.pwd.PasswordEncryptorUtil;
 import com.liferay.portal.kernel.service.ServiceComponentLocalService;
+import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.servlet.DirectServletRegistry;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
@@ -65,16 +72,20 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.ThreadUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.UnsyncPrintWriterPool;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.xuggler.XugglerInstallException;
 import com.liferay.portal.kernel.xuggler.XugglerUtil;
 import com.liferay.portal.util.MaintenanceUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
+import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.ShutdownUtil;
 import com.liferay.portlet.admin.util.CleanUpPermissionsUtil;
 import com.liferay.portlet.admin.util.CleanUpPortletPreferencesUtil;
 
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
@@ -190,6 +201,9 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		}
 		else if (cmd.equals("updateMail")) {
 			updateMail(actionRequest, portletPreferences);
+		}
+		else if (cmd.equals("upgradeLegacyPasswordsEncryption")) {
+			upgradeLegacyPasswordsEncryption();
 		}
 		else if (cmd.equals("verifyMembershipPolicies")) {
 			verifyMembershipPolicies();
@@ -518,6 +532,49 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		_mailService.clearSession();
 	}
 
+	protected void upgradeLegacyPasswordsEncryption() throws Exception {
+		if (Validator.isNull(
+				PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY)) {
+
+			_log.error(
+				"Upgrade Legacy Passwords Encryption action is only valid" +
+					"when passwords.encryption.algorithm.legacy is set");
+
+			return;
+		}
+
+		DynamicQuery dynamicQuery = _userLocalService.dynamicQuery();
+
+		// passwords start with '{' are using non-legacy hashing
+
+		Criterion pwc = RestrictionsFactoryUtil.like("password", "{%");
+
+		dynamicQuery.add(RestrictionsFactoryUtil.not(pwc));
+
+		dynamicQuery.add(RestrictionsFactoryUtil.eq("defaultUser", false));
+
+		ProjectionList projectionList = ProjectionFactoryUtil.projectionList();
+
+		projectionList.add(ProjectionFactoryUtil.property("userId"));
+		projectionList.add(ProjectionFactoryUtil.property("password"));
+
+		dynamicQuery.setProjection(projectionList);
+
+		List<Object[]> objects = _userLocalService.dynamicQuery(dynamicQuery);
+
+		for (Object[] object : objects) {
+			long userId = (Long)object[0];
+
+			String password = (String)object[1];
+
+			String doubleHashed = PasswordEncryptorUtil.encrypt(
+				password, password);
+
+			_userLocalService.updatePasswordManually(
+				userId, doubleHashed, true, true, new Date());
+		}
+	}
+
 	protected void verifyMembershipPolicies() throws Exception {
 		OrganizationMembershipPolicy organizationMembershipPolicy =
 			_organizationMembershipPolicyFactory.
@@ -578,5 +635,8 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private UserGroupMembershipPolicyFactory _userGroupMembershipPolicyFactory;
+
+	@Reference
+	private UserLocalService _userLocalService;
 
 }

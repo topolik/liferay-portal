@@ -265,4 +265,26 @@ long usedMemory = totalMemory - runtime.freeMemory();
 			</li>
 		</ul>
 	</liferay-ui:panel>
+
+	<liferay-ui:panel
+		collapsible="<%= true %>"
+		cssClass="server-admin-actions-panel"
+		extended="<%= true %>"
+		id="adminServerAdministrationVerificationActionsPanel"
+		markupView="lexicon"
+		persistState="<%= true %>"
+		title="upgrade-legacy-passwords-encryption-actions"
+	>
+		<ul class="list-group system-action-group">
+			<li class="clearfix list-group-item">
+				<div class="pull-left">
+					<h5><liferay-ui:message key="upgrade-legacy-passwords-encryption" /> <liferay-ui:icon-help message="upgrade-legacy-passwords-encryption-help" /></h5>
+				</div>
+
+				<div class="pull-right">
+					<aui:button cssClass="save-server-button" data-cmd="upgradeLegacyPasswordsEncryption" value="execute" />
+				</div>
+			</li>
+		</ul>
+	</liferay-ui:panel>
 </liferay-ui:panel-container>
