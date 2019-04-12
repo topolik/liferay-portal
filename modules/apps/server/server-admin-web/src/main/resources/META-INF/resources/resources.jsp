@@ -265,4 +265,45 @@ long usedMemory = totalMemory - runtime.freeMemory();
 			</li>
 		</ul>
 	</liferay-ui:panel>
+
+	<liferay-ui:panel
+		collapsible="<%= true %>"
+		cssClass="server-admin-actions-panel"
+		extended="<%= true %>"
+		id="adminServerAdministrationVerificationActionsPanel"
+		markupView="lexicon"
+		persistState="<%= true %>"
+		title="upgrade-legacy-passwords-encryption-actions"
+	>
+
+		<%
+		List<BackgroundTask> backgroundTasks = BackgroundTaskManagerUtil.getBackgroundTasks(CompanyConstants.SYSTEM, "com.liferay.server.admin.web.internal.background.task.UpgradeLegacyPasswordsBackgroundTaskExecutor", BackgroundTaskConstants.STATUS_IN_PROGRESS);
+		BackgroundTaskDisplay backgroundTaskDisplay = null;
+
+		if (!backgroundTasks.isEmpty()) {
+			BackgroundTask backgroundTask = backgroundTasks.get(0);
+
+			backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(backgroundTask);
+		}
+		%>
+
+		<ul class="list-group system-action-group">
+			<li class="clearfix list-group-item">
+				<div class="pull-left">
+					<h5><liferay-ui:message key="upgrade-legacy-passwords-encryption" /> <liferay-ui:icon-help message="upgrade-legacy-passwords-encryption-help" /></h5>
+				</div>
+
+				<div class="pull-right">
+					<c:choose>
+						<c:when test="<%= (backgroundTaskDisplay == null) || !backgroundTaskDisplay.hasPercentage() %>">
+							<aui:button cssClass="save-server-button" data-cmd="upgradeLegacyPasswordsEncryption" value="execute" />
+						</c:when>
+						<c:otherwise>
+							<%= backgroundTaskDisplay.renderDisplayTemplate() %>
+						</c:otherwise>
+					</c:choose>
+				</div>
+			</li>
+		</ul>
+	</liferay-ui:panel>
 </liferay-ui:panel-container>
