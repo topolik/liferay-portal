@@ -22,6 +22,7 @@ import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.convert.ConvertException;
 import com.liferay.portal.convert.ConvertProcess;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.cache.CacheRegistryUtil;
 import com.liferay.portal.kernel.cache.MultiVMPool;
 import com.liferay.portal.kernel.cache.SingleVMPool;
@@ -34,6 +35,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.log.SanitizerLogWrapper;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
+import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.portlet.LiferayActionResponse;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -51,6 +53,7 @@ import com.liferay.portal.kernel.security.membershippolicy.UserGroupMembershipPo
 import com.liferay.portal.kernel.security.membershippolicy.UserGroupMembershipPolicyFactory;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.ServiceComponentLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.servlet.DirectServletRegistry;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
@@ -73,8 +76,10 @@ import com.liferay.portal.util.PrefsPropsUtil;
 import com.liferay.portal.util.ShutdownUtil;
 import com.liferay.portlet.admin.util.CleanUpPermissionsUtil;
 import com.liferay.portlet.admin.util.CleanUpPortletPreferencesUtil;
+import com.liferay.server.admin.web.internal.background.task.UpgradeLegacyPasswordsBackgroundTaskExecutor;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
@@ -190,6 +195,9 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		}
 		else if (cmd.equals("updateMail")) {
 			updateMail(actionRequest, portletPreferences);
+		}
+		else if (cmd.equals("upgradeLegacyPasswordsEncryption")) {
+			upgradeLegacyPasswords(themeDisplay.getUserId());
 		}
 		else if (cmd.equals("verifyMembershipPolicies")) {
 			verifyMembershipPolicies();
@@ -518,6 +526,17 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		_mailService.clearSession();
 	}
 
+	protected void upgradeLegacyPasswords(long userId) throws Exception {
+		String jobName = "upgradeLegacyPasswords";
+
+		String executorName =
+			UpgradeLegacyPasswordsBackgroundTaskExecutor.class.getName();
+
+		_backgroundTaskManager.addBackgroundTask(
+			userId, CompanyConstants.SYSTEM, jobName, executorName,
+			new HashMap<>(), new ServiceContext());
+	}
+
 	protected void verifyMembershipPolicies() throws Exception {
 		OrganizationMembershipPolicy organizationMembershipPolicy =
 			_organizationMembershipPolicyFactory.
@@ -547,6 +566,9 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		EditServerMVCActionCommand.class);
+
+	@Reference
+	private BackgroundTaskManager _backgroundTaskManager;
 
 	@Reference
 	private DirectServletRegistry _directServletRegistry;
