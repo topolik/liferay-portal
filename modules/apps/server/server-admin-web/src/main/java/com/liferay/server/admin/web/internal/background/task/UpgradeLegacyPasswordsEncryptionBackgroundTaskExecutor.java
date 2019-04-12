@@ -1,0 +1,105 @@
+/**
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 2.1 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
+
+package com.liferay.server.admin.web.internal.background.task;
+
+import com.liferay.portal.kernel.backgroundtask.BackgroundTask;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskConstants;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskExecutor;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskResult;
+import com.liferay.portal.kernel.backgroundtask.BaseBackgroundTaskExecutor;
+import com.liferay.portal.kernel.backgroundtask.display.BackgroundTaskDisplay;
+import com.liferay.portal.kernel.dao.orm.Criterion;
+import com.liferay.portal.kernel.dao.orm.DynamicQuery;
+import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
+import com.liferay.portal.kernel.dao.orm.ProjectionList;
+import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
+import com.liferay.portal.kernel.security.pwd.PasswordEncryptorUtil;
+import com.liferay.portal.kernel.service.UserLocalService;
+
+import java.util.Date;
+import java.util.List;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
+/**
+ * @author arthurchan35
+ */
+@Component(
+	immediate = true,
+	property = "background.task.executor.class.name=com.liferay.server.admin.web.internal.background.task.UpgradeLegacyPasswordsEncryptionBackgroundTaskExecutor",
+	service = BackgroundTaskExecutor.class
+)
+public class UpgradeLegacyPasswordsEncryptionBackgroundTaskExecutor
+	extends BaseBackgroundTaskExecutor {
+
+	public UpgradeLegacyPasswordsEncryptionBackgroundTaskExecutor() {
+		setIsolationLevel(BackgroundTaskConstants.ISOLATION_LEVEL_COMPANY);
+	}
+
+	@Override
+	public BackgroundTaskExecutor clone() {
+		return this;
+	}
+
+	@Override
+	public BackgroundTaskResult execute(BackgroundTask backgroundTask)
+		throws Exception {
+
+		DynamicQuery dynamicQuery = _userLocalService.dynamicQuery();
+
+		// passwords start with '{' are using non-legacy hashing
+
+		Criterion pwc = RestrictionsFactoryUtil.like("password", "{%");
+
+		dynamicQuery.add(RestrictionsFactoryUtil.not(pwc));
+
+		dynamicQuery.add(RestrictionsFactoryUtil.eq("defaultUser", false));
+
+		ProjectionList projectionList = ProjectionFactoryUtil.projectionList();
+
+		projectionList.add(ProjectionFactoryUtil.property("userId"));
+		projectionList.add(ProjectionFactoryUtil.property("password"));
+
+		dynamicQuery.setProjection(projectionList);
+
+		List<Object[]> objects = _userLocalService.dynamicQuery(dynamicQuery);
+
+		for (Object[] object : objects) {
+			long userId = (Long)object[0];
+
+			String password = (String)object[1];
+
+			String doubleHashed = PasswordEncryptorUtil.encrypt(
+				password, password);
+
+			_userLocalService.updatePasswordManually(
+				userId, doubleHashed, true, true, new Date());
+		}
+
+		return BackgroundTaskResult.SUCCESS;
+	}
+
+	@Override
+	public BackgroundTaskDisplay getBackgroundTaskDisplay(
+		BackgroundTask backgroundTask) {
+
+		return null;
+	}
+
+	@Reference
+	private UserLocalService _userLocalService;
+
+}

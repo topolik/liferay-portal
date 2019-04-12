@@ -22,14 +22,10 @@ import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.convert.ConvertException;
 import com.liferay.portal.convert.ConvertProcess;
+import com.liferay.portal.kernel.backgroundtask.BackgroundTaskManager;
 import com.liferay.portal.kernel.cache.CacheRegistryUtil;
 import com.liferay.portal.kernel.cache.MultiVMPool;
 import com.liferay.portal.kernel.cache.SingleVMPool;
-import com.liferay.portal.kernel.dao.orm.Criterion;
-import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.dao.orm.ProjectionFactoryUtil;
-import com.liferay.portal.kernel.dao.orm.ProjectionList;
-import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.image.GhostscriptUtil;
 import com.liferay.portal.kernel.image.ImageMagickUtil;
 import com.liferay.portal.kernel.io.unsync.UnsyncByteArrayOutputStream;
@@ -39,6 +35,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.log.SanitizerLogWrapper;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
+import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.portlet.LiferayActionResponse;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -55,9 +52,8 @@ import com.liferay.portal.kernel.security.membershippolicy.SiteMembershipPolicyF
 import com.liferay.portal.kernel.security.membershippolicy.UserGroupMembershipPolicy;
 import com.liferay.portal.kernel.security.membershippolicy.UserGroupMembershipPolicyFactory;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
-import com.liferay.portal.kernel.security.pwd.PasswordEncryptorUtil;
 import com.liferay.portal.kernel.service.ServiceComponentLocalService;
-import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.servlet.DirectServletRegistry;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
@@ -82,10 +78,10 @@ import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.ShutdownUtil;
 import com.liferay.portlet.admin.util.CleanUpPermissionsUtil;
 import com.liferay.portlet.admin.util.CleanUpPortletPreferencesUtil;
+import com.liferay.server.admin.web.internal.background.task.UpgradeLegacyPasswordsEncryptionBackgroundTaskExecutor;
 
-import java.util.Date;
 import java.util.Enumeration;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.portlet.ActionRequest;
@@ -203,7 +199,7 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 			updateMail(actionRequest, portletPreferences);
 		}
 		else if (cmd.equals("upgradeLegacyPasswordsEncryption")) {
-			upgradeLegacyPasswordsEncryption();
+			upgradeLegacyPasswordsEncryption(themeDisplay.getUserId());
 		}
 		else if (cmd.equals("verifyMembershipPolicies")) {
 			verifyMembershipPolicies();
@@ -532,7 +528,9 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		_mailService.clearSession();
 	}
 
-	protected void upgradeLegacyPasswordsEncryption() throws Exception {
+	protected void upgradeLegacyPasswordsEncryption(long userId)
+		throws Exception {
+
 		if (Validator.isNull(
 				PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY)) {
 
@@ -543,36 +541,15 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 			return;
 		}
 
-		DynamicQuery dynamicQuery = _userLocalService.dynamicQuery();
+		String jobName = "upgradeLegacyPasswordsEncryption";
 
-		// passwords start with '{' are using non-legacy hashing
+		String executorName =
+			UpgradeLegacyPasswordsEncryptionBackgroundTaskExecutor.class.
+				getName();
 
-		Criterion pwc = RestrictionsFactoryUtil.like("password", "{%");
-
-		dynamicQuery.add(RestrictionsFactoryUtil.not(pwc));
-
-		dynamicQuery.add(RestrictionsFactoryUtil.eq("defaultUser", false));
-
-		ProjectionList projectionList = ProjectionFactoryUtil.projectionList();
-
-		projectionList.add(ProjectionFactoryUtil.property("userId"));
-		projectionList.add(ProjectionFactoryUtil.property("password"));
-
-		dynamicQuery.setProjection(projectionList);
-
-		List<Object[]> objects = _userLocalService.dynamicQuery(dynamicQuery);
-
-		for (Object[] object : objects) {
-			long userId = (Long)object[0];
-
-			String password = (String)object[1];
-
-			String doubleHashed = PasswordEncryptorUtil.encrypt(
-				password, password);
-
-			_userLocalService.updatePasswordManually(
-				userId, doubleHashed, true, true, new Date());
-		}
+		_backgroundTaskManager.addBackgroundTask(
+			userId, CompanyConstants.SYSTEM, jobName, executorName,
+			new HashMap<>(), new ServiceContext());
 	}
 
 	protected void verifyMembershipPolicies() throws Exception {
@@ -606,6 +583,9 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		EditServerMVCActionCommand.class);
 
 	@Reference
+	private BackgroundTaskManager _backgroundTaskManager;
+
+	@Reference
 	private DirectServletRegistry _directServletRegistry;
 
 	@Reference
@@ -635,8 +615,5 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private UserGroupMembershipPolicyFactory _userGroupMembershipPolicyFactory;
-
-	@Reference
-	private UserLocalService _userLocalService;
 
 }
