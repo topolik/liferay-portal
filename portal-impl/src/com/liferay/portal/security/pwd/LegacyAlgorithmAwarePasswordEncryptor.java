@@ -33,12 +33,6 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 	public static PasswordEncryptor create(
 		PasswordEncryptor parentPasswordEncryptor) {
 
-		if (Validator.isNull(
-				PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY)) {
-
-			return parentPasswordEncryptor;
-		}
-
 		return new LegacyAlgorithmAwarePasswordEncryptor(
 			parentPasswordEncryptor);
 	}
@@ -69,24 +63,30 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 
 		if (Validator.isNotNull(encryptedPassword)) {
 			if (encryptedPassword.charAt(0) != CharPool.OPEN_CURLY_BRACE) {
+				if (Validator.isNotNull(
+						PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY)) {
 
-				// If only happens when admin tries to hash passwords in legacy
-				// hashing, else is for user with a password in legacy hashing
-				// tries to login before admin has done hashing
+					// If only happens when admin tries to hash passwords in
+					// legacy hashing, else is for user with a password in
+					// legacy hashing tries to login before admin done hashing
 
-				if (plainTextPassword.equals(encryptedPassword)) {
-					doubleHash = true;
-					encryptedPassword = null;
+					if (plainTextPassword.equals(encryptedPassword)) {
+						doubleHash = true;
+						encryptedPassword = null;
+					}
+					else {
+						algorithm =
+							PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY;
+
+						prependAlgorithm = false;
+
+						if (_log.isDebugEnabled()) {
+							_log.debug("Using legacy algorithm " + algorithm);
+						}
+					}
 				}
 				else {
-					algorithm =
-						PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY;
-
 					prependAlgorithm = false;
-
-					if (_log.isDebugEnabled()) {
-						_log.debug("Using legacy algorithm " + algorithm);
-					}
 				}
 			}
 			else {
@@ -139,6 +139,12 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 							"Password contains illegal number of algorithms");
 					}
 				}
+			}
+		}
+		else {
+			if (Validator.isNull(
+				PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY)) {
+				prependAlgorithm = false;
 			}
 		}
 
