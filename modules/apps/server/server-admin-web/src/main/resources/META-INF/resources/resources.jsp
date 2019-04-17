@@ -275,6 +275,18 @@ long usedMemory = totalMemory - runtime.freeMemory();
 		persistState="<%= true %>"
 		title="upgrade-legacy-passwords-encryption-actions"
 	>
+
+		<%
+		List<BackgroundTask> backgroundTasks = BackgroundTaskManagerUtil.getBackgroundTasks(CompanyConstants.SYSTEM, "com.liferay.server.admin.web.internal.background.task.UpgradeLegacyPasswordsEncryptionBackgroundTaskExecutor", BackgroundTaskConstants.STATUS_IN_PROGRESS);
+		BackgroundTaskDisplay backgroundTaskDisplay = null;
+
+		if (!backgroundTasks.isEmpty()) {
+			BackgroundTask backgroundTask = backgroundTasks.get(0);
+
+			backgroundTaskDisplay = BackgroundTaskDisplayFactoryUtil.getBackgroundTaskDisplay(backgroundTask);
+		}
+		%>
+
 		<ul class="list-group system-action-group">
 			<li class="clearfix list-group-item">
 				<div class="pull-left">
@@ -282,7 +294,14 @@ long usedMemory = totalMemory - runtime.freeMemory();
 				</div>
 
 				<div class="pull-right">
-					<aui:button cssClass="save-server-button" data-cmd="upgradeLegacyPasswordsEncryption" value="execute" />
+					<c:choose>
+						<c:when test="<%= (backgroundTaskDisplay == null) || !backgroundTaskDisplay.hasPercentage() %>">
+							<aui:button cssClass="save-server-button" data-cmd="upgradeLegacyPasswordsEncryption" value="execute" />
+						</c:when>
+						<c:otherwise>
+							<%= backgroundTaskDisplay.renderDisplayTemplate() %>
+						</c:otherwise>
+					</c:choose>
 				</div>
 			</li>
 		</ul>
