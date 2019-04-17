@@ -68,18 +68,15 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.ThreadUtil;
 import com.liferay.portal.kernel.util.Time;
 import com.liferay.portal.kernel.util.UnsyncPrintWriterPool;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.xuggler.XugglerInstallException;
 import com.liferay.portal.kernel.xuggler.XugglerUtil;
 import com.liferay.portal.util.MaintenanceUtil;
 import com.liferay.portal.util.PrefsPropsUtil;
-import com.liferay.portal.util.PropsUtil;
-import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.util.ShutdownUtil;
 import com.liferay.portlet.admin.util.CleanUpPermissionsUtil;
 import com.liferay.portlet.admin.util.CleanUpPortletPreferencesUtil;
-import com.liferay.server.admin.web.internal.background.task.UpgradeLegacyPasswordsEncryptionBackgroundTaskExecutor;
+import com.liferay.server.admin.web.internal.background.task.UpgradeLegacyPasswordsBackgroundTaskExecutor;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -529,9 +526,7 @@ public class EditServerMVCActionCommand extends BaseMVCActionCommand {
 		_mailService.clearSession();
 	}
 
-	protected void upgradeLegacyPasswords(long userId)
-		throws Exception {
-
+	protected void upgradeLegacyPasswords(long userId) throws Exception {
 		String jobName = "upgradeLegacyPasswords";
 
 		String executorName =
