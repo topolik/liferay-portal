@@ -37,6 +37,8 @@ public class PortalUpgradeProcessRegistryImpl
 		upgradeProcesses.put(new Version("4.0.0"), new UpgradeSchema());
 
 		upgradeProcesses.put(new Version("5.0.0"), new UpgradeBadColumnNames());
+
+		upgradeProcesses.put(new Version("5.0.1"), new UpgradeUser());
 	}
 
 }
