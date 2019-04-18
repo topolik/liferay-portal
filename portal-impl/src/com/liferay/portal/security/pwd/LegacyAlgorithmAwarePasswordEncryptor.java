@@ -17,12 +17,9 @@ package com.liferay.portal.security.pwd;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PwdEncryptorException;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.pwd.PasswordEncryptor;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.util.PropsValues;
 
 /**
  * @author Tomas Polesovsky
@@ -33,14 +30,44 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 	public static PasswordEncryptor create(
 		PasswordEncryptor parentPasswordEncryptor) {
 
-		if (Validator.isNull(
-				PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY)) {
-
-			return parentPasswordEncryptor;
-		}
-
 		return new LegacyAlgorithmAwarePasswordEncryptor(
 			parentPasswordEncryptor);
+	}
+
+	@Override
+	public String encrypt(String plainTextPassword, String encryptedPassword)
+		throws PwdEncryptorException {
+
+		// Set new passwords
+
+		if (Validator.isNull(encryptedPassword)) {
+			return _encrypt(plainTextPassword);
+		}
+
+		int index = encryptedPassword.indexOf(CharPool.CLOSE_CURLY_BRACE);
+
+		if (index <= 0) {
+			throw new PwdEncryptorException(
+				"Encrypted password missing close curly brace");
+		}
+
+		String algorithms = encryptedPassword.substring(1, index);
+
+		String[] algosArr = algorithms.split(StringPool.COMMA);
+
+		encryptedPassword = encryptedPassword.substring(index + 1);
+
+		if (algosArr.length == 0) {
+			throw new PwdEncryptorException(
+				"Encrypted password does not have applied algorithm");
+		}
+
+		for (String algorithm : algosArr) {
+			plainTextPassword = _parentPasswordEncryptor.encrypt(
+				algorithm, plainTextPassword, encryptedPassword);
+		}
+
+		return _buildPasswordString(algorithms, plainTextPassword);
 	}
 
 	@Override
@@ -49,76 +76,13 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 			String encryptedPassword)
 		throws PwdEncryptorException {
 
-		if (_log.isDebugEnabled()) {
-			String message =
-				"Using legacy detection scheme for algorithm " + algorithm +
-					" with current password ";
+		// Set new passwords
 
-			if (Validator.isNull(encryptedPassword)) {
-				message += "empty";
-			}
-			else {
-				message += "provided";
-			}
-
-			_log.debug(message);
+		if (Validator.isNull(encryptedPassword)) {
+			return _encrypt(algorithm, plainTextPassword);
 		}
 
-		boolean prependAlgorithm = true;
-
-		if (Validator.isNotNull(encryptedPassword) &&
-			(encryptedPassword.charAt(0) != CharPool.OPEN_CURLY_BRACE)) {
-
-			algorithm = PropsValues.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY;
-
-			prependAlgorithm = false;
-
-			if (_log.isDebugEnabled()) {
-				_log.debug("Using legacy algorithm " + algorithm);
-			}
-		}
-		else if (Validator.isNotNull(encryptedPassword) &&
-				 (encryptedPassword.charAt(0) == CharPool.OPEN_CURLY_BRACE)) {
-
-			int index = encryptedPassword.indexOf(CharPool.CLOSE_CURLY_BRACE);
-
-			if (index > 0) {
-				algorithm = encryptedPassword.substring(1, index);
-
-				encryptedPassword = encryptedPassword.substring(index + 1);
-			}
-
-			if (_log.isDebugEnabled()) {
-				_log.debug("Upgraded password to use algorithm " + algorithm);
-			}
-		}
-
-		String newEncryptedPassword = _parentPasswordEncryptor.encrypt(
-			algorithm, plainTextPassword, encryptedPassword);
-
-		if (!prependAlgorithm) {
-			if (_log.isDebugEnabled()) {
-				_log.debug(
-					"Generated password without algorithm prefix using " +
-						algorithm);
-			}
-
-			return newEncryptedPassword;
-		}
-
-		if (_log.isDebugEnabled()) {
-			_log.debug(
-				"Generated password with algorithm prefix using " + algorithm);
-		}
-
-		StringBundler sb = new StringBundler(4);
-
-		sb.append(StringPool.OPEN_CURLY_BRACE);
-		sb.append(getAlgorithmName(algorithm));
-		sb.append(StringPool.CLOSE_CURLY_BRACE);
-		sb.append(newEncryptedPassword);
-
-		return sb.toString();
+		return encrypt(plainTextPassword, encryptedPassword);
 	}
 
 	@Override
@@ -142,8 +106,37 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 		_parentPasswordEncryptor = parentPasswordEncryptor;
 	}
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		LegacyAlgorithmAwarePasswordEncryptor.class);
+	private String _buildPasswordString(
+		String algorithms, String newEncryptedPassword) {
+
+		StringBundler sb = new StringBundler(4);
+
+		sb.append(CharPool.OPEN_CURLY_BRACE);
+		sb.append(algorithms);
+		sb.append(CharPool.CLOSE_CURLY_BRACE);
+		sb.append(newEncryptedPassword);
+
+		return sb.toString();
+	}
+
+	private String _encrypt(String plainTextPassword)
+		throws PwdEncryptorException {
+
+		String algorithm = getDefaultPasswordAlgorithmType();
+
+		algorithm = getAlgorithmName(algorithm);
+
+		return _encrypt(algorithm, plainTextPassword);
+	}
+
+	private String _encrypt(String algorithm, String plainTextPassword)
+		throws PwdEncryptorException {
+
+		String newEncryptedPassword = _parentPasswordEncryptor.encrypt(
+			algorithm, plainTextPassword, null);
+
+		return _buildPasswordString(algorithm, newEncryptedPassword);
+	}
 
 	private final PasswordEncryptor _parentPasswordEncryptor;
 
