@@ -240,7 +240,7 @@ DisplayTerms displayTerms = ctCollectionSearchContainer.getDisplayTerms();
 												<span class="card-h4"><liferay-ui:message key="created-by" /> & <liferay-ui:message key="modified-date" /></span>
 
 												<div class="card-text" data-qa-id="created-by-modified-date">
-													<%= curCTCollection.getUserName() + " - " + curCTCollection.getModifiedDate() %>
+													<%= HtmlUtil.escape(curCTCollection.getUserName()) + " - " + curCTCollection.getModifiedDate() %>
 												</div>
 											</div>
 
