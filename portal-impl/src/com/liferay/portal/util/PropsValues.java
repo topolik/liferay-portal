@@ -69,6 +69,9 @@ public class PropsValues {
 	public static final String ADMIN_EMAIL_USER_ADDED_NO_PASSWORD_BODY =
 		PropsUtil.get(PropsKeys.ADMIN_EMAIL_USER_ADDED_NO_PASSWORD_BODY);
 
+	public static final String ADMIN_EMAIL_USER_ADDED_RESET_PASSWORD_BODY =
+		PropsUtil.get(PropsKeys.ADMIN_EMAIL_USER_ADDED_RESET_PASSWORD_BODY);
+
 	public static final String ADMIN_EMAIL_USER_ADDED_SUBJECT = PropsUtil.get(
 		PropsKeys.ADMIN_EMAIL_USER_ADDED_SUBJECT);
 
