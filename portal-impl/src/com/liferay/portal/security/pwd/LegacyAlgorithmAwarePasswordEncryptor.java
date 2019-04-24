@@ -19,6 +19,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PwdEncryptorException;
 import com.liferay.portal.kernel.security.pwd.PasswordEncryptor;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 /**
@@ -55,16 +56,23 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 
 		String[] algosArr = algorithms.split(StringPool.COMMA);
 
-		encryptedPassword = encryptedPassword.substring(index + 1);
+		String encryptedPasswordWithoutPrefix = encryptedPassword.substring(
+			index + 1);
 
 		if (algosArr.length == 0) {
 			throw new PwdEncryptorException(
 				"Encrypted password does not have applied algorithm");
 		}
 
+		// Admin tries to hash passwords in legacy algorithm(s)
+
+		if (plainTextPassword.equals(encryptedPassword)) {
+			return _manuallyHash(encryptedPasswordWithoutPrefix, algorithms);
+		}
+
 		for (String algorithm : algosArr) {
 			plainTextPassword = _parentPasswordEncryptor.encrypt(
-				algorithm, plainTextPassword, encryptedPassword);
+				algorithm, plainTextPassword, encryptedPasswordWithoutPrefix);
 		}
 
 		return _buildPasswordString(algorithms, plainTextPassword);
@@ -94,10 +102,10 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 		int index = algorithm.indexOf(CharPool.SLASH);
 
 		if (index > 0) {
-			return algorithm.substring(0, index);
+			algorithm = algorithm.substring(0, index);
 		}
 
-		return algorithm;
+		return StringUtil.toUpperCase(algorithm);
 	}
 
 	private LegacyAlgorithmAwarePasswordEncryptor(
@@ -136,6 +144,21 @@ public class LegacyAlgorithmAwarePasswordEncryptor
 			algorithm, plainTextPassword, null);
 
 		return _buildPasswordString(algorithm, newEncryptedPassword);
+	}
+
+	private String _manuallyHash(String password, String algorithms)
+		throws PwdEncryptorException {
+
+		String currentAlgorithm = getDefaultPasswordAlgorithmType();
+
+		currentAlgorithm = getAlgorithmName(currentAlgorithm);
+
+		password = _parentPasswordEncryptor.encrypt(
+			currentAlgorithm, password, null);
+
+		algorithms = algorithms + CharPool.COMMA + currentAlgorithm;
+
+		return _buildPasswordString(algorithms, password);
 	}
 
 	private final PasswordEncryptor _parentPasswordEncryptor;
