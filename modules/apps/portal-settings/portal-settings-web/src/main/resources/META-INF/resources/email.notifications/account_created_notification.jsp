@@ -65,6 +65,18 @@ String sectionName = StringPool.BLANK;
 		showSubject="<%= false %>"
 	/>
 
+	<liferay-ui:error key="adminEmailUserAddedResetPasswordBody" message="please-enter-a-valid-body" />
+
+	<liferay-frontend:email-notification-settings
+		bodyLabel='<%= LanguageUtil.get(resourceBundle, "body-with-password-link") %>'
+		emailBody='<%= LocalizationUtil.getLocalizationXmlFromPreferences(companyPortletPreferences, renderRequest, "adminEmailUserAddedResetPasswordBody", "settings", ContentUtil.get(PortalClassLoaderUtil.getClassLoader(), PropsValues.ADMIN_EMAIL_USER_ADDED_RESET_PASSWORD_BODY)) %>'
+		emailParam="adminEmailUserAddedResetPasswordBody"
+		fieldPrefix="settings"
+		helpMessage='<%= LanguageUtil.get(resourceBundle, "account-created-notification-body-with-password-reset-help") %>'
+		showEmailEnabled="<%= false %>"
+		showSubject="<%= false %>"
+	/>
+
 	<aui:fieldset cssClass="definition-of-terms email-user-add terms" label="definition-of-terms">
 		<%@ include file="/email.notifications/definition_of_terms.jspf" %>
 	</aui:fieldset>
