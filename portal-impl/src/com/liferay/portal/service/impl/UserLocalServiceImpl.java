@@ -6326,9 +6326,9 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 			subjectProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_RESET_SUBJECT;
 		}
 		else {
-			bodyProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_SENT_BODY;
+			bodyProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_CHANGED_BODY;
 			prefix = "adminEmailPasswordSent";
-			subjectProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_SENT_SUBJECT;
+			subjectProperty = PropsKeys.ADMIN_EMAIL_PASSWORD_CHANGED_SUBJECT;
 		}
 
 		String localizedBody = body;
@@ -6383,8 +6383,6 @@ public class UserLocalServiceImpl extends UserLocalServiceBaseImpl {
 		mailTemplateContextBuilder.put("[$TO_NAME$]", HtmlUtil.escape(toName));
 		mailTemplateContextBuilder.put(
 			"[$USER_ID$]", String.valueOf(user.getUserId()));
-		mailTemplateContextBuilder.put(
-			"[$USER_PASSWORD$]", HtmlUtil.escape(newPassword));
 		mailTemplateContextBuilder.put(
 			"[$USER_SCREENNAME$]", HtmlUtil.escape(user.getScreenName()));
 
