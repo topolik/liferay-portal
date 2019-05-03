@@ -34,86 +34,31 @@ public class UpgradeUser extends UpgradeProcess {
 
 	@Override
 	protected void doUpgrade() throws Exception {
-		if (connection.getAutoCommit()) {
-			connection.setAutoCommit(false);
-		}
-
-		_addPrefixToPasswords();
-
-		if (connection.getAutoCommit()) {
-			connection.setAutoCommit(true);
-		}
-	}
-
-	private void _addPrefixToPasswords() throws SQLException {
-		Statement stmt1 = connection.createStatement();
-
-		String legacyAlgorithm = PropsUtil.get(
+		String passwordsEncryptionAlgorithm = PropsUtil.get(
 			PropsKeys.PASSWORDS_ENCRYPTION_ALGORITHM_LEGACY);
 
-		String currentAlgorithm = PropsUtil.get(
-			PropsKeys.PASSWORDS_ENCRYPTION_ALGORITHM);
-
-		StringBundler selectQuerySB = new StringBundler(4);
-
-		selectQuerySB.append("select userId, password_ from ");
-		selectQuerySB.append(UserTable.TABLE_NAME);
-		selectQuerySB.append(" where defaultUser = false and password_ not ");
-		selectQuerySB.append("like \"{%\"");
-
-		ResultSet rs = stmt1.executeQuery(selectQuerySB.toString());
-
-		Statement stmt2 = connection.createStatement();
-
-		String updateQueryPrefix =
-			"update " + UserTable.TABLE_NAME + " set password_= \"{";
-
-		if (Validator.isNotNull(legacyAlgorithm)) {
-			_addUpdateQueries(rs, updateQueryPrefix, legacyAlgorithm, stmt2);
-		}
-		else {
-			_addUpdateQueries(rs, updateQueryPrefix, currentAlgorithm, stmt2);
+		if (Validator.isBlank(passwordsEncryptionAlgorithm)) {
+			passwordsEncryptionAlgorithm =
+				PropsUtil.get(PropsKeys.PASSWORDS_ENCRYPTION_ALGORITHM);
 		}
 
-		stmt2.executeBatch();
+		int index = passwordsEncryptionAlgorithm.indexOf(CharPool.SLASH);
 
-		connection.commit();
-	}
+		if (index > -1) {
+			passwordsEncryptionAlgorithm =
+				passwordsEncryptionAlgorithm.substring(0, index);
+		}
 
-	private void _addUpdateQueries(
-			ResultSet rs, String updateQueryPrefix, String algorithm,
-			Statement stmt)
-		throws SQLException {
+		passwordsEncryptionAlgorithm = StringUtil.toUpperCase(
+			passwordsEncryptionAlgorithm);
 
-		while (rs.next()) {
-			StringBundler updateQuerySB = new StringBundler(8);
+		String sql = StringBundler.concat(
+			"update ", UserTable.TABLE_NAME, " set password_= CONCAT('{",
+			passwordsEncryptionAlgorithm,
+			"}', password) where password_ not like '{%'");
 
-			updateQuerySB.append(updateQueryPrefix);
-
-			long userId = rs.getLong("userId");
-			String password = rs.getString("password_");
-
-			updateQuerySB.append(_getAlgorithmName(algorithm));
-			updateQuerySB.append(CharPool.CLOSE_CURLY_BRACE);
-
-			updateQuerySB.append(password);
-			updateQuerySB.append(CharPool.QUOTE);
-			updateQuerySB.append(" where userId = ");
-			updateQuerySB.append(userId);
-			updateQuerySB.append(CharPool.SEMICOLON);
-
-			stmt.addBatch(updateQuerySB.toString());
+		try (Statement statement = connection.createStatement()) {
+			statement.execute(sql);
 		}
 	}
-
-	private String _getAlgorithmName(String algorithm) {
-		int index = algorithm.indexOf(CharPool.SLASH);
-
-		if (index > 0) {
-			algorithm = algorithm.substring(0, index);
-		}
-
-		return StringUtil.toUpperCase(algorithm);
-	}
-
 }
