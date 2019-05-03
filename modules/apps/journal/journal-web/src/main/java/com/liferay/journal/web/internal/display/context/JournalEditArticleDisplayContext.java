@@ -18,10 +18,8 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateLocalServiceUtil;
-import com.liferay.dynamic.data.mapping.service.DDMTemplateServiceUtil;
 import com.liferay.dynamic.data.mapping.storage.DDMFormValues;
 import com.liferay.dynamic.data.mapping.storage.Fields;
-import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.constants.JournalWebKeys;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleConstants;
@@ -31,11 +29,12 @@ import com.liferay.journal.service.JournalFolderLocalServiceUtil;
 import com.liferay.journal.util.JournalConverter;
 import com.liferay.journal.web.internal.security.permission.resource.JournalArticlePermission;
 import com.liferay.journal.web.internal.security.permission.resource.JournalFolderPermission;
-import com.liferay.journal.web.util.JournalUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.bean.BeanParamUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
@@ -51,7 +50,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
-import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,8 +58,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
-import javax.portlet.PortletRequest;
 import javax.portlet.PortletURL;
 import javax.portlet.RenderResponse;
 
@@ -96,6 +94,16 @@ public class JournalEditArticleDisplayContext {
 		return _articleId;
 	}
 
+	public Set<Locale> getAvailableLocales() {
+		if (_availableLocales != null) {
+			return _availableLocales;
+		}
+
+		_availableLocales = LanguageUtil.getAvailableLocales(getGroupId());
+
+		return _availableLocales;
+	}
+
 	public Map<String, Object> getChangeDefaultLanguageSoyContext() {
 		Map<String, Object> context = new HashMap<>();
 
@@ -112,10 +120,7 @@ public class JournalEditArticleDisplayContext {
 		strings.put(
 			"default", LanguageUtil.format(_request, "default", "content"));
 
-		for (Locale availableLocale :
-				LanguageUtil.getAvailableLocales(
-					_themeDisplay.getScopeGroupId())) {
-
+		for (Locale availableLocale : getAvailableLocales()) {
 			String curLanguageId = LocaleUtil.toLanguageId(availableLocale);
 
 			strings.put(
@@ -254,14 +259,21 @@ public class JournalEditArticleDisplayContext {
 		return _ddmStructureKey;
 	}
 
-	public DDMTemplate getDDMTemplate() throws PortalException {
+	public DDMTemplate getDDMTemplate() {
 		long ddmTemplateId = ParamUtil.getLong(_request, "ddmTemplateId");
+
+		if (ddmTemplateId == -1) {
+			return null;
+		}
 
 		if (ddmTemplateId > 0) {
 			_ddmTemplate = DDMTemplateLocalServiceUtil.fetchDDMTemplate(
 				ddmTemplateId);
+
+			return _ddmTemplate;
 		}
-		else if (Validator.isNotNull(getDDMTemplateKey())) {
+
+		if (Validator.isNotNull(getDDMTemplateKey())) {
 			long groupId = ParamUtil.getLong(
 				_request, "groupId", _themeDisplay.getSiteGroupId());
 
@@ -272,25 +284,11 @@ public class JournalEditArticleDisplayContext {
 			_ddmTemplate = DDMTemplateLocalServiceUtil.fetchTemplate(
 				groupId, PortalUtil.getClassNameId(DDMStructure.class),
 				getDDMTemplateKey(), true);
+
+			return _ddmTemplate;
 		}
 
-		if (_ddmTemplate == null) {
-			DDMStructure ddmStructure = getDDMStructure();
-
-			List<DDMTemplate> ddmTemplates =
-				DDMTemplateServiceUtil.getTemplates(
-					_themeDisplay.getCompanyId(), ddmStructure.getGroupId(),
-					PortalUtil.getClassNameId(DDMStructure.class),
-					ddmStructure.getStructureId(),
-					PortalUtil.getClassNameId(JournalArticle.class), true,
-					WorkflowConstants.STATUS_APPROVED);
-
-			if (!ddmTemplates.isEmpty()) {
-				_ddmTemplate = ddmTemplates.get(0);
-			}
-		}
-
-		return _ddmTemplate;
+		return null;
 	}
 
 	public String getDDMTemplateKey() {
@@ -311,12 +309,23 @@ public class JournalEditArticleDisplayContext {
 	}
 
 	public String getDefaultLanguageId() {
+		Locale siteDefaultLocale = null;
+
+		try {
+			siteDefaultLocale = PortalUtil.getSiteDefaultLocale(getGroupId());
+		}
+		catch (PortalException pe) {
+			_log.error(pe, pe);
+
+			siteDefaultLocale = LocaleUtil.getSiteDefault();
+		}
+
 		if (_article == null) {
-			return LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault());
+			return LocaleUtil.toLanguageId(siteDefaultLocale);
 		}
 
 		return LocalizationUtil.getDefaultLanguageId(
-			_article.getContent(), LocaleUtil.getSiteDefault());
+			_article.getContent(), siteDefaultLocale);
 	}
 
 	public String getEditArticleURL() {
@@ -360,7 +369,12 @@ public class JournalEditArticleDisplayContext {
 			}
 		}
 
-		sb.append(group.getPathFriendlyURL(privateLayout, _themeDisplay));
+		if (privateLayout) {
+			sb.append(PortalUtil.getPathFriendlyURLPrivateGroup());
+		}
+		else {
+			sb.append(PortalUtil.getPathFriendlyURLPublic());
+		}
 
 		sb.append(group.getFriendlyURL());
 
@@ -390,37 +404,6 @@ public class JournalEditArticleDisplayContext {
 		return _portletResource;
 	}
 
-	public String getPreviewContentURL() throws Exception {
-		PortletURL previewContentURL =
-			_liferayPortletResponse.createLiferayPortletURL(
-				JournalUtil.getPreviewPlid(_article, _themeDisplay),
-				JournalPortletKeys.JOURNAL, PortletRequest.RENDER_PHASE);
-
-		previewContentURL.setParameter(
-			"mvcPath", "/preview_article_content.jsp");
-
-		if (_article == null) {
-			return previewContentURL.toString();
-		}
-
-		previewContentURL.setParameter(
-			"groupId", String.valueOf(_article.getGroupId()));
-		previewContentURL.setParameter(
-			"articleId", String.valueOf(_article.getVersion()));
-
-		String ddmTemplateKey = _article.getDDMTemplateKey();
-
-		DDMTemplate ddmTemplate = getDDMTemplate();
-
-		if (ddmTemplate != null) {
-			ddmTemplateKey = ddmTemplate.getTemplateKey();
-		}
-
-		previewContentURL.setParameter("ddmTemplateKey", ddmTemplateKey);
-
-		return previewContentURL.toString();
-	}
-
 	public String getPublishButtonLabel() throws PortalException {
 		if (getClassNameId() > JournalArticleConstants.CLASSNAME_ID_DEFAULT) {
 			return "save";
@@ -443,14 +426,14 @@ public class JournalEditArticleDisplayContext {
 		return _redirect;
 	}
 
-	public long getReferringPlid() {
-		if (_referringPlid != null) {
-			return _referringPlid;
+	public long getRefererPlid() {
+		if (_refererPlid != null) {
+			return _refererPlid;
 		}
 
-		_referringPlid = ParamUtil.getLong(_request, "referringPlid");
+		_refererPlid = ParamUtil.getLong(_request, "refererPlid");
 
-		return _referringPlid;
+		return _refererPlid;
 	}
 
 	public String getReferringPortletResource() {
@@ -543,17 +526,6 @@ public class JournalEditArticleDisplayContext {
 			ParamUtil.getString(_request, "changeStructure"));
 
 		return _changeStructure;
-	}
-
-	public boolean isHideDefaultSuccessMessage() {
-		if (_hideDefaultSuccessMessage != null) {
-			return _hideDefaultSuccessMessage;
-		}
-
-		_hideDefaultSuccessMessage = ParamUtil.getBoolean(
-			_request, "hideDefaultSuccessMessage", false);
-
-		return _hideDefaultSuccessMessage;
 	}
 
 	public boolean isNeverExpire() {
@@ -725,8 +697,12 @@ public class JournalEditArticleDisplayContext {
 		}
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		JournalEditArticleDisplayContext.class);
+
 	private JournalArticle _article;
 	private String _articleId;
+	private Set<Locale> _availableLocales;
 	private Boolean _changeStructure;
 	private Long _classNameId;
 	private Long _classPK;
@@ -737,14 +713,13 @@ public class JournalEditArticleDisplayContext {
 	private String _ddmTemplateKey;
 	private Long _folderId;
 	private Long _groupId;
-	private Boolean _hideDefaultSuccessMessage;
 	private Long _inheritedWorkflowDDMStructuresFolderId;
 	private final LiferayPortletResponse _liferayPortletResponse;
 	private Boolean _neverExpire;
 	private Boolean _neverReview;
 	private String _portletResource;
 	private String _redirect;
-	private Long _referringPlid;
+	private Long _refererPlid;
 	private String _referringPortletResource;
 	private final HttpServletRequest _request;
 	private Boolean _showHeader;

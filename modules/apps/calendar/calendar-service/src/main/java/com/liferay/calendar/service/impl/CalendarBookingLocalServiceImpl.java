@@ -28,6 +28,7 @@ import com.liferay.calendar.internal.notification.NotificationSenderFactory;
 import com.liferay.calendar.internal.notification.NotificationTemplateContextFactory;
 import com.liferay.calendar.internal.recurrence.RecurrenceSplit;
 import com.liferay.calendar.internal.recurrence.RecurrenceSplitter;
+import com.liferay.calendar.internal.util.CalendarUtil;
 import com.liferay.calendar.model.Calendar;
 import com.liferay.calendar.model.CalendarBooking;
 import com.liferay.calendar.model.CalendarBookingConstants;
@@ -46,6 +47,7 @@ import com.liferay.calendar.util.RecurrenceUtil;
 import com.liferay.calendar.workflow.CalendarBookingWorkflowConstants;
 import com.liferay.message.boards.service.MBMessageLocalService;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.orm.Criterion;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
@@ -55,8 +57,8 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
@@ -74,6 +76,7 @@ import com.liferay.portal.kernel.service.SystemEventLocalService;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.DateUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -85,7 +88,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
-import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.social.kernel.model.SocialActivityConstants;
 import com.liferay.subscription.service.SubscriptionLocalService;
 import com.liferay.trash.exception.RestoreEntryException;
@@ -104,12 +106,19 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Eduardo Lundgren
  * @author Fabio Pezzutto
  * @author Marcellus Tavares
  * @author Pier Paolo Ramon
  */
+@Component(
+	property = "model.class.name=com.liferay.calendar.model.CalendarBooking",
+	service = AopService.class
+)
 public class CalendarBookingLocalServiceImpl
 	extends CalendarBookingLocalServiceBaseImpl {
 
@@ -174,8 +183,17 @@ public class CalendarBookingLocalServiceImpl
 		calendarBooking.setCompanyId(user.getCompanyId());
 		calendarBooking.setUserId(user.getUserId());
 		calendarBooking.setUserName(user.getFullName());
-		calendarBooking.setCreateDate(serviceContext.getCreateDate(now));
-		calendarBooking.setModifiedDate(serviceContext.getModifiedDate(now));
+
+		Date createDate = serviceContext.getCreateDate(now);
+
+		calendarBooking.setCreateDate(createDate);
+		serviceContext.setCreateDate(createDate);
+
+		Date modifiedDate = serviceContext.getModifiedDate(now);
+
+		calendarBooking.setModifiedDate(modifiedDate);
+		serviceContext.setModifiedDate(modifiedDate);
+
 		calendarBooking.setCalendarId(calendarId);
 		calendarBooking.setCalendarResourceId(calendar.getCalendarResourceId());
 
@@ -1020,8 +1038,8 @@ public class CalendarBookingLocalServiceImpl
 				calendarBooking.getParentCalendarBooking());
 		}
 
-		return calendarLocalService.isStagingCalendar(
-			calendarBooking.getCalendar());
+		return CalendarUtil.isStagingCalendar(
+			calendarBooking.getCalendar(), groupLocalService);
 	}
 
 	@Override
@@ -1468,7 +1486,8 @@ public class CalendarBookingLocalServiceImpl
 		updatedDescriptionMap.putAll(descriptionMap);
 
 		if (allFollowing) {
-			Calendar calendar = calendarLocalService.getCalendar(calendarId);
+			Calendar calendar = calendarPersistence.findByPrimaryKey(
+				calendarId);
 
 			List<CalendarBooking> recurringCalendarBookings =
 				splitCalendarBookingInstances(
@@ -1609,6 +1628,7 @@ public class CalendarBookingLocalServiceImpl
 		User user = userLocalService.getUser(userId);
 		Date now = new Date();
 
+		Date oldModifiedDate = calendarBooking.getModifiedDate();
 		int oldStatus = calendarBooking.getStatus();
 
 		calendarBooking.setModifiedDate(serviceContext.getModifiedDate(now));
@@ -1679,10 +1699,43 @@ public class CalendarBookingLocalServiceImpl
 						calendarBooking.getUuid(), null,
 						WorkflowConstants.STATUS_PENDING, null, null);
 				}
+			}
+		}
 
-				sendNotification(
-					calendarBooking, NotificationTemplateType.MOVED_TO_TRASH,
-					serviceContext);
+		if (calendarBooking.isMasterBooking()) {
+			Date createDate = calendarBooking.getCreateDate();
+
+			NotificationTemplateType notificationTemplateType =
+				NotificationTemplateType.INVITE;
+
+			if (!DateUtil.equals(createDate, oldModifiedDate)) {
+				notificationTemplateType = NotificationTemplateType.UPDATE;
+			}
+
+			for (CalendarBooking childCalendarBooking : childCalendarBookings) {
+				if (childCalendarBooking.equals(calendarBooking)) {
+					continue;
+				}
+
+				if (childCalendarBooking.isDenied()) {
+					notificationTemplateType = NotificationTemplateType.DECLINE;
+				}
+
+				if (calendarBooking.isApproved()) {
+					sendNotification(
+						childCalendarBooking, notificationTemplateType,
+						serviceContext);
+				}
+				else if ((oldStatus == WorkflowConstants.STATUS_APPROVED) &&
+						 (status == WorkflowConstants.STATUS_IN_TRASH)) {
+
+					notificationTemplateType =
+						NotificationTemplateType.MOVED_TO_TRASH;
+
+					sendNotification(
+						childCalendarBooking, notificationTemplateType,
+						serviceContext);
+				}
 			}
 		}
 
@@ -1816,21 +1869,6 @@ public class CalendarBookingLocalServiceImpl
 						oldChildCalendarBooking.getStatus(), serviceContext);
 				}
 			}
-
-			NotificationTemplateType notificationTemplateType =
-				NotificationTemplateType.INVITE;
-
-			if (childCalendarBooking.isDenied()) {
-				notificationTemplateType = NotificationTemplateType.DECLINE;
-			}
-			else if (childCalendarBookingMap.containsKey(
-						childCalendarBooking.getCalendarId())) {
-
-				notificationTemplateType = NotificationTemplateType.UPDATE;
-			}
-
-			sendNotification(
-				childCalendarBooking, notificationTemplateType, serviceContext);
 		}
 	}
 
@@ -1849,9 +1887,8 @@ public class CalendarBookingLocalServiceImpl
 	}
 
 	protected String getExtraDataJSON(CalendarBooking calendarBooking) {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("title", calendarBooking.getTitle());
+		JSONObject jsonObject = JSONUtil.put(
+			"title", calendarBooking.getTitle());
 
 		return jsonObject.toString();
 	}
@@ -1902,7 +1939,7 @@ public class CalendarBookingLocalServiceImpl
 
 			Group stagingGroup = group.getStagingGroup();
 
-			calendar = calendarLocalService.getCalendarByUuidAndGroupId(
+			calendar = calendarPersistence.findByUUID_G(
 				calendar.getUuid(), stagingGroup.getGroupId());
 		}
 
@@ -1912,7 +1949,7 @@ public class CalendarBookingLocalServiceImpl
 	protected long getNotLiveCalendarId(long calendarId)
 		throws PortalException {
 
-		Calendar calendar = calendarLocalService.getCalendar(calendarId);
+		Calendar calendar = calendarPersistence.findByPrimaryKey(calendarId);
 
 		calendar = getNotLiveCalendar(calendar);
 
@@ -2387,19 +2424,19 @@ public class CalendarBookingLocalServiceImpl
 		}
 	}
 
-	@ServiceReference(type = MBMessageLocalService.class)
+	@Reference
 	protected MBMessageLocalService mbMessageLocalService;
 
-	@ServiceReference(type = RecurrenceSplitter.class)
+	@Reference
 	protected RecurrenceSplitter recurrenceSplitter;
 
-	@ServiceReference(type = SubscriptionLocalService.class)
+	@Reference
 	protected SubscriptionLocalService subscriptionLocalService;
 
-	@ServiceReference(type = SystemEventLocalService.class)
+	@Reference
 	protected SystemEventLocalService systemEventLocalService;
 
-	@ServiceReference(type = TrashEntryLocalService.class)
+	@Reference
 	protected TrashEntryLocalService trashEntryLocalService;
 
 	private User _getDefaultSenderUser(Calendar calendar) throws Exception {

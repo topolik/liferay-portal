@@ -213,8 +213,8 @@ public class JournalArticleExportImportContentProcessor
 
 					String type = "page";
 
-					if (e instanceof NoSuchFileEntryException ||
-						e.getCause() instanceof NoSuchFileEntryException) {
+					if ((e instanceof NoSuchFileEntryException) ||
+						(e.getCause() instanceof NoSuchFileEntryException)) {
 
 						type = "file entry";
 					}
@@ -419,8 +419,11 @@ public class JournalArticleExportImportContentProcessor
 
 			JSONObject jsonObject = _jsonFactory.createJSONObject();
 
-			jsonObject.put("className", JournalArticle.class.getName());
-			jsonObject.put("classPK", journalArticle.getResourcePrimKey());
+			jsonObject.put(
+				"className", JournalArticle.class.getName()
+			).put(
+				"classPK", journalArticle.getResourcePrimKey()
+			);
 
 			content = StringUtil.replace(
 				content, journalArticleReference, jsonObject.toString());
@@ -452,7 +455,12 @@ public class JournalArticleExportImportContentProcessor
 				for (Element dynamicContentElement : dynamicContentElements) {
 					String json = dynamicContentElement.getStringValue();
 
-					if (Validator.isNull(json)) {
+					JSONObject jsonObject = _jsonFactory.createJSONObject(json);
+
+					long classPK = GetterUtil.getLong(
+						jsonObject.get("classPK"));
+
+					if (classPK <= 0) {
 						if (_log.isDebugEnabled()) {
 							_log.debug(
 								"No journal article reference is specified");
@@ -460,11 +468,6 @@ public class JournalArticleExportImportContentProcessor
 
 						continue;
 					}
-
-					JSONObject jsonObject = _jsonFactory.createJSONObject(json);
-
-					long classPK = GetterUtil.getLong(
-						jsonObject.get("classPK"));
 
 					JournalArticle journalArticle =
 						_journalArticleLocalService.fetchLatestArticle(classPK);
@@ -587,10 +590,7 @@ public class JournalArticleExportImportContentProcessor
 		}
 
 		try {
-			Fields fields = _journalConverter.getDDMFields(
-				ddmStructure, content);
-
-			return fields;
+			return _journalConverter.getDDMFields(ddmStructure, content);
 		}
 		catch (Exception e) {
 			if (_log.isWarnEnabled()) {

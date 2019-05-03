@@ -25,7 +25,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -91,26 +90,25 @@ public class BookmarksManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData("action", "deleteEntries");
+					dropdownItem -> {
+						dropdownItem.putData("action", "deleteEntries");
 
-							if (_trashHelper.isTrashEnabled(
-									_themeDisplay.getScopeGroupId())) {
+						if (_trashHelper.isTrashEnabled(
+								_themeDisplay.getScopeGroupId())) {
 
-								dropdownItem.setIcon("trash");
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										_request, "move-to-recycle-bin"));
-							}
-							else {
-								dropdownItem.setIcon("times");
-								dropdownItem.setLabel(
-									LanguageUtil.get(_request, "delete"));
-							}
+							dropdownItem.setIcon("trash");
+							dropdownItem.setLabel(
+								LanguageUtil.get(
+									_request, "move-to-recycle-bin"));
+						}
+						else {
+							dropdownItem.setIcon("times-circle");
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, "delete"));
+						}
 
-							dropdownItem.setQuickAction(true);
-						}));
+						dropdownItem.setQuickAction(true);
+					});
 			}
 		};
 	}
@@ -160,14 +158,12 @@ public class BookmarksManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				addGroup(
-					SafeConsumer.ignore(
-						dropdownGroupItem -> {
-							dropdownGroupItem.setDropdownItems(
-								_getFilterNavigationDropdownItems());
-							dropdownGroupItem.setLabel(
-								LanguageUtil.get(
-									_request, "filter-by-navigation"));
-						}));
+					dropdownGroupItem -> {
+						dropdownGroupItem.setDropdownItems(
+							_getFilterNavigationDropdownItems());
+						dropdownGroupItem.setLabel(
+							LanguageUtil.get(_request, "filter-by-navigation"));
+					});
 			}
 		};
 	}
@@ -179,39 +175,34 @@ public class BookmarksManagementToolbarDisplayContext {
 
 				if (navigation.equals("mine")) {
 					add(
-						SafeConsumer.ignore(
-							labelItem -> {
-								labelItem.putData(
-									"removeLabelURL",
-									_removeNavigartionParameter(
-										_currentURLObj));
+						labelItem -> {
+							labelItem.putData(
+								"removeLabelURL",
+								_removeNavigartionParameter(_currentURLObj));
 
-								labelItem.setCloseable(true);
+							labelItem.setCloseable(true);
 
-								User user = _themeDisplay.getUser();
+							User user = _themeDisplay.getUser();
 
-								String label = String.format(
-									"%s: %s",
-									LanguageUtil.get(_request, "owner"),
-									user.getFullName());
+							String label = String.format(
+								"%s: %s", LanguageUtil.get(_request, "owner"),
+								user.getFullName());
 
-								labelItem.setLabel(label);
-							}));
+							labelItem.setLabel(label);
+						});
 				}
 				else if (navigation.equals("recent")) {
 					add(
-						SafeConsumer.ignore(
-							labelItem -> {
-								labelItem.putData(
-									"removeLabelURL",
-									_removeNavigartionParameter(
-										_currentURLObj));
+						labelItem -> {
+							labelItem.putData(
+								"removeLabelURL",
+								_removeNavigartionParameter(_currentURLObj));
 
-								labelItem.setCloseable(true);
+							labelItem.setCloseable(true);
 
-								labelItem.setLabel(
-									LanguageUtil.get(_request, "recent"));
-							}));
+							labelItem.setLabel(
+								LanguageUtil.get(_request, "recent"));
+						});
 				}
 			}
 		};
@@ -335,20 +326,19 @@ public class BookmarksManagementToolbarDisplayContext {
 
 				for (String navigationKey : navigationKeys) {
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setActive(
-									navigationKey.equals(_getNavigation()));
+						dropdownItem -> {
+							dropdownItem.setActive(
+								navigationKey.equals(_getNavigation()));
 
-								PortletURL navigationURL = PortletURLUtil.clone(
-									portletURL, _liferayPortletResponse);
+							PortletURL navigationURL = PortletURLUtil.clone(
+								portletURL, _liferayPortletResponse);
 
-								dropdownItem.setHref(
-									navigationURL, "navigation", navigationKey);
+							dropdownItem.setHref(
+								navigationURL, "navigation", navigationKey);
 
-								dropdownItem.setLabel(
-									LanguageUtil.get(_request, navigationKey));
-							}));
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, navigationKey));
+						});
 				}
 			}
 		};

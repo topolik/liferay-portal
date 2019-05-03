@@ -14,43 +14,21 @@
 
 package com.liferay.portal.search.document;
 
-import java.util.ArrayList;
+import aQute.bnd.annotation.ProviderType;
+
 import java.util.List;
 
 /**
  * @author Michael C. Han
+ * @author André de Oliveira
  */
-public class Field {
+@ProviderType
+public interface Field {
 
-	public Field(String name) {
-		_name = name;
-	}
+	public String getName();
 
-	public void addValue(Object value) {
-		_values.add(value);
-	}
+	public Object getValue();
 
-	public void addValues(List<Object> values) {
-		_values.addAll(values);
-	}
-
-	public String getName() {
-		return _name;
-	}
-
-	public Object getValue() {
-		if (_values.isEmpty()) {
-			return null;
-		}
-
-		return _values.get(0);
-	}
-
-	public List<Object> getValues() {
-		return _values;
-	}
-
-	private final String _name;
-	private List<Object> _values = new ArrayList<>();
+	public List<Object> getValues();
 
 }

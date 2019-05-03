@@ -549,7 +549,7 @@ public class ResourcePermissionLocalServiceImpl
 				resourcePermission.setRoleId((Long)resourcePermissionArray[4]);
 				resourcePermission.setActionIds(resourceActionBitwiseValue);
 				resourcePermission.setViewActionId(
-					resourceActionBitwiseValue % 2 == 1);
+					(resourceActionBitwiseValue % 2) == 1);
 
 				session.save(resourcePermission);
 
@@ -764,21 +764,6 @@ public class ResourcePermissionLocalServiceImpl
 		}
 
 		return availableActionIds;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #getAvailableResourcePermissionActionIds(long, String, int,
-	 *             String, Collection)}
-	 */
-	@Deprecated
-	@Override
-	public Map<Long, Set<String>> getAvailableResourcePermissionActionIds(
-		long companyId, String name, int scope, String primKey, long[] roleIds,
-		Collection<String> actionIds) {
-
-		return getAvailableResourcePermissionActionIds(
-			companyId, name, scope, primKey, new ArrayList<String>(actionIds));
 	}
 
 	/**
@@ -1019,11 +1004,11 @@ public class ResourcePermissionLocalServiceImpl
 
 		// See LPS-47464
 
-		if (resourcePermissionPersistence.countByC_N_S_P(
-				individualResource.getCompanyId(), individualResource.getName(),
-				individualResource.getScope(),
-				individualResource.getPrimKey()) < 1) {
+		int count = resourcePermissionPersistence.countByC_N_S_P(
+			individualResource.getCompanyId(), individualResource.getName(),
+			individualResource.getScope(), individualResource.getPrimKey());
 
+		if (count < 1) {
 			StringBundler sb = new StringBundler(9);
 
 			sb.append("{companyId=");
@@ -1166,51 +1151,6 @@ public class ResourcePermissionLocalServiceImpl
 		}
 
 		return false;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link #getRoles(long,
-	 *             String, int, String, String}
-	 */
-	@Deprecated
-	@Override
-	public boolean[] hasResourcePermissions(
-			long companyId, String name, int scope, String primKey,
-			long[] roleIds, String actionId)
-		throws PortalException {
-
-		boolean[] hasResourcePermissions = new boolean[roleIds.length];
-
-		if (roleIds.length == 0) {
-			return hasResourcePermissions;
-		}
-
-		ResourceAction resourceAction =
-			resourceActionLocalService.getResourceAction(name, actionId);
-
-		List<ResourcePermission> resourcePermissions =
-			resourcePermissionPersistence.findByC_N_S_P_R(
-				companyId, name, scope, primKey, roleIds);
-
-		if (resourcePermissions.isEmpty()) {
-			return hasResourcePermissions;
-		}
-
-		for (ResourcePermission resourcePermission : resourcePermissions) {
-			if (resourcePermission.hasAction(resourceAction)) {
-				long roleId = resourcePermission.getRoleId();
-
-				for (int i = 0; i < roleIds.length; i++) {
-					if (roleIds[i] == roleId) {
-						hasResourcePermissions[i] = true;
-
-						break;
-					}
-				}
-			}
-		}
-
-		return hasResourcePermissions;
 	}
 
 	/**
@@ -2143,7 +2083,7 @@ public class ResourcePermissionLocalServiceImpl
 			}
 			else {
 				actionIdsLong =
-					actionIdsLong & (~resourceAction.getBitwiseValue());
+					actionIdsLong & ~resourceAction.getBitwiseValue();
 			}
 		}
 
@@ -2151,7 +2091,7 @@ public class ResourcePermissionLocalServiceImpl
 			resourcePermission.isNew()) {
 
 			resourcePermission.setActionIds(actionIdsLong);
-			resourcePermission.setViewActionId(actionIdsLong % 2 == 1);
+			resourcePermission.setViewActionId((actionIdsLong % 2) == 1);
 
 			resourcePermissionPersistence.update(resourcePermission);
 

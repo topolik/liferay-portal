@@ -30,6 +30,7 @@ import com.liferay.journal.service.JournalContentSearchLocalService;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.Portlet;
 import com.liferay.portal.kernel.model.PortletPreferences;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.service.LayoutLocalService;
@@ -74,10 +75,9 @@ public class JournalArticleAssetEntryUsageRecorder
 				article.getResourcePrimKey());
 		}
 
-		int count = _assetEntryUsageLocalService.getAssetEntryUsagesCount(
-			assetEntry.getEntryId(), StringPool.BLANK);
+		if (_assetEntryUsageLocalService.hasDefaultAssetEntryUsage(
+				assetEntry.getEntryId())) {
 
-		if (count > 0) {
 			return;
 		}
 
@@ -85,9 +85,8 @@ public class JournalArticleAssetEntryUsageRecorder
 		_recordPortletPreferences(assetEntry, true);
 		_recordPortletPreferences(assetEntry, false);
 
-		_assetEntryUsageLocalService.addAssetEntryUsage(
-			assetEntry.getUserId(), assetEntry.getGroupId(),
-			assetEntry.getEntryId(), 0, 0, StringPool.BLANK,
+		_assetEntryUsageLocalService.addDefaultAssetEntryUsage(
+			assetEntry.getGroupId(), assetEntry.getEntryId(),
 			ServiceContextThreadLocal.getServiceContext());
 	}
 
@@ -118,17 +117,17 @@ public class JournalArticleAssetEntryUsageRecorder
 			AssetEntryUsage assetEntryUsage =
 				_assetEntryUsageLocalService.fetchAssetEntryUsage(
 					assetEntry.getEntryId(),
-					_portal.getClassNameId(Layout.class), layout.getPlid(),
-					contentSearch.getPortletId());
+					_portal.getClassNameId(Portlet.class),
+					contentSearch.getPortletId(), layout.getPlid());
 
 			if (assetEntryUsage != null) {
 				continue;
 			}
 
 			_assetEntryUsageLocalService.addAssetEntryUsage(
-				article.getUserId(), contentSearch.getGroupId(),
-				assetEntry.getEntryId(), _portal.getClassNameId(Layout.class),
-				layout.getPlid(), contentSearch.getPortletId(), serviceContext);
+				contentSearch.getGroupId(), assetEntry.getEntryId(),
+				_portal.getClassNameId(Portlet.class),
+				contentSearch.getPortletId(), layout.getPlid(), serviceContext);
 		}
 	}
 
@@ -173,18 +172,18 @@ public class JournalArticleAssetEntryUsageRecorder
 			AssetEntryUsage assetEntryUsage =
 				_assetEntryUsageLocalService.fetchAssetEntryUsage(
 					assetEntry.getEntryId(),
-					_portal.getClassNameId(Layout.class),
-					portletPreferences.getPlid(),
-					portletPreferences.getPortletId());
+					_portal.getClassNameId(Portlet.class),
+					portletPreferences.getPortletId(),
+					portletPreferences.getPlid());
 
 			if (assetEntryUsage != null) {
 				continue;
 			}
 
 			_assetEntryUsageLocalService.addAssetEntryUsage(
-				assetEntry.getUserId(), assetEntry.getGroupId(),
-				assetEntry.getEntryId(), _portal.getClassNameId(Layout.class),
-				portletPreferences.getPlid(), portletPreferences.getPortletId(),
+				assetEntry.getGroupId(), assetEntry.getEntryId(),
+				_portal.getClassNameId(Portlet.class),
+				portletPreferences.getPortletId(), portletPreferences.getPlid(),
 				serviceContext);
 		}
 	}

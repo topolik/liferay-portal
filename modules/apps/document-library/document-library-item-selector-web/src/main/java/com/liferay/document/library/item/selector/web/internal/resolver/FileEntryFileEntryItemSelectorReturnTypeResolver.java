@@ -18,8 +18,8 @@ import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.item.selector.ItemSelectorReturnTypeResolver;
 import com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -54,17 +54,20 @@ public class FileEntryFileEntryItemSelectorReturnTypeResolver
 	public String getValue(FileEntry fileEntry, ThemeDisplay themeDisplay)
 		throws Exception {
 
-		JSONObject fileEntryJSONObject = JSONFactoryUtil.createJSONObject();
-
-		fileEntryJSONObject.put("fileEntryId", fileEntry.getFileEntryId());
-		fileEntryJSONObject.put("groupId", fileEntry.getGroupId());
-		fileEntryJSONObject.put("title", fileEntry.getTitle());
-		fileEntryJSONObject.put("type", "document");
+		JSONObject fileEntryJSONObject = JSONUtil.put(
+			"fileEntryId", fileEntry.getFileEntryId()
+		).put(
+			"groupId", fileEntry.getGroupId()
+		).put(
+			"title", fileEntry.getTitle()
+		).put(
+			"type", "document"
+		);
 
 		String previewURL = null;
 
 		if (fileEntry.getGroupId() == fileEntry.getRepositoryId()) {
-			previewURL = _dlurlHelper.getImagePreviewURL(
+			previewURL = _dlURLHelper.getImagePreviewURL(
 				fileEntry, fileEntry.getFileVersion(), themeDisplay,
 				StringPool.BLANK, false, false);
 		}
@@ -73,14 +76,16 @@ public class FileEntryFileEntryItemSelectorReturnTypeResolver
 				themeDisplay, fileEntry, "&imagePreview=1", false);
 		}
 
-		fileEntryJSONObject.put("url", previewURL);
-
-		fileEntryJSONObject.put("uuid", fileEntry.getUuid());
+		fileEntryJSONObject.put(
+			"url", previewURL
+		).put(
+			"uuid", fileEntry.getUuid()
+		);
 
 		return fileEntryJSONObject.toString();
 	}
 
 	@Reference
-	private DLURLHelper _dlurlHelper;
+	private DLURLHelper _dlURLHelper;
 
 }

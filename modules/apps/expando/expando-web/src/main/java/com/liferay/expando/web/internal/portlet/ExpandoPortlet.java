@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PropertiesParamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.io.IOException;
@@ -98,8 +99,19 @@ public class ExpandoPortlet extends MVCPortlet {
 		long resourcePrimKey = ParamUtil.getLong(
 			actionRequest, "resourcePrimKey");
 
-		String name = ParamUtil.getString(actionRequest, "name");
 		int type = ParamUtil.getInteger(actionRequest, "type");
+
+		String dataType = ParamUtil.getString(actionRequest, "dataType");
+		String precisionType = ParamUtil.getString(
+			actionRequest, "precisionType");
+
+		if (Validator.isNotNull(dataType) &&
+			Validator.isNotNull(precisionType)) {
+
+			type = _getNumberType(dataType, precisionType, type);
+		}
+
+		String name = ParamUtil.getString(actionRequest, "name");
 
 		ExpandoBridge expandoBridge = ExpandoBridgeFactoryUtil.getExpandoBridge(
 			themeDisplay.getCompanyId(), modelResource, resourcePrimKey);
@@ -383,6 +395,62 @@ public class ExpandoPortlet extends MVCPortlet {
 		}
 
 		expandoBridge.setAttributeProperties(name, properties);
+	}
+
+	private int _getNumberType(
+		String dataType, String precisionType, int type) {
+
+		if (dataType.equals(ExpandoColumnConstants.DATA_TYPE_DECIMAL) &&
+			precisionType.equals(ExpandoColumnConstants.PRECISION_64_BIT)) {
+
+			if (type == ExpandoColumnConstants.STRING_ARRAY) {
+				return ExpandoColumnConstants.DOUBLE_ARRAY;
+			}
+
+			return ExpandoColumnConstants.DOUBLE;
+		}
+
+		if (dataType.equals(ExpandoColumnConstants.DATA_TYPE_DECIMAL) &&
+			precisionType.equals(ExpandoColumnConstants.PRECISION_32_BIT)) {
+
+			if (type == ExpandoColumnConstants.STRING_ARRAY) {
+				return ExpandoColumnConstants.FLOAT_ARRAY;
+			}
+
+			return ExpandoColumnConstants.FLOAT;
+		}
+
+		if (dataType.equals(ExpandoColumnConstants.DATA_TYPE_INTEGER) &&
+			precisionType.equals(ExpandoColumnConstants.PRECISION_64_BIT)) {
+
+			if (type == ExpandoColumnConstants.STRING_ARRAY) {
+				return ExpandoColumnConstants.LONG_ARRAY;
+			}
+
+			return ExpandoColumnConstants.LONG;
+		}
+
+		if (dataType.equals(ExpandoColumnConstants.DATA_TYPE_INTEGER) &&
+			precisionType.equals(ExpandoColumnConstants.PRECISION_32_BIT)) {
+
+			if (type == ExpandoColumnConstants.STRING_ARRAY) {
+				return ExpandoColumnConstants.INTEGER_ARRAY;
+			}
+
+			return ExpandoColumnConstants.INTEGER;
+		}
+
+		if (dataType.equals(ExpandoColumnConstants.DATA_TYPE_INTEGER) &&
+			precisionType.equals(ExpandoColumnConstants.PRECISION_16_BIT)) {
+
+			if (type == ExpandoColumnConstants.STRING_ARRAY) {
+				return ExpandoColumnConstants.SHORT_ARRAY;
+			}
+
+			return ExpandoColumnConstants.SHORT;
+		}
+
+		return 0;
 	}
 
 	private ExpandoColumnService _expandoColumnService;

@@ -27,6 +27,7 @@ import java.util.Collection;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
@@ -39,6 +40,8 @@ public class ThreadLocalScopeContextScopeChecker
 
 	@Override
 	public boolean checkAllScopes(String... scopes) {
+		_checkOAuth2ScopeGrantLocalService();
+
 		if (Validator.isNull(scopes)) {
 			throw new IllegalArgumentException("Scopes are null");
 		}
@@ -68,6 +71,8 @@ public class ThreadLocalScopeContextScopeChecker
 
 	@Override
 	public boolean checkAnyScope(String... scopes) {
+		_checkOAuth2ScopeGrantLocalService();
+
 		if (Validator.isNull(scopes)) {
 			throw new IllegalArgumentException("Scopes are null");
 		}
@@ -95,6 +100,8 @@ public class ThreadLocalScopeContextScopeChecker
 
 	@Override
 	public boolean checkScope(String scope) {
+		_checkOAuth2ScopeGrantLocalService();
+
 		if (Validator.isNull(scope)) {
 			throw new IllegalArgumentException("Scope is null");
 		}
@@ -142,6 +149,14 @@ public class ThreadLocalScopeContextScopeChecker
 		_companyIdThreadLocal.set(companyId);
 	}
 
+	private void _checkOAuth2ScopeGrantLocalService() {
+		if (_oAuth2ScopeGrantLocalService == null) {
+			throw new IllegalStateException(
+				"ScopeChecker dependency upon OAuth2ScopeGrantLocalService " +
+					"is not satisfied");
+		}
+	}
+
 	private final ThreadLocal<String> _accessTokenThreadLocal =
 		ThreadLocal.withInitial(() -> StringPool.BLANK);
 	private final ThreadLocal<String> _applicationNameThreadLocal =
@@ -152,6 +167,7 @@ public class ThreadLocalScopeContextScopeChecker
 		ThreadLocal.withInitial(() -> 0L);
 
 	@Reference(
+		cardinality = ReferenceCardinality.OPTIONAL,
 		policy = ReferencePolicy.DYNAMIC,
 		policyOption = ReferencePolicyOption.GREEDY
 	)

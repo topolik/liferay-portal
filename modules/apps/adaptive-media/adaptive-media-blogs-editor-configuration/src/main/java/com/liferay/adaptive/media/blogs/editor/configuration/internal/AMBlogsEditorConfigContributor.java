@@ -32,7 +32,6 @@ import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Validator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -128,24 +127,20 @@ public class AMBlogsEditorConfigContributor
 				new ItemSelectorCriterion[itemSelectorCriteria.size()]));
 
 		jsonObject.put(
-			"filebrowserImageBrowseLinkUrl", itemSelectorPortletURL.toString());
-		jsonObject.put(
-			"filebrowserImageBrowseUrl", itemSelectorPortletURL.toString());
+			"filebrowserImageBrowseLinkUrl", itemSelectorPortletURL.toString()
+		).put(
+			"filebrowserImageBrowseUrl", itemSelectorPortletURL.toString()
+		);
 	}
 
 	protected void addAMImageFileEntryItemSelectorReturnType(
 		ItemSelectorCriterion itemSelectorCriterion) {
 
 		List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
-			new ArrayList<>();
+			itemSelectorCriterion.getDesiredItemSelectorReturnTypes();
 
 		desiredItemSelectorReturnTypes.add(
-			new AMImageFileEntryItemSelectorReturnType());
-		desiredItemSelectorReturnTypes.addAll(
-			itemSelectorCriterion.getDesiredItemSelectorReturnTypes());
-
-		itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
+			0, new AMImageFileEntryItemSelectorReturnType());
 	}
 
 	private static final String _IMG_TAG_RULE = "img[*](*){*};";

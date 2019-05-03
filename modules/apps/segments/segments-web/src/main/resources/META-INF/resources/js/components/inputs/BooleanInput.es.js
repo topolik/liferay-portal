@@ -1,6 +1,6 @@
-import React from 'react';
-import propTypes from 'prop-types';
 import ClaySelect from 'components/shared/ClaySelect.es';
+import propTypes from 'prop-types';
+import React from 'react';
 import {BOOLEAN_OPTIONS} from 'utils/constants.es';
 
 class BooleanInput extends React.Component {

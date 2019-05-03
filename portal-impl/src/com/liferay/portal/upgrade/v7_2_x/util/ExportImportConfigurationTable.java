@@ -30,23 +30,17 @@ public class ExportImportConfigurationTable {
 	public static final Object[][] TABLE_COLUMNS = {
 		{"mvccVersion", Types.BIGINT},
 		{"exportImportConfigurationId", Types.BIGINT},
-		{"groupId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"name", Types.VARCHAR},
-		{"description", Types.VARCHAR},
-		{"type_", Types.INTEGER},
-		{"settings_", Types.CLOB},
-		{"status", Types.INTEGER},
-		{"statusByUserId", Types.BIGINT},
-		{"statusByUserName", Types.VARCHAR},
-		{"statusDate", Types.TIMESTAMP}
+		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
+		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
+		{"name", Types.VARCHAR}, {"description", Types.VARCHAR},
+		{"type_", Types.INTEGER}, {"settings_", Types.CLOB},
+		{"status", Types.INTEGER}, {"statusByUserId", Types.BIGINT},
+		{"statusByUserName", Types.VARCHAR}, {"statusDate", Types.TIMESTAMP}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -82,9 +76,11 @@ TABLE_COLUMNS_MAP.put("statusByUserName", Types.VARCHAR);
 TABLE_COLUMNS_MAP.put("statusDate", Types.TIMESTAMP);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table ExportImportConfiguration (mvccVersion LONG default 0 not null,exportImportConfigurationId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name VARCHAR(200) null,description STRING null,type_ INTEGER,settings_ TEXT null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+	public static final String TABLE_SQL_CREATE =
+"create table ExportImportConfiguration (mvccVersion LONG default 0 not null,exportImportConfigurationId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,name VARCHAR(200) null,description STRING null,type_ INTEGER,settings_ TEXT null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 
-	public static final String TABLE_SQL_DROP = "drop table ExportImportConfiguration";
+	public static final String TABLE_SQL_DROP =
+"drop table ExportImportConfiguration";
 
 	public static final String[] TABLE_SQL_ADD_INDEXES = {
 		"create index IX_1827A2E5 on ExportImportConfiguration (companyId)",

@@ -53,7 +53,7 @@
 
 	&__elements-panel {
 		.card {
-			flex-basis: $sidebarElementCardWidth;
+			width: $sidebarElementCardWidth;
 
 			.card-body {
 				text-align: center;
@@ -74,94 +74,52 @@
 
 	&__structure-panel {
 		&__item {
-			border-radius: $topperBorderRadius * 2;
-			display: flex;
-			justify-content: space-between;
-			margin: ($fragmentsEditorSpacing / 2) auto;
-			padding: $fragmentsEditorSpacing / 2;
 			position: relative;
 			transition: background-color ease 0.2s, color ease 0.2s;
 			will-change: background-color, color;
+
+			.btn {
+				color: inherit;
+				transition: none;
+			}
+
+			&-name--padded {
+				padding-left: 5ch;
+			}
+
+			&-remove-btn {
+				color: inherit;
+				opacity: 0;
+				transition: opacity ease 0.2s;
+				will-change: opacity;
+			}
 
 			&.active {
 				font-weight: 600;
 			}
 
 			&.active,
-			&.active:hover {
+			&.active:hover,
+			&.active.hovered {
 				background-color: $topperBackgroundColor;
 				color: $topperColor;
 			}
 
-			&:hover {
+			&:hover,
+			&.hovered {
 				background-color: $sidebarTreeElementBackgroundColor;
 			}
-		}
 
-		&__item + .collapse,
-		&__item + .collapsing {
-			overflow: hidden;
-			padding-left: 1em;
-		}
-
-		&__item-icon {
-			left: 0;
-			position: absolute;
-			top: 0.1em;
-
-			> .collapse-icon-closed,
-			> .collapse-icon-open {
-				color: inherit;
-				display: block;
-				height: 2em;
-				left: 0;
-				position: relative;
-				top: 0;
-				transition: fill ease 0.2s;
-				width: 2em;
-				will-change: fill;
-
-				> .lexicon-icon {
-					left: 50%;
-					position: absolute;
-					top: 50%;
-					transform: translateX(-50%) translateY(-50%);
-					width: 10px;
-				}
+			&-remove-btn:focus,
+			&:hover &-remove-btn,
+			&.hovered &-remove-btn,
+			&.active &-remove-btn {
+				opacity: 1;
 			}
 
-			> .collapse-icon-closed[aria-expanded="true"],
-			> .collapse-icon-open[aria-expanded="false"] {
-				display: none;
+			&:focus-within &-remove-btn {
+				opacity: 1;
 			}
-		}
-
-		&__item-remove-btn.btn {
-			color: inherit;
-			height: 1.5em;
-			opacity: 0;
-			padding: 0;
-			position: relative;
-			transition: opacity ease 0.2s;
-			width: 1.5em;
-			will-change: opacity;
-
-			> .lexicon-icon {
-				left: 50%;
-				position: absolute;
-				top: 50%;
-				transform: translateX(-50%) translateY(-55%);
-			}
-		}
-
-		&__item:hover &__item-remove-btn, &__item.active &__item-remove-btn {
-			opacity: 1;
-		}
-
-		&__item-name {
-			cursor: pointer;
-			flex-grow: 1;
-			margin-left: 1.6em;
 		}
 	}
 
@@ -199,7 +157,7 @@
 
 	.fragments-editor__drag-handler {
 		background-color: transparent;
-		cursor: move;
+		cursor: grab;
 		display: block;
 		height: 100%;
 		position: absolute;

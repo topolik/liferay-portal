@@ -14,13 +14,14 @@
 
 package com.liferay.portal.service;
 
+import com.liferay.portal.kernel.aop.AopMethodInvocation;
+import com.liferay.portal.kernel.aop.ChainableMethodAdvice;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextThreadLocal;
-import com.liferay.portal.spring.aop.ChainableMethodAdvice;
-import com.liferay.portal.spring.aop.AopMethodInvocation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+
 import java.util.Map;
 
 /**
@@ -29,9 +30,22 @@ import java.util.Map;
 public class ServiceContextAdvice extends ChainableMethodAdvice {
 
 	@Override
+	public Object createMethodContext(
+		Class<?> targetClass, Method method,
+		Map<Class<? extends Annotation>, Annotation> annotations) {
+
+		int index = _getServiceContextParameterIndex(method);
+
+		if (index == -1) {
+			return null;
+		}
+
+		return index;
+	}
+
+	@Override
 	public Object invoke(
-			AopMethodInvocation aopMethodInvocation,
-			Object[] arguments)
+			AopMethodInvocation aopMethodInvocation, Object[] arguments)
 		throws Throwable {
 
 		int index = aopMethodInvocation.getAdviceMethodContext();
@@ -50,20 +64,6 @@ public class ServiceContextAdvice extends ChainableMethodAdvice {
 				ServiceContextThreadLocal.popServiceContext();
 			}
 		}
-	}
-
-	@Override
-	public Object createMethodContext(
-		Class<?> targetClass, Method method,
-		Map<Class<? extends Annotation>, Annotation> annotations) {
-
-		int index = _getServiceContextParameterIndex(method);
-
-		if (index == -1) {
-			return null;
-		}
-
-		return index;
 	}
 
 	private int _getServiceContextParameterIndex(Method method) {

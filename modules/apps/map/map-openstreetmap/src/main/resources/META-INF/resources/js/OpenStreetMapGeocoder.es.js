@@ -4,6 +4,7 @@ import State from 'metal-state';
  * OpenStreetMapGeocoder
  */
 class OpenStreetMapGeocoder extends State {
+
 	/**
 	 * Handles the server response of a successfull address forward
 	 * @param {Object} response Server response
@@ -25,7 +26,7 @@ class OpenStreetMapGeocoder extends State {
 	_handleReverseJSONP({error, display_name, lat, lon}, callback) {
 		const result = {
 			data: {},
-			err: error,
+			err: error
 		};
 
 		if (!result.err) {
@@ -33,8 +34,8 @@ class OpenStreetMapGeocoder extends State {
 				address: display_name,
 				location: {
 					lat: parseFloat(lat) || 0,
-					lng: parseFloat(lon) || 0,
-				},
+					lng: parseFloat(lon) || 0
+				}
 			};
 		}
 
@@ -60,8 +61,8 @@ class OpenStreetMapGeocoder extends State {
 					forwardUrl, {
 						context: this,
 						on: {
-							success: A.rbind('_handleForwardJSONP', this, callback),
-						},
+							success: A.rbind('_handleForwardJSONP', this, callback)
+						}
 					}
 				);
 			}
@@ -87,8 +88,8 @@ class OpenStreetMapGeocoder extends State {
 					reverseUrl, {
 						context: this,
 						on: {
-							success: A.rbind('_handleReverseJSONP', this, callback),
-						},
+							success: A.rbind('_handleReverseJSONP', this, callback)
+						}
 					}
 				);
 			}

@@ -17,6 +17,9 @@
 <%@ include file="/init.jsp" %>
 
 <%
+long previewAssetEntryId = ParamUtil.getLong(request, "previewAssetEntryId");
+int previewAssetEntryType = ParamUtil.getInteger(request, "previewAssetEntryType");
+
 AssetEntryResult assetEntryResult = (AssetEntryResult)request.getAttribute("view.jsp-assetEntryResult");
 
 for (AssetEntry assetEntry : assetEntryResult.getAssetEntries()) {
@@ -29,7 +32,12 @@ for (AssetEntry assetEntry : assetEntryResult.getAssetEntries()) {
 	AssetRenderer<?> assetRenderer = null;
 
 	try {
-		assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK());
+		if (previewAssetEntryId == assetEntry.getEntryId()) {
+			assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK(), previewAssetEntryType);
+		}
+		else {
+			assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK());
+		}
 	}
 	catch (Exception e) {
 		if (_log.isWarnEnabled()) {
@@ -37,7 +45,7 @@ for (AssetEntry assetEntry : assetEntryResult.getAssetEntries()) {
 		}
 	}
 
-	if ((assetRenderer == null) || !assetRenderer.isDisplayable()) {
+	if ((assetRenderer == null) || (!assetRenderer.isDisplayable() && (previewAssetEntryId <= 0))) {
 		continue;
 	}
 
@@ -47,8 +55,6 @@ for (AssetEntry assetEntry : assetEntryResult.getAssetEntries()) {
 %>
 
 	<liferay-util:include page="/view_asset_entry_full_content.jsp" servletContext="<%= application %>" />
-
-	<div class="separator"><!-- --></div>
 
 <%
 }

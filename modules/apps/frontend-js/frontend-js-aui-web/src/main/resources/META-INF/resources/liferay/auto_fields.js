@@ -15,11 +15,11 @@ AUI.add(
 		];
 
 		var TPL_ADD_BUTTON = '<button class="add-row btn btn-default btn-icon-only toolbar-first toolbar-item" title="" type="button">' +
-				'<span class="btn-icon icon icon-plus"></span>' +
+				Liferay.Util.getLexiconIconTpl('plus') +
 			'</button>';
 
 		var TPL_DELETE_BUTTON = '<button class="btn btn-default btn-icon-only delete-row toolbar-item toolbar-last" title="" type="button">' +
-				'<span class="btn-icon icon icon-minus"></span>' +
+				Liferay.Util.getLexiconIconTpl('hr') +
 			'</button>';
 
 		var TPL_AUTOROW_CONTROLS = '<span class="lfr-autorow-controls toolbar toolbar-horizontal">' +
@@ -76,6 +76,8 @@ AUI.add(
 							Liferay.Util.focusFormField(input);
 						}
 
+						instance._updateContentButtons();
+
 						instance.fire(
 							'clone',
 							{
@@ -93,17 +95,11 @@ AUI.add(
 					deleteRow: function(node) {
 						var instance = this;
 
-						var visibleRows = instance._contentBox.all('.lfr-form-row:visible').size();
+						var contentBox = instance._contentBox;
 
-						var deleteRow = visibleRows > 1;
+						var visibleRows = contentBox.all('.lfr-form-row:visible');
 
-						if (visibleRows == 1) {
-							instance.addRow(node);
-
-							deleteRow = true;
-						}
-
-						if (deleteRow) {
+						if (visibleRows.size() > 1) {
 							var form = node.ancestor('form');
 
 							node.hide();
@@ -165,6 +161,8 @@ AUI.add(
 
 									node.show();
 
+									instance._updateContentButtons();
+
 									if (form) {
 										form.fire('autofields:update');
 									}
@@ -183,6 +181,8 @@ AUI.add(
 								form.fire('autofields:update');
 							}
 						}
+
+						instance._updateContentButtons();
 					},
 
 					render: function() {
@@ -198,6 +198,7 @@ AUI.add(
 						instance._contentBox = contentBox;
 						instance._guid = baseRows.size();
 
+						instance.minimumRows = config.minimumRows;
 						instance.namespace = config.namespace;
 						instance.url = config.url;
 						instance.urlNamespace = config.urlNamespace;
@@ -233,7 +234,7 @@ AUI.add(
 									instance.deleteRow(currentRow);
 								}
 							},
-							'.lfr-autorow-controls .btn'
+							'.lfr-autorow-controls .btn:not(:disabled)'
 						);
 
 						baseRows.each(
@@ -262,6 +263,8 @@ AUI.add(
 								}
 							}
 						);
+
+						instance._updateContentButtons();
 
 						if (config.sortable) {
 							instance._makeSortable(config.sortableHandle);
@@ -635,6 +638,18 @@ AUI.add(
 								translatedLanguages: inputLocalized.get('translatedLanguages')
 							}
 						);
+					},
+
+					_updateContentButtons: function() {
+						var instance = this;
+
+						var minimumRows = instance.minimumRows;
+
+						if (minimumRows) {
+							var deleteRowButtons = instance._contentBox.all('.lfr-form-row:visible .delete-row');
+
+							Liferay.Util.toggleDisabled(deleteRowButtons, deleteRowButtons.size() <= minimumRows);
+						}
 					},
 
 					_guid: 0

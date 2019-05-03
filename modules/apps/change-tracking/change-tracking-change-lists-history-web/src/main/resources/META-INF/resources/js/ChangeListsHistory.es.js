@@ -10,8 +10,7 @@ import {Config} from 'metal-state';
 import templates from './ChangeListsHistory.soy';
 
 /**
- * Handles the tags of the selected
- * fileEntries inside a modal.
+ * Handles the tags of the selected file entries inside a modal.
  */
 class ChangeListsHistory extends PortletBase {
 
@@ -72,6 +71,10 @@ class ChangeListsHistory extends PortletBase {
 						detailsLink.setParameter('mvcRenderCommandName', '/change_lists_history/view_details');
 						detailsLink.setParameter('ctProcessId', processEntry.ctprocessId);
 
+						const viewLink = Liferay.PortletURL.createURL(this.baseURL);
+
+						detailsLink.setParameter('backURL', viewLink.toString());
+
 						this.processEntries.push(
 							{
 								description: processEntry.ctcollection.description,
@@ -104,6 +107,7 @@ class ChangeListsHistory extends PortletBase {
 
 /**
  * State definition.
+ *
  * @ignore
  * @static
  * @type {!Object}

@@ -28,23 +28,17 @@ public class WebsiteTable {
 	public static final String TABLE_NAME = "Website";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"uuid_", Types.VARCHAR},
-		{"websiteId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT},
-		{"url", Types.VARCHAR},
-		{"typeId", Types.BIGINT},
-		{"primary_", Types.BOOLEAN},
-		{"lastPublishDate", Types.TIMESTAMP}
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"websiteId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
+		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
+		{"classNameId", Types.BIGINT}, {"classPK", Types.BIGINT},
+		{"url", Types.VARCHAR}, {"typeId", Types.BIGINT},
+		{"primary_", Types.BOOLEAN}, {"lastPublishDate", Types.TIMESTAMP}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -76,7 +70,8 @@ TABLE_COLUMNS_MAP.put("primary_", Types.BOOLEAN);
 TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table Website (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,websiteId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,url STRING null,typeId LONG,primary_ BOOLEAN,lastPublishDate DATE null)";
+	public static final String TABLE_SQL_CREATE =
+"create table Website (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,websiteId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,url STRING null,typeId LONG,primary_ BOOLEAN,lastPublishDate DATE null)";
 
 	public static final String TABLE_SQL_DROP = "drop table Website";
 

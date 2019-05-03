@@ -17,13 +17,10 @@ package com.liferay.segments.internal.model.listener;
 import com.liferay.portal.kernel.exception.ModelListenerException;
 import com.liferay.portal.kernel.model.BaseModelListener;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.ModelListener;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
-import com.liferay.segments.exception.DefaultSegmentsExperienceException;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.segments.service.SegmentsExperienceLocalService;
-
-import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -35,20 +32,7 @@ import org.osgi.service.component.annotations.Reference;
 public class LayoutModelListener extends BaseModelListener<Layout> {
 
 	@Override
-	public void onAfterCreate(Layout layout) throws ModelListenerException {
-		if (!_isContentLayout(layout)) {
-			return;
-		}
-
-		_addDefaultSegmentsExperience(layout);
-	}
-
-	@Override
 	public void onAfterRemove(Layout layout) throws ModelListenerException {
-		if (!_isContentLayout(layout)) {
-			return;
-		}
-
 		try {
 			_segmentsExperienceLocalService.deleteSegmentsExperiences(
 				layout.getGroupId(),
@@ -60,48 +44,11 @@ public class LayoutModelListener extends BaseModelListener<Layout> {
 		}
 	}
 
-	@Override
-	public void onAfterUpdate(Layout layout) throws ModelListenerException {
-		if (!_isContentLayout(layout)) {
-			return;
-		}
-
-		try {
-			_segmentsExperienceLocalService.getDefaultSegmentsExperience(
-				layout.getGroupId(),
-				_classNameLocalService.getClassNameId(Layout.class),
-				layout.getPlid());
-		}
-		catch (DefaultSegmentsExperienceException dsee) {
-			_addDefaultSegmentsExperience(layout);
-		}
-		catch (Exception e) {
-			throw new ModelListenerException(e);
-		}
-	}
-
-	private void _addDefaultSegmentsExperience(Layout layout) {
-		try {
-			_segmentsExperienceLocalService.addDefaultSegmentsExperience(
-				layout.getGroupId(),
-				_classNameLocalService.getClassNameId(Layout.class),
-				layout.getPlid());
-		}
-		catch (Exception e) {
-			throw new ModelListenerException(e);
-		}
-	}
-
-	private boolean _isContentLayout(Layout layout) {
-		if (Objects.equals(layout.getType(), LayoutConstants.TYPE_CONTENT)) {
-			return true;
-		}
-
-		return false;
-	}
-
 	@Reference
 	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
+	private LayoutLocalService _layoutLocalService;
 
 	@Reference
 	private SegmentsExperienceLocalService _segmentsExperienceLocalService;

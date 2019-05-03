@@ -15,11 +15,13 @@
 package com.liferay.layout.internal.search.spi.model.index.contributor;
 
 import com.liferay.fragment.constants.FragmentEntryLinkConstants;
+import com.liferay.fragment.renderer.FragmentRendererController;
 import com.liferay.layout.internal.search.util.LayoutPageTemplateStructureRenderUtil;
 import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
@@ -30,11 +32,12 @@ import com.liferay.portal.kernel.servlet.DynamicServletRequest;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.search.spi.model.index.contributor.ModelDocumentContributor;
-import com.liferay.segments.model.SegmentsExperience;
+import com.liferay.segments.constants.SegmentsConstants;
 import com.liferay.segments.service.SegmentsExperienceLocalService;
 
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,7 +68,6 @@ public class LayoutModelDocumentContributor
 		document.addText(
 			Field.DEFAULT_LANGUAGE_ID, layout.getDefaultLanguageId());
 		document.addLocalizedText(Field.NAME, layout.getNameMap());
-		document.addNumberSortable("leftPlid", layout.getLeftPlid());
 		document.addText(
 			"privateLayout", String.valueOf(layout.isPrivateLayout()));
 		document.addText(Field.TYPE, layout.getType());
@@ -88,35 +90,38 @@ public class LayoutModelDocumentContributor
 			return;
 		}
 
-		HttpServletRequest request = null;
-		HttpServletResponse response = null;
+		HttpServletRequest httpServletRequest = null;
+		HttpServletResponse httpServletResponse = null;
 
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
 		if (serviceContext != null) {
-			request = DynamicServletRequest.addQueryString(
+			httpServletRequest = DynamicServletRequest.addQueryString(
 				serviceContext.getRequest(), "p_l_id=" + layout.getPlid(),
 				false);
-			response = serviceContext.getResponse();
+			httpServletResponse = serviceContext.getResponse();
 		}
 
-		long[] segmentsExperienceIds = _getSegmentsExperienceIds(
-			layout.getGroupId(),
-			_classNameLocalService.getClassNameId(Layout.class.getName()),
-			layout.getPrimaryKey());
+		long[] segmentsExperienceIds = {
+			SegmentsConstants.SEGMENTS_EXPERIENCE_ID_DEFAULT
+		};
 
-		for (String languageId : layout.getAvailableLanguageIds()) {
-			Locale locale = LocaleUtil.fromLanguageId(languageId);
+		Set<Locale> locales = LanguageUtil.getAvailableLocales(
+			layout.getGroupId());
 
+		for (Locale locale : locales) {
 			try {
-				if ((request == null) || (response == null)) {
+				if ((httpServletRequest == null) ||
+					(httpServletResponse == null)) {
+
 					break;
 				}
 
 				String content =
 					LayoutPageTemplateStructureRenderUtil.renderLayoutContent(
-						request, response, layoutPageTemplateStructure,
+						_fragmentRendererController, httpServletRequest,
+						httpServletResponse, layoutPageTemplateStructure,
 						FragmentEntryLinkConstants.VIEW, new HashMap<>(),
 						locale, segmentsExperienceIds);
 
@@ -129,25 +134,11 @@ public class LayoutModelDocumentContributor
 		}
 	}
 
-	private long[] _getSegmentsExperienceIds(
-		long groupId, long classNameId, long classPK) {
-
-		try {
-			SegmentsExperience defaultSegmentsExperience =
-				_segmentsExperienceLocalService.getDefaultSegmentsExperience(
-					groupId, classNameId, classPK);
-
-			return new long[] {
-				defaultSegmentsExperience.getSegmentsExperienceId()
-			};
-		}
-		catch (PortalException pe) {
-			throw new SystemException(pe);
-		}
-	}
-
 	@Reference
 	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
+	private FragmentRendererController _fragmentRendererController;
 
 	@Reference
 	private LayoutPageTemplateStructureLocalService

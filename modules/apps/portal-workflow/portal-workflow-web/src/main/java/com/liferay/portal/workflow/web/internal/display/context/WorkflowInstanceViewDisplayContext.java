@@ -17,6 +17,7 @@ package com.liferay.portal.workflow.web.internal.display.context;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.DisplayTerms;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -54,7 +55,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletURL;
@@ -529,8 +529,8 @@ public class WorkflowInstanceViewDisplayContext
 		}
 	}
 
-	private Consumer<DropdownItem> _getFilterNavigationDropdownItem(
-		String navigation) {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getFilterNavigationDropdownItem(String navigation) {
 
 		return dropdownItem -> {
 			dropdownItem.setActive(Objects.equals(getNavigation(), navigation));
@@ -541,7 +541,9 @@ public class WorkflowInstanceViewDisplayContext
 		};
 	}
 
-	private Consumer<DropdownItem> _getOrderByDropdownItem(String orderByCol) {
+	private UnsafeConsumer<DropdownItem, Exception> _getOrderByDropdownItem(
+		String orderByCol) {
+
 		return dropdownItem -> {
 			dropdownItem.setActive(Objects.equals(getOrderByCol(), orderByCol));
 			dropdownItem.setHref(getViewPortletURL(), "orderByCol", orderByCol);

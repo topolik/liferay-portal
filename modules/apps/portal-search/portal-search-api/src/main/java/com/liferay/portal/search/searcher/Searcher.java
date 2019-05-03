@@ -20,8 +20,6 @@ import aQute.bnd.annotation.ProviderType;
  * Performs a search using the Liferay Search Framework.
  *
  * @author André de Oliveira
- *
- * @review
  */
 @ProviderType
 public interface Searcher {
@@ -29,10 +27,9 @@ public interface Searcher {
 	/**
 	 * Performs a search.
 	 *
-	 * @param searchRequest the search request with parameters to be used
-	 * @return the search response with various outcomes returned
-	 *
-	 * @review
+	 * @param  searchRequest the search request to execute
+	 * @return the search response. Its format and content depend on the search
+	 *         request that was executed.
 	 */
 	public SearchResponse search(SearchRequest searchRequest);
 

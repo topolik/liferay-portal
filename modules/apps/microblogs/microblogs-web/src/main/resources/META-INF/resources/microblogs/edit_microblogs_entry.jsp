@@ -95,14 +95,12 @@ if (comment) {
 						<c:when test="<%= (receiverUser != null) && receiverUser.isActive() %>">
 							<a href="<%= receiverUser.getDisplayURL(themeDisplay) %>">
 								<liferay-ui:user-portrait
-									cssClass="sticker-sm"
 									userId="<%= (microblogsEntry != null) ? microblogsEntry.getUserId() : 0 %>"
 								/>
 							</a>
 						</c:when>
 						<c:otherwise>
 							<liferay-ui:user-portrait
-								cssClass="sticker-sm"
 								userId="<%= (microblogsEntry != null) ? microblogsEntry.getUserId() : 0 %>"
 							/>
 						</c:otherwise>
@@ -156,7 +154,6 @@ if (comment) {
 		<c:if test="<%= comment %>">
 			<span class="thumbnail">
 				<liferay-ui:user-portrait
-					cssClass="sticker-sm"
 					user="<%= user %>"
 				/>
 			</span>
@@ -225,7 +222,7 @@ if (comment) {
 <c:if test="<%= !repost %>">
 	<aui:script>
 		function <portlet:namespace />relationTypeOnChange(event) {
-			var form = event.currentTarget.closest('form');
+			var form = event.currentTarget.form;
 
 			var contentInput = form.getElementsByTagName('textarea')[0];
 

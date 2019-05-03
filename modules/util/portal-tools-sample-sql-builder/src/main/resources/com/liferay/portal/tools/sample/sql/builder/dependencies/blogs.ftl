@@ -17,6 +17,8 @@ ${dataFactory.toInsertSQL(userNotificationDeliveryModel)}
 
 	${dataFactory.toInsertSQL(dataFactory.newFriendlyURLEntryMapping(friendlyURLEntryModel))}
 
+	${dataFactory.toInsertSQL(dataFactory.newMBDiscussionAssetEntryModel(blogsEntryModel))}
+
 	<@insertAssetEntry
 		_categoryAndTag=true
 		_entry=blogsEntryModel

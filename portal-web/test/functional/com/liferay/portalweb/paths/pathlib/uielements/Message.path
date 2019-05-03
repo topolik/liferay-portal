@@ -20,7 +20,7 @@
 </tr>
 <tr>
 	<td>CHECKOUT_SUCCESS</td>
-	<td>//div[contains(@class,'sidenav-content')]/div[contains(@class,'alert-success')]</td>
+	<td>//div[contains(@class,'content')]/div[contains(@class,'alert-success')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -156,6 +156,11 @@
 <tr>
 	<td>ERROR_PUBLISH_UNSUCCESSFUL_EXTENSION</td>
 	<td>//div[contains(@class,'alert-danger') and contains(.,'The source file does not have the same extension as the original file')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ERROR_REQUEST_FAILED</td>
+	<td>//div[contains(@class,'alert-danger')][contains(@class,'alert-dismissible')][contains(@class,'show')]</td>
 	<td></td>
 </tr>
 <tr>

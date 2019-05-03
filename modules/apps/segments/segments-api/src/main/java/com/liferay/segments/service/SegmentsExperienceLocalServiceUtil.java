@@ -41,12 +41,15 @@ public class SegmentsExperienceLocalServiceUtil {
 	 * Never modify this class directly. Add custom service methods to <code>com.liferay.segments.service.impl.SegmentsExperienceLocalServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static com.liferay.segments.model.SegmentsExperience
-			addDefaultSegmentsExperience(
-				long groupId, long classNameId, long classPK)
+			addSegmentsExperience(
+				long segmentsEntryId, long classNameId, long classPK,
+				java.util.Map<java.util.Locale, String> nameMap, boolean active,
+				com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
-		return getService().addDefaultSegmentsExperience(
-			groupId, classNameId, classPK);
+		return getService().addSegmentsExperience(
+			segmentsEntryId, classNameId, classPK, nameMap, active,
+			serviceContext);
 	}
 
 	public static com.liferay.segments.model.SegmentsExperience
@@ -233,19 +236,32 @@ public class SegmentsExperienceLocalServiceUtil {
 		return getService().fetchSegmentsExperience(segmentsExperienceId);
 	}
 
+	/**
+	 * Returns the segments experience matching the UUID and group.
+	 *
+	 * @param uuid the segments experience's UUID
+	 * @param groupId the primary key of the group
+	 * @return the matching segments experience, or <code>null</code> if a matching segments experience could not be found
+	 */
+	public static com.liferay.segments.model.SegmentsExperience
+		fetchSegmentsExperienceByUuidAndGroupId(String uuid, long groupId) {
+
+		return getService().fetchSegmentsExperienceByUuidAndGroupId(
+			uuid, groupId);
+	}
+
 	public static com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery
 		getActionableDynamicQuery() {
 
 		return getService().getActionableDynamicQuery();
 	}
 
-	public static com.liferay.segments.model.SegmentsExperience
-			getDefaultSegmentsExperience(
-				long groupId, long classNameId, long classPK)
-		throws com.liferay.portal.kernel.exception.PortalException {
+	public static com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery
+		getExportActionableDynamicQuery(
+			com.liferay.exportimport.kernel.lar.PortletDataContext
+				portletDataContext) {
 
-		return getService().getDefaultSegmentsExperience(
-			groupId, classNameId, classPK);
+		return getService().getExportActionableDynamicQuery(portletDataContext);
 	}
 
 	public static
@@ -286,6 +302,22 @@ public class SegmentsExperienceLocalServiceUtil {
 	}
 
 	/**
+	 * Returns the segments experience matching the UUID and group.
+	 *
+	 * @param uuid the segments experience's UUID
+	 * @param groupId the primary key of the group
+	 * @return the matching segments experience
+	 * @throws PortalException if a matching segments experience could not be found
+	 */
+	public static com.liferay.segments.model.SegmentsExperience
+			getSegmentsExperienceByUuidAndGroupId(String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().getSegmentsExperienceByUuidAndGroupId(
+			uuid, groupId);
+	}
+
+	/**
 	 * Returns a range of all the segments experiences.
 	 *
 	 * <p>
@@ -300,6 +332,15 @@ public class SegmentsExperienceLocalServiceUtil {
 		getSegmentsExperiences(int start, int end) {
 
 		return getService().getSegmentsExperiences(start, end);
+	}
+
+	public static java.util.List<com.liferay.segments.model.SegmentsExperience>
+			getSegmentsExperiences(
+				long groupId, long classNameId, long classPK, boolean active)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().getSegmentsExperiences(
+			groupId, classNameId, classPK, active);
 	}
 
 	public static java.util.List<com.liferay.segments.model.SegmentsExperience>
@@ -329,12 +370,54 @@ public class SegmentsExperienceLocalServiceUtil {
 	}
 
 	/**
+	 * Returns all the segments experiences matching the UUID and company.
+	 *
+	 * @param uuid the UUID of the segments experiences
+	 * @param companyId the primary key of the company
+	 * @return the matching segments experiences, or an empty list if no matches were found
+	 */
+	public static java.util.List<com.liferay.segments.model.SegmentsExperience>
+		getSegmentsExperiencesByUuidAndCompanyId(String uuid, long companyId) {
+
+		return getService().getSegmentsExperiencesByUuidAndCompanyId(
+			uuid, companyId);
+	}
+
+	/**
+	 * Returns a range of segments experiences matching the UUID and company.
+	 *
+	 * @param uuid the UUID of the segments experiences
+	 * @param companyId the primary key of the company
+	 * @param start the lower bound of the range of segments experiences
+	 * @param end the upper bound of the range of segments experiences (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the range of matching segments experiences, or an empty list if no matches were found
+	 */
+	public static java.util.List<com.liferay.segments.model.SegmentsExperience>
+		getSegmentsExperiencesByUuidAndCompanyId(
+			String uuid, long companyId, int start, int end,
+			com.liferay.portal.kernel.util.OrderByComparator
+				<com.liferay.segments.model.SegmentsExperience>
+					orderByComparator) {
+
+		return getService().getSegmentsExperiencesByUuidAndCompanyId(
+			uuid, companyId, start, end, orderByComparator);
+	}
+
+	/**
 	 * Returns the number of segments experiences.
 	 *
 	 * @return the number of segments experiences
 	 */
 	public static int getSegmentsExperiencesCount() {
 		return getService().getSegmentsExperiencesCount();
+	}
+
+	public static int getSegmentsExperiencesCount(
+		long groupId, long classNameId, long classPK) {
+
+		return getService().getSegmentsExperiencesCount(
+			groupId, classNameId, classPK);
 	}
 
 	public static int getSegmentsExperiencesCount(
@@ -347,12 +430,11 @@ public class SegmentsExperienceLocalServiceUtil {
 	public static com.liferay.segments.model.SegmentsExperience
 			updateSegmentsExperience(
 				long segmentsExperienceId, long segmentsEntryId,
-				java.util.Map<java.util.Locale, String> nameMap, int priority,
-				boolean active)
+				java.util.Map<java.util.Locale, String> nameMap, boolean active)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().updateSegmentsExperience(
-			segmentsExperienceId, segmentsEntryId, nameMap, priority, active);
+			segmentsExperienceId, segmentsEntryId, nameMap, active);
 	}
 
 	/**
@@ -366,6 +448,15 @@ public class SegmentsExperienceLocalServiceUtil {
 			com.liferay.segments.model.SegmentsExperience segmentsExperience) {
 
 		return getService().updateSegmentsExperience(segmentsExperience);
+	}
+
+	public static com.liferay.segments.model.SegmentsExperience
+			updateSegmentsExperiencePriority(
+				long segmentsExperienceId, int newPriority)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().updateSegmentsExperiencePriority(
+			segmentsExperienceId, newPriority);
 	}
 
 	public static SegmentsExperienceLocalService getService() {

@@ -21,6 +21,14 @@ public class LDAPSettingsConstants {
 
 	public static final String BCRYPT = "BCRYPT";
 
+	public static final String CMD_UPDATE_AUTH = "CMD_UPDATE_AUTH";
+
+	public static final String CMD_UPDATE_EXPORT = "CMD_UPDATE_EXPORT";
+
+	public static final String CMD_UPDATE_IMPORT = "CMD_UPDATE_IMPORT";
+
+	public static final String CMD_UPDATE_SERVER = "CMD_UPDATE_SERVER";
+
 	public static final String IMPORT_METHOD_GROUP = "group";
 
 	public static final String IMPORT_METHOD_USER = "user";

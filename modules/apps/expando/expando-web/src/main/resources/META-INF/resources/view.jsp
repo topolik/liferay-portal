@@ -62,12 +62,16 @@ Collections.sort(customAttributesDisplays, new CustomAttributesDisplayComparator
 				href="<%= rowURL %>"
 				name="resource"
 			>
-				<liferay-ui:icon
-					icon="<%= customAttributesDisplay.getIconCssClass() %>"
-					label="<%= true %>"
-					markupView="lexicon"
-					message="<%= ResourceActionsUtil.getModelResource(locale, customAttributesDisplay.getClassName()) %>"
-				/>
+				<span class="text-truncate-inline">
+					<span class="inline-item inline-item-before">
+						<clay:icon
+							symbol="<%= customAttributesDisplay.getIconCssClass() %>"
+						/>
+					</span>
+					<span class="inline-item inline-item-after text-truncate">
+						<liferay-ui:message key="<%= ResourceActionsUtil.getModelResource(locale, customAttributesDisplay.getClassName()) %>" />
+					</span>
+				</span>
 			</liferay-ui:search-container-column-text>
 		</liferay-ui:search-container-row>
 

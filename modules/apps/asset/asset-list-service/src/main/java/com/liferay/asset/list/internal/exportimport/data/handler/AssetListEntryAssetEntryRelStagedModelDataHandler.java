@@ -26,6 +26,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.staged.model.repository.StagedModelRepository;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.util.MapUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.xml.Element;
 
 import java.util.Map;
@@ -77,6 +78,11 @@ public class AssetListEntryAssetEntryRelStagedModelDataHandler
 
 		AssetEntry assetEntry = _assetEntryLocalService.fetchEntry(
 			assetListEntryAssetEntryRel.getAssetEntryId());
+
+		if (Validator.isNull(assetListEntryAssetEntryRel.getAssetEntryUuid())) {
+			assetListEntryAssetEntryRel.setAssetEntryUuid(
+				assetEntry.getClassUuid());
+		}
 
 		_stagingAssetEntryHelper.addAssetReference(
 			portletDataContext, assetListEntryAssetEntryRel, entryElement,
@@ -133,6 +139,8 @@ public class AssetListEntryAssetEntryRelStagedModelDataHandler
 			portletDataContext.getScopeGroupId());
 		importedAssetListEntryAssetEntryRel.setAssetListEntryId(
 			assetListEntryId);
+		importedAssetListEntryAssetEntryRel.setAssetEntryUuid(
+			assetListEntryAssetEntryRel.getAssetEntryUuid());
 
 		AssetListEntryAssetEntryRel existingAssetListEntryAssetEntryRel =
 			_stagedModelRepository.fetchStagedModelByUuidAndGroupId(
@@ -170,8 +178,7 @@ public class AssetListEntryAssetEntryRelStagedModelDataHandler
 	private AssetEntryLocalService _assetEntryLocalService;
 
 	@Reference(
-		target = "(model.class.name=com.liferay.asset.list.model.AssetListEntryAssetEntryRel)",
-		unbind = "-"
+		target = "(model.class.name=com.liferay.asset.list.model.AssetListEntryAssetEntryRel)"
 	)
 	private StagedModelRepository<AssetListEntryAssetEntryRel>
 		_stagedModelRepository;

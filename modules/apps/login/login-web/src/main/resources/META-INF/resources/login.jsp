@@ -80,22 +80,14 @@
 
 						<%
 						String userEmailAddress = (String)SessionMessages.get(request, "userAdded");
-						String userPassword = (String)SessionMessages.get(request, "userAddedPassword");
 						%>
 
 						<div class="alert alert-success">
-							<c:choose>
-								<c:when test="<%= company.isStrangersVerify() || Validator.isNull(userPassword) %>">
-									<liferay-ui:message key="thank-you-for-creating-an-account" />
+							<liferay-ui:message key="thank-you-for-creating-an-account" />
 
-									<c:if test="<%= company.isStrangersVerify() %>">
-										<liferay-ui:message arguments="<%= HtmlUtil.escape(userEmailAddress) %>" key="your-email-verification-code-was-sent-to-x" translateArguments="<%= false %>" />
-									</c:if>
-								</c:when>
-								<c:otherwise>
-									<liferay-ui:message arguments="<%= HtmlUtil.escape(userPassword) %>" key="thank-you-for-creating-an-account.-your-password-is-x" translateArguments="<%= false %>" />
-								</c:otherwise>
-							</c:choose>
+							<c:if test="<%= company.isStrangersVerify() %>">
+								<liferay-ui:message arguments="<%= HtmlUtil.escape(userEmailAddress) %>" key="your-email-verification-code-was-sent-to-x" translateArguments="<%= false %>" />
+							</c:if>
 
 							<c:if test="<%= PrefsPropsUtil.getBoolean(company.getCompanyId(), PropsKeys.ADMIN_EMAIL_USER_ADDED_ENABLED) %>">
 								<liferay-ui:message arguments="<%= HtmlUtil.escape(userEmailAddress) %>" key="your-password-was-sent-to-x" translateArguments="<%= false %>" />
@@ -166,6 +158,10 @@
 
 					<aui:input autoFocus="<%= windowState.equals(LiferayWindowState.EXCLUSIVE) || windowState.equals(WindowState.MAXIMIZED) %>" cssClass="clearable" label="<%= loginLabel %>" name="login" showRequiredLabel="<%= false %>" type="text" value="<%= login %>">
 						<aui:validator name="required" />
+
+						<c:if test="<%= authType.equals(CompanyConstants.AUTH_TYPE_EA) %>">
+							<aui:validator name="email" />
+						</c:if>
 					</aui:input>
 
 					<aui:input name="password" showRequiredLabel="<%= false %>" type="password" value="<%= password %>">

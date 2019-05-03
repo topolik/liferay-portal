@@ -1,5 +1,5 @@
-import React from 'react';
 import ClayButton from 'components/shared/ClayButton.es';
+import React from 'react';
 import {cleanup, render} from 'react-testing-library';
 
 describe(

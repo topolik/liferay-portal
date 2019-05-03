@@ -161,7 +161,7 @@
 </tr>
 <tr>
 	<td>HISTORY_VERSIONS_TAB</td>
-	<td>//li[@class='tab']//a[contains(.,'Versions')]</td>
+	<td>//li[@class='nav-item']//a[contains(.,'Versions')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -274,7 +274,7 @@
 </tr>
 <tr>
 	<td>PAGE_TABS_CHANGE_PARENT</td>
-	<td>//ul[contains(@class,'nav nav-tabs')]//li/a[contains(.,'Change Parent')]</td>
+	<td>//ul[contains(@class,'nav nav-underline')]//li/a[contains(.,'Change Parent')]</td>
 	<td></td>
 </tr>
 <tr>

@@ -15,7 +15,7 @@
 package com.liferay.dynamic.data.mapping.form.builder.internal.servlet;
 
 import com.liferay.dynamic.data.mapping.model.DDMDataProviderInstance;
-import com.liferay.dynamic.data.mapping.service.DDMDataProviderInstanceLocalService;
+import com.liferay.dynamic.data.mapping.service.DDMDataProviderInstanceService;
 import com.liferay.dynamic.data.mapping.util.comparator.DataProviderInstanceNameComparator;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -115,8 +115,9 @@ public class DDMDataProviderInstancesServlet extends BaseDDMFormBuilderServlet {
 					new DataProviderInstanceNameComparator(true);
 
 			List<DDMDataProviderInstance> ddmDataProviderInstances =
-				_ddmDataProviderInstanceLocalService.getDataProviderInstances(
-					groupIds, start, end, dataProviderInstanceNameComparator);
+				_ddmDataProviderInstanceService.search(
+					themeDisplay.getCompanyId(), groupIds, null, start, end,
+					dataProviderInstanceNameComparator);
 
 			JSONArray dataProviderInstancesJSONArray =
 				_jsonFactory.createJSONArray();
@@ -128,11 +129,12 @@ public class DDMDataProviderInstancesServlet extends BaseDDMFormBuilderServlet {
 					_jsonFactory.createJSONObject();
 
 				dataProviderInstanceJSONObject.put(
-					"id", ddmDataProviderInstance.getDataProviderInstanceId());
-				dataProviderInstanceJSONObject.put(
-					"name", ddmDataProviderInstance.getName(locale));
-				dataProviderInstanceJSONObject.put(
-					"uuid", ddmDataProviderInstance.getUuid());
+					"id", ddmDataProviderInstance.getDataProviderInstanceId()
+				).put(
+					"name", ddmDataProviderInstance.getName(locale)
+				).put(
+					"uuid", ddmDataProviderInstance.getUuid()
+				);
 
 				dataProviderInstancesJSONArray.put(
 					dataProviderInstanceJSONObject);
@@ -155,8 +157,7 @@ public class DDMDataProviderInstancesServlet extends BaseDDMFormBuilderServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Reference
-	private DDMDataProviderInstanceLocalService
-		_ddmDataProviderInstanceLocalService;
+	private DDMDataProviderInstanceService _ddmDataProviderInstanceService;
 
 	@Reference
 	private JSONFactory _jsonFactory;

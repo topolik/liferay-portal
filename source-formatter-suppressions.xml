@@ -22,7 +22,7 @@
 		<suppress checks="MemberNameCheck" files="portal-impl/test/unit/com/liferay/portal/nio/intraband/proxy/IntrabandProxyUtilTest\.java" />
 		<suppress checks="MemberNameCheck" files="portal-test-integration/src/com/liferay/portal/search/test/BaseSearchTestCase\.java" />
 		<suppress checks="MethodNameCheck" files="portal-impl/src/com/liferay/portal/events/EventsProcessorUtil\.java" />
-		<suppress checks="MethodNameCheck" files="portal-impl/src/com/liferay/portal/template/AbstractTemplate\.java" />
+		<suppress checks="MethodNameCheck" files="portal-impl/src/com/liferay/portal/template/BaseTemplate\.java" />
 		<suppress checks="MethodNameCheck" files="portal-impl/src/com/liferay/portal/util/HttpImpl\.java" />
 		<suppress checks="MethodNameCheck" files="portal-impl/test/unit/com/liferay/portal/kernel/nio/intraband/CancelingPortalExecutorManagerUtilAdvice\.java" />
 		<suppress checks="MethodNameCheck" files="portal-impl/test/unit/com/liferay/portal/kernel/nio/intraband/PortalExecutorManagerUtilAdvice\.java" />
@@ -63,6 +63,7 @@
 		<suppress checks="SubnameCheck" files="portal-kernel/src/com/liferay/portal/kernel/util/ListUtil\.java" />
 		<suppress checks="SubnameCheck" files="portal-kernel/src/com/liferay/portal/kernel/util/PackagingUtil\.java" />
 		<suppress checks="SubnameCheck" files="portal-kernel/test/unit/com/liferay/portal/kernel/util/ListUtilTest\.java" />
+		<suppress checks="UnusedMethodCheck" files="portal-test-integration/src/com/liferay/portal/test/rule/SyntheticBundleClassTestRule\.java" />
 		<suppress checks="ValidatorIsNullCheck" files="portal-impl/src/com/liferay/portal/service/persistence/impl/UserFinderImpl\.java" />
 		<suppress checks="VariableDeclarationAsUsedCheck" files="portal-impl/src/com/liferay/portal/action/UpdateLayoutAction\.java" />
 
@@ -96,6 +97,7 @@
 		<suppress checks="JavaLogParametersCheck" files="portal-impl/test/integration/com/liferay/portal/kernel/log/SanitizerLogWrapperTest\.java" />
 		<suppress checks="JavaStringBundlerConcatCheck" files="portal-kernel/test/unit/com/liferay/portal/kernel/util/StringBundlerTest\.java" />
 		<suppress checks="JavaStringBundlerInitialCapacityCheck" files="portal-kernel/test/unit/com/liferay/portal/kernel/util/StringBundlerTest\.java" />
+		<suppress checks="JavaTaglibMethodCheck" files="util-taglib/src/com/liferay/taglib/ui/SearchFormTag\.java" />
 		<suppress checks="JavaUnsafeCastingCheck" files="portal-impl/src/com/liferay/portal/util/PortalImpl\.java" />
 		<suppress checks="JavaVariableTypeCheck" files="portal-impl/test/unit/com/liferay/portal/json/One\.java" />
 		<suppress checks="JavaVariableTypeCheck" files="portal-impl/test/unit/com/liferay/portal/json/Two\.java" />
@@ -120,7 +122,12 @@
 		<suppress checks="JavaXMLSecurityCheck" files="util-java/src/com/liferay/util/xml/XMLMergerRunner\.java" />
 		<suppress checks="JSPLineBreakCheck" files="portal-web/docroot/html/portal/progress_poller\.jsp" />
 		<suppress checks="JSPStylingCheck" files="portal-web/docroot/html/portal/api/jsonws/action\.jsp" />
+		<suppress checks="JSStylingCheck" files="modules/yarn-1\.13\.0\.js" />
+		<suppress checks="JSWhitespaceCheck" files="modules/yarn-1\.13\.0\.js" />
+		<suppress checks="LocaleUtilCheck" files="portal-kernel/src/com/liferay/portal/kernel/util/LocaleUtil\.java" />
+		<suppress checks="LocaleUtilCheck" files="portal-kernel/test/unit/com/liferay/portal/kernel/util/LocaleUtilTest\.java" />
 		<suppress checks="MethodCallsOrderCheck" files="portal-impl/src/com/liferay/portal/util/PortalImpl\.java" />
+		<suppress checks="PrimitiveWrapperInstantiationCheck" files="portal-impl/src/com/liferay/portal/json/jabsorb/serializer/LiferaySerializer\.java" />
 		<suppress checks="PropertiesEmptyLinesCheck" files="build\.properties" />
 		<suppress checks="PropertiesLongLinesCheck" files="portal-impl/src/portal_ja\.properties" />
 		<suppress checks="PropertiesLongLinesCheck" files="portal-impl/src/system\.properties" />
@@ -129,6 +136,7 @@
 		<suppress checks="PropertiesWhitespaceCheck" files="sql/lportal\.properties" />
 		<suppress checks="ResourceBundleCheck" files="portal-kernel/src/com/liferay/portal/kernel/util/ClassResourceBundleLoader\.java" />
 		<suppress checks="ResourceBundleCheck" files="portal-kernel/src/com/liferay/portal/kernel/util/ResourceBundleUtil\.java" />
+		<suppress checks="SlantedQuotesCheck" files="modules/yarn-1\.13\.0\.js" />
 		<suppress checks="StringUtilCheck" files="portal-kernel/test/unit/com/liferay/portal/kernel/util/StringUtilTest\.java" />
 		<suppress checks="XMLIndentationCheck" files="portal-web/test/functional/com/liferay/portalweb/macros/Calendar\.macro" />
 		<suppress checks="XMLIndentationCheck" files="tools/jalopy\.xml" />
@@ -169,10 +177,18 @@
 		<suppress checks="XMLLookAndFeelCompatibilityVersionCheck" files="modules/private/commerce/.*" />
 		<suppress checks="XMLServiceReferenceCheck" files="modules/private/.*" />
 
-		<!-- Temporary suppressions. Chema, please fix -->
+		<!-- Temporary suppressions for project-templates (Chema) -->
 
 		<suppress checks="JSONDeprecatedPackagesCheck" files="modules/sdk/project-templates/project-templates-form-field/src/main/resources/archetype-resources/package\.json" />
 		<suppress checks="JSONDeprecatedPackagesCheck" files="modules/sdk/project-templates/project-templates-soy-portlet/src/main/resources/archetype-resources/package\.json" />
-		<suppress checks="JSONScriptsCheck" files="modules/apps/hello-soy/hello-soy-web/package\.json" />
+
+		<!-- Temporary suppressions for frontend build setup (Chema) -->
+
+		<suppress checks="JSONPackageJSONCheck" files="modules/apps/analytics/analytics-client-js/package\.json" />
+		<suppress checks="JSONPackageJSONCheck" files="modules/apps/dynamic-data-mapping/dynamic-data-mapping-form-builder/package\.json" />
+		<suppress checks="JSONPackageJSONCheck" files="modules/apps/dynamic-data-mapping/dynamic-data-mapping-form-web/package\.json" />
+		<suppress checks="JSONPackageJSONCheck" files="modules/apps/frontend-js/frontend-js-node-shims/package\.json" />
+		<suppress checks="JSONPackageJSONCheck" files="modules/apps/frontend-js/frontend-js-web/package\.json" />
+		<suppress checks="JSONPackageJSONCheck" files="modules/apps/segments/segments-web/package\.json" />
 	</source-check>
 </suppressions>

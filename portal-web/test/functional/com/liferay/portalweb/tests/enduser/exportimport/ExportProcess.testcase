@@ -16,9 +16,6 @@ definition {
 		if ("${testPortalInstance}" == "true") {
 			PortalInstances.tearDownCP();
 		}
-		else {
-			Site.tearDownCP();
-		}
 	}
 
 	@priority = "4"
@@ -27,7 +24,9 @@ definition {
 
 		LAR.exportSiteCP(larFileName = "CustomExport");
 
-		LexiconEntry.gotoEntryMenuItem(menuItem = "Clear", rowEntry = "CustomExport");
+		LAR.deleteCurrentAndPreviousProcess(larFileName = "CustomExport");
+
+		AssertElementNotPresent(locator1 = "SitePagesExport#CURRENT_AND_PREVIOUS_STATUS");
 	}
 
 	@priority = "4"
@@ -37,14 +36,24 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
-		LAR.configureExportSiteCP(larFileName = "DMExport");
+		LAR.exportPortlet(larFileName = "DMExport");
 
-		LAR.exportSuccess();
+		LAR.deleteCurrentAndPreviousProcess(
+			deleteFromPortlet = "true",
+			larFileName = "DMExport");
 
-		LexiconEntry.gotoEntryMenuItem(menuItem = "Clear", rowEntry = "DMExport");
+		AssertElementNotPresent(locator1 = "ExportImport#CURRENT_AND_PREVIOUS_STATUS");
+	}
+
+	@priority = "4"
+	test RelaunchCustomExportProcess {
+		Navigator.openURL();
+
+		LAR.exportSiteCP(larFileName = "CustomExport");
+
+		LAR.relaunchCurrentAndPreviousProcess(larFileName = "CustomExport");
 	}
 
 	@priority = "3"
@@ -59,6 +68,6 @@ definition {
 
 		ManagementBar.setFilterAndOrder(filterBy = "Completed");
 
-		ManagementBar.toggleViewOrder(order = "Descending");
+		ManagementBar.toggleViewOrder(order = "Reverse Sort Direction");
 	}
 }

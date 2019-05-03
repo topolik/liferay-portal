@@ -57,16 +57,29 @@ public interface AssetListEntry extends AssetListEntryModel, PersistedModel {
 		};
 
 	public java.util.List<com.liferay.asset.kernel.model.AssetEntry>
-		getAssetEntries();
+		getAssetEntries(long segmentsEntryId);
 
 	public java.util.List<com.liferay.asset.kernel.model.AssetEntry>
-		getAssetEntries(int start, int end);
+		getAssetEntries(long segmentsEntryId, int start, int end);
 
-	public int getAssetEntriesCount();
+	public java.util.List<com.liferay.asset.kernel.model.AssetEntry>
+		getAssetEntries(long[] segmentsEntryIds);
+
+	public java.util.List<com.liferay.asset.kernel.model.AssetEntry>
+		getAssetEntries(long[] segmentsEntryIds, int start, int end);
+
+	public int getAssetEntriesCount(long segmentsEntryId);
+
+	public int getAssetEntriesCount(long[] segmentsEntryIds);
 
 	public com.liferay.asset.kernel.service.persistence.AssetEntryQuery
-		getAssetEntryQuery();
+		getAssetEntryQuery(long segmentsEntryId);
+
+	public com.liferay.asset.kernel.service.persistence.AssetEntryQuery
+		getAssetEntryQuery(long[] segmentsEntryIds);
 
 	public String getTypeLabel();
+
+	public String getTypeSettings(long segmentsEntryId);
 
 }

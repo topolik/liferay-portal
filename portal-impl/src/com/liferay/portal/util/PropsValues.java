@@ -150,13 +150,6 @@ public class PropsValues {
 				PropsKeys.BUFFERED_INCREMENT_ENABLED,
 				new Filter("AssetEntry")));
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public static final String ASSET_ENTRY_VALIDATOR = PropsUtil.get(
-		PropsKeys.ASSET_ENTRY_VALIDATOR);
-
 	public static final int ASSET_FILTER_SEARCH_LIMIT = GetterUtil.getInteger(
 		PropsUtil.get(PropsKeys.ASSET_FILTER_SEARCH_LIMIT));
 
@@ -1118,6 +1111,13 @@ public class PropsValues {
 	public static String DL_WEBDAV_SUBSTITUTION_CHAR = PropsUtil.get(
 		PropsKeys.DL_WEBDAV_SUBSTITUTION_CHAR);
 
+	public static final int DNS_SECURITY_ADDRESS_TIMEOUT_SECONDS =
+		GetterUtil.getInteger(
+			PropsUtil.get(PropsKeys.DNS_SECURITY_ADDRESS_TIMEOUT_SECONDS));
+
+	public static final int DNS_SECURITY_THREAD_LIMIT = GetterUtil.getInteger(
+		PropsUtil.get(PropsKeys.DNS_SECURITY_THREAD_LIMIT));
+
 	public static final String[] DYNAMIC_RESOURCE_SERVLET_ALLOWED_PATHS =
 		PropsUtil.getArray(PropsKeys.DYNAMIC_RESOURCE_SERVLET_ALLOWED_PATHS);
 
@@ -1663,10 +1663,10 @@ public class PropsValues {
 	public static final String LOGIN_EMAIL_FROM_NAME = PropsUtil.get(
 		PropsKeys.LOGIN_EMAIL_FROM_NAME);
 
-	public static final String[] LOGIN_EVENTS_POST = PropsUtil.getArray(
+	public static String[] LOGIN_EVENTS_POST = PropsUtil.getArray(
 		PropsKeys.LOGIN_EVENTS_POST);
 
-	public static final String[] LOGIN_EVENTS_PRE = PropsUtil.getArray(
+	public static String[] LOGIN_EVENTS_PRE = PropsUtil.getArray(
 		PropsKeys.LOGIN_EVENTS_PRE);
 
 	public static String[] LOGIN_FORM_NAVIGATION_POST = PropsUtil.getArray(

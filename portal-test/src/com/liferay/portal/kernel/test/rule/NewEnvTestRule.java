@@ -429,8 +429,7 @@ public class NewEnvTestRule implements TestRule {
 
 	}
 
-	private class RunInNewClassLoaderStatement
-		extends BaseTestRule.StatementWrapper {
+	private class RunInNewClassLoaderStatement extends StatementWrapper {
 
 		public RunInNewClassLoaderStatement(
 			Statement statement, Description description) {
@@ -507,7 +506,7 @@ public class NewEnvTestRule implements TestRule {
 
 	}
 
-	private class RunInNewJVMStatment extends BaseTestRule.StatementWrapper {
+	private class RunInNewJVMStatment extends StatementWrapper {
 
 		public RunInNewJVMStatment(
 			ProcessConfig processConfig, Statement statement,
@@ -548,8 +547,8 @@ public class NewEnvTestRule implements TestRule {
 			catch (ExecutionException ee) {
 				Throwable cause = ee.getCause();
 
-				while ((cause instanceof ProcessException) ||
-					   (cause instanceof InvocationTargetException)) {
+				while (cause instanceof InvocationTargetException ||
+					   cause instanceof ProcessException) {
 
 					cause = cause.getCause();
 				}

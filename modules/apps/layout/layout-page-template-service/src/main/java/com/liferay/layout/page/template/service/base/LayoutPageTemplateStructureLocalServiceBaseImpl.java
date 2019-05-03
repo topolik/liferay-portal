@@ -23,7 +23,9 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
 import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalService;
+import com.liferay.layout.page.template.service.persistence.LayoutPageTemplateEntryPersistence;
 import com.liferay.layout.page.template.service.persistence.LayoutPageTemplateStructurePersistence;
+import com.liferay.layout.page.template.service.persistence.LayoutPageTemplateStructureRelPersistence;
 import com.liferay.portal.kernel.bean.BeanReference;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
@@ -604,6 +606,56 @@ public abstract class LayoutPageTemplateStructureLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the layout page template entry local service.
+	 *
+	 * @return the layout page template entry local service
+	 */
+	public
+		com.liferay.layout.page.template.service.
+			LayoutPageTemplateEntryLocalService
+				getLayoutPageTemplateEntryLocalService() {
+
+		return layoutPageTemplateEntryLocalService;
+	}
+
+	/**
+	 * Sets the layout page template entry local service.
+	 *
+	 * @param layoutPageTemplateEntryLocalService the layout page template entry local service
+	 */
+	public void setLayoutPageTemplateEntryLocalService(
+		com.liferay.layout.page.template.service.
+			LayoutPageTemplateEntryLocalService
+				layoutPageTemplateEntryLocalService) {
+
+		this.layoutPageTemplateEntryLocalService =
+			layoutPageTemplateEntryLocalService;
+	}
+
+	/**
+	 * Returns the layout page template entry persistence.
+	 *
+	 * @return the layout page template entry persistence
+	 */
+	public LayoutPageTemplateEntryPersistence
+		getLayoutPageTemplateEntryPersistence() {
+
+		return layoutPageTemplateEntryPersistence;
+	}
+
+	/**
+	 * Sets the layout page template entry persistence.
+	 *
+	 * @param layoutPageTemplateEntryPersistence the layout page template entry persistence
+	 */
+	public void setLayoutPageTemplateEntryPersistence(
+		LayoutPageTemplateEntryPersistence layoutPageTemplateEntryPersistence) {
+
+		this.layoutPageTemplateEntryPersistence =
+			layoutPageTemplateEntryPersistence;
+	}
+
+	/**
 	 * Returns the user local service.
 	 *
 	 * @return the user local service
@@ -641,6 +693,56 @@ public abstract class LayoutPageTemplateStructureLocalServiceBaseImpl
 	 */
 	public void setUserPersistence(UserPersistence userPersistence) {
 		this.userPersistence = userPersistence;
+	}
+
+	/**
+	 * Returns the layout page template structure rel local service.
+	 *
+	 * @return the layout page template structure rel local service
+	 */
+	public com.liferay.layout.page.template.service.
+		LayoutPageTemplateStructureRelLocalService
+			getLayoutPageTemplateStructureRelLocalService() {
+
+		return layoutPageTemplateStructureRelLocalService;
+	}
+
+	/**
+	 * Sets the layout page template structure rel local service.
+	 *
+	 * @param layoutPageTemplateStructureRelLocalService the layout page template structure rel local service
+	 */
+	public void setLayoutPageTemplateStructureRelLocalService(
+		com.liferay.layout.page.template.service.
+			LayoutPageTemplateStructureRelLocalService
+				layoutPageTemplateStructureRelLocalService) {
+
+		this.layoutPageTemplateStructureRelLocalService =
+			layoutPageTemplateStructureRelLocalService;
+	}
+
+	/**
+	 * Returns the layout page template structure rel persistence.
+	 *
+	 * @return the layout page template structure rel persistence
+	 */
+	public LayoutPageTemplateStructureRelPersistence
+		getLayoutPageTemplateStructureRelPersistence() {
+
+		return layoutPageTemplateStructureRelPersistence;
+	}
+
+	/**
+	 * Sets the layout page template structure rel persistence.
+	 *
+	 * @param layoutPageTemplateStructureRelPersistence the layout page template structure rel persistence
+	 */
+	public void setLayoutPageTemplateStructureRelPersistence(
+		LayoutPageTemplateStructureRelPersistence
+			layoutPageTemplateStructureRelPersistence) {
+
+		this.layoutPageTemplateStructureRelPersistence =
+			layoutPageTemplateStructureRelPersistence;
 	}
 
 	public void afterPropertiesSet() {
@@ -711,6 +813,18 @@ public abstract class LayoutPageTemplateStructureLocalServiceBaseImpl
 	protected com.liferay.counter.kernel.service.CounterLocalService
 		counterLocalService;
 
+	@BeanReference(
+		type = com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService.class
+	)
+	protected
+		com.liferay.layout.page.template.service.
+			LayoutPageTemplateEntryLocalService
+				layoutPageTemplateEntryLocalService;
+
+	@BeanReference(type = LayoutPageTemplateEntryPersistence.class)
+	protected LayoutPageTemplateEntryPersistence
+		layoutPageTemplateEntryPersistence;
+
 	@ServiceReference(
 		type = com.liferay.portal.kernel.service.UserLocalService.class
 	)
@@ -719,6 +833,17 @@ public abstract class LayoutPageTemplateStructureLocalServiceBaseImpl
 
 	@ServiceReference(type = UserPersistence.class)
 	protected UserPersistence userPersistence;
+
+	@BeanReference(
+		type = com.liferay.layout.page.template.service.LayoutPageTemplateStructureRelLocalService.class
+	)
+	protected com.liferay.layout.page.template.service.
+		LayoutPageTemplateStructureRelLocalService
+			layoutPageTemplateStructureRelLocalService;
+
+	@BeanReference(type = LayoutPageTemplateStructureRelPersistence.class)
+	protected LayoutPageTemplateStructureRelPersistence
+		layoutPageTemplateStructureRelPersistence;
 
 	@ServiceReference(type = PersistedModelLocalServiceRegistry.class)
 	protected PersistedModelLocalServiceRegistry

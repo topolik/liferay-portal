@@ -1,4 +1,5 @@
 import Component from 'metal-component';
+import dom from 'metal-dom';
 import Soy from 'metal-soy';
 import {Config} from 'metal-state';
 
@@ -7,7 +8,9 @@ import './components/mapping_type/SelectMappingTypeDialog.es';
 import './components/fragment_entry_link/FragmentEntryLinkList.es';
 import './components/sidebar/FragmentsEditorSidebar.es';
 import './components/toolbar/FragmentsEditorToolbar.es';
+import {CLEAR_ACTIVE_ITEM, CLEAR_HOVERED_ITEM, UPDATE_ACTIVE_ITEM, UPDATE_HOVERED_ITEM} from './actions/actions.es';
 import {INITIAL_STATE} from './store/state.es';
+import {startListeningWidgetConfigurationChange, stopListeningWidgetConfigurationChange} from './utils/FragmentsEditorDialogUtils';
 import {Store} from './store/store.es';
 import templates from './FragmentsEditor.soy';
 
@@ -18,254 +21,164 @@ import templates from './FragmentsEditor.soy';
 class FragmentsEditor extends Component {
 
 	/**
-	 * Callback executed when a mappeable field has been selected for the
-	 * given editable.
-	 * @param {!{
-	 *   editableId: !string,
-	 *   fragmentEntryLinkId: !string,
-	 *   key: !string
-	 * }} event
+	 * @param {MouseEvent} event
+	 * @return {{fragmentsEditorItemId: string|null, fragmentsEditorItemType: string|null}}
 	 * @private
+	 * @review
 	 */
-	_handleMappeableFieldSelected(event) {
-		this._setFragmentEntryLinkEditableValue(
-			event.fragmentEntryLinkId,
-			event.editableId,
-			{
-				mappedField: event.key
+	static _getItemTarget(event) {
+		let {fragmentsEditorItemId = null, fragmentsEditorItemType = null} = event.target.dataset || {};
+
+		if (!fragmentsEditorItemId || !fragmentsEditorItemType) {
+			const parent = dom.closest(event.target, '[data-fragments-editor-item-id]');
+
+			if (parent) {
+				fragmentsEditorItemId = parent.dataset.fragmentsEditorItemId;
+				fragmentsEditorItemType = parent.dataset.fragmentsEditorItemType;
 			}
-		);
+		}
+
+		return {
+			fragmentsEditorItemId,
+			fragmentsEditorItemType
+		};
 	}
 
 	/**
-	 * Swap the positions of two fragmentEntryLinks
-	 * @param {Array} list
-	 * @param {number} indexA
-	 * @param {number} indexB
-	 * @return {Array}
-	 * @private
+	 * @inheritdoc
+	 * @review
 	 */
-	_swapListElements(list, indexA, indexB) {
-		[list[indexA], list[indexB]] = [
-			list[indexB],
-			list[indexA]
-		];
+	created() {
+		this._handleDocumentClick = this._handleDocumentClick.bind(this);
+		this._handleDocumentKeyUp = this._handleDocumentKeyUp.bind(this);
+		this._handleDocumentMouseOver = this._handleDocumentMouseOver.bind(this);
 
-		return list;
+		document.addEventListener('click', this._handleDocumentClick, true);
+		document.addEventListener('keyup', this._handleDocumentKeyUp);
+		document.addEventListener('mouseover', this._handleDocumentMouseOver);
 	}
 
+	/**
+	 * @inheritdoc
+	 * @review
+	 */
+	disposed() {
+		document.removeEventListener('click', this._handleDocumentClick, true);
+		document.removeEventListener('keyup', this._handleDocumentKeyUp);
+		document.removeEventListener('mouseover', this._handleDocumentMouseOver);
+
+		stopListeningWidgetConfigurationChange();
+	}
+
+	/**
+	 * @inheritdoc
+	 * @review
+	 */
+	syncStore() {
+		if (this.store) {
+			startListeningWidgetConfigurationChange(this.store);
+		}
+	}
+
+	/**
+	 * @param {MouseEvent} event
+	 * @private
+	 * @review
+	 */
+	_handleDocumentClick(event) {
+		this._updateActiveItem(event);
+	}
+
+	/**
+	 * @param {KeyboardEvent} event
+	 * @private
+	 * @review
+	 */
+	_handleDocumentKeyUp(event) {
+		this._updateActiveItem(event);
+	}
+
+	/**
+	 * @param {MouseEvent} event
+	 * @private
+	 * @review
+	 */
+	_handleDocumentMouseOver(event) {
+		const {fragmentsEditorItemId, fragmentsEditorItemType} = FragmentsEditor._getItemTarget(event);
+
+		if (fragmentsEditorItemId && fragmentsEditorItemType && this.store) {
+			this.store.dispatch(
+				{
+					hoveredItemId: fragmentsEditorItemId,
+					hoveredItemType: fragmentsEditorItemType,
+					type: UPDATE_HOVERED_ITEM
+				}
+			);
+		}
+		else if (this.store) {
+			this.store.dispatch(
+				{
+					type: CLEAR_HOVERED_ITEM
+				}
+			);
+		}
+	}
+
+	/**
+	 * @param {Event} event
+	 * @private
+	 * @review
+	 */
+	_updateActiveItem(event) {
+		if (this._activeElement !== document.activeElement) {
+			const {
+				fragmentsEditorItemId,
+				fragmentsEditorItemType
+			} = FragmentsEditor._getItemTarget(event);
+
+			if (fragmentsEditorItemId && fragmentsEditorItemType) {
+				this.store.dispatch(
+					{
+						activeItemId: fragmentsEditorItemId,
+						activeItemType: fragmentsEditorItemType,
+						type: UPDATE_ACTIVE_ITEM
+					}
+				);
+			}
+			else if (event.target instanceof HTMLElement &&
+				event.target.parentElement !== document.body &&
+				!dom.closest(event.target, '.modal')) {
+
+				this.store.dispatch(
+					{
+						type: CLEAR_ACTIVE_ITEM
+					}
+				);
+			}
+		}
+
+		this._activeElement = document.activeElement;
+	}
 }
 
 /**
  * State definition.
  * @review
  * @static
- * @type {!Object}
+ * @type {object}
  */
-
 FragmentsEditor.STATE = Object.assign(
 	{
 
 		/**
-		 * List of available languages for translation.
+		 * Previous document active element
 		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!object}
-		 */
-
-		availableLanguages: Config.object().required(),
-
-		/**
-		 * Default configurations for AlloyEditor instances.
-		 * @default {}
 		 * @instance
 		 * @memberOf FragmentsEditor
 		 * @review
 		 * @type {object}
 		 */
-
-		defaultEditorConfigurations: Config.object().value({}),
-
-		/**
-		 * Default language id.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!string}
-		 */
-
-		defaultLanguageId: Config.string().required(),
-
-		/**
-		 * URL for updating a distinct fragment entries of the editor.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!string}
-		 */
-
-		editFragmentEntryLinkURL: Config.string().required(),
-
-		/**
-		 * Available elements that can be used, organized by collections.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!Array<object>}
-		 */
-
-		elements: Config.arrayOf(
-			Config.shapeOf(
-				{
-					entries: Config.arrayOf(
-						Config.shapeOf(
-							{
-								fragmentEntryKey: Config.string().required(),
-								name: Config.string().required()
-							}
-						)
-					).required(),
-					fragmentCollectionId: Config.string().required(),
-					name: Config.string().required()
-				}
-			)
-		).required(),
-
-		/**
-		 * URL for obtaining the class types of an asset
-		 * created.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!string}
-		 */
-
-		getAssetClassTypesURL: Config.string(),
-
-		/**
-		 * URL for obtaining the asset types for which asset display pages can be
-		 * created.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!string}
-		 */
-
-		getAssetDisplayContributorsURL: Config.string(),
-
-		/**
-		 * URL for getting the list of mapping fields
-		 * @default null
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {string}
-		 */
-
-		mappingFieldsURL: Config.string().value(null),
-
-		/**
-		 *
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!string}
-		 */
-
-		publishURL: Config.string(),
-
-		/**
-		 * URL for redirect.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!string}
-		 */
-
-		redirectURL: Config.string().required(),
-
-		/**
-		 * Available sections that can be used, organized by collections.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!Array<object>}
-		 */
-
-		sections: Config.arrayOf(
-			Config.shapeOf(
-				{
-					entries: Config.arrayOf(
-						Config.shapeOf(
-							{
-								fragmentEntryKey: Config.string().required(),
-								name: Config.string().required()
-							}
-						)
-					).required(),
-					fragmentCollectionId: Config.string().required(),
-					name: Config.string().required()
-				}
-			)
-		).required(),
-
-		/**
-		 * Selected mapping types
-		 * @default {}
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {{
-		 *   subtype: {
-		 *   	id: !string,
-		 *   	label: !string
-		 *   },
-		 *   type: {
-		 *   	id: !string,
-		 *   	label: !string
-		 *   }
-		 * }}
-		 */
-
-		selectedMappingTypes: Config
-			.shapeOf(
-				{
-					subtype: Config.shapeOf(
-						{
-							id: Config.string().required(),
-							label: Config.string().required()
-						}
-					),
-					type: Config.shapeOf(
-						{
-							id: Config.string().required(),
-							label: Config.string().required()
-						}
-					)
-				}
-			)
-			.value({}),
-
-		/**
-		 * Path of the available icons.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!string}
-		 */
-
-		spritemap: Config.string().required(),
+		_activeElement: Config.object(),
 
 		/**
 		 * Store instance
@@ -275,21 +188,9 @@ FragmentsEditor.STATE = Object.assign(
 		 * @review
 		 * @type {Store}
 		 */
+		store: Config.instanceOf(Store)
 
-		store: Config.instanceOf(Store),
-
-		/**
-		 * URL for updating the asset type associated to a template.
-		 * @default undefined
-		 * @instance
-		 * @memberOf FragmentsEditor
-		 * @review
-		 * @type {!string}
-		 */
-
-		updateLayoutPageTemplateEntryAssetTypeURL: Config.string()
 	},
-
 	INITIAL_STATE
 );
 

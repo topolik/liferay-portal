@@ -83,12 +83,12 @@ public class AssetListEntryCacheModel
 		sb.append(createDate);
 		sb.append(", modifiedDate=");
 		sb.append(modifiedDate);
+		sb.append(", assetListEntryKey=");
+		sb.append(assetListEntryKey);
 		sb.append(", title=");
 		sb.append(title);
 		sb.append(", type=");
 		sb.append(type);
-		sb.append(", typeSettings=");
-		sb.append(typeSettings);
 		sb.append(", lastPublishDate=");
 		sb.append(lastPublishDate);
 		sb.append("}");
@@ -133,6 +133,13 @@ public class AssetListEntryCacheModel
 			assetListEntryImpl.setModifiedDate(new Date(modifiedDate));
 		}
 
+		if (assetListEntryKey == null) {
+			assetListEntryImpl.setAssetListEntryKey("");
+		}
+		else {
+			assetListEntryImpl.setAssetListEntryKey(assetListEntryKey);
+		}
+
 		if (title == null) {
 			assetListEntryImpl.setTitle("");
 		}
@@ -141,13 +148,6 @@ public class AssetListEntryCacheModel
 		}
 
 		assetListEntryImpl.setType(type);
-
-		if (typeSettings == null) {
-			assetListEntryImpl.setTypeSettings("");
-		}
-		else {
-			assetListEntryImpl.setTypeSettings(typeSettings);
-		}
 
 		if (lastPublishDate == Long.MIN_VALUE) {
 			assetListEntryImpl.setLastPublishDate(null);
@@ -175,10 +175,10 @@ public class AssetListEntryCacheModel
 		userName = objectInput.readUTF();
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
+		assetListEntryKey = objectInput.readUTF();
 		title = objectInput.readUTF();
 
 		type = objectInput.readInt();
-		typeSettings = objectInput.readUTF();
 		lastPublishDate = objectInput.readLong();
 	}
 
@@ -209,6 +209,13 @@ public class AssetListEntryCacheModel
 		objectOutput.writeLong(createDate);
 		objectOutput.writeLong(modifiedDate);
 
+		if (assetListEntryKey == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(assetListEntryKey);
+		}
+
 		if (title == null) {
 			objectOutput.writeUTF("");
 		}
@@ -217,14 +224,6 @@ public class AssetListEntryCacheModel
 		}
 
 		objectOutput.writeInt(type);
-
-		if (typeSettings == null) {
-			objectOutput.writeUTF("");
-		}
-		else {
-			objectOutput.writeUTF(typeSettings);
-		}
-
 		objectOutput.writeLong(lastPublishDate);
 	}
 
@@ -236,9 +235,9 @@ public class AssetListEntryCacheModel
 	public String userName;
 	public long createDate;
 	public long modifiedDate;
+	public String assetListEntryKey;
 	public String title;
 	public int type;
-	public String typeSettings;
 	public long lastPublishDate;
 
 }

@@ -263,36 +263,82 @@ if (hints != null) {
 					<aui:input id="<%= formName + fieldParam %>" label="<%= dateTogglerCheckboxLabel %>" name="<%= dateTogglerCheckboxName %>" type="checkbox" value="<%= disabled %>" />
 				</div>
 
-				<aui:script sandbox="<%= true %>">
-					var checkbox = $('#<portlet:namespace /><%= formName + fieldParam %>');
+				<aui:script use="event-base">
+					var checkbox = A.one('#<portlet:namespace /><%= formName + fieldParam %>');
 
-					checkbox.one(
-						'click',
-						function() {
-							Liferay.component('<portlet:namespace /><%= fieldParam %>DatePicker');
-						}
-					);
+					if (checkbox) {
+						checkbox.once(
+							'click',
+							function() {
+								Liferay.component('<portlet:namespace /><%= fieldParam %>DatePicker');
+							}
+						);
 
-					checkbox.on(
-						'click',
-						function(event) {
-							var checked = checkbox.prop('checked');
+						var form = document.<portlet:namespace /><%= formName %>;
 
-							var form = $(document.<portlet:namespace /><%= formName %>);
+						checkbox.on(
+							'click',
+							function(event) {
+								var checked = checkbox.get('checked');
 
-							form.fm('<%= fieldParam %>').prop('disabled', checked);
-							form.fm('<%= fieldParam %>Month').prop('disabled', checked);
-							form.fm('<%= fieldParam %>Day').prop('disabled', checked);
-							form.fm('<%= fieldParam %>Year').prop('disabled', checked);
+								var blankElement = Liferay.Util.getFormElement(form, '<%= fieldParam %>');
 
-							<c:if test="<%= showTime %>">
-								form.fm('<%= fieldParam %>Time').prop('disabled', checked);
-								form.fm('<%= fieldParam %>Hour').prop('disabled', checked);
-								form.fm('<%= fieldParam %>Minute').prop('disabled', checked);
-								form.fm('<%= fieldParam %>AmPm').prop('disabled', checked);
-							</c:if>
-						}
-					);
+								if (blankElement) {
+									blankElement.disabled = checked;
+								}
+
+								var dayElement = Liferay.Util.getFormElement(form, '<%= fieldParam %>Day');
+
+								if (dayElement) {
+									dayElement.disabled = checked;
+								}
+
+								var monthElement = Liferay.Util.getFormElement(form, '<%= fieldParam %>Month');
+
+								if (monthElement) {
+									monthElement.disabled = checked;
+								}
+
+								var yearElement = Liferay.Util.getFormElement(form, '<%= fieldParam %>Year');
+
+								if (yearElement) {
+									yearElement.disabled = checked;
+								}
+
+								var label = A.one('label[for="<portlet:namespace /><%= fieldParam %>"]');
+
+								if (label) {
+									label.toggleClass('disabled', checked);
+								}
+
+								<c:if test="<%= showTime %>">
+									var timeElement = Liferay.Util.getFormElement(form, '<%= fieldParam %>Time');
+
+									if (timeElement) {
+										timeElement.disabled = checked;
+									}
+
+									var hourElement = Liferay.Util.getFormElement(form, '<%= fieldParam %>Hour');
+
+									if (hourElement) {
+										hourElement.disabled = checked;
+									}
+
+									var minuteElement = Liferay.Util.getFormElement(form, '<%= fieldParam %>Minute');
+
+									if (minuteElement) {
+										minuteElement.disabled = checked;
+									}
+
+									var ampmElement = Liferay.Util.getFormElement(form, '<%= fieldParam %>AmPm');
+
+									if (ampmElement) {
+										ampmElement.disabled = checked;
+									}
+								</c:if>
+							}
+						);
+					}
 				</aui:script>
 			</c:if>
 		</c:when>
@@ -398,7 +444,7 @@ if (hints != null) {
 
 			if (localized) {
 				if (ModelHintsUtil.hasField(model, "groupId")) {
-					availableLocales = LanguageUtil.getAvailableLocales(themeDisplay.getSiteGroupId());
+					availableLocales = LanguageUtil.getAvailableLocales(BeanPropertiesUtil.getLongSilent(bean, "groupId", themeDisplay.getSiteGroupId()));
 				}
 				else {
 					availableLocales = LanguageUtil.getAvailableLocales();

@@ -106,6 +106,13 @@ public abstract class BaseJSONWebServiceClientImpl
 	implements JSONWebServiceClient {
 
 	public void afterPropertiesSet() throws IOReactorException {
+		if (_classLoader != null) {
+			TypeFactory typeFactory = TypeFactory.defaultInstance();
+
+			_objectMapper.setTypeFactory(
+				typeFactory.withClassLoader(_classLoader));
+		}
+
 		HttpAsyncClientBuilder httpAsyncClientBuilder =
 			HttpAsyncClients.custom();
 
@@ -156,16 +163,20 @@ public abstract class BaseJSONWebServiceClientImpl
 
 	@Override
 	public void destroy() {
-		try {
-			_asyncHttpClient.close();
-		}
-		catch (IOException ioe) {
-			_logger.error("Unable to close client", ioe);
+		if (_asyncHttpClient != null) {
+			try {
+				_asyncHttpClient.close();
+			}
+			catch (IOException ioe) {
+				_logger.error("Unable to close client", ioe);
+			}
+
+			_asyncHttpClient = null;
 		}
 
-		_asyncHttpClient = null;
-
-		_idleConnectionMonitorThread.shutdown();
+		if (_idleConnectionMonitorThread != null) {
+			_idleConnectionMonitorThread.shutdown();
+		}
 	}
 
 	@Override
@@ -753,6 +764,10 @@ public abstract class BaseJSONWebServiceClientImpl
 		catch (IOReactorException iore) {
 			_logger.error(iore.getMessage());
 		}
+	}
+
+	public void setClassLoader(ClassLoader classLoader) {
+		_classLoader = classLoader;
 	}
 
 	public void setContextPath(String contextPath) {
@@ -1350,6 +1365,7 @@ public abstract class BaseJSONWebServiceClientImpl
 		"status\":(\\d+)");
 
 	private AsyncHttpClient _asyncHttpClient;
+	private ClassLoader _classLoader;
 	private String _contextPath;
 	private Map<String, String> _headers = Collections.emptyMap();
 	private String _hostName;

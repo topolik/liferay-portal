@@ -1,0 +1,218 @@
+import 'clay-dropdown';
+import Component from 'metal-component';
+import Soy from 'metal-soy';
+import templates from './Calculator.soy.js';
+import Token from '../../expressions/Token.es';
+import Tokenizer from '../../expressions/Tokenizer.es';
+import {Config} from 'metal-state';
+
+/**
+ * Calculator.
+ * @extends Component
+ */
+
+class Calculator extends Component {
+
+	static STATE = {
+		expression: Config.string().value(''),
+
+		fields: Config.arrayOf(
+			Config.shapeOf(
+				{
+					fieldName: Config.string(),
+					label: Config.string(),
+					repeatable: Config.bool(),
+					value: Config.string()
+				}
+			)
+		).value([]),
+
+		functions: Config.array().value([]),
+
+		index: Config.number().value(0),
+
+		repeatableFields: Config.array().valueFn('_repeatableFieldsValueFn'),
+
+		spritemap: Config.string().required()
+	}
+
+	addTokenToExpression(tokenType, tokenValue) {
+		const {expression, index} = this;
+		const newToken = new Token(tokenType, tokenValue);
+		const tokens = Tokenizer.tokenize(expression);
+
+		if (this.shouldAddImplicitMultiplication(tokens, newToken)) {
+			tokens.push(new Token(Token.OPERATOR, '*'));
+		}
+
+		tokens.push(newToken);
+
+		this.setState(
+			{
+				expression: Tokenizer.stringifyTokens(tokens)
+			}
+		);
+
+		this.emit(
+			'editExpression',
+			{
+				expression: this.expression,
+				index
+			}
+		);
+	}
+
+	getStateBasedOnExpression(expression) {
+		let disableDot = false;
+		let disableFunctions = false;
+		let disableNumbers = false;
+		let disableOperators = false;
+		let showOnlyRepeatableFields = false;
+		const tokens = Tokenizer.tokenize(expression);
+
+		if (
+			tokens.length > 1 &&
+			tokens[tokens.length - 1].type === Token.LEFT_PARENTHESIS &&
+			tokens[tokens.length - 2].type === Token.FUNCTION &&
+			tokens[tokens.length - 2].value === 'sum'
+		) {
+			disableFunctions = true;
+			disableNumbers = true;
+			disableOperators = true;
+			showOnlyRepeatableFields = true;
+		}
+
+		if (
+			tokens.length === 0 ||
+			(
+				tokens.length > 0 &&
+				tokens[tokens.length - 1].type !== Token.LITERAL
+			)
+		) {
+			disableDot = true;
+		}
+
+		if (
+			tokens.length > 0 &&
+			tokens[tokens.length - 1].type === Token.OPERATOR
+		) {
+			disableOperators = true;
+		}
+
+		return {
+			disableDot,
+			disableFunctions,
+			disableNumbers,
+			disableOperators,
+			showOnlyRepeatableFields
+		};
+	}
+
+	prepareStateForRender(state) {
+		const {expression} = state;
+
+		return {
+			...state,
+			...this.getStateBasedOnExpression(expression),
+			expression: expression.replace(/[\[\]]/g, '')
+		};
+	}
+
+	removeTokenFromExpression() {
+		const {expression, index} = this;
+		const tokens = Tokenizer.tokenize(expression);
+
+		const removedToken = tokens.pop();
+
+		if (
+			removedToken && removedToken.type === Token.LEFT_PARENTHESIS &&
+			tokens.length && tokens[tokens.length - 1].type === Token.FUNCTION
+		) {
+			tokens.pop();
+		}
+
+		this.setState(
+			{
+				expression: Tokenizer.stringifyTokens(tokens)
+			}
+		);
+
+		this.emit(
+			'editExpression',
+			{
+				expression: this.expression,
+				index
+			}
+		);
+	}
+
+	shouldAddImplicitMultiplication(tokens, newToken) {
+		const lastToken = tokens[tokens.length - 1];
+
+		return (
+			lastToken !== undefined &&
+			(
+				(
+					newToken.type === Token.LEFT_PARENTHESIS &&
+					lastToken.type !== Token.OPERATOR &&
+					lastToken.type !== Token.FUNCTION &&
+					lastToken.type !== Token.LEFT_PARENTHESIS
+				) ||
+				(
+					newToken.type === Token.FUNCTION &&
+					lastToken.type !== Token.OPERATOR &&
+					lastToken.type !== Token.LEFT_PARENTHESIS
+				) ||
+				(
+					newToken.type === Token.VARIABLE &&
+					(
+						lastToken.type === Token.VARIABLE ||
+						lastToken.type === Token.LITERAL
+					)
+				) ||
+				(
+					newToken.type === Token.LITERAL &&
+					(
+						lastToken.type === Token.VARIABLE ||
+						lastToken.type === Token.FUNCTION
+					)
+				)
+			)
+		);
+	}
+
+	_handleButtonClicked({delegateTarget}) {
+		const {tokenType, tokenValue} = delegateTarget.dataset;
+
+		if (tokenValue === 'backspace') {
+			this.removeTokenFromExpression();
+		}
+		else {
+			this.addTokenToExpression(tokenType, tokenValue);
+		}
+	}
+
+	_handleFieldsDropdownItemClicked({data}) {
+		const {item} = data;
+		const {fieldName} = item;
+
+		this.addTokenToExpression(Token.VARIABLE, fieldName);
+	}
+
+	_handleFunctionsDropdownItemClicked({data}) {
+		const {item} = data;
+
+		this.addTokenToExpression(Token.FUNCTION, item.value);
+		this.addTokenToExpression(Token.LEFT_PARENTHESIS, '(');
+	}
+
+	_repeatableFieldsValueFn() {
+		const {fields} = this;
+
+		return fields.filter(({repeatable}) => repeatable === true);
+	}
+}
+
+Soy.register(Calculator, templates);
+
+export default Calculator;

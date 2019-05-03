@@ -3,11 +3,6 @@
 	"bugs": {
 		"url": "https://issues.liferay.com/"
 	},
-	"devDependencies": {
-		"gulp": "^3.8.10",
-		"liferay-theme-deps-7.1": "8.0.0-rc.2",
-		"liferay-theme-tasks": "8.0.0-rc.2"
-	},
 	"keywords": [
 		"liferay-theme"
 	],
@@ -21,5 +16,10 @@
 	"main": "package.json",
 	"name": "liferay-westeros-bank-theme",
 	"repository": "liferay/liferay-portal",
-	"version": "3.0.0"
+	"scripts": {
+		"build": "liferay-npm-scripts theme build",
+		"checkFormat": "liferay-npm-scripts lint",
+		"format": "liferay-npm-scripts format"
+	},
+	"version": "4.0.0"
 }

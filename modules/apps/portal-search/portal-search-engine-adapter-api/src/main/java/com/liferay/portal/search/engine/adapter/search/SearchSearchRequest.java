@@ -110,8 +110,7 @@ public class SearchSearchRequest
 	}
 
 	/**
-	 * @deprecated As of Mueller (7.2.x), replaced by
-	 * 		Sort
+	 * @deprecated As of Mueller (7.2.x), replaced by Sort
 	 */
 	@Deprecated
 	public com.liferay.portal.kernel.search.Sort[] getSorts71() {
@@ -124,7 +123,7 @@ public class SearchSearchRequest
 
 	/**
 	 * @deprecated As of Mueller (7.2.x), replaced by
-	 * 		com.liferay.portal.search.stats.StatsRequest
+	 *             com.liferay.portal.search.stats.StatsRequest
 	 */
 	@Deprecated
 	public Map<String, Stats> getStats() {
@@ -221,7 +220,7 @@ public class SearchSearchRequest
 		_selectedFieldNames = selectedFieldNames;
 	}
 
-	public void setSize(int size) {
+	public void setSize(Integer size) {
 		_size = size;
 	}
 
@@ -230,21 +229,20 @@ public class SearchSearchRequest
 	}
 
 	/**
-	 * @deprecated As of Mueller (7.2.x), replaced by
-	 * 		Sort
+	 * @deprecated As of Mueller (7.2.x), replaced by Sort
 	 */
 	@Deprecated
 	public void setSorts(com.liferay.portal.kernel.search.Sort[] sorts) {
 		_legacySorts = sorts;
 	}
 
-	public void setStart(int start) {
+	public void setStart(Integer start) {
 		_start = start;
 	}
 
 	/**
 	 * @deprecated As of Mueller (7.2.x), replaced by
-	 * 		com.liferay.portal.search.stats.StatsRequest
+	 *             com.liferay.portal.search.stats.StatsRequest
 	 */
 	@Deprecated
 	public void setStats(Map<String, Stats> stats) {

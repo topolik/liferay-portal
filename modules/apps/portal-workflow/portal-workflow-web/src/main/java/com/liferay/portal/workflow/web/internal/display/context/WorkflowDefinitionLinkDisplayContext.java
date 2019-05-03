@@ -16,6 +16,7 @@ package com.liferay.portal.workflow.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -65,7 +66,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.portlet.PortletException;
@@ -430,11 +430,9 @@ public class WorkflowDefinitionLinkDisplayContext {
 	public String getWorkflowDefinitionLabel(
 		WorkflowDefinition workflowDefinition) {
 
-		String workflowDefinitionName = workflowDefinition.getTitle(
+		return workflowDefinition.getTitle(
 			LanguageUtil.getLanguageId(
 				_workflowDefinitionLinkRequestHelper.getRequest()));
-
-		return workflowDefinitionName;
 	}
 
 	public List<WorkflowDefinition> getWorkflowDefinitions()
@@ -676,7 +674,7 @@ public class WorkflowDefinitionLinkDisplayContext {
 		return ParamUtil.getString(request, "orderByCol", "resource");
 	}
 
-	private Consumer<DropdownItem> _getOrderByDropdownItem(
+	private UnsafeConsumer<DropdownItem, Exception> _getOrderByDropdownItem(
 		String orderByCol, String currentOrder) {
 
 		return dropdownItem -> {

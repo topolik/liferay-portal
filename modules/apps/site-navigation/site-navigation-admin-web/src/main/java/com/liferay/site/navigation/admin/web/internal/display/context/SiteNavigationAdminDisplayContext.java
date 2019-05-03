@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
+import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -31,6 +32,7 @@ import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.site.navigation.admin.constants.SiteNavigationAdminPortletKeys;
+import com.liferay.site.navigation.admin.web.internal.security.permission.resource.SiteNavigationMenuPermission;
 import com.liferay.site.navigation.admin.web.internal.util.SiteNavigationMenuPortletUtil;
 import com.liferay.site.navigation.model.SiteNavigationMenu;
 import com.liferay.site.navigation.service.SiteNavigationMenuLocalService;
@@ -280,6 +282,21 @@ public class SiteNavigationAdminDisplayContext {
 		return true;
 	}
 
+	public boolean hasUpdatePermission() throws PortalException {
+		if (_updatePermission != null) {
+			return _updatePermission;
+		}
+
+		ThemeDisplay themeDisplay = (ThemeDisplay)_request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		_updatePermission = SiteNavigationMenuPermission.contains(
+			themeDisplay.getPermissionChecker(), getSiteNavigationMenuId(),
+			ActionKeys.UPDATE);
+
+		return _updatePermission;
+	}
+
 	private String _getAddURL(
 		SiteNavigationMenuItemType siteNavigationMenuItemType) {
 
@@ -332,5 +349,6 @@ public class SiteNavigationAdminDisplayContext {
 		_siteNavigationMenuLocalService;
 	private String _siteNavigationMenuName;
 	private final SiteNavigationMenuService _siteNavigationMenuService;
+	private Boolean _updatePermission;
 
 }

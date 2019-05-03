@@ -1,64 +1,14 @@
+import '../FormPortal/FormPortal.es';
 import 'clay-icon';
 import Component from 'metal-component';
 import Soy from 'metal-soy';
-import {Config} from 'metal-state';
-
 import templates from './Tooltip.soy.js';
 import {Align} from 'metal-position';
-
-import '../FormPortal/FormPortal.es';
+import {Config} from 'metal-state';
 
 const POSITIONS = ['top', 'left', 'right', 'bottom'];
 
 class Tooltip extends Component {
-	static STATE = {
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Tooltip
-		 * @type {?(string|undefined)}
-		 */
-
-		icon: Config.string().required(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Tooltip
-		 * @type {?(number|undefined)}
-		 */
-
-		position: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Tooltip
-		 * @type {?(string|undefined)}
-		 */
-
-		spritemap: Config.string().required(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Tooltip
-		 * @type {?(string|undefined)}
-		 */
-
-		text: Config.string().required(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Tooltip
-		 * @type {?(string|undefined)}
-		 */
-
-		showContent: Config.bool()
-	};
-
 	created() {
 		this._handleTooltipHovered = this._handleTooltipHovered.bind(this);
 		this._handleTooltipRendered = this._handleTooltipRendered.bind(this);
@@ -82,5 +32,53 @@ class Tooltip extends Component {
 }
 
 Soy.register(Tooltip, templates);
+
+Tooltip.STATE = {
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Tooltip
+	 * @type {?(string|undefined)}
+	 */
+
+	icon: Config.string().required(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Tooltip
+	 * @type {?(number|undefined)}
+	 */
+
+	position: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Tooltip
+	 * @type {?(string|undefined)}
+	 */
+
+	showContent: Config.bool(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Tooltip
+	 * @type {?(string|undefined)}
+	 */
+
+	spritemap: Config.string().required(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Tooltip
+	 * @type {?(string|undefined)}
+	 */
+
+	text: Config.string().required()
+};
 
 export default Tooltip;

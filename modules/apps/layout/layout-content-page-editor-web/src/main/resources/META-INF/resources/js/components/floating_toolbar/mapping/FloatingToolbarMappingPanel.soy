@@ -17,7 +17,6 @@
 	{@param? _handleAssetEntryLinkClick: any}
 	{@param? _handleFieldOptionChange: any}
 	{@param? _handleSourceTypeChange: any}
-	{@param? _handleUnmapButtonClick: any}
 	{@param? _selectedSourceTypeId: string}
 	{@param? _sourceTypeIds: [
 		content: string,
@@ -75,10 +74,6 @@
 				{param mappedFieldId: $item.editableValues.mappedField or $item.editableValues.fieldId /}
 			{/call}
 		</div>
-
-		{call .unmapButton}
-			{param handleUnmapButtonClick: $_handleUnmapButtonClick /}
-		{/call}
 	</div>
 {/template}
 
@@ -108,7 +103,7 @@
 	<div class="d-flex">
 		<input
 			class="form-control form-control-sm mr-2"
-			disabled
+			readonly
 			type="text"
 			value="{$selectedAssetEntryTitle ?: ''}"
 		/>
@@ -122,7 +117,7 @@
 				type="button"
 			>
 				<svg class="lexicon-icon">
-					<use xlink:href="{$spritemap ?: ''}#plus"></use>
+					<use xlink:href="{$spritemap ?: ''}#caret-bottom"></use>
 				</svg>
 			</button>
 
@@ -190,10 +185,14 @@
 		id="floatingToolbarMappingPanelFieldSelect"
 		{$fieldsDisabled}
 	>
+		{let $unmappedLabel kind="text"}
+			-- {msg desc=""}unmapped{/msg} --
+		{/let}
+
 		{call .selectOption}
 			{param optionId: '' /}
-			{param optionLabel: '-' /}
-			{param selectedId: $mappedFieldId or '-' /}
+			{param optionLabel: $unmappedLabel /}
+			{param selectedId: $mappedFieldId or $unmappedLabel /}
 		{/call}
 
 		{foreach $field in $fields}
@@ -254,19 +253,4 @@
 			{/call}
 		{/foreach}
 	</select>
-{/template}
-
-/**
- * Unmap button
- */
-{template .unmapButton}
-	{@param? handleUnmapButtonClick: any}
-
-	<button
-		class="btn btn-secondary"
-		data-onclick="{$handleUnmapButtonClick}"
-		type="button"
-	>
-		{msg desc=""}unmap{/msg}
-	</button>
 {/template}

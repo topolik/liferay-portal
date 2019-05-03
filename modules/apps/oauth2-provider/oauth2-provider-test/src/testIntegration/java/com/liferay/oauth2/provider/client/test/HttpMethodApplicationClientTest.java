@@ -15,6 +15,7 @@
 package com.liferay.oauth2.provider.client.test;
 
 import com.liferay.oauth2.provider.test.internal.TestApplication;
+import com.liferay.oauth2.provider.test.internal.TestHeadHandlingApplication;
 import com.liferay.oauth2.provider.test.internal.activator.BaseTestPreparatorBundleActivator;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
@@ -82,6 +83,50 @@ public class HttpMethodApplicationClientTest extends BaseClientTestCase {
 		Assert.assertEquals(403, response.getStatus());
 	}
 
+	@Test
+	public void testIgnoredMethods() throws Exception {
+		WebTarget webTarget = getWebTarget("/methods");
+
+		Invocation.Builder builder = authorize(
+			webTarget.request(), getToken("oauthTestApplicationAfter"));
+
+		Response response = builder.head();
+
+		Assert.assertEquals(200, response.getStatus());
+
+		webTarget = getWebTarget("/methods-with-ignore-missing-scopes-empty");
+
+		builder = authorize(
+			webTarget.request(), getToken("oauthTestApplicationAfter"));
+
+		response = builder.head();
+
+		Assert.assertEquals(403, response.getStatus());
+
+		webTarget = getWebTarget("/methods-with-head");
+
+		builder = authorize(
+			webTarget.request(), getToken("oauthTestApplicationAfter"));
+
+		response = builder.head();
+
+		Assert.assertEquals(403, response.getStatus());
+
+		builder = authorize(
+			webTarget.request(), getToken("oauthTestApplicationWithHead"));
+
+		response = builder.head();
+
+		Assert.assertEquals(200, response.getStatus());
+
+		builder = authorize(
+			webTarget.request(), getToken("oauthTestApplicationWithHead"));
+
+		response = builder.method("CUSTOM");
+
+		Assert.assertEquals(403, response.getStatus());
+	}
+
 	public static class MethodApplicationTestPreparatorBundleActivator
 		extends BaseTestPreparatorBundleActivator {
 
@@ -91,20 +136,30 @@ public class HttpMethodApplicationClientTest extends BaseClientTestCase {
 
 			User user = UserTestUtil.getAdminUser(defaultCompanyId);
 
-			Dictionary<String, Object> properties = new HashMapDictionary<>();
-
-			properties.put("oauth2.test.application", true);
-
 			createOAuth2Application(
 				defaultCompanyId, user, "oauthTestApplicationBefore",
 				Arrays.asList("GET", "POST"));
 
+			registerJaxRsApplication(new TestApplication(), "methods", null);
+
 			registerJaxRsApplication(
-				new TestApplication(), "methods", properties);
+				new TestHeadHandlingApplication(), "methods-with-head", null);
+
+			Dictionary<String, Object> properties = new HashMapDictionary<>();
+
+			properties.put("ignore.missing.scopes", "");
+
+			registerJaxRsApplication(
+				new TestApplication(),
+				"methods-with-ignore-missing-scopes-empty", properties);
 
 			createOAuth2Application(
 				defaultCompanyId, user, "oauthTestApplicationAfter",
 				Arrays.asList("GET", "POST"));
+
+			createOAuth2Application(
+				defaultCompanyId, user, "oauthTestApplicationWithHead",
+				Arrays.asList("HEAD"));
 
 			createOAuth2Application(
 				defaultCompanyId, user, "oauthTestApplicationWrong",

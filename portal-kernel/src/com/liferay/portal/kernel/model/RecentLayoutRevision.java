@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface RecentLayoutRevision
-	extends RecentLayoutRevisionModel, PersistedModel {
+	extends PersistedModel, RecentLayoutRevisionModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

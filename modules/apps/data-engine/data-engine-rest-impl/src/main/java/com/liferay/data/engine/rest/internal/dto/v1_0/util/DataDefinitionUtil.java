@@ -16,6 +16,8 @@ package com.liferay.data.engine.rest.internal.dto.v1_0.util;
 
 import com.liferay.data.engine.rest.dto.v1_0.DataDefinition;
 import com.liferay.data.engine.rest.dto.v1_0.DataDefinitionField;
+import com.liferay.data.engine.rest.dto.v1_0.DataDefinitionRule;
+import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.json.JSONUtil;
@@ -26,17 +28,32 @@ import com.liferay.portal.kernel.util.Validator;
  */
 public class DataDefinitionUtil {
 
-	public static DataDefinition toDataDefinition(String json)
+	public static DataDefinition toDataDefinition(DDMStructure ddmStructure)
 		throws Exception {
+
+		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
+			ddmStructure.getDefinition());
 
 		return new DataDefinition() {
 			{
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject(json);
-
 				dataDefinitionFields = JSONUtil.toArray(
 					jsonObject.getJSONArray("fields"),
 					fieldJSONObject -> _toDataDefinitionField(fieldJSONObject),
 					DataDefinitionField.class);
+				dataDefinitionRules = JSONUtil.toArray(
+					jsonObject.getJSONArray("rules"),
+					ruleJSONObject -> _toDataDefinitionRule(ruleJSONObject),
+					DataDefinitionRule.class);
+				dateCreated = ddmStructure.getCreateDate();
+				dateModified = ddmStructure.getModifiedDate();
+				description = LocalizedValueUtil.toLocalizedValues(
+					ddmStructure.getDescriptionMap());
+				id = ddmStructure.getStructureId();
+				name = LocalizedValueUtil.toLocalizedValues(
+					ddmStructure.getNameMap());
+				siteId = ddmStructure.getGroupId();
+				storageType = ddmStructure.getStorageType();
+				userId = ddmStructure.getUserId();
 			}
 		};
 	}
@@ -49,6 +66,11 @@ public class DataDefinitionUtil {
 			JSONUtil.toJSONArray(
 				dataDefinition.getDataDefinitionFields(),
 				dataDefinitionField -> _toJSONObject(dataDefinitionField))
+		).put(
+			"rules",
+			JSONUtil.toJSONArray(
+				dataDefinition.getDataDefinitionRules(),
+				dataDefinitionRule -> _toJSONObject(dataDefinitionRule))
 		).toString();
 	}
 
@@ -58,7 +80,10 @@ public class DataDefinitionUtil {
 
 		return new DataDefinitionField() {
 			{
-				defaultValue = jsonObject.getString("defaultValue");
+				if (jsonObject.has("predefinedValue")) {
+					defaultValue = LocalizedValueUtil.toLocalizedValues(
+						jsonObject.getJSONObject("predefinedValue"));
+				}
 
 				if (!jsonObject.has("type")) {
 					throw new Exception("Type is required");
@@ -95,23 +120,26 @@ public class DataDefinitionUtil {
 		};
 	}
 
+	private static DataDefinitionRule _toDataDefinitionRule(
+		JSONObject jsonObject) {
+
+		return new DataDefinitionRule() {
+			{
+				dataDefinitionFieldNames = JSONUtil.toStringArray(
+					jsonObject.getJSONArray("fields"));
+				dataDefinitionRuleParameters =
+					DataDefinitionRuleParameterUtil.
+						toDataDefinitionRuleParameters(
+							jsonObject.getJSONObject("parameters"));
+				name = jsonObject.getString("name");
+				ruleType = jsonObject.getString("ruleType");
+			}
+		};
+	}
+
 	private static JSONObject _toJSONObject(
 			DataDefinitionField dataDefinitionField)
 		throws Exception {
-
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		Object defaultValue = dataDefinitionField.getDefaultValue();
-
-		if (defaultValue != null) {
-			jsonObject.put("defaultValue", defaultValue);
-		}
-
-		jsonObject.put("indexable", dataDefinitionField.getIndexable());
-		jsonObject.put(
-			"label",
-			LocalizedValueUtil.toJSONObject(dataDefinitionField.getLabel()));
-		jsonObject.put("localizable", dataDefinitionField.getLocalizable());
 
 		String name = dataDefinitionField.getName();
 
@@ -119,22 +147,49 @@ public class DataDefinitionUtil {
 			throw new Exception("Name is required");
 		}
 
-		jsonObject.put("name", name);
-
-		jsonObject.put("repeatable", dataDefinitionField.getRepeatable());
-		jsonObject.put(
-			"tip",
-			LocalizedValueUtil.toJSONObject(dataDefinitionField.getTip()));
-
 		String type = dataDefinitionField.getFieldType();
 
 		if ((type == null) || type.isEmpty()) {
 			throw new Exception("Type is required");
 		}
 
-		jsonObject.put("type", type);
+		return JSONUtil.put(
+			"defaultValue", dataDefinitionField.getDefaultValue()
+		).put(
+			"indexable", dataDefinitionField.getIndexable()
+		).put(
+			"label",
+			LocalizedValueUtil.toJSONObject(dataDefinitionField.getLabel())
+		).put(
+			"localizable", dataDefinitionField.getLocalizable()
+		).put(
+			"name", name
+		).put(
+			"repeatable", dataDefinitionField.getRepeatable()
+		).put(
+			"tip", LocalizedValueUtil.toJSONObject(dataDefinitionField.getTip())
+		).put(
+			"type", type
+		);
+	}
 
-		return jsonObject;
+	private static JSONObject _toJSONObject(
+			DataDefinitionRule dataDefinitionRule)
+		throws Exception {
+
+		return JSONUtil.put(
+			"fields",
+			JSONFactoryUtil.createJSONArray(
+				dataDefinitionRule.getDataDefinitionFieldNames())
+		).put(
+			"name", dataDefinitionRule.getName()
+		).put(
+			"parameters",
+			DataDefinitionRuleParameterUtil.toJSONObject(
+				dataDefinitionRule.getDataDefinitionRuleParameters())
+		).put(
+			"ruleType", dataDefinitionRule.getRuleType()
+		);
 	}
 
 }

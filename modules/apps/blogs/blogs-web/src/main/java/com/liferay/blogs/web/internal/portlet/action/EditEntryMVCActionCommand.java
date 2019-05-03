@@ -14,8 +14,7 @@
 
 package com.liferay.blogs.web.internal.portlet.action;
 
-import com.liferay.asset.display.page.model.AssetDisplayPageEntry;
-import com.liferay.asset.display.page.service.AssetDisplayPageEntryLocalService;
+import com.liferay.asset.display.page.portlet.AssetDisplayPageEntryFormProcessor;
 import com.liferay.asset.kernel.exception.AssetCategoryException;
 import com.liferay.asset.kernel.exception.AssetTagException;
 import com.liferay.blogs.constants.BlogsPortletKeys;
@@ -37,14 +36,13 @@ import com.liferay.friendly.url.exception.DuplicateFriendlyURLEntryException;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.editor.EditorConstants;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.TrashedModel;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
-import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -53,6 +51,7 @@ import com.liferay.portal.kernel.sanitizer.SanitizerException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.servlet.MultiSessionMessages;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.taglib.ui.ImageSelector;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -86,7 +85,6 @@ import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
 import javax.portlet.PortletRequest;
-import javax.portlet.WindowState;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -209,15 +207,16 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 			boolean ajax = ParamUtil.getBoolean(actionRequest, "ajax");
 
 			if (ajax) {
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-				jsonObject.put(
+				JSONObject jsonObject = JSONUtil.put(
 					"attributeDataImageId",
-					EditorConstants.ATTRIBUTE_DATA_IMAGE_ID);
-				jsonObject.put("content", entry.getContent());
-				jsonObject.put(
-					"coverImageFileEntryId", entry.getCoverImageFileEntryId());
-				jsonObject.put("entryId", entry.getEntryId());
+					EditorConstants.ATTRIBUTE_DATA_IMAGE_ID
+				).put(
+					"content", entry.getContent()
+				).put(
+					"coverImageFileEntryId", entry.getCoverImageFileEntryId()
+				).put(
+					"entryId", entry.getEntryId()
+				);
 
 				JSONPortletResponseUtil.writeJSON(
 					actionRequest, actionResponse, jsonObject);
@@ -240,8 +239,6 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 				sendRedirect(actionRequest, actionResponse, redirect);
 			}
 			else {
-				WindowState windowState = actionRequest.getWindowState();
-
 				if (Validator.isNotNull(redirect) &&
 					cmd.equals(Constants.UPDATE)) {
 
@@ -252,20 +249,17 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 						false);
 				}
 
-				if (!windowState.equals(LiferayWindowState.POP_UP)) {
-					sendRedirect(actionRequest, actionResponse, redirect);
-				}
-				else {
-					redirect = _portal.escapeRedirect(redirect);
+				redirect = _portal.escapeRedirect(redirect);
 
-					if (Validator.isNotNull(redirect)) {
-						if (cmd.equals(Constants.ADD) && (entry != null)) {
-							String portletId = _http.getParameter(
-								redirect, "p_p_id", false);
+				if (Validator.isNotNull(redirect)) {
+					if (cmd.equals(Constants.ADD) && (entry != null)) {
+						String portletResource = _http.getParameter(
+							redirect, "portletResource", false);
 
-							String namespace = _portal.getPortletNamespace(
-								portletId);
+						String namespace = _portal.getPortletNamespace(
+							portletResource);
 
+						if (Validator.isNotNull(portletResource)) {
 							redirect = _http.addParameter(
 								redirect, namespace + "className",
 								BlogsEntry.class.getName());
@@ -273,9 +267,9 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 								redirect, namespace + "classPK",
 								entry.getEntryId());
 						}
-
-						actionRequest.setAttribute(WebKeys.REDIRECT, redirect);
 					}
+
+					actionRequest.setAttribute(WebKeys.REDIRECT, redirect);
 				}
 			}
 		}
@@ -351,23 +345,6 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 		for (long restoreTrashEntryId : restoreTrashEntryIds) {
 			_trashEntryService.restoreEntry(restoreTrashEntryId);
 		}
-	}
-
-	@Reference(unbind = "-")
-	protected void setBlogsEntryLocalService(
-		BlogsEntryLocalService blogsEntryLocalService) {
-
-		_blogsEntryLocalService = blogsEntryLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setBlogsEntryService(BlogsEntryService blogsEntryService) {
-		_blogsEntryService = blogsEntryService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setTrashEntryService(TrashEntryService trashEntryService) {
-		_trashEntryService = trashEntryService;
 	}
 
 	protected void subscribe(ActionRequest actionRequest) throws Exception {
@@ -556,30 +533,15 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 				smallImageFileEntryId);
 		}
 
-		AssetDisplayPageEntry assetDisplayPageEntry =
-			_assetDisplayPageEntryLocalService.fetchAssetDisplayPageEntry(
-				themeDisplay.getScopeGroupId(),
-				_portal.getClassNameId(BlogsEntry.class), entry.getEntryId());
+		_assetDisplayPageEntryFormProcessor.process(
+			BlogsEntry.class.getName(), entry.getEntryId(), actionRequest);
 
-		long assetDisplayPageId = ParamUtil.getLong(
-			actionRequest, "assetDisplayPageId");
+		String portletResource = ParamUtil.getString(
+			actionRequest, "portletResource");
 
-		int displayPageType = ParamUtil.getInteger(
-			actionRequest, "displayPageType");
-
-		if (assetDisplayPageEntry == null) {
-			_assetDisplayPageEntryLocalService.addAssetDisplayPageEntry(
-				themeDisplay.getUserId(), themeDisplay.getScopeGroupId(),
-				_portal.getClassNameId(BlogsEntry.class), entry.getEntryId(),
-				assetDisplayPageId, displayPageType, serviceContext);
-		}
-		else {
-			assetDisplayPageEntry.setLayoutPageTemplateEntryId(
-				assetDisplayPageId);
-			assetDisplayPageEntry.setType(displayPageType);
-
-			_assetDisplayPageEntryLocalService.updateAssetDisplayPageEntry(
-				assetDisplayPageEntry);
+		if (Validator.isNotNull(portletResource)) {
+			MultiSessionMessages.add(
+				actionRequest, portletResource + "requestProcessed");
 		}
 
 		return entry;
@@ -604,13 +566,16 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 			Propagation.REQUIRED, new Class<?>[] {Exception.class});
 
 	@Reference
-	private AssetDisplayPageEntryLocalService
-		_assetDisplayPageEntryLocalService;
+	private AssetDisplayPageEntryFormProcessor
+		_assetDisplayPageEntryFormProcessor;
 
 	@Reference
 	private AttachmentContentUpdater _attachmentContentUpdater;
 
+	@Reference
 	private BlogsEntryLocalService _blogsEntryLocalService;
+
+	@Reference
 	private BlogsEntryService _blogsEntryService;
 
 	@Reference
@@ -619,6 +584,7 @@ public class EditEntryMVCActionCommand extends BaseMVCActionCommand {
 	@Reference
 	private Portal _portal;
 
+	@Reference
 	private TrashEntryService _trashEntryService;
 
 	private class UpdateEntryCallable implements Callable<BlogsEntry> {

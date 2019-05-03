@@ -20,8 +20,8 @@ import com.liferay.contacts.model.Entry;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Address;
 import com.liferay.portal.kernel.model.Contact;
 import com.liferay.portal.kernel.model.Country;
@@ -57,15 +57,17 @@ import java.util.List;
 public class ContactsUtil {
 
 	public static JSONObject getEntryJSONObject(Entry entry) {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("comments", entry.getComments());
-		jsonObject.put("emailAddress", entry.getEmailAddress());
-		jsonObject.put("entryId", String.valueOf(entry.getEntryId()));
-		jsonObject.put("fullName", entry.getFullName());
-		jsonObject.put("portalUser", false);
-
-		return jsonObject;
+		return JSONUtil.put(
+			"comments", entry.getComments()
+		).put(
+			"emailAddress", entry.getEmailAddress()
+		).put(
+			"entryId", String.valueOf(entry.getEntryId())
+		).put(
+			"fullName", entry.getFullName()
+		).put(
+			"portalUser", false
+		);
 	}
 
 	public static long getGroupId(String filterBy) {
@@ -103,23 +105,32 @@ public class ContactsUtil {
 	public static JSONObject getUserJSONObject(long userId, User user)
 		throws PortalException {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
 		boolean block = SocialRelationLocalServiceUtil.hasRelation(
 			userId, user.getUserId(), SocialRelationConstants.TYPE_UNI_ENEMY);
 
-		jsonObject.put("block", block);
-
-		jsonObject.put("contactId", String.valueOf(user.getContactId()));
-		jsonObject.put("emailAddress", user.getEmailAddress());
-		jsonObject.put("firstName", user.getFirstName());
-		jsonObject.put("fullName", user.getFullName());
-		jsonObject.put("jobTitle", user.getJobTitle());
-		jsonObject.put("lastName", user.getLastName());
-		jsonObject.put("portalUser", true);
-		jsonObject.put("portraitId", String.valueOf(user.getPortraitId()));
-		jsonObject.put("userId", String.valueOf(user.getUserId()));
-		jsonObject.put("uuid", user.getUuid());
+		JSONObject jsonObject = JSONUtil.put(
+			"block", block
+		).put(
+			"contactId", String.valueOf(user.getContactId())
+		).put(
+			"emailAddress", user.getEmailAddress()
+		).put(
+			"firstName", user.getFirstName()
+		).put(
+			"fullName", user.getFullName()
+		).put(
+			"jobTitle", user.getJobTitle()
+		).put(
+			"lastName", user.getLastName()
+		).put(
+			"portalUser", true
+		).put(
+			"portraitId", String.valueOf(user.getPortraitId())
+		).put(
+			"userId", String.valueOf(user.getUserId())
+		).put(
+			"uuid", user.getUuid()
+		);
 
 		if (!SocialRelationLocalServiceUtil.hasRelation(
 				user.getUserId(), userId,

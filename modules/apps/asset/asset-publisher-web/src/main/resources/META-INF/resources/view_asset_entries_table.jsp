@@ -17,6 +17,9 @@
 <%@ include file="/init.jsp" %>
 
 <%
+long previewAssetEntryId = ParamUtil.getLong(request, "previewAssetEntryId");
+int previewAssetEntryType = ParamUtil.getInteger(request, "previewAssetEntryType");
+
 AssetEntryResult assetEntryResult = (AssetEntryResult)request.getAttribute("view.jsp-assetEntryResult");
 
 Group stageableGroup = themeDisplay.getScopeGroup();
@@ -75,7 +78,12 @@ if (stageableGroup.isLayout()) {
 						AssetRenderer<?> assetRenderer = null;
 
 						try {
-							assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK());
+							if (previewAssetEntryId == assetEntry.getEntryId()) {
+								assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK(), previewAssetEntryType);
+							}
+							else {
+								assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK());
+							}
 						}
 						catch (Exception e) {
 							if (_log.isWarnEnabled()) {
@@ -83,7 +91,7 @@ if (stageableGroup.isLayout()) {
 							}
 						}
 
-						if ((assetRenderer == null) || !assetRenderer.isDisplayable()) {
+						if ((assetRenderer == null) || (!assetRenderer.isDisplayable() && (previewAssetEntryId <= 0))) {
 							continue;
 						}
 
@@ -93,7 +101,7 @@ if (stageableGroup.isLayout()) {
 						request.setAttribute("view.jsp-assetRenderer", assetRenderer);
 					%>
 
-						<tr>
+						<tr class="<%= (previewAssetEntryId == assetEntry.getEntryId()) ? "table-active" : StringPool.BLANK %>">
 							<td class="table-cell-expand table-title">
 								<span class="asset-anchor lfr-asset-anchor" id="<%= assetEntry.getEntryId() %>"></span>
 

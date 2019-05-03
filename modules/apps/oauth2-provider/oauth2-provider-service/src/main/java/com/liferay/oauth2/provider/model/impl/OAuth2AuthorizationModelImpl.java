@@ -78,7 +78,8 @@ public class OAuth2AuthorizationModelImpl
 		{"accessTokenContentHash", Types.BIGINT},
 		{"accessTokenCreateDate", Types.TIMESTAMP},
 		{"accessTokenExpirationDate", Types.TIMESTAMP},
-		{"remoteIPInfo", Types.VARCHAR}, {"refreshTokenContent", Types.CLOB},
+		{"remoteHostInfo", Types.VARCHAR}, {"remoteIPInfo", Types.VARCHAR},
+		{"refreshTokenContent", Types.CLOB},
 		{"refreshTokenContentHash", Types.BIGINT},
 		{"refreshTokenCreateDate", Types.TIMESTAMP},
 		{"refreshTokenExpirationDate", Types.TIMESTAMP}
@@ -99,6 +100,7 @@ public class OAuth2AuthorizationModelImpl
 		TABLE_COLUMNS_MAP.put("accessTokenContentHash", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("accessTokenCreateDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("accessTokenExpirationDate", Types.TIMESTAMP);
+		TABLE_COLUMNS_MAP.put("remoteHostInfo", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("remoteIPInfo", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("refreshTokenContent", Types.CLOB);
 		TABLE_COLUMNS_MAP.put("refreshTokenContentHash", Types.BIGINT);
@@ -107,7 +109,7 @@ public class OAuth2AuthorizationModelImpl
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table OAuth2Authorization (oAuth2AuthorizationId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,oAuth2ApplicationId LONG,oA2AScopeAliasesId LONG,accessTokenContent TEXT null,accessTokenContentHash LONG,accessTokenCreateDate DATE null,accessTokenExpirationDate DATE null,remoteIPInfo VARCHAR(75) null,refreshTokenContent TEXT null,refreshTokenContentHash LONG,refreshTokenCreateDate DATE null,refreshTokenExpirationDate DATE null)";
+		"create table OAuth2Authorization (oAuth2AuthorizationId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,oAuth2ApplicationId LONG,oA2AScopeAliasesId LONG,accessTokenContent TEXT null,accessTokenContentHash LONG,accessTokenCreateDate DATE null,accessTokenExpirationDate DATE null,remoteHostInfo VARCHAR(255) null,remoteIPInfo VARCHAR(75) null,refreshTokenContent TEXT null,refreshTokenContentHash LONG,refreshTokenCreateDate DATE null,refreshTokenExpirationDate DATE null)";
 
 	public static final String TABLE_SQL_DROP =
 		"drop table OAuth2Authorization";
@@ -170,6 +172,7 @@ public class OAuth2AuthorizationModelImpl
 		model.setAccessTokenCreateDate(soapModel.getAccessTokenCreateDate());
 		model.setAccessTokenExpirationDate(
 			soapModel.getAccessTokenExpirationDate());
+		model.setRemoteHostInfo(soapModel.getRemoteHostInfo());
 		model.setRemoteIPInfo(soapModel.getRemoteIPInfo());
 		model.setRefreshTokenContent(soapModel.getRefreshTokenContent());
 		model.setRefreshTokenContentHash(
@@ -391,6 +394,12 @@ public class OAuth2AuthorizationModelImpl
 			(BiConsumer<OAuth2Authorization, Date>)
 				OAuth2Authorization::setAccessTokenExpirationDate);
 		attributeGetterFunctions.put(
+			"remoteHostInfo", OAuth2Authorization::getRemoteHostInfo);
+		attributeSetterBiConsumers.put(
+			"remoteHostInfo",
+			(BiConsumer<OAuth2Authorization, String>)
+				OAuth2Authorization::setRemoteHostInfo);
+		attributeGetterFunctions.put(
 			"remoteIPInfo", OAuth2Authorization::getRemoteIPInfo);
 		attributeSetterBiConsumers.put(
 			"remoteIPInfo",
@@ -605,6 +614,21 @@ public class OAuth2AuthorizationModelImpl
 	}
 
 	@Override
+	public String getRemoteHostInfo() {
+		if (_remoteHostInfo == null) {
+			return "";
+		}
+		else {
+			return _remoteHostInfo;
+		}
+	}
+
+	@Override
+	public void setRemoteHostInfo(String remoteHostInfo) {
+		_remoteHostInfo = remoteHostInfo;
+	}
+
+	@Override
 	public String getRemoteIPInfo() {
 		if (_remoteIPInfo == null) {
 			return "";
@@ -727,6 +751,7 @@ public class OAuth2AuthorizationModelImpl
 			getAccessTokenCreateDate());
 		oAuth2AuthorizationImpl.setAccessTokenExpirationDate(
 			getAccessTokenExpirationDate());
+		oAuth2AuthorizationImpl.setRemoteHostInfo(getRemoteHostInfo());
 		oAuth2AuthorizationImpl.setRemoteIPInfo(getRemoteIPInfo());
 		oAuth2AuthorizationImpl.setRefreshTokenContent(
 			getRefreshTokenContent());
@@ -894,6 +919,14 @@ public class OAuth2AuthorizationModelImpl
 				Long.MIN_VALUE;
 		}
 
+		oAuth2AuthorizationCacheModel.remoteHostInfo = getRemoteHostInfo();
+
+		String remoteHostInfo = oAuth2AuthorizationCacheModel.remoteHostInfo;
+
+		if ((remoteHostInfo != null) && (remoteHostInfo.length() == 0)) {
+			oAuth2AuthorizationCacheModel.remoteHostInfo = null;
+		}
+
 		oAuth2AuthorizationCacheModel.remoteIPInfo = getRemoteIPInfo();
 
 		String remoteIPInfo = oAuth2AuthorizationCacheModel.remoteIPInfo;
@@ -1030,6 +1063,7 @@ public class OAuth2AuthorizationModelImpl
 	private boolean _setOriginalAccessTokenContentHash;
 	private Date _accessTokenCreateDate;
 	private Date _accessTokenExpirationDate;
+	private String _remoteHostInfo;
 	private String _remoteIPInfo;
 	private String _refreshTokenContent;
 	private long _refreshTokenContentHash;

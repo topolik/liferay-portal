@@ -18,9 +18,7 @@ definition {
 		task ("Import test fragments from dependencies folder") {
 			FragmentsAdmin.openFragmentsAdmin(siteURLKey = "test-site-name");
 
-			FragmentsAdmin.importCollectionFromDependenciesFolder(
-				collectionZipFile = "fragment-collection.zip"
-			);
+			FragmentsAdmin.importCollectionFromDependenciesFolder(collectionZipFile = "fragment-collection.zip");
 		}
 	}
 
@@ -50,66 +48,57 @@ definition {
 		task ("Add a Title fragment to the content page") {
 			PageEditor.addFragment(
 				collectionName = "Collection Name",
-				fragmentName = "Title"
-			);
+				fragmentName = "Title");
 		}
 
 		task ("Add a Rich Text fragment to the content page") {
 			PageEditor.addFragment(
 				collectionName = "Collection Name",
-				fragmentName = "Rich Text"
-			);
+				fragmentName = "Rich Text");
 		}
 
 		task ("Add a Button fragment to the content page") {
 			PageEditor.addFragment(
 				collectionName = "Collection Name",
-				fragmentName = "Button"
-			);
+				fragmentName = "Button");
 		}
 
 		task ("Publish the content page") {
-			PageEditor.clickPublishPage();
+			PageEditor.clickPublish();
 		}
 
 		task ("Navigate to the content page") {
-			Navigator.openWithAppendToBaseURL(
-				urlAppend = "web/test-site-name/test-content-page-name"
-			);
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 		}
 
 		task ("Assert the Title fragment is present") {
 			AssertVisible(
-				locator1 = "Fragment#FRAGMENT",
 				key_content = "Lorem ipsum dolor sit amet",
 				key_fragmentClass = "header",
-				key_position = "1"
-			);
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT");
 		}
 
 		task ("Assert the Rich Text fragment is present") {
 			AssertVisible(
-				locator1 = "Fragment#FRAGMENT",
 				key_content = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
 				key_fragmentClass = "rich-text",
-				key_position = "2"
-			);
+				key_position = "2",
+				locator1 = "Fragment#FRAGMENT");
 		}
 
 		task ("Assert the Button fragment is present") {
 			AssertVisible(
-				locator1 = "Fragment#FRAGMENT",
 				key_content = "Submit",
 				key_fragmentClass = "footer",
-				key_position = "3"
-			);
+				key_position = "3",
+				locator1 = "Fragment#FRAGMENT");
 
 			AssertVisible(
-				locator1 = "Fragment#FRAGMENT",
 				key_content = "Cancel",
 				key_fragmentClass = "footer",
-				key_position = "3"
-			);
+				key_position = "3",
+				locator1 = "Fragment#FRAGMENT");
 		}
 
 		task ("Assert the Submit and Cancel buttons in the Button fragment is present") {
@@ -135,8 +124,7 @@ definition {
 
 			PageEditor.addFragment(
 				collectionName = "Collection Name",
-				fragmentName = "Button"
-			);
+				fragmentName = "Button");
 
 			Button.clickPublish();
 		}
@@ -146,17 +134,16 @@ definition {
 
 			ContentPages.addPage(
 				collectionName = "Page Template Collection",
-				pageName = "Test Page Name",
-				pageTemplateName = "Page Template Name"
-			);
+				pageName = "Test Content Page Name",
+				pageTemplateName = "Page Template Name");
 		}
 
 		task ("Publish the content page") {
-			PageEditor.clickPublishPage();
+			PageEditor.clickPublish();
 		}
 
 		task ("Navigate to the content page") {
-			Navigator.gotoSitePage(pageName = "Test Page Name", siteName = "Test Site Name");
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 		}
 
 		task ("Assert the Button fragment is present and the buttons work") {
@@ -184,35 +171,109 @@ definition {
 		task ("Add a Content fragment to the content page") {
 			PageEditor.addFragment(
 				collectionName = "Collection Name",
-				fragmentName = "Content"
-			);
+				fragmentName = "Content");
 		}
 
 		task ("Edit the Content fragment editable text") {
 			PageEditor.editFragmentText(
 				fragmentName = "Content",
 				id = "content",
-				text = "New editable fragment text"
-			);
+				text = "New editable fragment text");
 		}
 
 		task ("Publish the content page") {
-			PageEditor.clickPublishPage();
+			PageEditor.clickPublish();
 		}
 
 		task ("Navigate to the content page") {
-			Navigator.openWithAppendToBaseURL(
-				urlAppend = "web/test-site-name/test-content-page-name"
-			);
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 		}
 
 		task ("Assert the Content fragment has the updated editable text") {
 			AssertVisible(
-				locator1 = "Fragment#FRAGMENT",
 				key_content = "New editable fragment text",
 				key_fragmentClass = "body",
-				key_position = "1"
-			);
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT");
+		}
+	}
+
+	@description = "This is a test for LPS-95045. A user should be able to add an image fragment and change the image in the fragment."
+	@priority = "5"
+	test AddContentPageWithImageFragment {
+		property portal.acceptance = "true";
+
+		task ("Add a content page") {
+			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+
+			ContentPages.addPage(pageName = "Test Content Page Name");
+		}
+
+		task ("Add an Image fragment to the content page") {
+			PageEditor.addFragment(
+				collectionName = "Collection Name",
+				fragmentName = "Image");
+		}
+
+		task ("Edit the Image fragment's image") {
+			PageEditor.editFragmentImage(
+				fileName = "Document_1.png",
+				fragmentName = "Image",
+				id = "image");
+		}
+
+		task ("Assert the Image fragment's image was changed") {
+			AssertVisible(
+				key_fragmentClass = "image",
+				key_image = "Document_1.png",
+				key_position = "1",
+				locator1 = "Fragment#PAGE_EDITOR_FRAGMENT_IMAGE");
+		}
+
+		task ("Publish the content page") {
+			PageEditor.clickPublish();
+		}
+
+		task ("Navigate to the content page") {
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
+		}
+
+		task ("Assert the Image fragment appears with the image") {
+			AssertVisible(
+				key_fragmentClass = "image",
+				key_image = "Document_1.png",
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT_IMAGE");
+		}
+	}
+
+	@description = "This is a test for LPS-95042. Liferay should come out of the box with fragments."
+	@priority = "5"
+	test AddContentPageWithOOTBFragment {
+		property portal.acceptance = "true";
+
+		task ("Add a content page") {
+			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+
+			ContentPages.addPage(pageName = "Test Content Page Name");
+		}
+
+		task ("Add a Title fragment to the content page") {
+			PageEditor.addFragment(
+				collectionName = "Basic Sections",
+				fragmentName = "Banner Center");
+		}
+
+		task ("Publish the content page") {
+			PageEditor.clickPublish();
+		}
+
+		task ("Navigate to the content page") {
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
+		}
+
+		task ("Assert the Banner Center fragment is on the page") {
+			AssertVisible(locator1 = "//section//div[contains(@class,'banner')]");
 		}
 	}
 
@@ -225,34 +286,258 @@ definition {
 			ContentPages.addPage(pageName = "Test Content Page Name");
 		}
 
-		task ("Navigate to the content page (defaults to 'View Mode')") {
-			Navigator.openWithAppendToBaseURL(
-				urlAppend = "web/test-site-name/test-content-page-name"
-			);
+		task ("Navigate to the content page") {
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 		}
 
 		task ("Assert the page cannot be edited in 'View Mode' by asserting the fragments side bar is not present") {
 			AssertElementNotPresent(locator1 = "PageEditor#FRAGMENT_SIDEBAR");
 		}
 
-		task ("Navigate to the content page's 'Edit Mode' using the mode toggle") {
-			ContentPages.gotoEditMode();
+		task ("Navigate to the content page's 'Edit Mode'") {
+			ContentPages.clickPencil();
 		}
 
 		task ("Assert the content page can be edited in 'Edit Mode' by asserting the fragments side bar is present") {
 			AssertVisible(locator1 = "PageEditor#FRAGMENT_SIDEBAR");
 		}
 
-		task ("Navigate to the content page's 'View Mode' using the mode toggle") {
-			ContentPages.gotoViewMode();
+		task ("Navigate back to the content page") {
+			PageEditor.clickBack();
 		}
 
-		task ("Assert the page cannot be edited in 'View Mode' by asserting the fragments side bar is not present") {
+		task ("Assert the page cannot be edited by asserting the fragments side bar is not present") {
 			AssertElementNotPresent(locator1 = "PageEditor#FRAGMENT_SIDEBAR");
 		}
 	}
 
-	@description = "Edit an existing content page that has fragments. This testcase covers the bug found in LPS-85872."
+	@description = "This is a test for LPS-91000. User can edit number of columns a section has as well as padding options."
+	@priority = "5"
+	test ChangeLayoutSectionColumnCount {
+		property portal.acceptance = "false";
+
+		task ("Add a content page") {
+			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+
+			ContentPages.addPage(pageName = "Test Content Page Name");
+		}
+
+		task ("Add a 2 column layout") {
+			PageEditor.addLayoutSection(columnCount = "2");
+		}
+
+		task ("Assert the layout has exacty 2 columns") {
+			AssertVisible(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'col-6')][1]");
+			AssertVisible(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'col-6')][2]");
+			AssertElementNotPresent(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'col-6')][3]");
+		}
+
+		task ("Assert the layout by default has vertical padding x1") {
+			AssertVisible(locator1 = "//section[contains(@class,'py-3')]");
+		}
+
+		task ("Assert the layout by default has horizontal padding x1") {
+			AssertVisible(locator1 = "//section[contains(@class,'px-3')]");
+		}
+
+		task ("Assert the layout by default has space between columns") {
+			AssertVisible(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'row')][not(contains(@class,'no-gutters'))]");
+		}
+
+		task ("Edit the layout's spacing properties") {
+			PageEditor.editLayoutSectionSpacing(
+				numberOfColumns = "3",
+				paddingH = "x10",
+				paddingV = "x4",
+				spaceBetweenColumns = "false");
+		}
+
+		task ("Assert the layout now has exacty 2 columns") {
+			AssertVisible(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'col-4')][1]");
+			AssertVisible(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'col-4')][2]");
+			AssertVisible(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'col-4')][3]");
+			AssertElementNotPresent(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'col-4')][4]");
+		}
+
+		task ("Assert the layout now has vertical padding x4") {
+			AssertVisible(locator1 = "//section[contains(@class,'py-5')]");
+		}
+
+		task ("Assert the layout now has horizontal padding x10") {
+			AssertVisible(locator1 = "//section[contains(@class,'px-8')]");
+		}
+
+		task ("Assert the layout now has no space between columns") {
+			AssertVisible(locator1 = "//section[contains(@class,'fragment-entry-link')]//div[contains(@class,'row')][contains(@class,'no-gutters')]");
+		}
+	}
+
+	@description = "This is a test for LPS-78726. Discarding a draft will revert a content page back to its most recent published version."
+	@priority = "5"
+	test DiscardContentPageDraft {
+		property portal.acceptance = "true";
+
+		task ("Add a content page") {
+			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
+
+			ContentPages.addPage(pageName = "Test Content Page Name");
+		}
+
+		task ("Assert the Discard Draft and Publish buttons start off disabled") {
+			AssertVisible(
+				key_text = "Discard Draft",
+				locator1 = "Button#ANY_DISABLED");
+
+			AssertVisible(
+				key_text = "Publish",
+				locator1 = "Button#ANY_DISABLED");
+		}
+
+		task ("Add a Title fragment to the content page") {
+			PageEditor.addFragment(
+				collectionName = "Collection Name",
+				fragmentName = "Title");
+		}
+
+		task ("Discard the draft") {
+			PageEditor.clickDiscardDraft();
+		}
+
+		task ("Assert the Title fragment is no longer present") {
+			AssertElementNotPresent(
+				key_content = "Lorem ipsum dolor sit amet",
+				key_fragmentClass = "header",
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Assert the Discard Draft and Publish buttons are now disabled") {
+			AssertVisible(
+				key_text = "Discard Draft",
+				locator1 = "Button#ANY_DISABLED");
+
+			AssertVisible(
+				key_text = "Publish",
+				locator1 = "Button#ANY_DISABLED");
+		}
+
+		task ("Add a Title fragment to the content page") {
+			PageEditor.addFragment(
+				collectionName = "Collection Name",
+				fragmentName = "Title");
+		}
+
+		task ("Assert the Discard Draft and Publish buttons are now enabled") {
+			AssertVisible(
+				key_text = "Discard Draft",
+				locator1 = "Button#ANY_ENABLED");
+
+			AssertVisible(
+				key_text = "Publish",
+				locator1 = "Button#ANY_ENABLED");
+		}
+
+		task ("Publish the content page") {
+			PageEditor.clickPublish();
+		}
+
+		task ("Navigate to the content page") {
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
+		}
+
+		task ("Navigate to the content page's 'Edit Mode'") {
+			ContentPages.clickPencil();
+		}
+
+		task ("Assert the Discard Draft and Publish buttons are now disabled") {
+			AssertVisible(
+				key_text = "Discard Draft",
+				locator1 = "Button#ANY_DISABLED");
+
+			AssertVisible(
+				key_text = "Publish",
+				locator1 = "Button#ANY_DISABLED");
+		}
+
+		task ("Edit the Title fragment's editable text") {
+			PageEditor.editFragmentText(
+				fragmentName = "Title",
+				id = "title",
+				text = "New editable fragment text");
+		}
+
+		task ("Assert the Discard Draft and Publish buttons are now enabled") {
+			AssertVisible(
+				key_text = "Discard Draft",
+				locator1 = "Button#ANY_ENABLED");
+
+			AssertVisible(
+				key_text = "Publish",
+				locator1 = "Button#ANY_ENABLED");
+		}
+
+		task ("Discard the draft") {
+			PageEditor.clickDiscardDraft();
+		}
+
+		task ("Assert the Title fragment's text has reverted back to what it was before") {
+			AssertVisible(
+				key_content = "Lorem ipsum dolor sit amet",
+				key_fragmentClass = "header",
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Assert the Discard Draft and Publish buttons are now disabled") {
+			AssertVisible(
+				key_text = "Discard Draft",
+				locator1 = "Button#ANY_DISABLED");
+
+			AssertVisible(
+				key_text = "Publish",
+				locator1 = "Button#ANY_DISABLED");
+		}
+
+		task ("Add a Rich Text fragment to the content page") {
+			PageEditor.addFragment(
+				collectionName = "Collection Name",
+				fragmentName = "Rich Text");
+		}
+
+		task ("Assert the Discard Draft and Publish buttons are now enabled") {
+			AssertVisible(
+				key_text = "Discard Draft",
+				locator1 = "Button#ANY_ENABLED");
+
+			AssertVisible(
+				key_text = "Publish",
+				locator1 = "Button#ANY_ENABLED");
+		}
+
+		task ("Discard the draft") {
+			PageEditor.clickDiscardDraft();
+		}
+
+		task ("Assert the Rich Text fragment has been removed") {
+			AssertElementNotPresent(
+				key_content = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+				key_fragmentClass = "rich-text",
+				key_position = "2",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Assert the Discard Draft and Publish buttons are now disabled") {
+			AssertVisible(
+				key_text = "Discard Draft",
+				locator1 = "Button#ANY_DISABLED");
+
+			AssertVisible(
+				key_text = "Publish",
+				locator1 = "Button#ANY_DISABLED");
+		}
+	}
+
+	@description = "Edit an existing content page that has fragments. This testcase covers the bug found in LPS-85872. This test has been extended to cover LPS-78726. Changes to content pages only appear after they are published."
 	@priority = "5"
 	test EditContentPage {
 		property portal.acceptance = "true";
@@ -267,85 +552,146 @@ definition {
 		task ("Add a Title fragment to the content page") {
 			PageEditor.addFragment(
 				collectionName = "Collection Name",
-				fragmentName = "Title"
-			);
+				fragmentName = "Title");
 		}
 
 		task ("Add a Rich Text fragment to the content page") {
 			PageEditor.addFragment(
 				collectionName = "Collection Name",
-				fragmentName = "Rich Text"
-			);
-		}
-
-		task ("Publish the content page") {
-			PageEditor.clickPublishPage();
+				fragmentName = "Rich Text");
 		}
 
 		task ("Navigate to the content page") {
-			Navigator.openWithAppendToBaseURL(
-				urlAppend = "web/test-site-name/test-content-page-name"
-			);
+			Navigator.openWithAppendToBaseURL(urlAppend = "web/test-site-name/test-content-page-name");
 		}
 
-		task ("Navigate to the content page's 'Edit Mode' using the mode toggle") {
-			ContentPages.gotoEditMode();
+		task ("Assert the Title fragment is not present because it has not been published yet") {
+			AssertElementNotPresent(
+				key_content = "Lorem ipsum dolor sit amet",
+				key_fragmentClass = "header",
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Assert the Rich Text fragment is not present because it has not been published yet") {
+			AssertElementNotPresent(
+				key_content = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+				key_fragmentClass = "rich-text",
+				key_position = "2",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Navigate to the content page's 'Edit Mode'") {
+			ContentPages.clickPencil();
+		}
+
+		task ("Publish the content page") {
+			PageEditor.clickPublish();
+		}
+
+		task ("Assert the Title fragment is present") {
+			AssertVisible(
+				key_content = "Lorem ipsum dolor sit amet",
+				key_fragmentClass = "header",
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Assert the Rich Text fragment is present") {
+			AssertVisible(
+				key_content = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+				key_fragmentClass = "rich-text",
+				key_position = "2",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Navigate to the content page's 'Edit Mode'") {
+			ContentPages.clickPencil();
 		}
 
 		task ("Add a Content fragment to the content page") {
 			PageEditor.addFragment(
 				collectionName = "Collection Name",
-				fragmentName = "Content"
-			);
+				fragmentName = "Content");
 		}
 
 		task ("Edit the Rich Text fragment's editable text") {
 			PageEditor.editFragmentText(
 				fragmentName = "Rich Text",
 				id = "rich-text",
-				text = "New editable fragment text"
-			);
+				text = "New editable fragment text");
+		}
+
+		task ("View the content page") {
+			PageEditor.clickBack();
+		}
+
+		task ("Assert the Title fragment is present") {
+			AssertVisible(
+				key_content = "Lorem ipsum dolor sit amet",
+				key_fragmentClass = "header",
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Assert the Rich Text fragment is still has its original text because the edit has not been published yet") {
+			AssertVisible(
+				key_content = "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+				key_fragmentClass = "rich-text",
+				key_position = "2",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Assert the Content fragment is not present because the adding of the fragment has not been published yet") {
+			AssertElementNotPresent(
+				key_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean tempus eleifend lacus nec porttitor. Vestibulum pharetra ullamcorper felis volutpat commodo. Nam id ipsum placerat, hendrerit orci eu, congue nisi. Proin.",
+				key_fragmentClass = "body",
+				key_position = "3",
+				locator1 = "Fragment#FRAGMENT");
+		}
+
+		task ("Navigate to the content page's edit mode") {
+			ContentPages.clickPencil();
 		}
 
 		task ("Publish the content page") {
-			PageEditor.clickPublishPage();
-		}
-
-		task ("Navigate to the content page's 'View Mode' using the mode toggle") {
-			ContentPages.gotoViewMode();
+			PageEditor.clickPublish();
 		}
 
 		task ("Assert the Title Fragment is present") {
 			AssertVisible(
-				locator1 = "Fragment#FRAGMENT",
 				key_content = "Lorem ipsum dolor sit amet",
 				key_fragmentClass = "header",
-				key_position = "1"
-			);
+				key_position = "1",
+				locator1 = "Fragment#FRAGMENT");
 		}
 
 		task ("Assert the Rich Text fragment with updated editable text is present") {
 			AssertVisible(
-				locator1 = "Fragment#FRAGMENT",
 				key_content = "New editable fragment text",
 				key_fragmentClass = "rich-text",
-				key_position = "2"
-			);
+				key_position = "2",
+				locator1 = "Fragment#FRAGMENT");
 		}
 
 		task ("Assert the Content fragment is present") {
 			AssertVisible(
-				locator1 = "Fragment#FRAGMENT",
 				key_content = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean tempus eleifend lacus nec porttitor. Vestibulum pharetra ullamcorper felis volutpat commodo. Nam id ipsum placerat, hendrerit orci eu, congue nisi. Proin.",
 				key_fragmentClass = "body",
-				key_position = "3"
-			);
+				key_position = "3",
+				locator1 = "Fragment#FRAGMENT");
 		}
 	}
 
 	@description = "This is a test for LPS-81870. In edit mode the page should still show the elements of the page that are not from the page itself, like the header, footer, or elements defined by the theme."
 	@priority = "5"
 	test ViewEditModeHeaderFooterTheme {
+		task ("Add a widget page to the site") {
+			JSONLayout.addPublicLayout(
+				groupName = "Test Site Name",
+				layoutName = "Test Widget Page Name");
+		}
+
 		task ("Add a content page") {
 			SitePages.openPagesAdmin(siteURLKey = "test-site-name");
 
@@ -353,83 +699,59 @@ definition {
 		}
 
 		task ("Assert the header and footer are disabled") {
-			AssertVisible(
-				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_HEADER"
-			);
+			AssertVisible(locator1 = "PageEditor#CONTENT_PAGE_DISABLED_HEADER");
 
-			AssertVisible(
-				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_FOOTER"
-			);
+			AssertVisible(locator1 = "PageEditor#CONTENT_PAGE_DISABLED_FOOTER");
 		}
 
 		task ("Assert the header and footer contain the elements that are part of the header and footer") {
-			AssertVisible(
-				locator1 = "Home#DEFAULT_LOGO"
-			);
+			AssertVisible(locator1 = "Home#DEFAULT_LOGO");
 
 			AssertTextEquals(
 				locator1 = "Home#SITE_NAME",
-				value1 = "Test Site Name"
-			);
+				value1 = "Test Site Name");
 
 			AssertTextEquals(
 				locator1 = "Message#INFO",
-				value1 = "This search bar is not visible to users yet. Set up its destination to make it visible."
-			);
+				value1 = "This search bar is not visible to users yet. Set up its destination to make it visible.");
 
-			AssertVisible(
-				locator1 = "UserBar#USER_AVATAR_IMAGE"
-			);
-
-			AssertVisible(
-				locator1 = "Home#PAGE",
-				key_pageName = "Test Content Page Name"
-			);
+			AssertVisible(locator1 = "UserBar#USER_AVATAR_IMAGE");
 
 			AssertTextEquals(
 				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_FOOTER",
-				value1 = "Powered By Liferay"
-			);
+				value1 = "Powered By Liferay");
+		}
+
+		task ("Assert the navigation menu widget with the previously created widget page also displays in the disabled part of the header") {
+			AssertVisible(
+				key_pageName = "Test Widget Page Name",
+				locator1 = "Home#PAGE");
 		}
 
 		task ("Assert clicking on the disabled header will cause a popover message explaining that the header is disabled") {
-			Click(
-				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_HEADER"
-			);
+			Click(locator1 = "PageEditor#CONTENT_PAGE_DISABLED_HEADER");
 
-			AssertVisible(
-				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_POPOVER"
-			);
+			AssertVisible(locator1 = "PageEditor#CONTENT_PAGE_DISABLED_POPOVER");
 
 			AssertTextEquals(
 				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_POPOVER",
-				value1 = "This area is defined by the theme. To change theme settings go to page configuration."
-			);
+				value1 = "This area is defined by the theme. To change theme settings go to page configuration.");
 		}
 
 		task ("Click away from the header so the popover will disappear") {
-			Click(
-				locator1 = "PageEditor#EMPTY_MESSAGE"
-			);
+			Click(locator1 = "PageEditor#EMPTY_MESSAGE");
 
-			AssertElementNotPresent(
-				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_POPOVER"
-			);
+			AssertElementNotPresent(locator1 = "PageEditor#CONTENT_PAGE_DISABLED_POPOVER");
 		}
 
 		task ("Assert clicking on the disabled footer will cause a popover message explaining that the footer is disabled") {
-			Click(
-				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_FOOTER"
-			);
+			Click(locator1 = "PageEditor#CONTENT_PAGE_DISABLED_FOOTER");
 
-			AssertVisible(
-				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_POPOVER"
-			);
+			AssertVisible(locator1 = "PageEditor#CONTENT_PAGE_DISABLED_POPOVER");
 
 			AssertTextEquals(
 				locator1 = "PageEditor#CONTENT_PAGE_DISABLED_POPOVER",
-				value1 = "This area is defined by the theme. To change theme settings go to page configuration."
-			);
+				value1 = "This area is defined by the theme. To change theme settings go to page configuration.");
 		}
 	}
 }

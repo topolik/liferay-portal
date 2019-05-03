@@ -24,6 +24,13 @@ import com.liferay.petra.string.StringBundler;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,6 +45,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "DataLayoutRow")
 public class DataLayoutRow {
 
+	@Schema
 	public DataLayoutColumn[] getDataLayoutColums() {
 		return dataLayoutColums;
 	}
@@ -54,6 +62,9 @@ public class DataLayoutRow {
 		try {
 			dataLayoutColums = dataLayoutColumsUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -63,21 +74,44 @@ public class DataLayoutRow {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected DataLayoutColumn[] dataLayoutColums;
 
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
+
+		if (!(object instanceof DataLayoutRow)) {
+			return false;
+		}
+
+		DataLayoutRow dataLayoutRow = (DataLayoutRow)object;
+
+		return Objects.equals(toString(), dataLayoutRow.toString());
+	}
+
+	@Override
+	public int hashCode() {
+		String string = toString();
+
+		return string.hashCode();
+	}
+
 	public String toString() {
 		StringBundler sb = new StringBundler();
 
 		sb.append("{");
 
-		sb.append("\"dataLayoutColums\": ");
+		if (dataLayoutColums != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
 
-		if (dataLayoutColums == null) {
-			sb.append("null");
-		}
-		else {
+			sb.append("\"dataLayoutColums\": ");
+
 			sb.append("[");
 
 			for (int i = 0; i < dataLayoutColums.length; i++) {
-				sb.append(dataLayoutColums[i]);
+				sb.append(String.valueOf(dataLayoutColums[i]));
 
 				if ((i + 1) < dataLayoutColums.length) {
 					sb.append(", ");
@@ -85,6 +119,41 @@ public class DataLayoutRow {
 			}
 
 			sb.append("]");
+		}
+
+		sb.append("}");
+
+		return sb.toString();
+	}
+
+	private static String _escape(Object object) {
+		String string = String.valueOf(object);
+
+		return string.replaceAll("\"", "\\\\\"");
+	}
+
+	private static String _toJSON(Map<String, ?> map) {
+		StringBuilder sb = new StringBuilder("{");
+
+		@SuppressWarnings("unchecked")
+		Set set = map.entrySet();
+
+		@SuppressWarnings("unchecked")
+		Iterator<Map.Entry<String, ?>> iterator = set.iterator();
+
+		while (iterator.hasNext()) {
+			Map.Entry<String, ?> entry = iterator.next();
+
+			sb.append("\"");
+			sb.append(entry.getKey());
+			sb.append("\":");
+			sb.append("\"");
+			sb.append(entry.getValue());
+			sb.append("\"");
+
+			if (iterator.hasNext()) {
+				sb.append(",");
+			}
 		}
 
 		sb.append("}");

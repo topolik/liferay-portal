@@ -31,25 +31,21 @@ import org.osgi.service.component.annotations.Reference;
 /**
  * @author Raymond Augé
  * @author Alexander Chow
+ *
+ * @deprecated As of Mueller (7.2.x), with no direct replacement
  */
 @Component(
 	immediate = true,
 	property = "verify.process.name=com.liferay.bookmarks.service",
 	service = VerifyProcess.class
 )
+@Deprecated
 public class BookmarksServiceVerifyProcess extends VerifyProcess {
 
 	@Override
 	protected void doVerify() throws Exception {
 		updateFolderAssets();
 		verifyTree();
-	}
-
-	@Reference(unbind = "-")
-	protected void setBookmarksFolderLocalService(
-		BookmarksFolderLocalService bookmarksFolderLocalService) {
-
-		_bookmarksFolderLocalService = bookmarksFolderLocalService;
 	}
 
 	protected void updateFolderAssets() throws Exception {
@@ -97,6 +93,7 @@ public class BookmarksServiceVerifyProcess extends VerifyProcess {
 	private static final Log _log = LogFactoryUtil.getLog(
 		BookmarksServiceVerifyProcess.class);
 
+	@Reference
 	private BookmarksFolderLocalService _bookmarksFolderLocalService;
 
 	@Reference

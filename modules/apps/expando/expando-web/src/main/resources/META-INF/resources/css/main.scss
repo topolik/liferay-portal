@@ -1,7 +1,25 @@
 .portlet-expando {
+	.card-body {
+		.custom-aspect-ratio-geolocation {
+			padding-bottom: 35%;
+		}
+
+		.custom-checkbox, .custom-radio {
+			margin-bottom: 0 !important;
+		}
+	}
+
 	.custom-attribute-icon {
 		float: left;
 		margin-right: 5px;
+	}
+
+	.custom-card-body-boolean {
+		height: 60px;
+	}
+
+	.custom-precision-type-field-wrapper .form-group {
+		margin-bottom: 0;
 	}
 
 	.date-input-wrapper, .localized-input-wrapper {

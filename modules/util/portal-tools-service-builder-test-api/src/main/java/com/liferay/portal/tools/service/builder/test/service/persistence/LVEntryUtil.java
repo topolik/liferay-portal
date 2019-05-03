@@ -292,6 +292,380 @@ public class LVEntryUtil {
 	}
 
 	/**
+	 * Returns all the lv entries where uuid = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @return the matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_Head(String uuid, boolean head) {
+		return getPersistence().findByUuid_Head(uuid, head);
+	}
+
+	/**
+	 * Returns a range of all the lv entries where uuid = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @return the range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_Head(
+		String uuid, boolean head, int start, int end) {
+
+		return getPersistence().findByUuid_Head(uuid, head, start, end);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where uuid = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_Head(
+		String uuid, boolean head, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().findByUuid_Head(
+			uuid, head, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where uuid = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_Head(
+		String uuid, boolean head, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator,
+		boolean retrieveFromCache) {
+
+		return getPersistence().findByUuid_Head(
+			uuid, head, start, end, orderByComparator, retrieveFromCache);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where uuid = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByUuid_Head_First(
+			String uuid, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_Head_First(
+			uuid, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where uuid = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByUuid_Head_First(
+		String uuid, boolean head,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByUuid_Head_First(
+			uuid, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where uuid = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByUuid_Head_Last(
+			String uuid, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_Head_Last(
+			uuid, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where uuid = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByUuid_Head_Last(
+		String uuid, boolean head,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByUuid_Head_Last(
+			uuid, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the lv entries before and after the current lv entry in the ordered set where uuid = &#63; and head = &#63;.
+	 *
+	 * @param lvEntryId the primary key of the current lv entry
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next lv entry
+	 * @throws NoSuchLVEntryException if a lv entry with the primary key could not be found
+	 */
+	public static LVEntry[] findByUuid_Head_PrevAndNext(
+			long lvEntryId, String uuid, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_Head_PrevAndNext(
+			lvEntryId, uuid, head, orderByComparator);
+	}
+
+	/**
+	 * Removes all the lv entries where uuid = &#63; and head = &#63; from the database.
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 */
+	public static void removeByUuid_Head(String uuid, boolean head) {
+		getPersistence().removeByUuid_Head(uuid, head);
+	}
+
+	/**
+	 * Returns the number of lv entries where uuid = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param head the head
+	 * @return the number of matching lv entries
+	 */
+	public static int countByUuid_Head(String uuid, boolean head) {
+		return getPersistence().countByUuid_Head(uuid, head);
+	}
+
+	/**
+	 * Returns all the lv entries where uuid = &#63; and groupId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @return the matching lv entries
+	 */
+	public static List<LVEntry> findByUUID_G(String uuid, long groupId) {
+		return getPersistence().findByUUID_G(uuid, groupId);
+	}
+
+	/**
+	 * Returns a range of all the lv entries where uuid = &#63; and groupId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @return the range of matching lv entries
+	 */
+	public static List<LVEntry> findByUUID_G(
+		String uuid, long groupId, int start, int end) {
+
+		return getPersistence().findByUUID_G(uuid, groupId, start, end);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where uuid = &#63; and groupId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByUUID_G(
+		String uuid, long groupId, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().findByUUID_G(
+			uuid, groupId, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where uuid = &#63; and groupId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByUUID_G(
+		String uuid, long groupId, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator,
+		boolean retrieveFromCache) {
+
+		return getPersistence().findByUUID_G(
+			uuid, groupId, start, end, orderByComparator, retrieveFromCache);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where uuid = &#63; and groupId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByUUID_G_First(
+			String uuid, long groupId,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUUID_G_First(
+			uuid, groupId, orderByComparator);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where uuid = &#63; and groupId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByUUID_G_First(
+		String uuid, long groupId,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByUUID_G_First(
+			uuid, groupId, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where uuid = &#63; and groupId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByUUID_G_Last(
+			String uuid, long groupId,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUUID_G_Last(
+			uuid, groupId, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where uuid = &#63; and groupId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByUUID_G_Last(
+		String uuid, long groupId,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByUUID_G_Last(
+			uuid, groupId, orderByComparator);
+	}
+
+	/**
+	 * Returns the lv entries before and after the current lv entry in the ordered set where uuid = &#63; and groupId = &#63;.
+	 *
+	 * @param lvEntryId the primary key of the current lv entry
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next lv entry
+	 * @throws NoSuchLVEntryException if a lv entry with the primary key could not be found
+	 */
+	public static LVEntry[] findByUUID_G_PrevAndNext(
+			long lvEntryId, String uuid, long groupId,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUUID_G_PrevAndNext(
+			lvEntryId, uuid, groupId, orderByComparator);
+	}
+
+	/**
+	 * Removes all the lv entries where uuid = &#63; and groupId = &#63; from the database.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 */
+	public static void removeByUUID_G(String uuid, long groupId) {
+		getPersistence().removeByUUID_G(uuid, groupId);
+	}
+
+	/**
+	 * Returns the number of lv entries where uuid = &#63; and groupId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param groupId the group ID
+	 * @return the number of matching lv entries
+	 */
+	public static int countByUUID_G(String uuid, long groupId) {
+		return getPersistence().countByUUID_G(uuid, groupId);
+	}
+
+	/**
 	 * Returns the lv entry where uuid = &#63; and groupId = &#63; and head = &#63; or throws a <code>NoSuchLVEntryException</code> if it could not be found.
 	 *
 	 * @param uuid the uuid
@@ -300,11 +674,12 @@ public class LVEntryUtil {
 	 * @return the matching lv entry
 	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
 	 */
-	public static LVEntry findByUUID_G(String uuid, long groupId, boolean head)
+	public static LVEntry findByUUID_G_Head(
+			String uuid, long groupId, boolean head)
 		throws com.liferay.portal.tools.service.builder.test.exception.
 			NoSuchLVEntryException {
 
-		return getPersistence().findByUUID_G(uuid, groupId, head);
+		return getPersistence().findByUUID_G_Head(uuid, groupId, head);
 	}
 
 	/**
@@ -315,10 +690,10 @@ public class LVEntryUtil {
 	 * @param head the head
 	 * @return the matching lv entry, or <code>null</code> if a matching lv entry could not be found
 	 */
-	public static LVEntry fetchByUUID_G(
+	public static LVEntry fetchByUUID_G_Head(
 		String uuid, long groupId, boolean head) {
 
-		return getPersistence().fetchByUUID_G(uuid, groupId, head);
+		return getPersistence().fetchByUUID_G_Head(uuid, groupId, head);
 	}
 
 	/**
@@ -330,10 +705,10 @@ public class LVEntryUtil {
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching lv entry, or <code>null</code> if a matching lv entry could not be found
 	 */
-	public static LVEntry fetchByUUID_G(
+	public static LVEntry fetchByUUID_G_Head(
 		String uuid, long groupId, boolean head, boolean retrieveFromCache) {
 
-		return getPersistence().fetchByUUID_G(
+		return getPersistence().fetchByUUID_G_Head(
 			uuid, groupId, head, retrieveFromCache);
 	}
 
@@ -345,12 +720,12 @@ public class LVEntryUtil {
 	 * @param head the head
 	 * @return the lv entry that was removed
 	 */
-	public static LVEntry removeByUUID_G(
+	public static LVEntry removeByUUID_G_Head(
 			String uuid, long groupId, boolean head)
 		throws com.liferay.portal.tools.service.builder.test.exception.
 			NoSuchLVEntryException {
 
-		return getPersistence().removeByUUID_G(uuid, groupId, head);
+		return getPersistence().removeByUUID_G_Head(uuid, groupId, head);
 	}
 
 	/**
@@ -361,8 +736,403 @@ public class LVEntryUtil {
 	 * @param head the head
 	 * @return the number of matching lv entries
 	 */
-	public static int countByUUID_G(String uuid, long groupId, boolean head) {
-		return getPersistence().countByUUID_G(uuid, groupId, head);
+	public static int countByUUID_G_Head(
+		String uuid, long groupId, boolean head) {
+
+		return getPersistence().countByUUID_G_Head(uuid, groupId, head);
+	}
+
+	/**
+	 * Returns all the lv entries where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @return the matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_C(String uuid, long companyId) {
+		return getPersistence().findByUuid_C(uuid, companyId);
+	}
+
+	/**
+	 * Returns a range of all the lv entries where uuid = &#63; and companyId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @return the range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_C(
+		String uuid, long companyId, int start, int end) {
+
+		return getPersistence().findByUuid_C(uuid, companyId, start, end);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where uuid = &#63; and companyId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_C(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().findByUuid_C(
+			uuid, companyId, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where uuid = &#63; and companyId = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_C(
+		String uuid, long companyId, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator,
+		boolean retrieveFromCache) {
+
+		return getPersistence().findByUuid_C(
+			uuid, companyId, start, end, orderByComparator, retrieveFromCache);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByUuid_C_First(
+			String uuid, long companyId,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_C_First(
+			uuid, companyId, orderByComparator);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByUuid_C_First(
+		String uuid, long companyId,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByUuid_C_First(
+			uuid, companyId, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByUuid_C_Last(
+			String uuid, long companyId,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_C_Last(
+			uuid, companyId, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByUuid_C_Last(
+		String uuid, long companyId,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByUuid_C_Last(
+			uuid, companyId, orderByComparator);
+	}
+
+	/**
+	 * Returns the lv entries before and after the current lv entry in the ordered set where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param lvEntryId the primary key of the current lv entry
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next lv entry
+	 * @throws NoSuchLVEntryException if a lv entry with the primary key could not be found
+	 */
+	public static LVEntry[] findByUuid_C_PrevAndNext(
+			long lvEntryId, String uuid, long companyId,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_C_PrevAndNext(
+			lvEntryId, uuid, companyId, orderByComparator);
+	}
+
+	/**
+	 * Removes all the lv entries where uuid = &#63; and companyId = &#63; from the database.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 */
+	public static void removeByUuid_C(String uuid, long companyId) {
+		getPersistence().removeByUuid_C(uuid, companyId);
+	}
+
+	/**
+	 * Returns the number of lv entries where uuid = &#63; and companyId = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @return the number of matching lv entries
+	 */
+	public static int countByUuid_C(String uuid, long companyId) {
+		return getPersistence().countByUuid_C(uuid, companyId);
+	}
+
+	/**
+	 * Returns all the lv entries where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @return the matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_C_Head(
+		String uuid, long companyId, boolean head) {
+
+		return getPersistence().findByUuid_C_Head(uuid, companyId, head);
+	}
+
+	/**
+	 * Returns a range of all the lv entries where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @return the range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_C_Head(
+		String uuid, long companyId, boolean head, int start, int end) {
+
+		return getPersistence().findByUuid_C_Head(
+			uuid, companyId, head, start, end);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_C_Head(
+		String uuid, long companyId, boolean head, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().findByUuid_C_Head(
+			uuid, companyId, head, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByUuid_C_Head(
+		String uuid, long companyId, boolean head, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator,
+		boolean retrieveFromCache) {
+
+		return getPersistence().findByUuid_C_Head(
+			uuid, companyId, head, start, end, orderByComparator,
+			retrieveFromCache);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByUuid_C_Head_First(
+			String uuid, long companyId, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_C_Head_First(
+			uuid, companyId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByUuid_C_Head_First(
+		String uuid, long companyId, boolean head,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByUuid_C_Head_First(
+			uuid, companyId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByUuid_C_Head_Last(
+			String uuid, long companyId, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_C_Head_Last(
+			uuid, companyId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByUuid_C_Head_Last(
+		String uuid, long companyId, boolean head,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByUuid_C_Head_Last(
+			uuid, companyId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the lv entries before and after the current lv entry in the ordered set where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * @param lvEntryId the primary key of the current lv entry
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next lv entry
+	 * @throws NoSuchLVEntryException if a lv entry with the primary key could not be found
+	 */
+	public static LVEntry[] findByUuid_C_Head_PrevAndNext(
+			long lvEntryId, String uuid, long companyId, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByUuid_C_Head_PrevAndNext(
+			lvEntryId, uuid, companyId, head, orderByComparator);
+	}
+
+	/**
+	 * Removes all the lv entries where uuid = &#63; and companyId = &#63; and head = &#63; from the database.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 */
+	public static void removeByUuid_C_Head(
+		String uuid, long companyId, boolean head) {
+
+		getPersistence().removeByUuid_C_Head(uuid, companyId, head);
+	}
+
+	/**
+	 * Returns the number of lv entries where uuid = &#63; and companyId = &#63; and head = &#63;.
+	 *
+	 * @param uuid the uuid
+	 * @param companyId the company ID
+	 * @param head the head
+	 * @return the number of matching lv entries
+	 */
+	public static int countByUuid_C_Head(
+		String uuid, long companyId, boolean head) {
+
+		return getPersistence().countByUuid_C_Head(uuid, companyId, head);
 	}
 
 	/**
@@ -621,6 +1391,477 @@ public class LVEntryUtil {
 	}
 
 	/**
+	 * Returns all the lv entries where groupId = &#63; and head = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @return the matching lv entries
+	 */
+	public static List<LVEntry> findByGroupId_Head(long groupId, boolean head) {
+		return getPersistence().findByGroupId_Head(groupId, head);
+	}
+
+	/**
+	 * Returns a range of all the lv entries where groupId = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @return the range of matching lv entries
+	 */
+	public static List<LVEntry> findByGroupId_Head(
+		long groupId, boolean head, int start, int end) {
+
+		return getPersistence().findByGroupId_Head(groupId, head, start, end);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where groupId = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByGroupId_Head(
+		long groupId, boolean head, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().findByGroupId_Head(
+			groupId, head, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where groupId = &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByGroupId_Head(
+		long groupId, boolean head, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator,
+		boolean retrieveFromCache) {
+
+		return getPersistence().findByGroupId_Head(
+			groupId, head, start, end, orderByComparator, retrieveFromCache);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where groupId = &#63; and head = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByGroupId_Head_First(
+			long groupId, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByGroupId_Head_First(
+			groupId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where groupId = &#63; and head = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByGroupId_Head_First(
+		long groupId, boolean head,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByGroupId_Head_First(
+			groupId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where groupId = &#63; and head = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByGroupId_Head_Last(
+			long groupId, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByGroupId_Head_Last(
+			groupId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where groupId = &#63; and head = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByGroupId_Head_Last(
+		long groupId, boolean head,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByGroupId_Head_Last(
+			groupId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns the lv entries before and after the current lv entry in the ordered set where groupId = &#63; and head = &#63;.
+	 *
+	 * @param lvEntryId the primary key of the current lv entry
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next lv entry
+	 * @throws NoSuchLVEntryException if a lv entry with the primary key could not be found
+	 */
+	public static LVEntry[] findByGroupId_Head_PrevAndNext(
+			long lvEntryId, long groupId, boolean head,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByGroupId_Head_PrevAndNext(
+			lvEntryId, groupId, head, orderByComparator);
+	}
+
+	/**
+	 * Returns all the lv entries where groupId = any &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupIds the group IDs
+	 * @param head the head
+	 * @return the matching lv entries
+	 */
+	public static List<LVEntry> findByGroupId_Head(
+		long[] groupIds, boolean head) {
+
+		return getPersistence().findByGroupId_Head(groupIds, head);
+	}
+
+	/**
+	 * Returns a range of all the lv entries where groupId = any &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupIds the group IDs
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @return the range of matching lv entries
+	 */
+	public static List<LVEntry> findByGroupId_Head(
+		long[] groupIds, boolean head, int start, int end) {
+
+		return getPersistence().findByGroupId_Head(groupIds, head, start, end);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where groupId = any &#63; and head = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupIds the group IDs
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByGroupId_Head(
+		long[] groupIds, boolean head, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().findByGroupId_Head(
+			groupIds, head, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where groupId = &#63; and head = &#63;, optionally using the finder cache.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByGroupId_Head(
+		long[] groupIds, boolean head, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator,
+		boolean retrieveFromCache) {
+
+		return getPersistence().findByGroupId_Head(
+			groupIds, head, start, end, orderByComparator, retrieveFromCache);
+	}
+
+	/**
+	 * Removes all the lv entries where groupId = &#63; and head = &#63; from the database.
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 */
+	public static void removeByGroupId_Head(long groupId, boolean head) {
+		getPersistence().removeByGroupId_Head(groupId, head);
+	}
+
+	/**
+	 * Returns the number of lv entries where groupId = &#63; and head = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param head the head
+	 * @return the number of matching lv entries
+	 */
+	public static int countByGroupId_Head(long groupId, boolean head) {
+		return getPersistence().countByGroupId_Head(groupId, head);
+	}
+
+	/**
+	 * Returns the number of lv entries where groupId = any &#63; and head = &#63;.
+	 *
+	 * @param groupIds the group IDs
+	 * @param head the head
+	 * @return the number of matching lv entries
+	 */
+	public static int countByGroupId_Head(long[] groupIds, boolean head) {
+		return getPersistence().countByGroupId_Head(groupIds, head);
+	}
+
+	/**
+	 * Returns all the lv entries where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @return the matching lv entries
+	 */
+	public static List<LVEntry> findByG_UGK(
+		long groupId, String uniqueGroupKey) {
+
+		return getPersistence().findByG_UGK(groupId, uniqueGroupKey);
+	}
+
+	/**
+	 * Returns a range of all the lv entries where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @return the range of matching lv entries
+	 */
+	public static List<LVEntry> findByG_UGK(
+		long groupId, String uniqueGroupKey, int start, int end) {
+
+		return getPersistence().findByG_UGK(
+			groupId, uniqueGroupKey, start, end);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByG_UGK(
+		long groupId, String uniqueGroupKey, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().findByG_UGK(
+			groupId, uniqueGroupKey, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns an ordered range of all the lv entries where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @param retrieveFromCache whether to retrieve from the finder cache
+	 * @return the ordered range of matching lv entries
+	 */
+	public static List<LVEntry> findByG_UGK(
+		long groupId, String uniqueGroupKey, int start, int end,
+		OrderByComparator<LVEntry> orderByComparator,
+		boolean retrieveFromCache) {
+
+		return getPersistence().findByG_UGK(
+			groupId, uniqueGroupKey, start, end, orderByComparator,
+			retrieveFromCache);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByG_UGK_First(
+			long groupId, String uniqueGroupKey,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByG_UGK_First(
+			groupId, uniqueGroupKey, orderByComparator);
+	}
+
+	/**
+	 * Returns the first lv entry in the ordered set where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the first matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByG_UGK_First(
+		long groupId, String uniqueGroupKey,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByG_UGK_First(
+			groupId, uniqueGroupKey, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry
+	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
+	 */
+	public static LVEntry findByG_UGK_Last(
+			long groupId, String uniqueGroupKey,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByG_UGK_Last(
+			groupId, uniqueGroupKey, orderByComparator);
+	}
+
+	/**
+	 * Returns the last lv entry in the ordered set where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the last matching lv entry, or <code>null</code> if a matching lv entry could not be found
+	 */
+	public static LVEntry fetchByG_UGK_Last(
+		long groupId, String uniqueGroupKey,
+		OrderByComparator<LVEntry> orderByComparator) {
+
+		return getPersistence().fetchByG_UGK_Last(
+			groupId, uniqueGroupKey, orderByComparator);
+	}
+
+	/**
+	 * Returns the lv entries before and after the current lv entry in the ordered set where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * @param lvEntryId the primary key of the current lv entry
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
+	 * @return the previous, current, and next lv entry
+	 * @throws NoSuchLVEntryException if a lv entry with the primary key could not be found
+	 */
+	public static LVEntry[] findByG_UGK_PrevAndNext(
+			long lvEntryId, long groupId, String uniqueGroupKey,
+			OrderByComparator<LVEntry> orderByComparator)
+		throws com.liferay.portal.tools.service.builder.test.exception.
+			NoSuchLVEntryException {
+
+		return getPersistence().findByG_UGK_PrevAndNext(
+			lvEntryId, groupId, uniqueGroupKey, orderByComparator);
+	}
+
+	/**
+	 * Removes all the lv entries where groupId = &#63; and uniqueGroupKey = &#63; from the database.
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 */
+	public static void removeByG_UGK(long groupId, String uniqueGroupKey) {
+		getPersistence().removeByG_UGK(groupId, uniqueGroupKey);
+	}
+
+	/**
+	 * Returns the number of lv entries where groupId = &#63; and uniqueGroupKey = &#63;.
+	 *
+	 * @param groupId the group ID
+	 * @param uniqueGroupKey the unique group key
+	 * @return the number of matching lv entries
+	 */
+	public static int countByG_UGK(long groupId, String uniqueGroupKey) {
+		return getPersistence().countByG_UGK(groupId, uniqueGroupKey);
+	}
+
+	/**
 	 * Returns the lv entry where groupId = &#63; and uniqueGroupKey = &#63; and head = &#63; or throws a <code>NoSuchLVEntryException</code> if it could not be found.
 	 *
 	 * @param groupId the group ID
@@ -629,12 +1870,12 @@ public class LVEntryUtil {
 	 * @return the matching lv entry
 	 * @throws NoSuchLVEntryException if a matching lv entry could not be found
 	 */
-	public static LVEntry findByG_UGK(
+	public static LVEntry findByG_UGK_Head(
 			long groupId, String uniqueGroupKey, boolean head)
 		throws com.liferay.portal.tools.service.builder.test.exception.
 			NoSuchLVEntryException {
 
-		return getPersistence().findByG_UGK(groupId, uniqueGroupKey, head);
+		return getPersistence().findByG_UGK_Head(groupId, uniqueGroupKey, head);
 	}
 
 	/**
@@ -645,10 +1886,11 @@ public class LVEntryUtil {
 	 * @param head the head
 	 * @return the matching lv entry, or <code>null</code> if a matching lv entry could not be found
 	 */
-	public static LVEntry fetchByG_UGK(
+	public static LVEntry fetchByG_UGK_Head(
 		long groupId, String uniqueGroupKey, boolean head) {
 
-		return getPersistence().fetchByG_UGK(groupId, uniqueGroupKey, head);
+		return getPersistence().fetchByG_UGK_Head(
+			groupId, uniqueGroupKey, head);
 	}
 
 	/**
@@ -660,11 +1902,11 @@ public class LVEntryUtil {
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching lv entry, or <code>null</code> if a matching lv entry could not be found
 	 */
-	public static LVEntry fetchByG_UGK(
+	public static LVEntry fetchByG_UGK_Head(
 		long groupId, String uniqueGroupKey, boolean head,
 		boolean retrieveFromCache) {
 
-		return getPersistence().fetchByG_UGK(
+		return getPersistence().fetchByG_UGK_Head(
 			groupId, uniqueGroupKey, head, retrieveFromCache);
 	}
 
@@ -676,12 +1918,13 @@ public class LVEntryUtil {
 	 * @param head the head
 	 * @return the lv entry that was removed
 	 */
-	public static LVEntry removeByG_UGK(
+	public static LVEntry removeByG_UGK_Head(
 			long groupId, String uniqueGroupKey, boolean head)
 		throws com.liferay.portal.tools.service.builder.test.exception.
 			NoSuchLVEntryException {
 
-		return getPersistence().removeByG_UGK(groupId, uniqueGroupKey, head);
+		return getPersistence().removeByG_UGK_Head(
+			groupId, uniqueGroupKey, head);
 	}
 
 	/**
@@ -692,10 +1935,11 @@ public class LVEntryUtil {
 	 * @param head the head
 	 * @return the number of matching lv entries
 	 */
-	public static int countByG_UGK(
+	public static int countByG_UGK_Head(
 		long groupId, String uniqueGroupKey, boolean head) {
 
-		return getPersistence().countByG_UGK(groupId, uniqueGroupKey, head);
+		return getPersistence().countByG_UGK_Head(
+			groupId, uniqueGroupKey, head);
 	}
 
 	/**
@@ -905,6 +2149,244 @@ public class LVEntryUtil {
 	 */
 	public static int countAll() {
 		return getPersistence().countAll();
+	}
+
+	/**
+	 * Returns the primaryKeys of big decimal entries associated with the lv entry.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @return long[] of the primaryKeys of big decimal entries associated with the lv entry
+	 */
+	public static long[] getBigDecimalEntryPrimaryKeys(long pk) {
+		return getPersistence().getBigDecimalEntryPrimaryKeys(pk);
+	}
+
+	/**
+	 * Returns all the big decimal entries associated with the lv entry.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @return the big decimal entries associated with the lv entry
+	 */
+	public static List
+		<com.liferay.portal.tools.service.builder.test.model.BigDecimalEntry>
+			getBigDecimalEntries(long pk) {
+
+		return getPersistence().getBigDecimalEntries(pk);
+	}
+
+	/**
+	 * Returns a range of all the big decimal entries associated with the lv entry.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @return the range of big decimal entries associated with the lv entry
+	 */
+	public static List
+		<com.liferay.portal.tools.service.builder.test.model.BigDecimalEntry>
+			getBigDecimalEntries(long pk, int start, int end) {
+
+		return getPersistence().getBigDecimalEntries(pk, start, end);
+	}
+
+	/**
+	 * Returns an ordered range of all the big decimal entries associated with the lv entry.
+	 *
+	 * <p>
+	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>LVEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
+	 * </p>
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param start the lower bound of the range of lv entries
+	 * @param end the upper bound of the range of lv entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the ordered range of big decimal entries associated with the lv entry
+	 */
+	public static List
+		<com.liferay.portal.tools.service.builder.test.model.BigDecimalEntry>
+			getBigDecimalEntries(
+				long pk, int start, int end,
+				OrderByComparator
+					<com.liferay.portal.tools.service.builder.test.model.
+						BigDecimalEntry> orderByComparator) {
+
+		return getPersistence().getBigDecimalEntries(
+			pk, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns the number of big decimal entries associated with the lv entry.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @return the number of big decimal entries associated with the lv entry
+	 */
+	public static int getBigDecimalEntriesSize(long pk) {
+		return getPersistence().getBigDecimalEntriesSize(pk);
+	}
+
+	/**
+	 * Returns <code>true</code> if the big decimal entry is associated with the lv entry.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntryPK the primary key of the big decimal entry
+	 * @return <code>true</code> if the big decimal entry is associated with the lv entry; <code>false</code> otherwise
+	 */
+	public static boolean containsBigDecimalEntry(
+		long pk, long bigDecimalEntryPK) {
+
+		return getPersistence().containsBigDecimalEntry(pk, bigDecimalEntryPK);
+	}
+
+	/**
+	 * Returns <code>true</code> if the lv entry has any big decimal entries associated with it.
+	 *
+	 * @param pk the primary key of the lv entry to check for associations with big decimal entries
+	 * @return <code>true</code> if the lv entry has any big decimal entries associated with it; <code>false</code> otherwise
+	 */
+	public static boolean containsBigDecimalEntries(long pk) {
+		return getPersistence().containsBigDecimalEntries(pk);
+	}
+
+	/**
+	 * Adds an association between the lv entry and the big decimal entry. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntryPK the primary key of the big decimal entry
+	 */
+	public static void addBigDecimalEntry(long pk, long bigDecimalEntryPK) {
+		getPersistence().addBigDecimalEntry(pk, bigDecimalEntryPK);
+	}
+
+	/**
+	 * Adds an association between the lv entry and the big decimal entry. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntry the big decimal entry
+	 */
+	public static void addBigDecimalEntry(
+		long pk,
+		com.liferay.portal.tools.service.builder.test.model.BigDecimalEntry
+			bigDecimalEntry) {
+
+		getPersistence().addBigDecimalEntry(pk, bigDecimalEntry);
+	}
+
+	/**
+	 * Adds an association between the lv entry and the big decimal entries. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntryPKs the primary keys of the big decimal entries
+	 */
+	public static void addBigDecimalEntries(
+		long pk, long[] bigDecimalEntryPKs) {
+
+		getPersistence().addBigDecimalEntries(pk, bigDecimalEntryPKs);
+	}
+
+	/**
+	 * Adds an association between the lv entry and the big decimal entries. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntries the big decimal entries
+	 */
+	public static void addBigDecimalEntries(
+		long pk,
+		List
+			<com.liferay.portal.tools.service.builder.test.model.
+				BigDecimalEntry> bigDecimalEntries) {
+
+		getPersistence().addBigDecimalEntries(pk, bigDecimalEntries);
+	}
+
+	/**
+	 * Clears all associations between the lv entry and its big decimal entries. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry to clear the associated big decimal entries from
+	 */
+	public static void clearBigDecimalEntries(long pk) {
+		getPersistence().clearBigDecimalEntries(pk);
+	}
+
+	/**
+	 * Removes the association between the lv entry and the big decimal entry. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntryPK the primary key of the big decimal entry
+	 */
+	public static void removeBigDecimalEntry(long pk, long bigDecimalEntryPK) {
+		getPersistence().removeBigDecimalEntry(pk, bigDecimalEntryPK);
+	}
+
+	/**
+	 * Removes the association between the lv entry and the big decimal entry. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntry the big decimal entry
+	 */
+	public static void removeBigDecimalEntry(
+		long pk,
+		com.liferay.portal.tools.service.builder.test.model.BigDecimalEntry
+			bigDecimalEntry) {
+
+		getPersistence().removeBigDecimalEntry(pk, bigDecimalEntry);
+	}
+
+	/**
+	 * Removes the association between the lv entry and the big decimal entries. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntryPKs the primary keys of the big decimal entries
+	 */
+	public static void removeBigDecimalEntries(
+		long pk, long[] bigDecimalEntryPKs) {
+
+		getPersistence().removeBigDecimalEntries(pk, bigDecimalEntryPKs);
+	}
+
+	/**
+	 * Removes the association between the lv entry and the big decimal entries. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntries the big decimal entries
+	 */
+	public static void removeBigDecimalEntries(
+		long pk,
+		List
+			<com.liferay.portal.tools.service.builder.test.model.
+				BigDecimalEntry> bigDecimalEntries) {
+
+		getPersistence().removeBigDecimalEntries(pk, bigDecimalEntries);
+	}
+
+	/**
+	 * Sets the big decimal entries associated with the lv entry, removing and adding associations as necessary. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntryPKs the primary keys of the big decimal entries to be associated with the lv entry
+	 */
+	public static void setBigDecimalEntries(
+		long pk, long[] bigDecimalEntryPKs) {
+
+		getPersistence().setBigDecimalEntries(pk, bigDecimalEntryPKs);
+	}
+
+	/**
+	 * Sets the big decimal entries associated with the lv entry, removing and adding associations as necessary. Also notifies the appropriate model listeners and clears the mapping table finder cache.
+	 *
+	 * @param pk the primary key of the lv entry
+	 * @param bigDecimalEntries the big decimal entries to be associated with the lv entry
+	 */
+	public static void setBigDecimalEntries(
+		long pk,
+		List
+			<com.liferay.portal.tools.service.builder.test.model.
+				BigDecimalEntry> bigDecimalEntries) {
+
+		getPersistence().setBigDecimalEntries(pk, bigDecimalEntries);
 	}
 
 	public static Set<String> getBadColumnNames() {

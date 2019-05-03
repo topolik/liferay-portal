@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.tasks.model.impl.TasksEntryImpl")
 @ProviderType
-public interface TasksEntry extends TasksEntryModel, PersistedModel {
+public interface TasksEntry extends PersistedModel, TasksEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

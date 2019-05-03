@@ -413,6 +413,24 @@ public class DDMStructureLayoutLocalServiceUtil {
 		return getService().getStructureLayouts(groupId, start, end);
 	}
 
+	public static int getStructureLayoutsCount(long groupId) {
+		return getService().getStructureLayoutsCount(groupId);
+	}
+
+	public static java.util.List
+		<com.liferay.dynamic.data.mapping.model.DDMStructureLayout> search(
+				long companyId, long[] groupIds, long classNameId,
+				String keywords, int start, int end,
+				com.liferay.portal.kernel.util.OrderByComparator
+					<com.liferay.dynamic.data.mapping.model.DDMStructureLayout>
+						orderByComparator)
+			throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().search(
+			companyId, groupIds, classNameId, keywords, start, end,
+			orderByComparator);
+	}
+
 	/**
 	 * Updates the ddm structure layout in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	 *

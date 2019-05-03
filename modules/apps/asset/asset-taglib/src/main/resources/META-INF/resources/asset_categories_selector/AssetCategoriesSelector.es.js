@@ -1,3 +1,4 @@
+import 'clay-icon';
 import {Config} from 'metal-state';
 import Component from 'metal-component';
 import Soy from 'metal-soy';
@@ -10,6 +11,13 @@ import templates from './AssetCategoriesSelector.soy';
  * that offers the user a tag selection input
  */
 class AssetCategoriesSelector extends Component {
+	_handleInputFocus(event) {
+		this.emit('inputFocus', event);
+	}
+
+	_handleSelectedItemsChange(event) {
+		this.emit('selectedItemsChange', event);
+	}
 }
 
 AssetCategoriesSelector.STATE = {

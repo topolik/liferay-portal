@@ -388,14 +388,6 @@ public class ThemeDisplay
 	}
 
 	/**
-	 * @deprecated As of Judson (7.1.x), with no direct replacement
-	 */
-	@Deprecated
-	public String getFacebookCanvasPageURL() {
-		return _facebookCanvasPageURL;
-	}
-
-	/**
 	 * Returns the current internationalization language's code.
 	 *
 	 * <p>
@@ -1016,14 +1008,6 @@ public class ThemeDisplay
 		return _unfilteredLayouts;
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public String getURLAddContent() {
-		return StringPool.BLANK;
-	}
-
 	public String getURLControlPanel() {
 		return _urlControlPanel;
 	}
@@ -1034,18 +1018,6 @@ public class ThemeDisplay
 
 	public String getURLHome() {
 		return _urlHome;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public String getURLLayoutTemplates() {
-		if (Validator.isNull(_urlLayoutTemplates)) {
-			return getURLPageSettings() + "#layout";
-		}
-
-		return _urlLayoutTemplates;
 	}
 
 	@JSON(include = false)
@@ -1060,23 +1032,6 @@ public class ThemeDisplay
 		}
 
 		return _urlMyAccount;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	@JSON(include = false)
-	public PortletURL getURLPageSettings() {
-		if (_urlPageSettings == null) {
-			String portletId = PortletProviderUtil.getPortletId(
-				Layout.class.getName(), PortletProvider.Action.EDIT);
-
-			_urlPageSettings = PortalUtil.getControlPanelPortletURL(
-				getRequest(), portletId, PortletRequest.RENDER_PHASE);
-		}
-
-		return _urlPageSettings;
 	}
 
 	public String getURLPortal() {
@@ -1141,13 +1096,9 @@ public class ThemeDisplay
 	}
 
 	/**
-	 * @deprecated As of Judson (7.1.x), with no direct replacement
+	 * @deprecated As of Judson (7.1.x), as of 7.1.x, with no direct replacement
 	 */
 	@Deprecated
-	public boolean isFacebook() {
-		return false;
-	}
-
 	public boolean isFreeformLayout() {
 		return _freeformLayout;
 	}
@@ -1235,22 +1186,6 @@ public class ThemeDisplay
 
 	public boolean isSecure() {
 		return _secure;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public boolean isShowAddContentIcon() {
-		return false;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public boolean isShowAddContentIconPermission() {
-		return false;
 	}
 
 	public boolean isShowControlPanelIcon() {
@@ -1414,13 +1349,9 @@ public class ThemeDisplay
 	}
 
 	/**
-	 * @deprecated As of Judson (7.1.x), with no direct replacement
+	 * @deprecated As of Judson (7.1.x), as of 7.1.x, with no direct replacement
 	 */
 	@Deprecated
-	public void setFacebookCanvasPageURL(String facebookCanvasPageURL) {
-		_facebookCanvasPageURL = facebookCanvasPageURL;
-	}
-
 	public void setFreeformLayout(boolean freeformLayout) {
 		_freeformLayout = freeformLayout;
 	}
@@ -1742,21 +1673,6 @@ public class ThemeDisplay
 		_sessionId = sessionId;
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public void setShowAddContentIcon(boolean showAddContentIcon) {
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public void setShowAddContentIconPermission(
-		boolean showAddContentIconPermission) {
-	}
-
 	public void setShowControlPanelIcon(boolean showControlPanelIcon) {
 		_showControlPanelIcon = showControlPanelIcon;
 	}
@@ -1878,13 +1794,6 @@ public class ThemeDisplay
 		_unfilteredLayouts = unfilteredLayouts;
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public void setURLAddContent(String urlAddContent) {
-	}
-
 	public void setURLControlPanel(String urlControlPanel) {
 		_urlControlPanel = urlControlPanel;
 	}
@@ -1901,22 +1810,6 @@ public class ThemeDisplay
 		_urlLayoutTemplates = urlLayoutTemplates;
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public void setURLMyAccount(PortletURL urlMyAccount) {
-		_urlMyAccount = urlMyAccount;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public void setURLPageSettings(PortletURL urlPageSettings) {
-		_urlPageSettings = urlPageSettings;
-	}
-
 	public void setURLPortal(String urlPortal) {
 		_urlPortal = urlPortal;
 	}
@@ -1931,14 +1824,6 @@ public class ThemeDisplay
 
 	public void setURLSignOut(String urlSignOut) {
 		_urlSignOut = urlSignOut;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public void setURLUpdateManager(PortletURL urlUpdateManager) {
-		_urlUpdateManager = urlUpdateManager;
 	}
 
 	public void setUser(User user) {
@@ -2044,13 +1929,6 @@ public class ThemeDisplay
 	private long _doAsGroupId;
 	private String _doAsUserId = StringPool.BLANK;
 	private String _doAsUserLanguageId = StringPool.BLANK;
-
-	/**
-	 * @deprecated As of Judson (7.1.x), with no direct replacement
-	 */
-	@Deprecated
-	private String _facebookCanvasPageURL;
-
 	private boolean _freeformLayout;
 	private boolean _hubAction;
 	private boolean _hubPartialAction;
@@ -2148,7 +2026,6 @@ public class ThemeDisplay
 	private String _urlHome = StringPool.BLANK;
 	private String _urlLayoutTemplates = StringPool.BLANK;
 	private transient PortletURL _urlMyAccount;
-	private transient PortletURL _urlPageSettings;
 	private String _urlPortal = StringPool.BLANK;
 	private transient PortletURL _urlPublishToLive;
 	private String _urlSignIn = StringPool.BLANK;

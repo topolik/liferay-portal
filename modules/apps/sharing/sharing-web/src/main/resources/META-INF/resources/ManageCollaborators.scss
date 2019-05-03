@@ -9,6 +9,16 @@
 		padding: 0;
 	}
 
+	.list-group {
+		margin-bottom: 0;
+	}
+
+	.list-group-item {
+		border: 0;
+		font-size: 1rem;
+		padding: 0.5rem 1.25rem;
+	}
+
 	.modal-body.inline-scroller .empty-collaborators {
 		height: 125px;
 		text-align: center;
@@ -17,35 +27,9 @@
 			margin: 0 auto;
 			max-width: 340px;
 		}
-	}
 
-	@media (min-height: 400px) {
-		.modal-body.inline-scroller .empty-collaborators {
+		@media (min-height: 400px) {
 			height: 320px;
-		}
-	}
-
-	h4 {
-		margin-bottom: 0;
-	}
-
-	input[type="date"] {
-		font-size: 0.875rem;
-		height: 2rem;
-		padding-top: 0.5em;
-		width: 165px;
-	}
-
-	.list-group-item {
-		border: 0;
-		padding: 0.5rem 20px;
-
-		.expiration-icon.hidden {
-			visibility: hidden;
-		}
-
-		&.active .expiration-icon.hidden {
-			visibility: visible;
 		}
 	}
 
@@ -56,19 +40,20 @@
 	.modal-footer {
 		bottom: 0;
 		position: absolute;
-		rigth: 0;
+		right: 0;
 		width: 100%;
 	}
 
+	input[type="date"] {
+		font-size: 0.875rem;
+		height: 2rem;
+		padding-top: 0.5em;
+	}
+
 	select.form-control:not([multiple]):not([size]) {
-		background-color: transparent;
+		background-color: #FFF;
 		font-size: 0.875rem;
 		height: 2rem;
 		padding-top: 0.25em;
-	}
-
-	ul.list-group {
-		margin-bottom: 0;
-		margin-top: 1em;
 	}
 }

@@ -1,5 +1,5 @@
-import React from 'react';
 import IntegerInput from 'components/inputs/IntegerInput.es';
+import React from 'react';
 import {cleanup, render} from 'react-testing-library';
 import {testControlledInput} from 'test/utils';
 

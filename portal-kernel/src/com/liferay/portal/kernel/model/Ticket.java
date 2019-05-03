@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.TicketImpl")
 @ProviderType
-public interface Ticket extends TicketModel, PersistedModel {
+public interface Ticket extends PersistedModel, TicketModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

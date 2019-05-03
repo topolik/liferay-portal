@@ -40,12 +40,12 @@
 </tr>
 <tr>
 	<td>DOCUMENT_VERSION_ANY</td>
-	<td>//li[@class='list-group-item']/div[contains(.,'${key_dmDocumentVersionNumber}')]/div</td>
+	<td>//li[contains(.,'${key_dmDocumentVersionNumber}')]//div[@class='list-group-title']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DOCUMENT_VERSION_VERTICAL_ELLIPSIS</td>
-	<td>//li[@class='list-group-item']/div[contains(.,'${key_dmDocumentVersionNumber}')]/..//div//a[span/*[name()='svg'][contains(@class,'icon-ellipsis')]]</td>
+	<td>//li[contains(.,'${key_dmDocumentVersionNumber}')]//a[span/*[contains(@class,'lexicon-icon-ellipsis-v')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -61,7 +61,7 @@
 <!--EDIT_TAGS-->
 <tr>
 	<td>EDIT_TAGS_FIELD</td>
-	<td>//div[@class='input-group-item']/div/input[@type='text']</td>
+	<td>//div[@class='input-group-item']//div/input[@type='text']</td>
 	<td></td>
 </tr>
 <tr>
@@ -133,7 +133,7 @@
 </tr>
 <tr>
 	<td>ICON_FOLDER_TITLE</td>
-	<td>//span//a[@title='${key_dmFolderName}']</td>
+	<td>//div//a[@title='${key_dmFolderName}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -253,8 +253,8 @@
 </tr>
 <!--SIDEBAR-->
 <tr>
-	<td>SIDEBAR_DROPDOWN</td>
-	<td>//ul[contains(@class,'navbar')]//a[contains(@class,'dropdown-toggle')]</td>
+	<td>SIDEBAR_INFO_ACTIVE</td>
+	<td>//div[contains(@class,'contextual-sidebar-visible')] | //div[contains(@class,'open')]/div[contains(@class,'info-panel')]/div[contains(@class,'sidebar')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -267,7 +267,6 @@
 	<td></td>
 	<td></td>
 </tr>
-
 <!--REPOSITORY-->
 <tr>
 	<td>REPOSITORY_FOLDER_NAME_DESCRIPTIVE_VIEW</td>

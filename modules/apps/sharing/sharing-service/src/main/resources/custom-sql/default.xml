@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <custom-sql>
-	<sql id="com.liferay.sharing.service.persistence.SharingEntryFinder.countByToUserId">
+	<sql id="com.liferay.sharing.service.persistence.SharingEntryFinder.countByUserId">
 		<![CDATA[
 			SELECT
 				COUNT(*) AS COUNT_VALUE
@@ -11,17 +11,17 @@
 				SharingEntry.sharingEntryId IN
 					(
 						SELECT
-							min(SharingEntry.sharingEntryId)
+							MAX(SharingEntry.sharingEntryId)
 						FROM
 							SharingEntry
 						WHERE
-							(SharingEntry.toUserId = ?) [$CLASS_NAME_ID_WHERE$]
+							(SharingEntry.userId = ?) [$CLASS_NAME_ID_WHERE$]
 						GROUP BY
 							SharingEntry.classNameId, SharingEntry.classPK
 					)
 		]]>
 	</sql>
-	<sql id="com.liferay.sharing.service.persistence.SharingEntryFinder.findByToUserId">
+	<sql id="com.liferay.sharing.service.persistence.SharingEntryFinder.findByUserId">
 		<![CDATA[
 			SELECT
 				{SharingEntry.*}
@@ -31,11 +31,11 @@
 				SharingEntry.sharingEntryId IN
 					(
 						SELECT
-							min(SharingEntry.sharingEntryId)
+							MAX(SharingEntry.sharingEntryId)
 						FROM
 							SharingEntry
 						WHERE
-							(SharingEntry.toUserId = ?) [$CLASS_NAME_ID_WHERE$]
+							(SharingEntry.userId = ?) [$CLASS_NAME_ID_WHERE$]
 						GROUP BY
 							SharingEntry.classNameId, SharingEntry.classPK
 					)

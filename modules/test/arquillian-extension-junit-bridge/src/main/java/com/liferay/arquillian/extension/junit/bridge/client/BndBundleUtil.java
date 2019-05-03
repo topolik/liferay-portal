@@ -14,26 +14,18 @@
 
 package com.liferay.arquillian.extension.junit.bridge.client;
 
-import aQute.bnd.build.Classpath;
 import aQute.bnd.build.Project;
 import aQute.bnd.build.ProjectBuilder;
 import aQute.bnd.build.Workspace;
-import aQute.bnd.osgi.Analyzer;
 import aQute.bnd.osgi.Jar;
 
-import com.liferay.arquillian.extension.junit.bridge.server.ArquillianBundleActivator;
-import com.liferay.petra.string.CharPool;
-import com.liferay.petra.string.StringPool;
-import com.liferay.petra.string.StringUtil;
+import com.liferay.arquillian.extension.junit.bridge.constants.Headers;
+import com.liferay.arquillian.extension.junit.bridge.server.TestBundleActivator;
+import com.liferay.arquillian.extension.junit.bridge.util.StringUtil;
 
 import java.io.File;
 
-import java.lang.reflect.Method;
-
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.net.URLClassLoader;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,40 +34,44 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 
 /**
  * @author Shuyang Zhou
  */
 public class BndBundleUtil {
 
-	public static Path createBundle() throws Exception {
-		ClassLoader classLoader = new URLClassLoader(_getClassPathURLs(), null);
+	public static Path createBundle(
+			Map<String, List<String>> filteredMethodNamesMap,
+			String hostAddress, int port, long passCode)
+		throws Exception {
 
-		Class<?> clazz = classLoader.loadClass(BndBundleUtil.class.getName());
-
-		Method method = clazz.getDeclaredMethod("_createBundle");
-
-		method.setAccessible(true);
-
-		return (Path)method.invoke(null);
-	}
-
-	private static Path _createBundle() throws Exception {
 		File buildDir = new File(System.getProperty("user.dir"));
 
 		try (Workspace workspace = new Workspace(buildDir);
 			Project project = new Project(workspace, buildDir);
-			ProjectBuilder projectBuilder = _createProjectBuilder(project);
-			Jar jar = projectBuilder.build();
-			Analyzer analyzer = new Analyzer()) {
+			ProjectBuilder projectBuilder = _createProjectBuilder(
+				project, filteredMethodNamesMap, hostAddress, port, passCode);
+			Jar jar = projectBuilder.build()) {
 
-			analyzer.setProperties(project.getProperties());
-			analyzer.setJar(jar);
+			Manifest manifest = jar.getManifest();
 
-			jar.setManifest(analyzer.calcManifest());
+			Attributes attributes = manifest.getMainAttributes();
+
+			attributes.putValue(
+				"Import-Package",
+				StringUtil.merge(
+					Arrays.asList(
+						_versionPattern.split(
+							attributes.getValue("Import-Package"))),
+					","));
 
 			Path path = Files.createTempFile(null, ".jar");
 
@@ -85,18 +81,48 @@ public class BndBundleUtil {
 		}
 	}
 
-	private static ProjectBuilder _createProjectBuilder(Project project)
+	private static ProjectBuilder _createProjectBuilder(
+			Project project, Map<String, List<String>> filteredMethodNamesMap,
+			String hostAddress, int port, long passCode)
 		throws Exception {
 
+		if (filteredMethodNamesMap != null) {
+			StringBuilder sb = new StringBuilder();
+
+			for (Map.Entry<String, List<String>> entry :
+					filteredMethodNamesMap.entrySet()) {
+
+				sb.append(entry.getKey());
+				sb.append(":");
+
+				for (String methodName : entry.getValue()) {
+					sb.append(methodName);
+					sb.append(",");
+				}
+
+				sb.setLength(sb.length() - 1);
+				sb.append(";");
+			}
+
+			sb.setLength(sb.length() - 1);
+
+			project.setProperty(
+				Headers.TEST_BRIDGE_FILTERED_METHOD_NAMES, sb.toString());
+		}
+
 		project.setProperty(
-			"Bundle-Activator",
-			ArquillianBundleActivator.class.getCanonicalName());
+			Headers.TEST_BRIDGE_REPORT_SERVER_HOST_NAME, hostAddress);
+		project.setProperty(
+			Headers.TEST_BRIDGE_REPORT_SERVER_PORT, String.valueOf(port));
+		project.setProperty(
+			Headers.TEST_BRIDGE_PASS_CODE, String.valueOf(passCode));
+		project.setProperty(
+			"Bundle-Activator", TestBundleActivator.class.getCanonicalName());
 
 		Set<String> importPackages = new LinkedHashSet<>();
 
 		importPackages.add("!aQute.bnd.build");
 		importPackages.add("!aQute.bnd.osgi");
-		importPackages.add("*");
 
 		String importPackageString = project.getProperty("Import-Package");
 
@@ -104,9 +130,10 @@ public class BndBundleUtil {
 			importPackages.addAll(StringUtil.split(importPackageString));
 		}
 
+		importPackages.add("*");
+
 		project.setProperty(
-			"Import-Package",
-			StringUtil.merge(importPackages, StringPool.COMMA));
+			"Import-Package", StringUtil.merge(importPackages, ","));
 
 		Set<String> includeResources = new LinkedHashSet<>();
 
@@ -130,8 +157,7 @@ public class BndBundleUtil {
 		}
 
 		project.setProperty(
-			"-includeresource",
-			StringUtil.merge(includeResources, StringPool.COMMA));
+			"-includeresource", StringUtil.merge(includeResources, ","));
 
 		ProjectBuilder projectBuilder = new ProjectBuilder(project);
 
@@ -159,39 +185,10 @@ public class BndBundleUtil {
 			}
 		}
 
-		String resource = Classpath.class.getName();
-
-		resource = resource.replace(CharPool.PERIOD, CharPool.SLASH);
-
-		resource = "/".concat(resource);
-
-		resource = resource.concat(".class");
-
-		URL bndURL = BndBundleUtil.class.getResource(resource);
-
-		String path = bndURL.getPath();
-
-		int start = path.indexOf(CharPool.SLASH);
-
-		int end = path.indexOf(CharPool.EXCLAMATION);
-
-		classPathFiles.add(0, new File(path.substring(start, end)));
-
 		return classPathFiles;
 	}
 
-	private static URL[] _getClassPathURLs() throws MalformedURLException {
-		List<File> classPathFiles = _getClassPathFiles();
-
-		List<URL> urls = new ArrayList<>();
-
-		for (File file : classPathFiles) {
-			URI uri = file.toURI();
-
-			urls.add(uri.toURL());
-		}
-
-		return urls.toArray(new URL[classPathFiles.size()]);
-	}
+	private static final Pattern _versionPattern = Pattern.compile(
+		";version=\"[\\[\\]\\(\\)0-9.,]*\",");
 
 }

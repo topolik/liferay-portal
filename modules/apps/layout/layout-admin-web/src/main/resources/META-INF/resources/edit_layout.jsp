@@ -74,37 +74,45 @@ renderResponse.setTitle(selLayout.getName(locale));
 		<aui:button-row>
 			<aui:button id="enableLayoutButton" name="enableLayout" value='<%= LanguageUtil.format(request, "enable-in-x", HtmlUtil.escape(layoutSetBranchName), false) %>' />
 
-			<portlet:actionURL name="/layout/enable_layout" var="enableLayoutURL">
-				<portlet:param name="redirect" value="<%= redirectURL.toString() %>" />
-				<portlet:param name="incompleteLayoutRevisionId" value="<%= String.valueOf(layoutRevision.getLayoutRevisionId()) %>" />
-			</portlet:actionURL>
-
-			<aui:script use="aui-base">
-				AUI.$('#<portlet:namespace />enableLayoutButton').on(
-					'click',
-					function(event) {
-						submitForm(document.hrefFm, '<%= enableLayoutURL %>');
-					}
-				);
-			</aui:script>
-
 			<aui:button cssClass="remove-layout" id="deleteLayoutButton" name="deleteLayout" value="delete-in-all-pages-variations" />
 
-			<portlet:actionURL name="/layout/delete_layout" var="deleteLayoutURL">
-				<portlet:param name="redirect" value='<%= HttpUtil.addParameter(redirectURL.toString(), liferayPortletResponse.getNamespace() + "selPlid", selLayout.getParentPlid()) %>' />
-				<portlet:param name="selPlid" value="<%= String.valueOf(layoutsAdminDisplayContext.getSelPlid()) %>" />
-				<portlet:param name="layoutSetBranchId" value="0" />
-				<portlet:param name="selPlid" value="<%= String.valueOf(selLayout.getParentPlid()) %>" />
-			</portlet:actionURL>
+			<script>
+				(function() {
+					var enableLayoutButton = document.getElementById('<portlet:namespace />enableLayoutButton');
 
-			<aui:script use="aui-base">
-				AUI.$('#<portlet:namespace />deleteLayoutButton').on(
-					'click',
-					function(event) {
-						submitForm(document.hrefFm, '<%= deleteLayoutURL %>');
+					if (enableLayoutButton) {
+						enableLayoutButton.addEventListener(
+							'click',
+							function(event) {
+								<portlet:actionURL name="/layout/enable_layout" var="enableLayoutURL">
+									<portlet:param name="redirect" value="<%= redirectURL.toString() %>" />
+									<portlet:param name="incompleteLayoutRevisionId" value="<%= String.valueOf(layoutRevision.getLayoutRevisionId()) %>" />
+								</portlet:actionURL>
+
+								submitForm(document.hrefFm, '<%= enableLayoutURL %>');
+							}
+						);
 					}
-				);
-			</aui:script>
+
+					var deleteLayoutButton = document.getElementById('<portlet:namespace />deleteLayoutButton');
+
+					if (deleteLayoutButton) {
+						deleteLayoutButton.addEventListener(
+							'click',
+							function(event) {
+								<portlet:actionURL name="/layout/delete_layout" var="deleteLayoutURL">
+									<portlet:param name="redirect" value='<%= HttpUtil.addParameter(redirectURL.toString(), liferayPortletResponse.getNamespace() + "selPlid", selLayout.getParentPlid()) %>' />
+									<portlet:param name="selPlid" value="<%= String.valueOf(layoutsAdminDisplayContext.getSelPlid()) %>" />
+									<portlet:param name="layoutSetBranchId" value="0" />
+									<portlet:param name="selPlid" value="<%= String.valueOf(selLayout.getParentPlid()) %>" />
+								</portlet:actionURL>
+
+								submitForm(document.hrefFm, '<%= deleteLayoutURL %>');
+							}
+						);
+					}
+				})();
+			</script>
 		</aui:button-row>
 	</c:when>
 	<c:otherwise>
@@ -117,6 +125,7 @@ renderResponse.setTitle(selLayout.getName(locale));
 			enctype="multipart/form-data"
 			method="post"
 			name="editLayoutFm"
+			onSubmit="event.preventDefault();"
 		>
 			<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 			<aui:input name="backURL" type="hidden" value="<%= backURL %>" />
@@ -130,7 +139,7 @@ renderResponse.setTitle(selLayout.getName(locale));
 			<aui:input name="type" type="hidden" value="<%= selLayout.getType() %>" />
 			<aui:input name="<%= PortletDataHandlerKeys.SELECTED_LAYOUTS %>" type="hidden" />
 
-			<c:if test="<%= StringUtil.equals(selLayout.getType(), LayoutConstants.TYPE_ASSET_DISPLAY) %>">
+			<c:if test="<%= layoutsAdminDisplayContext.isLayoutPageTemplateEntry() || ((Objects.equals(selLayout.getType(), LayoutConstants.TYPE_ASSET_DISPLAY) || Objects.equals(selLayout.getType(), LayoutConstants.TYPE_CONTENT)) && !layoutsAdminDisplayContext.isDraft()) %>">
 
 				<%
 				for (String languageId : group.getAvailableLanguageIds()) {
@@ -244,3 +253,19 @@ renderResponse.setTitle(selLayout.getName(locale));
 		</liferay-frontend:edit-form>
 	</c:otherwise>
 </c:choose>
+
+<aui:script>
+	var form = document.getElementById('<portlet:namespace />editLayoutFm');
+
+	form.addEventListener(
+		'submit',
+		function(event) {
+			var applyLayoutPrototype = document.getElementById('<portlet:namespace />applyLayoutPrototype');
+
+			if (!applyLayoutPrototype || (applyLayoutPrototype.value === 'false') || (applyLayoutPrototype && (applyLayoutPrototype.value === 'true') && confirm('<%= UnicodeLanguageUtil.get(request, "reactivating-inherited-changes-may-update-the-page-with-the-possible-changes-that-could-have-been-made-in-the-original-template") %>'))) {
+				submitForm(form);
+			}
+		}
+	);
+
+</aui:script>

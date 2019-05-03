@@ -15,7 +15,7 @@
 </tr>
 <tr>
 	<td>CATEGORY</td>
-	<td>//div[contains(@id,'assetCategoriesSelector')]//span[normalize-space(text())='${key_categoryName}']</td>
+	<td>//div[contains(@id,'assetCategoriesSelector')]//span[@id='item-tag'][contains(.,'${key_categoryName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -25,7 +25,7 @@
 </tr>
 <tr>
 	<td>CATEGORY_AUTOCOMPLETE_SPECIFIC</td>
-	<td>//div[contains(@id,'assetCategoriesSelector')]//ul/li/a[.='${key_categoryName}']</td>
+	<td>//div[contains(@id,'clay_dropdown_portal')]//ul/li/a[.='${key_categoryName}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -35,12 +35,12 @@
 </tr>
 <tr>
 	<td>VOCABULARY_LIST_ITEM</td>
-	<td>//span[@class='field-content'][${key_count}]/label</td>
+	<td>//*[@class='field-content'][${key_count}]/label</td>
 	<td></td>
 </tr>
 <tr>
 	<td>TAG</td>
-	<td>//span[@id='item-tag'][contains(.,'${key_tagName}')]</td>
+	<td>//div[contains(@id,'assetTagsSelector')]//span[@id='item-tag'][contains(.,'${key_tagName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -55,12 +55,12 @@
 </tr>
 <tr>
 	<td>TAG_AUTOCOMPLETE_CONTAINER</td>
-	<td>//div[contains(@class,'tag-group')]/ul</td>
+	<td>//ul[contains(@class,'dropdown-menu')][contains(@class,'show')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>TAG_AUTOCOMPLETE_SPECIFIC</td>
-	<td>//div[contains(@class,'tag-group')]/ul/li[.='${key_tagName}']</td>
+	<td>//ul[contains(@class,'dropdown-menu')][contains(@class,'show')]/li/a[.='${key_tagName}']</td>
 	<td></td>
 </tr>
 <tr>

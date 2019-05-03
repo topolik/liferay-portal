@@ -1,5 +1,7 @@
 [#if field_name??]
-	[#if field_name?is_date_like]
+	[#if contentAccessorUtil.isContentAccessor(field_name)]
+		${field_name.getContent()}
+	[#elseif field_name?is_date_like]
 		${field_name?datetime?string}
 	[#elseif field_name?is_sequence]
 		${field_name?join(", ")}

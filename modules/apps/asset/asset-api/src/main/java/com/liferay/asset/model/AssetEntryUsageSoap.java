@@ -37,15 +37,13 @@ public class AssetEntryUsageSoap implements Serializable {
 		soapModel.setUuid(model.getUuid());
 		soapModel.setAssetEntryUsageId(model.getAssetEntryUsageId());
 		soapModel.setGroupId(model.getGroupId());
-		soapModel.setCompanyId(model.getCompanyId());
-		soapModel.setUserId(model.getUserId());
-		soapModel.setUserName(model.getUserName());
 		soapModel.setCreateDate(model.getCreateDate());
 		soapModel.setModifiedDate(model.getModifiedDate());
 		soapModel.setAssetEntryId(model.getAssetEntryId());
-		soapModel.setClassNameId(model.getClassNameId());
-		soapModel.setClassPK(model.getClassPK());
-		soapModel.setPortletId(model.getPortletId());
+		soapModel.setContainerType(model.getContainerType());
+		soapModel.setContainerKey(model.getContainerKey());
+		soapModel.setPlid(model.getPlid());
+		soapModel.setType(model.getType());
 		soapModel.setLastPublishDate(model.getLastPublishDate());
 
 		return soapModel;
@@ -130,30 +128,6 @@ public class AssetEntryUsageSoap implements Serializable {
 		_groupId = groupId;
 	}
 
-	public long getCompanyId() {
-		return _companyId;
-	}
-
-	public void setCompanyId(long companyId) {
-		_companyId = companyId;
-	}
-
-	public long getUserId() {
-		return _userId;
-	}
-
-	public void setUserId(long userId) {
-		_userId = userId;
-	}
-
-	public String getUserName() {
-		return _userName;
-	}
-
-	public void setUserName(String userName) {
-		_userName = userName;
-	}
-
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -178,28 +152,36 @@ public class AssetEntryUsageSoap implements Serializable {
 		_assetEntryId = assetEntryId;
 	}
 
-	public long getClassNameId() {
-		return _classNameId;
+	public long getContainerType() {
+		return _containerType;
 	}
 
-	public void setClassNameId(long classNameId) {
-		_classNameId = classNameId;
+	public void setContainerType(long containerType) {
+		_containerType = containerType;
 	}
 
-	public long getClassPK() {
-		return _classPK;
+	public String getContainerKey() {
+		return _containerKey;
 	}
 
-	public void setClassPK(long classPK) {
-		_classPK = classPK;
+	public void setContainerKey(String containerKey) {
+		_containerKey = containerKey;
 	}
 
-	public String getPortletId() {
-		return _portletId;
+	public long getPlid() {
+		return _plid;
 	}
 
-	public void setPortletId(String portletId) {
-		_portletId = portletId;
+	public void setPlid(long plid) {
+		_plid = plid;
+	}
+
+	public int getType() {
+		return _type;
+	}
+
+	public void setType(int type) {
+		_type = type;
 	}
 
 	public Date getLastPublishDate() {
@@ -213,15 +195,13 @@ public class AssetEntryUsageSoap implements Serializable {
 	private String _uuid;
 	private long _assetEntryUsageId;
 	private long _groupId;
-	private long _companyId;
-	private long _userId;
-	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private long _assetEntryId;
-	private long _classNameId;
-	private long _classPK;
-	private String _portletId;
+	private long _containerType;
+	private String _containerKey;
+	private long _plid;
+	private int _type;
 	private Date _lastPublishDate;
 
 }

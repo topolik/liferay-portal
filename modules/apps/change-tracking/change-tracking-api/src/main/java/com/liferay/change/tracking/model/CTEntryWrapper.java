@@ -51,10 +51,12 @@ public class CTEntryWrapper
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
-		attributes.put("classNameId", getClassNameId());
-		attributes.put("classPK", getClassPK());
-		attributes.put("resourcePrimKey", getResourcePrimKey());
+		attributes.put("originalCTCollectionId", getOriginalCTCollectionId());
+		attributes.put("modelClassNameId", getModelClassNameId());
+		attributes.put("modelClassPK", getModelClassPK());
+		attributes.put("modelResourcePrimKey", getModelResourcePrimKey());
 		attributes.put("changeType", getChangeType());
+		attributes.put("collision", isCollision());
 		attributes.put("status", getStatus());
 
 		return attributes;
@@ -98,28 +100,42 @@ public class CTEntryWrapper
 			setModifiedDate(modifiedDate);
 		}
 
-		Long classNameId = (Long)attributes.get("classNameId");
+		Long originalCTCollectionId = (Long)attributes.get(
+			"originalCTCollectionId");
 
-		if (classNameId != null) {
-			setClassNameId(classNameId);
+		if (originalCTCollectionId != null) {
+			setOriginalCTCollectionId(originalCTCollectionId);
 		}
 
-		Long classPK = (Long)attributes.get("classPK");
+		Long modelClassNameId = (Long)attributes.get("modelClassNameId");
 
-		if (classPK != null) {
-			setClassPK(classPK);
+		if (modelClassNameId != null) {
+			setModelClassNameId(modelClassNameId);
 		}
 
-		Long resourcePrimKey = (Long)attributes.get("resourcePrimKey");
+		Long modelClassPK = (Long)attributes.get("modelClassPK");
 
-		if (resourcePrimKey != null) {
-			setResourcePrimKey(resourcePrimKey);
+		if (modelClassPK != null) {
+			setModelClassPK(modelClassPK);
+		}
+
+		Long modelResourcePrimKey = (Long)attributes.get(
+			"modelResourcePrimKey");
+
+		if (modelResourcePrimKey != null) {
+			setModelResourcePrimKey(modelResourcePrimKey);
 		}
 
 		Integer changeType = (Integer)attributes.get("changeType");
 
 		if (changeType != null) {
 			setChangeType(changeType);
+		}
+
+		Boolean collision = (Boolean)attributes.get("collision");
+
+		if (collision != null) {
+			setCollision(collision);
 		}
 
 		Integer status = (Integer)attributes.get("status");
@@ -140,33 +156,13 @@ public class CTEntryWrapper
 	}
 
 	/**
-	 * Returns the fully qualified class name of this ct entry.
+	 * Returns the collision of this ct entry.
 	 *
-	 * @return the fully qualified class name of this ct entry
+	 * @return the collision of this ct entry
 	 */
 	@Override
-	public String getClassName() {
-		return model.getClassName();
-	}
-
-	/**
-	 * Returns the class name ID of this ct entry.
-	 *
-	 * @return the class name ID of this ct entry
-	 */
-	@Override
-	public long getClassNameId() {
-		return model.getClassNameId();
-	}
-
-	/**
-	 * Returns the class pk of this ct entry.
-	 *
-	 * @return the class pk of this ct entry
-	 */
-	@Override
-	public long getClassPK() {
-		return model.getClassPK();
+	public boolean getCollision() {
+		return model.getCollision();
 	}
 
 	/**
@@ -205,6 +201,36 @@ public class CTEntryWrapper
 	}
 
 	/**
+	 * Returns the model class name ID of this ct entry.
+	 *
+	 * @return the model class name ID of this ct entry
+	 */
+	@Override
+	public long getModelClassNameId() {
+		return model.getModelClassNameId();
+	}
+
+	/**
+	 * Returns the model class pk of this ct entry.
+	 *
+	 * @return the model class pk of this ct entry
+	 */
+	@Override
+	public long getModelClassPK() {
+		return model.getModelClassPK();
+	}
+
+	/**
+	 * Returns the model resource prim key of this ct entry.
+	 *
+	 * @return the model resource prim key of this ct entry
+	 */
+	@Override
+	public long getModelResourcePrimKey() {
+		return model.getModelResourcePrimKey();
+	}
+
+	/**
 	 * Returns the modified date of this ct entry.
 	 *
 	 * @return the modified date of this ct entry
@@ -215,6 +241,16 @@ public class CTEntryWrapper
 	}
 
 	/**
+	 * Returns the original ct collection ID of this ct entry.
+	 *
+	 * @return the original ct collection ID of this ct entry
+	 */
+	@Override
+	public long getOriginalCTCollectionId() {
+		return model.getOriginalCTCollectionId();
+	}
+
+	/**
 	 * Returns the primary key of this ct entry.
 	 *
 	 * @return the primary key of this ct entry
@@ -222,16 +258,6 @@ public class CTEntryWrapper
 	@Override
 	public long getPrimaryKey() {
 		return model.getPrimaryKey();
-	}
-
-	/**
-	 * Returns the resource prim key of this ct entry.
-	 *
-	 * @return the resource prim key of this ct entry
-	 */
-	@Override
-	public long getResourcePrimKey() {
-		return model.getResourcePrimKey();
 	}
 
 	/**
@@ -279,9 +305,14 @@ public class CTEntryWrapper
 		return model.hasCTEntryAggregate();
 	}
 
+	/**
+	 * Returns <code>true</code> if this ct entry is collision.
+	 *
+	 * @return <code>true</code> if this ct entry is collision; <code>false</code> otherwise
+	 */
 	@Override
-	public boolean isResourceMain() {
-		return model.isResourceMain();
+	public boolean isCollision() {
+		return model.isCollision();
 	}
 
 	@Override
@@ -299,29 +330,14 @@ public class CTEntryWrapper
 		model.setChangeType(changeType);
 	}
 
-	@Override
-	public void setClassName(String className) {
-		model.setClassName(className);
-	}
-
 	/**
-	 * Sets the class name ID of this ct entry.
+	 * Sets whether this ct entry is collision.
 	 *
-	 * @param classNameId the class name ID of this ct entry
+	 * @param collision the collision of this ct entry
 	 */
 	@Override
-	public void setClassNameId(long classNameId) {
-		model.setClassNameId(classNameId);
-	}
-
-	/**
-	 * Sets the class pk of this ct entry.
-	 *
-	 * @param classPK the class pk of this ct entry
-	 */
-	@Override
-	public void setClassPK(long classPK) {
-		model.setClassPK(classPK);
+	public void setCollision(boolean collision) {
+		model.setCollision(collision);
 	}
 
 	/**
@@ -355,6 +371,36 @@ public class CTEntryWrapper
 	}
 
 	/**
+	 * Sets the model class name ID of this ct entry.
+	 *
+	 * @param modelClassNameId the model class name ID of this ct entry
+	 */
+	@Override
+	public void setModelClassNameId(long modelClassNameId) {
+		model.setModelClassNameId(modelClassNameId);
+	}
+
+	/**
+	 * Sets the model class pk of this ct entry.
+	 *
+	 * @param modelClassPK the model class pk of this ct entry
+	 */
+	@Override
+	public void setModelClassPK(long modelClassPK) {
+		model.setModelClassPK(modelClassPK);
+	}
+
+	/**
+	 * Sets the model resource prim key of this ct entry.
+	 *
+	 * @param modelResourcePrimKey the model resource prim key of this ct entry
+	 */
+	@Override
+	public void setModelResourcePrimKey(long modelResourcePrimKey) {
+		model.setModelResourcePrimKey(modelResourcePrimKey);
+	}
+
+	/**
 	 * Sets the modified date of this ct entry.
 	 *
 	 * @param modifiedDate the modified date of this ct entry
@@ -365,6 +411,16 @@ public class CTEntryWrapper
 	}
 
 	/**
+	 * Sets the original ct collection ID of this ct entry.
+	 *
+	 * @param originalCTCollectionId the original ct collection ID of this ct entry
+	 */
+	@Override
+	public void setOriginalCTCollectionId(long originalCTCollectionId) {
+		model.setOriginalCTCollectionId(originalCTCollectionId);
+	}
+
+	/**
 	 * Sets the primary key of this ct entry.
 	 *
 	 * @param primaryKey the primary key of this ct entry
@@ -372,16 +428,6 @@ public class CTEntryWrapper
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		model.setPrimaryKey(primaryKey);
-	}
-
-	/**
-	 * Sets the resource prim key of this ct entry.
-	 *
-	 * @param resourcePrimKey the resource prim key of this ct entry
-	 */
-	@Override
-	public void setResourcePrimKey(long resourcePrimKey) {
-		model.setResourcePrimKey(resourcePrimKey);
 	}
 
 	/**

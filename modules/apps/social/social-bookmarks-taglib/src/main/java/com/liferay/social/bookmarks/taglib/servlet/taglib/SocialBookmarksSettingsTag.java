@@ -30,6 +30,14 @@ import javax.servlet.jsp.PageContext;
  */
 public class SocialBookmarksSettingsTag extends IncludeTag {
 
+	public String getDisplayStyle() {
+		return _displayStyle;
+	}
+
+	public String getTypes() {
+		return StringUtil.merge(_types);
+	}
+
 	public void setDisplayStyle(String displayStyle) {
 		_displayStyle = displayStyle;
 	}

@@ -16,46 +16,39 @@ definition {
 
 		AntCommand(
 			locator1 = "build-test-documentum.xml",
-			value1 = "clean-documentum-repository -Dssh.host=${documentumVMHostName}"
-		);
+			value1 = "clean-documentum-repository -Dssh.host=${documentumVMHostName}");
 
-		User.loginPG(authenticationMethod = "By Screen Name", userScreenName = "test");
+		User.loginPG(
+			authenticationMethod = "By Screen Name",
+			userScreenName = "test");
 
 		Navigator.openURL();
 
-		ProductMenu.gotoPortlet(
-			category = "My Account",
-			panel = "User",
-			portlet = "Account Settings"
-		);
+		Navigator.gotoAccountSettings();
 
 		User.editDetailsViaMyAccount(userScreenNameEdit = "barthur");
 
 		Navigator.openURL();
 
-		ProductMenu.gotoPortlet(
-			category = "My Account",
-			panel = "User",
-			portlet = "Account Settings"
-		);
+		Navigator.gotoAccountSettings();
 
-		User.editPasswordViaMyAccount(currentPassword = "test", newPassword = "barthur");
+		User.editPasswordViaMyAccount(
+			currentPassword = "test",
+			newPassword = "barthur");
 
 		User.logoutPG();
 
 		User.loginPG(
 			authenticationMethod = "By Screen Name",
 			password = "barthur",
-			userScreenName = "barthur"
-		);
+			userScreenName = "barthur");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMNavigator.gotoAddRepositoryCP();
 
@@ -63,8 +56,7 @@ definition {
 
 		DMRepository.addDocumentum(
 			dmCabinetName = "Wombat Insurance Co",
-			dmRepositoryFieldName = "documentum"
-		);
+			dmRepositoryFieldName = "documentum");
 
 		PortletEntry.save();
 
@@ -79,8 +71,7 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		ProductMenuHelper.closeProductMenu();
 
@@ -93,8 +84,7 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		ProductMenuHelper.closeProductMenu();
 	}
@@ -112,34 +102,24 @@ definition {
 
 			Navigator.openURL();
 
-			ProductMenu.gotoPortlet(
-				category = "My Account",
-				panel = "User",
-				portlet = "Account Settings"
-			);
+			UserBar.gotoDropdownItem(dropdownItem = "Account Settings");
 
 			User.editDetailsViaMyAccount(userScreenNameEdit = "test");
 
 			Navigator.openURL();
 
-			ProductMenu.gotoPortlet(
-				category = "My Account",
-				panel = "User",
-				portlet = "Account Settings"
-			);
+			UserBar.gotoDropdownItem(dropdownItem = "Account Settings");
 
 			User.editPasswordViaMyAccount(
 				currentPassword = "password",
-				newPassword = "test"
-			);
+				newPassword = "test");
 
 			User.logoutPG();
 
 			User.loginPG(
 				authenticationMethod = "By Screen Name",
 				password = "test",
-				userScreenName = "test"
-			);
+				userScreenName = "test");
 		}
 	}
 
@@ -152,8 +132,7 @@ definition {
 
 			DMDocument.addCP(
 				dmDocumentFile = "${dmDocumentTitle}",
-				dmDocumentTitle = "${dmDocumentTitle}"
-			);
+				dmDocumentTitle = "${dmDocumentTitle}");
 
 			DMNavigator.gotoDocumentCP(dmDocumentTitle = "${dmDocumentTitle}");
 
@@ -162,8 +141,7 @@ definition {
 			ProductMenu.gotoPortlet(
 				category = "Content &amp; Data",
 				panel = "Site Administration",
-				portlet = "Documents and Media"
-			);
+				portlet = "Documents and Media");
 		}
 	}
 
@@ -175,21 +153,18 @@ definition {
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_3.txt",
-			dmDocumentTitle = "Document_3.txt"
-		);
+			dmDocumentTitle = "Document_3.txt");
 
 		DMDocument.checkoutCP(
 			dmDocumentTitle = "Document_3.txt",
-			dmRepositoryName = "true"
-		);
+			dmRepositoryName = "true");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
@@ -206,38 +181,32 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
 		var key_dmDocumentTitle = "Document_3.txt";
 
-		AssertElementNotPresent(
-			locator1 = "DocumentsAndMedia#ICON_DOCUMENT_ICON_LOCKED"
-		);
+		AssertElementNotPresent(locator1 = "DocumentsAndMedia#ICON_DOCUMENT_ICON_LOCKED");
 
 		DMNavigator.gotoDocumentCP(dmDocumentTitle = "Document_3.txt");
 
 		DMDocument.viewCheckedinCP(
 			dmDocumentVersionNumber = "1.1",
-			dmRepositoryName = "true"
-		);
+			dmRepositoryName = "true");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
 		DMDocument.deleteCP(
 			dmDocumentTitle = "Document_3.txt",
-			recycleBinDisabled = "true"
-		);
+			recycleBinDisabled = "true");
 	}
 
 	@description = "This is a use case for LPS-68454"
@@ -247,21 +216,18 @@ definition {
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_3.txt",
-			dmDocumentTitle = "Document_3.txt"
-		);
+			dmDocumentTitle = "Document_3.txt");
 
 		DMDocument.checkoutCP(
 			dmDocumentTitle = "Document_3.txt",
-			dmRepositoryName = "true"
-		);
+			dmRepositoryName = "true");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
@@ -269,20 +235,16 @@ definition {
 
 		DMDocument.deleteCP(
 			dmDocumentTitle = "Document_3.txt",
-			recycleBinDisabled = "true"
-		);
+			recycleBinDisabled = "true");
 
-		AssertConsoleTextNotPresent(
-			value1 = "Cannot prune sysobject Document_3.txt version tree since one or more of its versions are locked."
-		);
+		AssertConsoleTextNotPresent(value1 = "Cannot prune sysobject Document_3.txt version tree since one or more of its versions are locked.");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
@@ -297,22 +259,20 @@ definition {
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
-		DMFolder.addSubfolderCP(dmSubFolderName = "DM Folder3 Name");
+		DMFolder.addCP(dmFolderName = "DM Folder3 Name");
 
 		DMFolder.viewCP(dmFolderName = "DM Folder3 Name");
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_2.doc",
-			dmDocumentTitle = "Document_2.doc"
-		);
+			dmDocumentTitle = "Document_2.doc");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
@@ -327,8 +287,7 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
@@ -336,8 +295,7 @@ definition {
 
 		DMDocument.deleteCP(
 			dmDocumentTitle = "Document_2.doc",
-			recycleBinDisabled = "true"
-		);
+			recycleBinDisabled = "true");
 
 		DMNavigator.gotoHomeCP();
 
@@ -356,9 +314,11 @@ definition {
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
-		DMFolder.addSubfolderCP(dmSubFolderName = "DM Folder Name");
+		DMFolder.addCP(dmFolderName = "DM Folder Name");
 
-		DMFolder.deleteCP(dmFolderName = "DM Folder Name", recycleBinDisabled = "true");
+		DMFolder.deleteCP(
+			dmFolderName = "DM Folder Name",
+			recycleBinDisabled = "true");
 
 		DMNavigator.gotoHomeCP();
 
@@ -375,13 +335,11 @@ definition {
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_3.doc",
-			dmDocumentTitle = "Document_3.doc"
-		);
+			dmDocumentTitle = "Document_3.doc");
 
 		DMDocument.editCP(
 			dmDocumentFileEdit = "Document_2.jpg",
-			dmDocumentTitle = "Document_3.doc"
-		);
+			dmDocumentTitle = "Document_3.doc");
 
 		DMNavigator.gotoHomeCP();
 
@@ -393,28 +351,24 @@ definition {
 
 		DMDocument.viewDocumentMetadataCP(
 			metadataData = "image/jpeg",
-			metadataLabel = "Content Type"
-		);
+			metadataLabel = "Content Type");
 
 		DMDocument.cannotViewDocumentMetadataCP(
 			metadataData = "ISO-8859-1",
-			metadataLabel = "Content Encoding"
-		);
+			metadataLabel = "Content Encoding");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
 		DMDocument.deleteCP(
 			dmDocumentTitle = "Document_3.doc",
-			recycleBinDisabled = "true"
-		);
+			recycleBinDisabled = "true");
 	}
 
 	@priority = "5"
@@ -423,8 +377,7 @@ definition {
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_2.docx",
-			dmDocumentTitle = "Document_2.docx"
-		);
+			dmDocumentTitle = "Document_2.docx");
 
 		DMNavigator.gotoDocumentCP(dmDocumentTitle = "Document_2.docx");
 
@@ -435,23 +388,20 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
 		DMDocument.editCP(
 			dmDocumentTitle = "Document_2.docx",
-			dmDocumentTitleEdit = "Document_2_Edit.jpg"
-		);
+			dmDocumentTitleEdit = "Document_2_Edit.jpg");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		ProductMenuHelper.closeProductMenu();
 
@@ -470,21 +420,18 @@ definition {
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_3.docx",
-			dmDocumentTitle = "Document_3.docx"
-		);
+			dmDocumentTitle = "Document_3.docx");
 
 		DMDocument.editCP(
 			dmDocumentTitle = "Document_3.docx",
-			dmDocumentTitleEdit = "Document_3"
-		);
+			dmDocumentTitleEdit = "Document_3");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		ProductMenuHelper.closeProductMenu();
 
@@ -504,12 +451,11 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
-		DMFolder.addSubfolderCP(dmSubFolderName = "Documentum Subfolder Name");
+		DMFolder.addCP(dmFolderName = "Documentum Subfolder Name");
 
 		DMFolder.viewCP(dmFolderName = "Documentum Subfolder Name");
 
@@ -518,28 +464,24 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_1.txt",
-			dmDocumentTitle = "Document_1.txt"
-		);
+			dmDocumentTitle = "Document_1.txt");
 
 		DMDocument.checkoutCP(
 			dmDocumentTitle = "Document_1.txt",
-			dmRepositoryName = "true"
-		);
+			dmRepositoryName = "true");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
@@ -554,21 +496,18 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
 		DMDocument.moveToSubFolderCP(
 			dmDocumentTitle = "Document_1.txt",
 			dmFolderName = "Documentum Repository Name",
-			dmSubFolderName = "Documentum Subfolder Name"
-		);
+			dmSubFolderName = "Documentum Subfolder Name");
 
 		DMDocument.viewMovedToFolderCP(
 			dmDocumentTitle = "Document_1.txt",
-			dmFolderName = "Documentum Subfolder Name"
-		);
+			dmFolderName = "Documentum Subfolder Name");
 
 		DMDocument.viewIconLockedCP(dmDocumentTitle = "Document_1.txt");
 
@@ -587,21 +526,18 @@ definition {
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_1.doc",
-			dmDocumentTitle = "Document_1.doc"
-		);
+			dmDocumentTitle = "Document_1.doc");
 
 		DMDocument.moveToFolderCP(
 			dmDocumentTitle = "Document_1.doc",
-			dmFolderName = "Home"
-		);
+			dmFolderName = "Home");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMNavigator.gotoDocumentCP(dmDocumentTitle = "Document_1.doc");
 
@@ -612,8 +548,7 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
@@ -628,8 +563,7 @@ definition {
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_3.doc",
-			dmDocumentTitle = "Document_3.doc"
-		);
+			dmDocumentTitle = "Document_3.doc");
 
 		DMNavigator.gotoHomeCP();
 
@@ -637,8 +571,7 @@ definition {
 
 		DMDocument.viewSearchResultsCP(
 			dmDocumentTitle = "Document_3.doc",
-			dmRepositoryName = "Documentum Repository Name"
-		);
+			dmRepositoryName = "Documentum Repository Name");
 	}
 
 	@priority = "5"
@@ -649,37 +582,32 @@ definition {
 
 		DMDocument.addCP(
 			dmDocumentFile = "Document_1.xls",
-			dmDocumentTitle = "Document_1.xls"
-		);
+			dmDocumentTitle = "Document_1.xls");
 
 		DMDocument.checkoutCP(
 			dmDocumentTitle = "Document_1.xls",
-			dmRepositoryName = "true"
-		);
+			dmRepositoryName = "true");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
 		DMDocument.editCP(
 			checkedOut = "true",
 			dmDocumentTitle = "Document_1.xls",
-			dmDocumentTitleEdit = "Document_1_Edit.jpg"
-		);
+			dmDocumentTitleEdit = "Document_1_Edit.jpg");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMRepository.gotoCP(dmRepositoryName = "Documentum Repository Name");
 
@@ -701,8 +629,7 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		ProductMenuHelper.closeProductMenu();
 

@@ -14,9 +14,10 @@
 
 package com.liferay.frontend.taglib.clay.servlet.taglib.util;
 
+import com.liferay.petra.function.UnsafeConsumer;
+
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author Carlos Lancha
@@ -27,32 +28,55 @@ public class CreationMenu extends HashMap {
 		put("primaryItems", _primaryDropdownItems);
 	}
 
-	public void addDropdownItem(Consumer<DropdownItem> consumer) {
-		addPrimaryDropdownItem(consumer);
+	public void addDropdownItem(
+		UnsafeConsumer<DropdownItem, Exception> unsafeConsumer) {
+
+		addPrimaryDropdownItem(unsafeConsumer);
 	}
 
-	public void addFavoriteDropdownItem(Consumer<DropdownItem> consumer) {
+	public void addFavoriteDropdownItem(
+		UnsafeConsumer<DropdownItem, Exception> unsafeConsumer) {
+
 		DropdownItem dropdownItem = new DropdownItem();
 
-		consumer.accept(dropdownItem);
+		try {
+			unsafeConsumer.accept(dropdownItem);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 		_favoriteDropdownItems.add(dropdownItem);
 
 		put("secondaryItems", _buildSecondaryDropdownItems());
 	}
 
-	public void addPrimaryDropdownItem(Consumer<DropdownItem> consumer) {
+	public void addPrimaryDropdownItem(
+		UnsafeConsumer<DropdownItem, Exception> unsafeConsumer) {
+
 		DropdownItem dropdownItem = new DropdownItem();
 
-		consumer.accept(dropdownItem);
+		try {
+			unsafeConsumer.accept(dropdownItem);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 		_primaryDropdownItems.add(dropdownItem);
 	}
 
-	public void addRestDropdownItem(Consumer<DropdownItem> consumer) {
+	public void addRestDropdownItem(
+		UnsafeConsumer<DropdownItem, Exception> unsafeConsumer) {
+
 		DropdownItem dropdownItem = new DropdownItem();
 
-		consumer.accept(dropdownItem);
+		try {
+			unsafeConsumer.accept(dropdownItem);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 		_restDropdownItems.add(dropdownItem);
 
@@ -65,6 +89,10 @@ public class CreationMenu extends HashMap {
 
 	public void setHelpText(String helpText) {
 		put("helpText", helpText);
+	}
+
+	public void setItemsIconAlignment(String itemsIconAlignment) {
+		put("itemsIconAlignment", itemsIconAlignment);
 	}
 
 	public void setViewMoreURL(String viewMoreURL) {

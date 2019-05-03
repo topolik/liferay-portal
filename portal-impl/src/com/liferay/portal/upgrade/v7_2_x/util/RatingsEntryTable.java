@@ -28,19 +28,15 @@ public class RatingsEntryTable {
 	public static final String TABLE_NAME = "RatingsEntry";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"uuid_", Types.VARCHAR},
-		{"entryId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT},
-		{"score", Types.DOUBLE}
+		{"uuid_", Types.VARCHAR}, {"entryId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
+		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"classNameId", Types.BIGINT},
+		{"classPK", Types.BIGINT}, {"score", Types.DOUBLE}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
@@ -64,7 +60,8 @@ TABLE_COLUMNS_MAP.put("classPK", Types.BIGINT);
 TABLE_COLUMNS_MAP.put("score", Types.DOUBLE);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table RatingsEntry (uuid_ VARCHAR(75) null,entryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,score DOUBLE)";
+	public static final String TABLE_SQL_CREATE =
+"create table RatingsEntry (uuid_ VARCHAR(75) null,entryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,score DOUBLE)";
 
 	public static final String TABLE_SQL_DROP = "drop table RatingsEntry";
 

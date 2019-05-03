@@ -40,16 +40,28 @@ PortletURL portletURL = ddmDataProviderDisplayContext.getPortletURL();
 <aui:script>
 	var deleteDataProviderInstances = function() {
 		if (confirm('<%= UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-delete-this") %>')) {
-			var form = AUI.$(document.<portlet:namespace />searchContainerForm);
+			var searchContainer = document.getElementById('<portlet:namespace />dataProviderInstance');
 
-			var searchContainer = AUI.$('#<portlet:namespace />dataProviderInstance', form);
+			if (searchContainer) {
+				Liferay.Util.postForm(
+					document.<portlet:namespace />searchContainerForm,
+					{
+						data: {
+							deleteDataProviderInstanceIds: Liferay.Util.listCheckedExcept(searchContainer, '<portlet:namespace />allRowIds')
+						},
 
-			form.attr('method', 'post');
-			form.fm('deleteDataProviderInstanceIds').val(Liferay.Util.listCheckedExcept(searchContainer, '<portlet:namespace />allRowIds'));
+						<portlet:actionURL name="deleteDataProvider" var="deleteDataProviderURL">
+							<portlet:param name="mvcPath" value="/view.jsp" />
+							<portlet:param name="redirect" value="<%= currentURL %>" />
+						</portlet:actionURL>
 
-			submitForm(form, '<portlet:actionURL name="deleteDataProvider"><portlet:param name="mvcPath" value="/view.jsp" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:actionURL>');
+						url: '<%= deleteDataProviderURL %>'
+					}
+				);
+			}
 		}
-	}
+	};
+
 	var ACTIONS = {
 		'deleteDataProviderInstances': deleteDataProviderInstances
 	};

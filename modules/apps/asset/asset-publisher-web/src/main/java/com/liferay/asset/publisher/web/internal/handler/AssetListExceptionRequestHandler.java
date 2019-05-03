@@ -17,8 +17,8 @@ package com.liferay.asset.publisher.web.internal.handler;
 import com.liferay.asset.list.exception.AssetListEntryTitleException;
 import com.liferay.asset.list.exception.DuplicateAssetListEntryTitleException;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -43,18 +43,16 @@ public class AssetListExceptionRequestHandler {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
 		String errorMessage = "an-unexpected-error-occurred";
 
 		if (pe instanceof AssetListEntryTitleException) {
 			errorMessage = "please-enter-a-valid-title";
 		}
 		else if (pe instanceof DuplicateAssetListEntryTitleException) {
-			errorMessage = "an-asset-list-with-that-title-already-exists";
+			errorMessage = "a-content-set-with-that-title-already-exists";
 		}
 
-		jsonObject.put(
+		JSONObject jsonObject = JSONUtil.put(
 			"error", LanguageUtil.get(themeDisplay.getRequest(), errorMessage));
 
 		JSONPortletResponseUtil.writeJSON(

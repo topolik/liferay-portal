@@ -28,14 +28,18 @@ taglib uri="http://liferay.com/tld/util" prefix="liferay-util" %>
 <%@ page import="com.liferay.configuration.admin.category.ConfigurationCategory" %><%@
 page import="com.liferay.configuration.admin.display.ConfigurationFormRenderer" %><%@
 page import="com.liferay.configuration.admin.display.ConfigurationScreen" %><%@
+page import="com.liferay.configuration.admin.menu.ConfigurationMenuItem" %><%@
 page import="com.liferay.configuration.admin.web.internal.constants.ConfigurationAdminWebKeys" %><%@
 page import="com.liferay.configuration.admin.web.internal.display.ConfigurationCategoryDisplay" %><%@
 page import="com.liferay.configuration.admin.web.internal.display.ConfigurationCategoryMenuDisplay" %><%@
 page import="com.liferay.configuration.admin.web.internal.display.ConfigurationCategorySectionDisplay" %><%@
 page import="com.liferay.configuration.admin.web.internal.display.ConfigurationEntry" %><%@
+page import="com.liferay.configuration.admin.web.internal.display.ConfigurationModelConfigurationEntry" %><%@
 page import="com.liferay.configuration.admin.web.internal.display.ConfigurationScopeDisplay" %><%@
+page import="com.liferay.configuration.admin.web.internal.display.context.ConfigurationScopeDisplayContext" %><%@
 page import="com.liferay.configuration.admin.web.internal.model.ConfigurationModel" %><%@
 page import="com.liferay.configuration.admin.web.internal.util.ConfigurationCategoryUtil" %><%@
+page import="com.liferay.configuration.admin.web.internal.util.ConfigurationEntryIterator" %><%@
 page import="com.liferay.configuration.admin.web.internal.util.ConfigurationEntryRetriever" %><%@
 page import="com.liferay.configuration.admin.web.internal.util.ConfigurationModelIterator" %><%@
 page import="com.liferay.configuration.admin.web.internal.util.ResourceBundleLoaderProvider" %><%@
@@ -43,6 +47,7 @@ page import="com.liferay.portal.configuration.metatype.annotations.ExtendedObjec
 page import="com.liferay.portal.configuration.persistence.listener.ConfigurationModelListenerException" %><%@
 page import="com.liferay.portal.kernel.language.LanguageUtil" %><%@
 page import="com.liferay.portal.kernel.util.HtmlUtil" %><%@
+page import="com.liferay.portal.kernel.util.ListUtil" %><%@
 page import="com.liferay.portal.kernel.util.ParamUtil" %><%@
 page import="com.liferay.portal.kernel.util.PortalUtil" %><%@
 page import="com.liferay.portal.kernel.util.ResourceBundleLoader" %><%@
@@ -54,7 +59,8 @@ page import="java.util.ResourceBundle" %>
 
 <%@ page import="javax.portlet.PortletURL" %>
 
-<%@ page import="org.osgi.service.metatype.AttributeDefinition" %>
+<%@ page import="org.osgi.service.cm.Configuration" %><%@
+page import="org.osgi.service.metatype.AttributeDefinition" %>
 
 <liferay-frontend:defineObjects />
 

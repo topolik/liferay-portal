@@ -37,6 +37,17 @@ import org.dom4j.Node;
 public class VarPoshiElement extends PoshiElement {
 
 	@Override
+	public Element addAttribute(String name, String value) {
+		if (name.equals("from") || name.equals("method") ||
+			name.equals("value")) {
+
+			valueAttributeName = name;
+		}
+
+		return super.addAttribute(name, value);
+	}
+
+	@Override
 	public PoshiElement clone(Element element) {
 		if (isElementType(_ELEMENT_NAME, element)) {
 			return new VarPoshiElement(element);
@@ -102,7 +113,7 @@ public class VarPoshiElement extends PoshiElement {
 		String value = getValueFromAssignment(poshiScript);
 
 		if (value.startsWith("\'\'\'")) {
-			addCDATA(getPoshiScriptEscapedContent(value));
+			add(new PoshiCDATA(getPoshiScriptEscapedContent(value)));
 
 			return;
 		}
@@ -331,12 +342,8 @@ public class VarPoshiElement extends PoshiElement {
 			return;
 		}
 
-		for (Node node : Dom4JUtil.toNodeList(element.content())) {
-			if (node instanceof CDATA) {
-				add((CDATA)node.clone());
-
-				return;
-			}
+		if (getText() != null) {
+			return;
 		}
 
 		try {
@@ -410,7 +417,7 @@ public class VarPoshiElement extends PoshiElement {
 
 	private static final Pattern _statementPattern = Pattern.compile(
 		"^" + VAR_NAME_REGEX + ASSIGNMENT_REGEX + _VAR_VALUE_REGEX +
-			STATEMENT_END_REGEX,
+			VAR_STATEMENT_END_REGEX,
 		Pattern.DOTALL);
 
 }

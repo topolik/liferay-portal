@@ -109,17 +109,13 @@ public abstract class PoshiNodeFactory {
 				PoshiElement poshiElement = _definitionPoshiElement.clone(
 					content, url);
 
-				if (!hasPoshiScriptParserException(url)) {
-					validatePoshiScriptContent(poshiElement, url);
-				}
-
 				return poshiElement;
 			}
 		}
-		catch (DocumentException | IOException e) {
+		catch (DocumentException de) {
 			throw new RuntimeException(
 				"Unable to parse Poshi XML file: " + url.getFile(),
-				e.getCause());
+				de.getCause());
 		}
 		catch (PoshiScriptParserException pspe) {
 			if (pspe instanceof UnbalancedCodeException) {
@@ -177,8 +173,6 @@ public abstract class PoshiNodeFactory {
 			PoshiScriptParserException pspe = new PoshiScriptParserException(
 				"Data loss has occurred while parsing Poshi Script",
 				newPoshiElement);
-
-			pspe.setPoshiScriptSnippet(newPoshiScript);
 
 			throw pspe;
 		}

@@ -1,5 +1,6 @@
 import AnalyticsClient from '../src/analytics';
 import {expect} from 'chai';
+import fetchMock from 'fetch-mock';
 
 let Analytics;
 let EVENT_ID = 0;
@@ -17,8 +18,6 @@ const MOCKED_REQUEST_DURATION = 5000;
 const STORAGE_KEY_EVENTS = 'ac_client_batch';
 const STORAGE_KEY_USER_ID = 'ac_client_user_id';
 const STORAGE_KEY_IDENTITY = 'ac_client_identity';
-
-const fetchMock = window.fetchMock;
 
 /**
  * Sends dummy events to test the Analytics API
@@ -80,7 +79,7 @@ describe('Analytics Client', () => {
 		});
 
 		it('should prevent overlapping requests', (done) => {
-			fetchMock.mock(/identity$/, () => Promise.resolve(200));
+			fetchMock.restore();
 
 			let fetchCalled = 0;
 
@@ -151,28 +150,6 @@ describe('Analytics Client', () => {
 			});
 		});
 
-		it('should regenerate the stored userid if the identity changed' , () => {
-			fetchMock.mock(/identity$/ig, () => Promise.resolve(200));
-
-			Analytics.reset();
-			Analytics.dispose();
-
-			Analytics = AnalyticsClient.create(INITIAL_CONFIG);
-
-			Analytics.setIdentity(ANALYTICS_IDENTITY);
-
-			const previousUserId = localStorage.getItem(STORAGE_KEY_USER_ID);
-
-			return Analytics.setIdentity({
-				email: 'john@liferay.com',
-				name: 'John'
-			}).then(() => {
-				const currentUserId = localStorage.getItem(STORAGE_KEY_USER_ID);
-
-				expect(currentUserId).not.to.equal(previousUserId);
-			});
-		});
-
 		it('should report identity changes to the Identity Service', () => {
 			fetchMock.mock('*', () => Promise.resolve(200));
 
@@ -224,6 +201,7 @@ describe('Analytics Client', () => {
 		});
 
 		it('should only clear the persisted events when done', () => {
+			fetchMock.restore();
 			Analytics.reset();
 			Analytics.dispose();
 
@@ -233,8 +211,6 @@ describe('Analytics Client', () => {
 					...INITIAL_CONFIG,
 				}
 			);
-
-			fetchMock.mock(/identity$/, () => Promise.resolve({}));
 
 			fetchMock.mock(
 				/ac-server/ig,
@@ -256,6 +232,49 @@ describe('Analytics Client', () => {
 				const events = Analytics.events;
 
 				events.should.have.lengthOf(7);
+			});
+		});
+
+		it('should preserve the user id whenever the set identity is called after a anonymous navigation', () => {
+			fetchMock.mock(/ac-server/ig, () => Promise.resolve(200));
+			fetchMock.mock(/identity$/, () => Promise.resolve(200));
+
+			sendDummyEvents(Analytics, 1);
+
+			Analytics.flush();
+
+			const userId = localStorage.getItem(STORAGE_KEY_USER_ID);
+
+			return Analytics.setIdentity({
+				email: 'john@liferay.com',
+				name: 'John'
+			}).then(() => {
+				expect(localStorage.getItem(STORAGE_KEY_USER_ID)).to.equal(userId);
+			});
+		});
+
+		it('should regenerate the user id on logouts or session expirations ', () => {
+			fetchMock.mock(/ac-server/ig, () => Promise.resolve(200));
+			fetchMock.mock(/identity$/, () => Promise.resolve(200));
+
+			sendDummyEvents(Analytics, 1);
+
+			Analytics.flush();
+
+			const userId = localStorage.getItem(STORAGE_KEY_USER_ID);
+
+			Analytics.setIdentity({
+				email: 'john@liferay.com',
+				name: 'John'
+			});
+
+			Analytics.reset();
+			Analytics.dispose();
+
+			sendDummyEvents(Analytics, 1);
+
+			Analytics.flush().then(() => {
+				expect(localStorage.getItem(STORAGE_KEY_USER_ID)).not.to.equal(userId);
 			});
 		});
 	});
@@ -290,7 +309,7 @@ describe('Analytics Client', () => {
 
 			const events = JSON.parse(localStorage.getItem(STORAGE_KEY_EVENTS));
 
-			events.should.have.lengthOf.at.least(eventsNumber);
+			expect(events).to.have.lengthOf.at.least(eventsNumber);
 		});
 	});
 });

@@ -1,6 +1,6 @@
 import core from 'metal';
 import dom from 'metal-dom';
-import { EventHandler } from 'metal-events';
+import {EventHandler} from 'metal-events';
 
 import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
 
@@ -12,6 +12,7 @@ import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
  */
 
 class EditAdaptiveMediaConfig extends PortletBase {
+
 	/**
 	 * @inheritDoc
 	 */
@@ -214,6 +215,7 @@ class EditAdaptiveMediaConfig extends PortletBase {
  * @type {!Object}
  */
 EditAdaptiveMediaConfig.STATE = {
+
 	/**
 	 * Node where errors will be rendered.
 	 * @instance

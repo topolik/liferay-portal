@@ -55,6 +55,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -152,7 +153,7 @@ public class FileSystemImporter extends BaseImporter {
 		PortletPreferencesTranslator portletPreferencesTranslator,
 		Map<String, PortletPreferencesTranslator> portletPreferencesTranslators,
 		RepositoryLocalService repositoryLocalService, SAXReader saxReader,
-		ThemeLocalService themeLocalService, DLURLHelper dlurlHelper) {
+		ThemeLocalService themeLocalService, DLURLHelper dlURLHelper) {
 
 		this.assetTagLocalService = assetTagLocalService;
 		this.ddmFormJSONDeserializer = ddmFormJSONDeserializer;
@@ -181,7 +182,7 @@ public class FileSystemImporter extends BaseImporter {
 		this.repositoryLocalService = repositoryLocalService;
 		this.saxReader = saxReader;
 		this.themeLocalService = themeLocalService;
-		_dlurlHelper = dlurlHelper;
+		_dlURLHelper = dlURLHelper;
 	}
 
 	@Override
@@ -950,7 +951,7 @@ public class FileSystemImporter extends BaseImporter {
 				FileEntry fileEntry = _fileEntries.get(smallImageFileName);
 
 				if (fileEntry != null) {
-					smallImageURL = _dlurlHelper.getPreviewURL(
+					smallImageURL = _dlURLHelper.getPreviewURL(
 						fileEntry, fileEntry.getFileVersion(), null,
 						StringPool.BLANK);
 				}
@@ -1293,7 +1294,7 @@ public class FileSystemImporter extends BaseImporter {
 		Map<Locale, String> nameMap = getMap(
 			layoutTemplateJSONObject.getString("name"));
 
-		String name = nameMap.get(Locale.getDefault());
+		String name = nameMap.get(LocaleUtil.getDefault());
 
 		LayoutPrototype layoutPrototype = getLayoutPrototype(companyId, name);
 
@@ -1501,17 +1502,16 @@ public class FileSystemImporter extends BaseImporter {
 	}
 
 	protected JSONObject getDefaultPortletJSONObject(String journalArticleId) {
-		JSONObject portletJSONObject = JSONFactoryUtil.createJSONObject();
+		JSONObject portletJSONObject = JSONUtil.put(
+			"portletId", _JOURNAL_CONTENT_PORTLET_ID);
 
-		portletJSONObject.put("portletId", _JOURNAL_CONTENT_PORTLET_ID);
-
-		JSONObject portletPreferencesJSONObject =
-			JSONFactoryUtil.createJSONObject();
-
-		portletPreferencesJSONObject.put("articleId", journalArticleId);
-		portletPreferencesJSONObject.put("groupId", groupId);
-		portletPreferencesJSONObject.put(
-			"portletSetupPortletDecoratorId", "borderless");
+		JSONObject portletPreferencesJSONObject = JSONUtil.put(
+			"articleId", journalArticleId
+		).put(
+			"groupId", groupId
+		).put(
+			"portletSetupPortletDecoratorId", "borderless"
+		);
 
 		portletJSONObject.put(
 			"portletPreferences", portletPreferencesJSONObject);
@@ -1751,7 +1751,7 @@ public class FileSystemImporter extends BaseImporter {
 			String fileEntryURL = StringPool.BLANK;
 
 			if (fileEntry != null) {
-				fileEntryURL = _dlurlHelper.getPreviewURL(
+				fileEntryURL = _dlURLHelper.getPreviewURL(
 					fileEntry, fileEntry.getFileVersion(), null,
 					StringPool.BLANK);
 			}
@@ -1776,7 +1776,7 @@ public class FileSystemImporter extends BaseImporter {
 		return content;
 	}
 
-	protected void resetLayoutColumns(Layout layout) {
+	protected void resetLayoutColumns(Layout layout) throws PortalException {
 		UnicodeProperties typeSettings = layout.getTypeSettingsProperties();
 
 		Set<Map.Entry<String, String>> set = typeSettings.entrySet();
@@ -2086,7 +2086,7 @@ public class FileSystemImporter extends BaseImporter {
 	private final Map<String, JSONObject> _assetJSONObjectMap = new HashMap<>();
 	private final Set<String> _ddmStructureKeys = new HashSet<>();
 	private String _defaultLayoutTemplateId;
-	private final DLURLHelper _dlurlHelper;
+	private final DLURLHelper _dlURLHelper;
 	private final Map<String, FileEntry> _fileEntries = new HashMap<>();
 	private final Map<String, Set<Long>> _primaryKeys = new HashMap<>();
 	private File _resourcesDir;

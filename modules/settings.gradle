@@ -13,10 +13,16 @@ if (testClassGroupIndex) {
 
 	properties.load(new StringReader(file.text.replace("\\", "/")))
 
-	String testClassGroup = properties["TEST_CLASS_GROUP_" + testClassGroupIndex]
-	String testClassGroups = properties["TEST_CLASS_GROUPS"]
+	List<String> testClasses = []
 
-	gradle.ext.testClasses = testClassGroup.tokenize(",")
+	String testClassGroup = properties["TEST_CLASS_GROUP_" + testClassGroupIndex]
+
+	if (testClassGroup != null) {
+		testClasses = testClassGroup.tokenize(",")
+	}
+
+	gradle.ext.testClasses = testClasses
+
 	gradle.ext.testClassGroupIndex = testClassGroupIndex
-	gradle.ext.testClassGroups = testClassGroups
+	gradle.ext.testClassGroups = properties["TEST_CLASS_GROUPS"]
 }

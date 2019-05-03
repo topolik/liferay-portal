@@ -21,7 +21,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalFolder;
@@ -29,6 +28,7 @@ import com.liferay.journal.model.JournalFolderConstants;
 import com.liferay.journal.web.configuration.JournalWebConfiguration;
 import com.liferay.journal.web.internal.security.permission.resource.JournalArticlePermission;
 import com.liferay.journal.web.internal.security.permission.resource.JournalFolderPermission;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import javax.portlet.PortletURL;
 
@@ -94,27 +93,25 @@ public class JournalManagementToolbarDisplayContext
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData("action", "deleteEntries");
+					dropdownItem -> {
+						dropdownItem.putData("action", "deleteEntries");
 
-							boolean trashEnabled = _trashHelper.isTrashEnabled(
-								_themeDisplay.getScopeGroupId());
+						boolean trashEnabled = _trashHelper.isTrashEnabled(
+							_themeDisplay.getScopeGroupId());
 
-							dropdownItem.setIcon(
-								trashEnabled ? "trash" : "times");
+						dropdownItem.setIcon(
+							trashEnabled ? "trash" : "times-circle");
 
-							String label = "delete";
+						String label = "delete";
 
-							if (trashEnabled) {
-								label = "recycle-bin";
-							}
+						if (trashEnabled) {
+							label = "recycle-bin";
+						}
 
-							dropdownItem.setLabel(
-								LanguageUtil.get(request, label));
+						dropdownItem.setLabel(LanguageUtil.get(request, label));
 
-							dropdownItem.setQuickAction(true);
-						}));
+						dropdownItem.setQuickAction(true);
+					});
 
 				add(
 					dropdownItem -> {
@@ -128,7 +125,7 @@ public class JournalManagementToolbarDisplayContext
 				add(
 					dropdownItem -> {
 						dropdownItem.putData("action", "moveEntries");
-						dropdownItem.setIcon("change");
+						dropdownItem.setIcon("move-folder");
 						dropdownItem.setLabel(
 							LanguageUtil.get(request, "move"));
 						dropdownItem.setQuickAction(true);
@@ -268,100 +265,7 @@ public class JournalManagementToolbarDisplayContext
 	@Override
 	public CreationMenu getCreationMenu() {
 		try {
-			return new CreationMenu() {
-				{
-					setHelpText(
-						LanguageUtil.get(
-							request,
-							"you-can-customize-this-menu-or-see-all-you-have-" +
-								"by-clicking-more"));
-
-					if (JournalFolderPermission.contains(
-							_themeDisplay.getPermissionChecker(),
-							_themeDisplay.getScopeGroupId(),
-							_journalDisplayContext.getFolderId(),
-							ActionKeys.ADD_FOLDER)) {
-
-						addPrimaryDropdownItem(
-							dropdownItem -> {
-								dropdownItem.setHref(
-									liferayPortletResponse.createRenderURL(),
-									"mvcPath", "/edit_folder.jsp", "redirect",
-									PortalUtil.getCurrentURL(request),
-									"groupId",
-									String.valueOf(
-										_themeDisplay.getScopeGroupId()),
-									"parentFolderId",
-									String.valueOf(
-										_journalDisplayContext.getFolderId()));
-
-								String label = "folder";
-
-								if (_journalDisplayContext.getFolder() !=
-										null) {
-
-									label = "subfolder";
-								}
-
-								dropdownItem.setLabel(
-									LanguageUtil.get(request, label));
-							});
-					}
-
-					if (JournalFolderPermission.contains(
-							_themeDisplay.getPermissionChecker(),
-							_themeDisplay.getScopeGroupId(),
-							_journalDisplayContext.getFolderId(),
-							ActionKeys.ADD_ARTICLE)) {
-
-						List<DDMStructure> ddmStructures =
-							_journalDisplayContext.getDDMStructures();
-
-						for (DDMStructure ddmStructure : ddmStructures) {
-							PortletURL portletURL =
-								liferayPortletResponse.createRenderURL();
-
-							portletURL.setParameter(
-								"mvcPath", "/edit_article.jsp");
-							portletURL.setParameter(
-								"redirect", PortalUtil.getCurrentURL(request));
-							portletURL.setParameter(
-								"groupId",
-								String.valueOf(
-									_themeDisplay.getScopeGroupId()));
-							portletURL.setParameter(
-								"folderId",
-								String.valueOf(
-									_journalDisplayContext.getFolderId()));
-							portletURL.setParameter(
-								"ddmStructureKey",
-								ddmStructure.getStructureKey());
-
-							Consumer<DropdownItem> consumer =
-								SafeConsumer.ignore(
-									dropdownItem -> {
-										dropdownItem.setHref(portletURL);
-
-										dropdownItem.setLabel(
-											ddmStructure.getUnambiguousName(
-												ddmStructures,
-												_themeDisplay.getScopeGroupId(),
-												_themeDisplay.getLocale()));
-									});
-
-							if (ArrayUtil.contains(
-									_journalDisplayContext.getAddMenuFavItems(),
-									ddmStructure.getStructureKey())) {
-
-								addFavoriteDropdownItem(consumer);
-							}
-							else {
-								addRestDropdownItem(consumer);
-							}
-						}
-					}
-				}
-			};
+			return _getCreationMenu();
 		}
 		catch (PortalException pe) {
 			if (_log.isDebugEnabled()) {
@@ -449,7 +353,7 @@ public class JournalManagementToolbarDisplayContext
 
 				int status = _journalDisplayContext.getStatus();
 
-				if (status != WorkflowConstants.STATUS_ANY) {
+				if (status != _journalDisplayContext.getDefaultStatus()) {
 					add(
 						labelItem -> {
 							labelItem.setLabel(
@@ -559,6 +463,94 @@ public class JournalManagementToolbarDisplayContext
 	@Override
 	protected String[] getOrderByKeys() {
 		return _journalDisplayContext.getOrderColumns();
+	}
+
+	private CreationMenu _getCreationMenu() throws PortalException {
+		return new CreationMenu() {
+			{
+				if (JournalFolderPermission.contains(
+						_themeDisplay.getPermissionChecker(),
+						_themeDisplay.getScopeGroupId(),
+						_journalDisplayContext.getFolderId(),
+						ActionKeys.ADD_FOLDER)) {
+
+					addPrimaryDropdownItem(
+						dropdownItem -> {
+							dropdownItem.setHref(
+								liferayPortletResponse.createRenderURL(),
+								"mvcPath", "/edit_folder.jsp", "redirect",
+								PortalUtil.getCurrentURL(request), "groupId",
+								String.valueOf(_themeDisplay.getScopeGroupId()),
+								"parentFolderId",
+								String.valueOf(
+									_journalDisplayContext.getFolderId()));
+
+							String label = "folder";
+
+							if (_journalDisplayContext.getFolder() != null) {
+								label = "subfolder";
+							}
+
+							dropdownItem.setLabel(
+								LanguageUtil.get(request, label));
+						});
+				}
+
+				if (JournalFolderPermission.contains(
+						_themeDisplay.getPermissionChecker(),
+						_themeDisplay.getScopeGroupId(),
+						_journalDisplayContext.getFolderId(),
+						ActionKeys.ADD_ARTICLE)) {
+
+					List<DDMStructure> ddmStructures =
+						_journalDisplayContext.getDDMStructures();
+
+					for (DDMStructure ddmStructure : ddmStructures) {
+						PortletURL portletURL =
+							liferayPortletResponse.createRenderURL();
+
+						portletURL.setParameter("mvcPath", "/edit_article.jsp");
+						portletURL.setParameter(
+							"redirect", PortalUtil.getCurrentURL(request));
+						portletURL.setParameter(
+							"groupId",
+							String.valueOf(_themeDisplay.getScopeGroupId()));
+						portletURL.setParameter(
+							"folderId",
+							String.valueOf(
+								_journalDisplayContext.getFolderId()));
+						portletURL.setParameter(
+							"ddmStructureKey", ddmStructure.getStructureKey());
+
+						UnsafeConsumer<DropdownItem, Exception> unsafeConsumer =
+							dropdownItem -> {
+								dropdownItem.setHref(portletURL);
+								dropdownItem.setLabel(
+									ddmStructure.getUnambiguousName(
+										ddmStructures,
+										_themeDisplay.getScopeGroupId(),
+										_themeDisplay.getLocale()));
+							};
+
+						if (ArrayUtil.contains(
+								_journalDisplayContext.getAddMenuFavItems(),
+								ddmStructure.getStructureKey())) {
+
+							addFavoriteDropdownItem(unsafeConsumer);
+						}
+						else {
+							addRestDropdownItem(unsafeConsumer);
+						}
+					}
+				}
+
+				setHelpText(
+					LanguageUtil.get(
+						request,
+						"you-can-customize-this-menu-or-see-all-you-have-by-" +
+							"clicking-more"));
+			}
+		};
 	}
 
 	private List<DropdownItem> _getFilterStatusDropdownItems() {

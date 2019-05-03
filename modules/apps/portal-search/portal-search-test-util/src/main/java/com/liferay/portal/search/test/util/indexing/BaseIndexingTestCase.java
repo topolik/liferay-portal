@@ -38,12 +38,18 @@ import com.liferay.portal.search.aggregation.HierarchicalAggregationResult;
 import com.liferay.portal.search.aggregation.bucket.Bucket;
 import com.liferay.portal.search.aggregation.pipeline.PipelineAggregation;
 import com.liferay.portal.search.engine.adapter.SearchEngineAdapter;
+import com.liferay.portal.search.geolocation.GeoBuilders;
+import com.liferay.portal.search.highlight.Highlights;
 import com.liferay.portal.search.internal.aggregation.AggregationsImpl;
+import com.liferay.portal.search.internal.geolocation.GeoBuildersImpl;
+import com.liferay.portal.search.internal.highlight.HighlightsImpl;
 import com.liferay.portal.search.internal.legacy.searcher.SearchRequestBuilderImpl;
 import com.liferay.portal.search.internal.legacy.searcher.SearchResponseBuilderImpl;
 import com.liferay.portal.search.internal.query.QueriesImpl;
+import com.liferay.portal.search.internal.script.ScriptsImpl;
 import com.liferay.portal.search.internal.sort.SortsImpl;
 import com.liferay.portal.search.query.Queries;
+import com.liferay.portal.search.script.Scripts;
 import com.liferay.portal.search.searcher.SearchRequestBuilder;
 import com.liferay.portal.search.searcher.SearchResponse;
 import com.liferay.portal.search.searcher.SearchResponseBuilder;
@@ -100,12 +106,8 @@ public abstract class BaseIndexingTestCase {
 			return;
 		}
 
-		try {
-			_indexWriter.deleteEntityDocuments(
-				createSearchContext(), _entryClassName);
-		}
-		catch (SearchException se) {
-		}
+		_indexWriter.deleteEntityDocuments(
+			createSearchContext(), _entryClassName);
 
 		_documentFixture.tearDown();
 
@@ -143,6 +145,9 @@ public abstract class BaseIndexingTestCase {
 			_indexWriter.addDocument(createSearchContext(), document);
 		}
 		catch (SearchException se) {
+			_handle(se);
+
+			throw new RuntimeException(se);
 		}
 	}
 
@@ -225,6 +230,8 @@ public abstract class BaseIndexingTestCase {
 			return _indexSearcher.search(searchContext, query);
 		}
 		catch (SearchException se) {
+			_handle(se);
+
 			throw new RuntimeException(se);
 		}
 	}
@@ -234,6 +241,8 @@ public abstract class BaseIndexingTestCase {
 			return _indexSearcher.searchCount(searchContext, query);
 		}
 		catch (SearchException se) {
+			_handle(se);
+
 			throw new RuntimeException(se);
 		}
 	}
@@ -251,7 +260,10 @@ public abstract class BaseIndexingTestCase {
 	protected static final long GROUP_ID = RandomTestUtil.randomLong();
 
 	protected final Aggregations aggregations = new AggregationsImpl();
+	protected final GeoBuilders geoBuilders = new GeoBuildersImpl();
+	protected final Highlights highlights = new HighlightsImpl();
 	protected final Queries queries = new QueriesImpl();
+	protected final Scripts scripts = new ScriptsImpl();
 	protected final Sorts sorts = new SortsImpl();
 
 	protected class IndexingTestHelper {
@@ -260,7 +272,7 @@ public abstract class BaseIndexingTestCase {
 			_searchContext = createSearchContext();
 
 			_searchRequestBuilder = new SearchRequestBuilderImpl(
-				_searchContext);
+				null, _searchContext);
 		}
 
 		public void assertResultCount(int expected) {
@@ -424,6 +436,18 @@ public abstract class BaseIndexingTestCase {
 		private final SearchRequestBuilder _searchRequestBuilder;
 		private SearchResponse _searchResponse;
 
+	}
+
+	private void _handle(SearchException se) {
+		Throwable t = se.getCause();
+
+		if (t instanceof RuntimeException) {
+			throw (RuntimeException)t;
+		}
+
+		if (t != null) {
+			throw new RuntimeException(t);
+		}
 	}
 
 	private final DocumentFixture _documentFixture = new DocumentFixture();

@@ -67,7 +67,13 @@ public class LayoutPageTemplateServiceUpgrade
 		registry.register(
 			"2.0.0", "2.1.0",
 			new UpgradeLayout(
-				_layoutLocalService, _layoutPrototypeLocalService));
+				_fragmentEntryLinkLocalService, _layoutLocalService,
+				_layoutPrototypeLocalService));
+
+		registry.register(
+			"2.1.0", "3.0.0",
+			new com.liferay.layout.page.template.internal.upgrade.v3_0_0.
+				UpgradeLayoutPageTemplateStructure());
 	}
 
 	@Reference

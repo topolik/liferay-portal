@@ -28,20 +28,15 @@ public class CompanyTable {
 	public static final String TABLE_NAME = "Company";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"accountId", Types.BIGINT},
-		{"webId", Types.VARCHAR},
-		{"key_", Types.CLOB},
-		{"mx", Types.VARCHAR},
-		{"homeURL", Types.VARCHAR},
-		{"logoId", Types.BIGINT},
-		{"system_", Types.BOOLEAN},
-		{"maxUsers", Types.INTEGER},
-		{"active_", Types.BOOLEAN}
+		{"mvccVersion", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"accountId", Types.BIGINT}, {"webId", Types.VARCHAR},
+		{"key_", Types.CLOB}, {"mx", Types.VARCHAR}, {"homeURL", Types.VARCHAR},
+		{"logoId", Types.BIGINT}, {"system_", Types.BOOLEAN},
+		{"maxUsers", Types.INTEGER}, {"active_", Types.BOOLEAN}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -67,7 +62,8 @@ TABLE_COLUMNS_MAP.put("maxUsers", Types.INTEGER);
 TABLE_COLUMNS_MAP.put("active_", Types.BOOLEAN);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table Company (mvccVersion LONG default 0 not null,companyId LONG not null primary key,accountId LONG,webId VARCHAR(75) null,key_ TEXT null,mx VARCHAR(200) null,homeURL STRING null,logoId LONG,system_ BOOLEAN,maxUsers INTEGER,active_ BOOLEAN)";
+	public static final String TABLE_SQL_CREATE =
+"create table Company (mvccVersion LONG default 0 not null,companyId LONG not null primary key,accountId LONG,webId VARCHAR(75) null,key_ TEXT null,mx VARCHAR(200) null,homeURL STRING null,logoId LONG,system_ BOOLEAN,maxUsers INTEGER,active_ BOOLEAN)";
 
 	public static final String TABLE_SQL_DROP = "drop table Company";
 

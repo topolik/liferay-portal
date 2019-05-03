@@ -51,27 +51,16 @@ public class ConfigurationMessageListener extends BaseMessageListener {
 
 	@Override
 	protected void doReceive(Message message) throws Exception {
-		if (message.contains(ConfigurationAdmin.SERVICE_FACTORYPID)) {
-			reloadConfiguration(
-				message.getString(ConfigurationAdmin.SERVICE_FACTORYPID),
-				ConfigurationAdmin.SERVICE_FACTORYPID,
-				message.getInteger("configuration.event.type"));
-		}
-
-		if (message.contains(Constants.SERVICE_PID)) {
-			reloadConfiguration(
-				message.getString(Constants.SERVICE_PID), Constants.SERVICE_PID,
-				message.getInteger("configuration.event.type"));
-		}
+		reloadConfiguration(
+			message.getString(Constants.SERVICE_PID),
+			message.getInteger("configuration.event.type"));
 	}
 
-	protected void reloadConfiguration(String pid, String filter, int type)
-		throws Exception {
-
+	protected void reloadConfiguration(String pid, int type) throws Exception {
 		StringBundler sb = new StringBundler(5);
 
 		sb.append("(");
-		sb.append(filter);
+		sb.append(Constants.SERVICE_PID);
 		sb.append("=");
 		sb.append(pid);
 		sb.append(")");

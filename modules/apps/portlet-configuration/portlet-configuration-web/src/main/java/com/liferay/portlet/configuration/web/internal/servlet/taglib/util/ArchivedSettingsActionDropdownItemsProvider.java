@@ -16,6 +16,7 @@ package com.liferay.portlet.configuration.web.internal.servlet.taglib.util;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.settings.ArchivedSettings;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -24,7 +25,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletURL;
@@ -54,13 +54,15 @@ public class ArchivedSettingsActionDropdownItemsProvider {
 	public List<DropdownItem> getActionDropdownItems() {
 		return new DropdownItemList() {
 			{
-				add(_getRestoreArchivedSetupActionConsumer());
-				add(_getDeleteArchivedSetupActionConsumer());
+				add(_getRestoreArchivedSetupActionUnsafeConsumer());
+				add(_getDeleteArchivedSetupActionUnsafeConsumer());
 			}
 		};
 	}
 
-	private Consumer<DropdownItem> _getDeleteArchivedSetupActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getDeleteArchivedSetupActionUnsafeConsumer() {
+
 		PortletURL deleteArchivedSetupsURL = _renderResponse.createActionURL();
 
 		deleteArchivedSetupsURL.setParameter(
@@ -95,7 +97,9 @@ public class ArchivedSettingsActionDropdownItemsProvider {
 		return _portletResource;
 	}
 
-	private Consumer<DropdownItem> _getRestoreArchivedSetupActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getRestoreArchivedSetupActionUnsafeConsumer() {
+
 		PortletURL restoreArchivedSetupURL = _renderResponse.createActionURL();
 
 		restoreArchivedSetupURL.setParameter(

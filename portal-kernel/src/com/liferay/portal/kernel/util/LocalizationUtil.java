@@ -258,15 +258,6 @@ public class LocalizationUtil {
 		return modifiedLocales;
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #getLocalizedName(String, String)}
-	 */
-	@Deprecated
-	public static String getPreferencesKey(String key, String languageId) {
-		return getLocalization().getPreferencesKey(key, languageId);
-	}
-
 	public static String getPreferencesValue(
 		PortletPreferences preferences, String key, String languageId) {
 
@@ -333,6 +324,14 @@ public class LocalizationUtil {
 		Map<String, String> map, String defaultLanguageId, String key) {
 
 		return getLocalization().getXml(map, defaultLanguageId, key);
+	}
+
+	public static Map<Locale, String> populateLocalizationMap(
+		Map<Locale, String> localizationMap, String defaultLanguageId,
+		long groupId) {
+
+		return getLocalization().populateLocalizationMap(
+			localizationMap, defaultLanguageId, groupId);
 	}
 
 	public static String removeLocalization(

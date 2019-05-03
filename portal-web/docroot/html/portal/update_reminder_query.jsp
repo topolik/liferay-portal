@@ -75,27 +75,36 @@ if (referer.equals(themeDisplay.getPathMain() + "/portal/update_reminder_query")
 	</div>
 </div>
 
-<aui:script sandbox="<%= true %>">
-	var customQuestionContainer = $('#customQuestionContainer');
-	var reminderQueryQuestion = $('#reminderQueryQuestion');
+<script>
+	(function() {
+		var customQuestionContainer = document.getElementById('customQuestionContainer');
+		var reminderQueryQuestion = document.getElementById('reminderQueryQuestion');
 
-	customQuestionContainer.toggleClass('hide', reminderQueryQuestion.val() != '<%= UsersAdmin.CUSTOM_QUESTION %>');
-
-	reminderQueryQuestion.on(
-		'change',
-		function(event) {
-			if (reminderQueryQuestion.val() == '<%= UsersAdmin.CUSTOM_QUESTION %>') {
-				<c:if test="<%= PropsValues.USERS_REMINDER_QUERIES_CUSTOM_QUESTION_ENABLED %>">
-					customQuestionContainer.removeClass('hide');
-
-					Liferay.Util.focusFormField('#reminderQueryCustomQuestion');
-				</c:if>
+		if (customQuestionContainer && reminderQueryQuestion) {
+			if (reminderQueryQuestion.value === '<%= UsersAdmin.CUSTOM_QUESTION %>') {
+				customQuestionContainer.classList.remove('hide');
 			}
 			else {
-				customQuestionContainer.addClass('hide');
-
-				Liferay.Util.focusFormField('#reminderQueryAnswer');
+				customQuestionContainer.classList.add('hide');
 			}
+
+			reminderQueryQuestion.addEventListener(
+				'change',
+				function(event) {
+					if (reminderQueryQuestion.value === '<%= UsersAdmin.CUSTOM_QUESTION %>') {
+						<c:if test="<%= PropsValues.USERS_REMINDER_QUERIES_CUSTOM_QUESTION_ENABLED %>">
+							customQuestionContainer.classList.remove('hide');
+
+							Liferay.Util.focusFormField('#reminderQueryCustomQuestion');
+						</c:if>
+					}
+					else {
+						customQuestionContainer.classList.add('hide');
+
+						Liferay.Util.focusFormField('#reminderQueryAnswer');
+					}
+				}
+			);
 		}
-	);
-</aui:script>
+	})();
+</script>

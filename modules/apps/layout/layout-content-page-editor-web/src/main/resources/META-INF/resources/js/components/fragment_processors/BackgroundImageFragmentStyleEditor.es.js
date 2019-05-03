@@ -2,6 +2,7 @@
  * Possible types that can be returned by the image selector
  */
 const RETURN_TYPES = {
+	downloadURL: 'com.liferay.item.selector.criteria.DownloadURLItemSelectorReturnType',
 	fileEntryItemSelector: 'com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType',
 	url: 'URL'
 };
@@ -9,7 +10,7 @@ const RETURN_TYPES = {
 /**
  * Handle item selector image changes and propagate them with an
  * "styleChanged" event.
- * @param {Event} changeEvent
+ * @param {{newVal: {returnType: string, value: string}}} changeEvent
  * @param {HTMLElement} styledElement
  * @param {function} changedCallback
  * @private
@@ -25,21 +26,33 @@ function _handleImageEditorChange(
 		const {returnType} = selectedItem;
 		let url = '';
 
-		if (returnType === RETURN_TYPES.url) {
+		if (returnType === RETURN_TYPES.url || returnType === RETURN_TYPES.downloadURL) {
 			url = selectedItem.value;
 		}
 		else if (returnType === RETURN_TYPES.fileEntryItemSelector) {
 			url = JSON.parse(selectedItem.value).url;
 		}
 
-		styledElement.setAttribute('style', `background-image: url('${url}');`);
+		if (url) {
+			styledElement.setAttribute('style', `background-image: url('${url}');`);
 
-		changedCallback(
-			{
-				name: 'background-image',
-				value: `url('${url}')`
-			}
-		);
+			changedCallback(
+				{
+					name: 'background-image',
+					value: `url('${url}')`
+				}
+			);
+		}
+		else {
+			styledElement.removeAttribute('style');
+
+			changedCallback(
+				{
+					name: 'background-image',
+					value: ''
+				}
+			);
+		}
 	}
 }
 
@@ -60,6 +73,7 @@ function destroy() {
 function getButtons(showMapping) {
 	const buttons = [
 		{
+			icon: 'pencil',
 			id: 'select',
 			label: Liferay.Language.get('select-background')
 		}
@@ -68,11 +82,20 @@ function getButtons(showMapping) {
 	if (showMapping) {
 		buttons.push(
 			{
+				icon: 'bolt',
 				id: 'map',
 				label: Liferay.Language.get('map-background')
 			}
 		);
 	}
+
+	buttons.push(
+		{
+			icon: 'times-circle',
+			id: 'remove',
+			label: Liferay.Language.get('remove-background')
+		}
+	);
 
 	return buttons;
 }
@@ -131,13 +154,25 @@ function init(
 			}
 		);
 	}
-	else {
+	else if (buttonId === 'map') {
 		changedCallback(
 			{
 				eventType: 'map',
 				name: 'background-image',
 				type: 'image'
 			}
+		);
+	}
+	else if (buttonId === 'remove') {
+		_handleImageEditorChange(
+			{
+				newVal: {
+					returnType: RETURN_TYPES.url,
+					value: ''
+				}
+			},
+			styledElement,
+			changedCallback
 		);
 	}
 }

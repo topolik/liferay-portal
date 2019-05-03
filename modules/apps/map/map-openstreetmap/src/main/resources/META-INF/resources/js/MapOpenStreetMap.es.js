@@ -12,6 +12,7 @@ import OpenStreetMapMarker from './OpenStreetMapMarker.es';
  * @review
  */
 class MapOpenStreetMap extends MapBase {
+
 	/**
 	 * Creates a new map using OpenStreetMap's API
 	 * @param  {Array} args List of arguments to be passed to State
@@ -31,7 +32,7 @@ class MapOpenStreetMap extends MapBase {
 		const mapConfig = {
 			center: location,
 			layers: [L.tileLayer(this.tileURI)],
-			zoom: this.zoom,
+			zoom: this.zoom
 		};
 
 		const map = L.map(
@@ -69,8 +70,8 @@ class MapOpenStreetMap extends MapBase {
 				},
 
 				options: {
-					position: MapOpenStreetMap.POSITION_MAP[position],
-				},
+					position: MapOpenStreetMap.POSITION_MAP[position]
+				}
 			}
 		);
 
@@ -112,7 +113,7 @@ MapBase.SearchImpl = null;
 
 MapOpenStreetMap.CONTROLS_MAP = {
 	[MapBase.CONTROLS.ATTRIBUTION]: 'attributionControl',
-	[MapBase.CONTROLS.ZOOM]: 'zoomControl',
+	[MapBase.CONTROLS.ZOOM]: 'zoomControl'
 };
 
 MapOpenStreetMap.POSITION_MAP = {
@@ -132,7 +133,7 @@ MapOpenStreetMap.POSITION_MAP = {
 	[MapBase.POSITION.TOP]: 'topright',
 	[MapBase.POSITION.TOP_CENTER]: 'topright',
 	[MapBase.POSITION.TOP_LEFT]: 'topleft',
-	[MapBase.POSITION.TOP_RIGHT]: 'topright',
+	[MapBase.POSITION.TOP_RIGHT]: 'topright'
 };
 
 /**
@@ -141,11 +142,12 @@ MapOpenStreetMap.POSITION_MAP = {
  * @static
  */
 MapOpenStreetMap.STATE = Object.assign({}, MapBase.STATE, {
+
 	/**
 	 * Url used for fetching map tile information
 	 * @type {string}
 	 */
-	tileURI: Config.string().value('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+	tileURI: Config.string().value('//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
 });
 
 export default MapOpenStreetMap;

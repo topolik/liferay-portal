@@ -34,8 +34,8 @@ import com.liferay.journal.service.JournalArticleServiceUtil;
 import com.liferay.journal.service.JournalFolderServiceUtil;
 import com.liferay.journal.test.util.JournalTestUtil;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.model.ClassedModel;
 import com.liferay.portal.kernel.model.Group;
@@ -314,14 +314,19 @@ public class JournalArticleTrashHandlerTest
 		Element dynamicContent = (Element)document.selectSingleNode(
 			"//dynamic-content");
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("groupId", group.getGroupId());
-		jsonObject.put("name", "liferay.png");
-		jsonObject.put("tempFile", Boolean.TRUE.toString());
-		jsonObject.put("title", "liferay.png");
-		jsonObject.put("type", "journal");
-		jsonObject.put("uuid", tempFileEntry.getUuid());
+		JSONObject jsonObject = JSONUtil.put(
+			"groupId", group.getGroupId()
+		).put(
+			"name", "liferay.png"
+		).put(
+			"tempFile", Boolean.TRUE.toString()
+		).put(
+			"title", "liferay.png"
+		).put(
+			"type", "journal"
+		).put(
+			"uuid", tempFileEntry.getUuid()
+		);
 
 		dynamicContent.setText(jsonObject.toString());
 

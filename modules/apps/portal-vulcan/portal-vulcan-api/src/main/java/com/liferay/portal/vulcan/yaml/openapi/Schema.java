@@ -14,6 +14,8 @@
 
 package com.liferay.portal.vulcan.yaml.openapi;
 
+import java.beans.Transient;
+
 import java.util.List;
 import java.util.Map;
 
@@ -49,6 +51,15 @@ public class Schema {
 
 	public List<String> getEnumValues() {
 		return _enumValues;
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	@Transient
+	public String getExample() {
+		return _example;
 	}
 
 	public String getFormat() {
@@ -107,6 +118,15 @@ public class Schema {
 		_enumValues = enumValues;
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x)
+	 */
+	@Deprecated
+	@Transient
+	public void setExample(String example) {
+		_example = example;
+	}
+
 	public void setFormat(String format) {
 		_format = format;
 	}
@@ -150,6 +170,7 @@ public class Schema {
 	private List<Schema> _anyOfSchemas;
 	private String _description;
 	private List<String> _enumValues;
+	private String _example;
 	private String _format;
 	private Items _items;
 	private List<Schema> _oneOfSchemas;

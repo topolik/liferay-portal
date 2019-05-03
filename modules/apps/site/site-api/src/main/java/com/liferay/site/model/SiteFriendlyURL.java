@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.site.model.impl.SiteFriendlyURLImpl")
 @ProviderType
-public interface SiteFriendlyURL extends SiteFriendlyURLModel, PersistedModel {
+public interface SiteFriendlyURL extends PersistedModel, SiteFriendlyURLModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

@@ -14,7 +14,7 @@
 
 package com.liferay.fragment.internal.contributor;
 
-import com.liferay.fragment.constants.FragmentEntryTypeConstants;
+import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.contributor.FragmentCollectionContributor;
 import com.liferay.fragment.contributor.FragmentCollectionContributorTracker;
 import com.liferay.fragment.model.FragmentEntry;
@@ -40,11 +40,15 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class FragmentCollectionContributorTrackerImpl
 	implements FragmentCollectionContributorTracker {
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), replaced by #getFragmentEntries
+	 */
+	@Deprecated
 	@Override
 	public Map<String, FragmentEntry>
 		getFragmentCollectionContributorEntries() {
 
-		return new HashMap<>(_fragmentCollectionContributorEntries);
+		return getFragmentEntries();
 	}
 
 	@Override
@@ -52,6 +56,11 @@ public class FragmentCollectionContributorTrackerImpl
 		getFragmentCollectionContributors() {
 
 		return new ArrayList<>(_fragmentCollectionContributors);
+	}
+
+	@Override
+	public Map<String, FragmentEntry> getFragmentEntries() {
+		return new HashMap<>(_fragmentEntries);
 	}
 
 	@Reference(
@@ -63,11 +72,11 @@ public class FragmentCollectionContributorTrackerImpl
 
 		_fragmentCollectionContributors.add(fragmentCollectionContributor);
 
-		for (int type : _SUPPORTED_FRAGMENT_ENTRY_TYPES) {
+		for (int type : _SUPPORTED_FRAGMENT_TYPES) {
 			for (FragmentEntry fragmentEntry :
 					fragmentCollectionContributor.getFragmentEntries(type)) {
 
-				_fragmentCollectionContributorEntries.put(
+				_fragmentEntries.put(
 					fragmentEntry.getFragmentEntryKey(), fragmentEntry);
 			}
 		}
@@ -76,26 +85,24 @@ public class FragmentCollectionContributorTrackerImpl
 	protected void unsetFragmentCollectionContributor(
 		FragmentCollectionContributor fragmentCollectionContributor) {
 
-		for (int type : _SUPPORTED_FRAGMENT_ENTRY_TYPES) {
+		for (int type : _SUPPORTED_FRAGMENT_TYPES) {
 			for (FragmentEntry fragmentEntry :
 					fragmentCollectionContributor.getFragmentEntries(type)) {
 
-				_fragmentCollectionContributorEntries.remove(
-					fragmentEntry.getFragmentEntryKey());
+				_fragmentEntries.remove(fragmentEntry.getFragmentEntryKey());
 			}
 		}
 
 		_fragmentCollectionContributors.remove(fragmentCollectionContributor);
 	}
 
-	private static final int[] _SUPPORTED_FRAGMENT_ENTRY_TYPES = {
-		FragmentEntryTypeConstants.TYPE_COMPONENT,
-		FragmentEntryTypeConstants.TYPE_SECTION
+	private static final int[] _SUPPORTED_FRAGMENT_TYPES = {
+		FragmentConstants.TYPE_COMPONENT, FragmentConstants.TYPE_SECTION
 	};
 
-	private final Map<String, FragmentEntry>
-		_fragmentCollectionContributorEntries = new ConcurrentHashMap<>();
 	private final List<FragmentCollectionContributor>
 		_fragmentCollectionContributors = new CopyOnWriteArrayList<>();
+	private final Map<String, FragmentEntry> _fragmentEntries =
+		new ConcurrentHashMap<>();
 
 }

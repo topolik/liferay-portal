@@ -1,21 +1,57 @@
 @import "mixins";
 
 .portlet-asset-publisher {
-	.asset-abstract {
-		overflow: auto;
-	}
-
-	.asset-actions {
-		@include sm {
-			position: absolute;
-			right: 10px;
-			z-index: 1;
-		}
+	.addbutton-timeline-item {
+		position: relative;
 	}
 
 	.asset-full-content {
 		img {
 			max-width: 100%;
+		}
+	}
+
+	.asset-links .list-group-item:last-child {
+		border-bottom-width: 0;
+	}
+
+	.asset-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+	}
+
+	.component-title .icon-monospaced {
+		height: 1.3rem;
+		line-height: 1.3rem;
+	}
+
+	.metadata-author {
+		font-size: 0.875rem;
+	}
+
+	.preview-asset-entry {
+		border: 1px solid #0B5FFF;
+		border-radius: 0;
+	}
+
+	.timeline-increment-icon.add-condition:before {
+		background-color: #869CAD;
+		bottom: 37px;
+		content: '';
+		display: block;
+		left: 20px;
+		position: absolute;
+		top: -10px;
+		width: 2px;
+	}
+
+	.timeline-increment-icon.add-condition {
+		.form-builder-timeline-add-item {
+			border-radius: 100%;
+			color: #FFF;
+			margin-left: 10px;
+			margin-top: -72px;
+			padding: 0;
 		}
 	}
 
@@ -38,15 +74,15 @@
 			opacity: 1;
 		}
 
+		& + .timeline-item > .panel {
+			border-top: none;
+		}
+
 		.form-group {
 			display: inline-block;
-			margin: 8px;
+			margin: 0 8px 8px 0;
 			vertical-align: middle;
 			width: auto;
-
-			&:first-child {
-				margin-left: 0;
-			}
 		}
 
 		.container-trash {
@@ -121,31 +157,6 @@
 
 		.timeline-increment {
 			z-index: 0;
-		}
-	}
-
-	.addbutton-timeline-item {
-		position: relative;
-	}
-
-	.timeline-increment-icon.add-condition:before {
-		background-color: #869CAD;
-		bottom: 37px;
-		content: '';
-		display: block;
-		left: 20px;
-		position: absolute;
-		top: -10px;
-		width: 2px;
-	}
-
-	.timeline-increment-icon.add-condition {
-		.form-builder-timeline-add-item {
-			border-radius: 100%;
-			color: #FFF;
-			margin-left: 3px;
-			margin-top: -55px;
-			padding: 0;
 		}
 	}
 }

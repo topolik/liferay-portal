@@ -63,7 +63,7 @@ public class CTEntryCacheModel implements CacheModel<CTEntry>, Externalizable {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(23);
+		StringBundler sb = new StringBundler(27);
 
 		sb.append("{ctEntryId=");
 		sb.append(ctEntryId);
@@ -77,14 +77,18 @@ public class CTEntryCacheModel implements CacheModel<CTEntry>, Externalizable {
 		sb.append(createDate);
 		sb.append(", modifiedDate=");
 		sb.append(modifiedDate);
-		sb.append(", classNameId=");
-		sb.append(classNameId);
-		sb.append(", classPK=");
-		sb.append(classPK);
-		sb.append(", resourcePrimKey=");
-		sb.append(resourcePrimKey);
+		sb.append(", originalCTCollectionId=");
+		sb.append(originalCTCollectionId);
+		sb.append(", modelClassNameId=");
+		sb.append(modelClassNameId);
+		sb.append(", modelClassPK=");
+		sb.append(modelClassPK);
+		sb.append(", modelResourcePrimKey=");
+		sb.append(modelResourcePrimKey);
 		sb.append(", changeType=");
 		sb.append(changeType);
+		sb.append(", collision=");
+		sb.append(collision);
 		sb.append(", status=");
 		sb.append(status);
 		sb.append("}");
@@ -121,10 +125,12 @@ public class CTEntryCacheModel implements CacheModel<CTEntry>, Externalizable {
 			ctEntryImpl.setModifiedDate(new Date(modifiedDate));
 		}
 
-		ctEntryImpl.setClassNameId(classNameId);
-		ctEntryImpl.setClassPK(classPK);
-		ctEntryImpl.setResourcePrimKey(resourcePrimKey);
+		ctEntryImpl.setOriginalCTCollectionId(originalCTCollectionId);
+		ctEntryImpl.setModelClassNameId(modelClassNameId);
+		ctEntryImpl.setModelClassPK(modelClassPK);
+		ctEntryImpl.setModelResourcePrimKey(modelResourcePrimKey);
 		ctEntryImpl.setChangeType(changeType);
+		ctEntryImpl.setCollision(collision);
 		ctEntryImpl.setStatus(status);
 
 		ctEntryImpl.resetOriginalValues();
@@ -143,13 +149,17 @@ public class CTEntryCacheModel implements CacheModel<CTEntry>, Externalizable {
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
 
-		classNameId = objectInput.readLong();
+		originalCTCollectionId = objectInput.readLong();
 
-		classPK = objectInput.readLong();
+		modelClassNameId = objectInput.readLong();
 
-		resourcePrimKey = objectInput.readLong();
+		modelClassPK = objectInput.readLong();
+
+		modelResourcePrimKey = objectInput.readLong();
 
 		changeType = objectInput.readInt();
+
+		collision = objectInput.readBoolean();
 
 		status = objectInput.readInt();
 	}
@@ -172,13 +182,17 @@ public class CTEntryCacheModel implements CacheModel<CTEntry>, Externalizable {
 		objectOutput.writeLong(createDate);
 		objectOutput.writeLong(modifiedDate);
 
-		objectOutput.writeLong(classNameId);
+		objectOutput.writeLong(originalCTCollectionId);
 
-		objectOutput.writeLong(classPK);
+		objectOutput.writeLong(modelClassNameId);
 
-		objectOutput.writeLong(resourcePrimKey);
+		objectOutput.writeLong(modelClassPK);
+
+		objectOutput.writeLong(modelResourcePrimKey);
 
 		objectOutput.writeInt(changeType);
+
+		objectOutput.writeBoolean(collision);
 
 		objectOutput.writeInt(status);
 	}
@@ -189,10 +203,12 @@ public class CTEntryCacheModel implements CacheModel<CTEntry>, Externalizable {
 	public String userName;
 	public long createDate;
 	public long modifiedDate;
-	public long classNameId;
-	public long classPK;
-	public long resourcePrimKey;
+	public long originalCTCollectionId;
+	public long modelClassNameId;
+	public long modelClassPK;
+	public long modelResourcePrimKey;
 	public int changeType;
+	public boolean collision;
 	public int status;
 
 }

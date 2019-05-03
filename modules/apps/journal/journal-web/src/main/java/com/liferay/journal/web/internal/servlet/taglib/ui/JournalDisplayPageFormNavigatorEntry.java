@@ -26,7 +26,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Eudaldo Alonso
  */
 @Component(
-	property = "form.navigator.entry.order:Integer=70",
+	property = "form.navigator.entry.order:Integer=80",
 	service = FormNavigatorEntry.class
 )
 public class JournalDisplayPageFormNavigatorEntry
@@ -34,7 +34,7 @@ public class JournalDisplayPageFormNavigatorEntry
 
 	@Override
 	public String getKey() {
-		return "display-page";
+		return "display-page-template";
 	}
 
 	@Reference(target = "(view=private)", unbind = "-")

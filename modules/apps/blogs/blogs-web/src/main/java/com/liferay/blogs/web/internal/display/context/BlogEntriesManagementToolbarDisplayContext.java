@@ -21,7 +21,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -76,27 +75,25 @@ public class BlogEntriesManagementToolbarDisplayContext
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData("action", "deleteEntries");
+					dropdownItem -> {
+						dropdownItem.putData("action", "deleteEntries");
 
-							boolean trashEnabled = _trashHelper.isTrashEnabled(
-								_themeDisplay.getScopeGroupId());
+						boolean trashEnabled = _trashHelper.isTrashEnabled(
+							_themeDisplay.getScopeGroupId());
 
-							dropdownItem.setIcon(
-								trashEnabled ? "trash" : "times-circle");
+						dropdownItem.setIcon(
+							trashEnabled ? "trash" : "times-circle");
 
-							String label = "delete";
+						String label = "delete";
 
-							if (trashEnabled) {
-								label = "move-to-recycle-bin";
-							}
+						if (trashEnabled) {
+							label = "move-to-recycle-bin";
+						}
 
-							dropdownItem.setLabel(
-								LanguageUtil.get(request, label));
+						dropdownItem.setLabel(LanguageUtil.get(request, label));
 
-							dropdownItem.setQuickAction(true);
-						}));
+						dropdownItem.setQuickAction(true);
+					});
 			}
 		};
 	}
@@ -257,27 +254,24 @@ public class BlogEntriesManagementToolbarDisplayContext
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								"title".equals(getOrderByCol()));
-							dropdownItem.setHref(
-								_getCurrentSortingURL(), "orderByCol", "title");
-							dropdownItem.setLabel(
-								LanguageUtil.get(request, "title"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setActive("title".equals(getOrderByCol()));
+						dropdownItem.setHref(
+							_getCurrentSortingURL(), "orderByCol", "title");
+						dropdownItem.setLabel(
+							LanguageUtil.get(request, "title"));
+					});
 
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								"display-date".equals(getOrderByCol()));
-							dropdownItem.setHref(
-								_getCurrentSortingURL(), "orderByCol",
-								"display-date");
-							dropdownItem.setLabel(
-								LanguageUtil.get(request, "display-date"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setActive(
+							"display-date".equals(getOrderByCol()));
+						dropdownItem.setHref(
+							_getCurrentSortingURL(), "orderByCol",
+							"display-date");
+						dropdownItem.setLabel(
+							LanguageUtil.get(request, "display-date"));
+					});
 			}
 		};
 	}

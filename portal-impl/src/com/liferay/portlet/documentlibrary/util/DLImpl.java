@@ -14,6 +14,7 @@
 
 package com.liferay.portlet.documentlibrary.util;
 
+import com.liferay.document.library.kernel.model.DLFileEntry;
 import com.liferay.document.library.kernel.model.DLFileEntryConstants;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
 import com.liferay.document.library.kernel.model.DLFileEntryTypeConstants;
@@ -44,6 +45,7 @@ import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.Subscription;
 import com.liferay.portal.kernel.portlet.PortletLayoutFinder;
+import com.liferay.portal.kernel.portlet.PortletLayoutFinderRegistryUtil;
 import com.liferay.portal.kernel.portlet.PortletProvider;
 import com.liferay.portal.kernel.portlet.PortletProviderUtil;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
@@ -80,8 +82,6 @@ import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.workflow.WorkflowHandlerRegistryUtil;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portlet.documentlibrary.webdav.DLWebDAVUtil;
-import com.liferay.registry.collections.ServiceTrackerCollections;
-import com.liferay.registry.collections.ServiceTrackerList;
 import com.liferay.trash.kernel.util.TrashUtil;
 
 import java.io.Serializable;
@@ -141,7 +141,6 @@ public class DLImpl implements DL {
 	}
 
 	public void destroy() {
-		_serviceTrackerList.close();
 	}
 
 	@Override
@@ -689,8 +688,12 @@ public class DLImpl implements DL {
 			orderByComparator = new RepositoryModelSizeComparator<>(
 				orderByAsc, orderByModel);
 		}
-		else {
+		else if (orderByCol.equals("title")) {
 			orderByComparator = new RepositoryModelTitleComparator<>(
+				orderByAsc, orderByModel);
+		}
+		else {
+			orderByComparator = new RepositoryModelModifiedDateComparator<>(
 				orderByAsc, orderByModel);
 		}
 
@@ -1214,24 +1217,18 @@ public class DLImpl implements DL {
 		String portletId = PortletProviderUtil.getPortletId(
 			FileEntry.class.getName(), PortletProvider.Action.VIEW);
 
-		for (PortletLayoutFinder portletLayoutFinder : _serviceTrackerList) {
-			try {
-				PortletLayoutFinder.Result result = portletLayoutFinder.find(
-					themeDisplay, themeDisplay.getSiteGroupId());
+		DLFileEntry fileEntry = dlFileVersion.getFileEntry();
 
-				portletId = result.getPortletId();
-				plid = result.getPlid();
+		PortletLayoutFinder portletLayoutFinder =
+			PortletLayoutFinderRegistryUtil.getPortletLayoutFinder(
+				DLFileEntryConstants.getClassName());
 
-				break;
-			}
-			catch (PortalException pe) {
+		PortletLayoutFinder.Result result = portletLayoutFinder.find(
+			themeDisplay, fileEntry.getGroupId());
 
-				// LPS-52675
-
-				if (_log.isDebugEnabled()) {
-					_log.debug(pe, pe);
-				}
-			}
+		if (result != null) {
+			portletId = result.getPortletId();
+			plid = result.getPlid();
 		}
 
 		if ((plid == controlPanelPlid) ||
@@ -1372,10 +1369,5 @@ public class DLImpl implements DL {
 			_populateGenericNamesMap(genericName);
 		}
 	}
-
-	private final ServiceTrackerList<PortletLayoutFinder> _serviceTrackerList =
-		ServiceTrackerCollections.openList(
-			PortletLayoutFinder.class,
-			"(model.class.name=" + FileEntry.class.getName() + ")");
 
 }

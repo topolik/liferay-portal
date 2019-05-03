@@ -12,11 +12,12 @@ function getWebContentPayload(webContent) {
 	const {dataset} = webContent;
 
 	let payload = {
-		articleId: dataset.analyticsAssetId,
+		articleId: dataset.analyticsAssetId
 	};
 
 	if (dataset.analyticsAssetTitle) {
-		payload = {...payload, title: dataset.analyticsAssetTitle};
+		payload = {...payload,
+			title: dataset.analyticsAssetTitle};
 	}
 
 	return payload;
@@ -47,13 +48,14 @@ function trackWebContentClicked(analytics) {
 
 		const payload = {
 			...getWebContentPayload(webContentElement),
-			tagName,
+			tagName
 		};
 
 		if (tagName === 'a') {
 			payload.href = target.href;
 			payload.text = target.innerText;
-		} else if (tagName === 'img') {
+		}
+		else if (tagName === 'img') {
 			payload.src = target.src;
 		}
 
@@ -82,7 +84,8 @@ function trackWebContentViewed(analytics) {
 				let payload = getWebContentPayload(element);
 				const numberOfWords = getNumberOfWords(element);
 
-				payload = {numberOfWords, ...payload};
+				payload = {numberOfWords,
+					...payload};
 
 				analytics.send('webContentViewed', applicationId, payload);
 			});

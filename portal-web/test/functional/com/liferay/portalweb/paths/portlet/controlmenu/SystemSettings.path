@@ -38,6 +38,22 @@
 	<td>portal/screenshots/foundation/ldap_server_security_credential.png</td>
 	<td></td>
 </tr>
+<tr>
+	<td>SETTING_FIELD_NAME_CHECKBOX</td>
+	<td>//span[contains(@class,'custom-control-label-text') and contains(.,'${key_settingFieldName}')]/../..//input[@type='checkbox']</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--ASSETS-->
+<tr>
+	<td>ASSETS_DYNAMIC_EXPORT_LIMIT</td>
+	<td>//div[contains(@data-fieldname,'dynamicExportLimit')]//input[@type='text']</td>
+	<td></td>
+</tr>
 </tbody>
 </table>
 </body>

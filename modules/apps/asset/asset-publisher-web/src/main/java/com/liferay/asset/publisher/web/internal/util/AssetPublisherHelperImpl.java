@@ -51,7 +51,6 @@ import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.servlet.SessionMessages;
-import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
@@ -59,10 +58,10 @@ import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
 import com.liferay.portal.kernel.xml.SAXReaderUtil;
+import com.liferay.segments.constants.SegmentsWebKeys;
 import com.liferay.sites.kernel.util.SitesUtil;
 
 import java.io.Serializable;
@@ -139,7 +138,9 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 
 		if (_isSearchWithIndex(portletName, assetEntryQuery)) {
 			return _assetHelper.searchAssetEntries(
-				assetEntryQuery, getAssetCategoryIds(portletPreferences),
+				assetEntryQuery,
+				_filterAssetCategoryIds(
+					getAssetCategoryIds(portletPreferences)),
 				getAssetTagNames(portletPreferences), attributes, companyId,
 				assetEntryQuery.getKeywords(), layout, locale, scopeGroupId,
 				timeZone, userId, start, end);
@@ -322,7 +323,11 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 			_assetListEntryService.fetchAssetListEntry(assetListEntryId);
 
 		if (selectionStyle.equals("asset-list") && (assetListEntry != null)) {
-			return assetListEntry.getAssetEntries();
+			long[] segmentsEntryIds = GetterUtil.getLongValues(
+				portletRequest.getAttribute(
+					SegmentsWebKeys.SEGMENTS_ENTRY_IDS));
+
+			return assetListEntry.getAssetEntries(segmentsEntryIds);
 		}
 
 		List<AssetEntry> assetEntries = getAssetEntries(
@@ -551,22 +556,6 @@ public class AssetPublisherHelperImpl implements AssetPublisherHelper {
 			assetRenderer.getAssetRendererFactory();
 
 		viewFullContentURL.setParameter("type", assetRendererFactory.getType());
-
-		String urlTitle = assetRenderer.getUrlTitle(
-			liferayPortletRequest.getLocale());
-
-		if (Validator.isNotNull(urlTitle)) {
-			ThemeDisplay themeDisplay =
-				(ThemeDisplay)liferayPortletRequest.getAttribute(
-					WebKeys.THEME_DISPLAY);
-
-			if (assetRenderer.getGroupId() != themeDisplay.getScopeGroupId()) {
-				viewFullContentURL.setParameter(
-					"groupId", String.valueOf(assetRenderer.getGroupId()));
-			}
-
-			viewFullContentURL.setParameter("urlTitle", urlTitle);
-		}
 
 		String viewURL = null;
 

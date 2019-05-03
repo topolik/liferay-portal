@@ -1,3 +1,4 @@
+import '../libs/odata-parser.js';
 import {
 	CONJUNCTIONS,
 	FUNCTIONAL_OPERATORS,
@@ -7,7 +8,6 @@ import {
 	RELATIONAL_OPERATORS
 } from './constants.es';
 import {generateGroupId} from './utils.es';
-import '../libs/odata-parser.js';
 
 const OPERATORS = {
 	...FUNCTIONAL_OPERATORS,

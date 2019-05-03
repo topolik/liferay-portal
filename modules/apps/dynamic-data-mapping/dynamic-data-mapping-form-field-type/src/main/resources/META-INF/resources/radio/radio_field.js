@@ -44,7 +44,7 @@ AUI.add(
 						var predefinedValue = instance.get('predefinedValue');
 
 						if (A.Lang.isArray(predefinedValue)) {
-							return predefinedValue[0];
+							predefinedValue = predefinedValue[0];
 						}
 
 						return predefinedValue;
@@ -107,6 +107,14 @@ AUI.add(
 						var formGroup = container.one('.form-group');
 
 						formGroup.insert(container.one('.form-feedback-indicator'), 'after');
+					},
+
+					showPendingErrorMessage: function() {
+						var instance = this;
+
+						if (!instance.hasFocus()) {
+							instance.showErrorMessage();
+						}
 					}
 				}
 			}

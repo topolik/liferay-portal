@@ -53,7 +53,7 @@ public class MBDemo extends BasePortalInstanceLifecycleListener {
 			userIds.add(user.getUserId());
 		}
 
-		Group guestGroup = _groupLocalService.getGroup(
+		Group group = _groupLocalService.getGroup(
 			company.getCompanyId(), "Guest");
 
 		int rootCategoriesCount = 10;
@@ -65,7 +65,7 @@ public class MBDemo extends BasePortalInstanceLifecycleListener {
 
 			rootCategories.add(
 				_rootMBCategoryDemoDataCreator.create(
-					userId, guestGroup.getGroupId()));
+					userId, group.getGroupId()));
 		}
 
 		List<MBCategory> firstLevelCategories = new ArrayList<>();

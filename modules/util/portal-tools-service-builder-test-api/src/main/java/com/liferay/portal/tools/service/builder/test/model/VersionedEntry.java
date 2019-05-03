@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 	"com.liferay.portal.tools.service.builder.test.model.impl.VersionedEntryImpl"
 )
 @ProviderType
-public interface VersionedEntry extends VersionedEntryModel, PersistedModel {
+public interface VersionedEntry extends PersistedModel, VersionedEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

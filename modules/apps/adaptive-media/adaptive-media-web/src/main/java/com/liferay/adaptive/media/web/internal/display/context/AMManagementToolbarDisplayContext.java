@@ -21,7 +21,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
@@ -71,13 +70,12 @@ public class AMManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				addGroup(
-					SafeConsumer.ignore(
-						dropdownGroupItem -> {
-							dropdownGroupItem.setDropdownItems(
-								_getFilterNavigationDropdownItems());
-							dropdownGroupItem.setLabel(
-								LanguageUtil.get(_request, "filter-by-state"));
-						}));
+					dropdownGroupItem -> {
+						dropdownGroupItem.setDropdownItems(
+							_getFilterNavigationDropdownItems());
+						dropdownGroupItem.setLabel(
+							LanguageUtil.get(_request, "filter-by-state"));
+					});
 			}
 		};
 	}
@@ -91,25 +89,20 @@ public class AMManagementToolbarDisplayContext {
 					entriesNavigation.equals("disabled")) {
 
 					add(
-						SafeConsumer.ignore(
-							labelItem -> {
-								PortletURL removeLabelURL =
-									PortletURLUtil.clone(
-										_currentURLObj,
-										_liferayPortletResponse);
+						labelItem -> {
+							PortletURL removeLabelURL = PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse);
 
-								removeLabelURL.setParameter(
-									"entriesNavigation", (String)null);
+							removeLabelURL.setParameter(
+								"entriesNavigation", (String)null);
 
-								labelItem.putData(
-									"removeLabelURL",
-									removeLabelURL.toString());
+							labelItem.putData(
+								"removeLabelURL", removeLabelURL.toString());
 
-								labelItem.setCloseable(true);
-								labelItem.setLabel(
-									LanguageUtil.get(
-										_request, entriesNavigation));
-							}));
+							labelItem.setCloseable(true);
+							labelItem.setLabel(
+								LanguageUtil.get(_request, entriesNavigation));
+						});
 				}
 			}
 		};
@@ -152,56 +145,54 @@ public class AMManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								entriesNavigation.equals("all"));
+					dropdownItem -> {
+						dropdownItem.setActive(entriesNavigation.equals("all"));
 
-							PortletURL allImageConfigurationEntriesURL =
-								PortletURLUtil.clone(
-									_currentURLObj, _liferayPortletResponse);
+						PortletURL allImageConfigurationEntriesURL =
+							PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse);
 
-							dropdownItem.setHref(
-								allImageConfigurationEntriesURL,
-								"entriesNavigation", "all");
+						dropdownItem.setHref(
+							allImageConfigurationEntriesURL,
+							"entriesNavigation", "all");
 
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "all"));
-						}));
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "all"));
+					});
+
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								entriesNavigation.equals("enabled"));
+					dropdownItem -> {
+						dropdownItem.setActive(
+							entriesNavigation.equals("enabled"));
 
-							PortletURL enabledImageConfigurationEntriesURL =
-								PortletURLUtil.clone(
-									_currentURLObj, _liferayPortletResponse);
+						PortletURL enabledImageConfigurationEntriesURL =
+							PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse);
 
-							dropdownItem.setHref(
-								enabledImageConfigurationEntriesURL,
-								"entriesNavigation", "enabled");
+						dropdownItem.setHref(
+							enabledImageConfigurationEntriesURL,
+							"entriesNavigation", "enabled");
 
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "enabled"));
-						}));
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "enabled"));
+					});
+
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								entriesNavigation.equals("disabled"));
+					dropdownItem -> {
+						dropdownItem.setActive(
+							entriesNavigation.equals("disabled"));
 
-							PortletURL disabledImageConfigurationEntriesURL =
-								PortletURLUtil.clone(
-									_currentURLObj, _liferayPortletResponse);
+						PortletURL disabledImageConfigurationEntriesURL =
+							PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse);
 
-							dropdownItem.setHref(
-								disabledImageConfigurationEntriesURL,
-								"entriesNavigation", "disabled");
+						dropdownItem.setHref(
+							disabledImageConfigurationEntriesURL,
+							"entriesNavigation", "disabled");
 
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "disabled"));
-						}));
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "disabled"));
+					});
 			}
 		};
 	}

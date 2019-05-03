@@ -1,7 +1,7 @@
+import 'libs/odata-parser';
 import * as ODataUtil from 'utils/odata.es';
 import * as Utils from 'utils/utils.es';
 import {mockCriteria, mockCriteriaNested} from 'test/data';
-import 'libs/odata-parser';
 
 const properties = [
 	{

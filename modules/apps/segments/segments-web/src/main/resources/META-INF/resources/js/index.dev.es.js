@@ -2,8 +2,8 @@ import '../css/main.scss';
 import 'clay-css/lib/css/atlas.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ThemeContext from './ThemeContext.es';
 import SegmentEdit from './components/segment_edit/SegmentEdit.es';
+import ThemeContext from './ThemeContext.es';
 
 const altProps = {
 	contributors: [
@@ -222,11 +222,6 @@ const altProps = {
 					type: 'id'
 				},
 				{
-					label: 'Tree Path',
-					name: 'treePath',
-					type: 'string'
-				},
-				{
 					label: 'Type',
 					name: 'type',
 					type: 'string'
@@ -235,7 +230,8 @@ const altProps = {
 			propertyKey: 'user-organization'
 		}
 	],
-	redirect: 'http://localhost:8080/group/guest/~/control_panel/manage/-/segments/entries?p_p_auth=1EwOzg1e'
+	redirect: 'http://localhost:8080/group/guest/~/control_panel/manage/-/segments/entries?p_p_auth=1EwOzg1e',
+	showInEditMode: false
 };
 
 const context = {

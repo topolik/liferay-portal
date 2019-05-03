@@ -6,6 +6,7 @@ import Soy from 'metal-soy';
 
 /**
  * Treeview component.
+ * @deprecated since 7.2
  */
 
 class Treeview extends Component {

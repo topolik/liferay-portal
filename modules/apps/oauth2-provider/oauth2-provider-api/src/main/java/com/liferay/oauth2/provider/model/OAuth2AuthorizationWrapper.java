@@ -59,6 +59,7 @@ public class OAuth2AuthorizationWrapper
 		attributes.put("accessTokenCreateDate", getAccessTokenCreateDate());
 		attributes.put(
 			"accessTokenExpirationDate", getAccessTokenExpirationDate());
+		attributes.put("remoteHostInfo", getRemoteHostInfo());
 		attributes.put("remoteIPInfo", getRemoteIPInfo());
 		attributes.put("refreshTokenContent", getRefreshTokenContent());
 		attributes.put("refreshTokenContentHash", getRefreshTokenContentHash());
@@ -141,6 +142,12 @@ public class OAuth2AuthorizationWrapper
 
 		if (accessTokenExpirationDate != null) {
 			setAccessTokenExpirationDate(accessTokenExpirationDate);
+		}
+
+		String remoteHostInfo = (String)attributes.get("remoteHostInfo");
+
+		if (remoteHostInfo != null) {
+			setRemoteHostInfo(remoteHostInfo);
 		}
 
 		String remoteIPInfo = (String)attributes.get("remoteIPInfo");
@@ -316,6 +323,16 @@ public class OAuth2AuthorizationWrapper
 	@Override
 	public Date getRefreshTokenExpirationDate() {
 		return model.getRefreshTokenExpirationDate();
+	}
+
+	/**
+	 * Returns the remote host info of this o auth2 authorization.
+	 *
+	 * @return the remote host info of this o auth2 authorization
+	 */
+	@Override
+	public String getRemoteHostInfo() {
+		return model.getRemoteHostInfo();
 	}
 
 	/**
@@ -504,6 +521,16 @@ public class OAuth2AuthorizationWrapper
 	@Override
 	public void setRefreshTokenExpirationDate(Date refreshTokenExpirationDate) {
 		model.setRefreshTokenExpirationDate(refreshTokenExpirationDate);
+	}
+
+	/**
+	 * Sets the remote host info of this o auth2 authorization.
+	 *
+	 * @param remoteHostInfo the remote host info of this o auth2 authorization
+	 */
+	@Override
+	public void setRemoteHostInfo(String remoteHostInfo) {
+		model.setRemoteHostInfo(remoteHostInfo);
 	}
 
 	/**

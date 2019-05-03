@@ -21,16 +21,33 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * @author Jeyvison Nascimento
  */
 public class LocalizedValueUtil {
+
+	public static Object getLocalizedValue(
+		Locale locale, LocalizedValue[] localizedValues) {
+
+		for (LocalizedValue localizedValue : localizedValues) {
+			if (StringUtils.equals(
+					LocaleUtil.toLanguageId(locale), localizedValue.getKey())) {
+
+				return localizedValue.getValue();
+			}
+		}
+
+		return null;
+	}
 
 	public static JSONObject toJSONObject(LocalizedValue[] localizedValues)
 		throws Exception {
@@ -48,15 +65,33 @@ public class LocalizedValueUtil {
 		return jsonObject;
 	}
 
+	public static Map<String, String> toLocalizationMap(JSONObject jsonObject) {
+		Map<String, String> localizationMap = new HashMap<>();
+
+		Iterator<String> keys = jsonObject.keys();
+
+		while (keys.hasNext()) {
+			String key = keys.next();
+
+			localizationMap.put(key, jsonObject.getString(key));
+		}
+
+		return localizationMap;
+	}
+
 	public static Map<Locale, String> toLocalizationMap(
 		LocalizedValue[] localizedValues) {
+
+		if (ArrayUtil.isEmpty(localizedValues)) {
+			return Collections.emptyMap();
+		}
 
 		Map<Locale, String> localizationMap = new HashMap<>();
 
 		for (LocalizedValue localizedValue : localizedValues) {
 			localizationMap.put(
 				LocaleUtil.fromLanguageId(localizedValue.getKey()),
-				localizedValue.getValue());
+				(String)localizedValue.getValue());
 		}
 
 		return localizationMap;

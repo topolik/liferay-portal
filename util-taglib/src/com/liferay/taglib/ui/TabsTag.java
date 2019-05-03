@@ -216,12 +216,36 @@ public class TabsTag extends IncludeTag {
 		}
 	}
 
+	public String getBackLabel() {
+		return _backLabel;
+	}
+
+	public String getBackURL() {
+		return _backURL;
+	}
+
+	public String getCssClass() {
+		return _cssClass;
+	}
+
+	public String getFormName() {
+		return _formName;
+	}
+
+	public String getNames() {
+		return StringUtil.merge(_names);
+	}
+
 	public String getOnClick() {
 		return _onClick;
 	}
 
 	public String getParam() {
 		return _param;
+	}
+
+	public PortletURL getPortletURL() {
+		return _portletURL;
 	}
 
 	public String getSectionName() {
@@ -240,6 +264,26 @@ public class TabsTag extends IncludeTag {
 		}
 
 		return false;
+	}
+
+	public String getTabsValues() {
+		return StringUtil.merge(_tabsValues);
+	}
+
+	public String getType() {
+		return _type;
+	}
+
+	public String getUrl() {
+		return _url;
+	}
+
+	public String[] getUrls() {
+		return _urls;
+	}
+
+	public String getValue() {
+		return _value;
 	}
 
 	public void incrementSection() {

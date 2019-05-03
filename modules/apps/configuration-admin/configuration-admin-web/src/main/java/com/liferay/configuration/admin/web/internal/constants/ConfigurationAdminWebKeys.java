@@ -27,11 +27,17 @@ public class ConfigurationAdminWebKeys {
 
 	public static final String CONFIGURATION_ENTRY = "CONFIGURATION_ENTRY";
 
+	public static final String CONFIGURATION_ENTRY_ITERATOR =
+		"CONFIGURATION_ENTRY_ITERATOR";
+
 	public static final String CONFIGURATION_ENTRY_RETRIEVER =
 		"CONFIGURATION_ENTRY_RETRIEVER";
 
 	public static final String CONFIGURATION_FORM_RENDERER =
 		"CONFIGURATION_FORM_RENDERER";
+
+	public static final String CONFIGURATION_MENU_ITEMS =
+		"CONFIGURATION_MENU_ITEMS";
 
 	public static final String CONFIGURATION_MODEL = "CONFIGURATION_MODEL";
 

@@ -20,6 +20,8 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 
 /**
  * @author Shuyang Zhou
+ * @author Vernon Singleton
+ * @author Kyle Stiemann
  */
 @ExtendedObjectClassDefinition(category = "infrastructure")
 @Meta.OCD(
@@ -29,13 +31,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface PortletTCKBridgeConfiguration {
 
-	@Meta.AD(deflt = "8239", required = false)
-	public int handshakeServerPort();
-
-	@Meta.AD(deflt = "", required = false)
-	public String[] servletContextNames();
-
-	@Meta.AD(deflt = "1200", required = false)
-	public long timeout();
+	@Meta.AD(deflt = "")
+	public String configFile();
 
 }

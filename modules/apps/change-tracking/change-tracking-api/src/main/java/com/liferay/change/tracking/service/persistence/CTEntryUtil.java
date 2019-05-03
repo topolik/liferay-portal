@@ -127,237 +127,237 @@ public class CTEntryUtil {
 	}
 
 	/**
-	 * Returns all the ct entries where resourcePrimKey = &#63;.
+	 * Returns all the ct entries where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @return the matching ct entries
 	 */
-	public static List<CTEntry> findByResourcePrimKey(long resourcePrimKey) {
-		return getPersistence().findByResourcePrimKey(resourcePrimKey);
+	public static List<CTEntry> findByModelClassNameId(long modelClassNameId) {
+		return getPersistence().findByModelClassNameId(modelClassNameId);
 	}
 
 	/**
-	 * Returns a range of all the ct entries where resourcePrimKey = &#63;.
+	 * Returns a range of all the ct entries where modelClassNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param start the lower bound of the range of ct entries
 	 * @param end the upper bound of the range of ct entries (not inclusive)
 	 * @return the range of matching ct entries
 	 */
-	public static List<CTEntry> findByResourcePrimKey(
-		long resourcePrimKey, int start, int end) {
+	public static List<CTEntry> findByModelClassNameId(
+		long modelClassNameId, int start, int end) {
 
-		return getPersistence().findByResourcePrimKey(
-			resourcePrimKey, start, end);
+		return getPersistence().findByModelClassNameId(
+			modelClassNameId, start, end);
 	}
 
 	/**
-	 * Returns an ordered range of all the ct entries where resourcePrimKey = &#63;.
+	 * Returns an ordered range of all the ct entries where modelClassNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param start the lower bound of the range of ct entries
 	 * @param end the upper bound of the range of ct entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching ct entries
 	 */
-	public static List<CTEntry> findByResourcePrimKey(
-		long resourcePrimKey, int start, int end,
+	public static List<CTEntry> findByModelClassNameId(
+		long modelClassNameId, int start, int end,
 		OrderByComparator<CTEntry> orderByComparator) {
 
-		return getPersistence().findByResourcePrimKey(
-			resourcePrimKey, start, end, orderByComparator);
+		return getPersistence().findByModelClassNameId(
+			modelClassNameId, start, end, orderByComparator);
 	}
 
 	/**
-	 * Returns an ordered range of all the ct entries where resourcePrimKey = &#63;.
+	 * Returns an ordered range of all the ct entries where modelClassNameId = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param start the lower bound of the range of ct entries
 	 * @param end the upper bound of the range of ct entries (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching ct entries
 	 */
-	public static List<CTEntry> findByResourcePrimKey(
-		long resourcePrimKey, int start, int end,
+	public static List<CTEntry> findByModelClassNameId(
+		long modelClassNameId, int start, int end,
 		OrderByComparator<CTEntry> orderByComparator,
 		boolean retrieveFromCache) {
 
-		return getPersistence().findByResourcePrimKey(
-			resourcePrimKey, start, end, orderByComparator, retrieveFromCache);
+		return getPersistence().findByModelClassNameId(
+			modelClassNameId, start, end, orderByComparator, retrieveFromCache);
 	}
 
 	/**
-	 * Returns the first ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the first ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching ct entry
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
-	public static CTEntry findByResourcePrimKey_First(
-			long resourcePrimKey, OrderByComparator<CTEntry> orderByComparator)
+	public static CTEntry findByModelClassNameId_First(
+			long modelClassNameId, OrderByComparator<CTEntry> orderByComparator)
 		throws com.liferay.change.tracking.exception.NoSuchEntryException {
 
-		return getPersistence().findByResourcePrimKey_First(
-			resourcePrimKey, orderByComparator);
+		return getPersistence().findByModelClassNameId_First(
+			modelClassNameId, orderByComparator);
 	}
 
 	/**
-	 * Returns the first ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the first ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
-	public static CTEntry fetchByResourcePrimKey_First(
-		long resourcePrimKey, OrderByComparator<CTEntry> orderByComparator) {
+	public static CTEntry fetchByModelClassNameId_First(
+		long modelClassNameId, OrderByComparator<CTEntry> orderByComparator) {
 
-		return getPersistence().fetchByResourcePrimKey_First(
-			resourcePrimKey, orderByComparator);
+		return getPersistence().fetchByModelClassNameId_First(
+			modelClassNameId, orderByComparator);
 	}
 
 	/**
-	 * Returns the last ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the last ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching ct entry
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
-	public static CTEntry findByResourcePrimKey_Last(
-			long resourcePrimKey, OrderByComparator<CTEntry> orderByComparator)
+	public static CTEntry findByModelClassNameId_Last(
+			long modelClassNameId, OrderByComparator<CTEntry> orderByComparator)
 		throws com.liferay.change.tracking.exception.NoSuchEntryException {
 
-		return getPersistence().findByResourcePrimKey_Last(
-			resourcePrimKey, orderByComparator);
+		return getPersistence().findByModelClassNameId_Last(
+			modelClassNameId, orderByComparator);
 	}
 
 	/**
-	 * Returns the last ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the last ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
-	public static CTEntry fetchByResourcePrimKey_Last(
-		long resourcePrimKey, OrderByComparator<CTEntry> orderByComparator) {
+	public static CTEntry fetchByModelClassNameId_Last(
+		long modelClassNameId, OrderByComparator<CTEntry> orderByComparator) {
 
-		return getPersistence().fetchByResourcePrimKey_Last(
-			resourcePrimKey, orderByComparator);
+		return getPersistence().fetchByModelClassNameId_Last(
+			modelClassNameId, orderByComparator);
 	}
 
 	/**
-	 * Returns the ct entries before and after the current ct entry in the ordered set where resourcePrimKey = &#63;.
+	 * Returns the ct entries before and after the current ct entry in the ordered set where modelClassNameId = &#63;.
 	 *
 	 * @param ctEntryId the primary key of the current ct entry
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next ct entry
 	 * @throws NoSuchEntryException if a ct entry with the primary key could not be found
 	 */
-	public static CTEntry[] findByResourcePrimKey_PrevAndNext(
-			long ctEntryId, long resourcePrimKey,
+	public static CTEntry[] findByModelClassNameId_PrevAndNext(
+			long ctEntryId, long modelClassNameId,
 			OrderByComparator<CTEntry> orderByComparator)
 		throws com.liferay.change.tracking.exception.NoSuchEntryException {
 
-		return getPersistence().findByResourcePrimKey_PrevAndNext(
-			ctEntryId, resourcePrimKey, orderByComparator);
+		return getPersistence().findByModelClassNameId_PrevAndNext(
+			ctEntryId, modelClassNameId, orderByComparator);
 	}
 
 	/**
-	 * Removes all the ct entries where resourcePrimKey = &#63; from the database.
+	 * Removes all the ct entries where modelClassNameId = &#63; from the database.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 */
-	public static void removeByResourcePrimKey(long resourcePrimKey) {
-		getPersistence().removeByResourcePrimKey(resourcePrimKey);
+	public static void removeByModelClassNameId(long modelClassNameId) {
+		getPersistence().removeByModelClassNameId(modelClassNameId);
 	}
 
 	/**
-	 * Returns the number of ct entries where resourcePrimKey = &#63;.
+	 * Returns the number of ct entries where modelClassNameId = &#63;.
 	 *
-	 * @param resourcePrimKey the resource prim key
+	 * @param modelClassNameId the model class name ID
 	 * @return the number of matching ct entries
 	 */
-	public static int countByResourcePrimKey(long resourcePrimKey) {
-		return getPersistence().countByResourcePrimKey(resourcePrimKey);
+	public static int countByModelClassNameId(long modelClassNameId) {
+		return getPersistence().countByModelClassNameId(modelClassNameId);
 	}
 
 	/**
-	 * Returns the ct entry where classNameId = &#63; and classPK = &#63; or throws a <code>NoSuchEntryException</code> if it could not be found.
+	 * Returns the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; or throws a <code>NoSuchEntryException</code> if it could not be found.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @return the matching ct entry
 	 * @throws NoSuchEntryException if a matching ct entry could not be found
 	 */
-	public static CTEntry findByC_C(long classNameId, long classPK)
+	public static CTEntry findByC_C(long modelClassNameId, long modelClassPK)
 		throws com.liferay.change.tracking.exception.NoSuchEntryException {
 
-		return getPersistence().findByC_C(classNameId, classPK);
+		return getPersistence().findByC_C(modelClassNameId, modelClassPK);
 	}
 
 	/**
-	 * Returns the ct entry where classNameId = &#63; and classPK = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 * Returns the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
-	public static CTEntry fetchByC_C(long classNameId, long classPK) {
-		return getPersistence().fetchByC_C(classNameId, classPK);
+	public static CTEntry fetchByC_C(long modelClassNameId, long modelClassPK) {
+		return getPersistence().fetchByC_C(modelClassNameId, modelClassPK);
 	}
 
 	/**
-	 * Returns the ct entry where classNameId = &#63; and classPK = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 * Returns the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching ct entry, or <code>null</code> if a matching ct entry could not be found
 	 */
 	public static CTEntry fetchByC_C(
-		long classNameId, long classPK, boolean retrieveFromCache) {
+		long modelClassNameId, long modelClassPK, boolean retrieveFromCache) {
 
 		return getPersistence().fetchByC_C(
-			classNameId, classPK, retrieveFromCache);
+			modelClassNameId, modelClassPK, retrieveFromCache);
 	}
 
 	/**
-	 * Removes the ct entry where classNameId = &#63; and classPK = &#63; from the database.
+	 * Removes the ct entry where modelClassNameId = &#63; and modelClassPK = &#63; from the database.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @return the ct entry that was removed
 	 */
-	public static CTEntry removeByC_C(long classNameId, long classPK)
+	public static CTEntry removeByC_C(long modelClassNameId, long modelClassPK)
 		throws com.liferay.change.tracking.exception.NoSuchEntryException {
 
-		return getPersistence().removeByC_C(classNameId, classPK);
+		return getPersistence().removeByC_C(modelClassNameId, modelClassPK);
 	}
 
 	/**
-	 * Returns the number of ct entries where classNameId = &#63; and classPK = &#63;.
+	 * Returns the number of ct entries where modelClassNameId = &#63; and modelClassPK = &#63;.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
+	 * @param modelClassNameId the model class name ID
+	 * @param modelClassPK the model class pk
 	 * @return the number of matching ct entries
 	 */
-	public static int countByC_C(long classNameId, long classPK) {
-		return getPersistence().countByC_C(classNameId, classPK);
+	public static int countByC_C(long modelClassNameId, long modelClassPK) {
+		return getPersistence().countByC_C(modelClassNameId, modelClassPK);
 	}
 
 	/**
@@ -518,56 +518,51 @@ public class CTEntryUtil {
 	}
 
 	/**
-	 * Returns all the ct entry aggregates associated with the ct entry.
+	 * Returns all the ct entry associated with the ct entry aggregate.
 	 *
-	 * @param pk the primary key of the ct entry
-	 * @return the ct entry aggregates associated with the ct entry
+	 * @param pk the primary key of the ct entry aggregate
+	 * @return the ct entries associated with the ct entry aggregate
 	 */
-	public static List<com.liferay.change.tracking.model.CTEntryAggregate>
-		getCTEntryAggregates(long pk) {
-
-		return getPersistence().getCTEntryAggregates(pk);
+	public static List<CTEntry> getCTEntryAggregateCTEntries(long pk) {
+		return getPersistence().getCTEntryAggregateCTEntries(pk);
 	}
 
 	/**
-	 * Returns a range of all the ct entry aggregates associated with the ct entry.
+	 * Returns all the ct entry associated with the ct entry aggregate.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param pk the primary key of the ct entry
-	 * @param start the lower bound of the range of ct entries
-	 * @param end the upper bound of the range of ct entries (not inclusive)
-	 * @return the range of ct entry aggregates associated with the ct entry
+	 * @param pk the primary key of the ct entry aggregate
+	 * @param start the lower bound of the range of ct entry aggregates
+	 * @param end the upper bound of the range of ct entry aggregates (not inclusive)
+	 * @return the range of ct entries associated with the ct entry aggregate
 	 */
-	public static List<com.liferay.change.tracking.model.CTEntryAggregate>
-		getCTEntryAggregates(long pk, int start, int end) {
+	public static List<CTEntry> getCTEntryAggregateCTEntries(
+		long pk, int start, int end) {
 
-		return getPersistence().getCTEntryAggregates(pk, start, end);
+		return getPersistence().getCTEntryAggregateCTEntries(pk, start, end);
 	}
 
 	/**
-	 * Returns an ordered range of all the ct entry aggregates associated with the ct entry.
+	 * Returns all the ct entry associated with the ct entry aggregate.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param pk the primary key of the ct entry
-	 * @param start the lower bound of the range of ct entries
-	 * @param end the upper bound of the range of ct entries (not inclusive)
+	 * @param pk the primary key of the ct entry aggregate
+	 * @param start the lower bound of the range of ct entry aggregates
+	 * @param end the upper bound of the range of ct entry aggregates (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ct entry aggregates associated with the ct entry
+	 * @return the ordered range of ct entries associated with the ct entry aggregate
 	 */
-	public static List<com.liferay.change.tracking.model.CTEntryAggregate>
-		getCTEntryAggregates(
-			long pk, int start, int end,
-			OrderByComparator
-				<com.liferay.change.tracking.model.CTEntryAggregate>
-					orderByComparator) {
+	public static List<CTEntry> getCTEntryAggregateCTEntries(
+		long pk, int start, int end,
+		OrderByComparator<CTEntry> orderByComparator) {
 
-		return getPersistence().getCTEntryAggregates(
+		return getPersistence().getCTEntryAggregateCTEntries(
 			pk, start, end, orderByComparator);
 	}
 
@@ -751,55 +746,51 @@ public class CTEntryUtil {
 	}
 
 	/**
-	 * Returns all the ct collections associated with the ct entry.
+	 * Returns all the ct entry associated with the ct collection.
 	 *
-	 * @param pk the primary key of the ct entry
-	 * @return the ct collections associated with the ct entry
+	 * @param pk the primary key of the ct collection
+	 * @return the ct entries associated with the ct collection
 	 */
-	public static List<com.liferay.change.tracking.model.CTCollection>
-		getCTCollections(long pk) {
-
-		return getPersistence().getCTCollections(pk);
+	public static List<CTEntry> getCTCollectionCTEntries(long pk) {
+		return getPersistence().getCTCollectionCTEntries(pk);
 	}
 
 	/**
-	 * Returns a range of all the ct collections associated with the ct entry.
+	 * Returns all the ct entry associated with the ct collection.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param pk the primary key of the ct entry
-	 * @param start the lower bound of the range of ct entries
-	 * @param end the upper bound of the range of ct entries (not inclusive)
-	 * @return the range of ct collections associated with the ct entry
+	 * @param pk the primary key of the ct collection
+	 * @param start the lower bound of the range of ct collections
+	 * @param end the upper bound of the range of ct collections (not inclusive)
+	 * @return the range of ct entries associated with the ct collection
 	 */
-	public static List<com.liferay.change.tracking.model.CTCollection>
-		getCTCollections(long pk, int start, int end) {
+	public static List<CTEntry> getCTCollectionCTEntries(
+		long pk, int start, int end) {
 
-		return getPersistence().getCTCollections(pk, start, end);
+		return getPersistence().getCTCollectionCTEntries(pk, start, end);
 	}
 
 	/**
-	 * Returns an ordered range of all the ct collections associated with the ct entry.
+	 * Returns all the ct entry associated with the ct collection.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>CTEntryModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param pk the primary key of the ct entry
-	 * @param start the lower bound of the range of ct entries
-	 * @param end the upper bound of the range of ct entries (not inclusive)
+	 * @param pk the primary key of the ct collection
+	 * @param start the lower bound of the range of ct collections
+	 * @param end the upper bound of the range of ct collections (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of ct collections associated with the ct entry
+	 * @return the ordered range of ct entries associated with the ct collection
 	 */
-	public static List<com.liferay.change.tracking.model.CTCollection>
-		getCTCollections(
-			long pk, int start, int end,
-			OrderByComparator<com.liferay.change.tracking.model.CTCollection>
-				orderByComparator) {
+	public static List<CTEntry> getCTCollectionCTEntries(
+		long pk, int start, int end,
+		OrderByComparator<CTEntry> orderByComparator) {
 
-		return getPersistence().getCTCollections(
+		return getPersistence().getCTCollectionCTEntries(
 			pk, start, end, orderByComparator);
 	}
 

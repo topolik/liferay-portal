@@ -30,7 +30,7 @@ AUI.add(
 
 				var evaluator = instance.get('evaluator');
 
-				evaluator.after('evaluationEnded', A.bind('_afterEvaluationEnded', instance))
+				evaluator.after('evaluationEnded', A.bind('_afterEvaluationEnded', instance));
 			},
 
 			destructor: function() {

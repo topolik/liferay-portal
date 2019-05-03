@@ -1,13 +1,8 @@
 import * as Utils from 'utils/utils.es';
-import uniqueId from 'lodash.uniqueid';
 import {CONJUNCTIONS} from 'utils/constants.es';
 import {mockCriteria, mockCriteriaNested} from 'test/data';
 
-jest.mock('lodash.uniqueid');
-
-const GROUP_ID = 'group_01';
-
-uniqueId.mockReturnValue(GROUP_ID);
+const GROUP_ID = 'group_1';
 
 describe(
 	'utils',

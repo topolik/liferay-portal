@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
 @ImplementationClassName("com.liferay.portal.model.impl.ResourcePermissionImpl")
 @ProviderType
 public interface ResourcePermission
-	extends ResourcePermissionModel, PersistedModel {
+	extends PersistedModel, ResourcePermissionModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

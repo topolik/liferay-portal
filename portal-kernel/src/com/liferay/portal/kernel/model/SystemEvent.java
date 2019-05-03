@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.SystemEventImpl")
 @ProviderType
-public interface SystemEvent extends SystemEventModel, PersistedModel {
+public interface SystemEvent extends PersistedModel, SystemEventModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

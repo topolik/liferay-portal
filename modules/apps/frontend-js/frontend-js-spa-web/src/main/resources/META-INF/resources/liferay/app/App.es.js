@@ -1,14 +1,14 @@
-'use strict';
-
-import Uri from 'metal-uri/lib/Uri';
-import App from 'senna/lib/app/App';
-import core from 'metal/lib/core';
-import dom from 'metal-dom/lib/dom';
-import {CancellablePromise} from 'metal-promise/lib/promise/Promise';
+import {App} from 'senna';
+import {CancellablePromise} from 'metal-promise';
 import {openToast} from 'frontend-js-web/liferay/toast/commands/OpenToast.es';
+import core from 'metal';
+import dom from 'metal-dom';
+import Uri from 'metal-uri';
 
 import LiferaySurface from '../surface/Surface.es';
 import Utils from '../util/Utils.es';
+
+const PROPAGATED_PARAMS = ['bodyCssClass'];
 
 /**
  * LiferayApp
@@ -178,6 +178,8 @@ class LiferayApp extends App {
 		}
 
 		this._clearLayoutData();
+
+		data.path = this._propagateParams(data);
 
 		Liferay.fire(
 			'beforeNavigate',
@@ -408,6 +410,31 @@ class LiferayApp extends App {
 		if (this.timeoutAlert) {
 			this.timeoutAlert.dispose();
 		}
+	}
+
+	_propagateParams(data) {
+		const activeUri = new Uri(this.activePath || window.location.href);
+
+		const activePpid = activeUri.getParameterValue('p_p_id');
+
+		const nextUri = new Uri(data.path);
+
+		const nextPpid = nextUri.getParameterValue('p_p_id');
+
+		if (nextPpid && nextPpid === activePpid) {
+			PROPAGATED_PARAMS.forEach(
+				paramKey => {
+					const paramName = `_${nextPpid}_${paramKey}`;
+					const paramValue = activeUri.getParameterValue(paramName);
+
+					if (paramValue) {
+						nextUri.addParameterValue(paramName, paramValue);
+					}
+				}
+			);
+		}
+
+		return nextUri.toString();
 	}
 
 	/**

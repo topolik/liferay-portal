@@ -210,24 +210,33 @@ boolean weeklyPosSa = _getWeeklyDayPos(request, Calendar.SATURDAY, recurrence);
 	</aui:col>
 </aui:fieldset>
 
-<aui:script sandbox="<%= true %>">
-	var tables = $('#<portlet:namespace />recurrenceTypeDailyTable, #<portlet:namespace />recurrenceTypeMonthlyTable, #<portlet:namespace />recurrenceTypeNeverTable, #<portlet:namespace />recurrenceTypeWeeklyTable, #<portlet:namespace />recurrenceTypeYearlyTable');
+<aui:script require="metal-dom/src/dom as dom">
+	var tables = document.querySelectorAll('#<portlet:namespace />recurrenceTypeDailyTable, #<portlet:namespace />recurrenceTypeMonthlyTable, #<portlet:namespace />recurrenceTypeNeverTable, #<portlet:namespace />recurrenceTypeWeeklyTable, #<portlet:namespace />recurrenceTypeYearlyTable');
 
-	$('#<portlet:namespace />eventsContainer').on(
-		'change',
-		'.field',
-		function(event) {
-			var tableId = $(event.currentTarget).attr('id') + 'Table';
+	var eventsContainer = document.getElementById('<portlet:namespace />eventsContainer');
 
-			tables.each(
-				function(index, item) {
-					item = $(item);
+	if (eventsContainer) {
+		dom.delegate(
+			eventsContainer,
+			'change',
+			'.field',
+			function(event) {
+				var tableId = event.delegateTarget.id + 'Table';
 
-					item.toggleClass('hide', item.attr('id') != tableId);
-				}
-			);
-		}
-	);
+				Array.prototype.forEach.call(
+					tables,
+					function(table) {
+						if (table.id === tableId) {
+							table.classList.remove('hide');
+						}
+						else {
+							table.classList.add('hide');
+						}
+					}
+				);
+			}
+		);
+	}
 </aui:script>
 
 <%!

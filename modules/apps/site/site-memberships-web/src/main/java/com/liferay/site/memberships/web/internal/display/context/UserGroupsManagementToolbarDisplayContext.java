@@ -20,7 +20,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Role;
@@ -93,34 +92,32 @@ public class UserGroupsManagementToolbarDisplayContext
 							ActionKeys.ASSIGN_USER_ROLES)) {
 
 						add(
-							SafeConsumer.ignore(
-								dropdownItem -> {
-									dropdownItem.putData(
-										"action", "selectSiteRole");
+							dropdownItem -> {
+								dropdownItem.putData(
+									"action", "selectSiteRole");
 
-									PortletURL editUserGroupsSiteRolesURL =
-										liferayPortletResponse.
-											createActionURL();
+								PortletURL editUserGroupsSiteRolesURL =
+									liferayPortletResponse.createActionURL();
 
-									editUserGroupsSiteRolesURL.setParameter(
-										ActionRequest.ACTION_NAME,
-										"editUserGroupsSiteRoles");
-									editUserGroupsSiteRolesURL.setParameter(
-										"tabs1", "user-groups");
+								editUserGroupsSiteRolesURL.setParameter(
+									ActionRequest.ACTION_NAME,
+									"editUserGroupsSiteRoles");
+								editUserGroupsSiteRolesURL.setParameter(
+									"tabs1", "user-groups");
 
-									dropdownItem.putData(
-										"editUserGroupsSiteRolesURL",
-										editUserGroupsSiteRolesURL.toString());
+								dropdownItem.putData(
+									"editUserGroupsSiteRolesURL",
+									editUserGroupsSiteRolesURL.toString());
 
-									dropdownItem.putData(
-										"selectSiteRoleURL",
-										_getSelectorURL("/site_roles.jsp"));
-									dropdownItem.setIcon("add-role");
-									dropdownItem.setLabel(
-										LanguageUtil.get(
-											request, "assign-site-roles"));
-									dropdownItem.setQuickAction(true);
-								}));
+								dropdownItem.putData(
+									"selectSiteRoleURL",
+									_getSelectorURL("/site_roles.jsp"));
+								dropdownItem.setIcon("add-role");
+								dropdownItem.setLabel(
+									LanguageUtil.get(
+										request, "assign-site-roles"));
+								dropdownItem.setQuickAction(true);
+							});
 
 						Role role = _userGroupsDisplayContext.getRole();
 
@@ -293,34 +290,33 @@ public class UserGroupsManagementToolbarDisplayContext
 					});
 
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								Objects.equals(getNavigation(), "roles"));
-							dropdownItem.putData("action", "selectRoles");
-							dropdownItem.putData(
-								"selectRolesURL",
-								_getSelectorURL("/select_site_role.jsp"));
+					dropdownItem -> {
+						dropdownItem.setActive(
+							Objects.equals(getNavigation(), "roles"));
+						dropdownItem.putData("action", "selectRoles");
+						dropdownItem.putData(
+							"selectRolesURL",
+							_getSelectorURL("/select_site_role.jsp"));
 
-							PortletURL viewRoleURL =
-								liferayPortletResponse.createRenderURL();
+						PortletURL viewRoleURL =
+							liferayPortletResponse.createRenderURL();
 
-							viewRoleURL.setParameter("mvcPath", "/view.jsp");
-							viewRoleURL.setParameter("tabs1", "user-groups");
-							viewRoleURL.setParameter("navigation", "roles");
-							viewRoleURL.setParameter(
-								"redirect", themeDisplay.getURLCurrent());
-							viewRoleURL.setParameter(
-								"groupId",
-								String.valueOf(
-									_userGroupsDisplayContext.getGroupId()));
+						viewRoleURL.setParameter("mvcPath", "/view.jsp");
+						viewRoleURL.setParameter("tabs1", "user-groups");
+						viewRoleURL.setParameter("navigation", "roles");
+						viewRoleURL.setParameter(
+							"redirect", themeDisplay.getURLCurrent());
+						viewRoleURL.setParameter(
+							"groupId",
+							String.valueOf(
+								_userGroupsDisplayContext.getGroupId()));
 
-							dropdownItem.putData(
-								"viewRoleURL", viewRoleURL.toString());
+						dropdownItem.putData(
+							"viewRoleURL", viewRoleURL.toString());
 
-							dropdownItem.setLabel(
-								LanguageUtil.get(request, "roles"));
-						}));
+						dropdownItem.setLabel(
+							LanguageUtil.get(request, "roles"));
+					});
 			}
 		};
 	}

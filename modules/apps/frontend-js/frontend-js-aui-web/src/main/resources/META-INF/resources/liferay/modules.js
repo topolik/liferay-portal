@@ -366,13 +366,6 @@
 							'dd'
 						]
 					},
-					'liferay-layout-freeform': {
-						path: 'layout_freeform.js',
-						requires: [
-							'liferay-layout-column',
-							'resize'
-						]
-					},
 					'liferay-list-view': {
 						path: 'list_view.js',
 						requires: [
@@ -710,6 +703,7 @@
 						requires: [
 							'aui-dialog-iframe-deprecated',
 							'aui-modal',
+							'aui-url',
 							'event-resize',
 							'liferay-widget-zindex'
 						]

@@ -54,11 +54,14 @@ class BulkStatus extends Component {
 	 * @protected
 	 */
 	_getBulkStatus() {
-		fetch(this.bulkStatusUrl)
+		fetch(
+			this.pathModule + this.bulkStatusUrl,
+			{credentials: 'include'}
+		)
 			.then(response => response.json())
 			.then(
 				response => {
-					if (!response.busy) {
+					if (!response.actionInProgress) {
 						this._onBulkFinish(false);
 					}
 				}
@@ -158,7 +161,7 @@ BulkStatus.STATE = {
 	 * @memberof BulkStatus
 	 * @type {String}
 	 */
-	bulkStatusUrl: Config.string().value('/o/bulk/status'),
+	bulkStatusUrl: Config.string().value('/bulk-rest/v1.0/status'),
 
 	/**
 	 * The interval (in milliseconds) on how often
@@ -169,6 +172,16 @@ BulkStatus.STATE = {
 	 * @type {Number}
 	 */
 	intervalSpeed: Config.number().value(1000),
+
+	/**
+	 * PathModule
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {String}
+	 */
+	pathModule: Config.string().required(),
 
 	/**
 	 * Portlet's namespace

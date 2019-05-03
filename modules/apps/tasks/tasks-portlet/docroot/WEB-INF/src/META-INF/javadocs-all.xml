@@ -3,7 +3,7 @@
 <javadocs>
 	<javadoc>
 		<name>TasksEntryAssetRenderer</name>
-		<type>com.liferay.tasks.asset.TasksEntryAssetRenderer</type>
+		<type>com.liferay.tasks.asset.model.TasksEntryAssetRenderer</type>
 		<author><![CDATA[Matthew Kong]]></author>
 		<method>
 			<name>TasksEntryAssetRenderer</name>
@@ -130,7 +130,7 @@
 	</javadoc>
 	<javadoc>
 		<name>TasksEntryAssetRendererFactory</name>
-		<type>com.liferay.tasks.asset.TasksEntryAssetRendererFactory</type>
+		<type>com.liferay.tasks.asset.model.TasksEntryAssetRendererFactory</type>
 		<author><![CDATA[Matthew Kong]]></author>
 		<method>
 			<name>getAssetRenderer</name>

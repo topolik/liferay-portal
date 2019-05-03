@@ -1,5 +1,5 @@
-import React from 'react';
 import ClaySpinner from 'components/shared/ClaySpinner.es';
+import React from 'react';
 import {cleanup, render} from 'react-testing-library';
 
 const SPINNER_TESTID = 'spinner';

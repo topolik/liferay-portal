@@ -1,10 +1,11 @@
+import 'clay-dropdown';
+
 import Soy from 'metal-soy';
 import dom from 'metal-dom';
 import {CancellablePromise} from 'metal-promise';
 import {async, core} from 'metal';
 import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
 
-import 'frontend-js-web/liferay/compat/dropdown/Dropdown.es';
 import ImageEditorHistoryEntry from './ImageEditorHistoryEntry.es';
 import ImageEditorLoading from './ImageEditorLoading.es';
 import templates from './ImageEditor.soy';
@@ -39,12 +40,6 @@ class ImageEditor extends PortletBase {
 	 * @inheritDoc
 	 */
 	attached() {
-
-		/**
-		 * Current state in the history.
-		 * @protected
-		 * @type {Number}
-		 */
 		this.historyIndex_ = 0;
 
 		/**
@@ -112,6 +107,7 @@ class ImageEditor extends PortletBase {
 	/**
 	 * Notifies the opener app that the user wants to close the editor without
 	 * saving the changes.
+	 *
 	 * @protected
 	 */
 	close_() {
@@ -120,11 +116,11 @@ class ImageEditor extends PortletBase {
 
 	/**
 	 * Creates a new history entry state.
+	 *
 	 * @param  {ImageData} imageData The image data of the new image.
 	 * @protected
 	 */
 	createHistoryEntry_(imageData) {
-		// Push new state and discard stale redo states
 		this.historyIndex_++;
 		this.history_.length = this.historyIndex_ + 1;
 		this.history_[this.historyIndex_] = new ImageEditorHistoryEntry({data: imageData});
@@ -144,6 +140,7 @@ class ImageEditor extends PortletBase {
 
 	/**
 	 * Retrieves the editor canvas DOM node.
+	 *
 	 * @return {Element} The canvas element
 	 */
 	getImageEditorCanvas() {
@@ -152,6 +149,7 @@ class ImageEditor extends PortletBase {
 
 	/**
 	 * Retrieves the blob representation of the current image.
+	 *
 	 * @return {CancellablePromise} A promise that resolves with the image blob.
 	 */
 	getImageEditorImageBlob() {
@@ -184,6 +182,7 @@ class ImageEditor extends PortletBase {
 
 	/**
 	 * Retrieves the image data representation of the current image.
+	 *
 	 * @return {CancellablePromise} A promise that resolves with the image data.
 	 */
 	getImageEditorImageData() {
@@ -191,8 +190,18 @@ class ImageEditor extends PortletBase {
 	}
 
 	/**
+	 * Returns a list of all possible image editor capabilities.
+	 *
+	 * @return {Array<{Object}>}
+	 */
+	getPossibleControls() {
+		return this.imageEditorCapabilities.tools.reduce((prev, curr) => prev.concat(curr.controls), []);
+	}
+
+	/**
 	 * Normalizes different MIME types to the most similar MIME type available
 	 * to canvas implementations.
+	 *
 	 * @param  {String} mimeType The original MIME type.
 	 * @return {String} The normalized MIME type.
 	 * @see http://kangax.github.io/jstests/toDataUrl_mime_type_test/
@@ -203,6 +212,7 @@ class ImageEditor extends PortletBase {
 
 	/**
 	 * Notifies the opener app of the result of the save action.
+	 *
 	 * @param  {Object} result The server response to the save action.
 	 * @protected
 	 */
@@ -235,15 +245,34 @@ class ImageEditor extends PortletBase {
 	}
 
 	/**
-	 * Selects a control and starts its editing phase.
+	 * Selects a control and starts its editing phase with filters.
+	 *
 	 * @param  {MouseEvent} event The mouse event.
 	 */
-	requestImageEditorEdit(event) {
-		let controls = this.imageEditorCapabilities.tools.reduce(
-			(prev, curr) => prev.concat(curr.controls), []);
+	requestImageEditorEditFilters(event) {
+		let controls = this.getPossibleControls();
 
 		let target = event.delegateTarget || event.currentTarget;
 		let targetControl = target.getAttribute('data-control');
+		let targetTool = target.getAttribute('data-tool');
+
+		this.syncHistory_()
+			.then(() => {
+				this.selectedControl = controls.filter(tool => tool.variant === targetControl)[0];
+				this.selectedTool = targetTool;
+			});
+	}
+
+	/**
+	 * Select a control and starts its editing phase.
+	 *
+	 * @param {MouseEvent} event The mouse event.
+	 */
+	requestImageEditorEdit(event) {
+		let controls = this.getPossibleControls();
+
+		let target = event.target.element;
+		let targetControl = event.data.item.variant;
 		let targetTool = target.getAttribute('data-tool');
 
 		this.syncHistory_()
@@ -301,7 +330,7 @@ class ImageEditor extends PortletBase {
 	 */
 	setterSaveMimeTypeFn_(saveMimeType) {
 		if (!saveMimeType) {
-			const imageExtensionRegex = /(?:.*:\/\/)?(?:[^\/])*[^.]*.([^?\/$]*)/;
+			const imageExtensionRegex = /\.(\w+)\/[^?\/]+/;
 			const imageExtension = this.image.match(imageExtensionRegex)[1];
 
 			saveMimeType = `image/${imageExtension}`;

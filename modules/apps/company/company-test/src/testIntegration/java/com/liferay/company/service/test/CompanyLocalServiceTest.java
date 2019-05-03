@@ -69,9 +69,9 @@ import com.liferay.portal.kernel.transaction.TransactionInvokerUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortletKeys;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.PermissionCheckerTestRule;
-import com.liferay.portal.test.rule.callback.SybaseDump;
-import com.liferay.portal.test.rule.callback.SybaseDumpTransactionLog;
+import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+import com.liferay.portal.test.rule.SybaseDump;
+import com.liferay.portal.test.rule.SybaseDumpTransactionLog;
 import com.liferay.portal.util.PortalInstances;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.sites.kernel.util.SitesUtil;
@@ -112,7 +112,7 @@ public class CompanyLocalServiceTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE);
+			PermissionCheckerMethodTestRule.INSTANCE);
 
 	public void resetBackgroundTaskThreadLocal() throws Exception {
 		Class<?> backgroundTaskThreadLocalClass =
@@ -747,12 +747,9 @@ public class CompanyLocalServiceTest {
 
 		nameMap.put(LocaleUtil.getDefault(), name);
 
-		LayoutSetPrototype layoutSetPrototype =
-			LayoutSetPrototypeLocalServiceUtil.addLayoutSetPrototype(
-				userId, companyId, nameMap, new HashMap<Locale, String>(), true,
-				true, getServiceContext(companyId));
-
-		return layoutSetPrototype;
+		return LayoutSetPrototypeLocalServiceUtil.addLayoutSetPrototype(
+			userId, companyId, nameMap, new HashMap<Locale, String>(), true,
+			true, getServiceContext(companyId));
 	}
 
 	protected User addUser(

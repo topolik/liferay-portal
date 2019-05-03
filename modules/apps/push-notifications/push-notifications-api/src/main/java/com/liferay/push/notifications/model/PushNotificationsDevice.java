@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface PushNotificationsDevice
-	extends PushNotificationsDeviceModel, PersistedModel {
+	extends PersistedModel, PushNotificationsDeviceModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

@@ -3,62 +3,13 @@
 exports[`CriteriaBuilder should render 1`] = `
 <DocumentFragment>
   <div
-    class="criteria-builder-root sheet"
+    class="criteria-builder-root"
   >
-    <div
-      class="criteria-builder-toolbar"
+    <h4
+      class="sheet-subtitle"
     >
-      <div
-        class="criteria-model-label"
-      >
-        x-properties
-      </div>
-      <label
-        class="toggle-switch ml-auto"
-      >
-        <input
-          class="toggle-switch-check"
-          type="checkbox"
-        />
-        <span
-          aria-hidden="true"
-          class="toggle-switch-bar"
-        >
-          <span
-            class="toggle-switch-handle"
-            data-label-off=""
-            data-label-on=""
-          >
-            <span
-              class="button-icon button-icon-off toggle-switch-icon"
-            >
-              <svg
-                aria-hidden="true"
-                class="lexicon-icon lexicon-icon-pencil"
-                viewBox="0 0 512 512"
-              >
-                <use
-                  xlink:href="#pencil"
-                />
-              </svg>
-            </span>
-            <span
-              class="button-icon button-icon-on toggle-switch-icon"
-            >
-              <svg
-                aria-hidden="true"
-                class="lexicon-icon lexicon-icon-pencil"
-                viewBox="0 0 512 512"
-              >
-                <use
-                  xlink:href="#pencil"
-                />
-              </svg>
-            </span>
-          </span>
-        </span>
-      </label>
-    </div>
+      x-with-property-x
+    </h4>
   </div>
 </DocumentFragment>
 `;

@@ -120,22 +120,24 @@ String randomNamespace = ParamUtil.getString(request, "randomNamespace");
 			</aui:button-row>
 		</aui:form>
 
-		<aui:script>
-			var uploadImageButton = document.querySelector('#<portlet:namespace />uploadImage');
+		<script>
+			(function() {
+				var uploadImageButton = document.getElementById('<portlet:namespace />uploadImage');
 
-			if (uploadImageButton) {
-				uploadImageButton.addEventListener(
-					'keydown',
-					function(event) {
-						event.preventDefault();
+				if (uploadImageButton) {
+					uploadImageButton.addEventListener(
+						'keydown',
+						function(event) {
+							event.preventDefault();
 
-						if (event.key == 'Enter' || event.key == ' ') {
-							uploadImageButton.click();
+							if (event.key == 'Enter' || event.key == ' ') {
+								uploadImageButton.click();
+							}
 						}
-					}
-				);
-			}
-		</aui:script>
+					);
+				}
+			})();
+		</script>
 
 		<aui:script use="liferay-logo-editor">
 			<portlet:actionURL name="/image_uploader/view" var="addTempImageURL">

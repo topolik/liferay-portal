@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
@@ -89,7 +90,7 @@ public class MentionsPortlet extends MVCPortlet {
 			HttpServletRequest request = _portal.getHttpServletRequest(
 				resourceRequest);
 
-			JSONArray jsonArray = getJSONArray(request);
+			JSONArray jsonArray = _getJSONArray(request);
 
 			HttpServletResponse response = _portal.getHttpServletResponse(
 				resourceResponse);
@@ -103,7 +104,7 @@ public class MentionsPortlet extends MVCPortlet {
 		}
 	}
 
-	protected JSONArray getJSONArray(HttpServletRequest request)
+	private JSONArray _getJSONArray(HttpServletRequest request)
 		throws PortalException {
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
@@ -129,9 +130,8 @@ public class MentionsPortlet extends MVCPortlet {
 				continue;
 			}
 
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("fullName", user.getFullName());
+			JSONObject jsonObject = JSONUtil.put(
+				"fullName", user.getFullName());
 
 			String mention = "@" + user.getScreenName();
 
@@ -143,11 +143,15 @@ public class MentionsPortlet extends MVCPortlet {
 					"</a>");
 			}
 
-			jsonObject.put("mention", mention);
-
 			jsonObject.put(
-				"portraitHTML", _getUserPortraitHTML(user, themeDisplay));
-			jsonObject.put("screenName", user.getScreenName());
+				"mention", mention
+			).put(
+				"portraitHTML",
+				UserPortraitTag.getUserPortraitHTML(
+					StringPool.BLANK, user, themeDisplay)
+			).put(
+				"screenName", user.getScreenName()
+			);
 
 			jsonArray.put(jsonObject);
 		}
@@ -155,33 +159,10 @@ public class MentionsPortlet extends MVCPortlet {
 		return jsonArray;
 	}
 
-	@Reference(unbind = "-")
-	protected void setMentionsUserFinder(
-		MentionsUserFinder mentionsUserFinder) {
-
-		_mentionsUserFinder = mentionsUserFinder;
-	}
-
-	private String _getUserPortraitHTML(User user, ThemeDisplay themeDisplay)
-		throws PortalException {
-
-		return UserPortraitTag.getUserPortraitHTML(
-			StringPool.BLANK,
-			() -> {
-				try {
-					return user.getPortraitURL(themeDisplay);
-				}
-				catch (PortalException pe) {
-					_log.error(pe, pe);
-				}
-
-				return StringPool.BLANK;
-			});
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		MentionsPortlet.class);
 
+	@Reference
 	private MentionsUserFinder _mentionsUserFinder;
 
 	@Reference

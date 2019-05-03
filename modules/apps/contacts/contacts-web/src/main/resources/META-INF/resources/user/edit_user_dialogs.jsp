@@ -29,15 +29,15 @@ if (selUser != null) {
 	selContact = selUser.getContact();
 }
 
-String namespace = renderResponse.getNamespace();
+String portletNamespace = renderResponse.getNamespace();
 
 if (extension) {
-	namespace = PortalUtil.getPortletNamespace(PortletKeys.MY_ACCOUNT);
+	portletNamespace = PortalUtil.getPortletNamespace(PortletKeys.MY_ACCOUNT);
 }
 %>
 
-<div id="<%= namespace %>updateUserDialog">
-	<aui:form action="" cssClass="container-fluid-1280" method="post" name="dialogForm" portletNamespace="<%= namespace %>">
+<div id="<%= portletNamespace %>updateUserDialog">
+	<aui:form action="" cssClass="container-fluid-1280" method="post" name="dialogForm" portletNamespace="<%= portletNamespace %>">
 		<aui:input name="redirect" type="hidden" value="<%= selUser.getDisplayURL(themeDisplay) %>" />
 		<aui:input name="fieldGroup" type="hidden" value="<%= curSectionId %>" />
 		<aui:input name="p_u_i_d" type="hidden" value="<%= (selUser != null) ? selUser.getUserId() : 0 %>" />
@@ -67,8 +67,8 @@ if (extension) {
 		String sectionJsp = "/user/" + _getSectionJsp(curSectionId) + ".jsp";
 		%>
 
-		<div class="form-section selected" id="<%= namespace + curSectionId %>">
-			<div id="<%= namespace %>errorMessage"></div>
+		<div class="form-section selected" id="<%= portletNamespace + curSectionId %>">
+			<div id="<%= portletNamespace %>errorMessage"></div>
 
 			<c:choose>
 				<c:when test='<%= curSectionId.equals("categorization") %>'>
@@ -90,7 +90,7 @@ if (extension) {
 </div>
 
 <aui:script position="inline" use="aui-base,aui-io-request-deprecated">
-	var form = A.one('#<%= namespace %>dialogForm');
+	var form = A.one('#<%= portletNamespace %>dialogForm');
 
 	form.on(
 		'submit',
@@ -130,7 +130,7 @@ if (extension) {
 							var responseData = this.get('responseData');
 
 							if (!responseData.success) {
-								var message = A.one('#<%= namespace %>errorMessage');
+								var message = A.one('#<%= portletNamespace %>errorMessage');
 
 								if (message) {
 									message.html('<span class="alert alert-danger">' + responseData.message + '</span>');
@@ -160,7 +160,7 @@ if (extension) {
 </aui:script>
 
 <aui:script use="liferay-auto-fields">
-	Liferay.fire('formNavigator:reveal<%= namespace %><%= curSectionId %>');
+	Liferay.fire('formNavigator:reveal<%= portletNamespace %><%= curSectionId %>');
 </aui:script>
 
 <%!

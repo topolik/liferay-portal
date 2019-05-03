@@ -13,13 +13,11 @@ definition {
 
 		JSONLayout.addPublicLayout(
 			groupName = "Test Site Name",
-			layoutName = "Asset Publisher Page"
-		);
+			layoutName = "Asset Publisher Page");
 
 		Navigator.gotoSitePage(
 			pageName = "Asset Publisher Page",
-			siteName = "Test Site Name"
-		);
+			siteName = "Test Site Name");
 
 		Portlet.addPG(portletName = "Asset Publisher");
 	}
@@ -32,6 +30,26 @@ definition {
 		}
 		else {
 			JSONGroup.deleteGroupByName(groupName = "Test Site Name");
+		}
+	}
+
+	@description = "This is a test for LPS-93357. The subscribe button can be enabled/disabled."
+	@priority = "3"
+	test enableDisableSubscribeButton {
+		task ("Assert the subscribe button is disabled by default") {
+			AssertElementNotPresent(locator1 = "Button#SUBSCRIBE");
+		}
+
+		task("Enable the subscribe button") {
+			AssetPublisherPortlet.configureDisplaySettings(displaySettings = "Subscribe");
+		}
+
+		task ("Assert the subscribe button displays") {
+			Navigator.gotoSitePage(
+				pageName = "Asset Publisher Page",
+				siteName = "Test Site Name");
+
+			AssertElementPresent(locator1 = "Button#SUBSCRIBE");
 		}
 	}
 
@@ -48,7 +66,6 @@ definition {
 
 		AssertSelectedLabel(
 			locator1 = "APConfigurationDisplaysettings#ASSET_LINK_BEHAVIOR_SELECT",
-			value1 = "View in Context"
-		);
+			value1 = "View in Context");
 	}
 }

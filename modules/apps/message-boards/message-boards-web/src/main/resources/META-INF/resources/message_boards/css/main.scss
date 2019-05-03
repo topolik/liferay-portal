@@ -96,7 +96,10 @@
 
 	.message-content {
 		display: block;
-		overflow: auto;
+
+		.alloy-editor-container .alloy-editor-wrapper {
+			padding-top: 0.5em;
+		}
 
 		img {
 			max-width: 100%;
@@ -171,12 +174,9 @@
 		clear: both;
 	}
 
-	.list-group .list-group-item h4 {
+	.list-group .list-group-item h4,
+	.list-group .list-group-item h2 {
 		font-weight: 400;
-	}
-
-	.list-group .list-group-item h2.h5 {
-		font-weight: 600;
 	}
 
 	.taglib-custom-attributes-list {

@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface ReadingTimeEntry
-	extends ReadingTimeEntryModel, PersistedModel {
+	extends PersistedModel, ReadingTimeEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

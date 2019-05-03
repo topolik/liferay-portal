@@ -16,10 +16,6 @@
 
 <%@ include file="/dynamic_section/init.jsp" %>
 
-<%
-JSONArray collaboratorsJSONArray = JSONFactoryUtil.createJSONArray();
-%>
-
 <div class="autofit-row widget-metadata">
 	<div class="autofit-col inline-item-before">
 
@@ -31,7 +27,7 @@ JSONArray collaboratorsJSONArray = JSONFactoryUtil.createJSONArray();
 
 		<div class="lfr-portal-tooltip" data-title="<%= LanguageUtil.format(resourceBundle, "x-is-the-owner", owner.getFullName()) %>">
 			<liferay-ui:user-portrait
-				cssClass="sticker-lg"
+				size="lg"
 				user="<%= owner %>"
 			/>
 		</div>
@@ -44,19 +40,12 @@ JSONArray collaboratorsJSONArray = JSONFactoryUtil.createJSONArray();
 			List<User> sharingEntryToUsers = (List<User>)request.getAttribute("info_panel_file_entry.jsp-sharingEntryToUsers");
 
 			for (User sharingEntryToUser : sharingEntryToUsers) {
-				JSONObject collaboratorJSONObject = JSONFactoryUtil.createJSONObject();
-
-				collaboratorJSONObject.put("id", sharingEntryToUser.getUserId());
-				collaboratorJSONObject.put("imageSrc", sharingEntryToUser.getPortraitURL(themeDisplay));
-				collaboratorJSONObject.put("name", sharingEntryToUser.getFullName());
-
-				collaboratorsJSONArray.put(collaboratorJSONObject);
 			%>
 
 				<div class="autofit-col">
 					<div class="lfr-portal-tooltip" data-title="<%= sharingEntryToUser.getFullName() %>">
 						<liferay-ui:user-portrait
-							cssClass="sticker-lg"
+							size="lg"
 							user="<%= sharingEntryToUser %>"
 						/>
 					</div>
@@ -65,67 +54,80 @@ JSONArray collaboratorsJSONArray = JSONFactoryUtil.createJSONArray();
 			<%
 			}
 
-			int countSharingEntryToUserIds = GetterUtil.getInteger(request.getAttribute("info_panel_file_entry.jsp-countSharingEntryToUserIds"));
+			int sharingEntriesCount = GetterUtil.getInteger(request.getAttribute("info_panel_file_entry.jsp-sharingEntriesCount"));
 			%>
 
-			<c:if test="<%= countSharingEntryToUserIds > 4 %>">
+			<c:if test="<%= sharingEntriesCount > 4 %>">
 
 				<%
-				int moreCollaboratorsCount = countSharingEntryToUserIds - 4;
+				int moreCollaboratorsCount = sharingEntriesCount - 4;
 				%>
 
-				<div class="lfr-portal-tooltip rounded-circle sticker sticker-lg sticker-secondary" data-title="<%= LanguageUtil.format(resourceBundle, (moreCollaboratorsCount == 1) ? "x-more-collaborator" : "x-more-collaborators", moreCollaboratorsCount) %>">
-					+<%= moreCollaboratorsCount %>
+				<div class="autofit-col">
+					<div class="lfr-portal-tooltip" data-title="<%= LanguageUtil.format(resourceBundle, (moreCollaboratorsCount == 1) ? "x-more-collaborator" : "x-more-collaborators", moreCollaboratorsCount) %>">
+						<clay:sticker
+							elementClasses="user-icon-color-0"
+							icon="users"
+							shape="circle"
+							size="lg"
+						/>
+					</div>
 				</div>
 			</c:if>
 		</div>
 	</div>
 </div>
 
-<div class="autofit-row sidebar-panel">
-	<clay:button
-		elementClasses="manage-collaborators-btn"
-		id='<%= liferayPortletResponse.getNamespace() + "manageCollaboratorsButton" %>'
-		label='<%= LanguageUtil.get(resourceBundle, "manage-collaborators") %>'
-		size="sm"
-		style="link"
-	/>
-</div>
-
 <%
-PortletURL manageCollaboratorsRenderURL = PortletProviderUtil.getPortletURL(request, SharingEntry.class.getName(), PortletProvider.Action.MANAGE);
-
-manageCollaboratorsRenderURL.setParameter("classNameId", String.valueOf(ClassNameLocalServiceUtil.getClassNameId(DLFileEntry.class.getName())));
-manageCollaboratorsRenderURL.setParameter("classPK", String.valueOf(fileEntry.getFileEntryId()));
-manageCollaboratorsRenderURL.setParameter("manageCollaboratorDialogId", liferayPortletResponse.getNamespace() + "manageCollaboratorsDialog");
-manageCollaboratorsRenderURL.setWindowState(LiferayWindowState.POP_UP);
+boolean showManageCollaborators = GetterUtil.getBoolean(request.getAttribute("info_panel_file_entry.jsp-showManageCollaborators"));
 %>
 
-<aui:script>
-	var button = document.getElementById('<portlet:namespace/>manageCollaboratorsButton');
+<c:if test="<%= showManageCollaborators %>">
+	<div class="autofit-row sidebar-panel">
+		<clay:button
+			elementClasses="btn-link manage-collaborators-btn"
+			id='<%= liferayPortletResponse.getNamespace() + "manageCollaboratorsButton" %>'
+			label='<%= LanguageUtil.get(resourceBundle, "manage-collaborators") %>'
+			size="sm"
+			style="link"
+		/>
+	</div>
 
-	button.addEventListener(
-		'click',
-		function() {
-			Liferay.Util.openWindow(
-				{
-					dialog: {
-						destroyOnHide: true,
-						height: 470,
-						width: 600,
-						on: {
-							visibleChange: function(event) {
-								if (!event.newVal) {
-									Liferay.Util.getOpener().Liferay.fire('refreshInfoPanel');
+	<%
+	PortletURL manageCollaboratorsRenderURL = PortletProviderUtil.getPortletURL(request, SharingEntry.class.getName(), PortletProvider.Action.MANAGE);
+
+	manageCollaboratorsRenderURL.setParameter("classNameId", String.valueOf(ClassNameLocalServiceUtil.getClassNameId(DLFileEntry.class.getName())));
+	manageCollaboratorsRenderURL.setParameter("classPK", String.valueOf(fileEntry.getFileEntryId()));
+	manageCollaboratorsRenderURL.setParameter("dialogId", liferayPortletResponse.getNamespace() + "manageCollaboratorsDialog");
+	manageCollaboratorsRenderURL.setWindowState(LiferayWindowState.POP_UP);
+	%>
+
+	<aui:script>
+		var button = document.getElementById('<portlet:namespace/>manageCollaboratorsButton');
+
+		button.addEventListener(
+			'click',
+			function() {
+				Liferay.Util.openWindow(
+					{
+						dialog: {
+							destroyOnHide: true,
+							height: 470,
+							width: 600,
+							on: {
+								visibleChange: function(event) {
+									if (!event.newVal) {
+										Liferay.Util.getOpener().Liferay.fire('refreshInfoPanel');
+									}
 								}
 							}
-						}
-					},
-					id: '<portlet:namespace />manageCollaboratorsDialog',
-					title: '<%= LanguageUtil.get(resourceBundle, "collaborators") %>',
-					uri: '<%= manageCollaboratorsRenderURL.toString() %>'
-				}
-			);
-		}
-	);
-</aui:script>
+						},
+						id: '<portlet:namespace />manageCollaboratorsDialog',
+						title: '<%= LanguageUtil.get(resourceBundle, "collaborators") %>',
+						uri: '<%= manageCollaboratorsRenderURL.toString() %>'
+					}
+				);
+			}
+		);
+	</aui:script>
+</c:if>

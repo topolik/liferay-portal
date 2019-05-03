@@ -16,8 +16,7 @@ package com.liferay.layout.content.page.editor.web.internal.editor.configuration
 
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.ItemSelectorCriterion;
-import com.liferay.item.selector.ItemSelectorReturnType;
-import com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType;
+import com.liferay.item.selector.criteria.DownloadURLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.image.criterion.ImageItemSelectorCriterion;
 import com.liferay.item.selector.criteria.url.criterion.URLItemSelectorCriterion;
@@ -30,8 +29,6 @@ import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.portlet.PortletURL;
@@ -68,21 +65,23 @@ public class FragmentEntryLinkEditorConfigContributor
 			requestBackedPortletURLFactory, namespace + name + "selectItem",
 			getImageItemSelectorCriterion(), getURLItemSelectorCriterion());
 
-		jsonObject.put("allowedContent", "");
-
-		jsonObject.put("disallowedContent", "br");
-
-		jsonObject.put("enterMode", 2);
-
-		jsonObject.put("extraPlugins", getExtraPluginsLists());
-
 		jsonObject.put(
-			"filebrowserImageBrowseLinkUrl", itemSelectorURL.toString());
-		jsonObject.put("filebrowserImageBrowseUrl", itemSelectorURL.toString());
-
-		jsonObject.put("removePlugins", getRemovePluginsLists());
-
-		jsonObject.put("toolbars", JSONFactoryUtil.createJSONObject());
+			"allowedContent", ""
+		).put(
+			"disallowedContent", "br"
+		).put(
+			"enterMode", 2
+		).put(
+			"extraPlugins", getExtraPluginsLists()
+		).put(
+			"filebrowserImageBrowseLinkUrl", itemSelectorURL.toString()
+		).put(
+			"filebrowserImageBrowseUrl", itemSelectorURL.toString()
+		).put(
+			"removePlugins", getRemovePluginsLists()
+		).put(
+			"toolbars", JSONFactoryUtil.createJSONObject()
+		);
 	}
 
 	protected String getExtraPluginsLists() {
@@ -92,39 +91,28 @@ public class FragmentEntryLinkEditorConfigContributor
 	}
 
 	protected ItemSelectorCriterion getImageItemSelectorCriterion() {
-		List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
-			new ArrayList<>();
-
-		desiredItemSelectorReturnTypes.add(
-			new FileEntryItemSelectorReturnType());
-
-		ItemSelectorCriterion imageItemSelectorCriterion =
+		ItemSelectorCriterion itemSelectorCriterion =
 			new ImageItemSelectorCriterion();
 
-		imageItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
+		itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
+			new DownloadURLItemSelectorReturnType());
 
-		return imageItemSelectorCriterion;
+		return itemSelectorCriterion;
 	}
 
 	protected String getRemovePluginsLists() {
-		return "contextmenu,elementspath,image,link,liststyle,magicline," +
-			"resize,tabletools,toolbar,ae_embed";
+		return "contextmenu,elementspath,floatingspace,image,link,liststyle," +
+			"magicline,resize,tabletools,toolbar,ae_embed";
 	}
 
 	protected ItemSelectorCriterion getURLItemSelectorCriterion() {
-		ItemSelectorCriterion urlItemSelectorCriterion =
+		ItemSelectorCriterion itemSelectorCriterion =
 			new URLItemSelectorCriterion();
 
-		List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
-			new ArrayList<>();
+		itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
+			new URLItemSelectorReturnType());
 
-		desiredItemSelectorReturnTypes.add(new URLItemSelectorReturnType());
-
-		urlItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
-
-		return urlItemSelectorCriterion;
+		return itemSelectorCriterion;
 	}
 
 	@Reference

@@ -95,10 +95,6 @@ public class ContactFixture {
 		_group.setModelAttributes(group.getModelAttributes());
 	}
 
-	protected long getGroupId() throws Exception {
-		return _group.getGroupId();
-	}
-
 	protected long getUserId() throws Exception {
 		return _user.getUserId();
 	}

@@ -19,8 +19,8 @@ import com.liferay.item.selector.ItemSelectorReturnType;
 import com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType;
 import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
 import com.liferay.petra.string.StringPool;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ClassUtil;
@@ -69,18 +69,22 @@ public class ItemSelectorRepositoryEntryBrowserReturnTypeUtil
 			FileEntry fileEntry, ThemeDisplay themeDisplay)
 		throws Exception {
 
-		JSONObject fileEntryJSONObject = JSONFactoryUtil.createJSONObject();
-
-		fileEntryJSONObject.put("fileEntryId", fileEntry.getFileEntryId());
-		fileEntryJSONObject.put("groupId", fileEntry.getGroupId());
-		fileEntryJSONObject.put("title", fileEntry.getTitle());
-		fileEntryJSONObject.put("type", "document");
-		fileEntryJSONObject.put(
+		JSONObject fileEntryJSONObject = JSONUtil.put(
+			"fileEntryId", fileEntry.getFileEntryId()
+		).put(
+			"groupId", fileEntry.getGroupId()
+		).put(
+			"title", fileEntry.getTitle()
+		).put(
+			"type", "document"
+		).put(
 			"url",
 			DLUtil.getPreviewURL(
 				fileEntry, fileEntry.getFileVersion(), themeDisplay,
-				StringPool.BLANK, false, false));
-		fileEntryJSONObject.put("uuid", fileEntry.getUuid());
+				StringPool.BLANK, false, false)
+		).put(
+			"uuid", fileEntry.getUuid()
+		);
 
 		return fileEntryJSONObject.toString();
 	}

@@ -15,9 +15,9 @@
 package com.liferay.data.engine.rest.internal.resource.v1_0;
 
 import com.liferay.data.engine.rest.dto.v1_0.DataDefinition;
+import com.liferay.data.engine.rest.dto.v1_0.DataDefinitionPermission;
 import com.liferay.data.engine.rest.resource.v1_0.DataDefinitionResource;
 import com.liferay.petra.function.UnsafeFunction;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.vulcan.accept.language.AcceptLanguage;
 import com.liferay.portal.vulcan.pagination.Page;
@@ -30,8 +30,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 
-import java.net.URI;
-
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -49,7 +48,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 /**
@@ -62,33 +60,47 @@ public abstract class BaseDataDefinitionResourceImpl
 	implements DataDefinitionResource {
 
 	@Override
-	@GET
+	@DELETE
 	@Parameters(
-		value = {
-			@Parameter(in = ParameterIn.QUERY, name = "page"),
-			@Parameter(in = ParameterIn.QUERY, name = "pageSize")
-		}
+		value = {@Parameter(in = ParameterIn.PATH, name = "dataDefinitionId")}
 	)
-	@Path("/content-spaces/{content-space-id}/data-definitions")
+	@Path("/data-definitions/{dataDefinitionId}")
 	@Produces("application/json")
 	@Tags(value = {@Tag(name = "DataDefinition")})
-	public Page<DataDefinition> getContentSpaceDataDefinitionsPage(
-			@NotNull @PathParam("content-space-id") Long contentSpaceId,
-			@QueryParam("keywords") String keywords,
-			@Context Pagination pagination)
+	public void deleteDataDefinition(
+			@NotNull @Parameter(hidden = true) @PathParam("dataDefinitionId")
+				Long dataDefinitionId)
 		throws Exception {
-
-		return Page.of(Collections.emptyList());
 	}
 
 	@Override
-	@Consumes("application/json")
-	@POST
-	@Path("/content-spaces/{content-space-id}/data-definitions")
-	@Produces("application/json")
+	@GET
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "dataDefinitionId")}
+	)
+	@Path("/data-definitions/{dataDefinitionId}")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "DataDefinition")})
-	public DataDefinition postContentSpaceDataDefinition(
-			@NotNull @PathParam("content-space-id") Long contentSpaceId,
+	public DataDefinition getDataDefinition(
+			@NotNull @Parameter(hidden = true) @PathParam("dataDefinitionId")
+				Long dataDefinitionId)
+		throws Exception {
+
+		return new DataDefinition();
+	}
+
+	@Override
+	@Consumes({"application/json", "application/xml"})
+	@PUT
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "dataDefinitionId")}
+	)
+	@Path("/data-definitions/{dataDefinitionId}")
+	@Produces({"application/json", "application/xml"})
+	@Tags(value = {@Tag(name = "DataDefinition")})
+	public DataDefinition putDataDefinition(
+			@NotNull @Parameter(hidden = true) @PathParam("dataDefinitionId")
+				Long dataDefinitionId,
 			DataDefinition dataDefinition)
 		throws Exception {
 
@@ -96,37 +108,77 @@ public abstract class BaseDataDefinitionResourceImpl
 	}
 
 	@Override
-	@DELETE
-	@Path("/data-definitions/{data-definition-id}")
+	@Consumes({"application/json", "application/xml"})
+	@POST
+	@Parameters(
+		value = {
+			@Parameter(in = ParameterIn.PATH, name = "dataDefinitionId"),
+			@Parameter(in = ParameterIn.QUERY, name = "operation")
+		}
+	)
+	@Path("/data-definitions/{dataDefinitionId}/data-definition-permissions")
 	@Produces("application/json")
 	@Tags(value = {@Tag(name = "DataDefinition")})
-	public boolean deleteDataDefinition(
-			@NotNull @PathParam("data-definition-id") Long dataDefinitionId)
+	public void postDataDefinitionDataDefinitionPermission(
+			@NotNull @Parameter(hidden = true) @PathParam("dataDefinitionId")
+				Long dataDefinitionId,
+			@NotNull @Parameter(hidden = true) @QueryParam("operation") String
+				operation,
+			DataDefinitionPermission dataDefinitionPermission)
 		throws Exception {
+	}
 
-		return false;
+	@Override
+	@Consumes({"application/json", "application/xml"})
+	@POST
+	@Parameters(
+		value = {
+			@Parameter(in = ParameterIn.PATH, name = "siteId"),
+			@Parameter(in = ParameterIn.QUERY, name = "operation")
+		}
+	)
+	@Path("/sites/{siteId}/data-definition-permissions")
+	@Produces("application/json")
+	@Tags(value = {@Tag(name = "DataDefinition")})
+	public void postSiteDataDefinitionPermission(
+			@NotNull @Parameter(hidden = true) @PathParam("siteId") Long siteId,
+			@NotNull @Parameter(hidden = true) @QueryParam("operation") String
+				operation,
+			DataDefinitionPermission dataDefinitionPermission)
+		throws Exception {
 	}
 
 	@Override
 	@GET
-	@Path("/data-definitions/{data-definition-id}")
-	@Produces("application/json")
+	@Parameters(
+		value = {
+			@Parameter(in = ParameterIn.PATH, name = "siteId"),
+			@Parameter(in = ParameterIn.QUERY, name = "keywords"),
+			@Parameter(in = ParameterIn.QUERY, name = "page"),
+			@Parameter(in = ParameterIn.QUERY, name = "pageSize")
+		}
+	)
+	@Path("/sites/{siteId}/data-definitions")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "DataDefinition")})
-	public DataDefinition getDataDefinition(
-			@NotNull @PathParam("data-definition-id") Long dataDefinitionId)
+	public Page<DataDefinition> getSiteDataDefinitionsPage(
+			@NotNull @Parameter(hidden = true) @PathParam("siteId") Long siteId,
+			@Parameter(hidden = true) @QueryParam("keywords") String keywords,
+			@Context Pagination pagination)
 		throws Exception {
 
-		return new DataDefinition();
+		return Page.of(Collections.emptyList());
 	}
 
 	@Override
-	@Consumes("application/json")
-	@PUT
-	@Path("/data-definitions/{data-definition-id}")
-	@Produces("application/json")
+	@Consumes({"application/json", "application/xml"})
+	@POST
+	@Parameters(value = {@Parameter(in = ParameterIn.PATH, name = "siteId")})
+	@Path("/sites/{siteId}/data-definitions")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "DataDefinition")})
-	public DataDefinition putDataDefinition(
-			@NotNull @PathParam("data-definition-id") Long dataDefinitionId,
+	public DataDefinition postSiteDataDefinition(
+			@NotNull @Parameter(hidden = true) @PathParam("siteId") Long siteId,
 			DataDefinition dataDefinition)
 		throws Exception {
 
@@ -137,34 +189,15 @@ public abstract class BaseDataDefinitionResourceImpl
 		this.contextCompany = contextCompany;
 	}
 
-	protected String getJAXRSLink(String methodName, Object... values) {
-		String baseURIString = String.valueOf(contextUriInfo.getBaseUri());
-
-		if (baseURIString.endsWith(StringPool.FORWARD_SLASH)) {
-			baseURIString = baseURIString.substring(
-				0, baseURIString.length() - 1);
-		}
-
-		URI resourceURI = UriBuilder.fromResource(
-			BaseDataDefinitionResourceImpl.class
-		).build();
-
-		URI methodURI = UriBuilder.fromMethod(
-			BaseDataDefinitionResourceImpl.class, methodName
-		).build(
-			values
-		);
-
-		return baseURIString + resourceURI.toString() + methodURI.toString();
-	}
-
-	protected void preparePatch(DataDefinition dataDefinition) {
+	protected void preparePatch(
+		DataDefinition dataDefinition, DataDefinition existingDataDefinition) {
 	}
 
 	protected <T, R> List<R> transform(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction) {
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction) {
 
-		return TransformUtil.transform(list, unsafeFunction);
+		return TransformUtil.transform(collection, unsafeFunction);
 	}
 
 	protected <T, R> R[] transform(
@@ -175,10 +208,11 @@ public abstract class BaseDataDefinitionResourceImpl
 	}
 
 	protected <T, R> R[] transformToArray(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction,
-		Class<?> clazz) {
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction, Class<?> clazz) {
 
-		return TransformUtil.transformToArray(list, unsafeFunction, clazz);
+		return TransformUtil.transformToArray(
+			collection, unsafeFunction, clazz);
 	}
 
 	protected <T, R> List<R> transformToList(

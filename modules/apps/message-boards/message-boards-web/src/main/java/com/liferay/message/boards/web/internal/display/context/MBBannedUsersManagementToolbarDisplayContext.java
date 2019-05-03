@@ -16,7 +16,6 @@ package com.liferay.message.boards.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.message.boards.constants.MBPortletKeys;
 import com.liferay.message.boards.model.MBBan;
 import com.liferay.message.boards.web.internal.security.permission.MBResourcePermission;
@@ -63,15 +62,14 @@ public class MBBannedUsersManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData("action", "unbanUser");
-							dropdownItem.setIcon("unlock");
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "unban-user"));
+					dropdownItem -> {
+						dropdownItem.putData("action", "unbanUser");
+						dropdownItem.setIcon("unlock");
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "unban-user"));
 
-							dropdownItem.setQuickAction(true);
-						}));
+						dropdownItem.setQuickAction(true);
+					});
 			}
 		};
 	}

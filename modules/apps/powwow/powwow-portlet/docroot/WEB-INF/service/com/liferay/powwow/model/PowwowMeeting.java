@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.powwow.model.impl.PowwowMeetingImpl")
 @ProviderType
-public interface PowwowMeeting extends PowwowMeetingModel, PersistedModel {
+public interface PowwowMeeting extends PersistedModel, PowwowMeetingModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

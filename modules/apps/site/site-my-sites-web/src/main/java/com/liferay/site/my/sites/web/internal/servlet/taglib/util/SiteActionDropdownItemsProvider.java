@@ -16,6 +16,7 @@ package com.liferay.site.my.sites.web.internal.servlet.taglib.util;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -31,7 +32,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletURL;
@@ -66,17 +66,17 @@ public class SiteActionDropdownItemsProvider {
 					if (LayoutServiceUtil.getLayoutsCount(
 							_group.getGroupId(), false) > 0) {
 
-						add(_getViewSitePublicPagesActionConsumer());
+						add(_getViewSitePublicPagesActionUnsafeConsumer());
 					}
 
 					if (LayoutServiceUtil.getLayoutsCount(
 							_group.getGroupId(), true) > 0) {
 
-						add(_getViewSitePrivatePagesActionConsumer());
+						add(_getViewSitePrivatePagesActionUnsafeConsumer());
 					}
 
 					if (_isShowLeaveAction()) {
-						add(_getLeaveSiteActionConsumer());
+						add(_getLeaveSiteActionUnsafeConsumer());
 					}
 				}
 				else if (_group.isManualMembership()) {
@@ -86,26 +86,30 @@ public class SiteActionDropdownItemsProvider {
 							_themeDisplay.getUserId(), _group.getGroupId())) {
 
 						if (_group.getType() == GroupConstants.TYPE_SITE_OPEN) {
-							add(_getJoinSiteActionConsumer());
+							add(_getJoinSiteActionUnsafeConsumer());
 						}
 
 						if (_isShowMembershipRequestAction()) {
-							add(_getSiteMembershipRequestActionConsumer());
+							add(
+								_getSiteMembershipRequestActionUnsafeConsumer());
 						}
 
 						if (_isShowMembershipRequestedAction()) {
-							add(_getSiteMembershipRequestedActionConsumer());
+							add(
+								_getSiteMembershipRequestedActionUnsafeConsumer());
 						}
 					}
 					else if (_isShowLeaveAction()) {
-						add(_getLeaveSiteActionConsumer());
+						add(_getLeaveSiteActionUnsafeConsumer());
 					}
 				}
 			}
 		};
 	}
 
-	private Consumer<DropdownItem> _getJoinSiteActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getJoinSiteActionUnsafeConsumer() {
+
 		PortletURL joinSiteURL = _renderResponse.createActionURL();
 
 		joinSiteURL.setParameter(ActionRequest.ACTION_NAME, "updateGroupUsers");
@@ -123,7 +127,9 @@ public class SiteActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getLeaveSiteActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getLeaveSiteActionUnsafeConsumer() {
+
 		PortletURL leaveSiteURL = _renderResponse.createActionURL();
 
 		leaveSiteURL.setParameter(
@@ -142,7 +148,9 @@ public class SiteActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getSiteMembershipRequestActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getSiteMembershipRequestActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(
 				_renderResponse.createRenderURL(), "mvcPath",
@@ -152,7 +160,9 @@ public class SiteActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getSiteMembershipRequestedActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getSiteMembershipRequestedActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.putData("action", "membershipRequested");
 			dropdownItem.setLabel(
@@ -160,7 +170,9 @@ public class SiteActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getViewSitePrivatePagesActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getViewSitePrivatePagesActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(_group.getDisplayURL(_themeDisplay, true));
 			dropdownItem.setTarget("_blank");
@@ -169,7 +181,9 @@ public class SiteActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getViewSitePublicPagesActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getViewSitePublicPagesActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(_group.getDisplayURL(_themeDisplay, false));
 			dropdownItem.setTarget("_blank");

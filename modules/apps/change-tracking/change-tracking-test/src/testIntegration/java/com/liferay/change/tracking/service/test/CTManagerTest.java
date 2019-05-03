@@ -24,8 +24,10 @@ import com.liferay.change.tracking.constants.CTConstants;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.model.CTEntryAggregate;
+import com.liferay.change.tracking.service.CTCollectionLocalService;
 import com.liferay.change.tracking.service.CTEntryAggregateLocalService;
 import com.liferay.change.tracking.service.CTEntryLocalService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.ClassName;
 import com.liferay.portal.kernel.model.User;
@@ -96,7 +98,7 @@ public class CTManagerTest {
 		).setVersionEntityByVersionEntityIdFunction(
 			id -> new Object()
 		).setVersionEntityDetails(
-			o -> RandomTestUtil.randomString(),
+			Collections.emptyList(), o -> RandomTestUtil.randomString(),
 			o -> RandomTestUtil.randomString(), o -> 1L
 		).setEntityIdsFromVersionEntityFunctions(
 			testVersion -> _TEST_RESOURCE_CLASS_ENTITY_ID,
@@ -541,11 +543,11 @@ public class CTManagerTest {
 
 		Assert.assertEquals(
 			_testVersionClassClassName.getClassNameId(),
-			ctEntry.getClassNameId());
+			ctEntry.getModelClassNameId());
 		Assert.assertEquals(
-			_TEST_VERSION_CLASS_ENTITY_ID, ctEntry.getClassPK());
+			_TEST_VERSION_CLASS_ENTITY_ID, ctEntry.getModelClassPK());
 		Assert.assertEquals(
-			_TEST_RESOURCE_CLASS_ENTITY_ID, ctEntry.getResourcePrimKey());
+			_TEST_RESOURCE_CLASS_ENTITY_ID, ctEntry.getModelResourcePrimKey());
 	}
 
 	@Test
@@ -560,6 +562,46 @@ public class CTManagerTest {
 			CTConstants.CT_CHANGE_TYPE_ADDITION);
 
 		Assert.assertFalse("Optional is present", ctEntryOptional.isPresent());
+	}
+
+	@Test
+	public void testRegisterModelChangeWhenCollision() throws PortalException {
+		CTCollection ctCollection = _ctCollectionLocalService.addCTCollection(
+			TestPropsValues.getUserId(), RandomTestUtil.randomString(),
+			StringPool.BLANK, new ServiceContext());
+
+		CTEntry ctEntry = _ctEntryLocalService.addCTEntry(
+			_user.getUserId(), _testVersionClassClassName.getClassNameId(), 0L,
+			_TEST_RESOURCE_CLASS_ENTITY_ID, CTConstants.CT_CHANGE_TYPE_ADDITION,
+			ctCollection.getCtCollectionId(), new ServiceContext());
+
+		Optional<CTCollection> productionCTCollectionOptional =
+			_ctEngineManager.getProductionCTCollectionOptional(
+				TestPropsValues.getCompanyId());
+
+		Assert.assertTrue(productionCTCollectionOptional.isPresent());
+
+		CTCollection productionCTCollection =
+			productionCTCollectionOptional.get();
+
+		_ctEngineManager.checkoutCTCollection(
+			_user.getUserId(), productionCTCollection.getCtCollectionId());
+
+		Optional<CTEntry> productionCTEntryOptional =
+			_ctManager.registerModelChange(
+				_user.getUserId(), _testVersionClassClassName.getClassNameId(),
+				1L, _TEST_RESOURCE_CLASS_ENTITY_ID,
+				CTConstants.CT_CHANGE_TYPE_ADDITION);
+
+		Assert.assertTrue(productionCTEntryOptional.isPresent());
+
+		CTEntry productionCTEntry = productionCTEntryOptional.get();
+
+		Assert.assertFalse(productionCTEntry.isCollision());
+
+		ctEntry = _ctEntryLocalService.getCTEntry(ctEntry.getCtEntryId());
+
+		Assert.assertTrue(ctEntry.isCollision());
 	}
 
 	@Test
@@ -637,6 +679,9 @@ public class CTManagerTest {
 
 	@Inject
 	private ClassNameLocalService _classNameLocalService;
+
+	@Inject
+	private CTCollectionLocalService _ctCollectionLocalService;
 
 	private CTConfiguration _ctConfiguration;
 

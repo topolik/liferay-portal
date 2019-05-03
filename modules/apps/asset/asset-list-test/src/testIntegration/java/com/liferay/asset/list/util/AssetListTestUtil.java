@@ -18,8 +18,10 @@ import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.list.constants.AssetListEntryTypeConstants;
 import com.liferay.asset.list.model.AssetListEntry;
 import com.liferay.asset.list.model.AssetListEntryAssetEntryRel;
+import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel;
 import com.liferay.asset.list.service.AssetListEntryAssetEntryRelLocalServiceUtil;
 import com.liferay.asset.list.service.AssetListEntryLocalServiceUtil;
+import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -54,7 +56,8 @@ public class AssetListTestUtil {
 	}
 
 	public static AssetListEntryAssetEntryRel addAssetListEntryAssetEntryRel(
-			long groupId, AssetEntry assetEntry, AssetListEntry assetListEntry)
+			long groupId, AssetEntry assetEntry, AssetListEntry assetListEntry,
+			long segmentsEntryId)
 		throws PortalException {
 
 		ServiceContext serviceContext =
@@ -63,12 +66,12 @@ public class AssetListTestUtil {
 		return AssetListEntryAssetEntryRelLocalServiceUtil.
 			addAssetListEntryAssetEntryRel(
 				assetListEntry.getAssetListEntryId(), assetEntry.getEntryId(),
-				serviceContext);
+				segmentsEntryId, serviceContext);
 	}
 
 	public static AssetListEntryAssetEntryRel addAssetListEntryAssetEntryRel(
 			long groupId, AssetEntry assetEntry, AssetListEntry assetListEntry,
-			int position)
+			long segmentsEntryId, int position)
 		throws PortalException {
 
 		ServiceContext serviceContext =
@@ -77,7 +80,32 @@ public class AssetListTestUtil {
 		return AssetListEntryAssetEntryRelLocalServiceUtil.
 			addAssetListEntryAssetEntryRel(
 				assetListEntry.getAssetListEntryId(), assetEntry.getEntryId(),
-				position, serviceContext);
+				segmentsEntryId, position, serviceContext);
+	}
+
+	public static AssetListEntrySegmentsEntryRel
+			addAssetListEntrySegmentsEntryRel(
+				long groupId, AssetListEntry assetListEntry)
+		throws PortalException {
+
+		return addAssetListEntrySegmentsEntryRel(
+			groupId, assetListEntry, RandomTestUtil.nextLong());
+	}
+
+	public static AssetListEntrySegmentsEntryRel
+			addAssetListEntrySegmentsEntryRel(
+				long groupId, AssetListEntry assetListEntry,
+				long segmentsEntryId)
+		throws PortalException {
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(groupId);
+
+		return AssetListEntrySegmentsEntryRelLocalServiceUtil.
+			addAssetListEntrySegmentsEntryRel(
+				TestPropsValues.getUserId(), groupId,
+				assetListEntry.getAssetListEntryId(), segmentsEntryId,
+				RandomTestUtil.randomString(), serviceContext);
 	}
 
 }

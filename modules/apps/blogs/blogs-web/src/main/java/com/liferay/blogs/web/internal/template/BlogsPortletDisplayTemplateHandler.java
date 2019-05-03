@@ -23,6 +23,7 @@ import com.liferay.blogs.web.internal.security.permission.resource.BlogsEntryPer
 import com.liferay.blogs.web.internal.util.BlogsEntryUtil;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.comment.CommentManager;
+import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.portletdisplaytemplate.BasePortletDisplayTemplateHandler;
@@ -30,6 +31,7 @@ import com.liferay.portal.kernel.portletdisplaytemplate.PortletDisplayTemplateMa
 import com.liferay.portal.kernel.template.TemplateHandler;
 import com.liferay.portal.kernel.template.TemplateVariableGroup;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.taglib.security.PermissionsURLTag;
 import com.liferay.trash.TrashHelper;
 
@@ -66,6 +68,7 @@ public class BlogsPortletDisplayTemplateHandler
 		contextObjects.put("blogsEntryPermission", _blogsEntryPermission);
 		contextObjects.put("blogsEntryUtil", _blogsEntryUtil);
 		contextObjects.put("commentManager", _commentManager);
+		contextObjects.put("language", _language);
 		contextObjects.put("permissionsURLTag", new PermissionsURLTag());
 		contextObjects.put("trashHelper", _trashHelper);
 
@@ -75,7 +78,9 @@ public class BlogsPortletDisplayTemplateHandler
 	@Override
 	public String getName(Locale locale) {
 		String portletTitle = _portal.getPortletTitle(
-			BlogsPortletKeys.BLOGS, locale);
+			BlogsPortletKeys.BLOGS,
+			ResourceBundleUtil.getBundle(
+				"content.Language", locale, getClass()));
 
 		return LanguageUtil.format(locale, "x-template", portletTitle, false);
 	}
@@ -147,6 +152,9 @@ public class BlogsPortletDisplayTemplateHandler
 
 	@Reference
 	private CommentManager _commentManager;
+
+	@Reference
+	private Language _language;
 
 	@Reference
 	private Portal _portal;

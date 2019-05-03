@@ -18,17 +18,21 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.WebKeys;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletURL;
 import javax.portlet.WindowState;
+
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Pavel Savinov
@@ -37,13 +41,32 @@ public abstract class BaseAddLayoutMVCActionCommand
 	extends BaseMVCActionCommand {
 
 	protected String getContentRedirectURL(
-			ThemeDisplay themeDisplay, Layout layout)
+			ActionRequest actionRequest, Layout layout)
 		throws PortalException {
 
-		String layoutFullURL = PortalUtil.getLayoutFullURL(
-			layout, themeDisplay);
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
-		return HttpUtil.setParameter(layoutFullURL, "p_l_mode", Constants.EDIT);
+		String layoutFullURL = portal.getLayoutFullURL(layout, themeDisplay);
+
+		Layout draftLayout = layoutLocalService.fetchLayout(
+			portal.getClassNameId(Layout.class), layout.getPlid());
+
+		if (draftLayout != null) {
+			layoutFullURL = portal.getLayoutFullURL(draftLayout, themeDisplay);
+		}
+
+		layoutFullURL = HttpUtil.setParameter(
+			layoutFullURL, "p_l_mode", Constants.EDIT);
+
+		String backURL = ParamUtil.getString(actionRequest, "backURL");
+
+		if (Validator.isNotNull(backURL)) {
+			layoutFullURL = HttpUtil.setParameter(
+				layoutFullURL, "p_l_back_url", backURL);
+		}
+
+		return layoutFullURL;
 	}
 
 	protected String getRedirectURL(
@@ -51,7 +74,7 @@ public abstract class BaseAddLayoutMVCActionCommand
 		Layout layout) {
 
 		LiferayPortletResponse liferayPortletResponse =
-			PortalUtil.getLiferayPortletResponse(actionResponse);
+			portal.getLiferayPortletResponse(actionResponse);
 
 		PortletURL configureLayoutURL =
 			liferayPortletResponse.createRenderURL();
@@ -85,5 +108,11 @@ public abstract class BaseAddLayoutMVCActionCommand
 
 		return configureLayoutURL.toString();
 	}
+
+	@Reference
+	protected LayoutLocalService layoutLocalService;
+
+	@Reference
+	protected Portal portal;
 
 }

@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface WorkflowInstanceLink
-	extends WorkflowInstanceLinkModel, PersistedModel {
+	extends PersistedModel, WorkflowInstanceLinkModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

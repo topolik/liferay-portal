@@ -17,7 +17,6 @@ package com.liferay.portal.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for LayoutPrototype. This utility wraps
@@ -63,24 +62,6 @@ public class LayoutPrototypeLocalServiceUtil {
 
 		return getService().addLayoutPrototype(
 			userId, companyId, nameMap, descriptionMap, active, serviceContext);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 #addLayoutPrototype(long, long, Map, Map, boolean,
-	 ServiceContext)}
-	 */
-	@Deprecated
-	public static com.liferay.portal.kernel.model.LayoutPrototype
-			addLayoutPrototype(
-				long userId, long companyId,
-				java.util.Map<java.util.Locale, String> nameMap,
-				String description, boolean active,
-				ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().addLayoutPrototype(
-			userId, companyId, nameMap, description, active, serviceContext);
 	}
 
 	/**
@@ -406,32 +387,11 @@ public class LayoutPrototypeLocalServiceUtil {
 			layoutPrototypeId, nameMap, descriptionMap, active, serviceContext);
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 #updateLayoutPrototype(long, Map, Map, boolean,
-	 ServiceContext)}
-	 */
-	@Deprecated
-	public static com.liferay.portal.kernel.model.LayoutPrototype
-			updateLayoutPrototype(
-				long layoutPrototypeId,
-				java.util.Map<java.util.Locale, String> nameMap,
-				String description, boolean active,
-				ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().updateLayoutPrototype(
-			layoutPrototypeId, nameMap, description, active, serviceContext);
-	}
-
 	public static LayoutPrototypeLocalService getService() {
 		if (_service == null) {
 			_service =
 				(LayoutPrototypeLocalService)PortalBeanLocatorUtil.locate(
 					LayoutPrototypeLocalService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				LayoutPrototypeLocalServiceUtil.class, "_service");
 		}
 
 		return _service;

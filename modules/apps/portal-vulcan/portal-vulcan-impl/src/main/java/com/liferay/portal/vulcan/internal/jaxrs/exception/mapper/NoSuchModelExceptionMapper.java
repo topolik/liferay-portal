@@ -15,11 +15,10 @@
 package com.liferay.portal.vulcan.internal.jaxrs.exception.mapper;
 
 import com.liferay.portal.kernel.exception.NoSuchModelException;
+import com.liferay.portal.kernel.servlet.HttpMethods;
 
-import java.lang.reflect.Method;
+import javax.servlet.http.HttpServletRequest;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -39,9 +38,9 @@ public class NoSuchModelExceptionMapper
 
 	@Override
 	public Response toResponse(NoSuchModelException nsme) {
-		Method resourceMethod = resourceInfo.getResourceMethod();
+		String method = _httpServletRequest.getMethod();
 
-		if (resourceMethod.isAnnotationPresent(DELETE.class)) {
+		if (method.equals(HttpMethods.DELETE)) {
 			return Response.status(
 				Response.Status.NO_CONTENT
 			).build();
@@ -57,6 +56,6 @@ public class NoSuchModelExceptionMapper
 	}
 
 	@Context
-	protected ResourceInfo resourceInfo;
+	private HttpServletRequest _httpServletRequest;
 
 }

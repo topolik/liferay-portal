@@ -25,6 +25,8 @@ public class AssetTagException extends PortalException {
 
 	public static final int INVALID_CHARACTER = 2;
 
+	public static final int MAX_LENGTH = 3;
+
 	public AssetTagException(int type) {
 		_type = type;
 	}

@@ -20,10 +20,12 @@ import com.liferay.calendar.exception.CalendarResourceNameException;
 import com.liferay.calendar.exception.DuplicateCalendarResourceException;
 import com.liferay.calendar.model.Calendar;
 import com.liferay.calendar.model.CalendarResource;
+import com.liferay.calendar.service.CalendarLocalService;
 import com.liferay.calendar.service.base.CalendarResourceLocalServiceBaseImpl;
 import com.liferay.calendar.util.comparator.CalendarResourceCodeComparator;
 import com.liferay.exportimport.kernel.lar.ExportImportThreadLocal;
 import com.liferay.petra.string.CharPool;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.SystemEventConstants;
@@ -43,6 +45,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Eduardo Lundgren
  * @author Fabio Pezzutto
@@ -50,6 +55,10 @@ import java.util.Map;
  * @author Marcellus Tavares
  * @author Andrea Di Giorgi
  */
+@Component(
+	property = "model.class.name=com.liferay.calendar.model.CalendarResource",
+	service = AopService.class
+)
 public class CalendarResourceLocalServiceImpl
 	extends CalendarResourceLocalServiceBaseImpl {
 
@@ -120,7 +129,7 @@ public class CalendarResourceLocalServiceImpl
 			calendarServiceContext.setAddGroupPermissions(true);
 			calendarServiceContext.setAddGuestPermissions(true);
 
-			calendarLocalService.addCalendar(
+			_calendarLocalService.addCalendar(
 				userId, calendarResource.getGroupId(), calendarResourceId,
 				nameMap, descriptionMap, calendarResource.getTimeZoneId(),
 				CalendarServiceConfigurationValues.CALENDAR_COLOR_DEFAULT, true,
@@ -165,7 +174,7 @@ public class CalendarResourceLocalServiceImpl
 		for (Calendar calendar : calendars) {
 			calendar.setDefaultCalendar(false);
 
-			calendarLocalService.deleteCalendar(calendar);
+			_calendarLocalService.deleteCalendar(calendar);
 		}
 
 		return calendarResource;
@@ -356,5 +365,8 @@ public class CalendarResourceLocalServiceImpl
 			throw new CalendarResourceNameException();
 		}
 	}
+
+	@Reference
+	private CalendarLocalService _calendarLocalService;
 
 }

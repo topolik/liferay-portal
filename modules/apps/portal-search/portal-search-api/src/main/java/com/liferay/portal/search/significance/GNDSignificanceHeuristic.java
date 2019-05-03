@@ -18,12 +18,11 @@ import aQute.bnd.annotation.ProviderType;
 
 /**
  * @author Michael C. Han
+ * @author André de Oliveira
  */
 @ProviderType
-public class GNDSignificanceHeuristic extends NxySignificanceHeuristic {
+public interface GNDSignificanceHeuristic extends SignificanceHeuristic {
 
-	public GNDSignificanceHeuristic(boolean backgroundIsSuperset) {
-		super(backgroundIsSuperset, true);
-	}
+	public boolean isBackgroundIsSuperset();
 
 }

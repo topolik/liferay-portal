@@ -45,6 +45,7 @@
 /intellij
 /jacoco
 /modules/.releng/private
+/modules/node_modules_cache
 /modules/private
 /nbproject/private
 /out
@@ -165,7 +166,6 @@
 /tools/sdk
 /tools/selenium/*.exe
 /tools/selenium/extensions/ide.*.js
-/tools/tck
 /tools/zip_tmpl/license
 /tunnel-web/docroot/WEB-INF/classes
 /tunnel-web/docroot/WEB-INF/lib

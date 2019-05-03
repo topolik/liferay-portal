@@ -23,8 +23,8 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.editor.EditorConstants;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.servlet.ServletResponseConstants;
@@ -59,9 +59,7 @@ public class DefaultUploadResponseHandler implements UploadResponseHandler {
 			PortletRequest portletRequest, PortalException pe)
 		throws PortalException {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("success", Boolean.FALSE);
+		JSONObject jsonObject = JSONUtil.put("success", Boolean.FALSE);
 
 		if (pe instanceof AntivirusScannerException ||
 			pe instanceof FileExtensionException ||
@@ -100,10 +98,11 @@ public class DefaultUploadResponseHandler implements UploadResponseHandler {
 					ServletResponseConstants.SC_UPLOAD_REQUEST_SIZE_EXCEPTION;
 			}
 
-			JSONObject errorJSONObject = JSONFactoryUtil.createJSONObject();
-
-			errorJSONObject.put("errorType", errorType);
-			errorJSONObject.put("message", errorMessage);
+			JSONObject errorJSONObject = JSONUtil.put(
+				"errorType", errorType
+			).put(
+				"message", errorMessage
+			);
 
 			jsonObject.put("error", errorJSONObject);
 		}
@@ -116,22 +115,25 @@ public class DefaultUploadResponseHandler implements UploadResponseHandler {
 			UploadPortletRequest uploadPortletRequest, FileEntry fileEntry)
 		throws PortalException {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		JSONObject imageJSONObject = JSONFactoryUtil.createJSONObject();
-
-		imageJSONObject.put(
-			"attributeDataImageId", EditorConstants.ATTRIBUTE_DATA_IMAGE_ID);
-		imageJSONObject.put("fileEntryId", fileEntry.getFileEntryId());
-		imageJSONObject.put("groupId", fileEntry.getGroupId());
-		imageJSONObject.put("mimeType", fileEntry.getMimeType());
+		JSONObject imageJSONObject = JSONUtil.put(
+			"attributeDataImageId", EditorConstants.ATTRIBUTE_DATA_IMAGE_ID
+		).put(
+			"fileEntryId", fileEntry.getFileEntryId()
+		).put(
+			"groupId", fileEntry.getGroupId()
+		).put(
+			"mimeType", fileEntry.getMimeType()
+		);
 
 		String randomId = ParamUtil.getString(uploadPortletRequest, "randomId");
 
-		imageJSONObject.put("randomId", randomId);
-
-		imageJSONObject.put("title", fileEntry.getTitle());
-		imageJSONObject.put("type", "document");
+		imageJSONObject.put(
+			"randomId", randomId
+		).put(
+			"title", fileEntry.getTitle()
+		).put(
+			"type", "document"
+		);
 
 		ThemeDisplay themeDisplay =
 			(ThemeDisplay)uploadPortletRequest.getAttribute(
@@ -140,15 +142,17 @@ public class DefaultUploadResponseHandler implements UploadResponseHandler {
 		String url = PortletFileRepositoryUtil.getPortletFileEntryURL(
 			themeDisplay, fileEntry, StringPool.BLANK);
 
-		imageJSONObject.put("url", url);
+		imageJSONObject.put(
+			"url", url
+		).put(
+			"uuid", fileEntry.getUuid()
+		);
 
-		imageJSONObject.put("uuid", fileEntry.getUuid());
-
-		jsonObject.put("file", imageJSONObject);
-
-		jsonObject.put("success", Boolean.TRUE);
-
-		return jsonObject;
+		return JSONUtil.put(
+			"file", imageJSONObject
+		).put(
+			"success", Boolean.TRUE
+		);
 	}
 
 	@Activate

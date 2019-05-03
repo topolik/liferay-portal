@@ -22,15 +22,14 @@ JournalArticle article = journalDisplayContext.getArticle();
 JournalEditArticleDisplayContext journalEditArticleDisplayContext = new JournalEditArticleDisplayContext(request, liferayPortletResponse, article);
 %>
 
-<p class="mb-2 small text-secondary">
+<p class="mb-2 text-secondary">
 	<%= journalEditArticleDisplayContext.getFriendlyURLBase() %>
 </p>
 
-<div class="input-group-sm">
-	<liferay-ui:input-localized
-		defaultLanguageId="<%= journalEditArticleDisplayContext.getDefaultLanguageId() %>"
-		maxLength='<%= String.valueOf(ModelHintsUtil.getMaxLength(JournalArticle.class.getName(), "urlTitle")) %>'
-		name="friendlyURL"
-		xml="<%= (article != null) ? HttpUtil.decodeURL(article.getFriendlyURLsXML()) : StringPool.BLANK %>"
-	/>
-</div>
+<liferay-ui:input-localized
+	availableLocales="<%= journalEditArticleDisplayContext.getAvailableLocales() %>"
+	defaultLanguageId="<%= journalEditArticleDisplayContext.getDefaultLanguageId() %>"
+	maxLength='<%= String.valueOf(ModelHintsUtil.getMaxLength(JournalArticle.class.getName(), "urlTitle")) %>'
+	name="friendlyURL"
+	xml="<%= (article != null) ? HttpUtil.decodeURL(article.getFriendlyURLsXML()) : StringPool.BLANK %>"
+/>

@@ -14,17 +14,19 @@
 
 package com.liferay.layout.content.page.editor.web.internal.display.context;
 
-import com.liferay.asset.display.contributor.AssetDisplayContributor;
 import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.model.ClassType;
 import com.liferay.asset.kernel.model.ClassTypeReader;
+import com.liferay.fragment.renderer.FragmentRendererController;
+import com.liferay.info.display.contributor.InfoDisplayContributor;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
-import com.liferay.layout.page.template.service.LayoutPageTemplateEntryServiceUtil;
+import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalServiceUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.template.soy.util.SoyContext;
 import com.liferay.portal.template.soy.util.SoyContextFactoryUtil;
@@ -41,9 +43,12 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 
 	public ContentPageEditorLayoutPageTemplateDisplayContext(
 		HttpServletRequest request, RenderResponse renderResponse,
-		String className, long classPK, boolean showMapping) {
+		String className, long classPK, boolean showMapping,
+		FragmentRendererController fragmentRendererController) {
 
-		super(request, renderResponse, className, classPK);
+		super(
+			request, renderResponse, className, classPK,
+			fragmentRendererController);
 
 		_showMapping = showMapping;
 	}
@@ -57,13 +62,15 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 		SoyContext soyContext = super.getEditorSoyContext();
 
 		soyContext.put(
-			"getAssetDisplayContributorsURL",
+			"getInfoClassTypesURL",
+			getFragmentEntryActionURL("/content_layout/get_info_class_types")
+		).put(
+			"getInfoDisplayContributorsURL",
 			getFragmentEntryActionURL(
-				"/content_layout/get_asset_display_contributors"));
-		soyContext.put(
-			"getAssetClassTypesURL",
-			getFragmentEntryActionURL("/content_layout/get_asset_class_types"));
-		soyContext.put("lastSaveDate", StringPool.BLANK);
+				"/content_layout/get_info_display_contributors")
+		).put(
+			"lastSaveDate", StringPool.BLANK
+		);
 
 		if (_showMapping) {
 			soyContext.put(
@@ -72,14 +79,10 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 					"/content_layout/get_mapping_fields"));
 		}
 
-		if (classNameId == PortalUtil.getClassNameId(
-				LayoutPageTemplateEntry.class)) {
-
-			soyContext.put(
-				"publishURL",
-				getFragmentEntryActionURL(
-					"/content_layout/publish_layout_page_template_entry"));
-		}
+		soyContext.put(
+			"publishURL",
+			getFragmentEntryActionURL(
+				"/content_layout/publish_layout_page_template_entry"));
 
 		if (_showMapping) {
 			soyContext.put("selectedMappingTypes", _getSelectedMappingTypes());
@@ -133,9 +136,18 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 			return _layoutPageTemplateEntry;
 		}
 
+		Layout draftLayout = LayoutLocalServiceUtil.getLayout(classPK);
+
+		Layout layout = LayoutLocalServiceUtil.fetchLayout(
+			draftLayout.getClassPK());
+
+		if (layout == null) {
+			return null;
+		}
+
 		_layoutPageTemplateEntry =
-			LayoutPageTemplateEntryServiceUtil.fetchLayoutPageTemplateEntry(
-				classPK);
+			LayoutPageTemplateEntryLocalServiceUtil.
+				fetchLayoutPageTemplateEntryByPlid(layout.getPlid());
 
 		return _layoutPageTemplateEntry;
 	}
@@ -165,15 +177,15 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 		LayoutPageTemplateEntry layoutPageTemplateEntry =
 			_getLayoutPageTemplateEntry();
 
-		AssetDisplayContributor assetDisplayContributor =
-			assetDisplayContributorTracker.getAssetDisplayContributor(
+		InfoDisplayContributor infoDisplayContributor =
+			infoDisplayContributorTracker.getInfoDisplayContributor(
 				layoutPageTemplateEntry.getClassName());
 
-		if (assetDisplayContributor == null) {
+		if (infoDisplayContributor == null) {
 			return null;
 		}
 
-		return assetDisplayContributor.getLabel(themeDisplay.getLocale());
+		return infoDisplayContributor.getLabel(themeDisplay.getLocale());
 	}
 
 	private SoyContext _getSelectedMappingTypes() throws PortalException {
@@ -190,8 +202,11 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 
 		SoyContext typeSoyContext = SoyContextFactoryUtil.createSoyContext();
 
-		typeSoyContext.put("id", layoutPageTemplateEntry.getClassNameId());
-		typeSoyContext.put("label", _getMappingTypeLabel());
+		typeSoyContext.put(
+			"id", layoutPageTemplateEntry.getClassNameId()
+		).put(
+			"label", _getMappingTypeLabel()
+		);
 
 		soyContext.put("type", typeSoyContext);
 
@@ -200,8 +215,10 @@ public class ContentPageEditorLayoutPageTemplateDisplayContext
 				SoyContextFactoryUtil.createSoyContext();
 
 			subtypeSoyContext.put(
-				"id", layoutPageTemplateEntry.getClassTypeId());
-			subtypeSoyContext.put("label", _getMappingSubtypeLabel());
+				"id", layoutPageTemplateEntry.getClassTypeId()
+			).put(
+				"label", _getMappingSubtypeLabel()
+			);
 
 			soyContext.put("subtype", subtypeSoyContext);
 		}

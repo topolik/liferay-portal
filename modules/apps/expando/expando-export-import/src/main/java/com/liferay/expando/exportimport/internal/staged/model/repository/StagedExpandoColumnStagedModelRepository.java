@@ -63,7 +63,7 @@ public class StagedExpandoColumnStagedModelRepository
 		ExpandoColumn expandoColumn = _expandoColumnLocalService.addColumn(
 			stagedExpandoColumn.getTableId(), stagedExpandoColumn.getName(),
 			stagedExpandoColumn.getType(),
-			stagedExpandoColumn.getDefaultData());
+			stagedExpandoColumn.getDefaultValue());
 
 		expandoColumn = _expandoColumnLocalService.updateTypeSettings(
 			expandoColumn.getColumnId(), stagedExpandoColumn.getTypeSettings());
@@ -259,7 +259,7 @@ public class StagedExpandoColumnStagedModelRepository
 		_expandoColumnLocalService.updateColumn(
 			stagedExpandoColumn.getColumnId(), stagedExpandoColumn.getName(),
 			stagedExpandoColumn.getType(),
-			stagedExpandoColumn.getDefaultData());
+			stagedExpandoColumn.getDefaultValue());
 
 		ExpandoColumn expandoColumn =
 			_expandoColumnLocalService.updateTypeSettings(

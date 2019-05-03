@@ -12,16 +12,22 @@
 }
 
 .fragments-editor__drag-source {
+	transition: opacity ease 0.2s;
+	will-change: opacity;
+
+	&.dragged {
+		opacity: 0.6;
+	}
+
 	&.dragging {
 		background: transparent;
 		border: none;
 		box-shadow: none;
-		height: auto;
-		margin: 0;
+		height: 64px;
 		opacity: 1;
 		outline: none;
 		padding: 0;
-		width: auto;
+		width: 116px;
 		z-index: $dragSourceZIndex;
 
 		& > * {
@@ -46,7 +52,6 @@
 			padding: 8px;
 			text-align: center;
 			text-overflow: ellipsis;
-			transform: scale(0.6);
 			white-space: nowrap;
 			width: 116px;
 		}
@@ -54,7 +59,7 @@
 
 	&.fragments-editor__drag-handler,
 	.fragments-editor__drag-handler {
-		cursor: move;
+		cursor: grab;
 	}
 }
 
@@ -67,10 +72,22 @@
 		border-top: none;
 	}
 
-	&.fragments-editor-border-bottom:after,
-	&.fragments-editor-border-top:after {
-		content: '';
-		display: block;
+	&.fragments-editor-border-bottom,
+	&.fragments-editor-border-top {
+		&:after {
+			content: '';
+			display: block;
+			height: 100%;
+			left: 0;
+			position: absolute;
+			top: 0;
+			width: 100%;
+		}
+
+		&.fragment-entry-link-list__col:after {
+			left: $fragmentsEditorSpacing * 1.5;
+			width: calc(100% - #{$fragmentsEditorSpacing * 3});
+		}
 	}
 
 	&.fragments-editor-border-bottom:after {

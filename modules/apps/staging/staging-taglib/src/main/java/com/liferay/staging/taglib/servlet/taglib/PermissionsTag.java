@@ -29,6 +29,30 @@ import javax.servlet.jsp.PageContext;
 @ProviderType
 public class PermissionsTag extends IncludeTag {
 
+	public String getAction() {
+		return _action;
+	}
+
+	public String getDescriptionCSSClass() {
+		return _descriptionCSSClass;
+	}
+
+	public long getExportImportConfigurationId() {
+		return _exportImportConfigurationId;
+	}
+
+	public String getLabelCSSClass() {
+		return _labelCSSClass;
+	}
+
+	public boolean isDisableInputs() {
+		return _disableInputs;
+	}
+
+	public boolean isGlobal() {
+		return _global;
+	}
+
 	public void setAction(String action) {
 		if (action == null) {
 			_action = StringPool.BLANK;

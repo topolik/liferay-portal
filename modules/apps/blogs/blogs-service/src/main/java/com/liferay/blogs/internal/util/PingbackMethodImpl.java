@@ -48,7 +48,6 @@ import com.liferay.portal.util.PropsValues;
 
 import java.io.IOException;
 
-import java.net.InetAddress;
 import java.net.URL;
 
 import java.util.HashMap;
@@ -336,25 +335,6 @@ public class PingbackMethodImpl implements Method {
 		return null;
 	}
 
-	@Reference(unbind = "-")
-	protected void setBlogsEntryLocalService(
-		BlogsEntryLocalService blogsEntryLocalService) {
-
-		_blogsEntryLocalService = blogsEntryLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setPortletLocalService(
-		PortletLocalService portletLocalService) {
-
-		_portletLocalService = portletLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserLocalService(UserLocalService userLocalService) {
-		_userLocalService = userLocalService;
-	}
-
 	protected Response validateSource() throws Exception {
 		if (_isSourceURILocalNetwork()) {
 			return XmlRpcUtil.createFault(ACCESS_DENIED, "Access Denied");
@@ -396,7 +376,7 @@ public class PingbackMethodImpl implements Method {
 			URL url = new URL(_sourceURI);
 
 			return InetAddressUtil.isLocalInetAddress(
-				InetAddress.getByName(url.getHost()));
+				InetAddressUtil.getInetAddressByName(url.getHost()));
 		}
 		catch (Exception e) {
 			if (_log.isDebugEnabled()) {
@@ -410,6 +390,7 @@ public class PingbackMethodImpl implements Method {
 	private static final Log _log = LogFactoryUtil.getLog(
 		PingbackMethodImpl.class);
 
+	@Reference
 	private BlogsEntryLocalService _blogsEntryLocalService;
 
 	@Reference
@@ -421,9 +402,13 @@ public class PingbackMethodImpl implements Method {
 	@Reference
 	private Portal _portal;
 
+	@Reference
 	private PortletLocalService _portletLocalService;
+
 	private String _sourceURI;
 	private String _targetURI;
+
+	@Reference
 	private UserLocalService _userLocalService;
 
 }

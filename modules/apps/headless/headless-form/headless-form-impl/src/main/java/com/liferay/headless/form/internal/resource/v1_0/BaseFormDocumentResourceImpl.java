@@ -17,16 +17,17 @@ package com.liferay.headless.form.internal.resource.v1_0;
 import com.liferay.headless.form.dto.v1_0.FormDocument;
 import com.liferay.headless.form.resource.v1_0.FormDocumentResource;
 import com.liferay.petra.function.UnsafeFunction;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.vulcan.accept.language.AcceptLanguage;
 import com.liferay.portal.vulcan.util.TransformUtil;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 
-import java.net.URI;
-
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Generated;
@@ -39,7 +40,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 /**
@@ -53,23 +53,29 @@ public abstract class BaseFormDocumentResourceImpl
 
 	@Override
 	@DELETE
-	@Path("/form-documents/{form-document-id}")
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "formDocumentId")}
+	)
+	@Path("/form-documents/{formDocumentId}")
 	@Produces("application/json")
 	@Tags(value = {@Tag(name = "FormDocument")})
-	public boolean deleteFormDocument(
-			@NotNull @PathParam("form-document-id") Long formDocumentId)
+	public void deleteFormDocument(
+			@NotNull @Parameter(hidden = true) @PathParam("formDocumentId") Long
+				formDocumentId)
 		throws Exception {
-
-		return false;
 	}
 
 	@Override
 	@GET
-	@Path("/form-documents/{form-document-id}")
-	@Produces("application/json")
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "formDocumentId")}
+	)
+	@Path("/form-documents/{formDocumentId}")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "FormDocument")})
 	public FormDocument getFormDocument(
-			@NotNull @PathParam("form-document-id") Long formDocumentId)
+			@NotNull @Parameter(hidden = true) @PathParam("formDocumentId") Long
+				formDocumentId)
 		throws Exception {
 
 		return new FormDocument();
@@ -79,34 +85,15 @@ public abstract class BaseFormDocumentResourceImpl
 		this.contextCompany = contextCompany;
 	}
 
-	protected String getJAXRSLink(String methodName, Object... values) {
-		String baseURIString = String.valueOf(contextUriInfo.getBaseUri());
-
-		if (baseURIString.endsWith(StringPool.FORWARD_SLASH)) {
-			baseURIString = baseURIString.substring(
-				0, baseURIString.length() - 1);
-		}
-
-		URI resourceURI = UriBuilder.fromResource(
-			BaseFormDocumentResourceImpl.class
-		).build();
-
-		URI methodURI = UriBuilder.fromMethod(
-			BaseFormDocumentResourceImpl.class, methodName
-		).build(
-			values
-		);
-
-		return baseURIString + resourceURI.toString() + methodURI.toString();
-	}
-
-	protected void preparePatch(FormDocument formDocument) {
+	protected void preparePatch(
+		FormDocument formDocument, FormDocument existingFormDocument) {
 	}
 
 	protected <T, R> List<R> transform(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction) {
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction) {
 
-		return TransformUtil.transform(list, unsafeFunction);
+		return TransformUtil.transform(collection, unsafeFunction);
 	}
 
 	protected <T, R> R[] transform(
@@ -117,10 +104,11 @@ public abstract class BaseFormDocumentResourceImpl
 	}
 
 	protected <T, R> R[] transformToArray(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction,
-		Class<?> clazz) {
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction, Class<?> clazz) {
 
-		return TransformUtil.transformToArray(list, unsafeFunction, clazz);
+		return TransformUtil.transformToArray(
+			collection, unsafeFunction, clazz);
 	}
 
 	protected <T, R> List<R> transformToList(

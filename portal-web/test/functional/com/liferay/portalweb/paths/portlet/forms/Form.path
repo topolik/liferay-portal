@@ -51,12 +51,12 @@
 <!--ALT_PAGINATION-->
 <tr>
 	<td>ALT_PAGINATION_PAGE</td>
-	<td>//div[contains(@class,'form-builder-pagination')]//li[contains(.,'${key_page}')]</td>
+	<td>//div[contains(@class,'form-builder-pagination')]//li[contains(.,'${key_page}')] | //div[contains(@class,'ddm-form-pagination')]//a[contains(text(),'${key_page}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ALT_PAGINATION_SUCCESS_PAGE</td>
-	<td>//div[contains(@class,'form-builder-pagination')]//li[contains(@class,'pagination-success-page')]</td>
+	<td>//div[contains(@class,'form-builder-pagination')]//li[contains(@class,'pagination-success-page')] | //div[contains(@class,'ddm-form-pagination')]//a[contains(text(),'Success Page')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -67,29 +67,42 @@
 <!--PAGE_CONTROLS-->
 <tr>
 	<td>PAGE_CONTROLS_ELLIPSIS_ICON</td>
-	<td>//div[@class='form-builder-controls-trigger']</td>
+	<td>//div[@class='form-builder-controls-trigger'] | //div[contains(@class,'dropdown-action')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PAGE_CONTROLS_ADD_NEW_PAGE</td>
-	<td>//li[contains(@class,'dropdown-item')]//a[text()='Add New Page']</td>
+	<td>//li[contains(@class,'dropdown-item')]//a[text()='Add New Page'] | //button[contains(@class,'dropdown-item') and contains(text(),'Add New Page')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PAGE_CONTROLS_ADD_SUCCESS_PAGE</td>
-	<td>//li[contains(@class,'dropdown-item')]//a[text()='Add Success Page']</td>
+	<td>//li[contains(@class,'dropdown-item')]//a[text()='Add Success Page'] | //button[contains(@class,'dropdown-item') and contains(text(),'Add Success Page')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PAGE_CONTROLS_DELETE_CURRENT_PAGE</td>
-	<td>//li[contains(@class,'dropdown-item')]//a[text()='Delete Current Page']</td>
+	<td>//li[contains(@class,'dropdown-item')]//a[text()='Delete Current Page'] | //button[contains(@class,'dropdown-item') and contains(text(),'Delete Current Page')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>PAGE_CONTROLS_SWITCH_PAGINATION_MODE</td>
-	<td>//li[contains(@class,'dropdown-item')]//a[text()='Switch Pagination Mode']</td>
+	<td>//li[contains(@class,'dropdown-item')]//a[text()='Switch Pagination Mode'] | //button[contains(@class,'dropdown-item') and contains(text(),'Switch Pagination Mode')] | //button[contains(@class,'dropdown-item') and contains(text(),'Switch Pagination to')]</td>
 	<td></td>
 </tr>
+
+<tr>
+	<td>PAGE_CONTROLS_SWITCH_PAGINATION_MODE_TO_BOTTOM</td>
+	<td>//button[contains(@class,'dropdown-item') and contains(text(),'Switch Pagination to Bottom')]</td>
+	<td></td>
+</tr>
+
+<tr>
+	<td>PAGE_CONTROLS_SWITCH_PAGINATION_MODE_TO_TOP</td>
+	<td>//button[contains(@class,'dropdown-item') and contains(text(),'Switch Pagination to Top')]</td>
+	<td></td>
+</tr>
+
 <tr>
 	<td></td>
 	<td></td>
@@ -103,12 +116,12 @@
 </tr>
 <tr>
 	<td>ADD_FIELD_TYPE</td>
-	<td>//a[contains(@class,'field-type')]/div/h4[contains(.,'${key_fieldType}')] | //li[contains(@class,'field-type')]/div/h4[contains(.,'${key_fieldType}')] | //div[contains(@class,'list-group-body')]//div/h4[contains(.,'${key_fieldType}')]</td>
+	<td>//a[contains(@class,'field-type')]/div/h4[contains(.,'${key_fieldType}')] | //li[contains(@class,'field-type')]/div/h4[contains(.,'${key_fieldType}')] | //div[contains(@class,'list-group-body')]//div/h4[contains(.,'${key_fieldType}')] | //h4[contains(@class, 'list-group-title text-truncate')]//span[contains(.,'${key_fieldType}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ADD_FIELD_POSITION</td>
-	<td>//div[contains(@class,'yui3-dd-drop') and contains(@class,'col-empty')]</td>
+	<td>//div[contains(@class,'yui3-dd-drop') and contains(@class,'col-empty')] | //div[contains(@class,'col-empty')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -119,12 +132,12 @@
 <!--SUCCESS_PAGE-->
 <tr>
 	<td>SUCCESS_PAGE_TITLE_FIELD</td>
-	<td>//div[@class='form-builder-success-page']//input[contains(@class,'success-page-title')]</td>
+	<td>//div[@class='form-builder-success-page']//input[contains(@class,'success-page-title')] | //div[contains(@class,'form-builder-success-page')]//input[contains(@class,'success-page-title')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SUCCESS_PAGE_DESCRIPTION_FIELD</td>
-	<td>//div[@class='form-builder-success-page']//input[contains(@class,'success-page-content')]</td>
+	<td>//div[@class='form-builder-success-page']//input[contains(@class,'success-page-content')] | //div[contains(@class,'form-builder-success-page')]//input[contains(@class,'success-page-content')] </td>
 	<td></td>
 </tr>
 <tr>
@@ -140,7 +153,7 @@
 </tr>
 <tr>
 	<td>PUBLISH_FORM_PUBLIC_URL</td>
-	<td>//input[@class='form-control' and @type='text']</td>
+	<td>//div[contains(@class,'share-url-popover')]//input[@class='form-control' and @type='text']</td>
 	<td></td>
 </tr>
 <tr>
@@ -158,6 +171,13 @@
 	<td>//div[contains(@class,'alert-dismissable')]//div[contains(.,'${key_alertMessage}')]/preceding-sibling::button[@class='close']</td>
 	<td></td>
 </tr>
+<tr>
+	<td>PUBLISH_URL_ICON</td>
+	<td>//button[contains(@class,'share-form-icon') and contains(@title,'Copy URL')]</td>
+	<td></td>
+</tr>
+
+
 <tr>
 	<td></td>
 	<td></td>
@@ -187,12 +207,12 @@
 <!--FIELD-->
 <tr>
 	<td>FIELD_BODY</td>
-	<td>//div[contains(@data-fieldname,'${key_fieldName}')]</td>
+	<td>//div[contains(@class,'form-group')]//label[contains(text(),'${key_fieldName}')] | //div[contains(@data-fieldname,'${key_fieldName}')] | //div[contains(@class,'form-group')]//input[contains(@name,'${key_fieldName}')]/parent::div/parent::div</td>
 	<td></td>
 </tr>
 <tr>
 	<td>FIELD_LABEL</td>
-	<td>//div[contains(@data-fieldname,'${key_fieldName}')]//label</td>
+	<td>//div[contains(@data-fieldname,'${key_fieldName}')]//label | //div[contains(@class,'ddm-field-container')]//label[contains(text(),'${key_fieldName}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -203,17 +223,22 @@
 <!--SIDEBAR -->
 <tr>
 	<td>SIDEBAR_PROPERTIES_TAB</td>
-	<td>//a[contains(@class,'tab') and .='Properties']</td>
+	<td>//a[contains(@class,'tab') and .='Properties'] | //a[contains(@aria-controls,'sidebarLightDetails')]//*[contains(text(),'Properties')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SIDEBAR_BACK</td>
+	<td>//div[contains(@class,'open') and contains(@class,'form-builder-sidebar')]//a[contains(@class,'back')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SIDEBAR_BASIC_TAB</td>
-	<td>//a[contains(@class,'tab') and .='Basic']</td>
+	<td>//a[contains(@class,'tab') and .='Basic'] | //a[contains(@aria-controls,'sidebarLightDetails')]//*[contains(text(),'Basic')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SIDEBAR_ELEMENTS_TAB</td>
-	<td>//a[contains(@class,'tab') and .='Elements']</td>
+	<td>//a[contains(@class,'tab') and .='Elements'] | //a[contains(@class,'nav-link active') and .='Elements']</td>
 	<td></td>
 </tr>
 <tr>
@@ -223,22 +248,22 @@
 </tr>
 <tr>
 	<td>SIDEBAR_ELLIPSIS</td>
-	<td>//div[contains(@class,'sidebar')]//a[*[contains(@class,'lexicon-icon-ellipsis-v')]]</td>
+	<td>//div[contains(@class,'sidebar')]//a[*[contains(@class,'lexicon-icon-ellipsis-v')]] | //div[contains(@class,'sidebar')]//button[*[contains(@class,'lexicon-icon-ellipsis-v')]]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SIDEBAR_MENUITEM_REMOVE_FIELD</td>
-	<td>//a[@title='Remove Field']</td>
+	<td>//a[@title='Remove Field'] | //button[text()='Remove Field']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SIDEBAR_MENUITEM_DUPLICATE_FIELD</td>
-	<td>//a[@title='Duplicate Field']</td>
+	<td>//a[@title='Duplicate Field'] | //button[text()='Duplicate Field']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SIDEBAR_CLOSE</td>
-	<td>//div[contains(@class,'open') and contains(@class,'form-builder-sidebar')]//a[contains(@class,'close')]</td>
+	<td>//div[contains(@class,'open') and contains(@class,'form-builder-sidebar')]//a[contains(@class,'close')] | //div[contains(@class,'open') and contains(@class,'sidebar-container')]//a[contains(@class,'sidebar-close')]</td>
 	<td></td>
 </tr>
 <tr>

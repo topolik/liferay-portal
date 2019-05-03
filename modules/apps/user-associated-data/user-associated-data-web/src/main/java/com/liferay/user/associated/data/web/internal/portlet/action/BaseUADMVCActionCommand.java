@@ -133,6 +133,17 @@ public abstract class BaseUADMVCActionCommand extends BaseMVCActionCommand {
 			actionRequest, actionResponse, liferayPortletURL.toString());
 	}
 
+	protected String[] getApplicationKeys(ActionRequest actionRequest) {
+		String applicationKey = ParamUtil.getString(
+			actionRequest, "applicationKey");
+
+		if (Validator.isNotNull(applicationKey)) {
+			return new String[] {applicationKey};
+		}
+
+		return ParamUtil.getStringValues(actionRequest, "applicationKeys");
+	}
+
 	protected List<String> getEntityTypes(ActionRequest actionRequest) {
 		List<String> entityTypes = new ArrayList<>();
 
@@ -157,10 +168,8 @@ public abstract class BaseUADMVCActionCommand extends BaseMVCActionCommand {
 			return new String[] {primaryKey};
 		}
 
-		String[] primaryKeys = ParamUtil.getStringValues(
+		return ParamUtil.getStringValues(
 			actionRequest, "primaryKeys__" + entityType);
-
-		return primaryKeys;
 	}
 
 	protected User getSelectedUser(ActionRequest actionRequest)

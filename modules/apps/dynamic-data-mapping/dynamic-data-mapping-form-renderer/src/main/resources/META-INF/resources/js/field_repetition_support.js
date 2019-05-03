@@ -285,16 +285,14 @@ AUI.add(
 				if (predefinedValue) {
 					value = predefinedValue;
 				}
+				else if (Lang.isArray(value)) {
+					value = [];
+				}
+				else if (Lang.isObject(value)) {
+					value = {};
+				}
 				else {
-					if (Lang.isArray(value)) {
-						value = [];
-					}
-					else if (Lang.isObject(value)) {
-						value = {};
-					}
-					else {
-						value = '';
-					}
+					value = '';
 				}
 
 				config.value = config.context.value = value;

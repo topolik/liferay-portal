@@ -1,0 +1,9 @@
+{
+	"cssPath": "index.css",
+	"fragmentEntryKey": "spacer-8x",
+	"htmlPath": "index.html",
+	"jsPath": "index.js",
+	"name": "Spacer 8x",
+	"thumbnail": "spacer_8x.png",
+	"type": "component"
+}

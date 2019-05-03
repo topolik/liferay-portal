@@ -3,10 +3,11 @@ import {Config} from 'metal-state';
 import Soy from 'metal-soy';
 
 import './FloatingToolbarBackgroundImagePanelDelegateTemplate.soy';
+import {disableSavingChangesStatusAction, enableSavingChangesStatusAction, updateLastSaveDateAction} from '../../../actions/saveChanges.es';
 import {getConnectedComponent} from '../../../store/ConnectedComponent.es';
 import {openImageSelector} from '../../../utils/FragmentsEditorDialogUtils';
 import templates from './FloatingToolbarBackgroundImagePanel.soy';
-import {UPDATE_LAST_SAVE_DATE, UPDATE_SAVING_CHANGES_STATUS, UPDATE_SECTION_CONFIG, UPDATE_TRANSLATION_STATUS} from '../../../actions/actions.es';
+import {UPDATE_ROW_CONFIG, UPDATE_TRANSLATION_STATUS} from '../../../actions/actions.es';
 
 /**
  * FloatingToolbarBackgroundImagePanel
@@ -20,9 +21,11 @@ class FloatingToolbarBackgroundImagePanel extends Component {
 	 */
 	_handleSelectButtonClick() {
 		openImageSelector(
-			this.imageSelectorURL,
-			this.portletNamespace,
-			url => this._updateSectionBackgroundImage(url)
+			{
+				callback: url => this._updateRowBackgroundImage(url),
+				imageSelectorURL: this.imageSelectorURL,
+				portletNamespace: this.portletNamespace
+			}
 		);
 	}
 
@@ -32,47 +35,34 @@ class FloatingToolbarBackgroundImagePanel extends Component {
 	 * @review
 	 */
 	_handleClearButtonClick() {
-		this._updateSectionBackgroundImage('');
+		this._updateRowBackgroundImage('');
 	}
 
 	/**
-	 * Updates section image
-	 * @param {string} backgroundImage Section image
+	 * Updates row image
+	 * @param {string} backgroundImage Row image
 	 * @private
 	 * @review
 	 */
-	_updateSectionBackgroundImage(backgroundImage) {
+	_updateRowBackgroundImage(backgroundImage) {
 		this.store
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: true
-				}
-			)
-			.dispatchAction(
-				UPDATE_SECTION_CONFIG,
+			.dispatch(enableSavingChangesStatusAction())
+			.dispatch(
 				{
 					config: {
 						backgroundImage
 					},
-					sectionId: this.itemId
+					rowId: this.itemId,
+					type: UPDATE_ROW_CONFIG
 				}
 			)
-			.dispatchAction(
-				UPDATE_TRANSLATION_STATUS
-			)
-			.dispatchAction(
-				UPDATE_LAST_SAVE_DATE,
+			.dispatch(
 				{
-					lastSaveDate: new Date()
+					type: UPDATE_TRANSLATION_STATUS
 				}
 			)
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: false
-				}
-			);
+			.dispatch(updateLastSaveDateAction())
+			.dispatch(disableSavingChangesStatusAction());
 	}
 
 }

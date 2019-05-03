@@ -65,7 +65,7 @@ public class OAuth2ScopeGrantCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(13);
+		StringBundler sb = new StringBundler(15);
 
 		sb.append("{oAuth2ScopeGrantId=");
 		sb.append(oAuth2ScopeGrantId);
@@ -79,6 +79,8 @@ public class OAuth2ScopeGrantCacheModel
 		sb.append(bundleSymbolicName);
 		sb.append(", scope=");
 		sb.append(scope);
+		sb.append(", scopeAliases=");
+		sb.append(scopeAliases);
 		sb.append("}");
 
 		return sb.toString();
@@ -114,6 +116,13 @@ public class OAuth2ScopeGrantCacheModel
 			oAuth2ScopeGrantImpl.setScope(scope);
 		}
 
+		if (scopeAliases == null) {
+			oAuth2ScopeGrantImpl.setScopeAliases("");
+		}
+		else {
+			oAuth2ScopeGrantImpl.setScopeAliases(scopeAliases);
+		}
+
 		oAuth2ScopeGrantImpl.resetOriginalValues();
 
 		return oAuth2ScopeGrantImpl;
@@ -129,6 +138,7 @@ public class OAuth2ScopeGrantCacheModel
 		applicationName = objectInput.readUTF();
 		bundleSymbolicName = objectInput.readUTF();
 		scope = objectInput.readUTF();
+		scopeAliases = objectInput.readUTF();
 	}
 
 	@Override
@@ -159,6 +169,13 @@ public class OAuth2ScopeGrantCacheModel
 		else {
 			objectOutput.writeUTF(scope);
 		}
+
+		if (scopeAliases == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(scopeAliases);
+		}
 	}
 
 	public long oAuth2ScopeGrantId;
@@ -167,5 +184,6 @@ public class OAuth2ScopeGrantCacheModel
 	public String applicationName;
 	public String bundleSymbolicName;
 	public String scope;
+	public String scopeAliases;
 
 }

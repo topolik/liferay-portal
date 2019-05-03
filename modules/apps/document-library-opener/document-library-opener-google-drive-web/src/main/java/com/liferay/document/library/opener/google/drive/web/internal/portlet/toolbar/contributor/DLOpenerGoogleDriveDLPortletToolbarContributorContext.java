@@ -38,6 +38,7 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -81,15 +82,18 @@ public class DLOpenerGoogleDriveDLPortletToolbarContributorContext
 			menuItems.add(
 				_createURLMenuItem(
 					portletRequest, folder, "google-doc",
-					DLOpenerGoogleDriveMimeTypes.APPLICATION_VND_DOCX));
+					DLOpenerGoogleDriveMimeTypes.APPLICATION_VND_DOCX,
+					_ICON_NAME_DOCUMENT, _ICON_COLOR_DOCUMENT));
 			menuItems.add(
 				_createURLMenuItem(
 					portletRequest, folder, "google-slide",
-					DLOpenerGoogleDriveMimeTypes.APPLICATION_VND_PPTX));
+					DLOpenerGoogleDriveMimeTypes.APPLICATION_VND_PPTX,
+					_ICON_NAME_PRESENTATION, _ICON_COLOR_PRESENTATION));
 			menuItems.add(
 				_createURLMenuItem(
 					portletRequest, folder, "google-sheet",
-					DLOpenerGoogleDriveMimeTypes.APPLICATION_VND_XSLX));
+					DLOpenerGoogleDriveMimeTypes.APPLICATION_VND_XSLX,
+					_ICON_NAME_SPREADSHEET, _ICON_COLOR_SPREADSHEET));
 		}
 		catch (PortalException pe) {
 			_log.error(pe, pe);
@@ -98,13 +102,16 @@ public class DLOpenerGoogleDriveDLPortletToolbarContributorContext
 
 	private URLMenuItem _createURLMenuItem(
 		PortletRequest portletRequest, Folder folder, String key,
-		String contentType) {
+		String contentType, String icon, String iconColor) {
 
 		URLMenuItem urlMenuItem = new URLMenuItem();
 
+		urlMenuItem.setIcon(icon);
 		urlMenuItem.setLabel(_translateKey(portletRequest, key));
 		urlMenuItem.setMethod(HttpMethods.POST);
 		urlMenuItem.setURL(_getActionURL(portletRequest, folder, contentType));
+		urlMenuItem.setData(
+			Collections.singletonMap("file-icon-color", iconColor));
 
 		return urlMenuItem;
 	}
@@ -157,6 +164,19 @@ public class DLOpenerGoogleDriveDLPortletToolbarContributorContext
 
 		return _language.get(resourceBundle, key);
 	}
+
+	private static final String _ICON_COLOR_DOCUMENT = "6";
+
+	private static final String _ICON_COLOR_PRESENTATION = "4";
+
+	private static final String _ICON_COLOR_SPREADSHEET = "2";
+
+	private static final String _ICON_NAME_DOCUMENT = "document-text";
+
+	private static final String _ICON_NAME_PRESENTATION =
+		"document-presentation";
+
+	private static final String _ICON_NAME_SPREADSHEET = "document-table";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DLOpenerGoogleDriveDLPortletToolbarContributorContext.class);

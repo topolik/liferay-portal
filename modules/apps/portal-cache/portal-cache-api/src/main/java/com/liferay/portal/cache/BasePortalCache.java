@@ -39,19 +39,17 @@ public abstract class BasePortalCache<K extends Serializable, V>
 		return doGet(key);
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #getPortalCacheName()}
-	 */
-	@Deprecated
-	@Override
-	public String getName() {
-		return getPortalCacheName();
-	}
-
 	@Override
 	public PortalCacheManager<K, V> getPortalCacheManager() {
 		return _portalCacheManager;
+	}
+
+	public boolean isBlocking() {
+		return false;
+	}
+
+	public boolean isMVCC() {
+		return false;
 	}
 
 	@Override

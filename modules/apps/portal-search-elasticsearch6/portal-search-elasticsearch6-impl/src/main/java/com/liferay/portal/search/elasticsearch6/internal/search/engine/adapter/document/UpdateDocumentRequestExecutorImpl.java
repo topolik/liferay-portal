@@ -18,9 +18,6 @@ import com.liferay.portal.search.engine.adapter.document.BulkableDocumentRequest
 import com.liferay.portal.search.engine.adapter.document.UpdateDocumentRequest;
 import com.liferay.portal.search.engine.adapter.document.UpdateDocumentResponse;
 
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.rest.RestStatus;
@@ -40,30 +37,23 @@ public class UpdateDocumentRequestExecutorImpl
 		UpdateDocumentRequest updateDocumentRequest) {
 
 		UpdateRequestBuilder updateRequestBuilder =
-			_bulkableDocumentRequestTranslator.translate(
-				updateDocumentRequest, null);
+			_bulkableDocumentRequestTranslator.translate(updateDocumentRequest);
 
 		UpdateResponse updateResponse = updateRequestBuilder.get();
 
 		RestStatus restStatus = updateResponse.status();
 
-		UpdateDocumentResponse updateDocumentResponse =
-			new UpdateDocumentResponse(restStatus.getStatus());
-
-		return updateDocumentResponse;
+		return new UpdateDocumentResponse(restStatus.getStatus());
 	}
 
 	@Reference(target = "(search.engine.impl=Elasticsearch)", unbind = "-")
 	protected void setBulkableDocumentRequestTranslator(
-		BulkableDocumentRequestTranslator
-			<DeleteRequestBuilder, IndexRequestBuilder, UpdateRequestBuilder,
-			 BulkRequestBuilder> bulkableDocumentRequestTranslator) {
+		BulkableDocumentRequestTranslator bulkableDocumentRequestTranslator) {
 
 		_bulkableDocumentRequestTranslator = bulkableDocumentRequestTranslator;
 	}
 
 	private BulkableDocumentRequestTranslator
-		<DeleteRequestBuilder, IndexRequestBuilder, UpdateRequestBuilder,
-		 BulkRequestBuilder> _bulkableDocumentRequestTranslator;
+		_bulkableDocumentRequestTranslator;
 
 }

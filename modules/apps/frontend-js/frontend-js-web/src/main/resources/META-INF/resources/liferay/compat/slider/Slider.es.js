@@ -9,6 +9,7 @@ import templates from './Slider.soy';
 
 /**
  * Slider component.
+ * @deprecated since 7.2
  */
 
 class Slider extends Component {

@@ -54,7 +54,6 @@ public class MBThreadModelIndexerWriterContributor
 				dynamicQuery.add(
 					statusProperty.eq(WorkflowConstants.STATUS_APPROVED));
 			});
-
 		batchIndexingActionable.setPerformActionMethod(
 			(MBThread mbThread) -> {
 				if (_log.isDebugEnabled()) {

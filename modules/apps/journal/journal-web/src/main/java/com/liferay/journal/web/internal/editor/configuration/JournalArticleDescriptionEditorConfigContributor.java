@@ -18,8 +18,8 @@ import com.liferay.journal.constants.JournalPortletKeys;
 import com.liferay.portal.kernel.editor.configuration.BaseEditorConfigContributor;
 import com.liferay.portal.kernel.editor.configuration.EditorConfigContributor;
 import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 
@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(
 	property = {
-		"editor.config.key=descriptionMapAsXML",
+		"editor.config.key=descriptionMapAsXMLEditor",
 		"javax.portlet.name=" + JournalPortletKeys.JOURNAL
 	},
 	service = EditorConfigContributor.class
@@ -48,57 +48,39 @@ public class JournalArticleDescriptionEditorConfigContributor
 		RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 		jsonObject.put(
-			"allowedContent", "p br strong i ol ul li u link pre em a");
-		jsonObject.put(
-			"toolbars", getToolbarsJSONObject(themeDisplay.getLocale()));
+			"allowedContent", "p br strong i ol ul li u link pre em a"
+		).put(
+			"toolbars", getToolbarsJSONObject(themeDisplay.getLocale())
+		);
 	}
 
 	protected JSONObject getToolbarsJSONObject(Locale locale) {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("styles", getToolbarsStylesJSONObject(locale));
-
-		return jsonObject;
+		return JSONUtil.put("styles", getToolbarsStylesJSONObject(locale));
 	}
 
 	protected JSONObject getToolbarsStylesJSONObject(Locale locale) {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put(
-			"selections", getToolbarsStylesSelectionsJSONArray(locale));
-		jsonObject.put("tabIndex", 1);
-
-		return jsonObject;
+		return JSONUtil.put(
+			"selections", getToolbarsStylesSelectionsJSONArray(locale)
+		).put(
+			"tabIndex", 1
+		);
 	}
 
 	protected JSONArray getToolbarsStylesSelectionsJSONArray(Locale locale) {
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(getToolbarsStylesSelectionsTextJSONObject(locale));
-
-		return jsonArray;
+		return JSONUtil.put(getToolbarsStylesSelectionsTextJSONObject(locale));
 	}
 
 	protected JSONObject getToolbarsStylesSelectionsTextJSONObject(
 		Locale locale) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put("bold");
-		jsonArray.put("italic");
-		jsonArray.put("underline");
-		jsonArray.put("ol");
-		jsonArray.put("ul");
-		jsonArray.put("link");
-
-		jsonObject.put("buttons", jsonArray);
-
-		jsonObject.put("name", "text");
-		jsonObject.put("test", "AlloyEditor.SelectionTest.text");
-
-		return jsonObject;
+		return JSONUtil.put(
+			"buttons",
+			JSONUtil.putAll("bold", "italic", "underline", "ol", "ul", "link")
+		).put(
+			"name", "text"
+		).put(
+			"test", "AlloyEditor.SelectionTest.text"
+		);
 	}
 
 }

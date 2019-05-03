@@ -14,6 +14,8 @@
 
 package com.liferay.portal.kernel.cache;
 
+import aQute.bnd.annotation.ProviderType;
+
 import com.liferay.portal.kernel.nio.intraband.proxy.annotation.Id;
 import com.liferay.portal.kernel.nio.intraband.proxy.annotation.Proxy;
 
@@ -26,6 +28,7 @@ import java.util.List;
  * @author Edward Han
  * @author Shuyang Zhou
  */
+@ProviderType
 public interface PortalCache<K extends Serializable, V> {
 
 	public static final int DEFAULT_TIME_TO_LIVE = 0;
@@ -36,18 +39,14 @@ public interface PortalCache<K extends Serializable, V> {
 	@Proxy
 	public List<K> getKeys();
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #getPortalCacheName()}
-	 */
-	@Deprecated
-	@Id
-	public String getName();
-
 	public PortalCacheManager<K, V> getPortalCacheManager();
 
 	@Id
 	public String getPortalCacheName();
+
+	public boolean isBlocking();
+
+	public boolean isMVCC();
 
 	@Proxy
 	public void put(K key, V value);

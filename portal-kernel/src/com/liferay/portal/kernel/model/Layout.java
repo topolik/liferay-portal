@@ -28,8 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.LayoutImpl")
 @ProviderType
-public interface Layout
-	extends LayoutModel, NestedSetsTreeNodeModel, PersistedModel {
+public interface Layout extends LayoutModel, PersistedModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -411,12 +410,6 @@ public interface Layout
 	 portlets; <code>false</code> otherwise
 	 */
 	public boolean isSupportsEmbeddedPortlets();
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public boolean isTypeArticle();
 
 	public boolean isTypeControlPanel();
 

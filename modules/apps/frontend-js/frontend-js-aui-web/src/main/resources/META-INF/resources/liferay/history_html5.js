@@ -1,3 +1,10 @@
+/**
+ * The History HTML5 Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-history-html5
+ */
+
 AUI.add(
 	'liferay-history-html5',
 	function(A) {

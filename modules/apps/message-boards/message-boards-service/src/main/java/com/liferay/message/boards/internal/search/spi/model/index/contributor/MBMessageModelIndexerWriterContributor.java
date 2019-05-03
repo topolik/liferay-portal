@@ -66,7 +66,6 @@ public class MBMessageModelIndexerWriterContributor
 
 				dynamicQuery.add(statusProperty.in(statuses));
 			});
-
 		batchIndexingActionable.setPerformActionMethod(
 			(MBMessage mbMessage) -> {
 				if (_log.isDebugEnabled()) {

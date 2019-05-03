@@ -38,8 +38,8 @@ import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestHelper;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -107,8 +107,9 @@ public class DDLExporterTest {
 
 	@Before
 	public void setUp() throws Exception {
-		_availableLocales = DDMFormTestUtil.createAvailableLocales(Locale.US);
-		_defaultLocale = Locale.US;
+		_availableLocales = DDMFormTestUtil.createAvailableLocales(
+			LocaleUtil.US);
+		_defaultLocale = LocaleUtil.US;
 		_group = GroupTestUtil.addGroup();
 
 		_originalPermissionChecker =
@@ -661,22 +662,27 @@ public class DDLExporterTest {
 			ContentTypes.TEXT_PLAIN, TestDataConstants.TEST_BYTE_ARRAY,
 			serviceContext);
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("groupId", fileEntry.getGroupId());
-		jsonObject.put("name", fileEntry.getTitle());
-		jsonObject.put("tempFile", "false");
-		jsonObject.put("title", fileEntry.getTitle());
-		jsonObject.put("uuid", fileEntry.getUuid());
+		JSONObject jsonObject = JSONUtil.put(
+			"groupId", fileEntry.getGroupId()
+		).put(
+			"name", fileEntry.getTitle()
+		).put(
+			"tempFile", "false"
+		).put(
+			"title", fileEntry.getTitle()
+		).put(
+			"uuid", fileEntry.getUuid()
+		);
 
 		return jsonObject.toString();
 	}
 
 	protected String createGeolocationDDMFormFieldValue() throws Exception {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("latitude", "-8.035");
-		jsonObject.put("longitude", "-34.918");
+		JSONObject jsonObject = JSONUtil.put(
+			"latitude", "-8.035"
+		).put(
+			"longitude", "-34.918"
+		);
 
 		return jsonObject.toString();
 	}
@@ -685,19 +691,19 @@ public class DDLExporterTest {
 		Layout layout = LayoutTestUtil.addLayout(
 			_group.getGroupId(), "Link to Page content", false);
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("groupId", layout.getGroupId());
-		jsonObject.put("layoutId", layout.getLayoutId());
-		jsonObject.put("privateLayout", layout.isPrivateLayout());
+		JSONObject jsonObject = JSONUtil.put(
+			"groupId", layout.getGroupId()
+		).put(
+			"layoutId", layout.getLayoutId()
+		).put(
+			"privateLayout", layout.isPrivateLayout()
+		);
 
 		return jsonObject.toString();
 	}
 
 	protected String createListDDMFormFieldValue() throws Exception {
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put("Value 1");
+		JSONArray jsonArray = JSONUtil.put("Value 1");
 
 		return jsonArray.toString();
 	}

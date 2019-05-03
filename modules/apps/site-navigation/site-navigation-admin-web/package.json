@@ -12,19 +12,16 @@
 		}
 	},
 	"dependencies": {
-		"metal-dom": "^2.0.0",
-		"metal-drag-drop": "~3.0.1",
-		"metal-position": "^2.1.0",
-		"metal-state": "^2.13.2"
-	},
-	"devDependencies": {
-		"liferay-npm-scripts": "1.2.0"
+		"metal-dom": "2.16.8",
+		"metal-drag-drop": "3.3.1",
+		"metal-position": "2.1.2",
+		"metal-state": "2.16.8"
 	},
 	"name": "site-navigation-admin-web",
 	"scripts": {
-		"build": "liferay-npm-scripts build --bundler",
-		"csf": "liferay-npm-scripts lint",
+		"build": "liferay-npm-scripts build",
+		"checkFormat": "liferay-npm-scripts lint",
 		"format": "liferay-npm-scripts format"
 	},
-	"version": "2.0.0"
+	"version": "3.0.0"
 }

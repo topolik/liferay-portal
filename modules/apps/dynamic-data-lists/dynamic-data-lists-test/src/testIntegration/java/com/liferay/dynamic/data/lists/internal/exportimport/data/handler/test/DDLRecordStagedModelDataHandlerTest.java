@@ -41,8 +41,10 @@ import com.liferay.dynamic.data.mapping.test.util.DDMFormValuesTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMTemplateTestUtil;
 import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -299,11 +301,11 @@ public class DDLRecordStagedModelDataHandlerTest
 		DDMFormFieldValue ddmFormFieldValue =
 			createEmptyDocumentLibraryDDMFormFieldValue(locale, fieldName);
 
-		JSONObject fieldValueJSONObject = JSONFactoryUtil.createJSONObject();
-
-		fieldValueJSONObject.put(
-			"groupId", String.valueOf(fileEntry.getGroupId()));
-		fieldValueJSONObject.put("uuid", fileEntry.getUuid());
+		JSONObject fieldValueJSONObject = JSONUtil.put(
+			"groupId", String.valueOf(fileEntry.getGroupId())
+		).put(
+			"uuid", fileEntry.getUuid()
+		);
 
 		Value value = ddmFormFieldValue.getValue();
 
@@ -334,22 +336,16 @@ public class DDLRecordStagedModelDataHandlerTest
 
 		localizedValue.addString(locale, fieldValue);
 
-		DDMFormFieldValue ddmFormFieldValue =
-			DDMFormValuesTestUtil.createDDMFormFieldValue(
-				fieldName, localizedValue);
-
-		return ddmFormFieldValue;
+		return DDMFormValuesTestUtil.createDDMFormFieldValue(
+			fieldName, localizedValue);
 	}
 
 	@Override
-	protected StagedModel getStagedModel(String uuid, Group group) {
-		try {
-			return DDLRecordLocalServiceUtil.fetchDDLRecordByUuidAndGroupId(
-				uuid, group.getGroupId());
-		}
-		catch (Exception e) {
-			return null;
-		}
+	protected StagedModel getStagedModel(String uuid, Group group)
+		throws PortalException {
+
+		return DDLRecordLocalServiceUtil.getDDLRecordByUuidAndGroupId(
+			uuid, group.getGroupId());
 	}
 
 	@Override

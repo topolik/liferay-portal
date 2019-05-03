@@ -16,7 +16,6 @@ package com.liferay.knowledge.base.web.internal.portlet;
 
 import com.liferay.asset.kernel.exception.AssetCategoryException;
 import com.liferay.asset.kernel.exception.AssetTagException;
-import com.liferay.document.library.display.context.DLMimeTypeDisplayContext;
 import com.liferay.document.library.kernel.antivirus.AntivirusScannerException;
 import com.liferay.document.library.kernel.exception.DuplicateFileEntryException;
 import com.liferay.document.library.kernel.exception.DuplicateFileException;
@@ -46,7 +45,6 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactory;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -86,16 +84,12 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 import javax.portlet.ResourceRequest;
 import javax.portlet.ResourceResponse;
-import javax.portlet.WindowState;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Adolfo Pérez
@@ -219,8 +213,11 @@ public abstract class BaseKBPortlet extends MVCPortlet {
 			String errorMessage = themeDisplay.translate(
 				"an-unexpected-error-occurred-while-deleting-the-file");
 
-			jsonObject.put("deleted", Boolean.FALSE);
-			jsonObject.put("errorMessage", errorMessage);
+			jsonObject.put(
+				"deleted", Boolean.FALSE
+			).put(
+				"errorMessage", errorMessage
+			);
 		}
 
 		writeJSON(actionRequest, actionResponse, jsonObject);
@@ -471,11 +468,7 @@ public abstract class BaseKBPortlet extends MVCPortlet {
 		String redirect = PortalUtil.escapeRedirect(
 			ParamUtil.getString(actionRequest, "redirect"));
 
-		WindowState windowState = actionRequest.getWindowState();
-
-		if (cmd.equals(Constants.ADD) && Validator.isNotNull(redirect) &&
-			windowState.equals(LiferayWindowState.POP_UP)) {
-
+		if (cmd.equals(Constants.ADD) && Validator.isNotNull(redirect)) {
 			actionRequest.setAttribute(
 				WebKeys.REDIRECT,
 				getContentRedirect(
@@ -640,14 +633,17 @@ public abstract class BaseKBPortlet extends MVCPortlet {
 	protected String getContentRedirect(
 		Class<?> clazz, long classPK, String redirect) {
 
-		String portletId = HttpUtil.getParameter(redirect, "p_p_id", false);
+		String portletId = HttpUtil.getParameter(
+			redirect, "portletResource", false);
 
 		String namespace = PortalUtil.getPortletNamespace(portletId);
 
-		redirect = HttpUtil.addParameter(
-			redirect, namespace + "className", clazz.getName());
-		redirect = HttpUtil.addParameter(
-			redirect, namespace + "classPK", classPK);
+		if (Validator.isNotNull(portletId)) {
+			redirect = HttpUtil.addParameter(
+				redirect, namespace + "className", clazz.getName());
+			redirect = HttpUtil.addParameter(
+				redirect, namespace + "classPK", classPK);
+		}
 
 		return redirect;
 	}
@@ -678,17 +674,6 @@ public abstract class BaseKBPortlet extends MVCPortlet {
 	@Reference(unbind = "-")
 	protected void setAdminUtilHelper(AdminHelper adminHelper) {
 		this.adminHelper = adminHelper;
-	}
-
-	@Reference(
-		cardinality = ReferenceCardinality.OPTIONAL,
-		policy = ReferencePolicy.DYNAMIC,
-		policyOption = ReferencePolicyOption.GREEDY
-	)
-	protected void setDLMimeTypeDisplayContext(
-		DLMimeTypeDisplayContext dlMimeTypeDisplayContext) {
-
-		this.dlMimeTypeDisplayContext = dlMimeTypeDisplayContext;
 	}
 
 	@Reference(unbind = "-")
@@ -735,14 +720,7 @@ public abstract class BaseKBPortlet extends MVCPortlet {
 		this.uploadResponseHandler = uploadResponseHandler;
 	}
 
-	protected void unsetDLMimeTypeDisplayContext(
-		DLMimeTypeDisplayContext dlMimeTypeDisplayContext) {
-
-		this.dlMimeTypeDisplayContext = null;
-	}
-
 	protected AdminHelper adminHelper;
-	protected DLMimeTypeDisplayContext dlMimeTypeDisplayContext;
 	protected JSONFactory jsonFactory;
 	protected KBArticleService kbArticleService;
 	protected KBCommentLocalService kbCommentLocalService;

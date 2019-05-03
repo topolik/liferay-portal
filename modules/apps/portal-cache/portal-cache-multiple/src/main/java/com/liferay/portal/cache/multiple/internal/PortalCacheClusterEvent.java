@@ -15,11 +15,16 @@
 package com.liferay.portal.cache.multiple.internal;
 
 import com.liferay.petra.string.StringBundler;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.cache.io.SerializableObjectWrapper;
 import com.liferay.portal.kernel.cache.PortalCache;
+import com.liferay.portal.kernel.io.Deserializer;
+import com.liferay.portal.kernel.io.Serializer;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import java.io.Serializable;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author Shuyang Zhou
@@ -68,9 +73,10 @@ public class PortalCacheClusterEvent implements Serializable {
 		_portalCacheManagerName = portalCacheManagerName;
 		_portalCacheName = portalCacheName;
 		_elementKey = new SerializableObjectWrapper(elementKey);
-		_elementValue = new SerializableObjectWrapper(elementValue);
 		_timeToLive = timeToLive;
 		_portalCacheClusterEventType = portalCacheClusterEventType;
+
+		setElementValue(elementValue);
 	}
 
 	public Serializable getElementKey() {
@@ -78,7 +84,21 @@ public class PortalCacheClusterEvent implements Serializable {
 	}
 
 	public Serializable getElementValue() {
-		return SerializableObjectWrapper.unwrap(_elementValue);
+		if (_elementValueBytes == null) {
+			return null;
+		}
+
+		Deserializer deserializer = new Deserializer(
+			ByteBuffer.wrap(_elementValueBytes));
+
+		try {
+			return deserializer.readObject();
+		}
+		catch (ClassNotFoundException cnfe) {
+			_log.error("Unable to deserialize object", cnfe);
+		}
+
+		return null;
 	}
 
 	public PortalCacheClusterEventType getEventType() {
@@ -98,7 +118,17 @@ public class PortalCacheClusterEvent implements Serializable {
 	}
 
 	public void setElementValue(Serializable elementValue) {
-		_elementValue = new SerializableObjectWrapper(elementValue);
+		if (elementValue == null) {
+			return;
+		}
+
+		Serializer serializer = new Serializer();
+
+		serializer.writeObject(elementValue);
+
+		ByteBuffer byteBuffer = serializer.toByteBuffer();
+
+		_elementValueBytes = byteBuffer.array();
 	}
 
 	public void setTimeToLive(int timeToLive) {
@@ -111,27 +141,34 @@ public class PortalCacheClusterEvent implements Serializable {
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(9);
+		StringBundler sb = new StringBundler(13);
 
-		sb.append(_portalCacheManagerName);
-		sb.append(StringPool.COLON);
-		sb.append(_portalCacheName);
-		sb.append(StringPool.COLON);
+		sb.append("{elementKey=");
 		sb.append(_elementKey);
-		sb.append(StringPool.COLON);
 
-		if (_elementValue != null) {
-			sb.append(_elementValue.toString());
-			sb.append(StringPool.COLON);
+		if (_elementValueBytes != null) {
+			sb.append(", elementValueBytes.length=");
+			sb.append(_elementValueBytes.length);
 		}
 
-		sb.append(_portalCacheClusterEventType.toString());
+		sb.append(", timeToLive=");
+		sb.append(_timeToLive);
+		sb.append(", portalCacheClusterEventType=");
+		sb.append(_portalCacheClusterEventType);
+		sb.append(", portalCacheManagerName=");
+		sb.append(_portalCacheManagerName);
+		sb.append(", portalCacheName=");
+		sb.append(_portalCacheName);
+		sb.append("}");
 
 		return sb.toString();
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		PortalCacheClusterEvent.class);
+
 	private final SerializableObjectWrapper _elementKey;
-	private SerializableObjectWrapper _elementValue;
+	private byte[] _elementValueBytes;
 	private final PortalCacheClusterEventType _portalCacheClusterEventType;
 	private final String _portalCacheManagerName;
 	private final String _portalCacheName;

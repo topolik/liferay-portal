@@ -35,6 +35,7 @@ public class LayoutSetSoap implements Serializable {
 		LayoutSetSoap soapModel = new LayoutSetSoap();
 
 		soapModel.setMvccVersion(model.getMvccVersion());
+		soapModel.setHeadId(model.getHeadId());
 		soapModel.setLayoutSetId(model.getLayoutSetId());
 		soapModel.setGroupId(model.getGroupId());
 		soapModel.setCompanyId(model.getCompanyId());
@@ -109,6 +110,14 @@ public class LayoutSetSoap implements Serializable {
 
 	public void setMvccVersion(long mvccVersion) {
 		_mvccVersion = mvccVersion;
+	}
+
+	public long getHeadId() {
+		return _headId;
+	}
+
+	public void setHeadId(long headId) {
+		_headId = headId;
 	}
 
 	public long getLayoutSetId() {
@@ -234,6 +243,7 @@ public class LayoutSetSoap implements Serializable {
 	}
 
 	private long _mvccVersion;
+	private long _headId;
 	private long _layoutSetId;
 	private long _groupId;
 	private long _companyId;

@@ -15,13 +15,10 @@
 package com.liferay.layout.admin.web.internal.product.navigation.control.menu;
 
 import com.liferay.layout.admin.constants.LayoutAdminPortletKeys;
-import com.liferay.layout.content.page.editor.constants.ContentPageEditorWebKeys;
-import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Html;
 import com.liferay.portal.kernel.util.Portal;
@@ -41,7 +38,6 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.ResourceBundle;
 
 import javax.portlet.PortletRequest;
@@ -88,12 +84,6 @@ public class ManageLayoutProductNavigationControlMenuEntry
 			WebKeys.THEME_DISPLAY);
 
 		Layout layout = themeDisplay.getLayout();
-
-		if (StringUtil.equals(
-				layout.getType(), LayoutConstants.TYPE_ASSET_DISPLAY)) {
-
-			return false;
-		}
 
 		Map<String, String> values = new HashMap<>();
 
@@ -168,17 +158,12 @@ public class ManageLayoutProductNavigationControlMenuEntry
 			return false;
 		}
 
-		if (!(themeDisplay.isShowLayoutTemplatesIcon() ||
-			  themeDisplay.isShowPageSettingsIcon())) {
-
+		if (isEmbeddedPersonalApplicationLayout(layout)) {
 			return false;
 		}
 
-		String className = (String)request.getAttribute(
-			ContentPageEditorWebKeys.CLASS_NAME);
-
-		if (Objects.equals(
-				className, LayoutPageTemplateEntry.class.getName())) {
+		if (!(themeDisplay.isShowLayoutTemplatesIcon() ||
+			  themeDisplay.isShowPageSettingsIcon())) {
 
 			return false;
 		}

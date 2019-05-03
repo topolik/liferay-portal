@@ -6,17 +6,15 @@
 {template .render}
 	{@param defaultEditorConfigurations: ?}
 	{@param defaultLanguageId: string}
-	{@param defaultSegmentsExperienceId: string}
 	{@param fragmentEntryLinks: ?}
 	{@param imageSelectorURL: string}
 	{@param languageId: string}
 	{@param layoutData: ?}
 	{@param portletNamespace: string}
 	{@param spritemap: string}
-	{@param? fragmentsEditorSidebarVisible: bool}
+	{@param? defaultSegmentsExperienceId: string}
 	{@param? id: string}
 	{@param? mappingFieldsURL: string}
-	{@param? experienceId: string}
 	{@param? selectMappingDialogEditableId: string}
 	{@param? selectMappingDialogEditableType: string}
 	{@param? selectMappingDialogFragmentEntryLinkId: string}
@@ -45,14 +43,12 @@
 			{param defaultLanguageId: $defaultLanguageId /}
 			{param defaultSegmentsExperienceId: $defaultSegmentsExperienceId /}
 			{param fragmentEntryLinks: $fragmentEntryLinks /}
-			{param fragmentsEditorSidebarVisible: $fragmentsEditorSidebarVisible ?: true /}
 			{param imageSelectorURL: $imageSelectorURL /}
 			{param languageId: $languageId /}
 			{param layoutData: $layoutData /}
 			{param mappingFieldsURL: $mappingFieldsURL /}
 			{param portletNamespace: $portletNamespace /}
 			{param ref: 'fragmentsEditorRender' /}
-			{param experienceId: $experienceId /}
 			{param store: $store /}
 			{param translating: $languageId != $defaultLanguageId /}
 		{/call}

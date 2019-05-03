@@ -145,4 +145,19 @@ public interface OAuth2ScopeGrantModel
 	 */
 	public void setScope(String scope);
 
+	/**
+	 * Returns the scope aliases of this o auth2 scope grant.
+	 *
+	 * @return the scope aliases of this o auth2 scope grant
+	 */
+	@AutoEscape
+	public String getScopeAliases();
+
+	/**
+	 * Sets the scope aliases of this o auth2 scope grant.
+	 *
+	 * @param scopeAliases the scope aliases of this o auth2 scope grant
+	 */
+	public void setScopeAliases(String scopeAliases);
+
 }

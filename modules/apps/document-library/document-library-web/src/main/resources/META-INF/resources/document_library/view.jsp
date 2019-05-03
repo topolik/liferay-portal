@@ -71,6 +71,7 @@ String navigation = ParamUtil.getString(request, "navigation");
 		Map<String, Object> context = new HashMap<>();
 
 		context.put("bulkInProgress", bulkSelectionRunner.isBusy(user));
+		context.put("pathModule", PortalUtil.getPathModule());
 		context.put("portletNamespace", liferayPortletResponse.getNamespace());
 		%>
 
@@ -180,6 +181,16 @@ String navigation = ParamUtil.getString(request, "navigation");
 		selectCategoriesURL.setWindowState(LiferayWindowState.POP_UP);
 		%>
 
+		<aui:script>
+			function <portlet:namespace />move(itemsSelected, parameterName, parameterValue) {
+				var dlComponent = Liferay.component('<portlet:namespace />DocumentLibrary');
+
+				if (dlComponent) {
+					dlComponent.showFolderDialog(itemsSelected, parameterName, parameterValue);
+				}
+			}
+		</aui:script>
+
 		<aui:script use="liferay-document-library">
 
 			<%
@@ -224,8 +235,8 @@ String navigation = ParamUtil.getString(request, "navigation");
 							node: A.one(document.<portlet:namespace />fm2)
 						},
 						maxFileSize: <%= dlConfiguration.fileMaxSize() %>,
-						moveEntryUrl: '<portlet:renderURL><portlet:param name="mvcRenderCommandName" value="/document_library/move_entry" /><portlet:param name="redirect" value="<%= currentURL %>" /><portlet:param name="newFolderId" value="<%= String.valueOf(folderId) %>" /></portlet:renderURL>',
 						namespace: '<portlet:namespace />',
+						openViewMoreFileEntryTypesURL: '<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="mvcPath" value="/document_library/view_more_menu_items.jsp" /><portlet:param name="folderId" value="<%= String.valueOf(folderId) %>" /><portlet:param name="eventName" value='<%= liferayPortletResponse.getNamespace() + "selectAddMenuItem" %>' /></portlet:renderURL>',
 						portletId: '<%= HtmlUtil.escapeJS(portletId) %>',
 						redirect: encodeURIComponent('<%= currentURL %>'),
 						repositories: [
@@ -251,6 +262,7 @@ String navigation = ParamUtil.getString(request, "navigation");
 
 						],
 						selectFileEntryTypeURL: '<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="mvcPath" value="/document_library/select_file_entry_type.jsp" /><portlet:param name="fileEntryTypeId" value="<%= String.valueOf(fileEntryTypeId) %>" /></portlet:renderURL>',
+						selectFolderURL: '<portlet:renderURL windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="mvcRenderCommandName" value="/document_library/select_folder" /><portlet:param name="folderId" value="<%= String.valueOf(folderId) %>" /></portlet:renderURL>',
 						scopeGroupId: <%= scopeGroupId %>,
 						searchContainerId: 'entries',
 						trashEnabled: <%= (scopeGroupId == repositoryId) && dlTrashUtil.isTrashEnabled(scopeGroupId, repositoryId) %>,
@@ -273,30 +285,42 @@ String navigation = ParamUtil.getString(request, "navigation");
 			};
 
 			Liferay.on('changeScope', changeScopeHandles);
+
+			<portlet:renderURL var="addFileEntryURL">
+				<portlet:param name="mvcRenderCommandName" value="/document_library/edit_file_entry" />
+				<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD %>" />
+				<portlet:param name="redirect" value="<%= currentURL %>" />
+				<portlet:param name="groupId" value="<%= String.valueOf(scopeGroupId) %>" />
+				<portlet:param name="repositoryId" value="<%= String.valueOf(repositoryId) %>" />
+				<portlet:param name="folderId" value="<%= String.valueOf(folderId) %>" />
+			</portlet:renderURL>
+
+			var editFileEntryHandler = function(event) {
+				var uri = '<%= addFileEntryURL %>'
+
+				location.href = Liferay.Util.addParams('<portlet:namespace />fileEntryTypeId' + '=' + event.fileEntryTypeId, uri);
+			};
+
+			Liferay.on( '<portlet:namespace />selectAddMenuItem', editFileEntryHandler);
 		</aui:script>
 
 		<%
-		String classNameId = String.valueOf(ClassNameLocalServiceUtil.getClassNameId(DLFileEntryConstants.getClassName()));
 		String pathModule = PortalUtil.getPathModule();
-
-		String urlTags = pathModule + "/bulk/asset/tags/" + scopeGroupId + "/" + classNameId + "/common";
-		String urlUpdateTags = pathModule + "/bulk/asset/tags/" + classNameId;
 
 		Map<String, Object> tagsContext = new HashMap<>();
 
-		tagsContext.put("repositoryId", String.valueOf(repositoryId));
-		tagsContext.put("urlTags", urlTags);
-		tagsContext.put("urlUpdateTags", urlUpdateTags);
+		long groupIds[] = PortalUtil.getCurrentAndAncestorSiteGroupIds(scopeGroupId);
 
-		String urlCategories = pathModule + "/bulk/asset/categories/" + scopeGroupId + "/" + classNameId + "/common";
-		String urlUpdateCategories = pathModule + "/bulk/asset/categories/" + classNameId;
+		tagsContext.put("groupIds", groupIds);
+		tagsContext.put("pathModule", pathModule);
+		tagsContext.put("repositoryId", String.valueOf(repositoryId));
 
 		Map<String, Object> categoriesContext = new HashMap<>();
 
+		categoriesContext.put("groupIds", groupIds);
+		categoriesContext.put("pathModule", pathModule);
 		categoriesContext.put("repositoryId", String.valueOf(repositoryId));
 		categoriesContext.put("selectCategoriesUrl", selectCategoriesURL.toString());
-		categoriesContext.put("urlCategories", urlCategories);
-		categoriesContext.put("urlUpdateCategories", urlUpdateCategories);
 		%>
 
 		<liferay-frontend:component

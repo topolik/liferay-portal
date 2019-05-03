@@ -39,6 +39,38 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class RatingsTag extends IncludeTag {
 
+	public String getClassName() {
+		return _className;
+	}
+
+	public long getClassPK() {
+		return _classPK;
+	}
+
+	public int getNumberOfStars() {
+		return _numberOfStars;
+	}
+
+	public RatingsEntry getRatingsEntry() {
+		return _ratingsEntry;
+	}
+
+	public RatingsStats getRatingsStats() {
+		return _ratingsStats;
+	}
+
+	public String getUrl() {
+		return _url;
+	}
+
+	public boolean isInTrash() {
+		return _inTrash;
+	}
+
+	public boolean isRound() {
+		return _round;
+	}
+
 	public void setClassName(String className) {
 		_className = className;
 	}

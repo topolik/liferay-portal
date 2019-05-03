@@ -4,9 +4,10 @@ import Soy, {Config} from 'metal-soy';
 import '../common/FloatingToolbarColorPicker.es';
 import './FloatingToolbarTextPropertiesPanelDelegateTemplate.soy';
 import {EDITABLE_FIELD_CONFIG_KEYS, TEXT_ALIGNMENT_OPTIONS, TEXT_STYLES} from '../../../utils/constants';
+import {disableSavingChangesStatusAction, enableSavingChangesStatusAction, updateLastSaveDateAction} from '../../../actions/saveChanges.es';
 import getConnectedComponent from '../../../store/ConnectedComponent.es';
 import templates from './FloatingToolbarTextPropertiesPanel.soy';
-import {UPDATE_CONFIG_ATTRIBUTES, UPDATE_LAST_SAVE_DATE, UPDATE_SAVING_CHANGES_STATUS, UPDATE_TRANSLATION_STATUS} from '../../../actions/actions.es';
+import {UPDATE_CONFIG_ATTRIBUTES, UPDATE_TRANSLATION_STATUS} from '../../../actions/actions.es';
 
 /**
  * FloatingToolbarTextPropertiesPanel
@@ -15,41 +16,28 @@ class FloatingToolbarTextPropertiesPanel extends Component {
 
 	/**
 	 * Updates fragment configuration
-	 * @param {object} config Section configuration
+	 * @param {object} config Configuration
 	 * @private
 	 * @review
 	 */
 	_updateFragmentConfig(config) {
 		this.store
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: true
-				}
-			)
-			.dispatchAction(
-				UPDATE_CONFIG_ATTRIBUTES,
+			.dispatch(enableSavingChangesStatusAction())
+			.dispatch(
 				{
 					config,
-					editableId: this.itemId,
-					fragmentEntryLinkId: this.item.fragmentEntryLinkId
+					editableId: this.item.editableId,
+					fragmentEntryLinkId: this.item.fragmentEntryLinkId,
+					type: UPDATE_CONFIG_ATTRIBUTES
 				}
 			)
-			.dispatchAction(
-				UPDATE_TRANSLATION_STATUS
-			)
-			.dispatchAction(
-				UPDATE_LAST_SAVE_DATE,
+			.dispatch(
 				{
-					lastSaveDate: new Date()
+					type: UPDATE_TRANSLATION_STATUS
 				}
 			)
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: false
-				}
-			);
+			.dispatch(updateLastSaveDateAction())
+			.dispatch(disableSavingChangesStatusAction());
 	}
 
 	/**

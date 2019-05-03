@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface WeDeployAuthToken
-	extends WeDeployAuthTokenModel, PersistedModel {
+	extends PersistedModel, WeDeployAuthTokenModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

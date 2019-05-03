@@ -27,6 +27,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.security.auth.AuthTokenUtil;
@@ -199,14 +200,13 @@ public class EditorPortlet extends AdminPortlet {
 
 		serviceContext.setScopeGroupId(folder.getGroupId());
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
 		FileEntry fileEntry = DLAppServiceUtil.addFileEntry(
 			folder.getRepositoryId(), folderId, fileEntryTitle,
 			resourceRequest.getContentType(), fileEntryTitle, StringPool.BLANK,
 			StringPool.BLANK, bytes, serviceContext);
 
-		jsonObject.put("fileEntryId", fileEntry.getFileEntryId());
+		JSONObject jsonObject = JSONUtil.put(
+			"fileEntryId", fileEntry.getFileEntryId());
 
 		String portalURL = PortalUtil.getPortalURL(themeDisplay);
 
@@ -240,9 +240,7 @@ public class EditorPortlet extends AdminPortlet {
 			parentFolder.getRepositoryId(), parentFolderId, folderName,
 			StringPool.BLANK, serviceContext);
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("folderId", folder.getFolderId());
+		JSONObject jsonObject = JSONUtil.put("folderId", folder.getFolderId());
 
 		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
@@ -270,17 +268,14 @@ public class EditorPortlet extends AdminPortlet {
 			ResourceResponse resourceResponse)
 		throws IOException {
 
-		JSONObject jsonError = JSONFactoryUtil.createJSONObject();
-
-		jsonError.put("message", exception.getLocalizedMessage());
+		JSONObject jsonError = JSONUtil.put(
+			"message", exception.getLocalizedMessage());
 
 		Class<?> clazz = exception.getClass();
 
 		jsonError.put("name", clazz.getSimpleName());
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("error", jsonError);
+		JSONObject jsonObject = JSONUtil.put("error", jsonError);
 
 		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
@@ -295,9 +290,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		String content = StringUtil.read(fileEntry.getContentStream());
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("content", content);
+		JSONObject jsonObject = JSONUtil.put("content", content);
 
 		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}
@@ -317,12 +310,15 @@ public class EditorPortlet extends AdminPortlet {
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
 		for (Folder folder : folders) {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("entryId", folder.getFolderId());
-			jsonObject.put("label", folder.getName());
-			jsonObject.put("leaf", false);
-			jsonObject.put("type", "editor");
+			JSONObject jsonObject = JSONUtil.put(
+				"entryId", folder.getFolderId()
+			).put(
+				"label", folder.getName()
+			).put(
+				"leaf", false
+			).put(
+				"type", "editor"
+			);
 
 			jsonArray.put(jsonObject);
 		}
@@ -346,9 +342,8 @@ public class EditorPortlet extends AdminPortlet {
 				new RepositoryModelTitleComparator<FileEntry>(true));
 
 			for (FileEntry fileEntry : fileEntries) {
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-				jsonObject.put("entryId", fileEntry.getFileEntryId());
+				JSONObject jsonObject = JSONUtil.put(
+					"entryId", fileEntry.getFileEntryId());
 
 				String portalURL = PortalUtil.getPortalURL(themeDisplay);
 
@@ -368,10 +363,13 @@ public class EditorPortlet extends AdminPortlet {
 				catch (Exception e) {
 				}
 
-				jsonObject.put("gadgetId", gadgetId);
-
-				jsonObject.put("label", fileEntry.getTitle());
-				jsonObject.put("leaf", true);
+				jsonObject.put(
+					"gadgetId", gadgetId
+				).put(
+					"label", fileEntry.getTitle()
+				).put(
+					"leaf", true
+				);
 
 				JSONObject jsonPermissions = JSONFactoryUtil.createJSONObject();
 
@@ -384,9 +382,11 @@ public class EditorPortlet extends AdminPortlet {
 						"unpublishPermission", unpublishPermission);
 				}
 
-				jsonObject.put("permissions", jsonPermissions);
-
-				jsonObject.put("type", "editor");
+				jsonObject.put(
+					"permissions", jsonPermissions
+				).put(
+					"type", "editor"
+				);
 
 				jsonArray.put(jsonObject);
 			}
@@ -402,8 +402,6 @@ public class EditorPortlet extends AdminPortlet {
 		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
 		String fileEntryURL = ParamUtil.getString(
 			resourceRequest, "fileEntryURL");
 
@@ -412,7 +410,7 @@ public class EditorPortlet extends AdminPortlet {
 
 		ModulePrefs modulePrefs = gadgetSpec.getModulePrefs();
 
-		jsonObject.put("height", modulePrefs.getHeight());
+		JSONObject jsonObject = JSONUtil.put("height", modulePrefs.getHeight());
 
 		long moduleId = ShindigUtil.getModuleId(
 			resourceResponse.getNamespace());
@@ -437,9 +435,11 @@ public class EditorPortlet extends AdminPortlet {
 			ownerId, themeDisplay.getUserId(), fileEntryURL, portalURL,
 			fileEntryURL, moduleId, currentURL);
 
-		jsonObject.put("secureToken", secureToken);
-
-		jsonObject.put("specUrl", fileEntryURL);
+		jsonObject.put(
+			"secureToken", secureToken
+		).put(
+			"specUrl", fileEntryURL
+		);
 
 		writeJSON(resourceRequest, resourceResponse, jsonObject);
 	}

@@ -1,7 +1,16 @@
 import com.liferay.gradle.plugins.defaults.tasks.CopyIvyDependenciesTask
+import com.liferay.gradle.plugins.node.internal.util.FileUtil
+import com.liferay.gradle.plugins.node.tasks.ExecuteNpmTask
 import com.liferay.gradle.plugins.source.formatter.FormatSourceTask
 import com.liferay.gradle.plugins.util.PortalTools
+import com.liferay.gradle.util.OSDetector
 import com.liferay.gradle.util.StringUtil
+
+import groovy.io.FileType
+import groovy.io.FileVisitResult
+
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 
 import java.util.regex.Matcher
 
@@ -11,8 +20,12 @@ buildscript {
 	apply from: file("build-buildscript.gradle"), to: buildscript
 }
 
+apply plugin: "com.liferay.node"
+apply plugin: "com.liferay.node.defaults"
 apply plugin: "com.liferay.source.formatter"
 apply plugin: "com.liferay.source.formatter.defaults"
+
+buildDir = new File(rootDir.parentFile, "build")
 
 task formatSourceCurrentBranch(type: FormatSourceTask)
 task formatSourceLatestAuthor(type: FormatSourceTask)
@@ -20,6 +33,7 @@ task formatSourceLocalChanges(type: FormatSourceTask)
 task printDependencyPath
 task setUpLibs
 task setUpPortalTools
+task setUpYarn(type: ExecuteNpmTask)
 task wrapper(type: Wrapper)
 task wrapperSubrepo(type: Wrapper)
 
@@ -73,6 +87,45 @@ repositories {
 
 	maven {
 		url System.properties["repository.url"] ?: "https://repository-cdn.liferay.com/nexus/content/groups/public"
+	}
+}
+
+setUpYarn {
+	args "install"
+	args "--frozen-lockfile"
+
+	scriptFile = new File(projectDir, "yarn-1.13.0.js")
+
+	doFirst {
+		String buildBinariesCacheDir = project.findProperty("build.binaries.cache.dir")
+
+		if (buildBinariesCacheDir) {
+			File cacheDir = new File(rootDir.parentFile, buildBinariesCacheDir)
+
+			if (cacheDir.exists()) {
+				File fromDir = new File(cacheDir, ".yarn/offline-cache")
+				File intoDir = new File(rootDir, "node_modules_cache")
+
+				logger.lifecycle "Copying {} into {}", fromDir, intoDir
+
+				copy {
+					from fromDir
+					into intoDir
+				}
+			}
+		}
+
+		String registry = project.findProperty("nodejs.npm.ci.registry")
+
+		if (registry) {
+			File yarnLockFile = new File(rootDir, "yarn.lock")
+
+			if (yarnLockFile.exists()) {
+				logger.lifecycle "Using registry {}", registry
+
+				yarnLockFile.text = yarnLockFile.text.replaceAll("https://registry.yarnpkg.com", registry)
+			}
+		}
 	}
 }
 

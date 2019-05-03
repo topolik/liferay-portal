@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.dao.orm.CustomSQLParam;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -97,19 +98,19 @@ public class InviteMembersPortlet extends MVCPortlet {
 		String keywords = ParamUtil.getString(resourceRequest, "keywords");
 		int start = ParamUtil.getInteger(resourceRequest, "start");
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put(
+		JSONObject jsonObject = JSONUtil.put(
 			"count",
 			_getAvailableUsersCount(
 				themeDisplay.getCompanyId(), themeDisplay.getScopeGroupId(),
 				keywords));
 
-		JSONObject optionsJSONObject = JSONFactoryUtil.createJSONObject();
-
-		optionsJSONObject.put("end", end);
-		optionsJSONObject.put("keywords", keywords);
-		optionsJSONObject.put("start", start);
+		JSONObject optionsJSONObject = JSONUtil.put(
+			"end", end
+		).put(
+			"keywords", keywords
+		).put(
+			"start", start
+		);
 
 		jsonObject.put("options", optionsJSONObject);
 
@@ -120,15 +121,17 @@ public class InviteMembersPortlet extends MVCPortlet {
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
 		for (User user : users) {
-			JSONObject userJSONObject = JSONFactoryUtil.createJSONObject();
-
-			userJSONObject.put(
+			JSONObject userJSONObject = JSONUtil.put(
 				"hasPendingMemberRequest",
 				_memberRequestLocalService.hasPendingMemberRequest(
-					themeDisplay.getScopeGroupId(), user.getUserId()));
-			userJSONObject.put("userEmailAddress", user.getEmailAddress());
-			userJSONObject.put("userFullName", user.getFullName());
-			userJSONObject.put("userId", user.getUserId());
+					themeDisplay.getScopeGroupId(), user.getUserId())
+			).put(
+				"userEmailAddress", user.getEmailAddress()
+			).put(
+				"userFullName", user.getFullName()
+			).put(
+				"userId", user.getUserId()
+			);
 
 			jsonArray.put(userJSONObject);
 		}

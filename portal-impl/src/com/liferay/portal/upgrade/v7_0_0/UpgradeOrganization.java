@@ -15,7 +15,6 @@
 package com.liferay.portal.upgrade.v7_0_0;
 
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
-import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.upgrade.v7_0_0.util.OrganizationTable;
 
 import java.sql.PreparedStatement;
@@ -31,13 +30,19 @@ public class UpgradeOrganization extends UpgradeProcess {
 	@Override
 	protected void doUpgrade() throws Exception {
 		alter(OrganizationTable.class, new AlterColumnType("statusId", "LONG"));
+
 		upgradeOrganizationLogoId();
 	}
 
 	protected void upgradeOrganizationLogoId() throws SQLException {
 		try (PreparedStatement ps1 = connection.prepareStatement(
 				"select groupId, logoId from LayoutSet where logoId > 0 and " +
-					"privateLayout = ?")) {
+					"privateLayout = ?");
+			PreparedStatement ps2 = connection.prepareStatement(
+				"select classPK from Group_ where groupId = ?");
+			PreparedStatement ps3 = connection.prepareStatement(
+				"update Organization_ set logoId = ? where organizationId = " +
+					"?")) {
 
 			ps1.setBoolean(1, false);
 
@@ -47,23 +52,15 @@ public class UpgradeOrganization extends UpgradeProcess {
 				long groupId = rs1.getLong("groupId");
 				long logoId = rs1.getLong("logoId");
 
-				PreparedStatement ps2 = connection.prepareStatement(
-					"select classPK from Group_ where groupId = " + groupId);
+				ps2.setLong(1, groupId);
 
 				ResultSet rs2 = ps2.executeQuery();
 
 				while (rs2.next()) {
 					long classPK = rs2.getLong("classPK");
 
-					StringBundler sb = new StringBundler(4);
-
-					sb.append("update Organization_ set logoId = ");
-					sb.append(logoId);
-					sb.append(" where organizationId = ");
-					sb.append(classPK);
-
-					PreparedStatement ps3 = connection.prepareStatement(
-						sb.toString());
+					ps3.setLong(1, logoId);
+					ps3.setLong(2, classPK);
 
 					ps3.executeUpdate();
 				}

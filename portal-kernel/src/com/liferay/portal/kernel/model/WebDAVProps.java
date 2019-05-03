@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.WebDAVPropsImpl")
 @ProviderType
-public interface WebDAVProps extends WebDAVPropsModel, PersistedModel {
+public interface WebDAVProps extends PersistedModel, WebDAVPropsModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

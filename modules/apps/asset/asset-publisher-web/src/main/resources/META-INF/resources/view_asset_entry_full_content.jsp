@@ -39,6 +39,8 @@ AssetEntry assetEntry = (AssetEntry)request.getAttribute("view.jsp-assetEntry");
 AssetRendererFactory<?> assetRendererFactory = (AssetRendererFactory<?>)request.getAttribute("view.jsp-assetRendererFactory");
 AssetRenderer<?> assetRenderer = (AssetRenderer<?>)request.getAttribute("view.jsp-assetRenderer");
 
+long previewAssetEntryId = ParamUtil.getLong(request, "previewAssetEntryId");
+
 boolean print = GetterUtil.getBoolean(request.getAttribute("view.jsp-print"));
 
 assetPublisherDisplayContext.setLayoutAssetEntry(assetEntry);
@@ -67,51 +69,42 @@ if (Validator.isNotNull(assetRenderer.getUrlTitle())) {
 String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletRequest, liferayPortletResponse, HttpUtil.setParameter(viewFullContentURL.toString(), "redirect", currentURL));
 %>
 
-<div class="asset-full-content clearfix <%= assetPublisherDisplayContext.isDefaultAssetPublisher() ? "default-asset-publisher" : StringPool.BLANK %> <%= assetPublisherDisplayContext.isShowAssetTitle() ? "show-asset-title" : "no-title" %>">
+<div class="asset-full-content clearfix mb-5 <%= assetPublisherDisplayContext.isDefaultAssetPublisher() ? "default-asset-publisher" : StringPool.BLANK %> <%= assetPublisherDisplayContext.isShowAssetTitle() ? "show-asset-title" : "no-title" %> <%= (previewAssetEntryId == assetEntry.getEntryId()) ? "p-1 preview-asset-entry" : StringPool.BLANK %>">
 	<span class="asset-anchor lfr-asset-anchor" id="<%= assetEntry.getEntryId() %>"></span>
 
-	<div class="autofit-row autofit-row-center mb-3">
+	<div class="mb-2">
 		<c:if test="<%= assetPublisherDisplayContext.isShowAssetTitle() %>">
-			<div class="autofit-col">
-				<h4 class="asset-title component-title">
-					<c:if test="<%= showBackURL && Validator.isNotNull(redirect) %>">
-						<liferay-ui:icon
-							cssClass="header-back-to"
-							icon="angle-left"
-							markupView="lexicon"
-							url="<%= redirect %>"
-						/>
-					</c:if>
+			<h4 class="component-title">
+				<c:if test="<%= showBackURL && Validator.isNotNull(redirect) %>">
+					<liferay-ui:icon
+						cssClass="header-back-to"
+						icon="angle-left"
+						markupView="lexicon"
+						url="<%= redirect %>"
+					/>
+				</c:if>
 
-					<c:choose>
-						<c:when test="<%= assetPublisherDisplayContext.isShowContextLink() %>">
-							<a class="h2" href="<%= viewInContextURL %>">
-								<%= HtmlUtil.escape(title) %>
-							</a>
-						</c:when>
-						<c:otherwise>
-							<%= HtmlUtil.escape(title) %>
-						</c:otherwise>
-					</c:choose>
-				</h4>
-			</div>
-		</c:if>
+				<span class="asset-title d-inline">
+					<%= HtmlUtil.escape(title) %>
+				</span>
 
-		<c:if test="<%= !print %>">
+				<c:if test="<%= !print %>">
 
-			<%
-			String fullContentRedirect = currentURL;
+					<%
+					String fullContentRedirect = currentURL;
 
-			if (WorkflowDefinitionLinkLocalServiceUtil.hasWorkflowDefinitionLink(assetEntry.getCompanyId(), assetEntry.getGroupId(), assetEntry.getClassName())) {
-				fullContentRedirect = redirect;
-			}
+					if (WorkflowDefinitionLinkLocalServiceUtil.hasWorkflowDefinitionLink(assetEntry.getCompanyId(), assetEntry.getGroupId(), assetEntry.getClassName())) {
+						fullContentRedirect = redirect;
+					}
 
-			request.setAttribute("view.jsp-fullContentRedirect", fullContentRedirect);
-			%>
+					request.setAttribute("view.jsp-fullContentRedirect", fullContentRedirect);
+					%>
 
-			<div class="autofit-col autofit-col-end inline-item-after">
-				<liferay-util:include page="/asset_actions.jsp" servletContext="<%= application %>" />
-			</div>
+					<span class="d-inline-flex">
+						<liferay-util:include page="/asset_actions.jsp" servletContext="<%= application %>" />
+					</span>
+				</c:if>
+			</h4>
 		</c:if>
 	</div>
 
@@ -121,13 +114,23 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 		User assetRendererUser = UserLocalServiceUtil.getUser(assetRenderer.getUserId());
 		%>
 
-		<div class="autofit-row mb-3 metadata-author">
-			<div class="asset-avatar autofit-col inline-item-before mr-3 pt-1">
-				<liferay-ui:user-portrait
-					cssClass="sticker-lg"
-					user="<%= assetRendererUser %>"
-				/>
-			</div>
+		<div class="autofit-row mb-4 metadata-author">
+			<c:if test="<%= assetPublisherDisplayContext.isShowAuthor() %>">
+				<div class="asset-avatar autofit-col inline-item-before mr-3 pt-1">
+					<span class="user-avatar-image">
+						<div class="sticker sticker-circle sticker-lg sticker-light user-icon user-icon-default <%= LexiconUtil.getUserColorCssClass(assetRendererUser) %> ">
+							<c:choose>
+								<c:when test="<%= assetRendererUser.getPortraitId() <= 0 %>">
+									<aui:icon image="user" markupView="lexicon" />
+								</c:when>
+								<c:otherwise>
+									<img class="sticker-img" src="<%= HtmlUtil.escape(UserConstants.getPortraitURL(themeDisplay.getPathImage(), assetRendererUser.isMale(), assetRendererUser.getPortraitId(), assetRendererUser.getUserUuid())) %>" />
+								</c:otherwise>
+							</c:choose>
+						</div>
+					</span>
+				</div>
+			</c:if>
 
 			<div class="autofit-col autofit-col-expand">
 				<div class="autofit-row">
@@ -187,7 +190,7 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 		</div>
 	</c:if>
 
-	<div class="asset-content mb-3" id="<portlet:namespace /><%= assetEntry.getEntryId() %>">
+	<div class="asset-content mb-3">
 		<liferay-asset:asset-display
 			assetEntry="<%= assetEntry %>"
 			assetRenderer="<%= assetRenderer %>"
@@ -218,7 +221,7 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 	</c:if>
 
 	<c:if test="<%= assetPublisherDisplayContext.isShowPriority() %>">
-		<div class="asset-priority mb-3 text-secondary">
+		<div class="asset-priority mb-4 text-secondary">
 			<liferay-ui:message key="priority" />: <%= assetEntry.getPriority() %>
 		</div>
 	</c:if>
@@ -235,24 +238,24 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 		}
 		%>
 
-		<liferay-asset:asset-links
-			assetEntryId="<%= assetEntry.getEntryId() %>"
-			portletURL="<%= assetLingsURL %>"
-			viewInContext="<%= assetPublisherDisplayContext.isAssetLinkBehaviorViewInPortlet() %>"
-		/>
+		<div class="asset-links mb-4">
+			<liferay-asset:asset-links
+				assetEntryId="<%= assetEntry.getEntryId() %>"
+				portletURL="<%= assetLingsURL %>"
+				viewInContext="<%= assetPublisherDisplayContext.isAssetLinkBehaviorViewInPortlet() %>"
+			/>
+		</div>
 	</c:if>
 
 	<%
 	boolean showContextLink = assetPublisherDisplayContext.isShowContextLink(assetRenderer.getGroupId(), assetRendererFactory.getPortletId()) && !print && assetEntry.isVisible();
-	boolean showConversions = assetPublisherDisplayContext.isEnableConversions() && assetRenderer.isConvertible() && !print;
-	boolean showLocalization = (assetPublisherDisplayContext.isShowAvailableLocales() && assetRenderer.isLocalizable() && !print);
 	boolean showRatings = assetPublisherDisplayContext.isEnableRatings() && assetRenderer.isRatable();
 	%>
 
-	<c:if test="<%= showContextLink || showRatings || assetPublisherDisplayContext.isEnableFlags() || assetPublisherDisplayContext.isEnablePrint() || showLocalization || showConversions %>">
+	<c:if test="<%= showContextLink || showRatings || assetPublisherDisplayContext.isEnableFlags() || assetPublisherDisplayContext.isEnablePrint() || Validator.isNotNull(assetPublisherDisplayContext.getSocialBookmarksTypes()) %>">
 		<div class="separator"><!-- --></div>
 
-		<div class="asset-details autofit-row autofit-row-center">
+		<div class="asset-details autofit-float autofit-row autofit-row-center">
 			<c:if test="<%= showContextLink %>">
 				<div class="asset-more autofit-col mr-3">
 					<a href="<%= viewInContextURL %>"><liferay-ui:message key="<%= assetRenderer.getViewInContextMessage() %>" /> &raquo;</a>
@@ -295,6 +298,7 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 						<c:when test="<%= print %>">
 							<liferay-ui:icon
 								icon="print"
+								linkCssClass="btn btn-monospaced btn-outline-borderless btn-outline-secondary btn-sm"
 								markupView="lexicon"
 								message='<%= LanguageUtil.format(request, "print-x-x", new Object[] {"hide-accessible", HtmlUtil.escape(title)}, false) %>'
 								url="javascript:print();"
@@ -312,6 +316,7 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 
 							<liferay-ui:icon
 								icon="print"
+								linkCssClass="btn btn-monospaced btn-outline-borderless btn-outline-secondary btn-sm"
 								markupView="lexicon"
 								message='<%= LanguageUtil.format(request, "print-x-x", new Object[] {"hide-accessible", HtmlUtil.escape(title)}, false) %>'
 								url='<%= "javascript:" + renderResponse.getNamespace() + "printPage_" + id + "();" %>'
@@ -325,17 +330,6 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 							printAssetURL.setParameter("viewMode", Constants.PRINT);
 							printAssetURL.setParameter("type", assetRendererFactory.getType());
 							printAssetURL.setParameter("languageId", LanguageUtil.getLanguageId(request));
-
-							String urlTitle = assetRenderer.getUrlTitle(locale);
-
-							if (Validator.isNotNull(urlTitle)) {
-								if (assetRenderer.getGroupId() != scopeGroupId) {
-									printAssetURL.setParameter("groupId", String.valueOf(assetRenderer.getGroupId()));
-								}
-
-								printAssetURL.setParameter("urlTitle", urlTitle);
-							}
-
 							printAssetURL.setWindowState(LiferayWindowState.POP_UP);
 							%>
 
@@ -349,6 +343,31 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 				</div>
 			</c:if>
 
+			<c:if test="<%= Validator.isNotNull(assetPublisherDisplayContext.getSocialBookmarksTypes()) %>">
+				<div class="autofit-col">
+					<liferay-social-bookmarks:bookmarks
+						className="<%= assetEntry.getClassName() %>"
+						classPK="<%= assetEntry.getClassPK() %>"
+						displayStyle="<%= assetPublisherDisplayContext.getSocialBookmarksDisplayStyle() %>"
+						target="_blank"
+						title="<%= title %>"
+						types="<%= assetPublisherDisplayContext.getSocialBookmarksTypes() %>"
+						urlImpl="<%= viewFullContentURL %>"
+					/>
+				</div>
+			</c:if>
+		</div>
+	</c:if>
+
+	<%
+	boolean showConversions = assetPublisherDisplayContext.isEnableConversions() && assetRenderer.isConvertible() && !print;
+	boolean showLocalization = (assetPublisherDisplayContext.isShowAvailableLocales() && assetRenderer.isLocalizable() && !print);
+	%>
+
+	<c:if test="<%= showConversions || showLocalization %>">
+		<div class="separator"><!-- --></div>
+
+		<div class="asset-details autofit-float autofit-row autofit-row-center">
 			<c:if test="<%= showLocalization %>">
 
 				<%
@@ -383,8 +402,8 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 					data.put("resource-href", exportAssetURL.toString());
 				%>
 
-					<div class="autofit-col component-subtitle export-action mr-3">
-						<aui:a data="<%= data %>" href="<%= exportAssetURL.toString() %>" label='<%= LanguageUtil.format(request, "x-convert-x-to-x", new Object[] {"hide-accessible", title, StringUtil.toUpperCase(HtmlUtil.escape(extension))}, false) %>' />
+					<div class="autofit-col component-subtitle export-action">
+						<aui:a cssClass="btn btn-outline-borderless btn-outline-secondary btn-sm" data="<%= data %>" href="<%= exportAssetURL.toString() %>" label='<%= LanguageUtil.format(request, "x-convert-x-to-x", new Object[] {"hide-accessible", title, StringUtil.toUpperCase(HtmlUtil.escape(extension))}, false) %>' />
 					</div>
 
 				<%
@@ -395,22 +414,8 @@ String viewInContextURL = assetRenderer.getURLViewInContext(liferayPortletReques
 		</div>
 	</c:if>
 
-	<c:if test="<%= Validator.isNotNull(assetPublisherDisplayContext.getSocialBookmarksTypes()) %>">
-		<div class="separator"><!-- --></div>
-
-		<liferay-social-bookmarks:bookmarks
-			className="<%= assetEntry.getClassName() %>"
-			classPK="<%= assetEntry.getClassPK() %>"
-			displayStyle="<%= assetPublisherDisplayContext.getSocialBookmarksDisplayStyle() %>"
-			target="_blank"
-			title="<%= title %>"
-			types="<%= assetPublisherDisplayContext.getSocialBookmarksTypes() %>"
-			urlImpl="<%= viewFullContentURL %>"
-		/>
-	</c:if>
-
 	<c:if test="<%= assetPublisherDisplayContext.isEnableComments() && assetRenderer.isCommentable() %>">
-		<div class="col-md-12">
+		<div class="col-md-12 mt-4">
 			<liferay-comment:discussion
 				className="<%= assetEntry.getClassName() %>"
 				classPK="<%= assetEntry.getClassPK() %>"

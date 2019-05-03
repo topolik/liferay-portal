@@ -7,6 +7,7 @@ import templates from './Navigation.soy';
 class Navigation extends Component {}
 
 // Register component
+
 Soy.register(Navigation, templates);
 
 export default Navigation;

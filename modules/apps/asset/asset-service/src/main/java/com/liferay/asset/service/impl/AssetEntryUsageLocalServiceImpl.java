@@ -14,29 +14,38 @@
 
 package com.liferay.asset.service.impl;
 
+import com.liferay.asset.constants.AssetEntryUsageConstants;
 import com.liferay.asset.model.AssetEntryUsage;
 import com.liferay.asset.service.base.AssetEntryUsageLocalServiceBaseImpl;
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.model.User;
+import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
+import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
+import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
+import com.liferay.petra.string.StringPool;
+import com.liferay.portal.aop.AopService;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.OrderByComparator;
 
 import java.util.Date;
 import java.util.List;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Pavel Savinov
  */
+@Component(
+	property = "model.class.name=com.liferay.asset.model.AssetEntryUsage",
+	service = AopService.class
+)
 public class AssetEntryUsageLocalServiceImpl
 	extends AssetEntryUsageLocalServiceBaseImpl {
 
 	@Override
 	public AssetEntryUsage addAssetEntryUsage(
-			long userId, long groupId, long assetEntryId, long classNameId,
-			long classPK, String portletId, ServiceContext serviceContext)
-		throws PortalException {
-
-		User user = userLocalService.getUser(userId);
+		long groupId, long assetEntryId, long containerType,
+		String containerKey, long plid, ServiceContext serviceContext) {
 
 		long assetEntryUsageId = counterLocalService.increment();
 
@@ -45,39 +54,63 @@ public class AssetEntryUsageLocalServiceImpl
 
 		assetEntryUsage.setUuid(serviceContext.getUuid());
 		assetEntryUsage.setGroupId(groupId);
-		assetEntryUsage.setCompanyId(user.getCompanyId());
-		assetEntryUsage.setUserId(userId);
-		assetEntryUsage.setUserName(user.getFullName());
-		assetEntryUsage.setCreateDate(serviceContext.getCreateDate(new Date()));
-		assetEntryUsage.setModifiedDate(
-			serviceContext.getModifiedDate(new Date()));
+		assetEntryUsage.setCreateDate(new Date());
+		assetEntryUsage.setModifiedDate(new Date());
 		assetEntryUsage.setAssetEntryId(assetEntryId);
-		assetEntryUsage.setClassNameId(classNameId);
-		assetEntryUsage.setClassPK(classPK);
-		assetEntryUsage.setPortletId(portletId);
+		assetEntryUsage.setContainerType(containerType);
+		assetEntryUsage.setContainerKey(containerKey);
+		assetEntryUsage.setPlid(plid);
+		assetEntryUsage.setType(_getType(plid));
 
 		return assetEntryUsagePersistence.update(assetEntryUsage);
 	}
 
 	@Override
+	public AssetEntryUsage addDefaultAssetEntryUsage(
+		long groupId, long assetEntryId, ServiceContext serviceContext) {
+
+		return addAssetEntryUsage(
+			groupId, assetEntryId, 0, StringPool.BLANK, 0, serviceContext);
+	}
+
+	@Override
+	public void deleteAssetEntryUsages(long assetEntryId) {
+		assetEntryUsagePersistence.removeByAssetEntryId(assetEntryId);
+	}
+
+	@Override
 	public void deleteAssetEntryUsages(
-		long classNameId, long classPK, String portletId) {
+		long containerType, String containerKey, long plid) {
 
 		assetEntryUsagePersistence.removeByC_C_P(
-			classNameId, classPK, portletId);
+			containerType, containerKey, plid);
+	}
+
+	@Override
+	public void deleteAssetEntryUsagesByPlid(long plid) {
+		assetEntryUsagePersistence.removeByPlid(plid);
 	}
 
 	@Override
 	public AssetEntryUsage fetchAssetEntryUsage(
-		long assetEntryId, long classNameId, long classPK, String portletId) {
+		long assetEntryId, long containerType, String containerKey, long plid) {
 
 		return assetEntryUsagePersistence.fetchByA_C_C_P(
-			assetEntryId, classNameId, classPK, portletId);
+			assetEntryId, containerType, containerKey, plid);
 	}
 
 	@Override
 	public List<AssetEntryUsage> getAssetEntryUsages(long assetEntryId) {
 		return assetEntryUsagePersistence.findByAssetEntryId(assetEntryId);
+	}
+
+	@Override
+	public List<AssetEntryUsage> getAssetEntryUsages(
+		long assetEntryId, int type, int start, int end,
+		OrderByComparator<AssetEntryUsage> orderByComparator) {
+
+		return assetEntryUsagePersistence.findByA_T(
+			assetEntryId, type, start, end, orderByComparator);
 	}
 
 	@Override
@@ -90,27 +123,8 @@ public class AssetEntryUsageLocalServiceImpl
 	}
 
 	@Override
-	public List<AssetEntryUsage> getAssetEntryUsages(
-		long assetEntryId, long classNameId) {
-
-		return assetEntryUsagePersistence.findByA_C(assetEntryId, classNameId);
-	}
-
-	@Override
-	public List<AssetEntryUsage> getAssetEntryUsages(
-		long assetEntryId, long classNameId, int start, int end,
-		OrderByComparator<AssetEntryUsage> orderByComparator) {
-
-		return assetEntryUsagePersistence.findByA_C(
-			assetEntryId, classNameId, start, end, orderByComparator);
-	}
-
-	@Override
-	public List<AssetEntryUsage> getAssetEntryUsages(
-		long classNameId, long classPK, String portletId) {
-
-		return assetEntryUsagePersistence.findByC_C_P(
-			classNameId, classPK, portletId);
+	public List<AssetEntryUsage> getAssetEntryUsagesByPlid(long plid) {
+		return assetEntryUsagePersistence.findByPlid(plid);
 	}
 
 	@Override
@@ -119,13 +133,53 @@ public class AssetEntryUsageLocalServiceImpl
 	}
 
 	@Override
-	public int getAssetEntryUsagesCount(long assetEntryId, long classNameId) {
-		return assetEntryUsagePersistence.countByA_C(assetEntryId, classNameId);
+	public int getAssetEntryUsagesCount(long assetEntryId, int type) {
+		return assetEntryUsagePersistence.countByA_T(assetEntryId, type);
 	}
 
 	@Override
-	public int getAssetEntryUsagesCount(long assetEntryId, String portletId) {
-		return assetEntryUsagePersistence.countByA_P(assetEntryId, portletId);
+	public boolean hasDefaultAssetEntryUsage(long assetEntryId) {
+		AssetEntryUsage assetEntryUsage =
+			assetEntryUsageLocalService.fetchAssetEntryUsage(
+				assetEntryId, 0, StringPool.BLANK, 0);
+
+		if (assetEntryUsage != null) {
+			return true;
+		}
+
+		return false;
 	}
+
+	private int _getType(long plid) {
+		if (plid <= 0) {
+			return AssetEntryUsageConstants.TYPE_DEFAULT;
+		}
+
+		Layout layout = layoutLocalService.fetchLayout(plid);
+
+		if ((layout.getClassNameId() > 0) && (layout.getClassPK() > 0)) {
+			plid = layout.getClassPK();
+		}
+
+		LayoutPageTemplateEntry layoutPageTemplateEntry =
+			_layoutPageTemplateEntryLocalService.
+				fetchLayoutPageTemplateEntryByPlid(plid);
+
+		if (layoutPageTemplateEntry == null) {
+			return AssetEntryUsageConstants.TYPE_LAYOUT;
+		}
+
+		if (layoutPageTemplateEntry.getType() ==
+				LayoutPageTemplateEntryTypeConstants.TYPE_DISPLAY_PAGE) {
+
+			return AssetEntryUsageConstants.TYPE_DISPLAY_PAGE_TEMPLATE;
+		}
+
+		return AssetEntryUsageConstants.TYPE_PAGE_TEMPLATE;
+	}
+
+	@Reference
+	private LayoutPageTemplateEntryLocalService
+		_layoutPageTemplateEntryLocalService;
 
 }

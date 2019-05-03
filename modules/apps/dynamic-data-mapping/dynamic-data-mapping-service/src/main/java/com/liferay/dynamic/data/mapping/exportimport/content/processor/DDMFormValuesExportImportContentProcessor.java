@@ -34,6 +34,7 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -50,6 +51,7 @@ import com.liferay.portal.kernel.xml.Element;
 
 import java.io.Serializable;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -172,77 +174,6 @@ public class DDMFormValuesExportImportContentProcessor
 	private JournalArticleLocalService _journalArticleLocalService;
 
 	private LayoutLocalService _layoutLocalService;
-
-	private static class LayoutImportDDMFormFieldValueTransformer
-		implements DDMFormFieldValueTransformer {
-
-		public LayoutImportDDMFormFieldValueTransformer(
-			PortletDataContext portletDataContext) {
-
-			_portletDataContext = portletDataContext;
-		}
-
-		@Override
-		public String getFieldType() {
-			return DDMFormFieldType.LINK_TO_PAGE;
-		}
-
-		@Override
-		public void transform(DDMFormFieldValue ddmFormFieldValue)
-			throws PortalException {
-
-			Value value = ddmFormFieldValue.getValue();
-
-			for (Locale locale : value.getAvailableLocales()) {
-				String valueString = value.getString(locale);
-
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-					valueString);
-
-				Layout importedLayout = fetchImportedLayout(
-					_portletDataContext, jsonObject);
-
-				if (importedLayout == null) {
-					continue;
-				}
-
-				value.addString(locale, toJSON(importedLayout));
-			}
-		}
-
-		protected Layout fetchImportedLayout(
-			PortletDataContext portletDataContext, JSONObject jsonObject) {
-
-			Map<Long, Layout> layouts =
-				(Map<Long, Layout>)portletDataContext.getNewPrimaryKeysMap(
-					Layout.class + ".layout");
-
-			long layoutId = jsonObject.getLong("layoutId");
-
-			Layout layout = layouts.get(layoutId);
-
-			if (layout == null) {
-				if (_log.isWarnEnabled()) {
-					_log.warn("Unable to find layout with ID " + layoutId);
-				}
-			}
-
-			return layout;
-		}
-
-		protected String toJSON(Layout layout) {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("groupId", layout.getGroupId());
-			jsonObject.put("layoutId", layout.getLayoutId());
-			jsonObject.put("privateLayout", layout.isPrivateLayout());
-
-			return jsonObject.toString();
-		}
-
-		private final PortletDataContext _portletDataContext;
-
-	}
 
 	private class FileEntryExportDDMFormFieldValueTransformer
 		implements DDMFormFieldValueTransformer {
@@ -436,13 +367,17 @@ public class DDMFormValuesExportImportContentProcessor
 		}
 
 		protected String toJSON(FileEntry fileEntry, String type) {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("classPK", fileEntry.getFileEntryId());
-			jsonObject.put("groupId", fileEntry.getGroupId());
-			jsonObject.put("title", fileEntry.getTitle());
-			jsonObject.put("type", type);
-			jsonObject.put("uuid", fileEntry.getUuid());
+			JSONObject jsonObject = JSONUtil.put(
+				"classPK", fileEntry.getFileEntryId()
+			).put(
+				"groupId", fileEntry.getGroupId()
+			).put(
+				"title", fileEntry.getTitle()
+			).put(
+				"type", type
+			).put(
+				"uuid", fileEntry.getUuid()
+			);
 
 			return jsonObject.toString();
 		}
@@ -494,8 +429,11 @@ public class DDMFormValuesExportImportContentProcessor
 				JournalArticle journalArticle =
 					_journalArticleLocalService.fetchLatestArticle(classPK);
 
-				jsonObject.put("groupId", journalArticle.getGroupId());
-				jsonObject.put("uuid", journalArticle.getUuid());
+				jsonObject.put(
+					"groupId", journalArticle.getGroupId()
+				).put(
+					"uuid", journalArticle.getUuid()
+				);
 
 				value.addString(locale, jsonObject.toString());
 
@@ -628,6 +566,103 @@ public class DDMFormValuesExportImportContentProcessor
 
 		private final PortletDataContext _portletDataContext;
 		private final StagedModel _stagedModel;
+
+	}
+
+	private class LayoutImportDDMFormFieldValueTransformer
+		implements DDMFormFieldValueTransformer {
+
+		public LayoutImportDDMFormFieldValueTransformer(
+			PortletDataContext portletDataContext) {
+
+			_portletDataContext = portletDataContext;
+		}
+
+		@Override
+		public String getFieldType() {
+			return DDMFormFieldType.LINK_TO_PAGE;
+		}
+
+		@Override
+		public void transform(DDMFormFieldValue ddmFormFieldValue)
+			throws PortalException {
+
+			Value value = ddmFormFieldValue.getValue();
+
+			for (Locale locale : value.getAvailableLocales()) {
+				String valueString = value.getString(locale);
+
+				JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
+					valueString);
+
+				Layout importedLayout = fetchImportedLayout(
+					_portletDataContext, jsonObject);
+
+				if (importedLayout != null) {
+					value.addString(locale, toJSON(importedLayout));
+
+					continue;
+				}
+
+				Element missingReferencesElement =
+					_portletDataContext.getMissingReferencesElement();
+
+				List<Element> elements = missingReferencesElement.elements();
+
+				for (Element element : elements) {
+					String className = element.attributeValue("class-name");
+
+					if (className.equals(Layout.class.getName())) {
+						String uuid = element.attributeValue("uuid");
+						String privateLayout = element.attributeValue(
+							"private-layout");
+
+						importedLayout =
+							_layoutLocalService.fetchLayoutByUuidAndGroupId(
+								uuid, _portletDataContext.getScopeGroupId(),
+								Boolean.valueOf(privateLayout));
+					}
+				}
+
+				if (importedLayout != null) {
+					value.addString(locale, toJSON(importedLayout));
+				}
+			}
+		}
+
+		protected Layout fetchImportedLayout(
+			PortletDataContext portletDataContext, JSONObject jsonObject) {
+
+			Map<Long, Layout> layouts =
+				(Map<Long, Layout>)portletDataContext.getNewPrimaryKeysMap(
+					Layout.class + ".layout");
+
+			long layoutId = jsonObject.getLong("layoutId");
+
+			Layout layout = layouts.get(layoutId);
+
+			if (layout == null) {
+				if (_log.isWarnEnabled()) {
+					_log.warn("Unable to find layout with ID " + layoutId);
+				}
+			}
+
+			return layout;
+		}
+
+		protected String toJSON(Layout layout) {
+			JSONObject jsonObject = JSONUtil.put(
+				"groupId", layout.getGroupId()
+			).put(
+				"layoutId", layout.getLayoutId()
+			).put(
+				"privateLayout", layout.isPrivateLayout()
+			);
+
+			return jsonObject.toString();
+		}
+
+		private final PortletDataContext _portletDataContext;
 
 	}
 

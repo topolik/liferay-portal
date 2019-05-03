@@ -583,7 +583,7 @@
 			<finder-column comparator="&lt;" name="size" />
 		</finder>
 	</entity>
-	<entity local-service="true" name="Layout" remote-service="true" uad-application-name="Layout" uad-dir-path="../modules/apps/layout/layout-uad/src/main/java" uad-package-path="com.liferay.layout" uuid="true">
+	<entity local-service="true" name="Layout" remote-service="true" uad-application-name="Layout" uad-dir-path="../modules/apps/layout/layout-uad/src/main/java" uad-package-path="com.liferay.layout" uuid="true" versioned="true">
 
 		<!-- PK fields -->
 
@@ -604,8 +604,6 @@
 		<!-- Other fields -->
 
 		<column name="parentPlid" type="long" />
-		<column name="leftPlid" type="long" />
-		<column name="rightPlid" type="long" />
 		<column name="privateLayout" type="boolean" />
 		<column accessor="true" name="layoutId" type="long" />
 		<column name="parentLayoutId" type="long" />
@@ -704,11 +702,11 @@
 			<finder-column name="privateLayout" />
 			<finder-column name="sourcePrototypeLayoutUuid" />
 		</finder>
-		<finder name="G_P_GtLP_LtRP" return-type="Collection" where="system = [$FALSE$]">
+		<finder name="G_P_P_H" return-type="Collection" where="system = [$FALSE$]">
 			<finder-column name="groupId" />
-			<finder-column comparator="&gt;" name="leftPlid" />
-			<finder-column comparator="&lt;" name="rightPlid" />
 			<finder-column name="privateLayout" />
+			<finder-column arrayable-operator="OR" arrayable-pagination="true" name="parentLayoutId" />
+			<finder-column name="hidden" />
 		</finder>
 		<finder name="G_P_P_LtP" return-type="Collection" where="system = [$FALSE$]">
 			<finder-column name="groupId" />
@@ -727,6 +725,7 @@
 		<reference entity="LayoutSet" package-path="com.liferay.portal" />
 		<reference entity="LayoutSetPrototype" package-path="com.liferay.portal" />
 		<reference entity="PluginSetting" package-path="com.liferay.portal" />
+		<reference entity="PortalPreferences" package-path="com.liferay.portal" />
 		<reference entity="PortletPreferences" package-path="com.liferay.portal" />
 		<reference entity="Resource" package-path="com.liferay.portal" />
 		<reference entity="ResourcePermission" package-path="com.liferay.portal" />
@@ -1013,7 +1012,7 @@
 		<reference entity="User" package-path="com.liferay.portal" />
 		<reference entity="WorkflowInstanceLink" package-path="com.liferay.portal" />
 	</entity>
-	<entity local-service="true" name="LayoutSet" remote-service="true">
+	<entity local-service="true" name="LayoutSet" remote-service="true" versioned="true">
 
 		<!-- PK fields -->
 
@@ -2071,7 +2070,6 @@
 
 		<!-- References -->
 
-		<reference entity="ClassName" package-path="com.liferay.portal" />
 		<reference entity="Group" package-path="com.liferay.portal" />
 		<reference entity="RepositoryEntry" package-path="com.liferay.portal" />
 		<reference entity="User" package-path="com.liferay.portal" />
@@ -2616,6 +2614,7 @@
 
 		<!-- References -->
 
+		<reference entity="Group" package-path="com.liferay.portal" />
 		<reference entity="Resource" package-path="com.liferay.portal" />
 		<reference entity="Role" package-path="com.liferay.portal" />
 		<reference entity="User" package-path="com.liferay.portal" />
@@ -3457,7 +3456,6 @@
 		<exception>LayoutBranchName</exception>
 		<exception>LayoutFriendlyURL</exception>
 		<exception>LayoutFriendlyURLs</exception>
-		<exception>LayoutHidden</exception>
 		<exception>LayoutName</exception>
 		<exception>LayoutParentLayoutId</exception>
 		<exception>LayoutPermission</exception>

@@ -26,7 +26,7 @@ String smallImageSource = journalEditArticleDisplayContext.getSmallImageSource()
 
 <liferay-ui:error-marker
 	key="<%= WebKeys.ERROR_SECTION %>"
-	value="small_image"
+	value="featured-image"
 />
 
 <aui:model-context bean="<%= article %>" model="<%= JournalArticle.class %>" />
@@ -43,18 +43,18 @@ JournalFileUploadsConfiguration journalFileUploadsConfiguration = (JournalFileUp
 	<liferay-ui:message arguments="<%= TextFormatter.formatStorageSize(journalFileUploadsConfiguration.smallImageMaxSize(), locale) %>" key="please-enter-a-small-image-with-a-valid-file-size-no-larger-than-x" translateArguments="<%= false %>" />
 </liferay-ui:error>
 
-<aui:select cssClass="form-control-sm" ignoreRequestValue="<%= journalEditArticleDisplayContext.isChangeStructure() %>" label="" name="smallImageSource" value="<%= smallImageSource %>" wrapperCssClass="mb-3">
+<aui:select ignoreRequestValue="<%= journalEditArticleDisplayContext.isChangeStructure() %>" label="" name="smallImageSource" value="<%= smallImageSource %>" wrapperCssClass="mb-3">
 	<aui:option label="no-image" value="none" />
 	<aui:option label="from-url" value="url" />
 	<aui:option label="from-your-computer" value="file" />
 </aui:select>
 
 <div class="<%= Objects.equals(smallImageSource, "url") ? "" : "hide" %>" id="<portlet:namespace/>smallImageURLContainer">
-	<aui:input cssClass="form-control-sm" ignoreRequestValue="<%= journalEditArticleDisplayContext.isChangeStructure() %>" label="" name="smallImageURL" title="small-image-url" wrapperCssClass="mb-3" />
+	<aui:input ignoreRequestValue="<%= journalEditArticleDisplayContext.isChangeStructure() %>" label="" name="smallImageURL" title="small-image-url" wrapperCssClass="mb-3" />
 </div>
 
 <div class="<%= Objects.equals(smallImageSource, "file") ? "" : "hide" %>" id="<portlet:namespace/>smallFileContainer">
-	<aui:input cssClass="form-control-sm" ignoreRequestValue="<%= journalEditArticleDisplayContext.isChangeStructure() %>" label="" name="smallFile" type="file" wrapperCssClass="mb-3" />
+	<aui:input ignoreRequestValue="<%= journalEditArticleDisplayContext.isChangeStructure() %>" label="" name="smallFile" type="file" wrapperCssClass="mb-3" />
 </div>
 
 <aui:script>

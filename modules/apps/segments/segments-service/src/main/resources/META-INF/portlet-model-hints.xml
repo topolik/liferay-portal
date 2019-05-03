@@ -2,6 +2,7 @@
 
 <model-hints>
 	<model name="com.liferay.segments.model.SegmentsEntry">
+		<field name="uuid" type="String" />
 		<field name="segmentsEntryId" type="long" />
 		<field name="groupId" type="long" />
 		<field name="companyId" type="long" />
@@ -9,6 +10,7 @@
 		<field name="userName" type="String" />
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
+		<field name="segmentsEntryKey" type="String" />
 		<field localized="true" name="name" type="String" />
 		<field localized="true" name="description" type="String">
 			<hint-collection name="TEXTAREA" />
@@ -17,9 +19,9 @@
 		<field name="criteria" type="String">
 			<hint-collection name="CLOB" />
 		</field>
-		<field name="key" type="String" />
 		<field name="source" type="String" />
 		<field name="type" type="String" />
+		<field name="lastPublishDate" type="Date" />
 	</model>
 	<model name="com.liferay.segments.model.SegmentsEntryRel">
 		<field name="segmentsEntryRelId" type="long" />
@@ -34,6 +36,7 @@
 		<field name="classPK" type="long" />
 	</model>
 	<model name="com.liferay.segments.model.SegmentsExperience">
+		<field name="uuid" type="String" />
 		<field name="segmentsExperienceId" type="long" />
 		<field name="groupId" type="long" />
 		<field name="companyId" type="long" />
@@ -47,5 +50,6 @@
 		<field localized="true" name="name" type="String" />
 		<field name="priority" type="int" />
 		<field name="active" type="boolean" />
+		<field name="lastPublishDate" type="Date" />
 	</model>
 </model-hints>

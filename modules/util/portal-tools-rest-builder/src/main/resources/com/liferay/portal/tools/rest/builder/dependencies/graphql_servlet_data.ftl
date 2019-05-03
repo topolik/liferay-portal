@@ -1,10 +1,8 @@
 package ${configYAML.apiPackagePath}.internal.graphql.servlet.${escapedVersion};
 
-<#compress>
-	<#list openAPIYAML.components.schemas?keys as schemaName>
-		import ${configYAML.apiPackagePath}.resource.${escapedVersion}.${schemaName}Resource;
-	</#list>
-</#compress>
+<#list openAPIYAML.components.schemas?keys as schemaName>
+	import ${configYAML.apiPackagePath}.resource.${escapedVersion}.${schemaName}Resource;
+</#list>
 
 import ${configYAML.apiPackagePath}.internal.graphql.mutation.${escapedVersion}.Mutation;
 import ${configYAML.apiPackagePath}.internal.graphql.query.${escapedVersion}.Query;
@@ -36,11 +34,11 @@ public class ServletDataImpl implements ServletData {
 	@Activate
 	public void activate(BundleContext bundleContext) {
 		<#list mutationSchemaNames as schemaName>
-			Mutation.set${schemaName}ResourceComponentServiceObjects(_${schemaName?uncap_first}ResourceComponentServiceObjects);
+			Mutation.set${schemaName}ResourceComponentServiceObjects(_${freeMarkerTool.getSchemaVarName(schemaName)}ResourceComponentServiceObjects);
 		</#list>
 
 		<#list querySchemaNames as schemaName>
-			Query.set${schemaName}ResourceComponentServiceObjects(_${schemaName?uncap_first}ResourceComponentServiceObjects);
+			Query.set${schemaName}ResourceComponentServiceObjects(_${freeMarkerTool.getSchemaVarName(schemaName)}ResourceComponentServiceObjects);
 		</#list>
 	}
 
@@ -69,7 +67,7 @@ public class ServletDataImpl implements ServletData {
 
 	<#list schemaNames as schemaName>
 		@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)
-		private ComponentServiceObjects<${schemaName}Resource> _${schemaName?uncap_first}ResourceComponentServiceObjects;
+		private ComponentServiceObjects<${schemaName}Resource> _${freeMarkerTool.getSchemaVarName(schemaName)}ResourceComponentServiceObjects;
 	</#list>
 
 }

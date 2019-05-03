@@ -28,38 +28,25 @@ public class LayoutRevisionTable {
 	public static final String TABLE_NAME = "LayoutRevision";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"layoutRevisionId", Types.BIGINT},
-		{"groupId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"layoutSetBranchId", Types.BIGINT},
-		{"layoutBranchId", Types.BIGINT},
-		{"parentLayoutRevisionId", Types.BIGINT},
-		{"head", Types.BOOLEAN},
-		{"major", Types.BOOLEAN},
-		{"plid", Types.BIGINT},
-		{"privateLayout", Types.BOOLEAN},
-		{"name", Types.VARCHAR},
-		{"title", Types.VARCHAR},
-		{"description", Types.VARCHAR},
-		{"keywords", Types.VARCHAR},
-		{"robots", Types.VARCHAR},
-		{"typeSettings", Types.CLOB},
-		{"iconImageId", Types.BIGINT},
-		{"themeId", Types.VARCHAR},
-		{"colorSchemeId", Types.VARCHAR},
-		{"css", Types.CLOB},
-		{"status", Types.INTEGER},
-		{"statusByUserId", Types.BIGINT},
-		{"statusByUserName", Types.VARCHAR},
+		{"mvccVersion", Types.BIGINT}, {"layoutRevisionId", Types.BIGINT},
+		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
+		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
+		{"layoutSetBranchId", Types.BIGINT}, {"layoutBranchId", Types.BIGINT},
+		{"parentLayoutRevisionId", Types.BIGINT}, {"head", Types.BOOLEAN},
+		{"major", Types.BOOLEAN}, {"plid", Types.BIGINT},
+		{"privateLayout", Types.BOOLEAN}, {"name", Types.VARCHAR},
+		{"title", Types.VARCHAR}, {"description", Types.VARCHAR},
+		{"keywords", Types.VARCHAR}, {"robots", Types.VARCHAR},
+		{"typeSettings", Types.CLOB}, {"iconImageId", Types.BIGINT},
+		{"themeId", Types.VARCHAR}, {"colorSchemeId", Types.VARCHAR},
+		{"css", Types.CLOB}, {"status", Types.INTEGER},
+		{"statusByUserId", Types.BIGINT}, {"statusByUserName", Types.VARCHAR},
 		{"statusDate", Types.TIMESTAMP}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -121,7 +108,8 @@ TABLE_COLUMNS_MAP.put("statusByUserName", Types.VARCHAR);
 TABLE_COLUMNS_MAP.put("statusDate", Types.TIMESTAMP);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table LayoutRevision (mvccVersion LONG default 0 not null,layoutRevisionId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,layoutSetBranchId LONG,layoutBranchId LONG,parentLayoutRevisionId LONG,head BOOLEAN,major BOOLEAN,plid LONG,privateLayout BOOLEAN,name STRING null,title STRING null,description STRING null,keywords STRING null,robots STRING null,typeSettings TEXT null,iconImageId LONG,themeId VARCHAR(75) null,colorSchemeId VARCHAR(75) null,css TEXT null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
+	public static final String TABLE_SQL_CREATE =
+"create table LayoutRevision (mvccVersion LONG default 0 not null,layoutRevisionId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,layoutSetBranchId LONG,layoutBranchId LONG,parentLayoutRevisionId LONG,head BOOLEAN,major BOOLEAN,plid LONG,privateLayout BOOLEAN,name STRING null,title STRING null,description STRING null,keywords STRING null,robots STRING null,typeSettings TEXT null,iconImageId LONG,themeId VARCHAR(75) null,colorSchemeId VARCHAR(75) null,css TEXT null,status INTEGER,statusByUserId LONG,statusByUserName VARCHAR(75) null,statusDate DATE null)";
 
 	public static final String TABLE_SQL_DROP = "drop table LayoutRevision";
 

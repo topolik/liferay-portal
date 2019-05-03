@@ -62,6 +62,10 @@ public class SelectLayoutPageTemplateEntryVerticalCard implements VerticalCard {
 			addLayoutURL.setParameter(
 				"mvcRenderCommandName", "/layout/add_layout");
 
+			String redirect = ParamUtil.getString(_request, "redirect");
+
+			addLayoutURL.setParameter("backURL", redirect);
+
 			long selPlid = ParamUtil.getLong(_request, "selPlid");
 
 			addLayoutURL.setParameter("selPlid", String.valueOf(selPlid));
@@ -88,7 +92,8 @@ public class SelectLayoutPageTemplateEntryVerticalCard implements VerticalCard {
 
 	@Override
 	public String getElementClasses() {
-		return "add-layout-action-option";
+		return "add-layout-action-option card-interactive " +
+			"card-interactive-primary";
 	}
 
 	@Override
@@ -117,7 +122,7 @@ public class SelectLayoutPageTemplateEntryVerticalCard implements VerticalCard {
 			return LanguageUtil.get(_request, "widget-page-template");
 		}
 
-		return LanguageUtil.get(_request, "standard-page-template");
+		return LanguageUtil.get(_request, "content-page-template");
 	}
 
 	@Override

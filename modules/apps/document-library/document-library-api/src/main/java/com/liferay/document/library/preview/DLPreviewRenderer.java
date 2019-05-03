@@ -32,14 +32,16 @@ public interface DLPreviewRenderer {
 	/**
 	 * Renders content to the response.
 	 *
-	 * @param request the request
-	 * @param response the response
+	 * @param httpServletRequest the request
+	 * @param httpServletResponse the response
 	 * @see   DLPreviewRendererProvider#getPreviewDLPreviewRendererOptional(
 	 *        FileVersion)
 	 * @see   DLPreviewRendererProvider#getThumbnailDLPreviewRendererOptional(
 	 *        FileVersion)
 	 */
-	public void render(HttpServletRequest request, HttpServletResponse response)
+	public void render(
+			HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse)
 		throws IOException, PortalException, ServletException;
 
 }

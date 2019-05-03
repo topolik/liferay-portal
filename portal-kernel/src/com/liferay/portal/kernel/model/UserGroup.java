@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.UserGroupImpl")
 @ProviderType
-public interface UserGroup extends UserGroupModel, PersistedModel {
+public interface UserGroup extends PersistedModel, UserGroupModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

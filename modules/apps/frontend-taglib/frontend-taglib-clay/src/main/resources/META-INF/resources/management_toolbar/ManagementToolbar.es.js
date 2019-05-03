@@ -82,6 +82,18 @@ class ManagementToolbar extends ClayComponent {
 		}
 	}
 
+	isCacheable(uri) {
+		let cacheable = true;
+
+		if (this._searchContainer && this._searchContainer.select) {
+			const keepSelection = this._searchContainer.select.get('keepSelection');
+
+			cacheable = keepSelection.test(uri);
+		}
+
+		return cacheable;
+	}
+
 	/**
 	 * Deselects all searchContainer rows
 	 * @param {!Event} event
@@ -184,7 +196,7 @@ class ManagementToolbar extends ClayComponent {
 					return Object.assign(
 						actionItem,
 						{
-							disabled: event.actions && event.actions.indexOf(actionItem.data.action) === -1
+							disabled: event.actions && event.actions.indexOf(actionItem.data.action) === -1 && (!bulkSelection || !actionItem.data.enableOnBulk)
 						}
 					);
 				}
@@ -289,6 +301,7 @@ ManagementToolbar.STATE = {
 		{
 			caption: Config.string(),
 			helpText: Config.string(),
+			itemsIconAlignment: Config.string(),
 			maxPrimaryItems: Config.number(),
 			maxSecondaryItems: Config.number(),
 			maxTotalItems: Config.number(),

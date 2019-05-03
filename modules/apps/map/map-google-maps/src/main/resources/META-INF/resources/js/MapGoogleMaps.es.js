@@ -12,6 +12,7 @@ import GoogleMapsSearch from './GoogleMapsSearch.es';
  * @review
  */
 class MapGoogleMaps extends MapBase {
+
 	/**
 	 * Creates a new map using Google Map's API
 	 * @param  {Array} args List of arguments to be passed to State
@@ -31,7 +32,7 @@ class MapGoogleMaps extends MapBase {
 		const mapConfig = {
 			center: location,
 			mapTypeId: google.maps.MapTypeId.ROADMAP,
-			zoom: this.zoom,
+			zoom: this.zoom
 		};
 
 		const map = new google.maps.Map(
@@ -111,7 +112,7 @@ MapGoogleMaps.CONTROLS_MAP = {
 	[MapBase.CONTROLS.SCALE]: 'scaleControl',
 	[MapBase.CONTROLS.STREETVIEW]: 'streetViewControl',
 	[MapBase.CONTROLS.TYPE]: 'mapTypeControl',
-	[MapBase.CONTROLS.ZOOM]: 'zoomControl',
+	[MapBase.CONTROLS.ZOOM]: 'zoomControl'
 };
 
 window.Liferay = window.Liferay || {};

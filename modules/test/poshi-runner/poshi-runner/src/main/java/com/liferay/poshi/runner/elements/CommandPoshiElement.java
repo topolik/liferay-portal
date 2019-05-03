@@ -15,7 +15,6 @@
 package com.liferay.poshi.runner.elements;
 
 import com.liferay.poshi.runner.script.PoshiScriptParserException;
-import com.liferay.poshi.runner.util.StringUtil;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -58,12 +57,7 @@ public class CommandPoshiElement extends PoshiElement {
 
 	@Override
 	public int getPoshiScriptLineNumber() {
-		String poshiScript = getPoshiScript();
-
-		String blockName = getBlockName(poshiScript);
-
-		return super.getPoshiScriptLineNumber() +
-			StringUtil.count(blockName, "\n");
+		return getPoshiScriptLineNumber(false);
 	}
 
 	@Override
@@ -109,12 +103,13 @@ public class CommandPoshiElement extends PoshiElement {
 
 		sb.append("\n");
 
-		for (PoshiElement poshiElement :
-				toPoshiElements(elements("description"))) {
+		DescriptionPoshiElement descriptionPoshiElement =
+			(DescriptionPoshiElement)element("description");
 
-			sb.append("\n\t@description = \"");
-			sb.append(poshiElement.attributeValue("message"));
-			sb.append("\"");
+		if (descriptionPoshiElement != null) {
+			sb.append("\n\t");
+
+			sb.append(descriptionPoshiElement.toPoshiScript());
 		}
 
 		for (PoshiElementAttribute poshiElementAttribute :

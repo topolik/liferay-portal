@@ -14,13 +14,25 @@
 
 package com.liferay.change.tracking.change.lists.history.web.internal.display.context;
 
+import com.liferay.change.tracking.CTEngineManager;
+import com.liferay.change.tracking.CTManager;
+import com.liferay.change.tracking.constants.CTWebKeys;
+import com.liferay.change.tracking.model.CTCollection;
+import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.portal.kernel.dao.orm.QueryDefinition;
+import com.liferay.portal.kernel.dao.search.DisplayTerms;
+import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.portlet.PortletURLUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.template.soy.util.SoyContext;
 import com.liferay.portal.template.soy.util.SoyContextFactoryUtil;
 
@@ -32,6 +44,10 @@ import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Máté Thurzó
@@ -48,26 +64,82 @@ public class ChangeListsHistoryDisplayContext {
 
 		_themeDisplay = (ThemeDisplay)_httpServletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
+
+		_ctEngineManager = _ctEngineManagerServiceTracker.getService();
+		_ctManager = _ctManagerServiceTracker.getService();
+	}
+
+	public int getAffectsCount(CTEntry ctEntry) {
+		return _ctManager.getRelatedOwnerCTEntriesCount(ctEntry.getCtEntryId());
 	}
 
 	public SoyContext getChangeListsHistoryContext() {
 		SoyContext soyContext = SoyContextFactoryUtil.createSoyContext();
 
-		soyContext.put("baseURL", String.valueOf(_getPortletURL()));
-		soyContext.put("filterStatus", _getFilterByStatus());
-		soyContext.put("filterUser", _getFilterByUser());
-		soyContext.put("orderByCol", _getOrderByCol());
-		soyContext.put("orderByType", getOrderByType());
 		soyContext.put(
+			"baseURL", String.valueOf(_getPortletURL())
+		).put(
+			"filterStatus", _getFilterByStatus()
+		).put(
+			"filterUser", _getFilterByUser()
+		).put(
+			"orderByCol", _getOrderByCol()
+		).put(
+			"orderByType", getOrderByType()
+		).put(
 			"spritemap",
-			_themeDisplay.getPathThemeImages() + "/lexicon/icons.svg");
-		soyContext.put(
+			_themeDisplay.getPathThemeImages() + "/lexicon/icons.svg"
+		).put(
 			"urlProcesses",
 			_themeDisplay.getPortalURL() +
 				"/o/change-tracking/processes?companyId=" +
-					_themeDisplay.getCompanyId());
+					_themeDisplay.getCompanyId()
+		);
 
 		return soyContext;
+	}
+
+	public String getChangeType(int changeType) {
+		if (changeType == 1) {
+			return "deleted";
+		}
+		else if (changeType == 2) {
+			return "modified";
+		}
+		else {
+			return "added";
+		}
+	}
+
+	public SearchContainer<CTEntry> getCTCollectionDetailsSearchContainer(
+		CTCollection ctCollection) {
+
+		SearchContainer<CTEntry> searchContainer = new SearchContainer<>(
+			_renderRequest, new DisplayTerms(_renderRequest), null,
+			SearchContainer.DEFAULT_CUR_PARAM, 0, SearchContainer.DEFAULT_DELTA,
+			_getIteratorURL(), null, "there-are-no-change-entries");
+
+		OrderByComparator<CTEntry> orderByComparator =
+			OrderByComparatorFactoryUtil.create(
+				"CTEntry", _getOrderByCol(), getOrderByType().equals("asc"));
+
+		QueryDefinition<CTEntry> queryDefinition = new QueryDefinition<>(
+			WorkflowConstants.STATUS_DRAFT, true, searchContainer.getStart(),
+			searchContainer.getEnd(), orderByComparator);
+
+		queryDefinition.setEnd(searchContainer.getEnd());
+		queryDefinition.setOrderByComparator(orderByComparator);
+		queryDefinition.setStart(searchContainer.getStart());
+		queryDefinition.setStatus(WorkflowConstants.STATUS_APPROVED);
+
+		searchContainer.setResults(
+			_ctEngineManager.getCTEntries(
+				ctCollection.getCtCollectionId(), queryDefinition));
+		searchContainer.setTotal(
+			_ctEngineManager.getCTEntriesCount(
+				ctCollection.getCtCollectionId(), queryDefinition));
+
+		return searchContainer;
 	}
 
 	public List<DropdownItem> getFilterDropdownItems() {
@@ -125,17 +197,6 @@ public class ChangeListsHistoryDisplayContext {
 		PortletURL portletURL = _renderResponse.createRenderURL();
 
 		return portletURL.toString();
-	}
-
-	private String _getDisplayStyle() {
-		if (_displayStyle != null) {
-			return _displayStyle;
-		}
-
-		_displayStyle = ParamUtil.getString(
-			_httpServletRequest, "displayStyle", "list");
-
-		return _displayStyle;
 	}
 
 	private String _getFilterByStatus() {
@@ -227,13 +288,31 @@ public class ChangeListsHistoryDisplayContext {
 		};
 	}
 
+	private PortletURL _getIteratorURL() {
+		PortletURL currentURL = PortletURLUtil.getCurrent(
+			_renderRequest, _renderResponse);
+
+		long ctProcessId = ParamUtil.getLong(
+			_renderRequest, CTWebKeys.CT_PROCESS_ID);
+
+		PortletURL iteratorURL = _renderResponse.createRenderURL();
+
+		iteratorURL.setParameter("mvcPath", "/details.jsp");
+		iteratorURL.setParameter("redirect", currentURL.toString());
+		iteratorURL.setParameter("displayStyle", "list");
+		iteratorURL.setParameter(
+			CTWebKeys.CT_PROCESS_ID, String.valueOf(ctProcessId));
+
+		return iteratorURL;
+	}
+
 	private String _getOrderByCol() {
 		if (_orderByCol != null) {
 			return _orderByCol;
 		}
 
 		_orderByCol = ParamUtil.getString(
-			_httpServletRequest, "orderByCol", "publishDate");
+			_httpServletRequest, "orderByCol", "modifiedDate");
 
 		return _orderByCol;
 	}
@@ -244,12 +323,12 @@ public class ChangeListsHistoryDisplayContext {
 				add(
 					dropdownItem -> {
 						dropdownItem.setActive(
-							Objects.equals(_getOrderByCol(), "publishDate"));
+							Objects.equals(_getOrderByCol(), "modifiedDate"));
 						dropdownItem.setHref(
-							_getPortletURL(), "orderByCol", "publishDate");
+							_getPortletURL(), "orderByCol", "modifiedDate");
 						dropdownItem.setLabel(
 							LanguageUtil.get(
-								_httpServletRequest, "publish-date"));
+								_httpServletRequest, "modified-date"));
 					});
 				add(
 					dropdownItem -> {
@@ -267,12 +346,7 @@ public class ChangeListsHistoryDisplayContext {
 	private PortletURL _getPortletURL() {
 		PortletURL portletURL = _renderResponse.createRenderURL();
 
-		String displayStyle = ParamUtil.getString(
-			_httpServletRequest, "displayStyle");
-
-		if (Validator.isNotNull(displayStyle)) {
-			portletURL.setParameter("displayStyle", _getDisplayStyle());
-		}
+		portletURL.setParameter("displayStyle", "list");
 
 		String orderByCol = _getOrderByCol();
 
@@ -289,7 +363,33 @@ public class ChangeListsHistoryDisplayContext {
 		return portletURL;
 	}
 
-	private String _displayStyle;
+	private static ServiceTracker<CTEngineManager, CTEngineManager>
+		_ctEngineManagerServiceTracker;
+	private static ServiceTracker<CTManager, CTManager>
+		_ctManagerServiceTracker;
+
+	static {
+		Bundle bundle = FrameworkUtil.getBundle(CTEngineManager.class);
+
+		ServiceTracker<CTEngineManager, CTEngineManager>
+			ctEngineManagerServiceTracker = new ServiceTracker<>(
+				bundle.getBundleContext(), CTEngineManager.class, null);
+
+		ctEngineManagerServiceTracker.open();
+
+		_ctEngineManagerServiceTracker = ctEngineManagerServiceTracker;
+
+		ServiceTracker<CTManager, CTManager> ctManagerServiceTracker =
+			new ServiceTracker<>(
+				bundle.getBundleContext(), CTManager.class, null);
+
+		ctManagerServiceTracker.open();
+
+		_ctManagerServiceTracker = ctManagerServiceTracker;
+	}
+
+	private final CTEngineManager _ctEngineManager;
+	private final CTManager _ctManager;
 	private String _filterByStatus;
 	private String _filterByUser;
 	private final HttpServletRequest _httpServletRequest;

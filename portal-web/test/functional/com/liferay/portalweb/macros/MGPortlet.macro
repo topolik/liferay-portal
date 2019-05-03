@@ -2,8 +2,7 @@ definition {
 	macro configureShowAllPG {
 		Portlet.gotoPortletOptions(
 			portletName = "Media Gallery",
-			portletOption = "Configuration"
-		);
+			portletOption = "Configuration");
 
 		SelectFrame(locator1 = "IFrame#CONFIGURATION");
 
@@ -27,7 +26,7 @@ definition {
 	macro viewShowAllPG {
 		Click.waitForMenuToggleJSClick(locator1 = "Icon#BODY_VERTICAL_ELLIPSIS");
 
-		for (var menuItem : list "Permissions,Add Subfolder,Multiple Media,Add Shortcut,Access from Desktop") {
+		for (var menuItem : list "Permissions,Multiple Media,Add Shortcut,Access from Desktop") {
 			MenuItem.viewPresent(menuItem = "${menuItem}");
 		}
 	}

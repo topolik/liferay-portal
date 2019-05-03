@@ -32,7 +32,7 @@ if (selUser != null) {
 
 long selUserId = (selUser != null) ? selUser.getUserId() : 0;
 
-String screenNavigationCategoryKey = ParamUtil.getString(request, "screenNavigationCategoryKey", UserFormConstants.CATEGORY_KEY_GENERAL);
+String screenNavigationCategoryKey = ParamUtil.getString(request, "screenNavigationCategoryKey", UserScreenNavigationEntryConstants.CATEGORY_KEY_GENERAL);
 String screenNavigationEntryKey = ParamUtil.getString(request, "screenNavigationEntryKey");
 %>
 
@@ -61,7 +61,7 @@ if (!portletName.equals(UsersAdminPortletKeys.MY_ACCOUNT)) {
 
 <portlet:actionURL name="<%= actionCommandName %>" var="actionCommandURL" />
 
-<aui:form action="<%= actionCommandURL %>" cssClass="portlet-users-admin-edit-user" data-senna-off="true" method="post" name="fm">
+<aui:form action="<%= actionCommandURL %>" cssClass="portlet-users-admin-edit-user" method="post" name="fm">
 	<aui:input name="redirect" type="hidden" value="<%= redirect.toString() %>" />
 	<aui:input name="p_u_i_d" type="hidden" value="<%= selUserId %>" />
 	<aui:input name="screenNavigationCategoryKey" type="hidden" value="<%= screenNavigationCategoryKey %>" />

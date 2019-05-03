@@ -22,15 +22,14 @@ import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.ContainerModel;
 import com.liferay.portal.kernel.model.SystemEvent;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.TrashedModel;
-import com.liferay.portal.kernel.search.Query;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.filter.Filter;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
@@ -61,40 +60,12 @@ public abstract class BaseTrashHandler implements TrashHandler {
 			String referrerClassName)
 		throws PortalException {
 
-		JSONObject extraDataJSONObject = JSONFactoryUtil.createJSONObject();
-
-		extraDataJSONObject.put("inTrash", true);
+		JSONObject extraDataJSONObject = JSONUtil.put("inTrash", true);
 
 		return SystemEventLocalServiceUtil.addSystemEvent(
 			userId, groupId, getSystemEventClassName(), classPK, classUuid,
 			referrerClassName, SystemEventConstants.TYPE_DELETE,
 			extraDataJSONObject.toString());
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #checkRestorableEntry(long, long, String)}
-	 */
-	@Deprecated
-	@Override
-	public void checkDuplicateEntry(
-			long classPK, long containerModelId, String newName)
-		throws PortalException {
-
-		checkRestorableEntry(classPK, containerModelId, newName);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #checkRestorableEntry(TrashEntry, long, String)}
-	 */
-	@Deprecated
-	@Override
-	public void checkDuplicateTrashEntry(
-			TrashEntry trashEntry, long containerModelId, String newName)
-		throws PortalException {
-
-		checkRestorableEntry(trashEntry, containerModelId, newName);
 	}
 
 	@Override
@@ -114,16 +85,6 @@ public abstract class BaseTrashHandler implements TrashHandler {
 		throws PortalException {
 
 		return null;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #getContainerModel(long)}
-	 */
-	@Deprecated
-	@Override
-	public String getContainerModelClassName() {
-		return getContainerModelClassName(0);
 	}
 
 	@Override
@@ -165,16 +126,6 @@ public abstract class BaseTrashHandler implements TrashHandler {
 
 	@Override
 	public Filter getExcludeFilter(SearchContext searchContext) {
-		return null;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #getExcludeFilter(SearchContext)}
-	 */
-	@Deprecated
-	@Override
-	public Query getExcludeQuery(SearchContext searchContext) {
 		return null;
 	}
 

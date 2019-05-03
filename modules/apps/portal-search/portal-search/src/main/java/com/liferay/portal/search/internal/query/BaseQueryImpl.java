@@ -27,12 +27,8 @@ public abstract class BaseQueryImpl implements Query {
 	}
 
 	@Override
-	public boolean isDefaultBoost() {
-		if (_boost == null) {
-			return true;
-		}
-
-		return false;
+	public String getQueryName() {
+		return _queryName;
 	}
 
 	@Override
@@ -40,8 +36,14 @@ public abstract class BaseQueryImpl implements Query {
 		_boost = boost;
 	}
 
+	@Override
+	public void setQueryName(String queryName) {
+		_queryName = queryName;
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	private Float _boost;
+	private String _queryName;
 
 }

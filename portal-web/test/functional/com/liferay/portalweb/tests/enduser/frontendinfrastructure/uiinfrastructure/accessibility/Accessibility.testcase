@@ -34,10 +34,9 @@ definition {
 	@priority = "4"
 	test ViewCollaborationPortlets {
 		ProductMenu.gotoPortlet(
-			category = "Build",
+			category = "Site Builder",
 			panel = "Site Administration",
-			portlet = "Pages"
-		);
+			portlet = "Pages");
 
 		SitePages.addPublicPage(pageName = "Collaboration Page");
 

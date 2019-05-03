@@ -28,26 +28,19 @@ public class AnnouncementsEntryTable {
 	public static final String TABLE_NAME = "AnnouncementsEntry";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"uuid_", Types.VARCHAR},
-		{"entryId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT},
-		{"title", Types.VARCHAR},
-		{"content", Types.CLOB},
-		{"url", Types.VARCHAR},
-		{"type_", Types.VARCHAR},
-		{"displayDate", Types.TIMESTAMP},
-		{"expirationDate", Types.TIMESTAMP},
-		{"priority", Types.INTEGER},
+		{"uuid_", Types.VARCHAR}, {"entryId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
+		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"classNameId", Types.BIGINT},
+		{"classPK", Types.BIGINT}, {"title", Types.VARCHAR},
+		{"content", Types.CLOB}, {"url", Types.VARCHAR},
+		{"type_", Types.VARCHAR}, {"displayDate", Types.TIMESTAMP},
+		{"expirationDate", Types.TIMESTAMP}, {"priority", Types.INTEGER},
 		{"alert", Types.BOOLEAN}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
@@ -85,7 +78,8 @@ TABLE_COLUMNS_MAP.put("priority", Types.INTEGER);
 TABLE_COLUMNS_MAP.put("alert", Types.BOOLEAN);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table AnnouncementsEntry (uuid_ VARCHAR(75) null,entryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,title VARCHAR(75) null,content TEXT null,url STRING null,type_ VARCHAR(75) null,displayDate DATE null,expirationDate DATE null,priority INTEGER,alert BOOLEAN)";
+	public static final String TABLE_SQL_CREATE =
+"create table AnnouncementsEntry (uuid_ VARCHAR(75) null,entryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,title VARCHAR(75) null,content TEXT null,url STRING null,type_ VARCHAR(75) null,displayDate DATE null,expirationDate DATE null,priority INTEGER,alert BOOLEAN)";
 
 	public static final String TABLE_SQL_DROP = "drop table AnnouncementsEntry";
 

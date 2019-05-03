@@ -20,24 +20,48 @@
 	for (Map.Entry<AssignableScopes, AssignScopesDisplayContext.Relations> scopeAliasAssignableScopesEntry : assignScopesDisplayContext.getGlobalAssignableScopesRelations().entrySet()) {
 		AssignScopesDisplayContext.Relations relations = scopeAliasAssignableScopesEntry.getValue();
 
+		Set<String> assignedScopeAliases = relations.getAssignedScopeAliases();
+
 		Set<String> scopeAliases = relations.getScopeAliases();
 
-		String scopeAlias = StringPool.BLANK;
+		Set<String> relatedScopeAliases = new HashSet<>(scopeAliases);
+		relatedScopeAliases.addAll(assignedScopeAliases);
 
-		if (!scopeAliases.isEmpty()) {
-			Iterator<String> iterator = scopeAliases.iterator();
+		List<String> relatedScopeAliasesList = new ArrayList<>(relatedScopeAliases);
 
-			scopeAlias = iterator.next();
+		Collections.sort(relatedScopeAliasesList);
+
+		Iterator<String> iterator = relatedScopeAliasesList.iterator();
+
+		StringBundler sb = new StringBundler(scopeAliases.size() * 2 - 1);
+
+		while (iterator.hasNext()) {
+			String scopeAlias = iterator.next();
+			if (!scopeAliases.contains(scopeAlias)) {
+				sb.append("<span class=\"removed-scope\">");
+				sb.append(LanguageUtil.get(request, scopeAlias));
+				sb.append("</span>");
+			}
+			else {
+				sb.append(LanguageUtil.get(request, scopeAlias));
+			}
+
+			if (iterator.hasNext()) {
+				sb.append(" / ");
+			}
 		}
+
+		String id = StringUtil.randomId();
+		String scopeAliasesString = StringUtil.merge(scopeAliases, StringPool.SPACE);
 	%>
 
-		<div class="panel panel-secondary" id="<portlet:namespace /><%= scopeAlias %>">
-			<div class="collapse-icon panel-header panel-header-link" id="<portlet:namespace />globalAccordionHeading<%= scopeAlias %>">
+		<div class="panel panel-secondary<c:if test="<%= scopeAliases.size() == 0 %>"> removed-scope</c:if>" data-master="<%= scopeAliasesString %>" id="<portlet:namespace /><%= id %>">
+			<div class="collapse-icon panel-header panel-header-link" id="<portlet:namespace />globalAccordionHeading<%= id %>">
 				<div class="inline">
-					<aui:input checked="<%= assignedScopes.contains(scopeAlias) %>" id="<%= StringUtil.randomId() %>" label="<%= HtmlUtil.escape(scopeAlias) %>" name="scopeAliases" onChange='<%= renderResponse.getNamespace() + "recalculateDependants(this)" %>' type="checkbox" value="<%= scopeAlias %>" />
+					<aui:input checked="<%= !assignedScopeAliases.isEmpty() %>" id='<%= "scopeAlias" + id %>' label="<%= sb.toString() %>" name="scopeAliases" onChange='<%= renderResponse.getNamespace() + "recalculateDependants(this)" %>' type="checkbox" value="<%= scopeAliasesString %>" />
 				</div>
 
-				<a aria-controls="<portlet:namespace />globalAccordion<%= scopeAlias %>" aria-expanded="false" class="collapsed" data-parent="#<portlet:namespace />globalAccordion" data-toggle="collapse" href="#<portlet:namespace />globalAccordion<%= scopeAlias %>" role="tab">
+				<a aria-controls="<portlet:namespace />globalAccordion<%= id %>" aria-expanded="false" class="collapsed" data-parent="#<portlet:namespace />globalAccordion" data-toggle="collapse" href="#<portlet:namespace />globalAccordion<%= id %>" role="tab">
 					<span>(<liferay-ui:message key="details" />)</span>
 
 					<span class="collapse-icon-closed">
@@ -53,11 +77,23 @@
 				</a>
 			</div>
 
-			<div aria-labelledby="<portlet:namespace />globalAccordionHeading<%= scopeAlias %>" class="collapse panel-collapse" id="<portlet:namespace />globalAccordion<%= scopeAlias %>" role="tabpanel">
+			<div aria-labelledby="<portlet:namespace />globalAccordionHeading<%= id %>" class="collapse panel-collapse" id="<portlet:namespace />globalAccordion<%= id %>" role="tabpanel">
 				<div class="panel-body">
 
 					<%
 					AssignableScopes assignableScopes = scopeAliasAssignableScopesEntry.getKey();
+					AssignableScopes assignedAssignableScopes = relations.getAssignedAssignableScopes();
+
+					AssignableScopes newAssignableScopes = null;
+					AssignableScopes removedAssignableScopes = null;
+					AssignableScopes unchangedAssignableScopes = null;
+
+					if (assignedAssignableScopes != null) {
+						newAssignableScopes = assignableScopes.subtract(assignedAssignableScopes);
+						removedAssignableScopes = assignedAssignableScopes.subtract(assignableScopes);
+						unchangedAssignableScopes = assignableScopes.subtract(newAssignableScopes).subtract(removedAssignableScopes);
+						assignableScopes = assignableScopes.add(assignedAssignableScopes);
+					}
 
 					for (String applicationName : assignableScopes.getApplicationNames()) {
 					%>
@@ -74,7 +110,49 @@
 									<h4 class="list-group-title text-truncate"><%= HtmlUtil.escape(assignScopesDisplayContext.getApplicationDescription(applicationName)) %></h4>
 
 									<p class="list-group-subtitle text-truncate">
-										<%= assignScopesDisplayContext.getApplicationScopeDescription(applicationName, assignableScopes, "<br />+ ") %>
+										<c:choose>
+											<c:when test="<%= assignedAssignableScopes == null %>">
+												<%= assignScopesDisplayContext.getApplicationScopeDescription(applicationName, assignableScopes, "<br />+ ") %>
+											</c:when>
+											<c:otherwise>
+
+												<%
+												String applicationScopeDescription = assignScopesDisplayContext.getApplicationScopeDescription(applicationName, unchangedAssignableScopes, "<br />+ ");
+												%>
+
+												<div>
+													<%= applicationScopeDescription %>
+												</div>
+
+												<%
+												boolean firstLine = applicationScopeDescription.length() == 0;
+												applicationScopeDescription = assignScopesDisplayContext.getApplicationScopeDescription(applicationName, removedAssignableScopes, "<br />+ ");
+												%>
+
+												<c:if test="<%= applicationScopeDescription.length() > 0 %>">
+													<div class="removed-scope">
+														<c:if test="<%= !firstLine %>">+ </c:if>
+
+														<%
+														firstLine = firstLine && applicationScopeDescription.length() == 0;
+														%>
+
+														<%= applicationScopeDescription %>
+													</div>
+												</c:if>
+
+												<%
+												applicationScopeDescription = assignScopesDisplayContext.getApplicationScopeDescription(applicationName, newAssignableScopes, "<br />+ ");
+												%>
+
+												<c:if test="<%= applicationScopeDescription.length() > 0 %>">
+													<div class="added-scope">
+														<c:if test="<%= !firstLine %>">+ </c:if>
+														<%= applicationScopeDescription %>
+													</div>
+												</c:if>
+											</c:otherwise>
+										</c:choose>
 									</p>
 								</div>
 							</li>

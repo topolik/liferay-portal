@@ -120,30 +120,26 @@ if (ratingsType == null) {
 		</c:when>
 	</c:choose>
 
-	<%
-	boolean expanded = ParamUtil.getBoolean(request, "expanded");
-	%>
+	<c:if test="<%= kbCommentsCount > 0 %>">
+		<c:choose>
+			<c:when test="<%= showAdminSuggestionView %>">
 
-	<c:choose>
-		<c:when test="<%= showAdminSuggestionView %>">
+				<%
+				KBSuggestionListDisplayContext kbSuggestionListDisplayContext = new KBSuggestionListDisplayContext(request, templatePath, kbArticle);
 
-			<%
-			KBSuggestionListDisplayContext kbSuggestionListDisplayContext = new KBSuggestionListDisplayContext(request, templatePath, kbArticle);
+				request.setAttribute(KBWebKeys.KNOWLEDGE_BASE_KB_SUGGESTION_LIST_DISPLAY_CONTEXT, kbSuggestionListDisplayContext);
 
-			request.setAttribute(KBWebKeys.KNOWLEDGE_BASE_KB_SUGGESTION_LIST_DISPLAY_CONTEXT, kbSuggestionListDisplayContext);
+				SearchContainer kbCommentsSearchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, currentURLObj, null, kbSuggestionListDisplayContext.getEmptyResultsMessage());
 
-			SearchContainer kbCommentsSearchContainer = new SearchContainer(renderRequest, null, null, SearchContainer.DEFAULT_CUR_PARAM, SearchContainer.DEFAULT_DELTA, currentURLObj, null, kbSuggestionListDisplayContext.getEmptyResultsMessage());
+				kbSuggestionListDisplayContext.populateResultsAndTotal(kbCommentsSearchContainer);
 
-			kbSuggestionListDisplayContext.populateResultsAndTotal(kbCommentsSearchContainer);
+				request.setAttribute("view_suggestions.jsp-resultRowSplitter", new KBCommentResultRowSplitter(kbSuggestionListDisplayContext, resourceBundle));
+				request.setAttribute("view_suggestions.jsp-searchContainer", kbCommentsSearchContainer);
+				%>
 
-			request.setAttribute("view_suggestions.jsp-resultRowSplitter", new KBCommentResultRowSplitter(kbSuggestionListDisplayContext, resourceBundle));
-			request.setAttribute("view_suggestions.jsp-searchContainer", kbCommentsSearchContainer);
-			%>
-
-			<liferay-util:include page="/admin/common/view_suggestions_by_status.jsp" servletContext="<%= application %>" />
-		</c:when>
-		<c:otherwise>
-			<c:if test="<%= kbCommentsCount > 0 %>">
+				<liferay-util:include page="/admin/common/view_suggestions_by_status.jsp" servletContext="<%= application %>" />
+			</c:when>
+			<c:otherwise>
 				<liferay-portlet:renderURL varImpl="iteratorURL">
 					<portlet:param name="expanded" value="<%= Boolean.TRUE.toString() %>" />
 				</liferay-portlet:renderURL>
@@ -191,7 +187,7 @@ if (ratingsType == null) {
 						markupView="lexicon"
 					/>
 				</liferay-ui:search-container>
-			</c:if>
-		</c:otherwise>
-	</c:choose>
+			</c:otherwise>
+		</c:choose>
+	</c:if>
 </c:if>

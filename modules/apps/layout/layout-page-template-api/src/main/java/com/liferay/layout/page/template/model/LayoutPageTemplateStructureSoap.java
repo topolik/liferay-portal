@@ -48,7 +48,6 @@ public class LayoutPageTemplateStructureSoap implements Serializable {
 		soapModel.setModifiedDate(model.getModifiedDate());
 		soapModel.setClassNameId(model.getClassNameId());
 		soapModel.setClassPK(model.getClassPK());
-		soapModel.setData(model.getData());
 
 		return soapModel;
 	}
@@ -193,14 +192,6 @@ public class LayoutPageTemplateStructureSoap implements Serializable {
 		_classPK = classPK;
 	}
 
-	public String getData() {
-		return _data;
-	}
-
-	public void setData(String data) {
-		_data = data;
-	}
-
 	private String _uuid;
 	private long _layoutPageTemplateStructureId;
 	private long _groupId;
@@ -211,6 +202,5 @@ public class LayoutPageTemplateStructureSoap implements Serializable {
 	private Date _modifiedDate;
 	private long _classNameId;
 	private long _classPK;
-	private String _data;
 
 }

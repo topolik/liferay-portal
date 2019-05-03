@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface SiteNavigationMenu
-	extends SiteNavigationMenuModel, PersistedModel {
+	extends PersistedModel, SiteNavigationMenuModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

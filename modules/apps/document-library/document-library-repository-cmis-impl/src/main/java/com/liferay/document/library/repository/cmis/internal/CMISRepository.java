@@ -463,6 +463,10 @@ public class CMISRepository extends BaseCmisRepository {
 		}
 	}
 
+	public CMISRepositoryDetector getCMISRepositoryDetector() {
+		return _cmisRepositoryDetector;
+	}
+
 	@Override
 	public List<FileEntry> getFileEntries(
 		long folderId, int status, int start, int end,
@@ -937,15 +941,6 @@ public class CMISRepository extends BaseCmisRepository {
 		catch (Exception e) {
 			throw new RepositoryException(e);
 		}
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x)
-	 */
-	@Deprecated
-	@Override
-	public String[] getSupportedConfigurations() {
-		return _cmisRepositoryHandler.getSupportedConfigurations();
 	}
 
 	/**
@@ -1867,10 +1862,8 @@ public class CMISRepository extends BaseCmisRepository {
 
 		Folder folder = getFolder(session, folderId);
 
-		org.apache.chemistry.opencmis.client.api.Folder cmisFolder =
-			(org.apache.chemistry.opencmis.client.api.Folder)folder.getModel();
-
-		return cmisFolder;
+		return (org.apache.chemistry.opencmis.client.api.Folder)
+			folder.getModel();
 	}
 
 	protected List<String> getCmisFolderIds(Session session, long folderId)
@@ -2180,7 +2173,7 @@ public class CMISRepository extends BaseCmisRepository {
 	protected void processException(Exception e) throws PortalException {
 		String message = e.getMessage();
 
-		if ((e instanceof CmisRuntimeException &&
+		if (((e instanceof CmisRuntimeException) &&
 			 message.contains("authorized")) ||
 			(e instanceof CmisPermissionDeniedException)) {
 
@@ -2200,10 +2193,10 @@ public class CMISRepository extends BaseCmisRepository {
 		List<E> list, int start, int end, OrderByComparator<E> obc) {
 
 		if ((obc != null) &&
-			((obc instanceof RepositoryModelCreateDateComparator) ||
-			 (obc instanceof RepositoryModelModifiedDateComparator) ||
-			 (obc instanceof RepositoryModelSizeComparator) ||
-			 (obc instanceof RepositoryModelTitleComparator))) {
+			(obc instanceof RepositoryModelCreateDateComparator ||
+			 obc instanceof RepositoryModelModifiedDateComparator ||
+			 obc instanceof RepositoryModelSizeComparator ||
+			 obc instanceof RepositoryModelTitleComparator)) {
 
 			list = ListUtil.sort(list, obc);
 		}

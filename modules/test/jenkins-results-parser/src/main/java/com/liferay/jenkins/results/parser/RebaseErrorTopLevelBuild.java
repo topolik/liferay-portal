@@ -17,6 +17,7 @@ package com.liferay.jenkins.results.parser;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -63,14 +64,17 @@ public class RebaseErrorTopLevelBuild extends TopLevelBuild {
 				return result;
 			}
 
+			waitForNonzeroDuration();
+
+			Map<String, String> buildEnvMap = new HashMap<>();
 			int retries = 0;
 			long time = System.currentTimeMillis();
-			Map<String, String> stopPropertiesTempMap =
-				getStopPropertiesTempMap();
 
-			while (!stopPropertiesTempMap.containsKey(
-						"TOP_LEVEL_GITHUB_COMMENT_ID")) {
+			if (fromArchive) {
+				buildEnvMap = getStopPropertiesTempMap();
+			}
 
+			while (!buildEnvMap.containsKey("TOP_LEVEL_GITHUB_COMMENT_ID")) {
 				if (retries > 2) {
 					throw new RuntimeException(
 						"Unable to get TOP_LEVE_GITHUB_COMMENT_ID from stop " +
@@ -85,15 +89,15 @@ public class RebaseErrorTopLevelBuild extends TopLevelBuild {
 					return result;
 				}
 
+				buildEnvMap.putAll(getInjectedEnvironmentVariablesMap());
+
 				retries++;
 
 				JenkinsResultsParserUtil.sleep(10 * 1000);
-
-				stopPropertiesTempMap = getStopPropertiesTempMap();
 			}
 
 			if (matchCommentTokens(
-					getActualCommentTokens(stopPropertiesTempMap),
+					getActualCommentTokens(buildEnvMap),
 					getExpectedCommentTokens())) {
 
 				setResult("SUCCESS");
@@ -198,6 +202,27 @@ public class RebaseErrorTopLevelBuild extends TopLevelBuild {
 		}
 
 		return true;
+	}
+
+	protected void waitForNonzeroDuration() throws IOException {
+		long maxWaitTime = 300 * 1000;
+		long startTime = System.currentTimeMillis();
+
+		String localBuildURL = JenkinsResultsParserUtil.getLocalURL(
+			getBuildURL());
+
+		while ((System.currentTimeMillis() - startTime) < maxWaitTime) {
+			JSONObject jsonObject = JenkinsResultsParserUtil.toJSONObject(
+				localBuildURL + "/api/json?tree=duration", false);
+
+			int duration = jsonObject.getInt("duration");
+
+			if (duration > 0) {
+				return;
+			}
+
+			JenkinsResultsParserUtil.sleep(10 * 1000);
+		}
 	}
 
 	private boolean _validResult;

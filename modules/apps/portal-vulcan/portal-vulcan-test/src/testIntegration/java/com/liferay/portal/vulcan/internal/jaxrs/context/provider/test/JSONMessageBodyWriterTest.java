@@ -19,12 +19,10 @@ import com.fasterxml.jackson.annotation.JsonFilter;
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.vulcan.internal.test.util.URLConnectionUtil;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceRegistration;
-
-import java.net.URL;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,7 +53,7 @@ public class JSONMessageBodyWriterTest {
 
 		Map<String, Object> properties = new HashMap<>();
 
-		properties.put("liferay.auth.verifier", false);
+		properties.put("liferay.auth.verifier", true);
 		properties.put("liferay.oauth2", false);
 		properties.put("osgi.jaxrs.application.base", "/test-vulcan");
 		properties.put(
@@ -72,12 +70,9 @@ public class JSONMessageBodyWriterTest {
 
 	@Test
 	public void testFieldsFilterNestedJSONObject() throws Exception {
-		URL url = new URL(
+		JSONObject jsonObject = _createJSONObject(
 			"http://localhost:8080/o/test-vulcan/test-class?" +
 				"fields=string,testClass,testClass.number");
-
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			StringUtil.read(url.openStream()));
 
 		Assert.assertFalse(jsonObject.has("number"));
 		Assert.assertEquals("hello", jsonObject.getString("string"));
@@ -91,11 +86,8 @@ public class JSONMessageBodyWriterTest {
 
 	@Test
 	public void testFieldsFilterRootJSONObject() throws Exception {
-		URL url = new URL(
+		JSONObject jsonObject = _createJSONObject(
 			"http://localhost:8080/o/test-vulcan/test-class?fields=string");
-
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			StringUtil.read(url.openStream()));
 
 		Assert.assertFalse(jsonObject.has("number"));
 		Assert.assertFalse(jsonObject.has("testClass"));
@@ -104,10 +96,8 @@ public class JSONMessageBodyWriterTest {
 
 	@Test
 	public void testIsWrittenToJSON() throws Exception {
-		URL url = new URL("http://localhost:8080/o/test-vulcan/test-class");
-
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
-			StringUtil.read(url.openStream()));
+		JSONObject jsonObject = _createJSONObject(
+			"http://localhost:8080/o/test-vulcan/test-class");
 
 		Assert.assertEquals(1L, jsonObject.getLong("number"));
 		Assert.assertEquals("hello", jsonObject.getString("string"));
@@ -154,6 +144,11 @@ public class JSONMessageBodyWriterTest {
 
 		}
 
+	}
+
+	private JSONObject _createJSONObject(String urlString) throws Exception {
+		return JSONFactoryUtil.createJSONObject(
+			URLConnectionUtil.read(urlString));
 	}
 
 	private ServiceRegistration<Application> _serviceRegistration;

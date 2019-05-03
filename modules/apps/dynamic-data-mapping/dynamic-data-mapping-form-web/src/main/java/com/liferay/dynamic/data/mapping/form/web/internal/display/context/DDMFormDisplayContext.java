@@ -53,6 +53,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.WorkflowDefinitionLinkLocalService;
@@ -83,7 +84,6 @@ import java.util.stream.Stream;
 import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
-import javax.portlet.ResourceURL;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -254,11 +254,22 @@ public class DDMFormDisplayContext {
 	}
 
 	public String getDefaultLanguageId() throws PortalException {
+		String languageId = ParamUtil.getString(_renderRequest, "languageId");
+
+		Locale locale = LocaleUtil.fromLanguageId(languageId, true, false);
+
 		DDMForm ddmForm = getDDMForm();
 
-		return ParamUtil.getString(
-			_renderRequest, "languageId",
-			LanguageUtil.getLanguageId(ddmForm.getDefaultLocale()));
+		Set<Locale> availableLocales = ddmForm.getAvailableLocales();
+
+		if (!availableLocales.contains(locale)) {
+			HttpServletRequest request = PortalUtil.getHttpServletRequest(
+				_renderRequest);
+
+			locale = getLocale(request, ddmForm);
+		}
+
+		return LanguageUtil.getLanguageId(locale);
 	}
 
 	public DDMFormInstance getFormInstance() {
@@ -445,11 +456,13 @@ public class DDMFormDisplayContext {
 	}
 
 	protected String createCaptchaResourceURL() {
-		ResourceURL resourceURL = _renderResponse.createResourceURL();
+		LiferayPortletURL liferayPortletURL =
+			(LiferayPortletURL)_renderResponse.createResourceURL();
 
-		resourceURL.setResourceID("captcha");
+		liferayPortletURL.setCopyCurrentRenderParameters(false);
+		liferayPortletURL.setResourceID("captcha");
 
-		return resourceURL.toString();
+		return liferayPortletURL.toString();
 	}
 
 	protected DDMFormRenderingContext createDDMFormRenderingContext(
@@ -663,10 +676,7 @@ public class DDMFormDisplayContext {
 	}
 
 	protected ThemeDisplay getThemeDisplay() {
-		ThemeDisplay themeDisplay = (ThemeDisplay)_renderRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		return themeDisplay;
+		return (ThemeDisplay)_renderRequest.getAttribute(WebKeys.THEME_DISPLAY);
 	}
 
 	protected User getUser() {

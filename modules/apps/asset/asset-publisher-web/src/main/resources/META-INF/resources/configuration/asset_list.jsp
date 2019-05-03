@@ -20,67 +20,66 @@
 AssetListEntry assetListEntry = assetPublisherDisplayContext.fetchAssetListEntry();
 %>
 
-<div class="form-group input-text-wrapper text-default">
-	<div class="d-inline-block">
-		<span id="<portlet:namespace />assetListTitle">
-			<c:choose>
-				<c:when test="<%= assetListEntry != null %>">
-					<%= HtmlUtil.escape(assetListEntry.getTitle()) %>
-				</c:when>
-				<c:otherwise>
-					<span class="text-muted"><liferay-ui:message key="none" /></span>
-				</c:otherwise>
-			</c:choose>
-		</span>
+<aui:input id="assetListEntryId" name="preferences--assetListEntryId--" type="hidden" value="<%= (assetListEntry != null) ? assetListEntry.getAssetListEntryId() : StringPool.BLANK %>" />
 
-		<div class="d-inline-block <%= (assetListEntry == null) ? "hide" : StringPool.BLANK %>" id="<portlet:namespace />assetListRemove" role="button">
-			<aui:icon cssClass="icon-monospaced" image="times" markupView="lexicon" />
-		</div>
-	</div>
-
-	<aui:input id="assetListEntryId" name="preferences--assetListEntryId--" type="hidden" value="<%= (assetListEntry != null) ? assetListEntry.getAssetListEntryId() : StringPool.BLANK %>" />
+<div class="form-group input-text-wrapper text-default" id="<portlet:namespace />assetListTitle">
+	<c:choose>
+		<c:when test="<%= assetListEntry != null %>">
+			<%= HtmlUtil.escape(assetListEntry.getTitle()) %>
+		</c:when>
+		<c:otherwise>
+			<span class="text-muted"><liferay-ui:message key="none" /></span>
+		</c:otherwise>
+	</c:choose>
 </div>
 
-<aui:button name="selectAssetList" value="select" />
+<div class="button-row">
+	<aui:button cssClass="mr-2" name="selectAssetListButton" value="select" />
 
-<aui:script use="liferay-item-selector-dialog">
-	var assetListEntryId = A.one('#<portlet:namespace />assetListEntryId');
-	var assetListRemove = A.one('#<portlet:namespace />assetListRemove');
-	var assetListTitle = A.one('#<portlet:namespace />assetListTitle');
+	<aui:button name="clearAssetListButton" value="clear" />
+</div>
 
-	A.one('#<portlet:namespace />selectAssetList').on(
-		'click',
-		function(event) {
-			Liferay.Util.selectEntity(
-				{
-					dialog: {
+<script>
+	var assetListEntryId = document.getElementById('<portlet:namespace />assetListEntryId');
+	var assetListTitle = document.getElementById('<portlet:namespace />assetListTitle');
+
+	var selectAssetListButton = document.getElementById('<portlet:namespace />selectAssetListButton');
+
+	if (selectAssetListButton) {
+		selectAssetListButton.addEventListener(
+			'click',
+			function(event) {
+				Liferay.Util.selectEntity(
+					{
+						dialog: {
 						constrain: true,
 						destroyOnHide: true
 					},
-					eventName: '<%= assetPublisherDisplayContext.getSelectAssetListEventName() %>',
-					id: '<portlet:namespace />selectAssetList',
-					title: '<liferay-ui:message key="select-asset-list" />',
-					uri: '<%= assetPublisherDisplayContext.getAssetListSelectorURL() %>'
-				},
-				function(event) {
-					assetListEntryId.val(event.assetlistentryid);
+						eventName: '<%= assetPublisherDisplayContext.getSelectAssetListEventName() %>',
+						id: '<portlet:namespace />selectAssetList',
+						title: '<liferay-ui:message key="select-content-set" />',
+						uri: '<%= assetPublisherDisplayContext.getAssetListSelectorURL() %>'
+					},
+					function(event) {
+						assetListEntryId.value = event.assetlistentryid;
 
-					assetListTitle.html(event.assetlistentrytitle);
+						assetListTitle.innerHTML = event.assetlistentrytitle;
+					}
+				);
+			}
+		);
+	}
 
-					assetListRemove.removeClass('hide');
-				}
-			);
-		}
-	);
+	var clearAssetListButton = document.getElementById('<portlet:namespace />clearAssetListButton');
 
-	assetListRemove.on(
-		'click',
-		function(event) {
-			assetListTitle.html('<liferay-ui:message key="none" />');
+	if (clearAssetListButton) {
+		clearAssetListButton.addEventListener(
+			'click',
+			function(event) {
+				assetListTitle.innerHTML = '<liferay-ui:message key="none" />';
 
-			assetListEntryId.val('');
-
-			assetListRemove.addClass('hide');
-		}
-	);
-</aui:script>
+				assetListEntryId.value = '';
+			}
+		);
+	}
+</script>

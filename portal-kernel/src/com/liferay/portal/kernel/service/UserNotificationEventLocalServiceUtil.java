@@ -17,7 +17,6 @@ package com.liferay.portal.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for UserNotificationEvent. This utility wraps
@@ -81,23 +80,6 @@ public class UserNotificationEventLocalServiceUtil {
 
 		return getService().addUserNotificationEvent(
 			userId, type, timestamp, deliveryType, deliverBy, payload, archived,
-			serviceContext);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), {@link
-	 #addUserNotificationEvent(long, String, long, int, long,
-	 String, boolean, ServiceContext)}
-	 */
-	@Deprecated
-	public static com.liferay.portal.kernel.model.UserNotificationEvent
-			addUserNotificationEvent(
-				long userId, String type, long timestamp, long deliverBy,
-				String payload, boolean archived, ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().addUserNotificationEvent(
-			userId, type, timestamp, deliverBy, payload, archived,
 			serviceContext);
 	}
 
@@ -747,9 +729,6 @@ public class UserNotificationEventLocalServiceUtil {
 			_service =
 				(UserNotificationEventLocalService)PortalBeanLocatorUtil.locate(
 					UserNotificationEventLocalService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				UserNotificationEventLocalServiceUtil.class, "_service");
 		}
 
 		return _service;

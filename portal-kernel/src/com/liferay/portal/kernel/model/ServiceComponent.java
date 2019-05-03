@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
 @ImplementationClassName("com.liferay.portal.model.impl.ServiceComponentImpl")
 @ProviderType
 public interface ServiceComponent
-	extends ServiceComponentModel, PersistedModel {
+	extends PersistedModel, ServiceComponentModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

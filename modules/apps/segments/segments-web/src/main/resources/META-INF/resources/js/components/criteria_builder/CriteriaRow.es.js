@@ -1,28 +1,27 @@
-import React, {Component} from 'react';
-import {PropTypes} from 'prop-types';
+import BooleanInput from '../inputs/BooleanInput.es';
 import ClayButton from '../shared/ClayButton.es';
 import ClayIcon from '../shared/ClayIcon.es';
 import ClaySelect from '../shared/ClaySelect.es';
 import CollectionInput from '../inputs/CollectionInput.es';
-import DecimalInput from '../inputs/DecimalInput.es';
 import DateInput from '../inputs/DateInput.es';
 import DateTimeInput from '../inputs/DateTimeInput.es';
-import BooleanInput from '../inputs/BooleanInput.es';
-import SelectEntityInput from '../inputs/SelectEntityInput.es';
+import DecimalInput from '../inputs/DecimalInput.es';
+import getCN from 'classnames';
 import IntegerInput from '../inputs/IntegerInput.es';
+import React, {Component} from 'react';
+import SelectEntityInput from '../inputs/SelectEntityInput.es';
 import StringInput from '../inputs/StringInput.es';
 import ThemeContext from '../../ThemeContext.es';
-import {DragSource as dragSource, DropTarget as dropTarget} from 'react-dnd';
-import {DragTypes} from '../../utils/drag-types.es';
-import {PROPERTY_TYPES} from '../../utils/constants.es';
-import getCN from 'classnames';
 import {
 	createNewGroup,
 	dateToInternationalHuman,
 	getSupportedOperatorsFromType,
-	objectToFormData,
-	sub
+	objectToFormData
 } from '../../utils/utils.es';
+import {DragSource as dragSource, DropTarget as dropTarget} from 'react-dnd';
+import {DragTypes} from '../../utils/drag-types.es';
+import {PROPERTY_TYPES} from '../../utils/constants.es';
+import {PropTypes} from 'prop-types';
 
 const acceptedDragTypes = [
 	DragTypes.CRITERIA_ROW,
@@ -218,7 +217,6 @@ class CriteriaRow extends Component {
 	}
 
 	_getReadableCriteriaString = (
-		modelLabel,
 		propertyLabel,
 		operatorLabel,
 		value,
@@ -228,23 +226,18 @@ class CriteriaRow extends Component {
 			dateToInternationalHuman(value) :
 			value;
 
-		return sub(
-			Liferay.Language.get('x-with-property-x-x-x'),
-			[
-				<span key="model-name">
-					{modelLabel}
-				</span>,
-				<b key="property">
+		return (
+			<span>
+				<b className="mr-1">
 					{propertyLabel}
-				</b>,
-				<span className="operator" key="operator">
+				</b>
+				<span className="operator mr-1">
 					{operatorLabel}
-				</span>,
-				<b key="value">
+				</span>
+				<b>
 					{parsedValue}
 				</b>
-			],
-			false
+			</span>
 		);
 	}
 
@@ -362,7 +355,6 @@ class CriteriaRow extends Component {
 			dragging,
 			editing,
 			hover,
-			modelLabel,
 			supportedOperators,
 			supportedProperties,
 			supportedPropertyTypes
@@ -413,18 +405,7 @@ class CriteriaRow extends Component {
 							)}
 
 							<span className="criterion-string">
-								{sub(
-									Liferay.Language.get('x-with-property-x'),
-									[
-										<span key="model-name">
-											{modelLabel}
-										</span>,
-										<b key="property">
-											{propertyLabel}
-										</b>
-									],
-									false
-								)}
+								<b>{propertyLabel}</b>
 							</span>
 
 							<ClaySelect
@@ -445,7 +426,6 @@ class CriteriaRow extends Component {
 
 							<ClayButton
 								borderless
-								className="duplicate-button"
 								iconName="paste"
 								monospaced
 								onClick={this._handleDuplicate}
@@ -453,23 +433,20 @@ class CriteriaRow extends Component {
 
 							<ClayButton
 								borderless
-								iconName="trash"
+								iconName="times-circle"
 								monospaced
 								onClick={this._handleDelete}
 							/>
 						</div>
 					) : (
-						<div className="read-only-container">
-							<span className="criterion-string">
-								{this._getReadableCriteriaString(
-									modelLabel,
-									propertyLabel,
-									operatorLabel,
-									criterion.displayValue || value,
-									selectedProperty.type
-								)}
-							</span>
-						</div>
+						<span className="criterion-string">
+							{this._getReadableCriteriaString(
+								propertyLabel,
+								operatorLabel,
+								criterion.displayValue || value,
+								selectedProperty.type
+							)}
+						</span>
 					)}
 				</div>
 			)

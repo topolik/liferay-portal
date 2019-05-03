@@ -20,7 +20,7 @@
 </tr>
 <tr>
 	<td>ASSET_ELLIPSIS_ICON</td>
-	<td>//div[@class='asset-abstract '][//a[normalize-space(./text())='${key_assetTitle}']]//a[span/*[name()='svg'][contains(@class,'icon-ellipsis')]]</td>
+	<td>//div[contains(@class,'asset-abstract')]//div[contains(.,'${key_assetTitle}')]//a[contains(@class,'dropdown-toggle')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -47,7 +47,7 @@
 <!--ASSET_EDIT-->
 <tr>
 	<td>ASSET_EDIT</td>
-	<td>//a[contains(@data-id,'editAsset')]</td>
+	<td>//span[contains(@class,'visible-interaction')]//a</td>
 	<td></td>
 </tr>
 <tr>
@@ -69,22 +69,22 @@
 <!--ASSET_ABSTRACT-->
 <tr>
 	<td>ASSET_ABSTRACT_TITLE</td>
-	<td>//section[@class='portlet']//h4[contains(@class,'asset-title')][contains(.,'${key_assetTitle}')]</td>
+	<td>//section[@class='portlet']//h4[contains(@class,'component-title')][contains(.,'${key_assetTitle}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSET_ABSTRACT_GENERIC_TITLE_1</td>
-	<td>//h4[@class='asset-title']</td>
+	<td>//h4/*[contains(@class,'asset-title')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSET_ABSTRACT_GENERIC_TITLE_2</td>
-	<td>xPath=(//h4[@class='asset-title'])[2]</td>
+	<td>xPath=(//h4/*[contains(@class,'asset-title')])[2]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSET_ABSTRACT_GENERIC_TITLE_3</td>
-	<td>xPath=(//h4[@class='asset-title'])[3]</td>
+	<td>xPath=(//h4/*[contains(@class,'asset-title')])[3]</td>
 	<td></td>
 </tr>
 <tr>
@@ -108,16 +108,6 @@
 	<td></td>
 </tr>
 <tr>
-	<td>ASSET_ABSTRACT_SHOW_FULL_CONTENT</td>
-	<td>//div[@class='asset-abstract'][contains(.,'${key_assetTitle}')]//a[contains(.,'Show Full Content')]</td>
-	<td></td>
-</tr>
-<tr>
-	<td>ASSET_ABSTRACT_VIEW_IN_CONTEXT</td>
-	<td>//div[@class='asset-abstract'][contains(.,'${key_assetTitle}')]//a[contains(.,'View in Context')]</td>
-	<td></td>
-</tr>
-<tr>
 	<td></td>
 	<td></td>
 	<td></td>
@@ -125,7 +115,7 @@
 <!--ASSET_ABSTRACT_DETAIL-->
 <tr>
 	<td>ASSET_ABSTRACT_DETAIL_CONTENT</td>
-	<td>//div[@class='asset-content']</td>
+	<td>//div[contains(@class,'asset-content')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -136,17 +126,17 @@
 <!--ASSET_ORDER-->
 <tr>
 	<td>ASSET_ORDER_FIRST</td>
-	<td>//div[@class='portlet-body']/div[2]/h4/a</td>
+	<td>//div[@class='portlet-body']/div/div/h4/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSET_ORDER_SECOND</td>
-	<td>//div[@class='portlet-body']/div[3]/h4/a</td>
+	<td>//div[@class='portlet-body']/div[2]/div/h4/a</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSET_ORDER_THIRD</td>
-	<td>//div[@class='portlet-body']/div[4]/h4/a</td>
+	<td>//div[@class='portlet-body']/div[3]/div/h4/a</td>
 	<td></td>
 </tr>
 <tr>
@@ -184,17 +174,17 @@
 <!--ASSET_ABSTRACT_DDL_RECORD-->
 <tr>
 	<td>ASSET_ABSTRACT_DDL_RECORD_1</td>
-	<td>//div[@class='asset-content']//div[contains(@class,'field-wrapper-content')]</td>
+	<td>//div[contains(@class,'asset-content')]//div[contains(@class,'field-wrapper-content')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSET_ABSTRACT_DDL_RECORD_2</td>
-	<td>xPath=(//div[@class='asset-content']//div[contains(@class,'field-wrapper-content')])[2]</td>
+	<td>xPath=(//div[contains(@class,'asset-content')]//div[contains(@class,'field-wrapper-content')])[2]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>ASSET_ABSTRACT_DDL_RECORD_3</td>
-	<td>xPath=(//div[@class='asset-content']//div[contains(@class,'field-wrapper-content')])[3]</td>
+	<td>xPath=(//div[contains(@class,'asset-content')]//div[contains(@class,'field-wrapper-content')])[3]</td>
 	<td></td>
 </tr>
 <tr>
@@ -215,12 +205,12 @@
 </tr>
 <tr>
 	<td>METADATA_CATEGORY</td>
-	<td>//dd[contains(@class,'categories')]/span/a[contains(.,'${key_categoryName}')]</td>
+	<td>//div[contains(@class,'categories')]/span/a[contains(.,'${key_categoryName}')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>METADATA_TAGS</td>
-	<td>//dd[contains(@class,'tags')]</td>
+	<td>//span[@class='taglib-asset-tags-summary']/a[contains(@class,'label')]</td>
 	<td></td>
 </tr>
 </tbody>

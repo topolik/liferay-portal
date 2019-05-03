@@ -7,7 +7,7 @@
 	<description/>
 	<groupId>com.liferay</groupId>
 	<artifactId>com.liferay.source.formatter</artifactId>
-	<version>1.0.802</version>
+	<version>1.0.839</version>
 	<goalPrefix>source-formatter</goalPrefix>
 	<isolatedRealm>false</isolatedRealm>
 	<inheritedByDefault>true</inheritedByDefault>
@@ -326,7 +326,7 @@
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<type>jar</type>
-			<version>20180130</version>
+			<version>20180813</version>
 		</dependency>
 		<dependency>
 			<groupId>xerces</groupId>

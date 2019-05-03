@@ -28,6 +28,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.patcher.PatcherUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.FileUtil;
@@ -111,8 +112,11 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 
 			JSONObject jsonObject = getAppJSONObject(app.getRemoteAppId());
 
-			jsonObject.put("cmd", "downloadApp");
-			jsonObject.put("message", "success");
+			jsonObject.put(
+				"cmd", "downloadApp"
+			).put(
+				"message", "success"
+			);
 
 			writeJSON(actionRequest, actionResponse, jsonObject);
 		}
@@ -131,8 +135,11 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 
 		JSONObject jsonObject = getAppJSONObject(remoteAppId);
 
-		jsonObject.put("cmd", "getApp");
-		jsonObject.put("message", "success");
+		jsonObject.put(
+			"cmd", "getApp"
+		).put(
+			"message", "success"
+		);
 
 		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
@@ -141,11 +148,13 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("apps", getInstalledAppsJSONArray());
-		jsonObject.put("cmd", "getInstalledApps");
-		jsonObject.put("message", "success");
+		JSONObject jsonObject = JSONUtil.put(
+			"apps", getInstalledAppsJSONArray()
+		).put(
+			"cmd", "getInstalledApps"
+		).put(
+			"message", "success"
+		);
 
 		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
@@ -208,8 +217,11 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 
 		JSONObject jsonObject = getAppJSONObject(remoteAppId);
 
-		jsonObject.put("cmd", "installApp");
-		jsonObject.put("message", "success");
+		jsonObject.put(
+			"cmd", "installApp"
+		).put(
+			"message", "success"
+		);
 
 		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
@@ -237,8 +249,11 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 
 		JSONObject jsonObject = getAppJSONObject(remoteAppId);
 
-		jsonObject.put("cmd", "uninstallApp");
-		jsonObject.put("message", "success");
+		jsonObject.put(
+			"cmd", "uninstallApp"
+		).put(
+			"message", "success"
+		);
 
 		writeJSON(actionRequest, actionResponse, jsonObject);
 	}
@@ -278,8 +293,11 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 
 			JSONObject jsonObject = getAppJSONObject(app.getRemoteAppId());
 
-			jsonObject.put("cmd", "updateApp");
-			jsonObject.put("message", "success");
+			jsonObject.put(
+				"cmd", "updateApp"
+			).put(
+				"message", "success"
+			);
 
 			writeJSON(actionRequest, actionResponse, jsonObject);
 		}
@@ -298,9 +316,7 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 		String productEntryName = ParamUtil.getString(
 			actionRequest, "productEntryName");
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("cmd", "updateAppLicense");
+		JSONObject jsonObject = JSONUtil.put("cmd", "updateAppLicense");
 
 		if (Validator.isNull(orderUuid) &&
 			Validator.isNotNull(productEntryName)) {
@@ -324,10 +340,11 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("cmd", "updateApps");
-		jsonObject.put("message", "success");
+		JSONObject jsonObject = JSONUtil.put(
+			"cmd", "updateApps"
+		).put(
+			"message", "success"
+		);
 
 		if (_reentrantLock.tryLock()) {
 			try {
@@ -438,14 +455,15 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 	}
 
 	protected JSONObject getAppJSONObject(App app) throws Exception {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("appId", app.getRemoteAppId());
-		jsonObject.put("downloaded", app.isDownloaded());
-		jsonObject.put("installed", app.isInstalled());
-		jsonObject.put("version", app.getVersion());
-
-		return jsonObject;
+		return JSONUtil.put(
+			"appId", app.getRemoteAppId()
+		).put(
+			"downloaded", app.isDownloaded()
+		).put(
+			"installed", app.isInstalled()
+		).put(
+			"version", app.getVersion()
+		);
 	}
 
 	protected JSONObject getAppJSONObject(long remoteAppId) throws Exception {
@@ -455,14 +473,15 @@ public class MarketplaceStorePortlet extends RemoteMVCPortlet {
 			return getAppJSONObject(app);
 		}
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("appId", remoteAppId);
-		jsonObject.put("downloaded", false);
-		jsonObject.put("installed", false);
-		jsonObject.put("version", StringPool.BLANK);
-
-		return jsonObject;
+		return JSONUtil.put(
+			"appId", remoteAppId
+		).put(
+			"downloaded", false
+		).put(
+			"installed", false
+		).put(
+			"version", StringPool.BLANK
+		);
 	}
 
 	@Override

@@ -17,7 +17,6 @@ package com.liferay.document.library.kernel.service.persistence;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * @author Brian Wing Shun Chan
@@ -35,11 +34,32 @@ public class DLFileEntryTypeFinderUtil {
 	}
 
 	public static int filterCountByKeywords(
+		long companyId, long folderId, long[] groupIds, String keywords,
+		boolean includeBasicFileEntryType, boolean inherited) {
+
+		return getFinder().filterCountByKeywords(
+			companyId, folderId, groupIds, keywords, includeBasicFileEntryType,
+			inherited);
+	}
+
+	public static int filterCountByKeywords(
 		long companyId, long[] groupIds, String keywords,
 		boolean includeBasicFileEntryType) {
 
 		return getFinder().filterCountByKeywords(
 			companyId, groupIds, keywords, includeBasicFileEntryType);
+	}
+
+	public static java.util.List
+		<com.liferay.document.library.kernel.model.DLFileEntryType>
+			filterFindByKeywords(
+				long companyId, long folderId, long[] groupIds, String keywords,
+				boolean includeBasicFileEntryType, boolean inherited, int start,
+				int end) {
+
+		return getFinder().filterFindByKeywords(
+			companyId, folderId, groupIds, keywords, includeBasicFileEntryType,
+			inherited, start, end);
 	}
 
 	public static java.util.List
@@ -74,9 +94,6 @@ public class DLFileEntryTypeFinderUtil {
 		if (_finder == null) {
 			_finder = (DLFileEntryTypeFinder)PortalBeanLocatorUtil.locate(
 				DLFileEntryTypeFinder.class.getName());
-
-			ReferenceRegistry.registerReference(
-				DLFileEntryTypeFinderUtil.class, "_finder");
 		}
 
 		return _finder;
@@ -84,9 +101,6 @@ public class DLFileEntryTypeFinderUtil {
 
 	public void setFinder(DLFileEntryTypeFinder finder) {
 		_finder = finder;
-
-		ReferenceRegistry.registerReference(
-			DLFileEntryTypeFinderUtil.class, "_finder");
 	}
 
 	private static DLFileEntryTypeFinder _finder;

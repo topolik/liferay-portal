@@ -1,4 +1,5 @@
-import 'frontend-js-web/liferay/compat/dropdown/Dropdown.es';
+import 'clay-dropdown';
+import 'clay-modal';
 import CompatibilityEventProxy from 'frontend-js-web/liferay/CompatibilityEventProxy.es';
 import Component from 'metal-component';
 import Soy from 'metal-soy';
@@ -33,15 +34,15 @@ class TranslationManager extends Component {
 	 * @review
 	 */
 	addLocale(event) {
-		let localeId = event.delegateTarget.getAttribute('data-locale-id');
+		let locale = event.data.item;
 
-		if (this.availableLocales.indexOf(localeId) === -1) {
-			this.availableLocales.push(localeId);
+		if (this.availableLocales.indexOf(locale) === -1) {
+			this.availableLocales.push(locale);
 		}
 
 		this.availableLocales = this.availableLocales;
 
-		this.editingLocale = localeId;
+		this.editingLocale = locale.id;
 	}
 
 	/**
@@ -92,25 +93,34 @@ class TranslationManager extends Component {
 	 * @param  {MouseEvent} event
 	 * @review
 	 */
-	removeAvailableLocale(event) {
-		let localeId = event.delegateTarget.getAttribute('data-locale-id');
+	removeAvailableLocale({delegateTarget}) {
+		const {availableLocales} = this;
+		const {localeId} = delegateTarget.dataset;
 
-		let localePosition = this.availableLocales.indexOf(localeId);
+		event.stopPropagation();
 
-		this.availableLocales.splice(localePosition, 1);
+		this.refs.deleteModal.events = {
+			clickButton: ({target}) => {
+				if (target.classList.contains('btn-primary')) {
+					this.availableLocales = availableLocales.filter(
+						({id}) => id !== localeId
+					);
 
-		this.availableLocales = this.availableLocales;
+					if (localeId === this.editingLocale) {
+						this.resetEditingLocale_();
+					}
 
-		if (localeId === this.editingLocale) {
-			this.resetEditingLocale_();
-		}
-
-		this.emit(
-			'deleteAvailableLocale',
-			{
-				locale: localeId
+					this.emit(
+						'deleteAvailableLocale',
+						{
+							locale: localeId
+						}
+					);
+				}
 			}
-		);
+		};
+
+		this.refs.deleteModal.show();
 	}
 
 	/**
@@ -162,7 +172,7 @@ TranslationManager.STATE = {
 	/**
 	 * List of available languages keys.
 	 * @review
-	 * @type {Array.<String>}
+	 * @type {Array.<Object>}
 	 */
 	availableLocales: {
 		validator: core.isArray

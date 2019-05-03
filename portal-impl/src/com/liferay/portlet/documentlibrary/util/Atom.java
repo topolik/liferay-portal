@@ -121,7 +121,7 @@ public class Atom {
 	}
 
 	public void patchAtom() {
-		for (int index = 4; index < _size - 4; index++) {
+		for (int index = 4; index < (_size - 4); index++) {
 			String type = new String(
 				ArrayUtil.clone(_buffer, index, index + 4));
 
@@ -154,7 +154,7 @@ public class Atom {
 		long value = 0;
 
 		for (int i = 0; i < buffer.length; i++) {
-			value += (buffer[i] & _BITMASK) << 8 * (buffer.length - i - 1);
+			value += (buffer[i] & _BITMASK) << (8 * (buffer.length - i - 1));
 		}
 
 		return value;

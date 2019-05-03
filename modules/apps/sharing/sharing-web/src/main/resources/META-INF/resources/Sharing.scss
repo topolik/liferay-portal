@@ -6,25 +6,13 @@
 	}
 
 	.custom-radio .form-text {
-		font-weight: 400;
+		font-weight: normal;
 		margin-bottom: 1rem;
 		margin-top: 0;
 		padding-left: 1.5rem;
 	}
+}
 
-	.dropdown-menu {
-		min-width: 300px;
-		width: auto;
-
-		.dropdown-item {
-			.sticker {
-				float: left;
-				margin-right: 1rem;
-			}
-
-			strong {
-				display: block;
-			}
-		}
-	}
+.sharing-autocomplete-sticker {
+	margin-right: 1rem;
 }

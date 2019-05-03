@@ -26,6 +26,38 @@ definition {
 		}
 	}
 
+	test AssertSearchAdmin {
+		ProductMenu.gotoPortlet(
+			category = "Configuration",
+			panel = "Control Panel",
+			portlet = "Search");
+
+		SearchAdministration.assertEngineVendorAndVersions(
+			clientVersion = "6.5.0",
+			engineVendor = "Elasticsearch",
+			serverVersion = "6.5.0");
+
+		Navigator.gotoNavItem(navItem = "Field Mappings");
+
+		Click(
+			key_navNested = "liferay-0",
+			locator1 = "NavNested#NAV_NESTED_LINK");
+
+		AssertTextEquals.assertPartialText(
+			indexName = "liferay-0",
+			locator1 = "Search#FIELD_MAPPINGS_EDITOR",
+			value1 = "liferay-0");
+
+		Click(
+			key_navNested = "liferay-20101",
+			locator1 = "NavNested#NAV_NESTED_LINK");
+
+		AssertTextEquals.assertPartialText(
+			indexName = "liferay-20101",
+			locator1 = "Search#FIELD_MAPPINGS_EDITOR",
+			value1 = "liferay-20101");
+	}
+
 	@ignore = "true"
 	@priority = "3"
 	test AssertSystemSettingsPropogateToModule {
@@ -36,32 +68,26 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Configuration",
 			panel = "Control Panel",
-			portlet = "System Settings"
-		);
+			portlet = "System Settings");
 
 		SystemSettings.gotoConfiguration(
 			configurationCategory = "Search",
 			configurationName = "Elasticsearch 6",
-			configurationScope = "System Scope"
-		);
+			configurationScope = "System Scope");
 
 		SystemSettings.editTextAreaSetting(
 			settingName = "Cluster Name",
-			settingValue = "LiferayElasticsearchCluster1"
-		);
+			settingValue = "LiferayElasticsearchCluster1");
 
 		SystemSettings.saveConfiguration();
 
 		Navigator.openSpecificURL(url = "http://localhost:9200");
 
-		Elasticsearch.viewClusterStatus(
-			clusterStatus = "&quot;cluster_name&quot; : &quot;LiferayElasticsearchCluster1&quot;"
-		);
+		Elasticsearch.viewClusterStatus(clusterStatus = "&quot;cluster_name&quot; : &quot;LiferayElasticsearchCluster1&quot;");
 	}
 
 	@priority = "5"
 	test ElasticsearchRemoteClusterSmokeTest {
-		property environment.acceptance = "false";
 		property portal.acceptance = "true";
 		property remote.elasticsearch.cluster.size = "2";
 		property remote.elasticsearch.enabled = "true";
@@ -74,24 +100,23 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Message Boards"
-		);
+			portlet = "Message Boards");
 
-		MessageboardsThread.addCP(threadBody = "Orange", threadSubject = "Apple");
+		MessageboardsThread.addCP(
+			threadBody = "Orange",
+			threadSubject = "Apple");
 
 		Navigator.openURL();
 
 		ProductMenu.gotoPortlet(
 			category = "Content &amp; Data",
 			panel = "Site Administration",
-			portlet = "Documents and Media"
-		);
+			portlet = "Documents and Media");
 
 		DMDocument.addCP(
 			dmDocumentDescription = "Orange",
 			dmDocumentFile = "Document_1.txt",
-			dmDocumentTitle = "Apple"
-		);
+			dmDocumentTitle = "Apple");
 
 		Navigator.openURL();
 
@@ -99,13 +124,11 @@ definition {
 
 		SearchResultPortlet.viewSearchResults(
 			searchAssetTitle = "Apple",
-			searchAssetType = "Document"
-		);
+			searchAssetType = "Document");
 
 		SearchResultPortlet.viewSearchResults(
 			searchAssetTitle = "Apple",
-			searchAssetType = "Message Boards Message"
-		);
+			searchAssetType = "Message Boards Message");
 
 		Navigator.openURL();
 
@@ -113,13 +136,11 @@ definition {
 
 		SearchResultPortlet.viewSearchResults(
 			searchAssetTitle = "Apple",
-			searchAssetType = "Document"
-		);
+			searchAssetType = "Document");
 
 		SearchResultPortlet.viewSearchResults(
 			searchAssetTitle = "Apple",
-			searchAssetType = "Message Boards Message"
-		);
+			searchAssetType = "Message Boards Message");
 	}
 
 	@priority = "5"
@@ -130,8 +151,6 @@ definition {
 
 		Navigator.openSpecificURL(url = "http://localhost:9200");
 
-		Elasticsearch.viewClusterStatus(
-			clusterStatus = "&quot;cluster_name&quot; : &quot;LiferayElasticsearchCluster1&quot;"
-		);
+		Elasticsearch.viewClusterStatus(clusterStatus = "&quot;cluster_name&quot; : &quot;LiferayElasticsearchCluster1&quot;");
 	}
 }

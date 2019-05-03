@@ -45,14 +45,6 @@
 
 						inputLocalized.updateInputLanguage(editor.getHTML());
 					}
-
-					$('#<portlet:namespace /><%= id %>ContentBox').on(
-						'click',
-						'.palette-item-inner',
-						function() {
-							window['<portlet:namespace /><%= HtmlUtil.escapeJS(inputEditorName) %>'].focus();
-						}
-					);
 				</aui:script>
 			</c:when>
 			<c:when test='<%= type.equals("input") %>'>
@@ -225,18 +217,24 @@
 </c:if>
 
 <c:if test="<%= Validator.isNotNull(inputAddon) %>">
-	<aui:script sandbox="<%= true %>">
-		var inputAddon = '<%= inputAddon.toString() %>';
+	<script>
+		(function() {
+			var inputAddon = '<%= inputAddon.toString() %>';
 
-		if (inputAddon.length > 40) {
-			$('#<portlet:namespace /><%= id %>InputAddon').on(
-				'mouseenter',
-				function(event) {
-					Liferay.Portal.ToolTip.show(event.currentTarget, inputAddon);
+			if (inputAddon.length > 40) {
+				var inputAddonElement = document.getElementById('<portlet:namespace /><%= id %>InputAddon');
+
+				if (inputAddonElement) {
+					inputAddonElement.addEventListener(
+						'mouseenter',
+						function(event) {
+							Liferay.Portal.ToolTip.show(event.currentTarget, inputAddon);
+						}
+					);
 				}
-			);
-		}
-	</aui:script>
+			}
+		})();
+	</script>
 </c:if>
 
 <c:choose>

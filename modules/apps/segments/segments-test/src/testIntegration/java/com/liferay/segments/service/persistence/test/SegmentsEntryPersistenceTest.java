@@ -124,6 +124,8 @@ public class SegmentsEntryPersistenceTest {
 
 		SegmentsEntry newSegmentsEntry = _persistence.create(pk);
 
+		newSegmentsEntry.setUuid(RandomTestUtil.randomString());
+
 		newSegmentsEntry.setGroupId(RandomTestUtil.nextLong());
 
 		newSegmentsEntry.setCompanyId(RandomTestUtil.nextLong());
@@ -136,6 +138,8 @@ public class SegmentsEntryPersistenceTest {
 
 		newSegmentsEntry.setModifiedDate(RandomTestUtil.nextDate());
 
+		newSegmentsEntry.setSegmentsEntryKey(RandomTestUtil.randomString());
+
 		newSegmentsEntry.setName(RandomTestUtil.randomString());
 
 		newSegmentsEntry.setDescription(RandomTestUtil.randomString());
@@ -144,17 +148,19 @@ public class SegmentsEntryPersistenceTest {
 
 		newSegmentsEntry.setCriteria(RandomTestUtil.randomString());
 
-		newSegmentsEntry.setKey(RandomTestUtil.randomString());
-
 		newSegmentsEntry.setSource(RandomTestUtil.randomString());
 
 		newSegmentsEntry.setType(RandomTestUtil.randomString());
+
+		newSegmentsEntry.setLastPublishDate(RandomTestUtil.nextDate());
 
 		_segmentsEntries.add(_persistence.update(newSegmentsEntry));
 
 		SegmentsEntry existingSegmentsEntry = _persistence.findByPrimaryKey(
 			newSegmentsEntry.getPrimaryKey());
 
+		Assert.assertEquals(
+			existingSegmentsEntry.getUuid(), newSegmentsEntry.getUuid());
 		Assert.assertEquals(
 			existingSegmentsEntry.getSegmentsEntryId(),
 			newSegmentsEntry.getSegmentsEntryId());
@@ -175,6 +181,9 @@ public class SegmentsEntryPersistenceTest {
 			Time.getShortTimestamp(existingSegmentsEntry.getModifiedDate()),
 			Time.getShortTimestamp(newSegmentsEntry.getModifiedDate()));
 		Assert.assertEquals(
+			existingSegmentsEntry.getSegmentsEntryKey(),
+			newSegmentsEntry.getSegmentsEntryKey());
+		Assert.assertEquals(
 			existingSegmentsEntry.getName(), newSegmentsEntry.getName());
 		Assert.assertEquals(
 			existingSegmentsEntry.getDescription(),
@@ -185,11 +194,39 @@ public class SegmentsEntryPersistenceTest {
 			existingSegmentsEntry.getCriteria(),
 			newSegmentsEntry.getCriteria());
 		Assert.assertEquals(
-			existingSegmentsEntry.getKey(), newSegmentsEntry.getKey());
-		Assert.assertEquals(
 			existingSegmentsEntry.getSource(), newSegmentsEntry.getSource());
 		Assert.assertEquals(
 			existingSegmentsEntry.getType(), newSegmentsEntry.getType());
+		Assert.assertEquals(
+			Time.getShortTimestamp(existingSegmentsEntry.getLastPublishDate()),
+			Time.getShortTimestamp(newSegmentsEntry.getLastPublishDate()));
+	}
+
+	@Test
+	public void testCountByUuid() throws Exception {
+		_persistence.countByUuid("");
+
+		_persistence.countByUuid("null");
+
+		_persistence.countByUuid((String)null);
+	}
+
+	@Test
+	public void testCountByUUID_G() throws Exception {
+		_persistence.countByUUID_G("", RandomTestUtil.nextLong());
+
+		_persistence.countByUUID_G("null", 0L);
+
+		_persistence.countByUUID_G((String)null, 0L);
+	}
+
+	@Test
+	public void testCountByUuid_C() throws Exception {
+		_persistence.countByUuid_C("", RandomTestUtil.nextLong());
+
+		_persistence.countByUuid_C("null", 0L);
+
+		_persistence.countByUuid_C((String)null, 0L);
 	}
 
 	@Test
@@ -223,6 +260,15 @@ public class SegmentsEntryPersistenceTest {
 	}
 
 	@Test
+	public void testCountByG_S() throws Exception {
+		_persistence.countByG_S(RandomTestUtil.nextLong(), "");
+
+		_persistence.countByG_S(0L, "null");
+
+		_persistence.countByG_S(0L, (String)null);
+	}
+
+	@Test
 	public void testCountByG_A() throws Exception {
 		_persistence.countByG_A(
 			RandomTestUtil.nextLong(), RandomTestUtil.randomBoolean());
@@ -235,15 +281,6 @@ public class SegmentsEntryPersistenceTest {
 		_persistence.countByG_A(
 			new long[] {RandomTestUtil.nextLong(), 0L},
 			RandomTestUtil.randomBoolean());
-	}
-
-	@Test
-	public void testCountByG_K() throws Exception {
-		_persistence.countByG_K(RandomTestUtil.nextLong(), "");
-
-		_persistence.countByG_K(0L, "null");
-
-		_persistence.countByG_K(0L, (String)null);
 	}
 
 	@Test
@@ -304,10 +341,11 @@ public class SegmentsEntryPersistenceTest {
 
 	protected OrderByComparator<SegmentsEntry> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
-			"SegmentsEntry", "segmentsEntryId", true, "groupId", true,
-			"companyId", true, "userId", true, "userName", true, "createDate",
-			true, "modifiedDate", true, "name", true, "description", true,
-			"active", true, "key", true, "source", true, "type", true);
+			"SegmentsEntry", "uuid", true, "segmentsEntryId", true, "groupId",
+			true, "companyId", true, "userId", true, "userName", true,
+			"createDate", true, "modifiedDate", true, "segmentsEntryKey", true,
+			"name", true, "description", true, "active", true, "source", true,
+			"type", true, "lastPublishDate", true);
 	}
 
 	@Test
@@ -532,21 +570,35 @@ public class SegmentsEntryPersistenceTest {
 		SegmentsEntry existingSegmentsEntry = _persistence.findByPrimaryKey(
 			newSegmentsEntry.getPrimaryKey());
 
+		Assert.assertTrue(
+			Objects.equals(
+				existingSegmentsEntry.getUuid(),
+				ReflectionTestUtil.invoke(
+					existingSegmentsEntry, "getOriginalUuid",
+					new Class<?>[0])));
+		Assert.assertEquals(
+			Long.valueOf(existingSegmentsEntry.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(
+				existingSegmentsEntry, "getOriginalGroupId", new Class<?>[0]));
+
 		Assert.assertEquals(
 			Long.valueOf(existingSegmentsEntry.getGroupId()),
 			ReflectionTestUtil.<Long>invoke(
 				existingSegmentsEntry, "getOriginalGroupId", new Class<?>[0]));
 		Assert.assertTrue(
 			Objects.equals(
-				existingSegmentsEntry.getKey(),
+				existingSegmentsEntry.getSegmentsEntryKey(),
 				ReflectionTestUtil.invoke(
-					existingSegmentsEntry, "getOriginalKey", new Class<?>[0])));
+					existingSegmentsEntry, "getOriginalSegmentsEntryKey",
+					new Class<?>[0])));
 	}
 
 	protected SegmentsEntry addSegmentsEntry() throws Exception {
 		long pk = RandomTestUtil.nextLong();
 
 		SegmentsEntry segmentsEntry = _persistence.create(pk);
+
+		segmentsEntry.setUuid(RandomTestUtil.randomString());
 
 		segmentsEntry.setGroupId(RandomTestUtil.nextLong());
 
@@ -560,6 +612,8 @@ public class SegmentsEntryPersistenceTest {
 
 		segmentsEntry.setModifiedDate(RandomTestUtil.nextDate());
 
+		segmentsEntry.setSegmentsEntryKey(RandomTestUtil.randomString());
+
 		segmentsEntry.setName(RandomTestUtil.randomString());
 
 		segmentsEntry.setDescription(RandomTestUtil.randomString());
@@ -568,11 +622,11 @@ public class SegmentsEntryPersistenceTest {
 
 		segmentsEntry.setCriteria(RandomTestUtil.randomString());
 
-		segmentsEntry.setKey(RandomTestUtil.randomString());
-
 		segmentsEntry.setSource(RandomTestUtil.randomString());
 
 		segmentsEntry.setType(RandomTestUtil.randomString());
+
+		segmentsEntry.setLastPublishDate(RandomTestUtil.nextDate());
 
 		_segmentsEntries.add(_persistence.update(segmentsEntry));
 

@@ -53,6 +53,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.module.configuration.ConfigurationException;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
@@ -79,6 +80,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.rss.util.RSSUtil;
+import com.liferay.segments.constants.SegmentsWebKeys;
 
 import java.io.Serializable;
 
@@ -258,7 +260,7 @@ public class AssetPublisherDisplayContext {
 				isEnablePermissions());
 		}
 		else if (isSelectionStyleAssetList() && (assetListEntry != null)) {
-			return assetListEntry.getAssetEntries();
+			return assetListEntry.getAssetEntries(_getSegmentsEntryIds());
 		}
 		else if (isSelectionStyleAssetListProvider()) {
 			String infoListProviderClassName = GetterUtil.getString(
@@ -310,7 +312,8 @@ public class AssetPublisherDisplayContext {
 		AssetListEntry assetListEntry = fetchAssetListEntry();
 
 		if (isSelectionStyleAssetList() && (assetListEntry != null)) {
-			_assetEntryQuery = assetListEntry.getAssetEntryQuery();
+			_assetEntryQuery = assetListEntry.getAssetEntryQuery(
+				_getSegmentsEntryIds());
 		}
 		else {
 			_assetEntryQuery = _assetPublisherHelper.getAssetEntryQuery(
@@ -477,13 +480,12 @@ public class AssetPublisherDisplayContext {
 		JSONArray rulesJSONArray = JSONFactoryUtil.createJSONArray();
 
 		for (int queryLogicIndex : queryLogicIndexes) {
-			JSONObject ruleJSONObject = JSONFactoryUtil.createJSONObject();
-
 			boolean queryAndOperator = PrefsParamUtil.getBoolean(
 				_portletPreferences, _request,
 				"queryAndOperator" + queryLogicIndex);
 
-			ruleJSONObject.put("queryAndOperator", queryAndOperator);
+			JSONObject ruleJSONObject = JSONUtil.put(
+				"queryAndOperator", queryAndOperator);
 
 			boolean queryContains = PrefsParamUtil.getBoolean(
 				_portletPreferences, _request,
@@ -506,10 +508,14 @@ public class AssetPublisherDisplayContext {
 				queryValues = _assetPublisherWebUtil.filterAssetTagNames(
 					_themeDisplay.getScopeGroupId(), queryValues);
 
-				List<Map<String, String>> selectedItems = new ArrayList<>();
-
 				String[] tagNames = StringUtil.split(
 					queryValues, StringPool.COMMA);
+
+				if (ArrayUtil.isEmpty(tagNames)) {
+					continue;
+				}
+
+				List<Map<String, String>> selectedItems = new ArrayList<>();
 
 				for (String tagName : tagNames) {
 					Map<String, String> item = new HashMap<>();
@@ -527,10 +533,14 @@ public class AssetPublisherDisplayContext {
 					_request, "queryCategoryIds" + queryLogicIndex,
 					queryValues);
 
-				List<HashMap<String, Object>> selectedItems = new ArrayList<>();
-
 				List<AssetCategory> categories = _filterAssetCategories(
 					GetterUtil.getLongValues(queryValues.split(",")));
+
+				if (ListUtil.isEmpty(categories)) {
+					continue;
+				}
+
+				List<HashMap<String, Object>> selectedItems = new ArrayList<>();
 
 				for (AssetCategory category : categories) {
 					HashMap<String, Object> selectedCategory = new HashMap<>();
@@ -549,8 +559,11 @@ public class AssetPublisherDisplayContext {
 				continue;
 			}
 
-			ruleJSONObject.put("queryValues", queryValues);
-			ruleJSONObject.put("type", queryName);
+			ruleJSONObject.put(
+				"queryValues", queryValues
+			).put(
+				"type", queryName
+			);
 
 			rulesJSONArray.put(ruleJSONObject);
 		}
@@ -781,7 +794,7 @@ public class AssetPublisherDisplayContext {
 			"metadataFields", null);
 
 		if (metadataFields == null) {
-			_metadataFields = new String[] {"modified-date"};
+			_metadataFields = new String[] {"author", "modified-date"};
 		}
 		else {
 			_metadataFields = StringUtil.split(metadataFields);
@@ -1236,6 +1249,17 @@ public class AssetPublisherDisplayContext {
 		return false;
 	}
 
+	public boolean isEnableSubscriptions() {
+		if (_enableSubscriptions != null) {
+			return _enableSubscriptions;
+		}
+
+		_enableSubscriptions = GetterUtil.getBoolean(
+			_portletPreferences.getValue("enableSubscriptions", null));
+
+		return _enableSubscriptions;
+	}
+
 	public boolean isEnableTagBasedNavigation() {
 		if (_enableTagBasedNavigation != null) {
 			return _enableTagBasedNavigation;
@@ -1324,16 +1348,7 @@ public class AssetPublisherDisplayContext {
 		return false;
 	}
 
-	public boolean isSelectionStyleDynamic() throws PortalException {
-		AssetListEntry assetListEntry = fetchAssetListEntry();
-
-		if (isSelectionStyleAssetList() && (assetListEntry != null) &&
-			(assetListEntry.getType() ==
-				AssetListEntryTypeConstants.TYPE_DYNAMIC)) {
-
-			return true;
-		}
-
+	public boolean isSelectionStyleDynamic() {
 		if (Objects.equals(getSelectionStyle(), "dynamic")) {
 			return true;
 		}
@@ -1697,15 +1712,18 @@ public class AssetPublisherDisplayContext {
 		}
 	}
 
-	public void setPageKeywords() throws PortalException {
+	public void setPageKeywords() {
 		if (getAssetCategoryId() > 0) {
 			AssetCategory assetCategory =
-				AssetCategoryLocalServiceUtil.getCategory(getAssetCategoryId());
+				AssetCategoryLocalServiceUtil.fetchAssetCategory(
+					getAssetCategoryId());
 
-			PortalUtil.setPageKeywords(
-				HtmlUtil.escape(
-					assetCategory.getTitle(_themeDisplay.getLocale())),
-				_request);
+			if (assetCategory != null) {
+				PortalUtil.setPageKeywords(
+					HtmlUtil.escape(
+						assetCategory.getTitle(_themeDisplay.getLocale())),
+					_request);
+			}
 		}
 
 		if (Validator.isNotNull(getAssetTagName())) {
@@ -1820,6 +1838,11 @@ public class AssetPublisherDisplayContext {
 		return filteredCategories;
 	}
 
+	private long[] _getSegmentsEntryIds() {
+		return GetterUtil.getLongValues(
+			_portletRequest.getAttribute(SegmentsWebKeys.SEGMENTS_ENTRY_IDS));
+	}
+
 	private Integer _abstractLength;
 	private long[] _allAssetCategoryIds;
 	private String[] _allAssetTagNames;
@@ -1859,6 +1882,7 @@ public class AssetPublisherDisplayContext {
 	private Boolean _enableRatings;
 	private Boolean _enableRelatedAssets;
 	private Boolean _enableRSS;
+	private Boolean _enableSubscriptions;
 	private Boolean _enableTagBasedNavigation;
 	private Boolean _enableViewCountIncrement;
 	private Boolean _excludeZeroViewCount;

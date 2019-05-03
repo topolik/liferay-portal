@@ -14,17 +14,20 @@
 
 package com.liferay.portal.search.web.internal.search.results.portlet.shared.search;
 
-import com.liferay.portal.kernel.search.QueryConfig;
+import com.liferay.portal.search.searcher.SearchRequestBuilder;
+import com.liferay.portal.search.searcher.SearchRequestBuilderFactory;
 import com.liferay.portal.search.web.internal.search.results.constants.SearchResultsPortletKeys;
 import com.liferay.portal.search.web.internal.search.results.portlet.SearchResultsPortletPreferences;
 import com.liferay.portal.search.web.internal.search.results.portlet.SearchResultsPortletPreferencesImpl;
 import com.liferay.portal.search.web.internal.util.SearchOptionalUtil;
+import com.liferay.portal.search.web.internal.util.SearchStringUtil;
 import com.liferay.portal.search.web.portlet.shared.search.PortletSharedSearchContributor;
 import com.liferay.portal.search.web.portlet.shared.search.PortletSharedSearchSettings;
 
 import java.util.Optional;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author André de Oliveira
@@ -47,19 +50,19 @@ public class SearchResultsPortletSharedSearchContributor
 
 		paginate(searchResultsPortletPreferences, portletSharedSearchSettings);
 
-		highlight(searchResultsPortletPreferences, portletSharedSearchSettings);
-	}
+		SearchRequestBuilder searchRequestBuilder =
+			portletSharedSearchSettings.getFederatedSearchRequestBuilder(
+				searchResultsPortletPreferences.
+					getFederatedSearchKeyOptional());
 
-	protected void highlight(
-		SearchResultsPortletPreferences searchResultsPortletPreferences,
-		PortletSharedSearchSettings portletSharedSearchSettings) {
+		if (searchResultsPortletPreferences.isHighlightEnabled()) {
+			searchRequestBuilder.highlightEnabled(true);
 
-		boolean highlightEnabled =
-			searchResultsPortletPreferences.isHighlightEnabled();
+			String[] fieldsToDisplay = SearchStringUtil.splitAndUnquote(
+				searchResultsPortletPreferences.getFieldsToDisplayOptional());
 
-		QueryConfig queryConfig = portletSharedSearchSettings.getQueryConfig();
-
-		queryConfig.setHighlightEnabled(highlightEnabled);
+			searchRequestBuilder.highlightFields(fieldsToDisplay);
+		}
 	}
 
 	protected void paginate(
@@ -95,5 +98,8 @@ public class SearchResultsPortletSharedSearchContributor
 
 		portletSharedSearchSettings.setPaginationDelta(paginationDelta);
 	}
+
+	@Reference
+	protected SearchRequestBuilderFactory searchRequestBuilderFactory;
 
 }

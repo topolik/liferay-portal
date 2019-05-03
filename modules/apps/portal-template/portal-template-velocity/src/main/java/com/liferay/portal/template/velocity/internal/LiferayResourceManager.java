@@ -15,15 +15,10 @@
 package com.liferay.portal.template.velocity.internal;
 
 import com.liferay.petra.reflect.ReflectionUtil;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.cache.PortalCache;
-import com.liferay.portal.kernel.cache.PortalCacheManagerNames;
-import com.liferay.portal.kernel.cache.SingleVMPool;
 import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.template.TemplateResourceLoader;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.template.TemplateResourceThreadLocal;
 
 import java.io.IOException;
@@ -92,15 +87,19 @@ public class LiferayResourceManager extends ResourceManagerImpl {
 				"Unable to find Velocity template with ID " + resourceName);
 		}
 
-		Object object = _portalCache.get(templateResource);
+		Template template = null;
 
-		if ((object != null) && (object instanceof Template)) {
-			return (Template)object;
+		if (_portalCache != null) {
+			template = _portalCache.get(templateResource);
+
+			if (template != null) {
+				return template;
+			}
 		}
 
-		Template template = _createTemplate(templateResource);
+		template = _createTemplate(templateResource);
 
-		if (_resourceModificationCheckInterval != 0) {
+		if (_portalCache != null) {
 			_portalCache.put(templateResource, template);
 		}
 
@@ -120,25 +119,17 @@ public class LiferayResourceManager extends ResourceManagerImpl {
 		field.set(
 			runtimeServices, new FastExtendedProperties(extendedProperties));
 
-		_resourceModificationCheckInterval = GetterUtil.getInteger(
-			extendedProperties.get(
-				"liferay." + VelocityEngine.RESOURCE_LOADER +
-					".resourceModificationCheckInterval"),
-			60);
 		_templateResourceLoader =
 			(TemplateResourceLoader)extendedProperties.get(
 				VelocityTemplateResourceLoader.class.getName());
 
-		SingleVMPool singleVMPool = (SingleVMPool)runtimeServices.getProperty(
-			PortalCacheManagerNames.SINGLE_VM);
-
 		_portalCache =
-			(PortalCache<TemplateResource, Object>)singleVMPool.getPortalCache(
-				StringBundler.concat(
-					TemplateResource.class.getName(), StringPool.POUND,
-					TemplateConstants.LANG_TYPE_VM));
+			(PortalCache<TemplateResource, Template>)extendedProperties.get(
+				"liferay." + VelocityEngine.RESOURCE_LOADER + "portal.cache");
 
-		_portalCache.removeAll();
+		if (_portalCache != null) {
+			_portalCache.removeAll();
+		}
 
 		super.initialize(runtimeServices);
 	}
@@ -158,8 +149,7 @@ public class LiferayResourceManager extends ResourceManagerImpl {
 		return template;
 	}
 
-	private PortalCache<TemplateResource, Object> _portalCache;
-	private int _resourceModificationCheckInterval = 60;
+	private PortalCache<TemplateResource, Template> _portalCache;
 	private TemplateResourceLoader _templateResourceLoader;
 
 	private static class LiferayTemplate extends Template {

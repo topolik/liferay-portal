@@ -6,13 +6,15 @@
 {template .render}
 	{@param item: ?}
 	{@param itemId: string}
-	{@param panels: list<[
+	{@param itemType: string}
+	{@param buttons: list<[
 		icon: string,
+		id: string,
 		panelId: string,
-		title: string
+		title: string,
+		type: string
 	]>}
 	{@param? _handlePanelButtonClick: any}
-	{@param? _handleFloatingToolbarFocusOut: any}
 	{@param? classes: string}
 	{@param? fixSelectedPanel: bool}
 	{@param? selectedPanelId: string}
@@ -21,34 +23,39 @@
 
 	<div
 		class="fragments-editor__floating-toolbar {$classes ?: ''}"
-		data-onfocusout="{$_handleFloatingToolbarFocusOut}"
+		data-fragments-editor-item-id="{$itemId}"
+		data-fragments-editor-item-type="{$itemType}"
 		tabindex="-1"
 	>
-		{if $spritemap and $panels and (length($panels) > 0)}
+		{if $spritemap and $buttons and (length($buttons) > 0)}
 			{if (not $selectedPanelId) or (not $fixSelectedPanel)}
-				<div class="fragments-editor__floating-toolbar-buttons popover">
-					{foreach $panel in $panels}
-						{call .panelButton}
-							{param handleButtonClick: $_handlePanelButtonClick /}
-							{param key: $panel.panelId /}
-							{param panel: $panel /}
-							{param ref: $panel.panelId /}
-							{param selectedPanelId: $selectedPanelId /}
-							{param spritemap: $spritemap /}
-						{/call}
-					{/foreach}
+				<div class="fragments-editor__floating-toolbar-buttons" ref="buttons">
+					<div class="popover">
+						{foreach $button in $buttons}
+							{call .button}
+								{param handleButtonClick: $_handlePanelButtonClick /}
+								{param key: $button.id /}
+								{param button: $button /}
+								{param ref: $button.id /}
+								{param selectedPanelId: $selectedPanelId /}
+								{param spritemap: $spritemap /}
+							{/call}
+						{/foreach}
+					</div>
 				</div>
 			{/if}
 
 			{if $selectedPanelId}
-				<div class="fragments-editor__floating-toolbar-panel popover">
-					{delcall com.liferay.layout.content.page.editor.web.FloatingToolbarPanel variant="$selectedPanelId"}
-						{param item: $item /}
-						{param itemId: $itemId /}
-						{param portalElement: null /}
-						{param selectedPanelId: $selectedPanelId /}
-						{param store: $store /}
-					{/delcall}
+				<div class="fragments-editor__floating-toolbar-panel" ref="panel">
+					<div class="popover">
+						{delcall com.liferay.layout.content.page.editor.web.FloatingToolbarPanel variant="$selectedPanelId"}
+							{param item: $item /}
+							{param itemId: $itemId /}
+							{param portalElement: null /}
+							{param selectedPanelId: $selectedPanelId /}
+							{param store: $store /}
+						{/delcall}
+					</div>
 				</div>
 			{/if}
 		{/if}
@@ -58,37 +65,41 @@
 /**
  * Panel button
  */
-{template .panelButton}
-	{@param panel: [
+{template .button}
+	{@param button: [
 		icon: string,
+		id: string,
 		panelId: string,
-		title: string
+		title: string,
+		type: string
 	]}
 	{@param spritemap: string}
 	{@param? handleButtonClick: any}
 	{@param? selectedPanelId: string}
 
-	{let $panelButtonClasses kind="text"}
+	{let $buttonClasses kind="text"}
 		btn
 		{sp}btn-monospaced
 		{sp}btn-outline-borderless
 		{sp}btn-outline-secondary
 		{sp}btn-sm
+		{sp}lfr-portal-tooltip
 
-		{if $panel.panelId == $selectedPanelId}
+		{if $button.type == 'panel' and $button.panelId == $selectedPanelId}
 			{sp}active
 		{/if}
 	{/let}
 
 	<button
-		class="{$panelButtonClasses}"
+		class="{$buttonClasses}"
+		data-type="{$button.type}"
 		data-onclick="{$handleButtonClick}"
-		data-panel-id="{$panel.panelId}"
-		title="{$panel.title}"
+		data-panel-id="{$button.panelId}"
+		data-title="{$button.title}"
 		type="button"
 	>
 		<svg class="lexicon-icon">
-			<use xlink:href="{$spritemap}#{$panel.icon}"></use>
+			<use xlink:href="{$spritemap}#{$button.icon}"></use>
 		</svg>
 	</button>
 {/template}

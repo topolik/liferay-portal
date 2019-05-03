@@ -15,6 +15,7 @@
 package com.liferay.portal.search.web.internal.custom.facet.portlet.shared.search;
 
 import com.liferay.portal.search.facet.custom.CustomFacetSearchContributor;
+import com.liferay.portal.search.searcher.SearchRequestBuilder;
 import com.liferay.portal.search.web.internal.custom.facet.constants.CustomFacetPortletKeys;
 import com.liferay.portal.search.web.internal.custom.facet.portlet.CustomFacetPortletPreferences;
 import com.liferay.portal.search.web.internal.custom.facet.portlet.CustomFacetPortletPreferencesImpl;
@@ -46,16 +47,24 @@ public class CustomFacetPortletSharedSearchContributor
 			new CustomFacetPortletPreferencesImpl(
 				portletSharedSearchSettings.getPortletPreferencesOptional());
 
+		SearchRequestBuilder searchRequestBuilder =
+			portletSharedSearchSettings.getFederatedSearchRequestBuilder(
+				customFacetPortletPreferences.getFederatedSearchKeyOptional());
+
 		Optional<String> fieldToAggregateOptional =
 			customFacetPortletPreferences.getAggregationFieldOptional();
 
 		fieldToAggregateOptional.ifPresent(
 			fieldToAggregate -> customFacetSearchContributor.contribute(
-				portletSharedSearchSettings.getSearchRequestBuilder(),
+				searchRequestBuilder,
 				customFacetBuilder -> customFacetBuilder.aggregationName(
 					portletSharedSearchSettings.getPortletId()
 				).fieldToAggregate(
 					fieldToAggregate
+				).frequencyThreshold(
+					customFacetPortletPreferences.getFrequencyThreshold()
+				).maxTerms(
+					customFacetPortletPreferences.getMaxTerms()
 				).selectedValues(
 					portletSharedSearchSettings.getParameterValues(
 						getParameterName(customFacetPortletPreferences))

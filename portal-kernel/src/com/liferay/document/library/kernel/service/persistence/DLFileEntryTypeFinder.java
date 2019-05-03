@@ -28,8 +28,19 @@ public interface DLFileEntryTypeFinder {
 		boolean includeBasicFileEntryType);
 
 	public int filterCountByKeywords(
+		long companyId, long folderId, long[] groupIds, String keywords,
+		boolean includeBasicFileEntryType, boolean inherited);
+
+	public int filterCountByKeywords(
 		long companyId, long[] groupIds, String keywords,
 		boolean includeBasicFileEntryType);
+
+	public java.util.List
+		<com.liferay.document.library.kernel.model.DLFileEntryType>
+			filterFindByKeywords(
+				long companyId, long folderId, long[] groupIds, String keywords,
+				boolean includeBasicFileEntryType, boolean inherited, int start,
+				int end);
 
 	public java.util.List
 		<com.liferay.document.library.kernel.model.DLFileEntryType>

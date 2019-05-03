@@ -15,21 +15,24 @@
 package com.liferay.fragment.entry.processor.editable.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.service.AssetEntryUsageLocalService;
 import com.liferay.fragment.constants.FragmentEntryLinkConstants;
 import com.liferay.fragment.exception.FragmentEntryContentException;
 import com.liferay.fragment.model.FragmentCollection;
 import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.fragment.processor.FragmentEntryProcessorRegistry;
-import com.liferay.fragment.service.FragmentCollectionServiceUtil;
-import com.liferay.fragment.service.FragmentEntryLinkLocalServiceUtil;
-import com.liferay.fragment.service.FragmentEntryServiceUtil;
+import com.liferay.fragment.service.FragmentCollectionService;
+import com.liferay.fragment.service.FragmentEntryLinkLocalService;
+import com.liferay.fragment.service.FragmentEntryService;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.model.Group;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
@@ -38,11 +41,13 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.PermissionCheckerTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
+import com.liferay.portlet.asset.util.test.AssetTestUtil;
 
 import java.io.IOException;
 
@@ -71,7 +76,7 @@ public class FragmentEntryProcessorEditableTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE);
+			PermissionCheckerMethodTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
@@ -99,7 +104,7 @@ public class FragmentEntryProcessorEditableTest {
 	@Test
 	public void testFragmentEntryProcessorEditable() throws Exception {
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -119,7 +124,7 @@ public class FragmentEntryProcessorEditableTest {
 		throws Exception {
 
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -133,6 +138,68 @@ public class FragmentEntryProcessorEditableTest {
 			_processedHTML,
 			_fragmentEntryProcessorRegistry.processFragmentEntryLinkHTML(
 				fragmentEntryLink));
+	}
+
+	@Test
+	public void testFragmentEntryProcessorEditableCSSMediaQuery()
+		throws Exception {
+
+		FragmentEntryLink fragmentEntryLink =
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
+
+		fragmentEntryLink.setCss(_getFileAsString("media_query.css"));
+
+		Assert.assertEquals(
+			_getFileAsString("processed_media_query.css"),
+			_fragmentEntryProcessorRegistry.processFragmentEntryLinkCSS(
+				fragmentEntryLink, FragmentEntryLinkConstants.EDIT,
+				LocaleUtil.getMostRelevantLocale(), new long[0], 0));
+	}
+
+	@Test
+	public void testFragmentEntryProcessorEditableMappedAssetField()
+		throws Exception {
+
+		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
+
+		FragmentEntryLink fragmentEntryLink =
+			_fragmentEntryLinkLocalService.addFragmentEntryLink(
+				TestPropsValues.getUserId(), _group.getGroupId(),
+				fragmentEntry.getFragmentEntryId(),
+				_portal.getClassNameId(Layout.class), TestPropsValues.getPlid(),
+				fragmentEntry.getCss(), fragmentEntry.getHtml(),
+				fragmentEntry.getJs(), StringPool.BLANK, 0,
+				ServiceContextTestUtil.getServiceContext());
+
+		AssetEntry assetEntry = AssetTestUtil.addAssetEntry(
+			_group.getGroupId());
+
+		String editableValues = _getJsonFileAsString(
+			"fragment_entry_link_mapped_asset_field.json");
+
+		editableValues = StringUtil.replace(
+			editableValues, "CLASS_NAME_ID",
+			String.valueOf(_portal.getClassNameId(assetEntry.getClassName())));
+
+		editableValues = StringUtil.replace(
+			editableValues, "CLASS_PK",
+			String.valueOf(assetEntry.getClassPK()));
+
+		_fragmentEntryLinkLocalService.updateFragmentEntryLink(
+			fragmentEntryLink.getFragmentEntryLinkId(), editableValues);
+
+		int count = _assetEntryUsageLocalService.getAssetEntryUsagesCount(
+			assetEntry.getEntryId());
+
+		Assert.assertEquals(1, count);
+
+		_fragmentEntryLinkLocalService.deleteFragmentEntryLink(
+			fragmentEntryLink);
+
+		count = _assetEntryUsageLocalService.getAssetEntryUsagesCount(
+			assetEntry.getEntryId());
+
+		Assert.assertEquals(0, count);
 	}
 
 	@Test(expected = FragmentEntryContentException.class)
@@ -155,7 +222,7 @@ public class FragmentEntryProcessorEditableTest {
 		throws Exception {
 
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -178,7 +245,7 @@ public class FragmentEntryProcessorEditableTest {
 		throws Exception {
 
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -201,7 +268,7 @@ public class FragmentEntryProcessorEditableTest {
 		throws Exception {
 
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -224,7 +291,7 @@ public class FragmentEntryProcessorEditableTest {
 		throws Exception {
 
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -246,7 +313,7 @@ public class FragmentEntryProcessorEditableTest {
 		throws Exception {
 
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -277,7 +344,7 @@ public class FragmentEntryProcessorEditableTest {
 		throws Exception {
 
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -300,7 +367,7 @@ public class FragmentEntryProcessorEditableTest {
 		throws Exception {
 
 		FragmentEntryLink fragmentEntryLink =
-			FragmentEntryLinkLocalServiceUtil.createFragmentEntryLink(0);
+			_fragmentEntryLinkLocalService.createFragmentEntryLink(0);
 
 		FragmentEntry fragmentEntry = _addFragmentEntry("fragment_entry.html");
 
@@ -326,11 +393,11 @@ public class FragmentEntryProcessorEditableTest {
 				_group.getGroupId(), TestPropsValues.getUserId());
 
 		FragmentCollection fragmentCollection =
-			FragmentCollectionServiceUtil.addFragmentCollection(
+			_fragmentCollectionService.addFragmentCollection(
 				_group.getGroupId(), "Fragment Collection", StringPool.BLANK,
 				serviceContext);
 
-		return FragmentEntryServiceUtil.addFragmentEntry(
+		return _fragmentEntryService.addFragmentEntry(
 			_group.getGroupId(), fragmentCollection.getFragmentCollectionId(),
 			"Fragment Entry", null, _getFileAsString(htmlFile), null,
 			WorkflowConstants.STATUS_APPROVED, serviceContext);
@@ -371,13 +438,29 @@ public class FragmentEntryProcessorEditableTest {
 	}
 
 	@Inject
+	private AssetEntryUsageLocalService _assetEntryUsageLocalService;
+
+	@Inject
+	private FragmentCollectionService _fragmentCollectionService;
+
+	@Inject
+	private FragmentEntryLinkLocalService _fragmentEntryLinkLocalService;
+
+	@Inject
 	private FragmentEntryProcessorRegistry _fragmentEntryProcessorRegistry;
+
+	@Inject
+	private FragmentEntryService _fragmentEntryService;
 
 	@DeleteAfterTestRun
 	private Group _group;
 
 	private Locale _originalSiteDefaultLocale;
 	private Locale _originalThemeDisplayDefaultLocale;
+
+	@Inject
+	private Portal _portal;
+
 	private String _processedHTML;
 
 }

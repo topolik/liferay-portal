@@ -30,7 +30,7 @@ import com.liferay.portal.kernel.util.Accessor;
 @Deprecated
 @ImplementationClassName("com.liferay.portal.model.impl.SubscriptionImpl")
 @ProviderType
-public interface Subscription extends SubscriptionModel, PersistedModel {
+public interface Subscription extends PersistedModel, SubscriptionModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

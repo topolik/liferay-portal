@@ -19,6 +19,7 @@ import com.liferay.poshi.runner.PoshiRunnerGetterUtil;
 import com.liferay.poshi.runner.script.PoshiScriptParserException;
 import com.liferay.poshi.runner.script.UnbalancedCodeException;
 import com.liferay.poshi.runner.util.Dom4JUtil;
+import com.liferay.poshi.runner.util.PropsValues;
 import com.liferay.poshi.runner.util.RegexUtil;
 import com.liferay.poshi.runner.util.StringUtil;
 
@@ -36,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.dom4j.Attribute;
+import org.dom4j.CDATA;
 import org.dom4j.Comment;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -62,6 +64,17 @@ public abstract class PoshiElement
 		super.add(new PoshiElementAttribute(attribute));
 	}
 
+	@Override
+	public void add(CDATA cdata) {
+		if (cdata instanceof PoshiCDATA) {
+			super.add(cdata);
+
+			return;
+		}
+
+		super.add(new PoshiCDATA(cdata));
+	}
+
 	public abstract PoshiElement clone(
 			PoshiElement parentPoshiElement, String poshiScript)
 		throws PoshiScriptParserException;
@@ -72,21 +85,27 @@ public abstract class PoshiElement
 		return clone(null, poshiScript);
 	}
 
-	public int getDefaultPoshiScriptLineNumber() {
-		return getPoshiScriptLineNumber();
-	}
-
 	public String getPoshiLogDescriptor() {
 		return getPoshiScript();
 	}
 
 	@Override
 	public String getPoshiScript() {
-		if (_poshiScript == null) {
-			return toPoshiScript();
+		return _poshiScript;
+	}
+
+	public int getPoshiScriptLineNumber(Boolean includeAnnotation) {
+		int poshiScriptLineNumber = PoshiNode.super.getPoshiScriptLineNumber();
+
+		if (!includeAnnotation) {
+			String poshiScript = getPoshiScript();
+
+			String blockName = getBlockName(poshiScript);
+
+			poshiScriptLineNumber += StringUtil.count(blockName, "\n");
 		}
 
-		return _poshiScript;
+		return poshiScriptLineNumber;
 	}
 
 	public boolean isPoshiScriptComment(String poshiScript) {
@@ -106,6 +125,21 @@ public abstract class PoshiElement
 
 			if (poshiElementAttribute == attribute) {
 				return super.remove(poshiElementAttribute);
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public boolean remove(CDATA cdata) {
+		if (cdata instanceof PoshiCDATA) {
+			return super.remove(cdata);
+		}
+
+		for (PoshiNode poshiNode : toPoshiNodes(content())) {
+			if (poshiNode == cdata) {
+				return super.remove(poshiNode);
 			}
 		}
 
@@ -135,6 +169,39 @@ public abstract class PoshiElement
 		}
 
 		return sb.toString();
+	}
+
+	public void validatePoshiScript() throws PoshiScriptParserException {
+		for (PoshiElementAttribute poshiElementAttribute :
+				toPoshiElementAttributes(attributeList())) {
+
+			poshiElementAttribute.validatePoshiScript();
+		}
+
+		String originalPoshiScript = getPoshiScript();
+		String generatedPoshiScript = toPoshiScript();
+
+		originalPoshiScript = originalPoshiScript.replaceAll("\\s+", "");
+
+		generatedPoshiScript = generatedPoshiScript.replaceAll("\\s+", "");
+
+		if (elements().size() == 0) {
+			if (!originalPoshiScript.equals(generatedPoshiScript)) {
+				PoshiScriptParserException pspe =
+					new PoshiScriptParserException(
+						PoshiScriptParserException.TRANSLATION_LOSS_MESSAGE,
+						this);
+
+				throw pspe;
+			}
+		}
+
+		if (originalPoshiScript.length() != generatedPoshiScript.length()) {
+			PoshiScriptParserException pspe = new PoshiScriptParserException(
+				PoshiScriptParserException.TRANSLATION_LOSS_MESSAGE, this);
+
+			throw pspe;
+		}
 	}
 
 	protected PoshiElement(String name, Element element) {
@@ -196,6 +263,10 @@ public abstract class PoshiElement
 
 		try {
 			parsePoshiScript(poshiScript.trim());
+
+			if (PropsValues.TEST_POSHI_SCRIPT_VALIDATION) {
+				validatePoshiScript();
+			}
 		}
 		catch (PoshiScriptParserException pspe) {
 			System.out.println(pspe.getMessage());
@@ -970,7 +1041,9 @@ public abstract class PoshiElement
 	protected static final String STATEMENT_END_REGEX = ";$";
 
 	protected static final String VAR_NAME_REGEX =
-		"(static[\\s]*|)var([\\s]*[A-Z][\\w]*|)[\\s]*[\\w]*";
+		"((static[\\s]*|)var|)([\\s]*[A-Z][\\w]*|)[\\s]*[\\w]*";
+
+	protected static final String VAR_STATEMENT_END_REGEX = "(;|)$";
 
 	protected static final Pattern poshiScriptAnnotationPattern =
 		Pattern.compile("@[\\w-]*[\\s]*?=[\\s]\".*?\"", Pattern.DOTALL);
@@ -989,6 +1062,10 @@ public abstract class PoshiElement
 		for (Node node : Dom4JUtil.toNodeList(element.content())) {
 			if (node instanceof Comment || node instanceof Element) {
 				add(PoshiNodeFactory.newPoshiNode(node));
+			}
+
+			if (node instanceof CDATA) {
+				add(new PoshiCDATA((CDATA)node.clone()));
 			}
 		}
 	}
@@ -1030,7 +1107,7 @@ public abstract class PoshiElement
 
 		_varInvocationAssignmentStatementPattern = Pattern.compile(
 			"^" + VAR_NAME_REGEX + ASSIGNMENT_REGEX + INVOCATION_REGEX +
-				STATEMENT_END_REGEX,
+				VAR_STATEMENT_END_REGEX,
 			Pattern.DOTALL);
 	}
 

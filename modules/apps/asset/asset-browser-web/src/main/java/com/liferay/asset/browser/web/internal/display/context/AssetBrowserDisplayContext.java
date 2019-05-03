@@ -77,19 +77,25 @@ public class AssetBrowserDisplayContext {
 		assetBrowserSearch.setOrderByType(getOrderByType());
 
 		if (AssetBrowserWebConfigurationValues.SEARCH_WITH_DATABASE) {
+			long[] subtypeSelectionIds = null;
+
+			if (getSubtypeSelectionId() > 0) {
+				subtypeSelectionIds = new long[] {getSubtypeSelectionId()};
+			}
+
 			int total = AssetEntryLocalServiceUtil.getEntriesCount(
-				_getFilterGroupIds(), _getClassNameIds(), _getKeywords(),
-				_getKeywords(), _getKeywords(), _getKeywords(), _getListable(),
-				false, false);
+				_getFilterGroupIds(), _getClassNameIds(), subtypeSelectionIds,
+				_getKeywords(), _getKeywords(), _getKeywords(), _getKeywords(),
+				_getListable(), false, false);
 
 			assetBrowserSearch.setTotal(total);
 
 			List<AssetEntry> assetEntries =
 				AssetEntryLocalServiceUtil.getEntries(
 					_getFilterGroupIds(), _getClassNameIds(),
-					new long[] {getSubtypeSelectionId()}, _getKeywords(),
-					_getKeywords(), _getKeywords(), _getKeywords(),
-					_getListable(), false, false, assetBrowserSearch.getStart(),
+					subtypeSelectionIds, _getKeywords(), _getKeywords(),
+					_getKeywords(), _getKeywords(), _getListable(), false,
+					false, assetBrowserSearch.getStart(),
 					assetBrowserSearch.getEnd(), "modifiedDate",
 					StringPool.BLANK, getOrderByType(), StringPool.BLANK);
 
@@ -316,7 +322,7 @@ public class AssetBrowserDisplayContext {
 			return _showAddButton;
 		}
 
-		_showAddButton = ParamUtil.getBoolean(_request, "showAddButton", true);
+		_showAddButton = ParamUtil.getBoolean(_request, "showAddButton");
 
 		return _showAddButton;
 	}

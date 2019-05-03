@@ -5,6 +5,7 @@ import State, {Config} from 'metal-state';
  * @review
  */
 class GoogleMapsDialog extends State {
+
 	/**
 	 * Creates a new map dialog using Google Map's API
 	 * @param  {Array} args List of arguments to be passed to State
@@ -36,12 +37,13 @@ class GoogleMapsDialog extends State {
  * @type {!Object}
  */
 GoogleMapsDialog.STATE = {
+
 	/**
 	 * Map used for creating the dialog content
 	 * @review
 	 * @type {Object}
 	 */
-	map: Config.object(),
+	map: Config.object()
 };
 
 export default GoogleMapsDialog;

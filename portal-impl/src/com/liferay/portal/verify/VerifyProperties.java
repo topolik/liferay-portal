@@ -669,6 +669,23 @@ public class VerifyProperties extends VerifyProcess {
 			"com.liferay.currency.converter.web"
 		},
 
+		// Discussion
+
+		{
+			"discussion.email.body", "discussion.email.body",
+			"com.liferay.comment.api"
+		},
+
+		{
+			"discussion.email.comments.added.enabled",
+			"discussion.email.comments.added.enabled", "com.liferay.comment.api"
+		},
+
+		{
+			"discussion.email.subject", "discussion.email.subject",
+			"com.liferay.comment.api"
+		},
+
 		// Document Library
 
 		{
@@ -1685,7 +1702,7 @@ public class VerifyProperties extends VerifyProcess {
 		"dl.file.entry.read.count.enabled",
 		"dl.file.entry.type.ig.image.auto.create.on.upgrade",
 		"dl.file.extensions", "dl.file.max.size", "dl.file.rank.enabled",
-		"dl.folder.menu.visible", "dockbar.add.portlets",
+		"dl.folder.menu.visible", "dl.tabs.visible", "dockbar.add.portlets",
 		"dockbar.administrative.links.show.in.pop.up",
 		"dynamic.data.lists.record.set.force.autogenerate.key",
 		"dynamic.data.lists.template.language.parser[ftl]",

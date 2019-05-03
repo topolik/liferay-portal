@@ -4,7 +4,6 @@ import '../Numeric/Numeric.es';
 import '../Select/Select.es';
 import '../Text/Text.es';
 import './ValidationRegister.soy.js';
-import autobind from 'autobind-decorator';
 import Component from 'metal-component';
 import Soy from 'metal-soy';
 import templates from './Validation.soy.js';
@@ -13,188 +12,6 @@ import {Config} from 'metal-state';
 import {subWords} from '../util/strings.es';
 
 class Validation extends Component {
-	static STATE = {
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {?(string|undefined)}
-		 */
-
-		dataType: Config.string().valueFn('_dataTypeValueFn'),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof Validation
-		 * @type {bool}
-		 */
-
-		enableValidation: Config.bool()
-			.internal()
-			.valueFn('_enableValidationValueFn'),
-
-		/**
-		 * @default ''
-		 * @instance
-		 * @memberof Validation
-		 * @type {String}
-		 */
-
-		errorMessage: Config.string()
-			.internal()
-			.value(''),
-
-		/**
-		 * @default ''
-		 * @instance
-		 * @memberof Validation
-		 * @type {String}
-		 */
-
-		expression: Config.string()
-			.internal()
-			.value(''),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {?(string|undefined)}
-		 */
-
-		fieldName: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {?(string|undefined)}
-		 */
-
-		id: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {?(string|undefined)}
-		 */
-
-		label: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {?(string|undefined)}
-		 */
-
-		name: Config.string().required(),
-
-		/**
-		 * @default ''
-		 * @instance
-		 * @memberof Validation
-		 * @type {String}
-		 */
-
-		parameterMessage: Config.string()
-			.internal()
-			.value(''),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {?(string|undefined)}
-		 */
-
-		spritemap: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {!string}
-		 */
-
-		strings: {
-			value: {
-				chooseAnOption: Liferay.Language.get('choose-an-option'),
-				email: Liferay.Language.get('email'),
-				errorMessage: Liferay.Language.get('error-message'),
-				ifInput: Liferay.Language.get('if-input'),
-				showErrorMessage: Liferay.Language.get('show-error-message'),
-				theValue: Liferay.Language.get('the-value'),
-				url: Liferay.Language.get('url'),
-				validationMessage: Liferay.Language.get('validation')
-			}
-		},
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {?(object|undefined)}
-		 */
-
-		validation: Config.object(),
-
-		/**
-		 * @default array
-		 * @instance
-		 * @memberof Validation
-		 * @type {array}
-		 */
-
-		validations: Config.array().valueFn('_validationsValueFn'),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Validation
-		 * @type {?(string|undefined)}
-		 */
-
-		value: Config.shapeOf(
-			{
-				errorMessage: Config.string(),
-				expression: Config.string()
-			}
-		).value({})
-	};
-
-	_getStateFromValue(value) {
-		const {errorMessage, expression} = value;
-		let parameterMessage = '';
-		let selectedValidation;
-		const enableValidation = !!expression;
-
-		if (enableValidation) {
-			selectedValidation = this._parseValidationFromExpression(expression);
-
-			if (selectedValidation) {
-				parameterMessage = this._parseParameterMessageFromExpression(expression, selectedValidation);
-			}
-			else {
-				selectedValidation = {
-					parameterMessage: this.validations[0].parameterMessage,
-					value: this.validations[0].name
-				};
-			}
-		}
-
-		return {
-			enableValidation,
-			errorMessage,
-			expression,
-			parameterMessage,
-			selectedValidation
-		};
-	}
-
 	prepareStateForRender(state) {
 		const parsedState = this._getStateFromValue(state.value);
 
@@ -230,12 +47,6 @@ class Validation extends Component {
 		return this.validation.dataType ? this.validation.dataType : this.dataType;
 	}
 
-	_enableValidationValueFn() {
-		const {value} = this;
-
-		return !!value.expression;
-	}
-
 	_emitFieldEdited(value) {
 		this.emit(
 			'fieldEdited',
@@ -245,6 +56,12 @@ class Validation extends Component {
 				value
 			}
 		);
+	}
+
+	_enableValidationValueFn() {
+		const {value} = this;
+
+		return !!value.expression;
 	}
 
 	_getSelectedValidation() {
@@ -263,6 +80,35 @@ class Validation extends Component {
 		}
 
 		return selectedValidation;
+	}
+
+	_getStateFromValue(value) {
+		const {errorMessage, expression} = value;
+		let parameterMessage = '';
+		let selectedValidation;
+		const enableValidation = !!expression;
+
+		if (enableValidation) {
+			selectedValidation = this._parseValidationFromExpression(expression);
+
+			if (selectedValidation) {
+				parameterMessage = this._parseParameterMessageFromExpression(expression, selectedValidation);
+			}
+			else {
+				selectedValidation = {
+					parameterMessage: this.validations[0].parameterMessage,
+					value: this.validations[0].name
+				};
+			}
+		}
+
+		return {
+			enableValidation,
+			errorMessage,
+			expression,
+			parameterMessage,
+			selectedValidation
+		};
 	}
 
 	_getValue() {
@@ -338,7 +184,6 @@ class Validation extends Component {
 		return validation;
 	}
 
-	@autobind
 	_updateValue() {
 		const value = this._getValue();
 
@@ -358,6 +203,155 @@ class Validation extends Component {
 		return this._normalizeValidationsOptions(VALIDATIONS[dataType]);
 	}
 }
+
+Validation.STATE = {
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(string|undefined)}
+	 */
+
+	dataType: Config.string().valueFn('_dataTypeValueFn'),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof Validation
+	 * @type {bool}
+	 */
+
+	enableValidation: Config.bool()
+		.internal()
+		.valueFn('_enableValidationValueFn'),
+
+	/**
+	 * @default ''
+	 * @instance
+	 * @memberof Validation
+	 * @type {String}
+	 */
+
+	errorMessage: Config.string()
+		.internal()
+		.value(''),
+
+	/**
+	 * @default ''
+	 * @instance
+	 * @memberof Validation
+	 * @type {String}
+	 */
+
+	expression: Config.string()
+		.internal()
+		.value(''),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(string|undefined)}
+	 */
+
+	fieldName: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(string|undefined)}
+	 */
+
+	id: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(string|undefined)}
+	 */
+
+	label: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(string|undefined)}
+	 */
+
+	name: Config.string().required(),
+
+	/**
+	 * @default ''
+	 * @instance
+	 * @memberof Validation
+	 * @type {String}
+	 */
+
+	parameterMessage: Config.string().internal().value(''),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof Validation
+	 * @type {?bool}
+	 */
+
+	readOnly: Config.bool().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(string|undefined)}
+	 */
+
+	spritemap: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(string|undefined)}
+	 */
+
+	type: Config.string().value('validation'),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(object|undefined)}
+	 */
+
+	validation: Config.object(),
+
+	/**
+	 * @default array
+	 * @instance
+	 * @memberof Validation
+	 * @type {array}
+	 */
+
+	validations: Config.array().valueFn('_validationsValueFn'),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Validation
+	 * @type {?(string|undefined)}
+	 */
+
+	value: Config.shapeOf(
+		{
+			errorMessage: Config.string(),
+			expression: Config.string()
+		}
+	).value({})
+};
 
 Soy.register(Validation, templates);
 

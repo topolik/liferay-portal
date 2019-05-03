@@ -30,6 +30,7 @@ import java.io.Writer;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Brian Wing Shun Chan
@@ -190,6 +191,11 @@ public class JSONObjectImpl implements JSONObject {
 	}
 
 	@Override
+	public Set<String> keySet() {
+		return _jsonObject.keySet();
+	}
+
+	@Override
 	public int length() {
 		return _jsonObject.length();
 	}
@@ -197,6 +203,11 @@ public class JSONObjectImpl implements JSONObject {
 	@Override
 	public JSONArray names() {
 		return new JSONArrayImpl(_jsonObject.names());
+	}
+
+	@Override
+	public Object opt(String key) {
+		return get(key);
 	}
 
 	@Override

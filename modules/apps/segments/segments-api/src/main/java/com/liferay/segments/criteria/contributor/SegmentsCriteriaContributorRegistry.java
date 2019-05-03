@@ -25,7 +25,6 @@ import java.util.List;
  * {@link SegmentsCriteriaContributor} implementations.
  *
  * @author Eduardo García
- * @review
  */
 @ProviderType
 public interface SegmentsCriteriaContributorRegistry {

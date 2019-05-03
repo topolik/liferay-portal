@@ -17,14 +17,14 @@ class EditTags extends Component {
 	 * @inheritDoc
 	 */
 	attached() {
-		this._bulkStatusComponent =	Liferay.component(this.portletNamespace + 'BulkStatus');
+		this._bulkStatusComponent =	Liferay.component(this.namespace + 'BulkStatus');
 	}
 
 	/**
 	 * Close the modal.
 	 */
 	close() {
-		this.showModal = false;
+		this._showModal = false;
 	}
 
 	/**
@@ -42,7 +42,7 @@ class EditTags extends Component {
 		this.fileEntries = fileEntries;
 		this.selectAll = selectAll;
 		this.folderId = folderId;
-		this.showModal = true;
+		this._showModal = true;
 
 		this._getCommonTags();
 	}
@@ -54,7 +54,7 @@ class EditTags extends Component {
 	 * @param {Object} bodyData The body of the request
 	 * @param {Function} callback Callback function
 	 */
-	_fetchTagsRequest(url, bodyData, callback) {
+	_fetchTagsRequest(url, method, bodyData) {
 		let body = JSON.stringify(bodyData);
 
 		let headers = new Headers();
@@ -64,23 +64,33 @@ class EditTags extends Component {
 			body,
 			credentials: 'include',
 			headers,
-			method: 'POST'
+			method
 		};
 
-		fetch(url, request)
+		return fetch(this.pathModule + url, request)
 			.then(
 				response => response.json()
-			)
-			.then(
-				response => {
-					callback(response);
-				}
 			)
 			.catch(
 				(xhr) => {
 					this.close();
 				}
 			);
+	}
+
+	_getDescription(size) {
+		if (size === 1) {
+			return Liferay.Language.get('you-are-editing-the-tags-for-the-selected-item');
+		}
+
+		return Liferay.Util.sub(
+			Liferay.Language.get('you-are-editing-the-common-tags-for-x-items.-select-edit-or-replace-current-tags'),
+			size
+		);
+	}
+
+	_handleSelectedItemsChange(event) {
+		this._commonTags = event.selectedItems;
 	}
 
 	/**
@@ -91,28 +101,34 @@ class EditTags extends Component {
 	 * @review
 	 */
 	_getCommonTags() {
-		this.loading = true;
+		this._loading = true;
 
-		let bodyData = {
-			folderId: this.folderId,
-			repositoryId: this.repositoryId,
-			selectAll: this.selectAll,
-			selection: this.fileEntries
-		};
+		let selection = this._getSelection();
 
-		this._fetchTagsRequest(
-			this.urlTags,
-			bodyData,
-			response => {
-				if (response) {
-					this.loading = false;
-					this.commonTags = response.tagNames;
-					this.description = response.description;
-					this.groupIds = response.groupIds;
+		Promise.all(
+			[
+				this._fetchTagsRequest(this.urlTags, 'POST', selection),
+				this._fetchTagsRequest(this.urlSelection, 'POST', selection)
+			]
+		).then(
+			([responseTags, responseSelection]) => {
+				if (responseTags && responseSelection) {
+					this._loading = false;
+					this._commonTags = this._setCommonTags((responseTags.items || []).map(item => item.name));
+					this.description = this._getDescription(responseSelection.size);
 					this.multiple = (this.fileEntries.length > 1) || this.selectAll;
 				}
 			}
 		);
+	}
+
+	_handleInputFocus(event) {
+		const dataProvider = event.target.refs.autocomplete.refs.dataProvider;
+		const modal = this.element.querySelector('.modal');
+
+		if (modal && dataProvider && !modal.contains(dataProvider.element)) {
+			modal.appendChild(dataProvider.element);
+		}
 	}
 
 	/**
@@ -128,12 +144,15 @@ class EditTags extends Component {
 	/**
 	 * Sends request to backend services
 	 * to update the tags.
+	 * @param {!Event} event
 	 *
 	 * @private
 	 * @review
 	 */
-	_handleSaveBtnClick() {
-		let finalTags = this.commonTags.map(tag => tag.label);
+	_handleFormSubmit(event) {
+		event.preventDefault();
+
+		let finalTags = this._commonTags.map(tag => tag.label);
 
 		let addedTags = [];
 
@@ -150,21 +169,17 @@ class EditTags extends Component {
 			tag => finalTags.indexOf(tag) == -1
 		);
 
-		let bodyData = {
-			append: this.append,
-			folderId: this.folderId,
-			repositoryId: this.repositoryId,
-			selectAll: this.selectAll,
-			selection: this.fileEntries,
-			toAddTagNames: addedTags,
-			toRemoveTagNames: removedTags
-		};
-
 		let instance = this;
 
 		this._fetchTagsRequest(
 			this.urlUpdateTags,
-			bodyData,
+			this.append ? 'PATCH' : 'PUT',
+			{
+				documentBulkSelection: this._getSelection(),
+				keywordsToAdd: addedTags,
+				keywordsToRemove: removedTags
+			}
+		).then(
 			response => {
 				instance.close();
 
@@ -202,6 +217,17 @@ class EditTags extends Component {
 
 		return commonTagsObjList;
 	}
+
+	_getSelection() {
+		return {
+			documentIds: this.fileEntries,
+			selectionScope: {
+				folderId: this.folderId,
+				repositoryId: this.repositoryId,
+				selectAll: this.selectAll
+			}
+		};
+	}
 }
 
 /**
@@ -220,7 +246,29 @@ EditTags.STATE = {
 	 * @review
 	 * @type {List<String>}
 	 */
-	commonTags: Config.array().setter('_setCommonTags').value([]),
+	_commonTags: Config.array().value([]).internal(),
+
+	/**
+	 * Flag that indicate if loading icon must
+	 * be shown.
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {Boolean}
+	 */
+	_loading: Config.bool().value(false).internal(),
+
+	/**
+	 * Flag that indicate if the modal must
+	 * be shown.
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {Boolean}
+	 */
+	_showModal: Config.bool().value(false).internal(),
 
 	/**
 	 * Description
@@ -256,18 +304,7 @@ EditTags.STATE = {
 	 * [groupIds description]
 	 * @type {[type]}
 	 */
-	groupIds: Config.array().value([]),
-
-	/**
-	 * Flag that indicate if loading icon must
-	 * be shown.
-	 *
-	 * @instance
-	 * @memberof EditTags
-	 * @review
-	 * @type {Boolean}
-	 */
-	loading: Config.bool().value(false).internal(),
+	groupIds: Config.array().required(),
 
 	/**
 	 * Flag that indicate if multiple
@@ -301,6 +338,16 @@ EditTags.STATE = {
 	repositoryId: Config.string().required(),
 
 	/**
+	 * PathModule
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {String}
+	 */
+	pathModule: Config.string().required(),
+
+	/**
 	 * Flag that indicate if "select all" checkbox
 	 * is checked.
 	 *
@@ -310,17 +357,6 @@ EditTags.STATE = {
 	 * @type {Boolean}
 	 */
 	selectAll: Config.bool(),
-
-	/**
-	 * Flag that indicate if the modal must
-	 * be shown.
-	 *
-	 * @instance
-	 * @memberof EditTags
-	 * @review
-	 * @type {Boolean}
-	 */
-	showModal: Config.bool().value(false).internal(),
 
 	/**
 	 * Path to images.
@@ -341,7 +377,18 @@ EditTags.STATE = {
 	 * @review
 	 * @type {String}
 	 */
-	urlTags: Config.string().required(),
+	urlTags: Config.string().value('/bulk-rest/v1.0/keywords/common'),
+
+	/**
+	 * Url to backend service that provides
+	 * the selection information.
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {String}
+	 */
+	urlSelection: Config.string().value('/bulk-rest/v1.0/bulk-selection'),
 
 	/**
 	 * Url to backend service that updates
@@ -352,7 +399,7 @@ EditTags.STATE = {
 	 * @review
 	 * @type {String}
 	 */
-	urlUpdateTags: Config.string().required()
+	urlUpdateTags: Config.string().value('/bulk-rest/v1.0/keywords/batch')
 };
 
 // Register component

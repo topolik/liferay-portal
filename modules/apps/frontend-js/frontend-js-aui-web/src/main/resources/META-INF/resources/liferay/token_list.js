@@ -1,3 +1,10 @@
+/**
+ * The Token List Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-token-list
+ */
+
 AUI().add(
 	'liferay-token-list',
 	function(A) {

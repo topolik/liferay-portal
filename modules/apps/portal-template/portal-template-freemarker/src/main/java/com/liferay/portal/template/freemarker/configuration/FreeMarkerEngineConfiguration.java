@@ -47,6 +47,12 @@ public interface FreeMarkerEngineConfiguration {
 	public String[] restrictedClasses();
 
 	@Meta.AD(
+		deflt = "com.liferay.portal.model.impl.CompanyImpl#getKey",
+		name = "restricted-methods", required = false
+	)
+	public String[] restrictedMethods();
+
+	@Meta.AD(
 		deflt = "httpUtilUnsafe|objectUtil|serviceLocator|staticFieldGetter|staticUtil|utilLocator",
 		name = "restricted-variables", required = false
 	)

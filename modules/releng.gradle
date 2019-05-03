@@ -218,7 +218,7 @@ lockDependencyVersion {
 
 			File moduleDir = buildGradleFile.parentFile
 
-			if (_isGitRepoReadOnly(moduleDir)) {
+			if (moduleDir.name.endsWith("-test") || _isGitRepoReadOnly(moduleDir)) {
 				return
 			}
 
@@ -502,7 +502,7 @@ prepareMajorIncrement {
 
 		Map<String, String> moduleNamePathsMap = [
 			"com.liferay.portal.configuration.metatype": ":apps:static:portal-configuration:portal-configuration-metatype-api",
-			"com.liferay.portal.mobile.device.detection.fiftyonedegrees": ":apps:portal-mobile-device-detection-fiftyonedegrees:portal-mobile-device-detection-fiftyonedegrees-api",
+			"com.liferay.portal.mobile.device.detection.fiftyonedegrees": ":apps:portal-mobile-device-detection-fiftyonedegrees:portal-mobile-device-detection-fiftyonedegrees",
 			"com.liferay.portal.osgi.web.wab.generator": ":apps:static:portal-osgi-web:portal-osgi-web-wab-generator-api",
 			"com.liferay.portal.profile": ":apps:static:portal:portal-profile-api",
 			"com.liferay.portal.template.soy": ":apps:portal-template:portal-template-soy-api",
@@ -515,9 +515,10 @@ prepareMajorIncrement {
 					return FileVisitResult.SKIP_SUBTREE
 				}
 
+				File masterOnlyMarkerFile = new File(it, ".lfrbuild-master-only")
 				File relengIgnoreMarkerFile = new File(it, ".lfrbuild-releng-ignore")
 
-				if (it.name.endsWith("-test") || it.name.endsWith("-test-api") || it.name.endsWith("-test-impl")|| it.name.endsWith("-test-service") || relengIgnoreMarkerFile.exists() || _isGitRepoReadOnly(it)) {
+				if (it.name.endsWith("-test") || it.name.endsWith("-test-api") || it.name.endsWith("-test-impl")|| it.name.endsWith("-test-service") || masterOnlyMarkerFile.exists() || relengIgnoreMarkerFile.exists() || _isGitRepoReadOnly(it)) {
 					println "Ignoring ${it}"
 
 					return FileVisitResult.SKIP_SUBTREE

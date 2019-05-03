@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.PhoneImpl")
 @ProviderType
-public interface Phone extends PhoneModel, PersistedModel {
+public interface Phone extends PersistedModel, PhoneModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

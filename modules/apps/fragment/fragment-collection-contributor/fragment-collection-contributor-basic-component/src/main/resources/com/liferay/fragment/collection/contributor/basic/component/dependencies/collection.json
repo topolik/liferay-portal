@@ -1,13 +1,3 @@
 {
-	"fragments": [
-		"card",
-		"heading",
-		"image",
-		"line",
-		"primary-button",
-		"quote",
-		"secondary-button",
-		"text"
-	],
 	"name": "Basic Components"
 }

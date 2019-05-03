@@ -10,7 +10,7 @@
 <tbody>
 <tr>
 	<td>ARTICLE_ID</td>
-	<td>//span[@class='workflow-id']/span[@class='workflow-value']</td>
+	<td>//table[contains(@data-searchcontainerid,'articleVersions')]//td[contains(@class,'lfr-id-column')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -19,8 +19,23 @@
 	<td></td>
 </tr>
 <tr>
+	<td>AUTOGENERATEID</td>
+	<td>//input[contains(@id,'autoArticleId')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SIDEBAR</td>
+	<td>//div[contains(@class,'contextual-sidebar-visible')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>EDIT_TEMPLATE</td>
 	<td>//a[contains(@id,'editDDMTemplate')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PREVIEW_TEMPLATE</td>
+	<td>//button[contains(@id,'previewWithTemplate')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -30,7 +45,7 @@
 </tr>
 <tr>
 	<td>SELECT_FEATURED_IMAGE_TYPE</td>
-	<td>//div[contains(@class,'input-select-wrapper')]/select</td>
+	<td>//div[contains(@class,'input-select-wrapper')]/select[contains(@id,'smallImageSource')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -50,12 +65,12 @@
 </tr>
 <tr>
 	<td>SELECTED_STRUCTURE</td>
-	<td>//div[contains(@class,'article-structure')]//a</td>
+	<td>//p[@class='article-structure']</td>
 	<td></td>
 </tr>
 <tr>
 	<td>SELECTED_TEMPLATE</td>
-	<td>//span[contains(@id,'templateNameLabel')]</td>
+	<td>//input[contains(@id,'TemplateName')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -65,7 +80,7 @@
 </tr>
 <tr>
 	<td>VERSION</td>
-	<td>//p[contains(@class,'article-version')]/b</td>
+	<td>//p[contains(@class,'article-version')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -133,6 +148,17 @@
 <tr>
 	<td>DISPLAY_PAGE_SELECT_PAGE_IFRAME</td>
 	<td>//iframe[contains(@id,'selectDisplayPage')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr>
+<!--IMAGE_FIELD-->
+<tr>
+	<td>IMAGE_FIELD_SELECT</td>
+	<td>//div[@class='button-holder']//span[contains(.,'Select')]</td>
 	<td></td>
 </tr>
 </tbody>

@@ -4,6 +4,8 @@ definition {
 	function dragAndDropPortletToObject {
 		WaitForSPARefresh();
 
+		Pause(locator1 = "1000");
+
 		selenium.waitForText("${locator1}", "${value1}");
 
 		selenium.mouseDown("${locator1}");

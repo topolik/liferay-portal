@@ -14,11 +14,15 @@
 
 package com.liferay.layout.page.template.util;
 
+import com.liferay.fragment.constants.FragmentConstants;
+import com.liferay.fragment.model.FragmentEntry;
 import com.liferay.fragment.model.FragmentEntryLink;
+import com.liferay.fragment.service.FragmentEntryLocalServiceUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 
 import java.util.List;
 
@@ -30,54 +34,61 @@ public class LayoutPageTemplateStructureHelperUtil {
 	public static JSONObject generateContentLayoutStructure(
 		List<FragmentEntryLink> fragmentEntryLinks) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
 		JSONArray structureJSONArray = JSONFactoryUtil.createJSONArray();
 
 		for (int i = 0; i < fragmentEntryLinks.size(); i++) {
 			FragmentEntryLink fragmentEntryLink = fragmentEntryLinks.get(i);
 
-			JSONObject structureJSONObject = JSONFactoryUtil.createJSONObject();
+			JSONObject columnJSONObject = JSONUtil.put(
+				"columnId", String.valueOf(i)
+			).put(
+				"fragmentEntryLinkIds",
+				JSONUtil.put(fragmentEntryLink.getFragmentEntryLinkId())
+			).put(
+				"size", StringPool.BLANK
+			);
 
-			JSONArray columnJSONArray = JSONFactoryUtil.createJSONArray();
-
-			JSONObject columnJSONObject = JSONFactoryUtil.createJSONObject();
-
-			columnJSONObject.put("columnId", String.valueOf(i));
-
-			JSONArray fragmentEntryLinksJSONArray =
-				JSONFactoryUtil.createJSONArray();
-
-			fragmentEntryLinksJSONArray.put(
-				fragmentEntryLink.getFragmentEntryLinkId());
-
-			columnJSONObject.put(
-				"fragmentEntryLinkIds", fragmentEntryLinksJSONArray);
-
-			columnJSONObject.put("size", StringPool.BLANK);
-
-			columnJSONArray.put(columnJSONObject);
-
-			structureJSONObject.put("columns", columnJSONArray);
-
-			structureJSONObject.put("rowId", String.valueOf(i));
+			JSONObject structureJSONObject = JSONUtil.put(
+				"columns", JSONUtil.put(columnJSONObject)
+			).put(
+				"rowId", String.valueOf(i)
+			).put(
+				"type", String.valueOf(_getRowType(fragmentEntryLink))
+			);
 
 			structureJSONArray.put(structureJSONObject);
 		}
 
-		jsonObject.put("config", JSONFactoryUtil.createJSONObject());
-		jsonObject.put(
-			"nextColumnId", String.valueOf(fragmentEntryLinks.size()));
-		jsonObject.put("nextRowId", String.valueOf(fragmentEntryLinks.size()));
+		JSONObject jsonObject = JSONUtil.put(
+			"config", JSONFactoryUtil.createJSONObject()
+		).put(
+			"nextColumnId", fragmentEntryLinks.size()
+		).put(
+			"nextRowId", fragmentEntryLinks.size()
+		);
 
 		if (!fragmentEntryLinks.isEmpty()) {
 			jsonObject.put(
-				"rowId", String.valueOf(fragmentEntryLinks.size() - 1));
+				"nextRowId", String.valueOf(fragmentEntryLinks.size() - 1));
 		}
 
 		jsonObject.put("structure", structureJSONArray);
 
 		return jsonObject;
+	}
+
+	private static int _getRowType(FragmentEntryLink fragmentEntryLink) {
+		FragmentEntry fragmentEntry =
+			FragmentEntryLocalServiceUtil.fetchFragmentEntry(
+				fragmentEntryLink.getFragmentEntryId());
+
+		if ((fragmentEntry != null) &&
+			(fragmentEntry.getType() == FragmentConstants.TYPE_COMPONENT)) {
+
+			return FragmentConstants.TYPE_COMPONENT;
+		}
+
+		return FragmentConstants.TYPE_SECTION;
 	}
 
 }

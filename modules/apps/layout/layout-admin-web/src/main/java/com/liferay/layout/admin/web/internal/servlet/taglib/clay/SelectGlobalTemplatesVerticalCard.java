@@ -51,6 +51,10 @@ public class SelectGlobalTemplatesVerticalCard implements VerticalCard {
 			addLayoutURL.setParameter(
 				"mvcRenderCommandName", "/layout/add_layout");
 
+			String redirect = ParamUtil.getString(_renderRequest, "redirect");
+
+			addLayoutURL.setParameter("backURL", redirect);
+
 			long selPlid = ParamUtil.getLong(_renderRequest, "selPlid");
 
 			addLayoutURL.setParameter("selPlid", String.valueOf(selPlid));
@@ -81,7 +85,8 @@ public class SelectGlobalTemplatesVerticalCard implements VerticalCard {
 
 	@Override
 	public String getElementClasses() {
-		return "add-layout-action-option";
+		return "add-layout-action-option card-interactive " +
+			"card-interactive-primary card-type-template template-card";
 	}
 
 	@Override

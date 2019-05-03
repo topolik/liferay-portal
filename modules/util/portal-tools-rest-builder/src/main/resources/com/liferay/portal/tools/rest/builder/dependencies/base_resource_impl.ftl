@@ -1,10 +1,8 @@
 package ${configYAML.apiPackagePath}.internal.resource.${escapedVersion};
 
-<#compress>
-	<#list openAPIYAML.components.schemas?keys as schemaName>
-		import ${configYAML.apiPackagePath}.dto.${escapedVersion}.${schemaName};
-	</#list>
-</#compress>
+<#list openAPIYAML.components.schemas?keys as schemaName>
+	import ${configYAML.apiPackagePath}.dto.${escapedVersion}.${schemaName};
+</#list>
 
 import ${configYAML.apiPackagePath}.resource.${escapedVersion}.${schemaName}Resource;
 
@@ -13,7 +11,6 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.search.filter.Filter;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.vulcan.accept.language.AcceptLanguage;
 import com.liferay.portal.vulcan.multipart.MultipartBody;
 import com.liferay.portal.vulcan.pagination.Page;
@@ -28,8 +25,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 
-import java.net.URI;
-
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -52,7 +48,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 /**
@@ -75,22 +70,25 @@ public abstract class Base${schemaName}ResourceImpl implements ${schemaName}Reso
 				Response.ResponseBuilder responseBuilder = Response.ok();
 
 				return responseBuilder.build();
+			<#elseif stringUtil.equals(javaMethodSignature.returnType, "void")>
 			<#elseif javaMethodSignature.returnType?contains("Page<")>
 				return Page.of(Collections.emptyList());
 			<#elseif freeMarkerTool.hasHTTPMethod(javaMethodSignature, "patch") && !javaMethodSignature.operation.requestBody.content?keys?seq_contains("multipart/form-data")>
 				<#assign firstJavaMethodParameter = javaMethodSignature.javaMethodParameters[0] />
 
-				preparePatch(${schemaVarName});
-
 				${schemaName} existing${schemaName} = get${schemaName}(${firstJavaMethodParameter.parameterName});
 
-				<#list freeMarkerTool.getDTOJavaMethodParameters(configYAML, openAPIYAML, schemaName) as javaMethodParameter>
-					<#if !freeMarkerTool.isSchemaParameter(javaMethodParameter, openAPIYAML) && !stringUtil.equals(javaMethodParameter.parameterName, "id")>
-						if (Validator.isNotNull(${schemaVarName}.get${javaMethodParameter.parameterName?cap_first}())) {
-							existing${schemaName}.set${javaMethodParameter.parameterName?cap_first}(${schemaVarName}.get${javaMethodParameter.parameterName?cap_first}());
+				<#assign properties = freeMarkerTool.getDTOProperties(configYAML, openAPIYAML, schema) />
+
+				<#list properties?keys as propertyName>
+					<#if !freeMarkerTool.isDTOSchemaProperty(openAPIYAML, propertyName, schema) && !stringUtil.equals(propertyName, "id")>
+						if (${schemaVarName}.get${propertyName?cap_first}() != null) {
+							existing${schemaName}.set${propertyName?cap_first}(${schemaVarName}.get${propertyName?cap_first}());
 						}
 					</#if>
 				</#list>
+
+				preparePatch(${schemaVarName}, existing${schemaName});
 
 				return put${schemaName}(${firstJavaMethodParameter.parameterName}, existing${schemaName});
 			<#else>
@@ -103,41 +101,19 @@ public abstract class Base${schemaName}ResourceImpl implements ${schemaName}Reso
 		this.contextCompany = contextCompany;
 	}
 
-	protected String getJAXRSLink(String methodName, Object... values) {
-		String baseURIString = String.valueOf(
-			contextUriInfo.getBaseUri());
-
-		if (baseURIString.endsWith(StringPool.FORWARD_SLASH)) {
-			baseURIString = baseURIString.substring(
-				0, baseURIString.length() - 1);
-		}
-
-		URI resourceURI = UriBuilder.fromResource(
-			Base${schemaName}ResourceImpl.class
-		).build();
-
-		URI methodURI = UriBuilder.fromMethod(
-			Base${schemaName}ResourceImpl.class, methodName
-		).build(
-			values
-		);
-
-		return baseURIString + resourceURI.toString() + methodURI.toString();
+	protected void preparePatch(${schemaName} ${schemaVarName}, ${schemaName} existing${schemaVarName?cap_first}) {
 	}
 
-	protected void preparePatch(${schemaName} ${schemaVarName}) {
-	}
-
-	protected <T, R> List<R> transform(List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction) {
-		return TransformUtil.transform(list, unsafeFunction);
+	protected <T, R> List<R> transform(Collection<T> collection, UnsafeFunction<T, R, Exception> unsafeFunction) {
+		return TransformUtil.transform(collection, unsafeFunction);
 	}
 
 	protected <T, R> R[] transform(T[] array, UnsafeFunction<T, R, Exception> unsafeFunction, Class<?> clazz) {
 		return TransformUtil.transform(array, unsafeFunction, clazz);
 	}
 
-	protected <T, R> R[] transformToArray(List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction, Class<?> clazz) {
-		return TransformUtil.transformToArray(list, unsafeFunction, clazz);
+	protected <T, R> R[] transformToArray(Collection<T> collection, UnsafeFunction<T, R, Exception> unsafeFunction, Class<?> clazz) {
+		return TransformUtil.transformToArray(collection, unsafeFunction, clazz);
 	}
 
 	protected <T, R> List<R> transformToList(T[] array, UnsafeFunction<T, R, Exception> unsafeFunction) {

@@ -45,7 +45,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
-import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.PortletRequestModel;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
@@ -142,16 +141,10 @@ public class JournalContentDisplayContext {
 			return _article;
 		}
 
-		long previewArticleId = ParamUtil.getLong(
-			_portletRequest, "previewArticleId");
-
-		if (previewArticleId > 0) {
-			_article = JournalArticleLocalServiceUtil.fetchArticle(
-				previewArticleId);
-		}
-
 		ThemeDisplay themeDisplay = (ThemeDisplay)_portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
+
+		_article = _getArticleByPreviewAssetEntryId();
 
 		if ((_article != null) &&
 			JournalArticlePermission.contains(
@@ -441,7 +434,7 @@ public class JournalContentDisplayContext {
 
 		Group scopeGroup = themeDisplay.getScopeGroup();
 
-		if (!scopeGroup.isStaged() ||
+		if (scopeGroup.isStaged() &&
 			!scopeGroup.isInStagingPortlet(JournalPortletKeys.JOURNAL)) {
 
 			groupId = scopeGroup.getLiveGroupId();
@@ -595,6 +588,9 @@ public class JournalContentDisplayContext {
 	}
 
 	public String getURLEdit() {
+		ThemeDisplay themeDisplay = (ThemeDisplay)_portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
 		try {
 			AssetRendererFactory<JournalArticle> assetRendererFactory =
 				AssetRendererFactoryRegistryUtil.getAssetRendererFactoryByClass(
@@ -606,16 +602,9 @@ public class JournalContentDisplayContext {
 				assetRendererFactory.getAssetRenderer(
 					article, AssetRendererFactory.TYPE_LATEST_APPROVED);
 
-			LiferayPortletResponse liferayPortletResponse =
-				PortalUtil.getLiferayPortletResponse(_portletResponse);
-
 			PortletURL portletURL = latestArticleAssetRenderer.getURLEdit(
 				PortalUtil.getLiferayPortletRequest(_portletRequest), null,
-				LiferayWindowState.MAXIMIZED,
-				liferayPortletResponse.createRenderURL());
-
-			portletURL.setParameter(
-				"hideDefaultSuccessMessage", Boolean.TRUE.toString());
+				LiferayWindowState.NORMAL, themeDisplay.getURLCurrent());
 
 			return portletURL.toString();
 		}
@@ -636,7 +625,7 @@ public class JournalContentDisplayContext {
 		ThemeDisplay themeDisplay = (ThemeDisplay)_portletRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		PortletURL portletURL = PortletURLFactoryUtil.create(
+		PortletURL portletURL = PortalUtil.getControlPanelPortletURL(
 			_portletRequest, JournalPortletKeys.JOURNAL,
 			PortletRequest.RENDER_PHASE);
 
@@ -648,6 +637,40 @@ public class JournalContentDisplayContext {
 		portletURL.setPortletMode(PortletMode.VIEW);
 
 		return portletURL.toString();
+	}
+
+	public String getURLViewHistory() {
+		try {
+			JournalArticle article = getArticle();
+
+			ThemeDisplay themeDisplay =
+				(ThemeDisplay)_portletRequest.getAttribute(
+					WebKeys.THEME_DISPLAY);
+
+			PortletURL portletURL = PortletURLFactoryUtil.create(
+				_portletRequest, JournalPortletKeys.JOURNAL,
+				PortletRequest.RENDER_PHASE);
+
+			portletURL.setParameter("mvcPath", "/view_article_history.jsp");
+
+			PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
+
+			portletURL.setParameter(
+				"referringPortletResource", portletDisplay.getId());
+
+			portletURL.setParameter(
+				"groupId", String.valueOf(article.getGroupId()));
+			portletURL.setParameter("articleId", article.getArticleId());
+			portletURL.setParameter("showHeader", Boolean.TRUE.toString());
+			portletURL.setWindowState(LiferayWindowState.POP_UP);
+
+			return portletURL.toString();
+		}
+		catch (Exception e) {
+			_log.error("Unable to get view history URL", e);
+
+			return StringPool.BLANK;
+		}
 	}
 
 	public boolean hasRestorePermission() throws PortalException {
@@ -771,17 +794,7 @@ public class JournalContentDisplayContext {
 			return _preview;
 		}
 
-		long previewArticleId = ParamUtil.getLong(
-			_portletRequest, "previewArticleId");
-
-		if (previewArticleId <= 0) {
-			_preview = false;
-
-			return _preview;
-		}
-
-		JournalArticle article = JournalArticleLocalServiceUtil.fetchArticle(
-			previewArticleId);
+		JournalArticle article = _getArticleByPreviewAssetEntryId();
 
 		if (article == null) {
 			_preview = false;
@@ -960,6 +973,44 @@ public class JournalContentDisplayContext {
 			portletRequest.setAttribute(
 				WebKeys.PORTLET_CONFIGURATOR_VISIBILITY, Boolean.TRUE);
 		}
+	}
+
+	private JournalArticle _getArticleByPreviewAssetEntryId() {
+		long previewAssetEntryId = ParamUtil.getLong(
+			_portletRequest, "previewAssetEntryId");
+
+		if (previewAssetEntryId <= 0) {
+			return null;
+		}
+
+		AssetEntry assetEntry = AssetEntryLocalServiceUtil.fetchEntry(
+			previewAssetEntryId);
+
+		if (assetEntry == null) {
+			return null;
+		}
+
+		AssetRendererFactory<?> assetRendererFactory =
+			assetEntry.getAssetRendererFactory();
+
+		if (assetRendererFactory == null) {
+			return null;
+		}
+
+		int previewAssetEntryType = ParamUtil.getInteger(
+			_portletRequest, "previewAssetEntryType",
+			AssetRendererFactory.TYPE_LATEST_APPROVED);
+
+		try {
+			AssetRenderer assetRenderer = assetRendererFactory.getAssetRenderer(
+				assetEntry.getClassPK(), previewAssetEntryType);
+
+			return (JournalArticle)assetRenderer.getAssetObject();
+		}
+		catch (Exception e) {
+		}
+
+		return null;
 	}
 
 	private DDMTemplate _getDDMTemplate(String ddmTemplateKey)

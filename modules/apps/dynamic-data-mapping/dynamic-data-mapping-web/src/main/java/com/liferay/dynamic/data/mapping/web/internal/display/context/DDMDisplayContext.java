@@ -43,6 +43,7 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -72,7 +73,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletURL;
@@ -540,6 +540,8 @@ public class DDMDisplayContext {
 							getCreationMenuDropdownItem(
 								addTemplateURL, message));
 					}
+
+					addTemplateURL.setParameter("mode", getTemplateMode());
 				}
 				else {
 					List<TemplateHandler> templateHandlers =
@@ -701,12 +703,11 @@ public class DDMDisplayContext {
 		long resourceClassNameId = PortalUtil.getClassNameId(
 			ddmDisplay.getStructureType());
 
-		if ((classNameId == 0) || (resourceClassNameId == 0)) {
-			return true;
-		}
+		ThemeDisplay themeDisplay = _ddmWebRequestHelper.getThemeDisplay();
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)_renderRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		if ((classNameId == 0) || (resourceClassNameId == 0)) {
+			return ddmDisplay.isShowAddButton(themeDisplay.getScopeGroup());
+		}
 
 		if (ddmDisplay.isShowAddButton(themeDisplay.getScopeGroup()) &&
 			DDMTemplatePermission.containsAddTemplatePermission(
@@ -738,9 +739,16 @@ public class DDMDisplayContext {
 			String resourceName)
 		throws PortalException {
 
+		if (getClassNameId() > 0) {
+			return PortletPermissionUtil.contains(
+				_ddmWebRequestHelper.getPermissionChecker(),
+				_ddmWebRequestHelper.getLayout(), resourceName,
+				ActionKeys.ADD_PORTLET_DISPLAY_TEMPLATE);
+		}
+
 		return PortletPermissionUtil.contains(
 			_ddmWebRequestHelper.getPermissionChecker(),
-			_ddmWebRequestHelper.getLayout(), resourceName,
+			_ddmWebRequestHelper.getScopeGroupId(), resourceName,
 			ActionKeys.ADD_PORTLET_DISPLAY_TEMPLATE);
 	}
 
@@ -752,8 +760,8 @@ public class DDMDisplayContext {
 		return ParamUtil.getLong(_renderRequest, "classPK");
 	}
 
-	protected Consumer<DropdownItem> getCreationMenuDropdownItem(
-		PortletURL url, String label) {
+	protected UnsafeConsumer<DropdownItem, Exception>
+		getCreationMenuDropdownItem(PortletURL url, String label) {
 
 		return dropdownItem -> {
 			dropdownItem.setHref(url);
@@ -782,7 +790,9 @@ public class DDMDisplayContext {
 		return ParamUtil.getString(_renderRequest, "keywords");
 	}
 
-	protected Consumer<DropdownItem> getOrderByDropdownItem(String orderByCol) {
+	protected UnsafeConsumer<DropdownItem, Exception> getOrderByDropdownItem(
+		String orderByCol) {
+
 		return dropdownItem -> {
 			dropdownItem.setActive(orderByCol.equals(getOrderByCol()));
 			dropdownItem.setHref(getPortletURL(), "orderByCol", orderByCol);

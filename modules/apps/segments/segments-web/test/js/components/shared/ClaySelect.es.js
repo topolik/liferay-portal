@@ -1,5 +1,5 @@
-import React from 'react';
 import ClaySelect from 'components/shared/ClaySelect.es';
+import React from 'react';
 import {cleanup, render} from 'react-testing-library';
 
 describe(

@@ -18,14 +18,11 @@ import com.liferay.asset.kernel.action.AssetEntryAction;
 import com.liferay.asset.kernel.model.AssetRenderer;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
-import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -67,31 +64,14 @@ public class AssetEntryActionDropdownItemsProvider {
 
 				if (editAssetEntryURL != null) {
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setIcon("pencil");
-								dropdownItem.putData(
-									"destroyOnHide", Boolean.TRUE.toString());
-
-								PortletDisplay portletDisplay =
-									_themeDisplay.getPortletDisplay();
-
-								String id = HtmlUtil.escape(
-									portletDisplay.getNamespace());
-
-								dropdownItem.putData("id", id + "editAsset");
-
-								dropdownItem.putData(
-									"title",
-									LanguageUtil.format(
-										_request, "edit-x",
-										_assetRenderer.getTitle(
-											_themeDisplay.getLocale())));
-								dropdownItem.setHref(
-									editAssetEntryURL.toString());
-								dropdownItem.setLabel(
-									LanguageUtil.get(_request, "edit"));
-							}));
+						dropdownItem -> {
+							dropdownItem.setIcon("pencil");
+							dropdownItem.putData(
+								"useDialog", Boolean.FALSE.toString());
+							dropdownItem.setHref(editAssetEntryURL.toString());
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, "edit"));
+						});
 				}
 
 				if (ListUtil.isNotEmpty(_assetEntryActions)) {
@@ -114,19 +94,19 @@ public class AssetEntryActionDropdownItemsProvider {
 							_themeDisplay.getLocale());
 
 						add(
-							SafeConsumer.ignore(
-								dropdownItem -> {
-									dropdownItem.setHref(
-										assetEntryAction.getDialogURL(
-											_request, _assetRenderer));
-									dropdownItem.setIcon(
-										assetEntryAction.getIcon());
-									dropdownItem.putData(
-										"destroyOnHide",
-										Boolean.TRUE.toString());
-									dropdownItem.putData("title", title);
-									dropdownItem.setLabel(title);
-								}));
+							dropdownItem -> {
+								dropdownItem.setHref(
+									assetEntryAction.getDialogURL(
+										_request, _assetRenderer));
+								dropdownItem.setIcon(
+									assetEntryAction.getIcon());
+								dropdownItem.putData(
+									"destroyOnHide", Boolean.TRUE.toString());
+								dropdownItem.putData(
+									"useDialog", Boolean.TRUE.toString());
+								dropdownItem.putData("title", title);
+								dropdownItem.setLabel(title);
+							});
 					}
 				}
 			}
@@ -148,29 +128,15 @@ public class AssetEntryActionDropdownItemsProvider {
 				return null;
 			}
 
-			PortletURL editAssetEntryURL = _assetRenderer.getURLEdit(
-				_liferayPortletRequest, _liferayPortletResponse,
-				LiferayWindowState.MAXIMIZED, null);
+			String redirect = _themeDisplay.getURLCurrent();
 
 			if (Validator.isNotNull(_fullContentRedirect)) {
-				editAssetEntryURL.setParameter(
-					"redirect", _fullContentRedirect);
-			}
-			else {
-				editAssetEntryURL.setParameter(
-					"redirect", _themeDisplay.getURLCurrent());
+				redirect = _fullContentRedirect;
 			}
 
-			if (editAssetEntryURL == null) {
-				return null;
-			}
-
-			editAssetEntryURL.setParameter(
-				"hideDefaultSuccessMessage", Boolean.TRUE.toString());
-			editAssetEntryURL.setParameter(
-				"showHeader", Boolean.FALSE.toString());
-
-			return editAssetEntryURL;
+			return _assetRenderer.getURLEdit(
+				_liferayPortletRequest, _liferayPortletResponse,
+				LiferayWindowState.NORMAL, redirect);
 		}
 		catch (Exception e) {
 		}

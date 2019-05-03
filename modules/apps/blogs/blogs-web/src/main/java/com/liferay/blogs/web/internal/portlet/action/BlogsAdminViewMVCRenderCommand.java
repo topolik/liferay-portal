@@ -16,17 +16,16 @@ package com.liferay.blogs.web.internal.portlet.action;
 
 import com.liferay.blogs.constants.BlogsPortletKeys;
 import com.liferay.blogs.web.constants.BlogsWebKeys;
-import com.liferay.document.library.display.context.DLMimeTypeDisplayContext;
+import com.liferay.blogs.web.internal.display.context.BlogEntriesDisplayContext;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.trash.TrashHelper;
 
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Sergio González
@@ -46,17 +45,19 @@ public class BlogsAdminViewMVCRenderCommand implements MVCRenderCommand {
 		RenderRequest renderRequest, RenderResponse renderResponse) {
 
 		renderRequest.setAttribute(
-			BlogsWebKeys.DL_MIME_TYPE_DISPLAY_CONTEXT,
-			_dlMimeTypeDisplayContext);
+			BlogsWebKeys.BLOG_ENTRIES_DISPLAY_CONTEXT,
+			new BlogEntriesDisplayContext(
+				_portal.getLiferayPortletRequest(renderRequest),
+				_portal.getLiferayPortletResponse(renderResponse),
+				_trashHelper));
 
 		return "/blogs_admin/view.jsp";
 	}
 
-	@Reference(
-		cardinality = ReferenceCardinality.OPTIONAL,
-		policy = ReferencePolicy.DYNAMIC,
-		policyOption = ReferencePolicyOption.GREEDY
-	)
-	private volatile DLMimeTypeDisplayContext _dlMimeTypeDisplayContext;
+	@Reference
+	private Portal _portal;
+
+	@Reference
+	private TrashHelper _trashHelper;
 
 }

@@ -1,3 +1,10 @@
+/**
+ * The Resize RTL Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-resize-rtl
+ */
+
 AUI.add(
 	'liferay-resize-rtl',
 	function(A) {

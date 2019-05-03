@@ -22,6 +22,7 @@ import com.liferay.exportimport.kernel.lar.StagedModelDataHandler;
 import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerRegistryUtil;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -43,7 +44,6 @@ import com.liferay.trash.TrashHelper;
 
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionURL;
@@ -76,26 +76,26 @@ public class BlogsEntryActionDropdownItemsProvider {
 		return new DropdownItemList() {
 			{
 				if (_hasUpdatePermission()) {
-					add(_getEditEntryActionConsumer());
+					add(_getEditEntryActionUnsafeConsumer());
 				}
 
 				if (_hasPermissionsPermission()) {
-					add(_getPermissionsActionConsumer());
+					add(_getPermissionsActionUnsafeConsumer());
 				}
 
 				if (_hasDeletePermission()) {
 					if (_isTrashEnabled()) {
-						add(_getMoveEntryToTrashActionConsumer());
+						add(_getMoveEntryToTrashActionUnsafeConsumer());
 					}
 					else {
-						add(_getDeleteEntryActionConsumer());
+						add(_getDeleteEntryActionUnsafeConsumer());
 					}
 				}
 
 				if (_isShowPublishMenuItem() &&
 					_hasExportImportPortletInfoPermission()) {
 
-					add(_getPublishToLiveEntryActionConsumer());
+					add(_getPublishToLiveEntryActionUnsafeConsumer());
 				}
 			}
 		};
@@ -162,7 +162,9 @@ public class BlogsEntryActionDropdownItemsProvider {
 		}
 	}
 
-	private Consumer<DropdownItem> _getDeleteEntryActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getDeleteEntryActionUnsafeConsumer() {
+
 		ActionURL deleteURL = _renderResponse.createActionURL();
 
 		deleteURL.setParameter(ActionRequest.ACTION_NAME, "/blogs/edit_entry");
@@ -178,7 +180,9 @@ public class BlogsEntryActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getEditEntryActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getEditEntryActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(
 				_renderResponse.createRenderURL(), "mvcRenderCommandName",
@@ -191,7 +195,9 @@ public class BlogsEntryActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getMoveEntryToTrashActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getMoveEntryToTrashActionUnsafeConsumer() {
+
 		ActionURL moveToTrashURL = _renderResponse.createActionURL();
 
 		moveToTrashURL.setParameter(
@@ -209,7 +215,9 @@ public class BlogsEntryActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getPermissionsActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getPermissionsActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.putData("action", "permissions");
 			dropdownItem.putData("permissionsURL", _getPermissionsURL());
@@ -230,7 +238,9 @@ public class BlogsEntryActionDropdownItemsProvider {
 		}
 	}
 
-	private Consumer<DropdownItem> _getPublishToLiveEntryActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getPublishToLiveEntryActionUnsafeConsumer() {
+
 		PortletURL publishEntryURL = _renderResponse.createActionURL();
 
 		publishEntryURL.setParameter(

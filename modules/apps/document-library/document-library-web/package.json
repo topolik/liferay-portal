@@ -1,31 +1,17 @@
 {
 	"dependencies": {
-		"clay-button": "^2.8.3",
-		"clay-multi-select": "^2.8.3",
-		"clay-radio": "^2.8.3",
-		"metal-component": "^2.16.7",
-		"metal-soy": "^2.16.7",
-		"metal-state": "^2.16.7"
-	},
-	"devDependencies": {
-		"babel-cli": "^6.26.0",
-		"babel-preset-env": "^1.7.0",
-		"check-source-formatting": "^2.0.4",
-		"cross-env": "^5.2.0",
-		"liferay-npm-bundler": "~2.5.1",
-		"liferay-npm-bundler-preset-liferay-dev": "^1.1.0",
-		"metal-tools-soy": "^4.2.9",
-		"rimraf": "^2.6.2"
+		"clay-button": "2.14.2",
+		"clay-multi-select": "2.14.2",
+		"clay-radio": "2.14.2",
+		"metal-component": "2.16.8",
+		"metal-soy": "2.16.8",
+		"metal-state": "2.16.8"
 	},
 	"name": "document-library-web",
 	"scripts": {
-		"build": "npm run build:soy && npm run compile && liferay-npm-bundler && npm run cleanSoy",
-		"build:soy": "metalsoy --soyDeps \"node_modules/+(clay-*|com.liferay.frontend.js.web|com.liferay.asset.taglib)/**/*.soy\"",
-		"checkFormat": "npm run csf",
-		"cleanSoy": "rimraf src/**/*.soy.js",
-		"compile": "cross-env NODE_ENV=production babel --source-maps -d classes/META-INF/resources src/main/resources/META-INF/resources",
-		"csf": "csf src/**/*.{es.js,soy,scss}",
-		"format": "npm run csf -- -i"
+		"build": "liferay-npm-scripts build",
+		"checkFormat": "liferay-npm-scripts lint",
+		"format": "liferay-npm-scripts format"
 	},
-	"version": "4.0.0"
+	"version": "5.0.0"
 }

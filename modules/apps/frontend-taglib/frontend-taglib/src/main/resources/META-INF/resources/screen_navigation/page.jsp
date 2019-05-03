@@ -22,6 +22,7 @@ String containerWrapperCssClass = (String)request.getAttribute("liferay-frontend
 String fullContainerCssClass = (String)request.getAttribute("liferay-frontend:screen-navigation:fullContainerCssClass");
 String headerContainerCssClass = (String)request.getAttribute("liferay-frontend:screen-navigation:headerContainerCssClass");
 String id = (String)request.getAttribute("liferay-frontend:screen-navigation:id");
+boolean inverted = (boolean)request.getAttribute("liferay-frontend:screen-navigation:inverted");
 String menubarCssClass = (String)request.getAttribute("liferay-frontend:screen-navigation:menubarCssClass");
 String navCssClass = (String)request.getAttribute("liferay-frontend:screen-navigation:navCssClass");
 PortletURL portletURL = (PortletURL)request.getAttribute("liferay-frontend:screen-navigation:portletURL");
@@ -29,32 +30,32 @@ ScreenNavigationCategory selectedScreenNavigationCategory = (ScreenNavigationCat
 ScreenNavigationEntry selectedScreenNavigationEntry = (ScreenNavigationEntry)request.getAttribute("liferay-frontend:screen-navigation:selectedScreenNavigationEntry");
 List<ScreenNavigationCategory> screenNavigationCategories = (List<ScreenNavigationCategory>)request.getAttribute("liferay-frontend:screen-navigation:screenNavigationCategories");
 List<ScreenNavigationEntry> screenNavigationEntries = (List<ScreenNavigationEntry>)request.getAttribute("liferay-frontend:screen-navigation:screenNavigationEntries");
+
+LiferayPortletResponse finalLiferayPortletResponse = liferayPortletResponse;
 %>
 
 <c:if test="<%= screenNavigationCategories.size() > 1 %>">
 	<div class="page-header">
 		<div class="<%= headerContainerCssClass %>">
-			<nav>
-				<ul class="nav nav-underline">
+			<clay:navigation-bar
+				inverted="<%= inverted %>"
+				navigationItems="<%=
+					new JSPNavigationItemList(pageContext) {
+						{
+							for (ScreenNavigationCategory screenNavigationCategory : screenNavigationCategories) {
+								PortletURL screenNavigationCategoryURL = PortletURLUtil.clone(portletURL, finalLiferayPortletResponse);
 
-					<%
-					for (ScreenNavigationCategory screenNavigationCategory : screenNavigationCategories) {
-						PortletURL screenNavigationCategoryURL = PortletURLUtil.clone(portletURL, liferayPortletResponse);
-
-						screenNavigationCategoryURL.setParameter("screenNavigationCategoryKey", screenNavigationCategory.getCategoryKey());
-						screenNavigationCategoryURL.setParameter("screenNavigationEntryKey", StringPool.BLANK);
-					%>
-
-						<li class="nav-item">
-							<a class="nav-link <%= Objects.equals(selectedScreenNavigationCategory.getCategoryKey(), screenNavigationCategory.getCategoryKey()) ? "active" : StringPool.BLANK %>" href="<%= screenNavigationCategoryURL.toString() %>"><%= screenNavigationCategory.getLabel(themeDisplay.getLocale()) %></a>
-						</li>
-
-					<%
+								add(
+									navigationItem -> {
+										navigationItem.setActive(Objects.equals(selectedScreenNavigationCategory.getCategoryKey(), screenNavigationCategory.getCategoryKey()));
+										navigationItem.setHref(screenNavigationCategoryURL, "screenNavigationCategoryKey", screenNavigationCategory.getCategoryKey(), "screenNavigationEntryKey", StringPool.BLANK);
+										navigationItem.setLabel(screenNavigationCategory.getLabel(themeDisplay.getLocale()));
+								});
+							}
+						}
 					}
-					%>
-
-				</ul>
-			</nav>
+				%>"
+			/>
 		</div>
 	</div>
 </c:if>
@@ -65,7 +66,7 @@ List<ScreenNavigationEntry> screenNavigationEntries = (List<ScreenNavigationEntr
 			<div class="<%= navCssClass %>">
 				<nav class="<%= menubarCssClass %>">
 					<a aria-controls="<%= id %>" aria-expanded="false" class="menubar-toggler" data-toggle="collapse" href="#<%= id %>" role="button">
-						<liferay-ui:message key="<%= selectedScreenNavigationEntry.getEntryKey() %>" />
+						<%= selectedScreenNavigationEntry.getLabel(locale) %>
 
 						<aui:icon image="caret-bottom" markupView="lexicon" />
 					</a>

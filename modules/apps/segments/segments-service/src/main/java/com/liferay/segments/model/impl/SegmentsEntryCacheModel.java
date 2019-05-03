@@ -65,9 +65,11 @@ public class SegmentsEntryCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(29);
+		StringBundler sb = new StringBundler(33);
 
-		sb.append("{segmentsEntryId=");
+		sb.append("{uuid=");
+		sb.append(uuid);
+		sb.append(", segmentsEntryId=");
 		sb.append(segmentsEntryId);
 		sb.append(", groupId=");
 		sb.append(groupId);
@@ -81,6 +83,8 @@ public class SegmentsEntryCacheModel
 		sb.append(createDate);
 		sb.append(", modifiedDate=");
 		sb.append(modifiedDate);
+		sb.append(", segmentsEntryKey=");
+		sb.append(segmentsEntryKey);
 		sb.append(", name=");
 		sb.append(name);
 		sb.append(", description=");
@@ -89,12 +93,12 @@ public class SegmentsEntryCacheModel
 		sb.append(active);
 		sb.append(", criteria=");
 		sb.append(criteria);
-		sb.append(", key=");
-		sb.append(key);
 		sb.append(", source=");
 		sb.append(source);
 		sb.append(", type=");
 		sb.append(type);
+		sb.append(", lastPublishDate=");
+		sb.append(lastPublishDate);
 		sb.append("}");
 
 		return sb.toString();
@@ -103,6 +107,13 @@ public class SegmentsEntryCacheModel
 	@Override
 	public SegmentsEntry toEntityModel() {
 		SegmentsEntryImpl segmentsEntryImpl = new SegmentsEntryImpl();
+
+		if (uuid == null) {
+			segmentsEntryImpl.setUuid("");
+		}
+		else {
+			segmentsEntryImpl.setUuid(uuid);
+		}
 
 		segmentsEntryImpl.setSegmentsEntryId(segmentsEntryId);
 		segmentsEntryImpl.setGroupId(groupId);
@@ -130,6 +141,13 @@ public class SegmentsEntryCacheModel
 			segmentsEntryImpl.setModifiedDate(new Date(modifiedDate));
 		}
 
+		if (segmentsEntryKey == null) {
+			segmentsEntryImpl.setSegmentsEntryKey("");
+		}
+		else {
+			segmentsEntryImpl.setSegmentsEntryKey(segmentsEntryKey);
+		}
+
 		if (name == null) {
 			segmentsEntryImpl.setName("");
 		}
@@ -153,13 +171,6 @@ public class SegmentsEntryCacheModel
 			segmentsEntryImpl.setCriteria(criteria);
 		}
 
-		if (key == null) {
-			segmentsEntryImpl.setKey("");
-		}
-		else {
-			segmentsEntryImpl.setKey(key);
-		}
-
 		if (source == null) {
 			segmentsEntryImpl.setSource("");
 		}
@@ -174,6 +185,13 @@ public class SegmentsEntryCacheModel
 			segmentsEntryImpl.setType(type);
 		}
 
+		if (lastPublishDate == Long.MIN_VALUE) {
+			segmentsEntryImpl.setLastPublishDate(null);
+		}
+		else {
+			segmentsEntryImpl.setLastPublishDate(new Date(lastPublishDate));
+		}
+
 		segmentsEntryImpl.resetOriginalValues();
 
 		return segmentsEntryImpl;
@@ -181,6 +199,8 @@ public class SegmentsEntryCacheModel
 
 	@Override
 	public void readExternal(ObjectInput objectInput) throws IOException {
+		uuid = objectInput.readUTF();
+
 		segmentsEntryId = objectInput.readLong();
 
 		groupId = objectInput.readLong();
@@ -191,18 +211,26 @@ public class SegmentsEntryCacheModel
 		userName = objectInput.readUTF();
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
+		segmentsEntryKey = objectInput.readUTF();
 		name = objectInput.readUTF();
 		description = objectInput.readUTF();
 
 		active = objectInput.readBoolean();
 		criteria = objectInput.readUTF();
-		key = objectInput.readUTF();
 		source = objectInput.readUTF();
 		type = objectInput.readUTF();
+		lastPublishDate = objectInput.readLong();
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput objectOutput) throws IOException {
+		if (uuid == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(uuid);
+		}
+
 		objectOutput.writeLong(segmentsEntryId);
 
 		objectOutput.writeLong(groupId);
@@ -220,6 +248,13 @@ public class SegmentsEntryCacheModel
 
 		objectOutput.writeLong(createDate);
 		objectOutput.writeLong(modifiedDate);
+
+		if (segmentsEntryKey == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(segmentsEntryKey);
+		}
 
 		if (name == null) {
 			objectOutput.writeUTF("");
@@ -244,13 +279,6 @@ public class SegmentsEntryCacheModel
 			objectOutput.writeUTF(criteria);
 		}
 
-		if (key == null) {
-			objectOutput.writeUTF("");
-		}
-		else {
-			objectOutput.writeUTF(key);
-		}
-
 		if (source == null) {
 			objectOutput.writeUTF("");
 		}
@@ -264,8 +292,11 @@ public class SegmentsEntryCacheModel
 		else {
 			objectOutput.writeUTF(type);
 		}
+
+		objectOutput.writeLong(lastPublishDate);
 	}
 
+	public String uuid;
 	public long segmentsEntryId;
 	public long groupId;
 	public long companyId;
@@ -273,12 +304,13 @@ public class SegmentsEntryCacheModel
 	public String userName;
 	public long createDate;
 	public long modifiedDate;
+	public String segmentsEntryKey;
 	public String name;
 	public String description;
 	public boolean active;
 	public String criteria;
-	public String key;
 	public String source;
 	public String type;
+	public long lastPublishDate;
 
 }

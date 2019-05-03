@@ -17,13 +17,11 @@ package com.liferay.site.memberships.web.internal.portlet;
 import com.liferay.portal.kernel.exception.MembershipRequestCommentsException;
 import com.liferay.portal.kernel.exception.NoSuchGroupException;
 import com.liferay.portal.kernel.exception.NoSuchRoleException;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.RequiredUserException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.MembershipRequest;
 import com.liferay.portal.kernel.model.MembershipRequestConstants;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.model.UserGroupGroupRole;
 import com.liferay.portal.kernel.model.UserGroupRole;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
@@ -136,7 +134,7 @@ public class SiteMembershipsPortlet extends MVCPortlet {
 
 		long[] addUserIds = ParamUtil.getLongValues(actionRequest, "rowIds");
 
-		addUserIds = filterAddUserIds(groupId, addUserIds);
+		addUserIds = _filterAddUserIds(groupId, addUserIds);
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
 			actionRequest);
@@ -144,6 +142,20 @@ public class SiteMembershipsPortlet extends MVCPortlet {
 		_userService.addGroupUsers(groupId, addUserIds, serviceContext);
 
 		LiveUsers.joinGroup(group.getCompanyId(), groupId, addUserIds);
+	}
+
+	public void addUserGroupGroupRole(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		Group group = _getGroup(actionRequest, actionResponse);
+
+		long userGroupId = ParamUtil.getLong(actionRequest, "userGroupId");
+
+		long[] roleIds = ParamUtil.getLongValues(actionRequest, "rowIds");
+
+		_userGroupGroupRoleService.addUserGroupGroupRoles(
+			userGroupId, group.getGroupId(), roleIds);
 	}
 
 	public void deleteGroupOrganizations(
@@ -211,7 +223,7 @@ public class SiteMembershipsPortlet extends MVCPortlet {
 			removeUserIds = ParamUtil.getLongValues(actionRequest, "rowIds");
 		}
 
-		long[] filteredRemoveUserIds = filterRemoveUserIds(
+		long[] filteredRemoveUserIds = _filterRemoveUserIds(
 			groupId, removeUserIds);
 
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
@@ -228,38 +240,6 @@ public class SiteMembershipsPortlet extends MVCPortlet {
 
 			throw new RequiredUserException();
 		}
-	}
-
-	public void editUserGroupGroupRole(
-			ActionRequest actionRequest, ActionResponse actionResponse)
-		throws Exception {
-
-		Group group = _getGroup(actionRequest, actionResponse);
-
-		long userGroupId = ParamUtil.getLong(actionRequest, "userGroupId");
-
-		long[] roleIds = ParamUtil.getLongValues(actionRequest, "rowIds");
-
-		List<UserGroupGroupRole> userGroupGroupRoles =
-			_userGroupGroupRoleLocalService.getUserGroupGroupRoles(
-				userGroupId, group.getGroupId());
-
-		List<Long> curRoleIds = ListUtil.toList(
-			userGroupGroupRoles, UsersAdmin.USER_GROUP_GROUP_ROLE_ID_ACCESSOR);
-
-		List<Long> removeRoleIds = new ArrayList<>();
-
-		for (long roleId : curRoleIds) {
-			if (!ArrayUtil.contains(roleIds, roleId)) {
-				removeRoleIds.add(roleId);
-			}
-		}
-
-		_userGroupGroupRoleService.addUserGroupGroupRoles(
-			userGroupId, group.getGroupId(), roleIds);
-		_userGroupGroupRoleService.deleteUserGroupGroupRoles(
-			userGroupId, group.getGroupId(),
-			ArrayUtil.toLongArray(removeRoleIds));
 	}
 
 	public void editUserGroupRole(
@@ -385,6 +365,20 @@ public class SiteMembershipsPortlet extends MVCPortlet {
 		sendRedirect(actionRequest, actionResponse);
 	}
 
+	public void unassignUserGroupGroupRole(
+			ActionRequest actionRequest, ActionResponse actionResponse)
+		throws Exception {
+
+		Group group = _getGroup(actionRequest, actionResponse);
+
+		long userGroupId = ParamUtil.getLong(actionRequest, "userGroupId");
+
+		long[] roleIds = ParamUtil.getLongValues(actionRequest, "rowIds");
+
+		_userGroupGroupRoleService.deleteUserGroupGroupRoles(
+			userGroupId, group.getGroupId(), roleIds);
+	}
+
 	@Override
 	protected void doDispatch(
 			RenderRequest renderRequest, RenderResponse renderResponse)
@@ -404,36 +398,6 @@ public class SiteMembershipsPortlet extends MVCPortlet {
 		}
 	}
 
-	protected long[] filterAddUserIds(long groupId, long[] userIds)
-		throws Exception {
-
-		Set<Long> filteredUserIds = new HashSet<>(userIds.length);
-
-		for (long userId : userIds) {
-			if (!_userLocalService.hasGroupUser(groupId, userId)) {
-				filteredUserIds.add(userId);
-			}
-		}
-
-		return ArrayUtil.toArray(
-			filteredUserIds.toArray(new Long[filteredUserIds.size()]));
-	}
-
-	protected long[] filterRemoveUserIds(long groupId, long[] userIds)
-		throws Exception {
-
-		Set<Long> filteredUserIds = new HashSet<>(userIds.length);
-
-		for (long userId : userIds) {
-			if (_userLocalService.hasGroupUser(groupId, userId)) {
-				filteredUserIds.add(userId);
-			}
-		}
-
-		return ArrayUtil.toArray(
-			filteredUserIds.toArray(new Long[filteredUserIds.size()]));
-	}
-
 	@Override
 	protected boolean isSessionErrorException(Throwable cause) {
 		if (cause instanceof MembershipPolicyException ||
@@ -450,66 +414,34 @@ public class SiteMembershipsPortlet extends MVCPortlet {
 		return false;
 	}
 
-	@Reference(unbind = "-")
-	protected void setMembershipRequestService(
-		MembershipRequestService membershipRequestService) {
+	private long[] _filterAddUserIds(long groupId, long[] userIds) {
+		Set<Long> filteredUserIds = new HashSet<>(userIds.length);
 
-		_membershipRequestService = membershipRequestService;
+		for (long userId : userIds) {
+			if (!_userLocalService.hasGroupUser(groupId, userId)) {
+				filteredUserIds.add(userId);
+			}
+		}
+
+		return ArrayUtil.toArray(
+			filteredUserIds.toArray(new Long[filteredUserIds.size()]));
 	}
 
-	@Reference(unbind = "-")
-	protected void setOrganizationService(
-		OrganizationService organizationService) {
+	private long[] _filterRemoveUserIds(long groupId, long[] userIds) {
+		Set<Long> filteredUserIds = new HashSet<>(userIds.length);
 
-		_organizationService = organizationService;
-	}
+		for (long userId : userIds) {
+			if (_userLocalService.hasGroupUser(groupId, userId)) {
+				filteredUserIds.add(userId);
+			}
+		}
 
-	@Reference(unbind = "-")
-	protected void setUserGroupGroupRoleLocalService(
-		UserGroupGroupRoleLocalService userGroupGroupRoleLocalService) {
-
-		_userGroupGroupRoleLocalService = userGroupGroupRoleLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserGroupGroupRoleService(
-		UserGroupGroupRoleService userGroupGroupRoleService) {
-
-		_userGroupGroupRoleService = userGroupGroupRoleService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserGroupRoleLocalService(
-		UserGroupRoleLocalService userGroupRoleLocalService) {
-
-		_userGroupRoleLocalService = userGroupRoleLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserGroupRoleService(
-		UserGroupRoleService userGroupRoleService) {
-
-		_userGroupRoleService = userGroupRoleService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserGroupService(UserGroupService userGroupService) {
-		_userGroupService = userGroupService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserLocalService(UserLocalService userLocalService) {
-		_userLocalService = userLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserService(UserService userService) {
-		_userService = userService;
+		return ArrayUtil.toArray(
+			filteredUserIds.toArray(new Long[filteredUserIds.size()]));
 	}
 
 	private Group _getGroup(
-			PortletRequest portletRequest, PortletResponse portletResponse)
-		throws PortalException {
+		PortletRequest portletRequest, PortletResponse portletResponse) {
 
 		HttpServletRequest request = _portal.getHttpServletRequest(
 			portletRequest);
@@ -523,18 +455,34 @@ public class SiteMembershipsPortlet extends MVCPortlet {
 		return siteMembershipsDisplayContext.getGroup();
 	}
 
+	@Reference
 	private MembershipRequestService _membershipRequestService;
+
+	@Reference
 	private OrganizationService _organizationService;
 
 	@Reference
 	private Portal _portal;
 
+	@Reference
 	private UserGroupGroupRoleLocalService _userGroupGroupRoleLocalService;
+
+	@Reference
 	private UserGroupGroupRoleService _userGroupGroupRoleService;
+
+	@Reference
 	private UserGroupRoleLocalService _userGroupRoleLocalService;
+
+	@Reference
 	private UserGroupRoleService _userGroupRoleService;
+
+	@Reference
 	private UserGroupService _userGroupService;
+
+	@Reference
 	private UserLocalService _userLocalService;
+
+	@Reference
 	private UserService _userService;
 
 }

@@ -28,17 +28,14 @@ public class ImageTable {
 	public static final String TABLE_NAME = "Image";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"imageId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"type_", Types.VARCHAR},
-		{"height", Types.INTEGER},
-		{"width", Types.INTEGER},
-		{"size_", Types.INTEGER}
+		{"mvccVersion", Types.BIGINT}, {"imageId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"modifiedDate", Types.TIMESTAMP},
+		{"type_", Types.VARCHAR}, {"height", Types.INTEGER},
+		{"width", Types.INTEGER}, {"size_", Types.INTEGER}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -58,7 +55,8 @@ TABLE_COLUMNS_MAP.put("width", Types.INTEGER);
 TABLE_COLUMNS_MAP.put("size_", Types.INTEGER);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table Image (mvccVersion LONG default 0 not null,imageId LONG not null primary key,companyId LONG,modifiedDate DATE null,type_ VARCHAR(75) null,height INTEGER,width INTEGER,size_ INTEGER)";
+	public static final String TABLE_SQL_CREATE =
+"create table Image (mvccVersion LONG default 0 not null,imageId LONG not null primary key,companyId LONG,modifiedDate DATE null,type_ VARCHAR(75) null,height INTEGER,width INTEGER,size_ INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table Image";
 

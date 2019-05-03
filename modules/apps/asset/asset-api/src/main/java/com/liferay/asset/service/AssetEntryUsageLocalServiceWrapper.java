@@ -51,14 +51,22 @@ public class AssetEntryUsageLocalServiceWrapper
 
 	@Override
 	public com.liferay.asset.model.AssetEntryUsage addAssetEntryUsage(
-			long userId, long groupId, long assetEntryId, long classNameId,
-			long classPK, String portletId,
-			com.liferay.portal.kernel.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
+		long groupId, long assetEntryId, long containerType,
+		String containerKey, long plid,
+		com.liferay.portal.kernel.service.ServiceContext serviceContext) {
 
 		return _assetEntryUsageLocalService.addAssetEntryUsage(
-			userId, groupId, assetEntryId, classNameId, classPK, portletId,
+			groupId, assetEntryId, containerType, containerKey, plid,
 			serviceContext);
+	}
+
+	@Override
+	public com.liferay.asset.model.AssetEntryUsage addDefaultAssetEntryUsage(
+		long groupId, long assetEntryId,
+		com.liferay.portal.kernel.service.ServiceContext serviceContext) {
+
+		return _assetEntryUsageLocalService.addDefaultAssetEntryUsage(
+			groupId, assetEntryId, serviceContext);
 	}
 
 	/**
@@ -106,11 +114,21 @@ public class AssetEntryUsageLocalServiceWrapper
 	}
 
 	@Override
+	public void deleteAssetEntryUsages(long assetEntryId) {
+		_assetEntryUsageLocalService.deleteAssetEntryUsages(assetEntryId);
+	}
+
+	@Override
 	public void deleteAssetEntryUsages(
-		long classNameId, long classPK, String portletId) {
+		long containerType, String containerKey, long plid) {
 
 		_assetEntryUsageLocalService.deleteAssetEntryUsages(
-			classNameId, classPK, portletId);
+			containerType, containerKey, plid);
+	}
+
+	@Override
+	public void deleteAssetEntryUsagesByPlid(long plid) {
+		_assetEntryUsageLocalService.deleteAssetEntryUsagesByPlid(plid);
 	}
 
 	/**
@@ -226,10 +244,10 @@ public class AssetEntryUsageLocalServiceWrapper
 
 	@Override
 	public com.liferay.asset.model.AssetEntryUsage fetchAssetEntryUsage(
-		long assetEntryId, long classNameId, long classPK, String portletId) {
+		long assetEntryId, long containerType, String containerKey, long plid) {
 
 		return _assetEntryUsageLocalService.fetchAssetEntryUsage(
-			assetEntryId, classNameId, classPK, portletId);
+			assetEntryId, containerType, containerKey, plid);
 	}
 
 	/**
@@ -315,6 +333,17 @@ public class AssetEntryUsageLocalServiceWrapper
 	@Override
 	public java.util.List<com.liferay.asset.model.AssetEntryUsage>
 		getAssetEntryUsages(
+			long assetEntryId, int type, int start, int end,
+			com.liferay.portal.kernel.util.OrderByComparator
+				<com.liferay.asset.model.AssetEntryUsage> orderByComparator) {
+
+		return _assetEntryUsageLocalService.getAssetEntryUsages(
+			assetEntryId, type, start, end, orderByComparator);
+	}
+
+	@Override
+	public java.util.List<com.liferay.asset.model.AssetEntryUsage>
+		getAssetEntryUsages(
 			long assetEntryId, int start, int end,
 			com.liferay.portal.kernel.util.OrderByComparator
 				<com.liferay.asset.model.AssetEntryUsage> orderByComparator) {
@@ -325,66 +354,9 @@ public class AssetEntryUsageLocalServiceWrapper
 
 	@Override
 	public java.util.List<com.liferay.asset.model.AssetEntryUsage>
-		getAssetEntryUsages(long assetEntryId, long classNameId) {
+		getAssetEntryUsagesByPlid(long plid) {
 
-		return _assetEntryUsageLocalService.getAssetEntryUsages(
-			assetEntryId, classNameId);
-	}
-
-	@Override
-	public java.util.List<com.liferay.asset.model.AssetEntryUsage>
-		getAssetEntryUsages(
-			long assetEntryId, long classNameId, int start, int end,
-			com.liferay.portal.kernel.util.OrderByComparator
-				<com.liferay.asset.model.AssetEntryUsage> orderByComparator) {
-
-		return _assetEntryUsageLocalService.getAssetEntryUsages(
-			assetEntryId, classNameId, start, end, orderByComparator);
-	}
-
-	@Override
-	public java.util.List<com.liferay.asset.model.AssetEntryUsage>
-		getAssetEntryUsages(long classNameId, long classPK, String portletId) {
-
-		return _assetEntryUsageLocalService.getAssetEntryUsages(
-			classNameId, classPK, portletId);
-	}
-
-	/**
-	 * Returns all the asset entry usages matching the UUID and company.
-	 *
-	 * @param uuid the UUID of the asset entry usages
-	 * @param companyId the primary key of the company
-	 * @return the matching asset entry usages, or an empty list if no matches were found
-	 */
-	@Override
-	public java.util.List<com.liferay.asset.model.AssetEntryUsage>
-		getAssetEntryUsagesByUuidAndCompanyId(String uuid, long companyId) {
-
-		return _assetEntryUsageLocalService.
-			getAssetEntryUsagesByUuidAndCompanyId(uuid, companyId);
-	}
-
-	/**
-	 * Returns a range of asset entry usages matching the UUID and company.
-	 *
-	 * @param uuid the UUID of the asset entry usages
-	 * @param companyId the primary key of the company
-	 * @param start the lower bound of the range of asset entry usages
-	 * @param end the upper bound of the range of asset entry usages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the range of matching asset entry usages, or an empty list if no matches were found
-	 */
-	@Override
-	public java.util.List<com.liferay.asset.model.AssetEntryUsage>
-		getAssetEntryUsagesByUuidAndCompanyId(
-			String uuid, long companyId, int start, int end,
-			com.liferay.portal.kernel.util.OrderByComparator
-				<com.liferay.asset.model.AssetEntryUsage> orderByComparator) {
-
-		return _assetEntryUsageLocalService.
-			getAssetEntryUsagesByUuidAndCompanyId(
-				uuid, companyId, start, end, orderByComparator);
+		return _assetEntryUsageLocalService.getAssetEntryUsagesByPlid(plid);
 	}
 
 	/**
@@ -404,25 +376,9 @@ public class AssetEntryUsageLocalServiceWrapper
 	}
 
 	@Override
-	public int getAssetEntryUsagesCount(long assetEntryId, long classNameId) {
+	public int getAssetEntryUsagesCount(long assetEntryId, int type) {
 		return _assetEntryUsageLocalService.getAssetEntryUsagesCount(
-			assetEntryId, classNameId);
-	}
-
-	@Override
-	public int getAssetEntryUsagesCount(long assetEntryId, String portletId) {
-		return _assetEntryUsageLocalService.getAssetEntryUsagesCount(
-			assetEntryId, portletId);
-	}
-
-	@Override
-	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery
-		getExportActionableDynamicQuery(
-			com.liferay.exportimport.kernel.lar.PortletDataContext
-				portletDataContext) {
-
-		return _assetEntryUsageLocalService.getExportActionableDynamicQuery(
-			portletDataContext);
+			assetEntryId, type);
 	}
 
 	@Override
@@ -449,6 +405,12 @@ public class AssetEntryUsageLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _assetEntryUsageLocalService.getPersistedModel(primaryKeyObj);
+	}
+
+	@Override
+	public boolean hasDefaultAssetEntryUsage(long assetEntryId) {
+		return _assetEntryUsageLocalService.hasDefaultAssetEntryUsage(
+			assetEntryId);
 	}
 
 	/**

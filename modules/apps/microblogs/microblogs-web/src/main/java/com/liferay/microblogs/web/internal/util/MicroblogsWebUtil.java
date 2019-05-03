@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -87,15 +88,19 @@ public class MicroblogsWebUtil {
 				continue;
 			}
 
-			JSONObject userJSONObject = JSONFactoryUtil.createJSONObject();
-
-			userJSONObject.put("emailAddress", user.getEmailAddress());
-			userJSONObject.put("fullName", user.getFullName());
-			userJSONObject.put("jobTitle", user.getJobTitle());
-			userJSONObject.put(
-				"portraitURL", user.getPortraitURL(themeDisplay));
-			userJSONObject.put("screenName", user.getScreenName());
-			userJSONObject.put("userId", user.getUserId());
+			JSONObject userJSONObject = JSONUtil.put(
+				"emailAddress", user.getEmailAddress()
+			).put(
+				"fullName", user.getFullName()
+			).put(
+				"jobTitle", user.getJobTitle()
+			).put(
+				"portraitURL", user.getPortraitURL(themeDisplay)
+			).put(
+				"screenName", user.getScreenName()
+			).put(
+				"userId", user.getUserId()
+			);
 
 			jsonArray.put(userJSONObject);
 		}

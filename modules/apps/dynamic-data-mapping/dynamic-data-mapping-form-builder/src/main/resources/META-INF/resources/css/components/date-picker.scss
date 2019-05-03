@@ -1,0 +1,123 @@
+.datepicker {
+	body {
+		background-color: #FFF;
+	}
+
+	.row {
+		margin-bottom: 20px;
+	}
+
+	.header {
+		display: flex;
+		justify-content: space-between;
+		padding: 3px;
+		width: 100%;
+
+		.form-caption {
+			width: 75%;
+
+			select {
+				margin: 0 1px;
+			}
+		}
+
+		.navigation {
+			width: 25%;
+		}
+	}
+
+	.grid {
+		display: flex;
+		flex-wrap: wrap;
+		margin-top: 16px;
+		width: 100%;
+	}
+
+	.rowgroup {
+		display: flex;
+		margin: 4px 0;
+		width: 100%;
+	}
+
+	.day {
+		align-items: center;
+		border-radius: 100%;
+		color: #6B6C7E;
+		cursor: pointer;
+		display: flex;
+		height: 31px;
+		justify-content: center;
+		margin: 0 1px;
+		width: 32px;
+
+		&:focus {
+			outline: none;
+		}
+	}
+
+	.day.active {
+		background-color: #0B5FFF;
+		color: #FFF !important;
+	}
+
+	.day.outside {
+		color: #A7A9BC;
+	}
+
+	.form-caption,
+	.navigation {
+		display: flex;
+	}
+
+	.datepicker {
+		padding: 16px;
+	}
+
+	.dropdown-menu {
+		max-width: 384px;
+		padding: 0;
+	}
+
+	.weekdays {
+		align-items: center;
+		display: flex;
+		height: 21px;
+		justify-content: space-between;
+		margin-top: 16px;
+		padding: 0 8px;
+		width: 100%;
+	}
+
+	.week {
+		color: #272833;
+		font-weight: 600;
+		text-align: center;
+		width: 32px;
+	}
+
+	.extension-time {
+		align-items: center;
+		background-color: rgba(241, 242, 245, 0.5);
+		color: #6B6C7E;
+		display: flex;
+		padding: 16px 32px;
+	}
+
+	.extension-control {
+		align-items: center;
+		display: flex;
+	}
+
+	.extension-time > svg {
+		height: 16px;
+		margin-right: 16px;
+		margin-top: 1px;
+		width: 16px;
+	}
+
+	.datepicker .form-control,
+	.extension-time .form-control {
+		background-color: transparent;
+		border: transparent;
+	}
+}

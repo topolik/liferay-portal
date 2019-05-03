@@ -59,8 +59,7 @@ definition {
 
 		AntCommand(
 			locator1 = "build-test.xml",
-			value1 = "redeploy-osgi-modules -Dmodule.base.dir=modules/test/upgrade -Dupdate.properties.original=2.1.1 -Dupdate.properties=2.1.0"
-		);
+			value1 = "redeploy-osgi-modules -Dmodule.base.dir=modules/test/upgrade -Dupdate.properties.original=2.1.1 -Dupdate.properties=2.1.0");
 
 		Pause(locator1 = "15000");
 
@@ -76,8 +75,7 @@ definition {
 
 		AntCommand(
 			locator1 = "build-test.xml",
-			value1 = "redeploy-osgi-modules -Dmodule.base.dir=modules/test/upgrade -Dupdate.properties.original=2.1.0 -Dupdate.properties=2.0.0"
-		);
+			value1 = "redeploy-osgi-modules -Dmodule.base.dir=modules/test/upgrade -Dupdate.properties.original=2.1.0 -Dupdate.properties=2.0.0");
 
 		Pause(locator1 = "15000");
 
@@ -87,7 +85,7 @@ definition {
 
 		GogoShell.executeCommand(commandName = "dm wtf");
 
-		for (var outputContent : list "1 missing dependencies found,The following service(s) are missing,release.bundle.symbolic.name=revert.schema.version,release.schema.version>=2.0.0,release.schema.version>=2.1.0,is not found in the service registry") {
+		for (var outputContent : list "1 missing dependencies found,The following service(s) are missing,release.bundle.symbolic.name=com.liferay.revert.schema.version,release.schema.version>=2.0.0,release.schema.version>=2.1.0,is not found in the service registry") {
 			GogoShell.viewOutput(outputContent = "${outputContent}");
 		}
 
@@ -95,8 +93,7 @@ definition {
 
 		AntCommand(
 			locator1 = "build-test.xml",
-			value1 = "redeploy-osgi-modules -Dmodule.base.dir=modules/test/upgrade -Dupdate.properties.original=2.0.0 -Dupdate.properties=1.0.0"
-		);
+			value1 = "redeploy-osgi-modules -Dmodule.base.dir=modules/test/upgrade -Dupdate.properties.original=2.0.0 -Dupdate.properties=1.0.0");
 
 		Pause(locator1 = "15000");
 
@@ -106,7 +103,7 @@ definition {
 
 		GogoShell.executeCommand(commandName = "dm wtf");
 
-		for (var outputContent : list "1 missing dependencies found,The following service(s) are missing,release.bundle.symbolic.name=revert.schema.version,release.schema.version>=1.0.0,release.schema.version>=1.1.0,is not found in the service registry") {
+		for (var outputContent : list "1 missing dependencies found,The following service(s) are missing,release.bundle.symbolic.name=com.liferay.revert.schema.version,release.schema.version>=1.0.0,release.schema.version>=1.1.0,is not found in the service registry") {
 			GogoShell.viewOutput(outputContent = "${outputContent}");
 		}
 	}

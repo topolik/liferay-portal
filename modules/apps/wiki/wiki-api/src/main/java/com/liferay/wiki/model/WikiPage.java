@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.wiki.model.impl.WikiPageImpl")
 @ProviderType
-public interface WikiPage extends WikiPageModel, PersistedModel {
+public interface WikiPage extends PersistedModel, WikiPageModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

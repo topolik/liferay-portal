@@ -18,8 +18,8 @@ import com.liferay.frontend.editor.ckeditor.web.internal.constants.CKEditorConst
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.editor.configuration.EditorConfigContributor;
 import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -67,15 +67,18 @@ public class CKEditorCreoleConfigContributor
 			}
 		}
 
-		jsonObject.put("decodeLinks", Boolean.TRUE);
-		jsonObject.put("disableObjectResizing", Boolean.TRUE);
 		jsonObject.put(
-			"extraPlugins",
-			"a11yhelpbtn,creole,itemselector,lfrpopup,wikilink");
-		jsonObject.put(
+			"decodeLinks", Boolean.TRUE
+		).put(
+			"disableObjectResizing", Boolean.TRUE
+		).put(
+			"extraPlugins", "a11yhelpbtn,creole,itemselector,lfrpopup,wikilink"
+		).put(
 			"filebrowserWindowFeatures",
-			"title=" + LanguageUtil.get(themeDisplay.getLocale(), "browse"));
-		jsonObject.put("format_tags", "p;h1;h2;h3;h4;h5;h6;pre");
+			"title=" + LanguageUtil.get(themeDisplay.getLocale(), "browse")
+		).put(
+			"format_tags", "p;h1;h2;h3;h4;h5;h6;pre"
+		);
 
 		StringBundler sb = new StringBundler(4);
 
@@ -84,40 +87,36 @@ public class CKEditorCreoleConfigContributor
 		sb.append("newpage,pagebreak,preview,print,save,showblocks,smiley,");
 		sb.append("stylescombo,templates,video");
 
-		jsonObject.put("removePlugins", sb.toString());
-
 		jsonObject.put(
+			"removePlugins", sb.toString()
+		).put(
 			"toolbar_creole",
-			getToolbarsCreoleJSONArray(inputEditorTaglibAttributes));
-		jsonObject.put(
+			getToolbarsCreoleJSONArray(inputEditorTaglibAttributes)
+		).put(
 			"toolbar_phone",
-			getToolbarsPhoneJSONArray(inputEditorTaglibAttributes));
-		jsonObject.put(
+			getToolbarsPhoneJSONArray(inputEditorTaglibAttributes)
+		).put(
 			"toolbar_tablet",
-			getToolbarsTabletJSONArray(inputEditorTaglibAttributes));
+			getToolbarsTabletJSONArray(inputEditorTaglibAttributes)
+		);
 	}
 
 	protected JSONArray getToolbarsCreoleJSONArray(
 		Map<String, Object> inputEditorTaglibAttributes) {
 
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(toJSONArray("['Bold', 'Italic', '-' ,'RemoveFormat']"));
-		jsonArray.put(
+		JSONArray jsonArray = JSONUtil.putAll(
+			toJSONArray("['Bold', 'Italic', '-' ,'RemoveFormat']"),
 			toJSONArray(
-				"['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']"));
-		jsonArray.put(toJSONArray("['Format']"));
-		jsonArray.put(toJSONArray("['Link', 'Unlink']"));
-		jsonArray.put(
+				"['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']"),
+			toJSONArray("['Format']"), toJSONArray("['Link', 'Unlink']"),
 			toJSONArray(
 				"['Table', '-','ImageSelector', '-', 'HorizontalRule', '-', " +
-					"'SpecialChar']"));
-		jsonArray.put("/");
-		jsonArray.put(
+					"'SpecialChar']"),
+			"/",
 			toJSONArray(
 				"['Cut', 'Copy', 'Paste', '-', 'PasteText', 'PasteFromWord', " +
-					"'-', 'SelectAll', '-', 'Undo', 'Redo']"));
-		jsonArray.put(toJSONArray("['Find','Replace']"));
+					"'-', 'SelectAll', '-', 'Undo', 'Redo']"),
+			toJSONArray("['Find','Replace']"));
 
 		if (isShowSource(inputEditorTaglibAttributes)) {
 			jsonArray.put(toJSONArray("['Source']"));
@@ -131,12 +130,11 @@ public class CKEditorCreoleConfigContributor
 	protected JSONArray getToolbarsPhoneJSONArray(
 		Map<String, Object> inputEditorTaglibAttributes) {
 
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(toJSONArray("['Bold', 'Italic']"));
-		jsonArray.put(toJSONArray("['NumberedList', 'BulletedList']"));
-		jsonArray.put(toJSONArray("['Link', 'Unlink']"));
-		jsonArray.put(toJSONArray("['ImageSelector']"));
+		JSONArray jsonArray = JSONUtil.putAll(
+			toJSONArray("['Bold', 'Italic']"),
+			toJSONArray("['NumberedList', 'BulletedList']"),
+			toJSONArray("['Link', 'Unlink']"),
+			toJSONArray("['ImageSelector']"));
 
 		if (isShowSource(inputEditorTaglibAttributes)) {
 			jsonArray.put(toJSONArray("['Source']"));
@@ -148,15 +146,12 @@ public class CKEditorCreoleConfigContributor
 	protected JSONArray getToolbarsTabletJSONArray(
 		Map<String, Object> inputEditorTaglibAttributes) {
 
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(toJSONArray("['Bold', 'Italic']"));
-		jsonArray.put(
+		JSONArray jsonArray = JSONUtil.putAll(
+			toJSONArray("['Bold', 'Italic']"),
 			toJSONArray(
-				"['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']"));
-		jsonArray.put(toJSONArray("['Format']"));
-		jsonArray.put(toJSONArray("['Link', 'Unlink']"));
-		jsonArray.put(toJSONArray("['ImageSelector']"));
+				"['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent']"),
+			toJSONArray("['Format']"), toJSONArray("['Link', 'Unlink']"),
+			toJSONArray("['ImageSelector']"));
 
 		if (isShowSource(inputEditorTaglibAttributes)) {
 			jsonArray.put(toJSONArray("['Source']"));

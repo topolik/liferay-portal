@@ -46,16 +46,16 @@ public class ClusterNode implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object object) {
+		if (this == object) {
 			return true;
 		}
 
-		if (!(obj instanceof ClusterNode)) {
+		if (!(object instanceof ClusterNode)) {
 			return false;
 		}
 
-		ClusterNode clusterNode = (ClusterNode)obj;
+		ClusterNode clusterNode = (ClusterNode)object;
 
 		if (Objects.equals(_clusterNodeId, clusterNode._clusterNodeId) &&
 			Objects.equals(_bindInetAddress, clusterNode._bindInetAddress) &&

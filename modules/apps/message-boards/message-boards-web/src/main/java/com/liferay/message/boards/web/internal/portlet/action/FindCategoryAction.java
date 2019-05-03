@@ -54,9 +54,7 @@ public class FindCategoryAction extends FindStrutsAction {
 	}
 
 	@Override
-	public void setPrimaryKeyParameter(PortletURL portletURL, long primaryKey)
-		throws Exception {
-
+	public void setPrimaryKeyParameter(PortletURL portletURL, long primaryKey) {
 		portletURL.setParameter(
 			getPrimaryKeyParameterName(), String.valueOf(primaryKey));
 	}
@@ -74,24 +72,12 @@ public class FindCategoryAction extends FindStrutsAction {
 		return _portletPageFinder;
 	}
 
-	@Reference(unbind = "-")
-	protected void setMBCategoryLocalService(
-		MBCategoryLocalService mbCategoryLocalService) {
-
-		_mbCategoryLocalService = mbCategoryLocalService;
-	}
+	@Reference
+	private MBCategoryLocalService _mbCategoryLocalService;
 
 	@Reference(
-		target = "(model.class.name=com.liferay.message.boards.model.MBCategory)",
-		unbind = "-"
+		target = "(model.class.name=com.liferay.message.boards.model.MBCategory)"
 	)
-	protected void setPortletLayoutFinder(
-		PortletLayoutFinder portletPageFinder) {
-
-		_portletPageFinder = portletPageFinder;
-	}
-
-	private MBCategoryLocalService _mbCategoryLocalService;
 	private PortletLayoutFinder _portletPageFinder;
 
 }

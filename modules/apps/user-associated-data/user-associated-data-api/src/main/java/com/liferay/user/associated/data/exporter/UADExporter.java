@@ -22,21 +22,19 @@ import com.liferay.user.associated.data.component.UADComponent;
 import java.io.File;
 
 /**
- * Handles converting the entities of type {@code T} related to a user into a
- * format that can be written to a file and downloaded.
+ * Handles converting the user-related type {@code T} entities into a format
+ * that can be written to a file and downloaded.
  *
  * @author William Newbury
- * @review
  */
 @ProviderType
 public interface UADExporter<T> extends UADComponent<T> {
 
 	/**
-	 * Returns the number of entities of type {@code T} associated with a user.
+	 * Returns the number of type {@code T} entities associated with the user.
 	 *
-	 * @param userId the primary key of the user whose data to count
+	 * @param  userId the primary key of the user whose data to count
 	 * @return the number of entities associated with the user
-	 * @review
 	 */
 	public long count(long userId) throws PortalException;
 
@@ -44,21 +42,19 @@ public interface UADExporter<T> extends UADComponent<T> {
 	 * Returns a byte array representing the entity, ready to be written to a
 	 * file.
 	 *
-	 * @param t the entity of type {@code T} to convert into a byte array
+	 * @param  t the type {@code T} entity to convert into a byte array
 	 * @return a byte array representing the given entity
-	 * @throws PortalException
-	 * @review
+	 * @throws PortalException if a portal exception occurred
 	 */
 	public byte[] export(T t) throws PortalException;
 
 	/**
-	 * Returns a file object containing the data from all entities of type
-	 * {@code T} related to a user.
+	 * Returns a file object containing the data from all type {@code T}
+	 * entities related to the user.
 	 *
-	 * @param userId the primary key of the user whose data to export
-	 * @return a {@link File} object containing the exported data
-	 * @throws PortalException
-	 * @review
+	 * @param  userId the primary key of the user whose data to export
+	 * @return a file containing the exported data
+	 * @throws PortalException if a portal exception occurred
 	 */
 	public File exportAll(long userId) throws PortalException;
 

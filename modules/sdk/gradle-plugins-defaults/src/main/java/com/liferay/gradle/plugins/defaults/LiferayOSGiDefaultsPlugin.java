@@ -55,6 +55,7 @@ import com.liferay.gradle.plugins.jasper.jspc.JspCPlugin;
 import com.liferay.gradle.plugins.js.transpiler.JSTranspilerPlugin;
 import com.liferay.gradle.plugins.jsdoc.JSDocPlugin;
 import com.liferay.gradle.plugins.jsdoc.JSDocTask;
+import com.liferay.gradle.plugins.lang.builder.LangBuilderPlugin;
 import com.liferay.gradle.plugins.node.tasks.PublishNodeModuleTask;
 import com.liferay.gradle.plugins.patcher.PatchTask;
 import com.liferay.gradle.plugins.rest.builder.BuildRESTTask;
@@ -452,6 +453,9 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 			project, liferayExtension, deployToAppServerLibs, deployToTools);
 		_configureEclipse(project);
 		_configureJavaPlugin(project);
+		_configureLocalPortalTool(
+			project, portalRootDir, LangBuilderPlugin.CONFIGURATION_NAME,
+			_LANG_BUILDER_PORTAL_TOOL_NAME);
 		_configureLocalPortalTool(
 			project, portalRootDir, SourceFormatterPlugin.CONFIGURATION_NAME,
 			_SOURCE_FORMATTER_PORTAL_TOOL_NAME);
@@ -2665,12 +2669,12 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 			portalRootDir = new File(portalRootDirValue);
 		}
 
+		Logger logger = project.getLogger();
+
 		File dir = new File(
 			portalRootDir, "tools/sdk/dependencies/" + portalToolName + "/lib");
 
 		if (!dir.exists()) {
-			Logger logger = project.getLogger();
-
 			if (logger.isWarnEnabled()) {
 				logger.warn(
 					"Unable to find {}, using default version of {}", dir,
@@ -2678,6 +2682,10 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 			}
 
 			return;
+		}
+
+		if (logger.isLifecycleEnabled()) {
+			logger.lifecycle("Using local portal tool: {}", dir);
 		}
 
 		Configuration configuration = GradleUtil.getConfiguration(
@@ -2806,8 +2814,8 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 		sourceSet.setRuntimeClasspath(
 			FileUtil.join(
-				compileClasspathConfiguration, sourceSet.getRuntimeClasspath(),
-				portalTestConfiguration, portalConfiguration));
+				compileClasspathConfiguration, portalConfiguration,
+				sourceSet.getRuntimeClasspath(), portalTestConfiguration));
 	}
 
 	private void _configureSourceSetTestIntegration(
@@ -2826,13 +2834,13 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 		sourceSet.setCompileClasspath(
 			FileUtil.join(
-				compileOnlyConfiguration, sourceSet.getCompileClasspath(),
-				portalTestConfiguration, portalConfiguration));
+				portalConfiguration, compileOnlyConfiguration,
+				sourceSet.getCompileClasspath(), portalTestConfiguration));
 
 		sourceSet.setRuntimeClasspath(
 			FileUtil.join(
-				compileOnlyConfiguration, sourceSet.getRuntimeClasspath(),
-				portalTestConfiguration, portalConfiguration));
+				portalConfiguration, compileOnlyConfiguration,
+				sourceSet.getRuntimeClasspath(), portalTestConfiguration));
 	}
 
 	private void _configureTaskBaselineSyncReleaseVersions(
@@ -3178,6 +3186,12 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 		final Task deployTask = GradleUtil.getTask(
 			project, LiferayBasePlugin.DEPLOY_TASK_NAME);
 
+		String projectName = project.getName();
+
+		if (projectName.endsWith("-demo")) {
+			_configureTaskDeployDemo(project, deployTask);
+		}
+
 		deployTask.finalizedBy(deployConfigsTask);
 		deployTask.finalizedBy(deployDepenciesTask);
 
@@ -3192,6 +3206,55 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 
 						deployTask.dependsOn(
 							WSDDBuilderPlugin.BUILD_WSDD_TASK_NAME);
+					}
+				}
+
+			});
+	}
+
+	private void _configureTaskDeployDemo(
+		Project project, final Task deployTask) {
+
+		project.afterEvaluate(
+			new Action<Project>() {
+
+				@Override
+				public void execute(Project project) {
+					Configuration configuration = GradleUtil.fetchConfiguration(
+						project, JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME);
+
+					if (configuration == null) {
+						return;
+					}
+
+					DependencySet dependencySet =
+						configuration.getAllDependencies();
+
+					for (ProjectDependency projectDependency :
+							dependencySet.withType(ProjectDependency.class)) {
+
+						Project dependencyProject =
+							projectDependency.getDependencyProject();
+
+						String name = dependencyProject.getName();
+
+						if (!name.endsWith("-demo-data-creator-api")) {
+							continue;
+						}
+
+						String path = dependencyProject.getPath();
+
+						deployTask.finalizedBy(
+							path + ':' + LiferayBasePlugin.DEPLOY_TASK_NAME);
+
+						dependencyProject = project.findProject(
+							path.substring(0, path.length() - 3) + "impl");
+
+						if (dependencyProject != null) {
+							deployTask.finalizedBy(
+								dependencyProject.getPath() + ':' +
+									LiferayBasePlugin.DEPLOY_TASK_NAME);
+						}
 					}
 				}
 
@@ -3708,7 +3771,7 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 			"excludes",
 			Arrays.asList(
 				"**/bin/", "**/build/", "**/classes/", "**/node_modules/",
-				"**/test-classes/", "**/tmp/"));
+				"**/node_modules_cache/", "**/test-classes/", "**/tmp/"));
 		args.put(
 			"includes",
 			Arrays.asList("**/*.gradle", "**/sdk/*/README.markdown"));
@@ -4560,6 +4623,9 @@ public class LiferayOSGiDefaultsPlugin implements Plugin<Project> {
 	private static final String _GROUP_PORTAL = "com.liferay.portal";
 
 	private static final JavaVersion _JAVA_VERSION = JavaVersion.VERSION_1_8;
+
+	private static final String _LANG_BUILDER_PORTAL_TOOL_NAME =
+		"com.liferay.lang.builder";
 
 	private static final String _PMD_PORTAL_TOOL_NAME = "com.liferay.pmd";
 

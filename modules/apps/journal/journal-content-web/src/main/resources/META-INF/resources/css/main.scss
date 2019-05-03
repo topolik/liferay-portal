@@ -16,6 +16,12 @@
 				margin-top: 24px;
 			}
 		}
+
+		&:after {
+			clear: both;
+			content: '';
+			display: block;
+		}
 	}
 
 	.portlet .portlet-header {
@@ -36,6 +42,11 @@
 		.lfr-icon-menu > a {
 			color: inherit;
 		}
+	}
+
+	.preview-asset-entry {
+		border: 1px solid #0B5FFF;
+		border-radius: 0;
 	}
 
 	@media only screen and (min-width: 768px) {

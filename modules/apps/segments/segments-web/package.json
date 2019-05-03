@@ -31,8 +31,8 @@
 		"classnames": "^2.2.6",
 		"date-fns": "^1.30.1",
 		"formik": "^1.4.1",
-		"lodash.debounce": "^4.0.8",
-		"lodash.uniqueid": "^4.0.1",
+		"metal": "2.16.8",
+		"metal-debounce": "2.0.1",
 		"prop-types": "^15.6.2",
 		"react": "^16.6.3",
 		"react-dnd": "^7.0.2",
@@ -41,17 +41,15 @@
 	},
 	"description": "",
 	"devDependencies": {
-		"babel-cli": "^6.26.0",
-		"babel-core": "^6.26.3",
+		"@babel/cli": "^7.2.3",
+		"@babel/plugin-proposal-class-properties": "^7.4.0",
+		"@babel/preset-env": "^7.4.2",
+		"@babel/preset-react": "^7.0.0",
 		"babel-eslint": "^10.0.1",
-		"babel-loader": "^7.0.0",
-		"babel-plugin-module-resolver": "^3.1.2",
-		"babel-plugin-transform-class-properties": "^6.24.1",
-		"babel-plugin-transform-object-rest-spread": "^6.26.0",
-		"babel-preset-env": "^1.7.0",
-		"babel-preset-react": "^6.0.0",
-		"check-source-formatting": "^2.0.13",
-		"clay-css": "^2.5.1",
+		"babel-loader": "^8.0.5",
+		"babel-plugin-module-resolver": "^3.2.0",
+		"check-source-formatting": "^2.0.14",
+		"clay-css": "2.14.2",
 		"css-loader": "^2.0.1",
 		"eslint": "^5.8.0",
 		"eslint-config-liferay": "^2.0.18",
@@ -60,26 +58,26 @@
 		"eslint-plugin-sort-destructure-keys": "^1.1.0",
 		"html-webpack-plugin": "^3.2.0",
 		"html-webpack-template": "^6.2.0",
-		"jest": "^23.6.0",
+		"jest": "^24.5.0",
 		"jest-dom": "^3.0.0",
 		"liferay-lang-key-dev-loader": "^1.0.3",
-		"liferay-npm-bundler": "^2.0.0",
-		"liferay-npm-bundler-preset-liferay-dev": "^1.1.0",
 		"node-sass": "^4.11.0",
 		"odata-v4-parser": "^0.1.29",
 		"react-testing-library": "^5.3.2",
 		"sass-loader": "^7.1.0",
 		"snapshot-diff": "^0.4.1",
 		"style-loader": "^0.23.1",
-		"webpack": "^4.27.0",
-		"webpack-cli": "^3.1.2",
+		"webpack": "^4.29.5",
+		"webpack-cli": "^3.2.3",
 		"webpack-dev-server": "^3.1.10"
 	},
 	"jest": {
 		"modulePathIgnorePatterns": [
 			"/classes/"
 		],
-		"setupTestFrameworkScriptFile": "<rootDir>/test/js/setup.js",
+		"setupFilesAfterEnv": [
+			"<rootDir>/test/js/setup.js"
+		],
 		"testMatch": [
 			"<rootDir>/test/js/**/*.es.js"
 		]
@@ -90,12 +88,11 @@
 	"scripts": {
 		"build": "babel --source-maps -d classes/META-INF/resources src/main/resources/META-INF/resources && liferay-npm-bundler",
 		"build:libs": "webpack",
-		"checkFormat": "npm run csf",
 		"csf": "csf {src,test}/**/*.es.js src/**/*.scss",
 		"format": "npm run csf -- -i",
 		"start": "webpack-dev-server --config ./webpack.dev.config.js",
 		"test": "env TZ=utc jest",
 		"test:watch": "jest --watch"
 	},
-	"version": "1.0.0"
+	"version": "2.0.0"
 }

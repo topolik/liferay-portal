@@ -28,44 +28,28 @@ public class PasswordPolicyTable {
 	public static final String TABLE_NAME = "PasswordPolicy";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"uuid_", Types.VARCHAR},
-		{"passwordPolicyId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"defaultPolicy", Types.BOOLEAN},
-		{"name", Types.VARCHAR},
-		{"description", Types.VARCHAR},
-		{"changeable", Types.BOOLEAN},
-		{"changeRequired", Types.BOOLEAN},
-		{"minAge", Types.BIGINT},
-		{"checkSyntax", Types.BOOLEAN},
-		{"allowDictionaryWords", Types.BOOLEAN},
-		{"minAlphanumeric", Types.INTEGER},
-		{"minLength", Types.INTEGER},
-		{"minLowerCase", Types.INTEGER},
-		{"minNumbers", Types.INTEGER},
-		{"minSymbols", Types.INTEGER},
-		{"minUpperCase", Types.INTEGER},
-		{"regex", Types.VARCHAR},
-		{"history", Types.BOOLEAN},
-		{"historyCount", Types.INTEGER},
-		{"expireable", Types.BOOLEAN},
-		{"maxAge", Types.BIGINT},
-		{"warningTime", Types.BIGINT},
-		{"graceLimit", Types.INTEGER},
-		{"lockout", Types.BOOLEAN},
-		{"maxFailure", Types.INTEGER},
-		{"lockoutDuration", Types.BIGINT},
-		{"requireUnlock", Types.BOOLEAN},
-		{"resetFailureCount", Types.BIGINT},
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"passwordPolicyId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
+		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
+		{"defaultPolicy", Types.BOOLEAN}, {"name", Types.VARCHAR},
+		{"description", Types.VARCHAR}, {"changeable", Types.BOOLEAN},
+		{"changeRequired", Types.BOOLEAN}, {"minAge", Types.BIGINT},
+		{"checkSyntax", Types.BOOLEAN}, {"allowDictionaryWords", Types.BOOLEAN},
+		{"minAlphanumeric", Types.INTEGER}, {"minLength", Types.INTEGER},
+		{"minLowerCase", Types.INTEGER}, {"minNumbers", Types.INTEGER},
+		{"minSymbols", Types.INTEGER}, {"minUpperCase", Types.INTEGER},
+		{"regex", Types.VARCHAR}, {"history", Types.BOOLEAN},
+		{"historyCount", Types.INTEGER}, {"expireable", Types.BOOLEAN},
+		{"maxAge", Types.BIGINT}, {"warningTime", Types.BIGINT},
+		{"graceLimit", Types.INTEGER}, {"lockout", Types.BOOLEAN},
+		{"maxFailure", Types.INTEGER}, {"lockoutDuration", Types.BIGINT},
+		{"requireUnlock", Types.BOOLEAN}, {"resetFailureCount", Types.BIGINT},
 		{"resetTicketMaxAge", Types.BIGINT}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -139,7 +123,8 @@ TABLE_COLUMNS_MAP.put("resetFailureCount", Types.BIGINT);
 TABLE_COLUMNS_MAP.put("resetTicketMaxAge", Types.BIGINT);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table PasswordPolicy (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,passwordPolicyId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,defaultPolicy BOOLEAN,name VARCHAR(75) null,description STRING null,changeable BOOLEAN,changeRequired BOOLEAN,minAge LONG,checkSyntax BOOLEAN,allowDictionaryWords BOOLEAN,minAlphanumeric INTEGER,minLength INTEGER,minLowerCase INTEGER,minNumbers INTEGER,minSymbols INTEGER,minUpperCase INTEGER,regex STRING null,history BOOLEAN,historyCount INTEGER,expireable BOOLEAN,maxAge LONG,warningTime LONG,graceLimit INTEGER,lockout BOOLEAN,maxFailure INTEGER,lockoutDuration LONG,requireUnlock BOOLEAN,resetFailureCount LONG,resetTicketMaxAge LONG)";
+	public static final String TABLE_SQL_CREATE =
+"create table PasswordPolicy (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,passwordPolicyId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,defaultPolicy BOOLEAN,name VARCHAR(75) null,description STRING null,changeable BOOLEAN,changeRequired BOOLEAN,minAge LONG,checkSyntax BOOLEAN,allowDictionaryWords BOOLEAN,minAlphanumeric INTEGER,minLength INTEGER,minLowerCase INTEGER,minNumbers INTEGER,minSymbols INTEGER,minUpperCase INTEGER,regex STRING null,history BOOLEAN,historyCount INTEGER,expireable BOOLEAN,maxAge LONG,warningTime LONG,graceLimit INTEGER,lockout BOOLEAN,maxFailure INTEGER,lockoutDuration LONG,requireUnlock BOOLEAN,resetFailureCount LONG,resetTicketMaxAge LONG)";
 
 	public static final String TABLE_SQL_DROP = "drop table PasswordPolicy";
 

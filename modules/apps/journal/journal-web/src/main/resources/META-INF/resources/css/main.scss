@@ -1,5 +1,7 @@
 @import "mixins";
 
+$toolbarDesktopHeight: 62px;
+$toolbarHeight: 110px;
 $toolbarZIndex: 971;
 
 $controlMenuDesktopHeight: 56px;
@@ -27,13 +29,6 @@ $productMenuWidth: 320px;
 			}
 		}
 
-		.form-builder-field {
-			box-shadow: none;
-			margin: 0;
-			padding-bottom: 0;
-			padding-right: 0;
-		}
-
 		.alloy-editor-container .alloy-editor-wrapper {
 			padding-top: 0;
 		}
@@ -42,31 +37,39 @@ $productMenuWidth: 320px;
 			margin-top: -40px;
 		}
 
+		.form-builder-field {
+			box-shadow: none;
+			margin: 0;
+			padding-bottom: 0;
+			padding-right: 0;
+		}
+
 		.input-localized.input-localized-editor .form-control {
 			border-width: 1px;
 			min-height: 2.5rem;
 			padding: 0.5rem 1rem;
 		}
-	}
 
-	.article-content-description {
-		@extend .article-content-content;
-
-		.alloy-editor-switch {
-			display: none;
+		.input-localized-content {
+			margin-bottom: 24px;
 		}
-	}
 
-	.article-content-title {
-		.form-validator-stack {
-			display: none;
+		.lfr-ddm-field-group {
+			margin-bottom: 10px;
+			margin-top: 10px;
+			padding: 28px 24px;
+		}
+
+		.lfr-ddm-container > .lfr-ddm-field-group {
+			padding: 0;
 		}
 	}
 
 	.edit-article-form {
 		.component-tbar {
-			height: $controlMenuHeight;
+			height: auto;
 			left: 0;
+			min-height: 3.5rem;
 			position: fixed;
 			top: $controlMenuHeight;
 			transition: left ease $productMenuTransitionDuration, width ease $productMenuTransitionDuration;
@@ -78,29 +81,131 @@ $productMenuWidth: 320px;
 				width: calc(100% - #{$productMenuWidth});
 			}
 
+			> .container-fluid {
+				padding: 0;
+
+				> .tbar-nav {
+					flex-wrap: wrap;
+
+					> .tbar-item {
+						padding: 0.5em;
+					}
+
+					> .tbar-item:first-child {
+						border-top: solid thin #E7E7ED;
+						order: 1;
+						width: 100%;
+					}
+
+					> .tbar-item:last-child {
+						flex-grow: 1;
+						padding-right: 1em;
+
+						> .tbar-section {
+							display: flex;
+							justify-content: flex-end;
+						}
+					}
+				}
+			}
+
+			.form-text {
+				display: none;
+			}
+
+			.input-localized {
+				flex-direction: row-reverse;
+
+				.form-validator-stack {
+					display: none;
+				}
+
+				.input-group-item {
+					order: 2;
+				}
+
+				.input-localized-content {
+					order: 1;
+					padding-right: 0.5rem;
+				}
+			}
+
 			@media (min-width: 768px) {
-				height: $controlMenuDesktopHeight;
+				min-height: $controlMenuDesktopHeight;
 				top: $controlMenuDesktopHeight;
+
+				> .container-fluid > .tbar-nav {
+					> .tbar-item:first-child {
+						border-top: none;
+						order: 0;
+						width: auto;
+					}
+
+					> .tbar-item:last-child {
+						flex-grow: 0;
+					}
+				}
+
+				.input-localized {
+					flex-direction: row;
+				}
 			}
 		}
 
-		.container.container-view.contextual-sidebar-content {
-			margin-top: $controlMenuHeight;
+		.contextual-sidebar-content {
+			margin-top: $toolbarHeight;
 
 			@media (min-width: 768px) {
-				margin-top: $controlMenuDesktopHeight;
+				margin-top: $toolbarDesktopHeight;
+			}
+
+			@media (max-width: 769px) {
+				> .container-fluid {
+					margin: 0;
+					padding: 0;
+
+					> .sheet {
+						border: none;
+						border-radius: 0;
+						min-height: calc(100vh - #{$controlMenuHeight + $toolbarHeight});
+					}
+				}
 			}
 		}
 
 		.edit-article-sidebar {
+			border-left: 1px #E7E7ED solid;
 			box-shadow: none;
-			height: calc(100vh - #{$controlMenuHeight * 2}) !important;
+			height: calc(100vh - #{$controlMenuHeight + $toolbarHeight}) !important;
 			overflow-y: scroll;
-			top: $controlMenuHeight * 2 !important;
+			top: $controlMenuHeight + $toolbarHeight !important;
+			width: 100%;
+			z-index: 1;
 
 			@media (min-width: 768px) {
-				height: calc(100vh - #{$controlMenuDesktopHeight * 2}) !important;
-				top: $controlMenuDesktopHeight * 2 !important;
+				height: calc(100vh - #{$controlMenuDesktopHeight + $toolbarDesktopHeight}) !important;
+				top: $controlMenuDesktopHeight + $toolbarDesktopHeight !important;
+				width: $productMenuWidth;
+			}
+
+			.article-content-description {
+				@extend .article-content-content;
+
+				.alloy-editor-switch {
+					display: none;
+				}
+			}
+
+			.schedule {
+				.form-group-autofit {
+					margin-bottom: 16px;
+				}
+
+				.expiration-date, .review-date {
+					.form-group-autofit {
+						margin-bottom: 8px;
+					}
+				}
 			}
 		}
 
@@ -109,47 +214,9 @@ $productMenuWidth: 320px;
 		}
 	}
 
-	.form-builder {
-		.nav-tabs + .tab-content .tab-pane {
-			padding: 2rem 1rem;
+	.check-circle-center {
+		.green {
+			color: green;
 		}
-
-		.property-builder-fields-container .property-builder-field {
-			width: 33%;
-		}
-	}
-
-	.schedule {
-		.form-group-autofit {
-			margin-bottom: 16px;
-		}
-
-		.expiration-date, .review-date {
-			.form-group-autofit {
-				margin-bottom: 8px;
-			}
-		}
-	}
-
-	.journal-article-preview {
-		padding: 0 20px;
-	}
-
-	.lfr-ddm-field-group {
-		margin-bottom: 10px;
-		margin-top: 10px;
-		padding: 28px 24px;
-	}
-
-	.lfr-ddm-container > .lfr-ddm-field-group {
-		padding: 0;
-	}
-
-	.structure-restrictions .lfr-workflow-column .form-group {
-		margin-bottom: 0;
-	}
-
-	td.change-list-title {
-		font-weight: 600;
 	}
 }

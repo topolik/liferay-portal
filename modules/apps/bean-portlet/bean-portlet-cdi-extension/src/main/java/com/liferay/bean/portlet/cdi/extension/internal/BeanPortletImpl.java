@@ -18,9 +18,11 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.portlet.LiferayPortletMode;
 import com.liferay.portal.kernel.util.HashMapDictionary;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
@@ -32,11 +34,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import javax.portlet.PortletMode;
+import javax.portlet.annotations.ServeResourceMethod;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -87,7 +89,7 @@ public class BeanPortletImpl implements BeanPortlet {
 		_supportedPublicRenderParameters = supportedPublicRenderParameters;
 		_containerRuntimeOptions = containerRuntimeOptions;
 		_portletDependencies = portletDependencies;
-		_asyncSupported = asyncSupported;
+		_asyncSupported = asyncSupported || _isAsyncSupported(beanMethodMap);
 		_multipartConfig = multipartConfig;
 		_displayCategory = displayCategory;
 		_liferayConfiguration = liferayConfiguration;
@@ -737,6 +739,30 @@ public class BeanPortletImpl implements BeanPortlet {
 		return namespaceURI;
 	}
 
+	private boolean _isAsyncSupported(
+		Map<MethodType, List<BeanMethod>> beanMethodMap) {
+
+		List<BeanMethod> beanMethods = beanMethodMap.get(
+			MethodType.SERVE_RESOURCE);
+
+		if (beanMethods != null) {
+			for (BeanMethod beanMethod : beanMethods) {
+				Method method = beanMethod.getMethod();
+
+				ServeResourceMethod serveResourceMethod = method.getAnnotation(
+					ServeResourceMethod.class);
+
+				if ((serveResourceMethod != null) &&
+					serveResourceMethod.asyncSupported()) {
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	private String _toNameValuePair(String name, String value) {
 		if (Validator.isNull(value)) {
 			return name;
@@ -749,7 +775,7 @@ public class BeanPortletImpl implements BeanPortlet {
 		);
 	}
 
-	private static final String _ENGLISH_EN = Locale.ENGLISH.getLanguage();
+	private static final String _ENGLISH_EN = LocaleUtil.ENGLISH.getLanguage();
 
 	private final boolean _asyncSupported;
 	private final Map<MethodType, List<BeanMethod>> _beanMethodMap;

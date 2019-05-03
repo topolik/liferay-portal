@@ -16,10 +16,9 @@ definition {
 	@priority = "4"
 	test ViewJSR {
 		ProductMenu.gotoPortlet(
-			category = "Build",
+			category = "Site Builder",
 			panel = "Site Administration",
-			portlet = "Pages"
-		);
+			portlet = "Pages");
 
 		SitePages.addPublicPage(pageName = "Test JSR 286 PLT.26.6 Page");
 

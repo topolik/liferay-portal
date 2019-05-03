@@ -7,12 +7,13 @@
 .fragments-editor-sidebar {
 	box-shadow: none;
 	height: 100vh;
+	overflow: visible;
 	padding-left: $sidebarWidth - $sidebarButtonsWidth;
 	position: fixed;
 	right: 0;
 	top: $managementBarHeight;
-	transition: padding-left ease $productMenuTransitionDuration;
-	will-change: padding-left;
+	transition: padding ease $productMenuTransitionDuration;
+	will-change: padding;
 	z-index: $sidebarZIndex;
 
 	&-content {
@@ -41,7 +42,7 @@
 	}
 
 	&--collapsed > &-content > &-section {
-		transform: translateX(calc(100% + #{$sidebarButtonsWidth + $sidebarLeftBorderWidth}));
+		transform: translateX(100%) translateX(#{$sidebarButtonsWidth + $sidebarLeftBorderWidth});
 	}
 
 	@media (min-width: 768px) {
@@ -58,5 +59,9 @@
 			height: calc(100vh - #{$desktopControlMenuHeight + $desktopManagementBarHeight});
 			top: $desktopControlMenuHeight + $desktopManagementBarHeight;
 		}
+	}
+
+	html.rtl &--collapsed > &-content > &-section {
+		transform: translateX(-100%);
 	}
 }

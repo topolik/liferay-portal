@@ -20,11 +20,24 @@ class FragmentsEditorToolbar extends Component {
 		this.once(
 			'storeChanged',
 			() => {
-				this.store.dispatchAction(
-					UPDATE_TRANSLATION_STATUS
+				this.store.dispatch(
+					{
+						type: UPDATE_TRANSLATION_STATUS
+					}
 				);
 			}
 		);
+	}
+
+	/**
+	 * Handles discard draft form submit action.
+	 * @private
+	 * @review
+	 */
+	_handleDiscardDraft(event) {
+		if (!confirm(Liferay.Language.get('are-you-sure-you-want-to-discard-current-draft-and-apply-latest-published-changes'))) {
+			event.preventDefault();
+		}
 	}
 
 	/**
@@ -32,7 +45,11 @@ class FragmentsEditorToolbar extends Component {
 	 * @review
 	 */
 	_handleToggleContextualSidebarButtonClick() {
-		this.store.dispatchAction(TOGGLE_SIDEBAR);
+		this.store.dispatch(
+			{
+				type: TOGGLE_SIDEBAR
+			}
+		);
 	}
 
 }
@@ -41,15 +58,15 @@ const ConnectedFragmentsEditorToolbar = getConnectedComponent(
 	FragmentsEditorToolbar,
 	[
 		'classPK',
+		'discardDraftRedirectURL',
 		'discardDraftURL',
-		'fragmentsEditorSidebarVisible',
 		'lastSaveDate',
 		'portletNamespace',
 		'publishURL',
 		'redirectURL',
 		'savingChanges',
-		'spritemap',
-		'status'
+		'selectedSidebarPanelId',
+		'spritemap'
 	]
 );
 

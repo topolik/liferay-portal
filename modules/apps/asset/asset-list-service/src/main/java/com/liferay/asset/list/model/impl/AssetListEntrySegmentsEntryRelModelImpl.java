@@ -18,14 +18,12 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel;
 import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRelModel;
-import com.liferay.asset.list.model.AssetListEntrySegmentsEntryRelSoap;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
 import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSON;
 import com.liferay.portal.kernel.model.CacheModel;
 import com.liferay.portal.kernel.model.ModelWrapper;
 import com.liferay.portal.kernel.model.User;
@@ -40,12 +38,10 @@ import java.io.Serializable;
 
 import java.sql.Types;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -61,7 +57,6 @@ import java.util.function.Function;
  * @see AssetListEntrySegmentsEntryRelImpl
  * @generated
  */
-@JSON(strict = true)
 @ProviderType
 public class AssetListEntrySegmentsEntryRelModelImpl
 	extends BaseModelImpl<AssetListEntrySegmentsEntryRel>
@@ -119,21 +114,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.entity.cache.enabled.com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel"),
-		true);
-
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.finder.cache.enabled.com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel"),
-		true);
-
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.column.bitmask.enabled.com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel"),
-		true);
-
 	public static final long ASSETLISTENTRYID_COLUMN_BITMASK = 1L;
 
 	public static final long COMPANYID_COLUMN_BITMASK = 2L;
@@ -147,65 +127,13 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 	public static final long ASSETLISTENTRYSEGMENTSENTRYRELID_COLUMN_BITMASK =
 		32L;
 
-	/**
-	 * Converts the soap model instance into a normal model instance.
-	 *
-	 * @param soapModel the soap model instance to convert
-	 * @return the normal model instance
-	 */
-	public static AssetListEntrySegmentsEntryRel toModel(
-		AssetListEntrySegmentsEntryRelSoap soapModel) {
-
-		if (soapModel == null) {
-			return null;
-		}
-
-		AssetListEntrySegmentsEntryRel model =
-			new AssetListEntrySegmentsEntryRelImpl();
-
-		model.setUuid(soapModel.getUuid());
-		model.setAssetListEntrySegmentsEntryRelId(
-			soapModel.getAssetListEntrySegmentsEntryRelId());
-		model.setGroupId(soapModel.getGroupId());
-		model.setCompanyId(soapModel.getCompanyId());
-		model.setUserId(soapModel.getUserId());
-		model.setUserName(soapModel.getUserName());
-		model.setCreateDate(soapModel.getCreateDate());
-		model.setModifiedDate(soapModel.getModifiedDate());
-		model.setAssetListEntryId(soapModel.getAssetListEntryId());
-		model.setSegmentsEntryId(soapModel.getSegmentsEntryId());
-		model.setTypeSettings(soapModel.getTypeSettings());
-		model.setLastPublishDate(soapModel.getLastPublishDate());
-
-		return model;
+	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
+		_entityCacheEnabled = entityCacheEnabled;
 	}
 
-	/**
-	 * Converts the soap model instances into normal model instances.
-	 *
-	 * @param soapModels the soap model instances to convert
-	 * @return the normal model instances
-	 */
-	public static List<AssetListEntrySegmentsEntryRel> toModels(
-		AssetListEntrySegmentsEntryRelSoap[] soapModels) {
-
-		if (soapModels == null) {
-			return null;
-		}
-
-		List<AssetListEntrySegmentsEntryRel> models =
-			new ArrayList<AssetListEntrySegmentsEntryRel>(soapModels.length);
-
-		for (AssetListEntrySegmentsEntryRelSoap soapModel : soapModels) {
-			models.add(toModel(soapModel));
-		}
-
-		return models;
+	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
+		_finderCacheEnabled = finderCacheEnabled;
 	}
-
-	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"lock.expiration.time.com.liferay.asset.list.model.AssetListEntrySegmentsEntryRel"));
 
 	public AssetListEntrySegmentsEntryRelModelImpl() {
 	}
@@ -400,7 +328,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 			(Map)attributeSetterBiConsumers);
 	}
 
-	@JSON
 	@Override
 	public String getUuid() {
 		if (_uuid == null) {
@@ -426,7 +353,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		return GetterUtil.getString(_originalUuid);
 	}
 
-	@JSON
 	@Override
 	public long getAssetListEntrySegmentsEntryRelId() {
 		return _assetListEntrySegmentsEntryRelId;
@@ -439,7 +365,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		_assetListEntrySegmentsEntryRelId = assetListEntrySegmentsEntryRelId;
 	}
 
-	@JSON
 	@Override
 	public long getGroupId() {
 		return _groupId;
@@ -462,7 +387,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		return _originalGroupId;
 	}
 
-	@JSON
 	@Override
 	public long getCompanyId() {
 		return _companyId;
@@ -485,7 +409,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		return _originalCompanyId;
 	}
 
-	@JSON
 	@Override
 	public long getUserId() {
 		return _userId;
@@ -512,7 +435,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 	public void setUserUuid(String userUuid) {
 	}
 
-	@JSON
 	@Override
 	public String getUserName() {
 		if (_userName == null) {
@@ -528,7 +450,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		_userName = userName;
 	}
 
-	@JSON
 	@Override
 	public Date getCreateDate() {
 		return _createDate;
@@ -539,7 +460,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		_createDate = createDate;
 	}
 
-	@JSON
 	@Override
 	public Date getModifiedDate() {
 		return _modifiedDate;
@@ -556,7 +476,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		_modifiedDate = modifiedDate;
 	}
 
-	@JSON
 	@Override
 	public long getAssetListEntryId() {
 		return _assetListEntryId;
@@ -579,7 +498,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		return _originalAssetListEntryId;
 	}
 
-	@JSON
 	@Override
 	public long getSegmentsEntryId() {
 		return _segmentsEntryId;
@@ -602,7 +520,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		return _originalSegmentsEntryId;
 	}
 
-	@JSON
 	@Override
 	public String getTypeSettings() {
 		if (_typeSettings == null) {
@@ -618,7 +535,6 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 		_typeSettings = typeSettings;
 	}
 
-	@JSON
 	@Override
 	public Date getLastPublishDate() {
 		return _lastPublishDate;
@@ -740,12 +656,12 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 
 	@Override
 	public boolean isEntityCacheEnabled() {
-		return ENTITY_CACHE_ENABLED;
+		return _entityCacheEnabled;
 	}
 
 	@Override
 	public boolean isFinderCacheEnabled() {
-		return FINDER_CACHE_ENABLED;
+		return _finderCacheEnabled;
 	}
 
 	@Override
@@ -939,6 +855,8 @@ public class AssetListEntrySegmentsEntryRelModelImpl
 	private static final Class<?>[] _escapedModelInterfaces = new Class[] {
 		AssetListEntrySegmentsEntryRel.class, ModelWrapper.class
 	};
+	private static boolean _entityCacheEnabled;
+	private static boolean _finderCacheEnabled;
 
 	private String _uuid;
 	private String _originalUuid;

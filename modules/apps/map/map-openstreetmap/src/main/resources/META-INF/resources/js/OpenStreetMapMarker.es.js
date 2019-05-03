@@ -5,6 +5,7 @@ import MarkerBase from 'map-common/js/MarkerBase.es';
  * @review
  */
 class OpenStreetMapMarker extends MarkerBase {
+
 	/**
 	 * @inheritDoc
 	 * @review
@@ -13,7 +14,7 @@ class OpenStreetMapMarker extends MarkerBase {
 		if (!this._nativeMarker) {
 			this._nativeMarker = L.marker(
 				location, {
-					draggable: true,
+					draggable: true
 				}
 			).addTo(map);
 
@@ -36,7 +37,7 @@ class OpenStreetMapMarker extends MarkerBase {
 	 */
 	_getNormalizedEventData(nativeEvent) {
 		return {
-			location: nativeEvent.target.getLatLng(),
+			location: nativeEvent.target.getLatLng()
 		};
 	}
 

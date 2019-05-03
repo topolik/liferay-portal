@@ -1,18 +1,15 @@
 {
 	"dependencies": {
-		"metal": "^2.13.2",
-		"metal-dom": "^2.13.2",
-		"metal-state": "^2.13.2"
-	},
-	"devDependencies": {
-		"babel-cli": "^6.26.0",
-		"babel-preset-env": "^1.6.1",
-		"liferay-npm-bundler": "^2.1.0"
+		"metal": "2.16.8",
+		"metal-dom": "2.16.8",
+		"metal-state": "2.16.8"
 	},
 	"name": "map-openstreetmap",
 	"private": true,
 	"scripts": {
-		"build": "babel --source-maps -d classes/META-INF/resources src/main/resources/META-INF/resources && liferay-npm-bundler"
+		"build": "liferay-npm-scripts build",
+		"checkFormat": "liferay-npm-scripts lint",
+		"format": "liferay-npm-scripts format"
 	},
-	"version": "4.0.0"
+	"version": "5.0.0"
 }

@@ -1,7 +1,7 @@
-import React, {Component, createRef} from 'react';
-import PropTypes from 'prop-types';
 import ClayButton from '../shared/ClayButton.es';
 import getCN from 'classnames';
+import PropTypes from 'prop-types';
+import React, {Component, createRef} from 'react';
 import {ENTER} from 'utils/key-constants.es';
 
 class TitleEditor extends Component {

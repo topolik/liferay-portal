@@ -16,8 +16,8 @@ package com.liferay.asset.list.staging.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.asset.list.model.AssetListEntry;
-import com.liferay.asset.list.service.AssetListEntryLocalServiceUtil;
-import com.liferay.asset.list.service.AssetListEntryServiceUtil;
+import com.liferay.asset.list.service.AssetListEntryLocalService;
+import com.liferay.asset.list.service.AssetListEntrySegmentsEntryRelLocalService;
 import com.liferay.asset.list.util.AssetListStagingTestUtil;
 import com.liferay.asset.list.util.AssetListTestUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -29,7 +29,11 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
+import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
+import com.liferay.segments.model.SegmentsEntry;
+import com.liferay.segments.service.SegmentsEntryLocalServiceUtil;
+import com.liferay.segments.test.util.SegmentsTestUtil;
 
 import java.util.List;
 
@@ -75,7 +79,7 @@ public class AssetListEntryStagingTest {
 			_liveGroup, true);
 
 		AssetListEntry stagingAssetListEntry =
-			AssetListEntryLocalServiceUtil.fetchAssetListEntryByUuidAndGroupId(
+			_assetListEntryLocalService.fetchAssetListEntryByUuidAndGroupId(
 				liveAssetListEntry.getUuid(), _stagingGroup.getGroupId());
 
 		Assert.assertNotNull(stagingAssetListEntry);
@@ -87,7 +91,7 @@ public class AssetListEntryStagingTest {
 			_liveGroup, true);
 
 		List<AssetListEntry> originalLiveAssetListEntries =
-			AssetListEntryLocalServiceUtil.getAssetListEntries(
+			_assetListEntryLocalService.getAssetListEntries(
 				_liveGroup.getGroupId());
 
 		AssetListTestUtil.addAssetListEntry(_stagingGroup.getGroupId());
@@ -95,13 +99,51 @@ public class AssetListEntryStagingTest {
 		AssetListStagingTestUtil.publishLayouts(_stagingGroup, _liveGroup);
 
 		List<AssetListEntry> actualLiveAssetListEntries =
-			AssetListEntryLocalServiceUtil.getAssetListEntries(
+			_assetListEntryLocalService.getAssetListEntries(
 				_liveGroup.getGroupId());
 
 		Assert.assertEquals(
 			actualLiveAssetListEntries.toString(),
 			originalLiveAssetListEntries.size() + 1,
 			actualLiveAssetListEntries.size());
+	}
+
+	@Test
+	public void testPublishCreateAssetListWithSegments()
+		throws PortalException {
+
+		_stagingGroup = AssetListStagingTestUtil.enableLocalStaging(
+			_liveGroup, true);
+
+		AssetListEntry assetListEntry = AssetListTestUtil.addAssetListEntry(
+			_stagingGroup.getGroupId());
+
+		SegmentsEntry segmentsEntry = SegmentsTestUtil.addSegmentsEntry(
+			_liveGroup.getGroupId());
+
+		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+			_stagingGroup.getGroupId(), assetListEntry,
+			segmentsEntry.getSegmentsEntryId());
+
+		int assetListEntrySegmentsEntryRelsCount =
+			_assetListEntrySegmentsEntryRelLocalService.
+				getAssetListEntrySegmentsEntryRelsCount(
+					assetListEntry.getAssetListEntryId());
+
+		AssetListStagingTestUtil.publishLayouts(_stagingGroup, _liveGroup);
+
+		AssetListEntry liveAssetListEntry =
+			_assetListEntryLocalService.fetchAssetListEntryByUuidAndGroupId(
+				assetListEntry.getUuid(), _liveGroup.getGroupId());
+
+		int liveAssetListEntrySegmentsEntryRelsCount =
+			_assetListEntrySegmentsEntryRelLocalService.
+				getAssetListEntrySegmentsEntryRelsCount(
+					liveAssetListEntry.getAssetListEntryId());
+
+		Assert.assertEquals(
+			assetListEntrySegmentsEntryRelsCount,
+			liveAssetListEntrySegmentsEntryRelsCount);
 	}
 
 	@Test
@@ -113,26 +155,72 @@ public class AssetListEntryStagingTest {
 			_liveGroup, true);
 
 		List<AssetListEntry> originalLiveAssetListEntries =
-			AssetListEntryLocalServiceUtil.getAssetListEntries(
+			_assetListEntryLocalService.getAssetListEntries(
 				_liveGroup.getGroupId());
 
 		AssetListEntry stagingAssetListEntry =
-			AssetListEntryLocalServiceUtil.fetchAssetListEntryByUuidAndGroupId(
+			_assetListEntryLocalService.fetchAssetListEntryByUuidAndGroupId(
 				liveAssetListEntry.getUuid(), _stagingGroup.getGroupId());
 
-		AssetListEntryLocalServiceUtil.deleteAssetListEntry(
-			stagingAssetListEntry);
+		_assetListEntryLocalService.deleteAssetListEntry(stagingAssetListEntry);
 
 		AssetListStagingTestUtil.publishLayouts(_stagingGroup, _liveGroup);
 
 		List<AssetListEntry> actualLiveAssetListEntries =
-			AssetListEntryLocalServiceUtil.getAssetListEntries(
+			_assetListEntryLocalService.getAssetListEntries(
 				_liveGroup.getGroupId());
 
 		Assert.assertEquals(
 			actualLiveAssetListEntries.toString(),
 			originalLiveAssetListEntries.size() - 1,
 			actualLiveAssetListEntries.size());
+	}
+
+	@Test
+	public void testPublishDeleteAssetListWithSegments()
+		throws PortalException {
+
+		AssetListEntry liveAssetListEntry = AssetListTestUtil.addAssetListEntry(
+			_liveGroup.getGroupId());
+
+		SegmentsEntry liveSegmentsEntry = SegmentsTestUtil.addSegmentsEntry(
+			_liveGroup.getGroupId());
+
+		AssetListTestUtil.addAssetListEntrySegmentsEntryRel(
+			_liveGroup.getGroupId(), liveAssetListEntry,
+			liveSegmentsEntry.getSegmentsEntryId());
+
+		int originalLiveAssetListEntrySegmentsEntryRelsCount =
+			_assetListEntrySegmentsEntryRelLocalService.
+				getAssetListEntrySegmentsEntryRelsCount(
+					liveAssetListEntry.getAssetListEntryId());
+
+		_stagingGroup = AssetListStagingTestUtil.enableLocalStaging(
+			_liveGroup, true);
+
+		AssetListEntry stagingAssetListEntry =
+			_assetListEntryLocalService.fetchAssetListEntryByUuidAndGroupId(
+				liveAssetListEntry.getUuid(), _stagingGroup.getGroupId());
+
+		SegmentsEntry stagingSegmentsEntry =
+			SegmentsEntryLocalServiceUtil.fetchSegmentsEntryByUuidAndGroupId(
+				liveSegmentsEntry.getUuid(), _stagingGroup.getGroupId());
+
+		_assetListEntrySegmentsEntryRelLocalService.
+			deleteAssetListEntrySegmentsEntryRel(
+				stagingAssetListEntry.getAssetListEntryId(),
+				stagingSegmentsEntry.getSegmentsEntryId());
+
+		AssetListStagingTestUtil.publishLayouts(_stagingGroup, _liveGroup);
+
+		int liveAssetListEntrySegmentsEntryRelsCount =
+			_assetListEntrySegmentsEntryRelLocalService.
+				getAssetListEntrySegmentsEntryRelsCount(
+					liveAssetListEntry.getAssetListEntryId());
+
+		Assert.assertEquals(
+			originalLiveAssetListEntrySegmentsEntryRelsCount - 1,
+			liveAssetListEntrySegmentsEntryRelsCount);
 	}
 
 	@Test
@@ -144,18 +232,18 @@ public class AssetListEntryStagingTest {
 			_liveGroup, true);
 
 		AssetListEntry stagingAsset =
-			AssetListEntryLocalServiceUtil.fetchAssetListEntryByUuidAndGroupId(
+			_assetListEntryLocalService.fetchAssetListEntryByUuidAndGroupId(
 				liveAsset.getUuid(), _stagingGroup.getGroupId());
 
 		Assert.assertEquals(stagingAsset.getTitle(), liveAsset.getTitle());
 
-		stagingAsset = AssetListEntryServiceUtil.updateAssetListEntry(
+		stagingAsset = _assetListEntryLocalService.updateAssetListEntry(
 			stagingAsset.getAssetListEntryId(), "Test Title Edit");
 
 		AssetListStagingTestUtil.publishLayouts(_stagingGroup, _liveGroup);
 
 		liveAsset =
-			AssetListEntryLocalServiceUtil.fetchAssetListEntryByUuidAndGroupId(
+			_assetListEntryLocalService.fetchAssetListEntryByUuidAndGroupId(
 				stagingAsset.getUuid(), _liveGroup.getGroupId());
 
 		Assert.assertEquals(stagingAsset.getTitle(), liveAsset.getTitle());
@@ -168,6 +256,13 @@ public class AssetListEntryStagingTest {
 		PermissionThreadLocal.setPermissionChecker(
 			PermissionCheckerFactoryUtil.create(TestPropsValues.getUser()));
 	}
+
+	@Inject
+	private AssetListEntryLocalService _assetListEntryLocalService;
+
+	@Inject
+	private AssetListEntrySegmentsEntryRelLocalService
+		_assetListEntrySegmentsEntryRelLocalService;
 
 	@DeleteAfterTestRun
 	private Group _liveGroup;

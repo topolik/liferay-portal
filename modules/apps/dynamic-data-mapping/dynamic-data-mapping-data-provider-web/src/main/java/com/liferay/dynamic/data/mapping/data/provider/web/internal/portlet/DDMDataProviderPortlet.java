@@ -16,6 +16,7 @@ package com.liferay.dynamic.data.mapping.data.provider.web.internal.portlet;
 
 import com.liferay.dynamic.data.mapping.data.provider.DDMDataProviderTracker;
 import com.liferay.dynamic.data.mapping.data.provider.web.internal.constants.DDMDataProviderPortletKeys;
+import com.liferay.dynamic.data.mapping.data.provider.web.internal.display.DDMDataProviderDisplayTracker;
 import com.liferay.dynamic.data.mapping.data.provider.web.internal.display.context.DDMDataProviderDisplayContext;
 import com.liferay.dynamic.data.mapping.form.renderer.DDMFormRenderer;
 import com.liferay.dynamic.data.mapping.io.DDMFormValuesDeserializer;
@@ -72,9 +73,10 @@ public class DDMDataProviderPortlet extends MVCPortlet {
 
 		DDMDataProviderDisplayContext ddmDataProviderDisplayContext =
 			new DDMDataProviderDisplayContext(
-				renderRequest, renderResponse, _ddmDataProviderInstanceService,
-				_ddmDataProviderTracker, _ddmFormRenderer,
-				getDDMFormValuesDeserializer(), _userLocalService);
+				renderRequest, renderResponse, _ddmDataProviderDisplayTracker,
+				_ddmDataProviderInstanceService, _ddmDataProviderTracker,
+				_ddmFormRenderer, getDDMFormValuesDeserializer(),
+				_userLocalService);
 
 		renderRequest.setAttribute(
 			WebKeys.PORTLET_DISPLAY_CONTEXT, ddmDataProviderDisplayContext);
@@ -85,6 +87,13 @@ public class DDMDataProviderPortlet extends MVCPortlet {
 	protected DDMFormValuesDeserializer getDDMFormValuesDeserializer() {
 		return _ddmFormValuesDeserializerTracker.getDDMFormValuesDeserializer(
 			"json");
+	}
+
+	@Reference(unbind = "-")
+	protected void setDDMDataProviderDisplayTracker(
+		DDMDataProviderDisplayTracker ddmDataProviderDisplayTracker) {
+
+		_ddmDataProviderDisplayTracker = ddmDataProviderDisplayTracker;
 	}
 
 	@Reference(unbind = "-")
@@ -118,6 +127,7 @@ public class DDMDataProviderPortlet extends MVCPortlet {
 		_userLocalService = userLocalService;
 	}
 
+	private DDMDataProviderDisplayTracker _ddmDataProviderDisplayTracker;
 	private DDMDataProviderInstanceService _ddmDataProviderInstanceService;
 	private DDMDataProviderTracker _ddmDataProviderTracker;
 	private DDMFormRenderer _ddmFormRenderer;

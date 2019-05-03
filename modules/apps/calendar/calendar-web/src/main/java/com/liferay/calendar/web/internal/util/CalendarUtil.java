@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
@@ -142,9 +143,8 @@ public class CalendarUtil {
 			for (Integer month : months) {
 				List<Integer> days = monthsMap.get(month);
 
-				JSONObject jsonObjectDay = JSONFactoryUtil.createJSONObject();
-
-				jsonObjectDay.put(StringUtil.merge(days), ruleName);
+				JSONObject jsonObjectDay = JSONUtil.put(
+					StringUtil.merge(days), ruleName);
 
 				jsonObjectMonth.put(String.valueOf(month), jsonObjectDay);
 			}
@@ -174,15 +174,16 @@ public class CalendarUtil {
 			TimeZone timeZone)
 		throws PortalException {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("allDay", calendarBooking.isAllDay());
-		jsonObject.put(
-			"calendarBookingId", calendarBooking.getCalendarBookingId());
-		jsonObject.put("calendarId", calendarBooking.getCalendarId());
-		jsonObject.put(
+		JSONObject jsonObject = JSONUtil.put(
+			"allDay", calendarBooking.isAllDay()
+		).put(
+			"calendarBookingId", calendarBooking.getCalendarBookingId()
+		).put(
+			"calendarId", calendarBooking.getCalendarId()
+		).put(
 			"description",
-			calendarBooking.getDescription(themeDisplay.getLocale()));
+			calendarBooking.getDescription(themeDisplay.getLocale())
+		);
 
 		if (calendarBooking.isAllDay()) {
 			timeZone = TimeZone.getTimeZone(StringPool.UTC);
@@ -193,27 +194,31 @@ public class CalendarUtil {
 
 		_addTimeProperties(jsonObject, "endTime", endTimeJCalendar);
 
-		jsonObject.put("firstReminder", calendarBooking.getFirstReminder());
 		jsonObject.put(
-			"firstReminderType", calendarBooking.getFirstReminderType());
+			"firstReminder", calendarBooking.getFirstReminder()
+		).put(
+			"firstReminderType", calendarBooking.getFirstReminderType()
+		);
 
 		List<CalendarBooking> childCalendarBookings =
 			calendarBooking.getChildCalendarBookings();
 
 		jsonObject.put(
-			"hasChildCalendarBookings", childCalendarBookings.size() > 1);
-
-		jsonObject.put(
+			"hasChildCalendarBookings", childCalendarBookings.size() > 1
+		).put(
 			"hasWorkflowInstanceLink",
 			_workflowInstanceLinkLocalService.hasWorkflowInstanceLink(
 				themeDisplay.getCompanyId(), calendarBooking.getGroupId(),
 				CalendarBooking.class.getName(),
-				calendarBooking.getCalendarBookingId()));
-		jsonObject.put("instanceIndex", calendarBooking.getInstanceIndex());
-		jsonObject.put("location", calendarBooking.getLocation());
-		jsonObject.put(
+				calendarBooking.getCalendarBookingId())
+		).put(
+			"instanceIndex", calendarBooking.getInstanceIndex()
+		).put(
+			"location", calendarBooking.getLocation()
+		).put(
 			"parentCalendarBookingId",
-			calendarBooking.getParentCalendarBookingId());
+			calendarBooking.getParentCalendarBookingId()
+		);
 
 		CalendarBooking lastInstanceCalendarBooking =
 			_calendarBookingService.getLastInstanceCalendarBooking(
@@ -232,20 +237,24 @@ public class CalendarUtil {
 			recurrence = RecurrenceSerializer.serialize(recurrenceObj);
 		}
 
-		jsonObject.put("recurrence", recurrence);
-
 		jsonObject.put(
+			"recurrence", recurrence
+		).put(
 			"recurringCalendarBookingId",
-			calendarBooking.getRecurringCalendarBookingId());
-		jsonObject.put("secondReminder", calendarBooking.getSecondReminder());
-		jsonObject.put(
-			"secondReminderType", calendarBooking.getSecondReminder());
+			calendarBooking.getRecurringCalendarBookingId()
+		).put(
+			"secondReminder", calendarBooking.getSecondReminder()
+		).put(
+			"secondReminderType", calendarBooking.getSecondReminder()
+		);
 
 		_addTimeProperties(jsonObject, "startTime", startTimeJCalendar);
 
-		jsonObject.put("status", calendarBooking.getStatus());
 		jsonObject.put(
-			"title", calendarBooking.getTitle(themeDisplay.getLocale()));
+			"status", calendarBooking.getStatus()
+		).put(
+			"title", calendarBooking.getTitle(themeDisplay.getLocale())
+		);
 
 		return jsonObject;
 	}
@@ -298,42 +307,46 @@ public class CalendarUtil {
 			ThemeDisplay themeDisplay, Calendar calendar)
 		throws PortalException {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("calendarId", calendar.getCalendarId());
+		JSONObject jsonObject = JSONUtil.put(
+			"calendarId", calendar.getCalendarId());
 
 		CalendarResource calendarResource =
 			_calendarResourceLocalService.fetchCalendarResource(
 				calendar.getCalendarResourceId());
 
 		jsonObject.put(
-			"calendarResourceId", calendarResource.getCalendarResourceId());
-		jsonObject.put(
+			"calendarResourceId", calendarResource.getCalendarResourceId()
+		).put(
 			"calendarResourceName",
-			calendarResource.getName(themeDisplay.getLocale()));
-		jsonObject.put("classNameId", calendarResource.getClassNameId());
-		jsonObject.put("classPK", calendarResource.getClassPK());
-
-		jsonObject.put("color", ColorUtil.toHexString(calendar.getColor()));
-		jsonObject.put("defaultCalendar", calendar.isDefaultCalendar());
-		jsonObject.put("groupId", calendar.getGroupId());
-		jsonObject.put(
+			calendarResource.getName(themeDisplay.getLocale())
+		).put(
+			"classNameId", calendarResource.getClassNameId()
+		).put(
+			"classPK", calendarResource.getClassPK()
+		).put(
+			"color", ColorUtil.toHexString(calendar.getColor())
+		).put(
+			"defaultCalendar", calendar.isDefaultCalendar()
+		).put(
+			"groupId", calendar.getGroupId()
+		).put(
 			"hasWorkflowDefinitionLink",
 			_workflowDefinitionLinkLocalService.hasWorkflowDefinitionLink(
 				themeDisplay.getCompanyId(), calendarResource.getGroupId(),
-				CalendarBooking.class.getName()));
-
-		jsonObject.put(
+				CalendarBooking.class.getName())
+		).put(
 			"manageable",
 			_calendarService.isManageableFromGroup(
-				calendar.getCalendarId(), themeDisplay.getScopeGroupId()));
-
-		jsonObject.put("name", calendar.getName(themeDisplay.getLocale()));
-		jsonObject.put(
+				calendar.getCalendarId(), themeDisplay.getScopeGroupId())
+		).put(
+			"name", calendar.getName(themeDisplay.getLocale())
+		).put(
 			"permissions",
 			_getPermissionsJSONObject(
-				themeDisplay.getPermissionChecker(), calendar));
-		jsonObject.put("userId", calendar.getUserId());
+				themeDisplay.getPermissionChecker(), calendar)
+		).put(
+			"userId", calendar.getUserId()
+		);
 
 		return jsonObject;
 	}
@@ -341,20 +354,23 @@ public class CalendarUtil {
 	public static JSONObject toCalendarResourceJSONObject(
 		ThemeDisplay themeDisplay, CalendarResource calendarResource) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put(
-			"calendarResourceId", calendarResource.getCalendarResourceId());
-		jsonObject.put("classNameId", calendarResource.getClassNameId());
-		jsonObject.put("classPK", calendarResource.getClassPK());
-		jsonObject.put("classUuid", calendarResource.getClassUuid());
-		jsonObject.put("code", calendarResource.getCode());
-		jsonObject.put("groupId", calendarResource.getGroupId());
-		jsonObject.put(
-			"name", calendarResource.getName(themeDisplay.getLocale()));
-		jsonObject.put("userId", calendarResource.getUserId());
-
-		return jsonObject;
+		return JSONUtil.put(
+			"calendarResourceId", calendarResource.getCalendarResourceId()
+		).put(
+			"classNameId", calendarResource.getClassNameId()
+		).put(
+			"classPK", calendarResource.getClassPK()
+		).put(
+			"classUuid", calendarResource.getClassUuid()
+		).put(
+			"code", calendarResource.getCode()
+		).put(
+			"groupId", calendarResource.getGroupId()
+		).put(
+			"name", calendarResource.getName(themeDisplay.getLocale())
+		).put(
+			"userId", calendarResource.getUserId()
+		);
 	}
 
 	public static JSONArray toCalendarsJSONArray(
@@ -424,57 +440,51 @@ public class CalendarUtil {
 	private static void _addTimeProperties(
 		JSONObject jsonObject, String prefix, java.util.Calendar jCalendar) {
 
-		jsonObject.put(prefix, jCalendar.getTimeInMillis());
 		jsonObject.put(
-			prefix + "Day", jCalendar.get(java.util.Calendar.DAY_OF_MONTH));
-		jsonObject.put(
-			prefix + "Hour", jCalendar.get(java.util.Calendar.HOUR_OF_DAY));
-		jsonObject.put(
-			prefix + "Minute", jCalendar.get(java.util.Calendar.MINUTE));
-		jsonObject.put(
-			prefix + "Month", jCalendar.get(java.util.Calendar.MONTH));
-		jsonObject.put(prefix + "Year", jCalendar.get(java.util.Calendar.YEAR));
+			prefix, jCalendar.getTimeInMillis()
+		).put(
+			prefix + "Day", jCalendar.get(java.util.Calendar.DAY_OF_MONTH)
+		).put(
+			prefix + "Hour", jCalendar.get(java.util.Calendar.HOUR_OF_DAY)
+		).put(
+			prefix + "Minute", jCalendar.get(java.util.Calendar.MINUTE)
+		).put(
+			prefix + "Month", jCalendar.get(java.util.Calendar.MONTH)
+		).put(
+			prefix + "Year", jCalendar.get(java.util.Calendar.YEAR)
+		);
 	}
 
 	private static JSONObject _getPermissionsJSONObject(
 			PermissionChecker permissionChecker, Calendar calendar)
 		throws PortalException {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put(
+		return JSONUtil.put(
 			ActionKeys.DELETE,
 			_calendarModelResourcePermission.contains(
-				permissionChecker, calendar, ActionKeys.DELETE));
-
-		jsonObject.put(
+				permissionChecker, calendar, ActionKeys.DELETE)
+		).put(
 			ActionKeys.PERMISSIONS,
 			_calendarModelResourcePermission.contains(
-				permissionChecker, calendar, ActionKeys.PERMISSIONS));
-
-		jsonObject.put(
+				permissionChecker, calendar, ActionKeys.PERMISSIONS)
+		).put(
 			ActionKeys.UPDATE,
 			_calendarModelResourcePermission.contains(
-				permissionChecker, calendar, ActionKeys.UPDATE));
-
-		jsonObject.put(
+				permissionChecker, calendar, ActionKeys.UPDATE)
+		).put(
 			ActionKeys.VIEW,
 			_calendarModelResourcePermission.contains(
-				permissionChecker, calendar, ActionKeys.VIEW));
-
-		jsonObject.put(
+				permissionChecker, calendar, ActionKeys.VIEW)
+		).put(
 			CalendarActionKeys.MANAGE_BOOKINGS,
 			_calendarModelResourcePermission.contains(
-				permissionChecker, calendar,
-				CalendarActionKeys.MANAGE_BOOKINGS));
-
-		jsonObject.put(
+				permissionChecker, calendar, CalendarActionKeys.MANAGE_BOOKINGS)
+		).put(
 			CalendarActionKeys.VIEW_BOOKING_DETAILS,
 			_calendarModelResourcePermission.contains(
 				permissionChecker, calendar,
-				CalendarActionKeys.VIEW_BOOKING_DETAILS));
-
-		return jsonObject;
+				CalendarActionKeys.VIEW_BOOKING_DETAILS)
+		);
 	}
 
 	private static CalendarBookingService _calendarBookingService;

@@ -13,10 +13,17 @@
 		var selectedIndex = event.selectedIndex;
 
 		var tabItem = event.tabItem;
+		var tabLink = tabItem.one('a');
 		var tabSection = event.tabSection;
 
 		if (tabItem) {
-			tabItem.radioClass('active');
+			var previousTabItem = tabItem.siblings().one('.active');
+
+			if (previousTabItem) {
+				previousTabItem.removeClass('active');
+			}
+
+			tabLink.addClass('active');
 		}
 
 		if (tabSection) {
@@ -26,7 +33,7 @@
 		var tabTitle = A.one('#' + event.namespace + 'dropdownTitle');
 
 		if (tabTitle) {
-			tabTitle.html(tabItem.one('a').text());
+			tabTitle.html(tabLink.text());
 		}
 
 		names.splice(selectedIndex, 1);
@@ -51,20 +58,22 @@
 			var tab = A.one('#' + namespacedId + 'TabsId');
 			var tabSection = A.one('#' + namespacedId + 'TabsSection');
 
-			var details = {
-				id: id,
-				names: names,
-				namespace: namespace,
-				selectedIndex: names.indexOf(id),
-				tabItem: tab,
-				tabSection: tabSection
-			};
+			if (tab && tabSection) {
+				var details = {
+					id: id,
+					names: names,
+					namespace: namespace,
+					selectedIndex: names.indexOf(id),
+					tabItem: tab,
+					tabSection: tabSection
+				};
 
-			if (callback && A.Lang.isFunction(callback)) {
-				callback.call(this, namespace, names, id, details);
+				if (callback && A.Lang.isFunction(callback)) {
+					callback.call(this, namespace, names, id, details);
+				}
+
+				Liferay.fire('showTab', details);
 			}
-
-			Liferay.fire('showTab', details);
 		},
 		['aui-base']
 	);

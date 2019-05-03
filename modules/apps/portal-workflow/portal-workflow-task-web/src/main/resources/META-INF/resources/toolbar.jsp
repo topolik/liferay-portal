@@ -25,23 +25,28 @@ portletURL.setParameter("mvcPath", "/view.jsp");
 portletURL.setParameter("tabs1", tabs1);
 %>
 
-<aui:nav-bar cssClass="collapse-basic-search" markupView="lexicon">
-	<aui:nav cssClass="nav-bar-workflow nav-tabs nav-tabs-default">
-		<portlet:renderURL var="viewAssignedToMeURL">
-			<portlet:param name="mvcPath" value="/view.jsp" />
-			<portlet:param name="tabs1" value="assigned-to-me" />
-		</portlet:renderURL>
+<clay:navigation-bar
+	inverted="<%= layout.isTypeControlPanel() %>"
+	navigationItems="<%=
+		new JSPNavigationItemList(pageContext) {
+			{
+				add(
+					navigationItem -> {
+						navigationItem.setActive(tabs1.equals("assigned-to-me"));
+						navigationItem.setHref(renderResponse.createRenderURL(), "mvcPath", "/view.jsp", "tabs1", "assigned-to-me");
+						navigationItem.setLabel(LanguageUtil.get(request, "assigned-to-me"));
+					});
 
-		<aui:nav-item href="<%= viewAssignedToMeURL %>" label="assigned-to-me" selected='<%= tabs1.equals("assigned-to-me") %>' />
-
-		<portlet:renderURL var="viewAssignedToMyRolesURL">
-			<portlet:param name="mvcPath" value="/view.jsp" />
-			<portlet:param name="tabs1" value="assigned-to-my-roles" />
-		</portlet:renderURL>
-
-		<aui:nav-item href="<%= viewAssignedToMyRolesURL %>" label="assigned-to-my-roles" selected='<%= tabs1.equals("assigned-to-my-roles") %>' />
-	</aui:nav>
-</aui:nav-bar>
+				add(
+					navigationItem -> {
+						navigationItem.setActive(tabs1.equals("assigned-to-my-roles"));
+						navigationItem.setHref(renderResponse.createRenderURL(), "mvcPath", "/view.jsp", "tabs1", "assigned-to-my-roles");
+						navigationItem.setLabel(LanguageUtil.get(request, "assigned-to-my-roles"));
+					});
+			}
+		}
+	%>"
+/>
 
 <clay:management-toolbar
 	clearResultsURL="<%= workflowTaskDisplayContext.getClearResultsURL() %>"

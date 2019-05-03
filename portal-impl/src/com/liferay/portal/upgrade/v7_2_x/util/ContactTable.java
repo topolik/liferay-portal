@@ -28,38 +28,25 @@ public class ContactTable {
 	public static final String TABLE_NAME = "Contact_";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"contactId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT},
-		{"accountId", Types.BIGINT},
-		{"parentContactId", Types.BIGINT},
-		{"emailAddress", Types.VARCHAR},
-		{"firstName", Types.VARCHAR},
-		{"middleName", Types.VARCHAR},
-		{"lastName", Types.VARCHAR},
-		{"prefixId", Types.BIGINT},
-		{"suffixId", Types.BIGINT},
-		{"male", Types.BOOLEAN},
-		{"birthday", Types.TIMESTAMP},
-		{"smsSn", Types.VARCHAR},
-		{"facebookSn", Types.VARCHAR},
-		{"jabberSn", Types.VARCHAR},
-		{"skypeSn", Types.VARCHAR},
-		{"twitterSn", Types.VARCHAR},
-		{"employeeStatusId", Types.VARCHAR},
-		{"employeeNumber", Types.VARCHAR},
-		{"jobTitle", Types.VARCHAR},
-		{"jobClass", Types.VARCHAR},
+		{"mvccVersion", Types.BIGINT}, {"contactId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
+		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"classNameId", Types.BIGINT},
+		{"classPK", Types.BIGINT}, {"accountId", Types.BIGINT},
+		{"parentContactId", Types.BIGINT}, {"emailAddress", Types.VARCHAR},
+		{"firstName", Types.VARCHAR}, {"middleName", Types.VARCHAR},
+		{"lastName", Types.VARCHAR}, {"prefixId", Types.BIGINT},
+		{"suffixId", Types.BIGINT}, {"male", Types.BOOLEAN},
+		{"birthday", Types.TIMESTAMP}, {"smsSn", Types.VARCHAR},
+		{"facebookSn", Types.VARCHAR}, {"jabberSn", Types.VARCHAR},
+		{"skypeSn", Types.VARCHAR}, {"twitterSn", Types.VARCHAR},
+		{"employeeStatusId", Types.VARCHAR}, {"employeeNumber", Types.VARCHAR},
+		{"jobTitle", Types.VARCHAR}, {"jobClass", Types.VARCHAR},
 		{"hoursOfOperation", Types.VARCHAR}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -121,7 +108,8 @@ TABLE_COLUMNS_MAP.put("jobClass", Types.VARCHAR);
 TABLE_COLUMNS_MAP.put("hoursOfOperation", Types.VARCHAR);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table Contact_ (mvccVersion LONG default 0 not null,contactId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,accountId LONG,parentContactId LONG,emailAddress VARCHAR(254) null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,prefixId LONG,suffixId LONG,male BOOLEAN,birthday DATE null,smsSn VARCHAR(75) null,facebookSn VARCHAR(75) null,jabberSn VARCHAR(75) null,skypeSn VARCHAR(75) null,twitterSn VARCHAR(75) null,employeeStatusId VARCHAR(75) null,employeeNumber VARCHAR(75) null,jobTitle VARCHAR(100) null,jobClass VARCHAR(75) null,hoursOfOperation VARCHAR(75) null)";
+	public static final String TABLE_SQL_CREATE =
+"create table Contact_ (mvccVersion LONG default 0 not null,contactId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,accountId LONG,parentContactId LONG,emailAddress VARCHAR(254) null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,prefixId LONG,suffixId LONG,male BOOLEAN,birthday DATE null,smsSn VARCHAR(75) null,facebookSn VARCHAR(75) null,jabberSn VARCHAR(75) null,skypeSn VARCHAR(75) null,twitterSn VARCHAR(75) null,employeeStatusId VARCHAR(75) null,employeeNumber VARCHAR(75) null,jobTitle VARCHAR(100) null,jobClass VARCHAR(75) null,hoursOfOperation VARCHAR(75) null)";
 
 	public static final String TABLE_SQL_DROP = "drop table Contact_";
 

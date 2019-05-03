@@ -41,6 +41,7 @@ import com.liferay.portal.kernel.model.Role;
 import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.module.framework.service.IdentifiableOSGiService;
 import com.liferay.portal.kernel.portlet.FriendlyURLMapper;
+import com.liferay.portal.kernel.portlet.FriendlyURLResolverRegistryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.PortletLocalServiceUtil;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
@@ -65,6 +66,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Raymond Augé
@@ -154,8 +157,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 			int priority = defaultPriority;
 
 			if (priority < 0) {
-				Layout layout = layoutPersistence.findByG_P_P_First(
-					groupId, privateLayout, parentLayoutId,
+				Layout layout = layoutPersistence.findByG_P_P_Head_First(
+					groupId, privateLayout, parentLayoutId, false,
 					new LayoutPriorityComparator(false));
 
 				priority = layout.getPriority() + 1;
@@ -164,8 +167,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 			if ((priority < _PRIORITY_BUFFER) &&
 				Validator.isNull(sourcePrototypeLayoutUuid)) {
 
-				LayoutSet layoutSet = layoutSetPersistence.fetchByG_P(
-					groupId, privateLayout);
+				LayoutSet layoutSet = layoutSetPersistence.fetchByG_P_Head(
+					groupId, privateLayout, false);
 
 				if (Validator.isNotNull(
 						layoutSet.getLayoutSetPrototypeUuid()) &&
@@ -201,8 +204,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 
 			// Ensure parent layout exists
 
-			Layout parentLayout = layoutPersistence.fetchByG_P_L(
-				groupId, privateLayout, parentLayoutId);
+			Layout parentLayout = layoutPersistence.fetchByG_P_L_Head(
+				groupId, privateLayout, parentLayoutId, false);
 
 			if (parentLayout == null) {
 				parentLayoutId = LayoutConstants.DEFAULT_PARENT_LAYOUT_ID;
@@ -216,8 +219,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 			LayoutSetPrototype layoutSetPrototype, String layoutUuid)
 		throws PortalException {
 
-		Layout layout = layoutPersistence.fetchByUUID_G_P(
-			layoutUuid, layoutSetPrototype.getGroupId(), true);
+		Layout layout = layoutPersistence.fetchByUUID_G_P_Head(
+			layoutUuid, layoutSetPrototype.getGroupId(), true, false);
 
 		if (layout != null) {
 			return true;
@@ -237,8 +240,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 		boolean firstLayout = false;
 
 		if (parentLayoutId == LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
-			List<Layout> layouts = layoutPersistence.findByG_P_P(
-				groupId, privateLayout, parentLayoutId, 0, 1);
+			List<Layout> layouts = layoutPersistence.findByG_P_P_Head(
+				groupId, privateLayout, parentLayoutId, false, 0, 1);
 
 			if (layouts.isEmpty()) {
 				firstLayout = true;
@@ -258,10 +261,10 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 			// Layout cannot become a child of a layout that is not sortable
 			// because it is linked to a layout set prototype
 
-			Layout layout = layoutPersistence.fetchByG_P_L(
-				groupId, privateLayout, layoutId);
-			Layout parentLayout = layoutPersistence.findByG_P_L(
-				groupId, privateLayout, parentLayoutId);
+			Layout layout = layoutPersistence.fetchByG_P_L_Head(
+				groupId, privateLayout, layoutId, false);
+			Layout parentLayout = layoutPersistence.findByG_P_L_Head(
+				groupId, privateLayout, parentLayoutId, false);
 
 			if (((layout == null) ||
 				 Validator.isNull(layout.getSourcePrototypeLayoutUuid())) &&
@@ -290,8 +293,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 		}
 
 		if (!layoutTypeController.isParentable()) {
-			if (layoutPersistence.countByG_P_P(
-					groupId, privateLayout, layoutId) > 0) {
+			if (layoutPersistence.countByG_P_P_Head(
+					groupId, privateLayout, layoutId, false) > 0) {
 
 				throw new LayoutTypeException(
 					LayoutTypeException.NOT_PARENTABLE);
@@ -376,6 +379,32 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 			lfurle.setKeywordConflict(Portal.FRIENDLY_URL_SEPARATOR);
 
 			throw lfurle;
+		}
+
+		Matcher matcher = _urlSeparatorPattern.matcher(friendlyURL);
+
+		if (matcher.matches()) {
+			LayoutFriendlyURLException lfurle = new LayoutFriendlyURLException(
+				LayoutFriendlyURLException.KEYWORD_CONFLICT);
+
+			lfurle.setKeywordConflict(friendlyURL);
+
+			throw lfurle;
+		}
+
+		String[] urlSeparators =
+			FriendlyURLResolverRegistryUtil.getURLSeparators();
+
+		for (String urlSeparator : urlSeparators) {
+			if (urlSeparator.contains(friendlyURL)) {
+				LayoutFriendlyURLException lfurle =
+					new LayoutFriendlyURLException(
+						LayoutFriendlyURLException.KEYWORD_CONFLICT);
+
+				lfurle.setKeywordConflict(urlSeparator);
+
+				throw lfurle;
+			}
 		}
 
 		List<FriendlyURLMapper> friendlyURLMappers =
@@ -509,8 +538,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 			long parentLayoutId)
 		throws PortalException {
 
-		Layout layout = layoutPersistence.findByG_P_L(
-			groupId, privateLayout, layoutId);
+		Layout layout = layoutPersistence.findByG_P_L_Head(
+			groupId, privateLayout, layoutId, false);
 
 		if (parentLayoutId == layout.getParentLayoutId()) {
 			return;
@@ -524,8 +553,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 
 		// Layout cannot become a child of a layout that is not parentable
 
-		Layout parentLayout = layoutPersistence.findByG_P_L(
-			groupId, privateLayout, parentLayoutId);
+		Layout parentLayout = layoutPersistence.findByG_P_L_Head(
+			groupId, privateLayout, parentLayoutId, false);
 
 		LayoutType parentLayoutType = parentLayout.getLayoutType();
 
@@ -556,9 +585,9 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 		if (layout.getParentLayoutId() ==
 				LayoutConstants.DEFAULT_PARENT_LAYOUT_ID) {
 
-			List<Layout> layouts = layoutPersistence.findByG_P_P(
+			List<Layout> layouts = layoutPersistence.findByG_P_P_Head(
 				groupId, privateLayout,
-				LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, 0, 2);
+				LayoutConstants.DEFAULT_PARENT_LAYOUT_ID, false, 0, 2);
 
 			// You can only reach this point if there are more than two layouts
 			// at the root level because of the descendant check
@@ -615,5 +644,8 @@ public class LayoutLocalServiceHelper implements IdentifiableOSGiService {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		LayoutLocalServiceHelper.class);
+
+	private static final Pattern _urlSeparatorPattern = Pattern.compile(
+		"/[A-Za-z]");
 
 }

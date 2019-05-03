@@ -36,19 +36,22 @@ List<DropdownItem> dropdownItems = assetEntryActionDropdownItemsProvider.getActi
 				markupView="lexicon"
 				message="<%= StringPool.BLANK %>"
 				showWhenSingleIcon="<%= true %>"
-				triggerCssClass="component-action"
+				triggerCssClass="text-primary"
 			>
 
 				<%
 				for (DropdownItem dropdownItem : dropdownItems) {
+					Map data = (HashMap)dropdownItem.get("data");
+
+					boolean useDialog = GetterUtil.getBoolean(data.get("useDialog"));
 				%>
 
 					<liferay-ui:icon
-						data='<%= (HashMap)dropdownItem.get("data") %>'
+						data="<%= data %>"
 						message='<%= String.valueOf(dropdownItem.get("label")) %>'
 						method="get"
 						url='<%= String.valueOf(dropdownItem.get("href")) %>'
-						useDialog="<%= true %>"
+						useDialog="<%= useDialog %>"
 					/>
 
 				<%
@@ -61,16 +64,21 @@ List<DropdownItem> dropdownItems = assetEntryActionDropdownItemsProvider.getActi
 
 			<%
 			DropdownItem dropdownItem = dropdownItems.get(0);
+
+			Map data = (HashMap)dropdownItem.get("data");
+
+			boolean useDialog = GetterUtil.getBoolean(data.get("useDialog"));
 			%>
 
 			<liferay-ui:icon
 				cssClass="visible-interaction"
 				data='<%= (HashMap)dropdownItem.get("data") %>'
 				icon='<%= String.valueOf(dropdownItem.get("icon")) %>'
+				linkCssClass="text-primary"
 				markupView="lexicon"
 				method="get"
 				url='<%= String.valueOf(dropdownItem.get("href")) %>'
-				useDialog="<%= true %>"
+				useDialog="<%= useDialog %>"
 			/>
 		</c:otherwise>
 	</c:choose>

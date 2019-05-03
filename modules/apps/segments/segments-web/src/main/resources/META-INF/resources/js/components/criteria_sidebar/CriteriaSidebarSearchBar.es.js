@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import ClayButton from '../shared/ClayButton.es';
+import PropTypes from 'prop-types';
+import React, {Component} from 'react';
 
 class CriteriaSidebarSearchBar extends Component {
 	static propTypes = {

@@ -18,7 +18,6 @@
 
 <%
 JournalArticle article = journalContentDisplayContext.getArticle();
-DDMTemplate defaultDDMTemplate = journalContentDisplayContext.getDefaultDDMTemplate();
 DDMStructure ddmStructure = journalContentDisplayContext.getDDMStructure();
 
 String refererPortletName = ParamUtil.getString(request, "refererPortletName");
@@ -33,7 +32,17 @@ String refererPortletName = ParamUtil.getString(request, "refererPortletName");
 		<liferay-ui:message key="please-select-one-option" />
 	</div>
 
-	<aui:input checked="<%= journalContentDisplayContext.isDefaultTemplate() %>" id='<%= refererPortletName + "ddmTemplateTypeDefault" %>' label='<%= LanguageUtil.format(request, "use-default-template-x", defaultDDMTemplate.getName(locale), false) %>' name='<%= refererPortletName + "ddmTemplateType" %>' type="radio" useNamespace="<%= false %>" value="default" />
+	<%
+	String defaultDDMTemplateName = LanguageUtil.get(request, "no-template");
+
+	DDMTemplate defaultDDMTemplate = journalContentDisplayContext.getDefaultDDMTemplate();
+
+	if (defaultDDMTemplate != null) {
+		defaultDDMTemplateName = defaultDDMTemplate.getName(locale);
+	}
+	%>
+
+	<aui:input checked="<%= journalContentDisplayContext.isDefaultTemplate() %>" id='<%= refererPortletName + "ddmTemplateTypeDefault" %>' label='<%= LanguageUtil.format(request, "use-default-template-x", defaultDDMTemplateName, false) %>' name='<%= refererPortletName + "ddmTemplateType" %>' type="radio" useNamespace="<%= false %>" value="default" />
 
 	<aui:input checked="<%= !journalContentDisplayContext.isDefaultTemplate() %>" id='<%= refererPortletName + "ddmTemplateTypeCustom" %>' label="use-a-specific-template" name='<%= refererPortletName + "ddmTemplateType" %>' type="radio" useNamespace="<%= false %>" value="custom" />
 
@@ -42,7 +51,7 @@ String refererPortletName = ParamUtil.getString(request, "refererPortletName");
 			<c:choose>
 				<c:when test="<%= journalContentDisplayContext.isDefaultTemplate() %>">
 					<p class="text-default">
-						<liferay-ui:message key="none" />
+						<liferay-ui:message key="no-template" />
 					</p>
 				</c:when>
 				<c:otherwise>
@@ -52,6 +61,8 @@ String refererPortletName = ParamUtil.getString(request, "refererPortletName");
 		</div>
 
 		<aui:button id='<%= refererPortletName + "selectDDMTemplateButton" %>' useNamespace="<%= false %>" value="select" />
+
+		<aui:button id='<%= refererPortletName + "clearddmTemplateButton" %>' useNamespace="<%= false %>" value="clear" />
 	</div>
 </div>
 
@@ -72,9 +83,12 @@ AssetRenderer<JournalArticle> assetRenderer = assetRendererFactory.getAssetRende
 	PortletURL selectDDMTemplateURL = PortletProviderUtil.getPortletURL(renderRequest, className, PortletProvider.Action.BROWSE);
 
 	selectDDMTemplateURL.setParameter("ddmStructureId", String.valueOf(ddmStructure.getStructureId()));
-	selectDDMTemplateURL.setWindowState(LiferayWindowState.POP_UP);
 
 	String portletId = PortletProviderUtil.getPortletId(className, PortletProvider.Action.BROWSE);
+
+	selectDDMTemplateURL.setParameter("eventName", PortalUtil.getPortletNamespace(portletId) + "selectDDMTemplate");
+
+	selectDDMTemplateURL.setWindowState(LiferayWindowState.POP_UP);
 	%>
 
 	A.one('#<%= refererPortletName + "selectDDMTemplateButton" %>').on(
@@ -86,10 +100,11 @@ AssetRenderer<JournalArticle> assetRenderer = assetRendererFactory.getAssetRende
 				{
 					dialog: {
 						constrain: true,
+						destroyOnHide: true,
 						modal: true
 					},
-					eventName: '<%= PortalUtil.getPortletNamespace(portletId) + "selectTemplate" %>',
-					id: '<%= PortalUtil.getPortletNamespace(portletId) + "selectTemplate" %>',
+					eventName: '<%= PortalUtil.getPortletNamespace(portletId) + "selectDDMTemplate" %>',
+					id: '<%= PortalUtil.getPortletNamespace(portletId) + "selectDDMTemplate" %>',
 					title: '<liferay-ui:message key="templates" />',
 					uri: '<%= selectDDMTemplateURL %>'
 				},
@@ -149,6 +164,15 @@ AssetRenderer<JournalArticle> assetRenderer = assetRendererFactory.getAssetRende
 		'click',
 		function(event) {
 			templateKeyInput.setAttribute('value', '');
+		}
+	);
+
+	A.one('#<%= refererPortletName + "clearddmTemplateButton" %>').on(
+		'click',
+		function(event) {
+			templateKeyInput.setAttribute('value', '');
+
+			templatePreview.html('<p class="text-default"><liferay-ui:message key="no-template" /></p>');
 		}
 	);
 

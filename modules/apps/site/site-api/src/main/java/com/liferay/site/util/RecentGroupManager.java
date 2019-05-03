@@ -148,20 +148,22 @@ public class RecentGroupManager {
 				continue;
 			}
 
-			Layout layout = _layoutLocalService.fetchFirstLayout(
-				group.getGroupId(), false,
-				LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
-
-			if (layout == null) {
-				layout = _layoutLocalService.fetchFirstLayout(
-					group.getGroupId(), true,
+			if (!group.isCompany()) {
+				Layout layout = _layoutLocalService.fetchFirstLayout(
+					group.getGroupId(), false,
 					LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 
-				if ((layout == null) ||
-					!LayoutPermissionUtil.contains(
-						permissionChecker, layout, true, ActionKeys.VIEW)) {
+				if (layout == null) {
+					layout = _layoutLocalService.fetchFirstLayout(
+						group.getGroupId(), true,
+						LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 
-					continue;
+					if ((layout == null) ||
+						!LayoutPermissionUtil.contains(
+							permissionChecker, layout, true, ActionKeys.VIEW)) {
+
+						continue;
+					}
 				}
 			}
 

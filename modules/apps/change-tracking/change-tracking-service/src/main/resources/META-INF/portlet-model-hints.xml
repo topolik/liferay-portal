@@ -22,10 +22,12 @@
 		<field name="userName" type="String" />
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
-		<field name="classNameId" type="long" />
-		<field name="classPK" type="long" />
-		<field name="resourcePrimKey" type="long" />
+		<field name="originalCTCollectionId" type="long" />
+		<field name="modelClassNameId" type="long" />
+		<field name="modelClassPK" type="long" />
+		<field name="modelResourcePrimKey" type="long" />
 		<field name="changeType" type="int" />
+		<field name="collision" type="boolean" />
 		<field name="status" type="int" />
 	</model>
 	<model name="com.liferay.change.tracking.model.CTEntryAggregate">

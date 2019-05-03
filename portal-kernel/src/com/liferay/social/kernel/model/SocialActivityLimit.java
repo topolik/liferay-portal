@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface SocialActivityLimit
-	extends SocialActivityLimitModel, PersistedModel {
+	extends PersistedModel, SocialActivityLimitModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

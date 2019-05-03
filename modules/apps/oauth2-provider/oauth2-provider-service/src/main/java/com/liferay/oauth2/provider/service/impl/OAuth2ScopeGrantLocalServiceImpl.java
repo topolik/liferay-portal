@@ -48,6 +48,16 @@ public class OAuth2ScopeGrantLocalServiceImpl
 			String applicationName, String bundleSymbolicName, String scope)
 		throws DuplicateOAuth2ScopeGrantException {
 
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public OAuth2ScopeGrant createOAuth2ScopeGrant(
+			long companyId, long oAuth2ApplicationScopeAliasesId,
+			String applicationName, String bundleSymbolicName, String scope,
+			List<String> scopeAliases)
+		throws DuplicateOAuth2ScopeGrantException {
+
 		OAuth2ScopeGrant oAuth2ScopeGrant =
 			oAuth2ScopeGrantPersistence.fetchByC_O_A_B_S(
 				companyId, oAuth2ApplicationScopeAliasesId, applicationName,
@@ -69,6 +79,8 @@ public class OAuth2ScopeGrantLocalServiceImpl
 		oAuth2ScopeGrant.setApplicationName(applicationName);
 		oAuth2ScopeGrant.setBundleSymbolicName(bundleSymbolicName);
 		oAuth2ScopeGrant.setScope(scope);
+
+		oAuth2ScopeGrant.setScopeAliasesList(scopeAliases);
 
 		return oAuth2ScopeGrantPersistence.update(oAuth2ScopeGrant);
 	}

@@ -41,4 +41,20 @@ public class NodePluginUtil {
 		return new File(nodeModulesDir, "npm");
 	}
 
+	public static boolean isYarnScriptFile(File scriptFile) {
+		if (scriptFile == null) {
+			return false;
+		}
+
+		String scriptFileName = scriptFile.getName();
+
+		if (!scriptFileName.startsWith("yarn-") ||
+			!scriptFileName.endsWith(".js")) {
+
+			return false;
+		}
+
+		return true;
+	}
+
 }

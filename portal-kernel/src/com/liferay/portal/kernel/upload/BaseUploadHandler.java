@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
@@ -95,9 +96,11 @@ public abstract class BaseUploadHandler implements UploadHandler {
 
 			imageJSONObject.put("randomId", randomId);
 
-			jsonObject.put("file", imageJSONObject);
-
-			jsonObject.put("success", Boolean.TRUE);
+			jsonObject.put(
+				"file", imageJSONObject
+			).put(
+				"success", Boolean.TRUE
+			);
 
 			JSONPortletResponseUtil.writeJSON(
 				portletRequest, portletResponse, jsonObject);
@@ -175,13 +178,19 @@ public abstract class BaseUploadHandler implements UploadHandler {
 					folderId, uniqueFileName, contentType, inputStream, size,
 					getServiceContext(uploadPortletRequest));
 
-				imageJSONObject.put("fileEntryId", fileEntry.getFileEntryId());
-				imageJSONObject.put("groupId", fileEntry.getGroupId());
-				imageJSONObject.put("title", fileEntry.getTitle());
-
-				imageJSONObject.put("type", "document");
-				imageJSONObject.put("url", getURL(fileEntry, themeDisplay));
-				imageJSONObject.put("uuid", fileEntry.getUuid());
+				imageJSONObject.put(
+					"fileEntryId", fileEntry.getFileEntryId()
+				).put(
+					"groupId", fileEntry.getGroupId()
+				).put(
+					"title", fileEntry.getTitle()
+				).put(
+					"type", "document"
+				).put(
+					"url", getURL(fileEntry, themeDisplay)
+				).put(
+					"uuid", fileEntry.getUuid()
+				);
 
 				return imageJSONObject;
 			}
@@ -278,10 +287,11 @@ public abstract class BaseUploadHandler implements UploadHandler {
 					ServletResponseConstants.SC_UPLOAD_REQUEST_SIZE_EXCEPTION;
 			}
 
-			JSONObject errorJSONObject = JSONFactoryUtil.createJSONObject();
-
-			errorJSONObject.put("errorType", errorType);
-			errorJSONObject.put("message", errorMessage);
+			JSONObject errorJSONObject = JSONUtil.put(
+				"errorType", errorType
+			).put(
+				"message", errorMessage
+			);
 
 			jsonObject.put("error", errorJSONObject);
 		}

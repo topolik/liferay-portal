@@ -15,6 +15,7 @@
 package com.liferay.document.library.internal.security.permission.resource;
 
 import com.liferay.document.library.kernel.service.DLAppLocalService;
+import com.liferay.portal.kernel.repository.RepositoryFactory;
 import com.liferay.portal.kernel.repository.model.Folder;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
@@ -65,6 +66,9 @@ public class FolderModelResourcePermissionRegistrar {
 
 	@Reference(target = "(resource.name=" + DLConstants.RESOURCE_NAME + ")")
 	private PortletResourcePermission _portletResourcePermission;
+
+	@Reference
+	private RepositoryFactory _repositoryFactory;
 
 	private ServiceRegistration<ModelResourcePermission> _serviceRegistration;
 

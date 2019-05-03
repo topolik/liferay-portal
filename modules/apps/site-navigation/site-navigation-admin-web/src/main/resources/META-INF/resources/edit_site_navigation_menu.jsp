@@ -25,28 +25,30 @@ portletDisplay.setURLBack(redirect);
 renderResponse.setTitle(siteNavigationAdminDisplayContext.getSiteNavigationMenuName());
 %>
 
-<nav class="management-bar management-bar-light navbar navbar-expand-md site-navigation-management-bar">
-	<div class="container">
-		<ul class="navbar-nav"></ul>
+<c:if test="<%= siteNavigationAdminDisplayContext.hasUpdatePermission() %>">
+	<nav class="management-bar management-bar-light navbar navbar-expand-md site-navigation-management-bar">
+		<div class="container">
+			<ul class="navbar-nav"></ul>
 
-		<ul class="navbar-nav">
-			<li class="nav-item">
-				<button class="btn btn-unstyled nav-link nav-link-monospaced" id="<portlet:namespace />showSiteNavigationMenuSettings" type="button">
-					<aui:icon cssClass="icon-monospaced" image="cog" markupView="lexicon" />
-				</button>
-			</li>
-			<li class="nav-item">
-				<clay:dropdown-menu
-					buttonStyle="primary"
-					dropdownItems="<%= siteNavigationAdminDisplayContext.getAddSiteNavigationMenuItemDropdownItems() %>"
-					icon="plus"
-					style="primary"
-					triggerCssClasses="nav-btn nav-btn-monospaced"
-				/>
-			</li>
-		</ul>
-	</div>
-</nav>
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<button class="btn btn-unstyled nav-link nav-link-monospaced" id="<portlet:namespace />showSiteNavigationMenuSettings" type="button">
+						<aui:icon cssClass="icon-monospaced" image="cog" markupView="lexicon" />
+					</button>
+				</li>
+				<li class="nav-item">
+					<clay:dropdown-menu
+						buttonStyle="primary"
+						dropdownItems="<%= siteNavigationAdminDisplayContext.getAddSiteNavigationMenuItemDropdownItems() %>"
+						icon="plus"
+						style="primary"
+						triggerCssClasses="nav-btn nav-btn-monospaced"
+					/>
+				</li>
+			</ul>
+		</div>
+	</nav>
+</c:if>
 
 <liferay-ui:error key="<%= InvalidSiteNavigationMenuItemOrderException.class.getName() %>" message="the-order-of-site-navigation-menu-items-is-invalid" />
 
@@ -346,46 +348,48 @@ sb.append("/js/SiteNavigationMenuItemDOMHandler.es as siteNavigationMenuItemDOMH
 		);
 	};
 
-	Liferay.componentReady(
-		'<portlet:namespace />sidebar'
-	)
-	.then(
-		function(_sidebar) {
-			sidebar = _sidebar;
+	<c:if test="<%= siteNavigationAdminDisplayContext.hasUpdatePermission() %>">
+		Liferay.componentReady(
+			'<portlet:namespace />sidebar'
+		)
+		.then(
+			function(_sidebar) {
+				sidebar = _sidebar;
 
-			sidebar.on('hide', closeSidebar);
+				sidebar.on('hide', closeSidebar);
 
-			siteNavigationMenuEditor = new siteNavigationMenuEditorModule.default(
-				{
-					editSiteNavigationMenuItemParentURL: '<portlet:actionURL name="/navigation_menu/edit_site_navigation_menu_item_parent"><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:actionURL>',
-					namespace: '<portlet:namespace />'
-				}
-			);
+				siteNavigationMenuEditor = new siteNavigationMenuEditorModule.default(
+					{
+						editSiteNavigationMenuItemParentURL: '<portlet:actionURL name="/navigation_menu/edit_site_navigation_menu_item_parent"><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:actionURL>',
+						namespace: '<portlet:namespace />'
+					}
+				);
 
-			siteNavigationMenuEditor.on(
-				'selectedMenuItemChanged',
-				handleSelectedMenuItemChanged
-			);
+				siteNavigationMenuEditor.on(
+					'selectedMenuItemChanged',
+					handleSelectedMenuItemChanged
+				);
 
-			AUI().use(
-				['aui-base'],
-				function(A) {
-					siteNavigationMenuItemRemoveButtonClickHandler = A
-						.all('.site-navigation-menu-item__remove-icon')
-						.on('click', handleSiteNavigationMenuItemRemoveIconClick);
+				AUI().use(
+					['aui-base'],
+					function(A) {
+						siteNavigationMenuItemRemoveButtonClickHandler = A
+							.all('.site-navigation-menu-item__remove-icon')
+							.on('click', handleSiteNavigationMenuItemRemoveIconClick);
 
-					siteNavigationMenuItemRemoveButtonKeyupHandler = A
-						.all('.site-navigation-menu-item__remove-icon')
-						.on('keyup', handleSiteNavigationMenuItemRemoveIconKeyup);
+						siteNavigationMenuItemRemoveButtonKeyupHandler = A
+							.all('.site-navigation-menu-item__remove-icon')
+							.on('keyup', handleSiteNavigationMenuItemRemoveIconKeyup);
 
-					showSiteNavigationMenuSettingsButtonClickHandler = A
-						.one('#<portlet:namespace />showSiteNavigationMenuSettings')
-						.on('click', handleShowSiteNavigationMenuSettingsButtonClick);
-				}
-			);
+						showSiteNavigationMenuSettingsButtonClickHandler = A
+							.one('#<portlet:namespace />showSiteNavigationMenuSettings')
+							.on('click', handleShowSiteNavigationMenuSettingsButtonClick);
+					}
+				);
 
-			Liferay.on('<%= portletDisplay.getId() %>:portletRefreshed', handlePortletDestroy);
-			Liferay.on('destroyPortlet', handlePortletDestroy);
-		}
-	);
+				Liferay.on('<%= portletDisplay.getId() %>:portletRefreshed', handlePortletDestroy);
+				Liferay.on('destroyPortlet', handlePortletDestroy);
+			}
+		);
+	</c:if>
 </aui:script>

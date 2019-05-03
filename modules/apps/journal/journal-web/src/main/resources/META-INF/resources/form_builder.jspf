@@ -19,9 +19,7 @@ boolean changeableDefaultLanguage = journalEditDDMStructuresDisplayContext.chang
 
 String defaultLanguageId = LocaleUtil.toLanguageId(LocaleUtil.getSiteDefault());
 
-DDMForm ddmForm = journalEditDDMStructuresDisplayContext.getDDMForm();
-
-if (ddmForm != null) {
+if ((ddmForm != null) && (ddmForm.getDefaultLocale() != null)) {
 	String ddmFormDefaultLanguageId = LocaleUtil.toLanguageId(ddmForm.getDefaultLocale());
 
 	if (!Objects.equals(defaultLanguageId, ddmFormDefaultLanguageId)) {
@@ -37,7 +35,6 @@ if (ddmForm != null) {
 <liferay-ui:tabs
 	names='<%= LanguageUtil.get(request, "view[action]") + "," + LanguageUtil.get(request, "source") %>'
 	refresh="<%= false %>"
-	type="tabs nav-tabs-default"
 >
 	<liferay-ui:section>
 		<div id="<portlet:namespace />formBuilderTab">

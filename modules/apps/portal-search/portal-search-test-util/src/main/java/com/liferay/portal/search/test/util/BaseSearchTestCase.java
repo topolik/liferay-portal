@@ -149,7 +149,12 @@ public abstract class BaseSearchTestCase {
 
 	@Test
 	public void testSearchComments() throws Exception {
-		searchComments();
+		searchComments(false);
+	}
+
+	@Test
+	public void testSearchCommentsByKeywords() throws Exception {
+		searchComments(true);
 	}
 
 	@Test
@@ -205,10 +210,8 @@ public abstract class BaseSearchTestCase {
 		try {
 			WorkflowThreadLocal.setEnabled(true);
 
-			BaseModel<?> baseModel = addBaseModelWithWorkflow(
+			return addBaseModelWithWorkflow(
 				parentBaseModel, approved, keywords, serviceContext);
-
-			return baseModel;
 		}
 		finally {
 			WorkflowThreadLocal.setEnabled(workflowEnabled);
@@ -685,7 +688,7 @@ public abstract class BaseSearchTestCase {
 		assertBaseModelsCount(initialBaseModelsSearchCount, searchContext);
 	}
 
-	protected void searchComments() throws Exception {
+	protected void searchComments(boolean searchByKeywords) throws Exception {
 		ServiceContext serviceContext =
 			ServiceContextTestUtil.getServiceContext(group.getGroupId());
 
@@ -709,7 +712,13 @@ public abstract class BaseSearchTestCase {
 
 		addComment(baseModel, getSearchKeywords(), serviceContext);
 
-		assertBaseModelsCount(initialBaseModelsSearchCount + 2, searchContext);
+		if (searchByKeywords) {
+			searchContext.setKeywords(getSearchKeywords());
+		}
+
+		assertBaseModelsCount(
+			initialBaseModelsSearchCount + (searchByKeywords ? 1 : 2),
+			searchContext);
 
 		moveBaseModelToTrash((Long)baseModel.getPrimaryKeyObj());
 

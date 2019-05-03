@@ -14,27 +14,30 @@
 
 package com.liferay.oauth2.provider.service.impl;
 
+import com.liferay.oauth2.provider.model.OAuth2Application;
 import com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases;
 import com.liferay.oauth2.provider.model.OAuth2ScopeGrant;
 import com.liferay.oauth2.provider.scope.liferay.LiferayOAuth2Scope;
 import com.liferay.oauth2.provider.scope.liferay.ScopeLocator;
 import com.liferay.oauth2.provider.service.OAuth2ScopeGrantLocalService;
 import com.liferay.oauth2.provider.service.base.OAuth2ApplicationScopeAliasesLocalServiceBaseImpl;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.kernel.util.StringUtil;
-import com.liferay.portal.kernel.util.Validator;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
@@ -56,29 +59,19 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 			long oAuth2ApplicationId, List<String> scopeAliasesList)
 		throws PortalException {
 
-		long oAuth2ApplicationScopeAliasesId = counterLocalService.increment(
-			OAuth2ApplicationScopeAliases.class.getName());
+		for (String scopeAlias : scopeAliasesList) {
+			if (scopeAlias.contains(" ")) {
+				throw new PortalException(
+					"Scope aliases cannot contain spaces");
+			}
+		}
 
-		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases =
-			createOAuth2ApplicationScopeAliases(
-				oAuth2ApplicationScopeAliasesId);
+		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopesScopeAliases =
+			_getLiferayOAuth2ScopesScopeAliases(companyId, scopeAliasesList);
 
-		oAuth2ApplicationScopeAliases.setCompanyId(companyId);
-		oAuth2ApplicationScopeAliases.setUserId(userId);
-		oAuth2ApplicationScopeAliases.setUserName(userName);
-		oAuth2ApplicationScopeAliases.setCreateDate(new Date());
-		oAuth2ApplicationScopeAliases.setOAuth2ApplicationId(
-			oAuth2ApplicationId);
-		oAuth2ApplicationScopeAliases.setScopeAliasesList(scopeAliasesList);
-
-		oAuth2ApplicationScopeAliases =
-			oAuth2ApplicationScopeAliasesPersistence.update(
-				oAuth2ApplicationScopeAliases);
-
-		createScopeGrants(
-			companyId, oAuth2ApplicationScopeAliasesId, scopeAliasesList);
-
-		return oAuth2ApplicationScopeAliases;
+		return _addOAuth2ApplicationScopeAliases(
+			companyId, userId, userName, oAuth2ApplicationId,
+			liferayOAuth2ScopesScopeAliases);
 	}
 
 	@Override
@@ -104,23 +97,26 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 	public OAuth2ApplicationScopeAliases fetchOAuth2ApplicationScopeAliases(
 		long oAuth2ApplicationId, List<String> scopeAliasesList) {
 
-		String scopeAliases = StringUtil.merge(
-			ListUtil.sort(
-				ListUtil.filter(scopeAliasesList, Validator::isNotNull)),
-			StringPool.SPACE);
+		OAuth2Application oAuth2Application =
+			oAuth2ApplicationPersistence.fetchByPrimaryKey(oAuth2ApplicationId);
 
-		List<OAuth2ApplicationScopeAliases> oAuth2ApplicationScopeAliasesList =
-			oAuth2ApplicationScopeAliasesPersistence.findByO_S(
-				oAuth2ApplicationId, scopeAliases.hashCode());
+		if (oAuth2Application == null) {
+			return null;
+		}
 
-		for (OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases :
-				oAuth2ApplicationScopeAliasesList) {
+		Set<String> scopeAliases = new HashSet<>(scopeAliasesList);
 
-			if (scopeAliases.equals(
-					oAuth2ApplicationScopeAliases.getScopeAliases())) {
+		long oAuth2ApplicationScopeAliasesId =
+			oAuth2Application.getOAuth2ApplicationScopeAliasesId();
 
-				return oAuth2ApplicationScopeAliases;
-			}
+		List<String> assignedScopeAliases = getScopeAliasesList(
+			oAuth2ApplicationScopeAliasesId);
+
+		if ((scopeAliases.size() == assignedScopeAliases.size()) &&
+			assignedScopeAliases.containsAll(scopeAliases)) {
+
+			return fetchOAuth2ApplicationScopeAliases(
+				oAuth2ApplicationScopeAliasesId);
 		}
 
 		return null;
@@ -139,20 +135,46 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 	}
 
 	@Override
+	public List<String> getScopeAliasesList(
+		long oAuth2ApplicationScopeAliasesId) {
+
+		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
+			_oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
+				oAuth2ApplicationScopeAliasesId, QueryUtil.ALL_POS,
+				QueryUtil.ALL_POS, null);
+
+		return _getScopeAliasesList(oAuth2ScopeGrants);
+	}
+
+	@Override
 	public OAuth2ApplicationScopeAliases updateOAuth2ApplicationScopeAliases(
 		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases) {
 
-		if (_hasUpToDateScopeGrants(oAuth2ApplicationScopeAliases)) {
+		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
+			_oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
+				oAuth2ApplicationScopeAliases.
+					getOAuth2ApplicationScopeAliasesId(),
+				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+
+		List<String> scopeAliasesList = _getScopeAliasesList(oAuth2ScopeGrants);
+
+		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopesScopeAliases =
+			_getLiferayOAuth2ScopesScopeAliases(
+				oAuth2ApplicationScopeAliases.getCompanyId(), scopeAliasesList);
+
+		if (_hasUpToDateScopeGrants(
+				oAuth2ScopeGrants, liferayOAuth2ScopesScopeAliases)) {
+
 			return oAuth2ApplicationScopeAliases;
 		}
 
 		try {
-			return addOAuth2ApplicationScopeAliases(
+			return _addOAuth2ApplicationScopeAliases(
 				oAuth2ApplicationScopeAliases.getCompanyId(),
 				oAuth2ApplicationScopeAliases.getUserId(),
 				oAuth2ApplicationScopeAliases.getUserName(),
 				oAuth2ApplicationScopeAliases.getOAuth2ApplicationId(),
-				oAuth2ApplicationScopeAliases.getScopeAliasesList());
+				liferayOAuth2ScopesScopeAliases);
 		}
 		catch (PortalException pe) {
 			throw new IllegalArgumentException(pe);
@@ -161,55 +183,116 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 
 	protected void createScopeGrants(
 			long companyId, long oAuth2ApplicationScopeAliasesId,
-			List<String> scopeAliasesList)
+			Map<LiferayOAuth2Scope, List<String>>
+				liferayOAuth2ScopesScopeAliases)
 		throws PortalException {
 
-		Set<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>();
+		for (Map.Entry<LiferayOAuth2Scope, List<String>> entry :
+				liferayOAuth2ScopesScopeAliases.entrySet()) {
 
-		for (String scopeAlias : scopeAliasesList) {
-			liferayOAuth2Scopes.addAll(
-				_scopeLocator.getLiferayOAuth2Scopes(companyId, scopeAlias));
-		}
+			LiferayOAuth2Scope liferayOAuth2Scope = entry.getKey();
 
-		for (LiferayOAuth2Scope liferayOAuth2Scope : liferayOAuth2Scopes) {
 			Bundle bundle = liferayOAuth2Scope.getBundle();
 
 			_oAuth2ScopeGrantLocalService.createOAuth2ScopeGrant(
 				companyId, oAuth2ApplicationScopeAliasesId,
 				liferayOAuth2Scope.getApplicationName(),
-				bundle.getSymbolicName(), liferayOAuth2Scope.getScope());
+				bundle.getSymbolicName(), liferayOAuth2Scope.getScope(),
+				entry.getValue());
 		}
 	}
 
-	private boolean _hasUpToDateScopeGrants(
-		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases) {
+	private OAuth2ApplicationScopeAliases _addOAuth2ApplicationScopeAliases(
+			long companyId, long userId, String userName,
+			long oAuth2ApplicationId,
+			Map<LiferayOAuth2Scope, List<String>>
+				liferayOAuth2ScopesScopeAliases)
+		throws PortalException {
 
-		List<String> scopeAliasesList =
-			oAuth2ApplicationScopeAliases.getScopeAliasesList();
+		long oAuth2ApplicationScopeAliasesId = counterLocalService.increment(
+			OAuth2ApplicationScopeAliases.class.getName());
 
-		Collection<LiferayOAuth2Scope> liferayOAuth2Scopes = new HashSet<>();
+		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases =
+			createOAuth2ApplicationScopeAliases(
+				oAuth2ApplicationScopeAliasesId);
 
-		for (String scopeAlias : scopeAliasesList) {
-			liferayOAuth2Scopes.addAll(
-				_scopeLocator.getLiferayOAuth2Scopes(
-					oAuth2ApplicationScopeAliases.getCompanyId(), scopeAlias));
+		oAuth2ApplicationScopeAliases.setCompanyId(companyId);
+		oAuth2ApplicationScopeAliases.setUserId(userId);
+		oAuth2ApplicationScopeAliases.setUserName(userName);
+		oAuth2ApplicationScopeAliases.setCreateDate(new Date());
+		oAuth2ApplicationScopeAliases.setOAuth2ApplicationId(
+			oAuth2ApplicationId);
+
+		oAuth2ApplicationScopeAliases =
+			oAuth2ApplicationScopeAliasesPersistence.update(
+				oAuth2ApplicationScopeAliases);
+
+		createScopeGrants(
+			companyId, oAuth2ApplicationScopeAliasesId,
+			liferayOAuth2ScopesScopeAliases);
+
+		return oAuth2ApplicationScopeAliases;
+	}
+
+	private Map<LiferayOAuth2Scope, List<String>>
+		_getLiferayOAuth2ScopesScopeAliases(
+			long companyId, List<String> scopeAliasesList) {
+
+		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopesScopeAliases =
+			new HashMap<>();
+
+		for (String scopeAlias : ListUtil.sort(scopeAliasesList)) {
+			for (LiferayOAuth2Scope liferayOAuth2Scope :
+					_scopeLocator.getLiferayOAuth2Scopes(
+						companyId, scopeAlias)) {
+
+				List<String> scopeAliases =
+					liferayOAuth2ScopesScopeAliases.computeIfAbsent(
+						liferayOAuth2Scope, x -> new ArrayList<>());
+
+				scopeAliases.add(scopeAlias);
+			}
 		}
 
-		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
-			_oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
-				oAuth2ApplicationScopeAliases.
-					getOAuth2ApplicationScopeAliasesId(),
-				QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+		return liferayOAuth2ScopesScopeAliases;
+	}
 
-		if (liferayOAuth2Scopes.size() != oAuth2ScopeGrants.size()) {
+	private List<String> _getScopeAliasesList(
+		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants) {
+
+		Stream<OAuth2ScopeGrant> stream = oAuth2ScopeGrants.stream();
+
+		Set<String> scopeAliases = stream.flatMap(
+			oa2sg -> oa2sg.getScopeAliasesList(
+			).stream()
+		).collect(
+			Collectors.toSet()
+		);
+
+		return new ArrayList<>(scopeAliases);
+	}
+
+	private boolean _hasUpToDateScopeGrants(
+		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants,
+		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopesScopeAliases) {
+
+		if (liferayOAuth2ScopesScopeAliases.size() !=
+				oAuth2ScopeGrants.size()) {
+
 			return false;
 		}
 
-		for (OAuth2ScopeGrant oAuth2ScopeGrant : oAuth2ScopeGrants) {
-			boolean found = liferayOAuth2Scopes.removeIf(
-				liferayOAuth2Scope -> {
-					Bundle bundle = liferayOAuth2Scope.getBundle();
+		oAuth2ScopeGrants = new ArrayList<>(oAuth2ScopeGrants);
 
+		for (Map.Entry<LiferayOAuth2Scope, List<String>> entry :
+				liferayOAuth2ScopesScopeAliases.entrySet()) {
+
+			LiferayOAuth2Scope liferayOAuth2Scope = entry.getKey();
+			List<String> scopeAliases = entry.getValue();
+			Bundle bundle = liferayOAuth2Scope.getBundle();
+
+			boolean found = oAuth2ScopeGrants.removeIf(
+				oAuth2ScopeGrant -> {
 					if (Objects.equals(
 							liferayOAuth2Scope.getApplicationName(),
 							oAuth2ScopeGrant.getApplicationName()) &&
@@ -220,7 +303,11 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 							liferayOAuth2Scope.getScope(),
 							oAuth2ScopeGrant.getScope())) {
 
-						return true;
+						List<String> oAuth2ScopeGrantScopeAliases =
+							oAuth2ScopeGrant.getScopeAliasesList();
+
+						return oAuth2ScopeGrantScopeAliases.equals(
+							scopeAliases);
 					}
 
 					return false;

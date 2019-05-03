@@ -61,7 +61,6 @@ public class LayoutPageTemplateStructureWrapper
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
-		attributes.put("data", getData());
 
 		return attributes;
 	}
@@ -128,12 +127,6 @@ public class LayoutPageTemplateStructureWrapper
 		if (classPK != null) {
 			setClassPK(classPK);
 		}
-
-		String data = (String)attributes.get("data");
-
-		if (data != null) {
-			setData(data);
-		}
 	}
 
 	/**
@@ -186,14 +179,16 @@ public class LayoutPageTemplateStructureWrapper
 		return model.getCreateDate();
 	}
 
-	/**
-	 * Returns the data of this layout page template structure.
-	 *
-	 * @return the data of this layout page template structure
-	 */
 	@Override
-	public String getData() {
-		return model.getData();
+	public String getData(long segmentsExperienceId) {
+		return model.getData(segmentsExperienceId);
+	}
+
+	@Override
+	public String getData(long[] segmentsExperienceIds)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return model.getData(segmentsExperienceIds);
 	}
 
 	/**
@@ -324,16 +319,6 @@ public class LayoutPageTemplateStructureWrapper
 	@Override
 	public void setCreateDate(Date createDate) {
 		model.setCreateDate(createDate);
-	}
-
-	/**
-	 * Sets the data of this layout page template structure.
-	 *
-	 * @param data the data of this layout page template structure
-	 */
-	@Override
-	public void setData(String data) {
-		model.setData(data);
 	}
 
 	/**

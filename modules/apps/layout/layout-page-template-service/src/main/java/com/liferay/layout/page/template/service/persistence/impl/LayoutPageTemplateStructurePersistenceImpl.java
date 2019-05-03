@@ -2280,7 +2280,6 @@ public class LayoutPageTemplateStructurePersistenceImpl
 		Map<String, String> dbColumnNames = new HashMap<String, String>();
 
 		dbColumnNames.put("uuid", "uuid_");
-		dbColumnNames.put("data", "data_");
 
 		setDBColumnNames(dbColumnNames);
 	}
@@ -3264,6 +3263,6 @@ public class LayoutPageTemplateStructurePersistenceImpl
 		LayoutPageTemplateStructurePersistenceImpl.class);
 
 	private static final Set<String> _badColumnNames = SetUtil.fromArray(
-		new String[] {"uuid", "data"});
+		new String[] {"uuid"});
 
 }

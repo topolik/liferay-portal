@@ -29,8 +29,8 @@ import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestHelper;
 import com.liferay.dynamic.data.mapping.util.DDMFormFactory;
 import com.liferay.dynamic.data.mapping.util.DDMUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.ServiceContext;
@@ -172,13 +172,17 @@ public class DDMFormInstanceTestHelper {
 		ddmFormValues.setAvailableLocales(availableLocales);
 		ddmFormValues.setDefaultLocale(LocaleUtil.US);
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("classPK", fileEntry.getFileEntryId());
-		jsonObject.put("groupId", fileEntry.getGroupId());
-		jsonObject.put("title", fileEntry.getTitle());
-		jsonObject.put("type", "document");
-		jsonObject.put("uuid", fileEntry.getUuid());
+		JSONObject jsonObject = JSONUtil.put(
+			"classPK", fileEntry.getFileEntryId()
+		).put(
+			"groupId", fileEntry.getGroupId()
+		).put(
+			"title", fileEntry.getTitle()
+		).put(
+			"type", "document"
+		).put(
+			"uuid", fileEntry.getUuid()
+		);
 
 		List<DDMFormField> ddmFormFields = fileEntryDDMForm.getDDMFormFields();
 

@@ -17,7 +17,6 @@ package com.liferay.portal.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for Team. This utility wraps
@@ -39,19 +38,6 @@ public class TeamLocalServiceUtil {
 	 *
 	 * Never modify this class directly. Add custom service methods to <code>com.liferay.portal.service.impl.TeamLocalServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link #addTeam(long,
-	 long, String, String, ServiceContext)}
-	 */
-	@Deprecated
-	public static com.liferay.portal.kernel.model.Team addTeam(
-			long userId, long groupId, String name, String description)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().addTeam(userId, groupId, name, description);
-	}
-
 	public static com.liferay.portal.kernel.model.Team addTeam(
 			long userId, long groupId, String name, String description,
 			ServiceContext serviceContext)
@@ -615,9 +601,6 @@ public class TeamLocalServiceUtil {
 		if (_service == null) {
 			_service = (TeamLocalService)PortalBeanLocatorUtil.locate(
 				TeamLocalService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				TeamLocalServiceUtil.class, "_service");
 		}
 
 		return _service;

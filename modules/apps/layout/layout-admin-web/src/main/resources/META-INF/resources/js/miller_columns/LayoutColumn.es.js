@@ -1,3 +1,4 @@
+import 'clay-badge';
 import 'clay-dropdown';
 import Component from 'metal-component';
 import {Config} from 'metal-state';
@@ -17,7 +18,7 @@ class LayoutColumn extends Component {
 	 * @return {object[]} Dropdown options
 	 * @review
 	 */
-	static _getLayoutColumnItemDropDownItems(layoutColumnItem) {
+	static _getLayoutColumnItemDropDownItems(layoutColumnItem, namespace) {
 		const {actionURLs = {}} = layoutColumnItem;
 
 		const dropdownItems = LAYOUT_COLUMN_ITEM_DROPDOWN_ITEMS
@@ -29,7 +30,8 @@ class LayoutColumn extends Component {
 					handleClick: dropdownItem.handleClick || null,
 					href: actionURLs[dropdownItem.name],
 					label: dropdownItem.label,
-					layoutColumnItem
+					layoutColumnItem,
+					namespace
 				})
 			);
 
@@ -47,7 +49,8 @@ class LayoutColumn extends Component {
 				layoutColumnItem,
 				{
 					dropdownItems: LayoutColumn._getLayoutColumnItemDropDownItems(
-						layoutColumnItem
+						layoutColumnItem,
+						this.portletNamespace
 					)
 				}
 			)
@@ -102,6 +105,7 @@ LayoutColumn.STATE = {
 	layoutColumn: Config.arrayOf(
 		Config.shapeOf(
 			{
+				actions: Config.string().required(),
 				actionURLs: Config.object().required(),
 				active: Config.bool().required(),
 				description: Config.string().required(),

@@ -6,8 +6,7 @@ import {openToast} from 'frontend-js-web/liferay/toast/commands/OpenToast.es';
 import templates from './ChangeListsConfiguration.soy';
 
 /**
- * Component for the Change Tracking Change Lists configuration screen
- * @review
+ * Provides the component for the Change Lists configuration screen.
  */
 class ChangeListsConfiguration extends PortletBase {
 
@@ -16,12 +15,16 @@ class ChangeListsConfiguration extends PortletBase {
 			this.urlChangeTrackingConfiguration,
 			response => {
 				if (response) {
+					this.changeTrackingAllowed = response.changeTrackingAllowed;
 					this.changeTrackingEnabled = response.changeTrackingEnabled;
 					this.initialFetch = true;
 					this.tooltipBody = '';
 
 					response.supportedContentTypes.forEach(
 						(supportedContentType) => {
+							if (this.tooltipBody.length > 0) {
+								this.tooltipBody = this.tooltipBody.concat(' ');
+							}
 							this.tooltipBody = this.tooltipBody.concat(supportedContentType);
 						}
 					);
@@ -31,20 +34,20 @@ class ChangeListsConfiguration extends PortletBase {
 	}
 
 	/**
-	 * Handles the change of the toggle
+	 * Handles the toggle change.
+	 *
 	 * @param {!Event} event
 	 * @private
-	 * @review
 	 */
 	_handleCheck(event) {
 		this.changeTrackingEnabled = event.target.checked;
 	}
 
 	/**
-	 * Saves the configuration
+	 * Saves the configuration.
+	 *
 	 * @param {!Event} event
 	 * @private
-	 * @review
 	 */
 	_handleSave(event) {
 		event.preventDefault();
@@ -57,24 +60,16 @@ class ChangeListsConfiguration extends PortletBase {
 			this.urlChangeTrackingConfiguration,
 			data,
 			response => {
-				const message = Liferay.Language.get('the-configuration-has-been-saved');
-
-				openToast(
-					{
-						message,
-						title: Liferay.Language.get('success'),
-						type: 'success'
-					}
-				);
+				Liferay.Util.navigate(this.urlConfiguration);
 			}
 		);
 	}
 
 	/**
-	 * Saves the configuration and redirects the user to the overview screen
+	 * Saves the configuration and redirects the user to the overview screen.
+	 *
 	 * @param {!Event} event
 	 * @private
-	 * @review
 	 */
 	_handleSaveAndGoToOverview(event) {
 		let data = {
@@ -168,75 +163,87 @@ class ChangeListsConfiguration extends PortletBase {
 
 /**
  * State definition.
- * @review
+ *
  * @static
  * @type {!Object}
  */
 ChangeListsConfiguration.STATE = {
 
 	/**
-	 * If true, change tracking is enabled
+	 * If <code>true</code>, change tracking is allowed.
+	 *
 	 * @instance
 	 * @memberOf ChangeListsConfiguration
-	 * @review
 	 * @type {boolean}
 	 */
+	changeTrackingAllowed: Config.bool(),
 
+	/**
+	 * If <code>true</code>, change tracking is enabled.
+	 *
+	 * @instance
+	 * @memberOf ChangeListsConfiguration
+	 * @type {boolean}
+	 */
 	changeTrackingEnabled: Config.bool(),
 
 	/**
-	 * If true, an initial fetch has already happened
+	 * If <code>true</code>, an initial fetch has already occurred.
+	 *
 	 * @default false
 	 * @instance
 	 * @memberOf ChangeListsConfiguration
-	 * @review
 	 * @type {boolean}
 	 */
-
 	initialFetch: Config.bool().value(false),
 
 	/**
-	 * Property that contains the url for the REST service to the change
-	 * tracking configuration endpoint
+	 * URL for the REST service to the change tracking configuration endpoint.
+	 *
 	 * @default undefined
 	 * @instance
 	 * @memberOf ChangeListsConfiguration
-	 * @review
 	 * @type {!string}
 	 */
-
 	urlChangeTrackingConfiguration: Config.string().required(),
 
 	/**
-	 * Property that contains the url for the 'Overview' screen
+	 * URL for the Overview screen.
+	 *
 	 * @default undefined
 	 * @instance
 	 * @memberOf ChangeListsConfiguration
-	 * @review
 	 * @type {!string}
 	 */
-
 	urlOverview: Config.string().required(),
 
 	/**
-	 * Path of the available icons.
+	 * URL for the Configuration screen.
+	 *
 	 * @default undefined
 	 * @instance
 	 * @memberOf ChangeListsConfiguration
-	 * @review
 	 * @type {!string}
 	 */
+	urlConfiguration: Config.string().required(),
 
+	/**
+	 * Path of the available icons.
+	 *
+	 * @default undefined
+	 * @instance
+	 * @memberOf ChangeListsConfiguration
+	 * @type {!string}
+	 */
 	spritemap: Config.string().required(),
 
 	/**
-	 * An array of content types that support change tracking
+	 * Content types that support change tracking.
+	 *
 	 * @instance
 	 * @memberOf ChangeListsConfiguration
-	 * @review
 	 * @type {string}
 	 */
-
 	tooltipBody: Config.string()
 };
 

@@ -18,7 +18,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.display.context.BaseManag
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -69,19 +68,18 @@ public class UADExportProcessManagementToolbarDisplayContext
 		CreationMenu creationMenu = new CreationMenu();
 
 		creationMenu.addPrimaryDropdownItem(
-			SafeConsumer.ignore(
-				dropdownItem -> {
-					User selectedUser = PortalUtil.getSelectedUser(request);
+			dropdownItem -> {
+				User selectedUser = PortalUtil.getSelectedUser(request);
 
-					dropdownItem.setHref(
-						liferayPortletResponse.createRenderURL(),
-						"mvcRenderCommandName", "/add_uad_export_processes",
-						"backURL", PortalUtil.getCurrentURL(request), "p_u_i_d",
-						String.valueOf(selectedUser.getUserId()));
+				dropdownItem.setHref(
+					liferayPortletResponse.createRenderURL(),
+					"mvcRenderCommandName", "/add_uad_export_processes",
+					"backURL", PortalUtil.getCurrentURL(request), "p_u_i_d",
+					String.valueOf(selectedUser.getUserId()));
 
-					dropdownItem.setLabel(
-						LanguageUtil.get(request, "add-export-processes"));
-				}));
+				dropdownItem.setLabel(
+					LanguageUtil.get(request, "add-export-processes"));
+			});
 
 		return creationMenu;
 	}

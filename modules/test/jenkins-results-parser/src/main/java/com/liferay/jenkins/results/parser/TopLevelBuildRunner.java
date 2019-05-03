@@ -141,14 +141,14 @@ public abstract class TopLevelBuildRunner
 		File workspaceDir = topLevelBuildData.getWorkspaceDir();
 
 		FilePropagator filePropagator = new FilePropagator(
-			new String[] {BuildDatabase.BUILD_DATABASE_FILE_NAME},
+			new String[] {BuildDatabase.FILE_NAME_BUILD_DATABASE},
 			JenkinsResultsParserUtil.combine(
 				topLevelBuildData.getHostname(), ":", workspaceDir.toString()),
 			topLevelBuildData.getDistPath(), topLevelBuildData.getDistNodes());
 
-		filePropagator.setCleanUpCommand(_FILE_PROPAGATOR_CLEAN_UP_COMMAND);
+		filePropagator.setCleanUpCommand(_COMMAND_FILE_PROPAGATOR_CLEAN_UP);
 
-		filePropagator.start(_FILE_PROPAGATOR_THREAD_COUNT);
+		filePropagator.start(_THREADS_FILE_PROPAGATOR_THREAD_SIZE);
 
 		List<String> distNodes = Lists.newArrayList(
 			topLevelBuildData.getDistNodes());
@@ -197,7 +197,7 @@ public abstract class TopLevelBuildRunner
 			return;
 		}
 
-		if ((_lastGeneratedReportTime + _REPORT_GENERATION_INTERVAL) >
+		if ((_lastGeneratedReportTime + _MILLIS_REPORT_GENERATION_INTERVAL) >
 				currentTimeMillis) {
 
 			return;
@@ -226,7 +226,7 @@ public abstract class TopLevelBuildRunner
 			}
 
 			JenkinsResultsParserUtil.sleep(
-				_WAIT_FOR_INVOKED_JOB_DURATION * 1000);
+				_SECONDS_WAIT_FOR_INVOKED_JOB_DURATION * 1000);
 		}
 	}
 
@@ -391,20 +391,22 @@ public abstract class TopLevelBuildRunner
 		}
 	}
 
-	private static final String _FILE_PROPAGATOR_CLEAN_UP_COMMAND =
+	private static final String _COMMAND_FILE_PROPAGATOR_CLEAN_UP =
 		JenkinsResultsParserUtil.combine(
-			"find ", BuildData.DIST_ROOT_PATH,
+			"find ", BuildData.FILE_PATH_DIST_ROOT,
 			"/*/* -maxdepth 1 -type d -mmin +",
-			String.valueOf(TopLevelBuildRunner._FILE_PROPAGATOR_EXPIRATION),
+			String.valueOf(
+				TopLevelBuildRunner._MILLIS_FILE_PROPAGATOR_EXPIRATION),
 			" -exec rm -frv {} \\;");
 
-	private static final int _FILE_PROPAGATOR_EXPIRATION = 1440;
+	private static final int _MILLIS_FILE_PROPAGATOR_EXPIRATION = 1440;
 
-	private static final int _FILE_PROPAGATOR_THREAD_COUNT = 1;
+	private static final long _MILLIS_REPORT_GENERATION_INTERVAL =
+		1000 * 60 * 5;
 
-	private static final long _REPORT_GENERATION_INTERVAL = 1000 * 60 * 5;
+	private static final int _SECONDS_WAIT_FOR_INVOKED_JOB_DURATION = 30;
 
-	private static final int _WAIT_FOR_INVOKED_JOB_DURATION = 30;
+	private static final int _THREADS_FILE_PROPAGATOR_THREAD_SIZE = 1;
 
 	private final List<BuildData> _downstreamBuildDataList = new ArrayList<>();
 	private long _lastGeneratedReportTime = -1;

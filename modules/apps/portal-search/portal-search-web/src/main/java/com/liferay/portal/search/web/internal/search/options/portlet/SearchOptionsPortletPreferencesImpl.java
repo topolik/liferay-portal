@@ -14,6 +14,7 @@
 
 package com.liferay.portal.search.web.internal.search.options.portlet;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.search.web.internal.util.PortletPreferencesHelper;
 
 import java.util.Optional;
@@ -31,6 +32,40 @@ public class SearchOptionsPortletPreferencesImpl
 
 		_portletPreferencesHelper = new PortletPreferencesHelper(
 			portletPreferencesOptional);
+	}
+
+	@Override
+	public Optional<String> getFederatedSearchKeyOptional() {
+		return _portletPreferencesHelper.getString(
+			SearchOptionsPortletPreferences.
+				PREFERENCE_KEY_FEDERATED_SEARCH_KEY);
+	}
+
+	@Override
+	public String getFederatedSearchKeyString() {
+		return getFederatedSearchKeyOptional().orElse(StringPool.BLANK);
+	}
+
+	@Override
+	public Optional<String> getFieldsToReturnOptional() {
+		return _portletPreferencesHelper.getString(
+			SearchOptionsPortletPreferences.PREFERENCE_KEY_FIELDS_TO_RETURN);
+	}
+
+	@Override
+	public String getFieldsToReturnString() {
+		return getFieldsToReturnOptional().orElse(StringPool.BLANK);
+	}
+
+	@Override
+	public Optional<String> getIndexesOptional() {
+		return _portletPreferencesHelper.getString(
+			SearchOptionsPortletPreferences.PREFERENCE_KEY_INDEXES);
+	}
+
+	@Override
+	public String getIndexesString() {
+		return getIndexesOptional().orElse(StringPool.BLANK);
 	}
 
 	@Override

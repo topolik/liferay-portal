@@ -16,7 +16,6 @@ package com.liferay.asset.model;
 
 import aQute.bnd.annotation.ProviderType;
 
-import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.model.ModelWrapper;
 import com.liferay.portal.kernel.model.wrapper.BaseModelWrapper;
 
@@ -49,15 +48,13 @@ public class AssetEntryUsageWrapper
 		attributes.put("uuid", getUuid());
 		attributes.put("assetEntryUsageId", getAssetEntryUsageId());
 		attributes.put("groupId", getGroupId());
-		attributes.put("companyId", getCompanyId());
-		attributes.put("userId", getUserId());
-		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("assetEntryId", getAssetEntryId());
-		attributes.put("classNameId", getClassNameId());
-		attributes.put("classPK", getClassPK());
-		attributes.put("portletId", getPortletId());
+		attributes.put("containerType", getContainerType());
+		attributes.put("containerKey", getContainerKey());
+		attributes.put("plid", getPlid());
+		attributes.put("type", getType());
 		attributes.put("lastPublishDate", getLastPublishDate());
 
 		return attributes;
@@ -83,24 +80,6 @@ public class AssetEntryUsageWrapper
 			setGroupId(groupId);
 		}
 
-		Long companyId = (Long)attributes.get("companyId");
-
-		if (companyId != null) {
-			setCompanyId(companyId);
-		}
-
-		Long userId = (Long)attributes.get("userId");
-
-		if (userId != null) {
-			setUserId(userId);
-		}
-
-		String userName = (String)attributes.get("userName");
-
-		if (userName != null) {
-			setUserName(userName);
-		}
-
 		Date createDate = (Date)attributes.get("createDate");
 
 		if (createDate != null) {
@@ -119,22 +98,28 @@ public class AssetEntryUsageWrapper
 			setAssetEntryId(assetEntryId);
 		}
 
-		Long classNameId = (Long)attributes.get("classNameId");
+		Long containerType = (Long)attributes.get("containerType");
 
-		if (classNameId != null) {
-			setClassNameId(classNameId);
+		if (containerType != null) {
+			setContainerType(containerType);
 		}
 
-		Long classPK = (Long)attributes.get("classPK");
+		String containerKey = (String)attributes.get("containerKey");
 
-		if (classPK != null) {
-			setClassPK(classPK);
+		if (containerKey != null) {
+			setContainerKey(containerKey);
 		}
 
-		String portletId = (String)attributes.get("portletId");
+		Long plid = (Long)attributes.get("plid");
 
-		if (portletId != null) {
-			setPortletId(portletId);
+		if (plid != null) {
+			setPlid(plid);
+		}
+
+		Integer type = (Integer)attributes.get("type");
+
+		if (type != null) {
+			setType(type);
 		}
 
 		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
@@ -165,43 +150,23 @@ public class AssetEntryUsageWrapper
 	}
 
 	/**
-	 * Returns the fully qualified class name of this asset entry usage.
+	 * Returns the container key of this asset entry usage.
 	 *
-	 * @return the fully qualified class name of this asset entry usage
+	 * @return the container key of this asset entry usage
 	 */
 	@Override
-	public String getClassName() {
-		return model.getClassName();
+	public String getContainerKey() {
+		return model.getContainerKey();
 	}
 
 	/**
-	 * Returns the class name ID of this asset entry usage.
+	 * Returns the container type of this asset entry usage.
 	 *
-	 * @return the class name ID of this asset entry usage
+	 * @return the container type of this asset entry usage
 	 */
 	@Override
-	public long getClassNameId() {
-		return model.getClassNameId();
-	}
-
-	/**
-	 * Returns the class pk of this asset entry usage.
-	 *
-	 * @return the class pk of this asset entry usage
-	 */
-	@Override
-	public long getClassPK() {
-		return model.getClassPK();
-	}
-
-	/**
-	 * Returns the company ID of this asset entry usage.
-	 *
-	 * @return the company ID of this asset entry usage
-	 */
-	@Override
-	public long getCompanyId() {
-		return model.getCompanyId();
+	public long getContainerType() {
+		return model.getContainerType();
 	}
 
 	/**
@@ -245,13 +210,13 @@ public class AssetEntryUsageWrapper
 	}
 
 	/**
-	 * Returns the portlet ID of this asset entry usage.
+	 * Returns the plid of this asset entry usage.
 	 *
-	 * @return the portlet ID of this asset entry usage
+	 * @return the plid of this asset entry usage
 	 */
 	@Override
-	public String getPortletId() {
-		return model.getPortletId();
+	public long getPlid() {
+		return model.getPlid();
 	}
 
 	/**
@@ -265,33 +230,13 @@ public class AssetEntryUsageWrapper
 	}
 
 	/**
-	 * Returns the user ID of this asset entry usage.
+	 * Returns the type of this asset entry usage.
 	 *
-	 * @return the user ID of this asset entry usage
+	 * @return the type of this asset entry usage
 	 */
 	@Override
-	public long getUserId() {
-		return model.getUserId();
-	}
-
-	/**
-	 * Returns the user name of this asset entry usage.
-	 *
-	 * @return the user name of this asset entry usage
-	 */
-	@Override
-	public String getUserName() {
-		return model.getUserName();
-	}
-
-	/**
-	 * Returns the user uuid of this asset entry usage.
-	 *
-	 * @return the user uuid of this asset entry usage
-	 */
-	@Override
-	public String getUserUuid() {
-		return model.getUserUuid();
+	public int getType() {
+		return model.getType();
 	}
 
 	/**
@@ -329,39 +274,24 @@ public class AssetEntryUsageWrapper
 		model.setAssetEntryUsageId(assetEntryUsageId);
 	}
 
+	/**
+	 * Sets the container key of this asset entry usage.
+	 *
+	 * @param containerKey the container key of this asset entry usage
+	 */
 	@Override
-	public void setClassName(String className) {
-		model.setClassName(className);
+	public void setContainerKey(String containerKey) {
+		model.setContainerKey(containerKey);
 	}
 
 	/**
-	 * Sets the class name ID of this asset entry usage.
+	 * Sets the container type of this asset entry usage.
 	 *
-	 * @param classNameId the class name ID of this asset entry usage
+	 * @param containerType the container type of this asset entry usage
 	 */
 	@Override
-	public void setClassNameId(long classNameId) {
-		model.setClassNameId(classNameId);
-	}
-
-	/**
-	 * Sets the class pk of this asset entry usage.
-	 *
-	 * @param classPK the class pk of this asset entry usage
-	 */
-	@Override
-	public void setClassPK(long classPK) {
-		model.setClassPK(classPK);
-	}
-
-	/**
-	 * Sets the company ID of this asset entry usage.
-	 *
-	 * @param companyId the company ID of this asset entry usage
-	 */
-	@Override
-	public void setCompanyId(long companyId) {
-		model.setCompanyId(companyId);
+	public void setContainerType(long containerType) {
+		model.setContainerType(containerType);
 	}
 
 	/**
@@ -405,13 +335,13 @@ public class AssetEntryUsageWrapper
 	}
 
 	/**
-	 * Sets the portlet ID of this asset entry usage.
+	 * Sets the plid of this asset entry usage.
 	 *
-	 * @param portletId the portlet ID of this asset entry usage
+	 * @param plid the plid of this asset entry usage
 	 */
 	@Override
-	public void setPortletId(String portletId) {
-		model.setPortletId(portletId);
+	public void setPlid(long plid) {
+		model.setPlid(plid);
 	}
 
 	/**
@@ -425,33 +355,13 @@ public class AssetEntryUsageWrapper
 	}
 
 	/**
-	 * Sets the user ID of this asset entry usage.
+	 * Sets the type of this asset entry usage.
 	 *
-	 * @param userId the user ID of this asset entry usage
+	 * @param type the type of this asset entry usage
 	 */
 	@Override
-	public void setUserId(long userId) {
-		model.setUserId(userId);
-	}
-
-	/**
-	 * Sets the user name of this asset entry usage.
-	 *
-	 * @param userName the user name of this asset entry usage
-	 */
-	@Override
-	public void setUserName(String userName) {
-		model.setUserName(userName);
-	}
-
-	/**
-	 * Sets the user uuid of this asset entry usage.
-	 *
-	 * @param userUuid the user uuid of this asset entry usage
-	 */
-	@Override
-	public void setUserUuid(String userUuid) {
-		model.setUserUuid(userUuid);
+	public void setType(int type) {
+		model.setType(type);
 	}
 
 	/**
@@ -462,11 +372,6 @@ public class AssetEntryUsageWrapper
 	@Override
 	public void setUuid(String uuid) {
 		model.setUuid(uuid);
-	}
-
-	@Override
-	public StagedModelType getStagedModelType() {
-		return model.getStagedModelType();
 	}
 
 	@Override

@@ -34,6 +34,7 @@ import com.liferay.portal.kernel.upload.UploadPortletRequest;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
+import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
@@ -98,8 +99,7 @@ public class EditLayoutMVCActionCommand extends BaseMVCActionCommand {
 		Map<Locale, String> robotsMap = LocalizationUtil.getLocalizationMap(
 			actionRequest, "robots");
 		String type = ParamUtil.getString(uploadPortletRequest, "type");
-		boolean showInMenu = ParamUtil.getBoolean(
-			uploadPortletRequest, "showInMenu");
+		boolean hidden = ParamUtil.getBoolean(uploadPortletRequest, "hidden");
 		Map<Locale, String> friendlyURLMap =
 			LocalizationUtil.getLocalizationMap(actionRequest, "friendlyURL");
 		boolean deleteLogo = ParamUtil.getBoolean(actionRequest, "deleteLogo");
@@ -121,6 +121,14 @@ public class EditLayoutMVCActionCommand extends BaseMVCActionCommand {
 		Layout layout = _layoutLocalService.getLayout(
 			groupId, privateLayout, layoutId);
 
+		if (MapUtil.isEmpty(
+				MapUtil.filter(
+					friendlyURLMap,
+					entry -> Validator.isNotNull(entry.getValue())))) {
+
+			friendlyURLMap = layout.getFriendlyURLMap();
+		}
+
 		String currentType = layout.getType();
 
 		if (StringUtil.equals(
@@ -133,8 +141,7 @@ public class EditLayoutMVCActionCommand extends BaseMVCActionCommand {
 		layout = _layoutService.updateLayout(
 			groupId, privateLayout, layoutId, layout.getParentLayoutId(),
 			nameMap, titleMap, descriptionMap, keywordsMap, robotsMap, type,
-			!showInMenu, friendlyURLMap, !deleteLogo, iconBytes,
-			serviceContext);
+			hidden, friendlyURLMap, !deleteLogo, iconBytes, serviceContext);
 
 		themeDisplay.clearLayoutFriendlyURL(layout);
 

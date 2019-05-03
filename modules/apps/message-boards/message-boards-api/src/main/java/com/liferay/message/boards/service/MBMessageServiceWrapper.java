@@ -67,8 +67,8 @@ public class MBMessageServiceWrapper
 			String format, String fileName, java.io.File file,
 			boolean anonymous, double priority, boolean allowPingbacks,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
-		throws java.io.FileNotFoundException,
-			   com.liferay.portal.kernel.exception.PortalException {
+		throws com.liferay.portal.kernel.exception.PortalException,
+			   java.io.FileNotFoundException {
 
 		return _mbMessageService.addMessage(
 			groupId, categoryId, subject, body, format, fileName, file,

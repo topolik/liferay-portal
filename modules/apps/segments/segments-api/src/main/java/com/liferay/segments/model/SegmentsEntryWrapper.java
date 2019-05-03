@@ -16,6 +16,7 @@ package com.liferay.segments.model;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.portal.kernel.model.ModelWrapper;
 import com.liferay.portal.kernel.model.wrapper.BaseModelWrapper;
 
@@ -45,6 +46,7 @@ public class SegmentsEntryWrapper
 	public Map<String, Object> getModelAttributes() {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 
+		attributes.put("uuid", getUuid());
 		attributes.put("segmentsEntryId", getSegmentsEntryId());
 		attributes.put("groupId", getGroupId());
 		attributes.put("companyId", getCompanyId());
@@ -52,19 +54,26 @@ public class SegmentsEntryWrapper
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
+		attributes.put("segmentsEntryKey", getSegmentsEntryKey());
 		attributes.put("name", getName());
 		attributes.put("description", getDescription());
 		attributes.put("active", isActive());
 		attributes.put("criteria", getCriteria());
-		attributes.put("key", getKey());
 		attributes.put("source", getSource());
 		attributes.put("type", getType());
+		attributes.put("lastPublishDate", getLastPublishDate());
 
 		return attributes;
 	}
 
 	@Override
 	public void setModelAttributes(Map<String, Object> attributes) {
+		String uuid = (String)attributes.get("uuid");
+
+		if (uuid != null) {
+			setUuid(uuid);
+		}
+
 		Long segmentsEntryId = (Long)attributes.get("segmentsEntryId");
 
 		if (segmentsEntryId != null) {
@@ -107,6 +116,12 @@ public class SegmentsEntryWrapper
 			setModifiedDate(modifiedDate);
 		}
 
+		String segmentsEntryKey = (String)attributes.get("segmentsEntryKey");
+
+		if (segmentsEntryKey != null) {
+			setSegmentsEntryKey(segmentsEntryKey);
+		}
+
 		String name = (String)attributes.get("name");
 
 		if (name != null) {
@@ -131,12 +146,6 @@ public class SegmentsEntryWrapper
 			setCriteria(criteria);
 		}
 
-		String key = (String)attributes.get("key");
-
-		if (key != null) {
-			setKey(key);
-		}
-
 		String source = (String)attributes.get("source");
 
 		if (source != null) {
@@ -147,6 +156,12 @@ public class SegmentsEntryWrapper
 
 		if (type != null) {
 			setType(type);
+		}
+
+		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
+
+		if (lastPublishDate != null) {
+			setLastPublishDate(lastPublishDate);
 		}
 	}
 
@@ -292,13 +307,13 @@ public class SegmentsEntryWrapper
 	}
 
 	/**
-	 * Returns the key of this segments entry.
+	 * Returns the last publish date of this segments entry.
 	 *
-	 * @return the key of this segments entry
+	 * @return the last publish date of this segments entry
 	 */
 	@Override
-	public String getKey() {
-		return model.getKey();
+	public Date getLastPublishDate() {
+		return model.getLastPublishDate();
 	}
 
 	/**
@@ -408,6 +423,16 @@ public class SegmentsEntryWrapper
 	}
 
 	/**
+	 * Returns the segments entry key of this segments entry.
+	 *
+	 * @return the segments entry key of this segments entry
+	 */
+	@Override
+	public String getSegmentsEntryKey() {
+		return model.getSegmentsEntryKey();
+	}
+
+	/**
 	 * Returns the source of this segments entry.
 	 *
 	 * @return the source of this segments entry
@@ -458,6 +483,16 @@ public class SegmentsEntryWrapper
 	}
 
 	/**
+	 * Returns the uuid of this segments entry.
+	 *
+	 * @return the uuid of this segments entry
+	 */
+	@Override
+	public String getUuid() {
+		return model.getUuid();
+	}
+
+	/**
 	 * Returns <code>true</code> if this segments entry is active.
 	 *
 	 * @return <code>true</code> if this segments entry is active; <code>false</code> otherwise
@@ -465,11 +500,6 @@ public class SegmentsEntryWrapper
 	@Override
 	public boolean isActive() {
 		return model.isActive();
-	}
-
-	@Override
-	public boolean isDefaultSegment() {
-		return model.isDefaultSegment();
 	}
 
 	@Override
@@ -610,13 +640,13 @@ public class SegmentsEntryWrapper
 	}
 
 	/**
-	 * Sets the key of this segments entry.
+	 * Sets the last publish date of this segments entry.
 	 *
-	 * @param key the key of this segments entry
+	 * @param lastPublishDate the last publish date of this segments entry
 	 */
 	@Override
-	public void setKey(String key) {
-		model.setKey(key);
+	public void setLastPublishDate(Date lastPublishDate) {
+		model.setLastPublishDate(lastPublishDate);
 	}
 
 	/**
@@ -713,6 +743,16 @@ public class SegmentsEntryWrapper
 	}
 
 	/**
+	 * Sets the segments entry key of this segments entry.
+	 *
+	 * @param segmentsEntryKey the segments entry key of this segments entry
+	 */
+	@Override
+	public void setSegmentsEntryKey(String segmentsEntryKey) {
+		model.setSegmentsEntryKey(segmentsEntryKey);
+	}
+
+	/**
 	 * Sets the source of this segments entry.
 	 *
 	 * @param source the source of this segments entry
@@ -760,6 +800,21 @@ public class SegmentsEntryWrapper
 	@Override
 	public void setUserUuid(String userUuid) {
 		model.setUserUuid(userUuid);
+	}
+
+	/**
+	 * Sets the uuid of this segments entry.
+	 *
+	 * @param uuid the uuid of this segments entry
+	 */
+	@Override
+	public void setUuid(String uuid) {
+		model.setUuid(uuid);
+	}
+
+	@Override
+	public StagedModelType getStagedModelType() {
+		return model.getStagedModelType();
 	}
 
 	@Override

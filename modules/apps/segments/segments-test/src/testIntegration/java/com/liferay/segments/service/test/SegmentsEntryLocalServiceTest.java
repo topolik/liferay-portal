@@ -25,12 +25,13 @@ import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.test.util.TestPropsValues;
-import com.liferay.portal.kernel.util.FriendlyURLNormalizerUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.segments.exception.DefaultSegmentsEntryException;
+import com.liferay.segments.criteria.Criteria;
+import com.liferay.segments.criteria.CriteriaSerializer;
 import com.liferay.segments.exception.RequiredSegmentsEntryException;
 import com.liferay.segments.exception.SegmentsEntryKeyException;
 import com.liferay.segments.model.SegmentsEntry;
@@ -75,23 +76,25 @@ public class SegmentsEntryLocalServiceTest {
 
 	@Test
 	public void testAddSegmentsEntry() throws PortalException {
+		String segmentsEntryKey = RandomTestUtil.randomString();
 		String name = RandomTestUtil.randomString();
 		String description = RandomTestUtil.randomString();
-		String criteria = RandomTestUtil.randomString();
-		String key = RandomTestUtil.randomString();
+		String criteria = CriteriaSerializer.serialize(new Criteria());
 		String type = RandomTestUtil.randomString();
 
 		SegmentsEntry segmentsEntry = SegmentsTestUtil.addSegmentsEntry(
-			_group.getGroupId(), name, description, criteria, key, type);
+			_group.getGroupId(), segmentsEntryKey, name, description, criteria,
+			type);
 
+		Assert.assertEquals(
+			StringUtil.toUpperCase(segmentsEntryKey.trim()),
+			segmentsEntry.getSegmentsEntryKey());
 		Assert.assertEquals(
 			name, segmentsEntry.getName(LocaleUtil.getDefault()));
 		Assert.assertEquals(
 			description, segmentsEntry.getDescription(LocaleUtil.getDefault()));
 		Assert.assertTrue(segmentsEntry.isActive());
 		Assert.assertEquals(criteria, segmentsEntry.getCriteria());
-		Assert.assertEquals(
-			FriendlyURLNormalizerUtil.normalize(key), segmentsEntry.getKey());
 		Assert.assertEquals(type, segmentsEntry.getType());
 
 		Assert.assertEquals(
@@ -102,36 +105,29 @@ public class SegmentsEntryLocalServiceTest {
 
 	@Test(expected = SegmentsEntryKeyException.class)
 	public void testAddSegmentsEntryWithExistingKey() throws PortalException {
-		String key = RandomTestUtil.randomString();
+		String segmentsEntryKey = RandomTestUtil.randomString();
 
-		SegmentsTestUtil.addSegmentsEntry(_group.getGroupId(), key);
-		SegmentsTestUtil.addSegmentsEntry(_group.getGroupId(), key);
+		SegmentsTestUtil.addSegmentsEntry(
+			_group.getGroupId(), segmentsEntryKey);
+		SegmentsTestUtil.addSegmentsEntry(
+			_group.getGroupId(), segmentsEntryKey);
 	}
 
 	@Test(expected = SegmentsEntryKeyException.class)
 	public void testAddSegmentsEntryWithExistingKeyInAncestorGroup()
 		throws Exception {
 
-		String key = RandomTestUtil.randomString();
+		String segmentsEntryKey = RandomTestUtil.randomString();
 
-		SegmentsTestUtil.addSegmentsEntry(_group.getGroupId(), key);
+		SegmentsTestUtil.addSegmentsEntry(
+			_group.getGroupId(), segmentsEntryKey);
 
 		Group childGroup = GroupTestUtil.addGroup(_group.getGroupId());
 
 		_groups.add(0, childGroup);
 
-		SegmentsTestUtil.addSegmentsEntry(childGroup.getGroupId(), key);
-	}
-
-	@Test(
-		expected = DefaultSegmentsEntryException.MustNotDeleteDefaultSegmentsEntry.class
-	)
-	public void testDeleteDefaultSegmentsEntry() throws PortalException {
-		SegmentsEntry defaultSegmentsEntry =
-			_segmentsEntryLocalService.getDefaultSegmentsEntry(
-				_group.getGroupId());
-
-		_segmentsEntryLocalService.deleteSegmentsEntry(defaultSegmentsEntry);
+		SegmentsTestUtil.addSegmentsEntry(
+			childGroup.getGroupId(), segmentsEntryKey);
 	}
 
 	@Test
@@ -269,27 +265,12 @@ public class SegmentsEntryLocalServiceTest {
 		Assert.assertFalse(segmentsEntries.contains(segmentsEntry));
 	}
 
-	@Test(
-		expected = DefaultSegmentsEntryException.MustNotUpdateDefaultSegmentsEntry.class
-	)
-	public void testUpdateDefaultSegmentsEntry() throws PortalException {
-		SegmentsEntry defaultSegmentsEntry =
-			_segmentsEntryLocalService.getDefaultSegmentsEntry(
-				_group.getGroupId());
-
-		_segmentsEntryLocalService.updateSegmentsEntry(
-			defaultSegmentsEntry.getSegmentsEntryId(),
-			defaultSegmentsEntry.getNameMap(),
-			defaultSegmentsEntry.getDescriptionMap(),
-			defaultSegmentsEntry.isActive(), defaultSegmentsEntry.getCriteria(),
-			defaultSegmentsEntry.getKey(),
-			ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
-	}
-
 	@Test
 	public void testUpdateSegmentsEntry() throws PortalException {
 		SegmentsEntry segmentsEntry = SegmentsTestUtil.addSegmentsEntry(
 			_group.getGroupId());
+
+		String segmentsEntryKey = RandomTestUtil.randomString();
 
 		Map<Locale, String> nameMap = new HashMap<>();
 
@@ -301,14 +282,16 @@ public class SegmentsEntryLocalServiceTest {
 			LocaleUtil.getDefault(), RandomTestUtil.randomString());
 
 		String criteria = RandomTestUtil.randomString();
-		String key = RandomTestUtil.randomString();
 
 		SegmentsEntry updatedSegmentsEntry =
 			_segmentsEntryLocalService.updateSegmentsEntry(
-				segmentsEntry.getSegmentsEntryId(), nameMap, descriptionMap,
-				false, criteria, key,
+				segmentsEntry.getSegmentsEntryId(), segmentsEntryKey, nameMap,
+				descriptionMap, false, criteria,
 				ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
 
+		Assert.assertEquals(
+			StringUtil.toUpperCase(segmentsEntryKey.trim()),
+			updatedSegmentsEntry.getSegmentsEntryKey());
 		Assert.assertEquals(
 			nameMap.get(LocaleUtil.getDefault()),
 			updatedSegmentsEntry.getName(LocaleUtil.getDefault()));
@@ -317,9 +300,6 @@ public class SegmentsEntryLocalServiceTest {
 			updatedSegmentsEntry.getDescription(LocaleUtil.getDefault()));
 		Assert.assertFalse(updatedSegmentsEntry.isActive());
 		Assert.assertEquals(criteria, updatedSegmentsEntry.getCriteria());
-		Assert.assertEquals(
-			FriendlyURLNormalizerUtil.normalize(key),
-			updatedSegmentsEntry.getKey());
 
 		Assert.assertEquals(
 			1,
@@ -331,17 +311,18 @@ public class SegmentsEntryLocalServiceTest {
 	public void testUpdateSegmentsEntryWithExistingKey()
 		throws PortalException {
 
-		String key1 = RandomTestUtil.randomString();
+		String segmentsEntryKey = RandomTestUtil.randomString();
 
-		SegmentsTestUtil.addSegmentsEntry(_group.getGroupId(), key1);
+		SegmentsTestUtil.addSegmentsEntry(
+			_group.getGroupId(), segmentsEntryKey);
 
 		SegmentsEntry segmentsEntry = SegmentsTestUtil.addSegmentsEntry(
 			_group.getGroupId(), RandomTestUtil.randomString());
 
 		_segmentsEntryLocalService.updateSegmentsEntry(
-			segmentsEntry.getSegmentsEntryId(), segmentsEntry.getNameMap(),
-			segmentsEntry.getDescriptionMap(), segmentsEntry.isActive(),
-			segmentsEntry.getCriteria(), key1,
+			segmentsEntry.getSegmentsEntryId(), segmentsEntryKey,
+			segmentsEntry.getNameMap(), segmentsEntry.getDescriptionMap(),
+			segmentsEntry.isActive(), segmentsEntry.getCriteria(),
 			ServiceContextTestUtil.getServiceContext(_group.getGroupId()));
 	}
 

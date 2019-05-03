@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface SocialActivitySetting
-	extends SocialActivitySettingModel, PersistedModel {
+	extends PersistedModel, SocialActivitySettingModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

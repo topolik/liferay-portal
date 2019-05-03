@@ -38,20 +38,20 @@ import java.util.List;
 public class SharingEntryFinderImpl
 	extends SharingEntryFinderBaseImpl implements SharingEntryFinder {
 
-	public static final String COUNT_BY_TO_USER_ID =
-		SharingEntryFinder.class.getName() + ".countByToUserId";
+	public static final String COUNT_BY_USER_ID =
+		SharingEntryFinder.class.getName() + ".countByUserId";
 
-	public static final String FIND_BY_TO_USER_ID =
-		SharingEntryFinder.class.getName() + ".findByToUserId";
+	public static final String FIND_BY_USER_ID =
+		SharingEntryFinder.class.getName() + ".findByUserId";
 
 	@Override
-	public int countByToUserId(long toUserId, long classNameId) {
+	public int countByUserId(long userId, long classNameId) {
 		Session session = null;
 
 		try {
 			session = openSession();
 
-			String sql = _customSQL.get(getClass(), COUNT_BY_TO_USER_ID);
+			String sql = _customSQL.get(getClass(), COUNT_BY_USER_ID);
 
 			sql = _replaceClassNameIdWhere(sql, classNameId);
 
@@ -61,7 +61,7 @@ public class SharingEntryFinderImpl
 
 			QueryPos qPos = QueryPos.getInstance(q);
 
-			qPos.add(toUserId);
+			qPos.add(userId);
 
 			if (classNameId > 0) {
 				qPos.add(classNameId);
@@ -88,8 +88,8 @@ public class SharingEntryFinderImpl
 	}
 
 	@Override
-	public List<SharingEntry> findByToUserId(
-		long toUserId, long classNameId, int begin, int end,
+	public List<SharingEntry> findByUserId(
+		long userId, long classNameId, int begin, int end,
 		OrderByComparator<SharingEntry> orderByComparator) {
 
 		Session session = null;
@@ -97,7 +97,7 @@ public class SharingEntryFinderImpl
 		try {
 			session = openSession();
 
-			String sql = _customSQL.get(getClass(), FIND_BY_TO_USER_ID);
+			String sql = _customSQL.get(getClass(), FIND_BY_USER_ID);
 
 			if (orderByComparator != null) {
 				sql = _customSQL.replaceOrderBy(sql, orderByComparator);
@@ -111,7 +111,7 @@ public class SharingEntryFinderImpl
 
 			QueryPos qPos = QueryPos.getInstance(q);
 
-			qPos.add(toUserId);
+			qPos.add(userId);
 
 			if (classNameId > 0) {
 				qPos.add(classNameId);

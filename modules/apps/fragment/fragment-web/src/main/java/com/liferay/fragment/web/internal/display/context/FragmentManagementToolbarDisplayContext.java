@@ -15,7 +15,7 @@
 package com.liferay.fragment.web.internal.display.context;
 
 import com.liferay.fragment.constants.FragmentActionKeys;
-import com.liferay.fragment.constants.FragmentEntryTypeConstants;
+import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.web.internal.security.permission.resource.FragmentPermission;
 import com.liferay.frontend.taglib.clay.servlet.taglib.display.context.SearchContainerManagementToolbarDisplayContext;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
@@ -23,6 +23,7 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
@@ -35,7 +36,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletURL;
@@ -88,7 +88,7 @@ public class FragmentManagementToolbarDisplayContext
 						dropdownItem -> {
 							dropdownItem.putData(
 								"action", "moveSelectedFragmentEntries");
-							dropdownItem.setIcon("change");
+							dropdownItem.setIcon("move-folder");
 							dropdownItem.setLabel(
 								LanguageUtil.get(request, "move"));
 							dropdownItem.setQuickAction(true);
@@ -205,13 +205,13 @@ public class FragmentManagementToolbarDisplayContext
 			{
 				addPrimaryDropdownItem(
 					_getAddFragmentEntryDropdownItem(
-						FragmentEntryTypeConstants.TYPE_SECTION,
-						FragmentEntryTypeConstants.TYPE_SECTION_LABEL));
+						FragmentConstants.TYPE_SECTION,
+						FragmentConstants.TYPE_SECTION_LABEL));
 
 				addPrimaryDropdownItem(
 					_getAddFragmentEntryDropdownItem(
-						FragmentEntryTypeConstants.TYPE_COMPONENT,
-						FragmentEntryTypeConstants.TYPE_COMPONENT_LABEL));
+						FragmentConstants.TYPE_COMPONENT,
+						FragmentConstants.TYPE_COMPONENT_LABEL));
 			}
 		};
 	}
@@ -281,8 +281,8 @@ public class FragmentManagementToolbarDisplayContext
 		return new String[] {"name", "create-date"};
 	}
 
-	private Consumer<DropdownItem> _getAddFragmentEntryDropdownItem(
-		int type, String label) {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getAddFragmentEntryDropdownItem(int type, String label) {
 
 		return dropdownItem -> {
 			dropdownItem.putData("action", "addFragmentEntry");

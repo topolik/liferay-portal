@@ -18,7 +18,6 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.search.geolocation.GeoDistance;
 import com.liferay.portal.search.geolocation.GeoLocationPoint;
-import com.liferay.portal.search.geolocation.ShapeBuilder;
 import com.liferay.portal.search.query.BooleanQuery;
 import com.liferay.portal.search.query.BoostingQuery;
 import com.liferay.portal.search.query.CommonTermsQuery;
@@ -201,12 +200,8 @@ public class QueriesInstantiationTest {
 	}
 
 	@Test
-	public void testGeoShapeQuery() {
-		ShapeBuilder shapeBuilder = null;
-
-		GeoShapeQuery geoShapeQuery = _queries.geoShape("field", shapeBuilder);
-
-		Assert.assertNotNull(geoShapeQuery);
+	public void testGeoShapeQuery1() {
+		Assert.assertNotNull(_queries.geoShape("field", null));
 	}
 
 	@Test
@@ -261,7 +256,7 @@ public class QueriesInstantiationTest {
 	}
 
 	@Test
-	public void testMoreLikeThisQuery() {
+	public void testMoreLikeThisQuery1() {
 		List<String> likeTexts = new ArrayList<>();
 
 		MoreLikeThisQuery moreLikeThisQuery = _queries.moreLikeThis(likeTexts);
@@ -278,7 +273,7 @@ public class QueriesInstantiationTest {
 	}
 
 	@Test
-	public void testMultiMatchQuery() {
+	public void testMultiMatchQuery1() {
 		Object value = null;
 		Set<String> fields = new HashSet<>();
 
@@ -323,7 +318,7 @@ public class QueriesInstantiationTest {
 	}
 
 	@Test
-	public void testRangeTermQuery() {
+	public void testRangeTermQuery1() {
 		boolean includesLower = true;
 		boolean includesUpper = true;
 

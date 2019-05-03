@@ -23,7 +23,6 @@ import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
 import com.liferay.portal.kernel.security.access.control.AccessControlled;
 import com.liferay.portal.kernel.service.BaseService;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.spring.osgi.OSGiBeanProperties;
 import com.liferay.portal.kernel.transaction.Isolation;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
@@ -42,13 +41,6 @@ import java.util.List;
  */
 @AccessControlled
 @JSONWebService
-@OSGiBeanProperties(
-	property = {
-		"json.web.service.context.name=assetlist",
-		"json.web.service.context.path=AssetListEntry"
-	},
-	service = AssetListEntryService.class
-)
 @ProviderType
 @Transactional(
 	isolation = Isolation.PORTAL,
@@ -62,7 +54,12 @@ public interface AssetListEntryService extends BaseService {
 	 * Never modify or reference this interface directly. Always use {@link AssetListEntryServiceUtil} to access the asset list entry remote service. Add custom service methods to <code>com.liferay.asset.list.service.impl.AssetListEntryServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void addAssetEntrySelection(
-			long assetListEntryId, long assetEntryId,
+			long assetListEntryId, long assetEntryId, long segmentsEntryId,
+			ServiceContext serviceContext)
+		throws PortalException;
+
+	public void addAssetEntrySelections(
+			long assetListEntryId, long[] assetEntryIds, long segmentsEntryId,
 			ServiceContext serviceContext)
 		throws PortalException;
 
@@ -80,13 +77,18 @@ public interface AssetListEntryService extends BaseService {
 			ServiceContext serviceContext)
 		throws PortalException;
 
-	public void deleteAssetEntrySelection(long assetListEntryId, int position)
+	public void deleteAssetEntrySelection(
+			long assetListEntryId, long segmentsEntryId, int position)
 		throws PortalException;
 
 	public void deleteAssetListEntries(long[] assetListEntriesIds)
 		throws PortalException;
 
 	public AssetListEntry deleteAssetListEntry(long assetListEntryId)
+		throws PortalException;
+
+	public void deleteAssetListEntry(
+			long assetListEntryId, long segmentsEntryId)
 		throws PortalException;
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
@@ -109,6 +111,20 @@ public interface AssetListEntryService extends BaseService {
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public int getAssetListEntriesCount(long groupId, String title);
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public AssetListEntry getAssetListEntry(long assetListEntryId)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public AssetListEntry getAssetListEntry(
+			long groupId, String assetListEntryKey)
+		throws PortalException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public AssetListEntry getAssetListEntryByUuidAndGroupId(
+			String uuid, long groupId)
+		throws PortalException;
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
@@ -117,19 +133,21 @@ public interface AssetListEntryService extends BaseService {
 	public String getOSGiServiceIdentifier();
 
 	public void moveAssetEntrySelection(
-			long assetListEntryId, int position, int newPosition)
+			long assetListEntryId, long segmentsEntryId, int position,
+			int newPosition)
+		throws PortalException;
+
+	public void updateAssetListEntry(
+			long assetListEntryId, long segmentsEntryId, String typeSettings,
+			ServiceContext serviceContext)
 		throws PortalException;
 
 	public AssetListEntry updateAssetListEntry(
 			long assetListEntryId, String title)
 		throws PortalException;
 
-	public AssetListEntry updateAssetListEntryTypeSettings(
-			long assetListEntryId, String typeSettings)
-		throws PortalException;
-
-	public AssetListEntry updateAssetListEntryTypeSettingsProperties(
-			long assetListEntryId, String typeSettingsProperties)
+	public void updateAssetListEntryTypeSettings(
+			long assetListEntryId, long segmentsEntryId, String typeSettings)
 		throws PortalException;
 
 }

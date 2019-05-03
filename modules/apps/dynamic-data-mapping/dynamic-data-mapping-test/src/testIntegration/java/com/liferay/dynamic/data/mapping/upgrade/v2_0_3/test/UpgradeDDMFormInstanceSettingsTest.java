@@ -73,7 +73,8 @@ public class UpgradeDDMFormInstanceSettingsTest {
 
 		DDMFormInstance formInstance = createFormInstance(settings);
 
-		JSONArray fieldValues = getFieldValues(formInstance.getSettings());
+		JSONArray fieldValues = getFieldValuesJSONArray(
+			formInstance.getSettings());
 
 		Assert.assertFalse(containsField(fieldValues, "requireAuthentication"));
 
@@ -81,7 +82,7 @@ public class UpgradeDDMFormInstanceSettingsTest {
 
 		formInstance = getRecordSet(formInstance);
 
-		fieldValues = getFieldValues(formInstance.getSettings());
+		fieldValues = getFieldValuesJSONArray(formInstance.getSettings());
 
 		Assert.assertTrue(containsField(fieldValues, "requireAuthentication"));
 	}
@@ -92,7 +93,8 @@ public class UpgradeDDMFormInstanceSettingsTest {
 
 		DDMFormInstance formInstance = createFormInstance(settings);
 
-		JSONArray fieldValues = getFieldValues(formInstance.getSettings());
+		JSONArray fieldValues = getFieldValuesJSONArray(
+			formInstance.getSettings());
 
 		Assert.assertFalse(containsField(fieldValues, "autosaveEnabled"));
 
@@ -100,7 +102,7 @@ public class UpgradeDDMFormInstanceSettingsTest {
 
 		formInstance = getRecordSet(formInstance);
 
-		fieldValues = getFieldValues(formInstance.getSettings());
+		fieldValues = getFieldValuesJSONArray(formInstance.getSettings());
 
 		Assert.assertTrue(containsField(fieldValues, "autosaveEnabled"));
 	}
@@ -122,20 +124,34 @@ public class UpgradeDDMFormInstanceSettingsTest {
 	protected JSONArray createFieldValues(boolean hasSetting) {
 		JSONArray jsonArray = _jsonFactory.createJSONArray();
 
-		jsonArray.put(getFieldValue("requireCaptcha", "false"));
-		jsonArray.put(getFieldValue("redirectURL", ""));
-		jsonArray.put(getFieldValue("storageType", "json"));
-		jsonArray.put(getFieldValue("workflowDefinition", ""));
-		jsonArray.put(getFieldValue("sendEmailNotification", "false"));
-		jsonArray.put(getFieldValue("emailFromName", ""));
-		jsonArray.put(getFieldValue("emailFromAddress", ""));
-		jsonArray.put(getFieldValue("emailToAddress", ""));
-		jsonArray.put(getFieldValue("emailSubject", ""));
-		jsonArray.put(getFieldValue("published", "false"));
+		jsonArray.put(
+			getFieldValueJSONObject("requireCaptcha", "false")
+		).put(
+			getFieldValueJSONObject("redirectURL", "")
+		).put(
+			getFieldValueJSONObject("storageType", "json")
+		).put(
+			getFieldValueJSONObject("workflowDefinition", "")
+		).put(
+			getFieldValueJSONObject("sendEmailNotification", "false")
+		).put(
+			getFieldValueJSONObject("emailFromName", "")
+		).put(
+			getFieldValueJSONObject("emailFromAddress", "")
+		).put(
+			getFieldValueJSONObject("emailToAddress", "")
+		).put(
+			getFieldValueJSONObject("emailSubject", "")
+		).put(
+			getFieldValueJSONObject("published", "false")
+		);
 
 		if (hasSetting) {
-			jsonArray.put(getFieldValue("autosaveEnabled", "false"));
-			jsonArray.put(getFieldValue("requireAuthentication", "false"));
+			jsonArray.put(
+				getFieldValueJSONObject("autosaveEnabled", "false")
+			).put(
+				getFieldValueJSONObject("requireAuthentication", "false")
+			);
 		}
 
 		return jsonArray;
@@ -165,9 +181,11 @@ public class UpgradeDDMFormInstanceSettingsTest {
 		JSONArray availableLanguagesJSONArray = getAvailableLanguagesJSONArray(
 			"en_US");
 
-		object.put("availableLanguageIdss", availableLanguagesJSONArray);
-
-		object.put("defaultLanguageId", "en_US");
+		object.put(
+			"availableLanguageIdss", availableLanguagesJSONArray
+		).put(
+			"defaultLanguageId", "en_US"
+		);
 
 		JSONArray fieldValues = createFieldValues(hasSetting);
 
@@ -184,17 +202,23 @@ public class UpgradeDDMFormInstanceSettingsTest {
 		return array;
 	}
 
-	protected JSONObject getFieldValue(String name, String value) {
+	protected JSONObject getFieldValueJSONObject(String name, String value) {
 		JSONObject jsonObject = _jsonFactory.createJSONObject();
 
-		jsonObject.put("instanceId", RandomTestUtil.randomString());
-		jsonObject.put("name", name);
-		jsonObject.put("value", value);
+		jsonObject.put(
+			"instanceId", RandomTestUtil.randomString()
+		).put(
+			"name", name
+		).put(
+			"value", value
+		);
 
 		return jsonObject;
 	}
 
-	protected JSONArray getFieldValues(String settings) throws JSONException {
+	protected JSONArray getFieldValuesJSONArray(String settings)
+		throws JSONException {
+
 		JSONObject settingsJSONObject = _jsonFactory.createJSONObject(settings);
 
 		return settingsJSONObject.getJSONArray("fieldValues");

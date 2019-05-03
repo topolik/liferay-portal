@@ -1,3 +1,10 @@
+/**
+ * The Form Placeholders Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-form-placeholders
+ */
+
 AUI.add(
 	'liferay-form-placeholders',
 	function(A) {

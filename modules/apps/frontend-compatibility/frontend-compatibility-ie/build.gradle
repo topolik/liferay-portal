@@ -3,26 +3,32 @@ import com.liferay.gradle.util.copy.StripPathSegmentsAction
 configurations {
 	arrayFill
 	arrayFind
+	arrayFindIndex
 	arrayFrom
 	arrayIncludes
+	arrayOf
 	fetch
 	formData
 	objectAssign
 	objectEntries
 	objectValues
+	promise
 	stringEndsWith
 	urlSearchParams
 }
 
 task buildArrayFill(type: Copy)
 task buildArrayFind(type: Copy)
+task buildArrayFindIndex(type: Copy)
 task buildArrayFrom(type: Copy)
 task buildArrayIncludes(type: Copy)
+task buildArrayOf(type: Copy)
 task buildFetch(type: Copy)
 task buildFormData(type: Copy)
 task buildObjectAssign(type: Copy)
 task buildObjectEntries(type: Copy)
 task buildObjectValues(type: Copy)
+task buildPromise(type: Copy)
 task buildStringEndsWith(type: Copy)
 task buildUrlSearchParams(type: Copy)
 
@@ -58,6 +64,22 @@ buildArrayFind {
 	}
 }
 
+buildArrayFindIndex {
+	eachFile new StripPathSegmentsAction(5)
+
+	from {
+		zipTree(configurations.arrayFindIndex.singleFile)
+	}
+
+	include "META-INF/resources/webjars/Array.prototype.findIndex/1.0.0/index.js"
+	includeEmptyDirs = false
+	into "classes/META-INF/resources"
+
+	rename {
+		it.replace "index", "array.findindex"
+	}
+}
+
 buildArrayFrom {
 	eachFile new StripPathSegmentsAction(5)
 
@@ -87,6 +109,22 @@ buildArrayIncludes {
 
 	rename {
 		it.replace "Array.prototype.includes", "array.includes"
+	}
+}
+
+buildArrayOf {
+	eachFile new StripPathSegmentsAction(5)
+
+	from {
+		zipTree(configurations.arrayOf.singleFile)
+	}
+
+	include "META-INF/resources/webjars/array.of/0.1.1/array-of.js"
+	includeEmptyDirs = false
+	into "classes/META-INF/resources"
+
+	rename {
+		it.replace "array-of", "array.of"
 	}
 }
 
@@ -166,6 +204,22 @@ buildObjectValues {
 	}
 }
 
+buildPromise {
+	eachFile new StripPathSegmentsAction(6)
+
+	from {
+		zipTree(configurations.promise.singleFile)
+	}
+
+	include "META-INF/resources/webjars/promise-polyfill/8.1.0/dist/polyfill.js"
+	includeEmptyDirs = false
+	into "classes/META-INF/resources"
+
+	rename {
+		it.replace "polyfill", "promise"
+	}
+}
+
 buildStringEndsWith{
 	eachFile new StripPathSegmentsAction(5)
 
@@ -201,13 +255,16 @@ buildUrlSearchParams {
 classes {
 	dependsOn buildArrayFill
 	dependsOn buildArrayFind
+	dependsOn buildArrayFindIndex
 	dependsOn buildArrayFrom
 	dependsOn buildArrayIncludes
+	dependsOn buildArrayOf
 	dependsOn buildFetch
 	dependsOn buildFormData
 	dependsOn buildObjectAssign
 	dependsOn buildObjectEntries
 	dependsOn buildObjectValues
+	dependsOn buildPromise
 	dependsOn buildStringEndsWith
 	dependsOn buildUrlSearchParams
 }
@@ -217,9 +274,13 @@ dependencies {
 
 	arrayFind group: "org.webjars.bower", name: "Array.prototype.find", transitive: false, version: "1.0.0"
 
+	arrayFindIndex group: "org.webjars.bower", name: "Array.prototype.findIndex", transitive: false, version: "1.0.0"
+
 	arrayFrom group: "org.webjars.npm", name: "mdn-polyfills", transitive: false, version: "5.8.0"
 
 	arrayIncludes group: "org.webjars.npm", name: "mdn-polyfills", transitive: false, version: "5.8.0"
+
+	arrayOf group: "org.webjars.npm", name: "array.of", transitive: false, version: "0.1.1"
 
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.impl", version: "default"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
@@ -237,6 +298,8 @@ dependencies {
 	objectEntries group: "org.webjars.npm", name: "object_entries", transitive: false, version: "0.1.2"
 
 	objectValues group: "org.webjars.npm", name: "object_values", transitive: false, version: "0.1.2"
+
+	promise group: "org.webjars.npm", name: "promise-polyfill", transitive: false, version: "8.1.0"
 
 	stringEndsWith group: "org.webjars.npm", name: "mdn-polyfills", transitive: false, version: "5.8.0"
 

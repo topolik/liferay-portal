@@ -10,7 +10,7 @@
 <tbody>
 <tr>
 	<td>HEADER</td>
-	<td>//h2[contains(@class,'asset-links-title')]</td>
+	<td>//h2[contains(@class,'sheet-tertiary-title')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -41,7 +41,7 @@
 <!--This is temporary. After path restructure, the ideal solution is to make the path variable more generic.-->
 <tr>
 	<td>KB_RELATED_ASSETS_LINKS</td>
-	<td>//ul[@class='asset-links-list']/li/a[contains(.,'${key_kbArticleRelatedAssetTitle}')]</td>
+	<td>//ul[@class='list-group sidebar-list-group']/li//a[contains(.,'${key_kbArticleRelatedAssetTitle}')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -52,22 +52,22 @@
 <!--RELATED_ASSETS_TABLE-->
 <tr>
 	<td>RELATED_ASSETS_TABLE_TYPE</td>
-	<td>//tr[contains(.,'${key_assetTitle}')]//td[1]</td>
+	<td>//tr[contains(.,'${key_assetTitle}')]//p</td>
 	<td></td>
 </tr>
 <tr>
 	<td>RELATED_ASSETS_TABLE_TITLE</td>
-	<td>//tr[contains(.,'${key_assetTitle}')]//td[2]</td>
+	<td>//tr[contains(.,'${key_assetTitle}')]//*[contains(@class,'title')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>RELATED_ASSETS_TABLE_SCOPE</td>
-	<td>//tr[contains(.,'${key_assetTitle}')]//td[3]</td>
+	<td>//tr[contains(.,'${key_assetTitle}')]//p[2]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>RELATED_ASSETS_TABLE_REMOVE_LINK</td>
-	<td>//tr[contains(.,'${key_assetTitle}')]//td[4]//a</td>
+	<td>//tr[contains(.,'${key_assetTitle}')]//a</td>
 	<td></td>
 </tr>
 <tr>

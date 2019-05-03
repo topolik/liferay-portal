@@ -23,6 +23,14 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface SharingJavaScriptFactory {
 
+	public String createManageCollaboratorsJavaScript(
+			HttpServletRequest request)
+		throws PortalException;
+
+	public String createManageCollaboratorsOnClickMethod(
+			String className, long classPK, HttpServletRequest request)
+		throws PortalException;
+
 	public String createSharingJavaScript(HttpServletRequest request)
 		throws PortalException;
 

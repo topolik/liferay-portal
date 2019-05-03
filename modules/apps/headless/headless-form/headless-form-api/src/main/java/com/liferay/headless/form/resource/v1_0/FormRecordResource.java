@@ -44,6 +44,9 @@ public interface FormRecordResource {
 	public FormRecord postFormFormRecord(Long formId, FormRecord formRecord)
 		throws Exception;
 
+	public FormRecord getFormFormRecordByLatestDraft(Long formId)
+		throws Exception;
+
 	public void setContextCompany(Company contextCompany);
 
 }

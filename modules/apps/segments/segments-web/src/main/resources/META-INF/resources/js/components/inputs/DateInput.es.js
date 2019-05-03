@@ -1,7 +1,7 @@
-import React from 'react';
 import propTypes from 'prop-types';
-import {PROPERTY_TYPES} from 'utils/constants.es';
+import React from 'react';
 import {jsDatetoYYYYMMDD} from '../../utils/utils.es';
+import {PROPERTY_TYPES} from 'utils/constants.es';
 
 class DateInput extends React.Component {
 	static propTypes = {

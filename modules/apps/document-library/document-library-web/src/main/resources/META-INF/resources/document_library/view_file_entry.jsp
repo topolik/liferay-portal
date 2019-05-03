@@ -85,10 +85,21 @@ if (portletTitleBasedNavigation) {
 }
 %>
 
+<liferay-util:buffer
+	var="documentTitle"
+>
+	<%= fileVersion.getTitle() %>
+
+	<c:if test="<%= versionSpecific %>">
+		(<liferay-ui:message key="version" /> <%= fileVersion.getVersion() %>)
+	</c:if>
+</liferay-util:buffer>
+
 <c:if test="<%= portletTitleBasedNavigation %>">
 
 	<%
 	request.setAttribute("file_entry_upper_tbar.jsp-dlViewFileVersionDisplayContext", dlViewFileVersionDisplayContext);
+	request.setAttribute("file_entry_upper_tbar.jsp-documentTitle", documentTitle);
 	request.setAttribute("file_entry_upper_tbar.jsp-fileEntry", fileEntry);
 	request.setAttribute("file_entry_upper_tbar.jsp-fileVersion", fileVersion);
 	request.setAttribute("file_entry_upper_tbar.jsp-versionSpecific", versionSpecific);
@@ -97,56 +108,87 @@ if (portletTitleBasedNavigation) {
 	<liferay-util:include page="/document_library/file_entry_upper_tbar.jsp" servletContext="<%= application %>" />
 </c:if>
 
+<c:choose>
+	<c:when test="<%= portletTitleBasedNavigation %>">
 <div class="container-fluid-1280" id="<portlet:namespace />FileEntry">
+	</c:when>
+	<c:otherwise>
+<div class="closed container-fluid-1280 sidenav-container sidenav-right" id="<portlet:namespace />infoPanelId">
+	</c:otherwise>
+</c:choose>
+
 	<portlet:actionURL name="/document_library/edit_file_entry" var="editFileEntry" />
 
 	<aui:form action="<%= editFileEntry %>" method="post" name="fm">
 		<aui:input name="<%= Constants.CMD %>" type="hidden" />
 		<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
 		<aui:input name="fileEntryId" type="hidden" value="<%= String.valueOf(fileEntry.getFileEntryId()) %>" />
+		<aui:input name="newFolderId" type="hidden" />
+		<aui:input name="rowIdsDLFileShortcut" type="hidden" />
+		<aui:input name="rowIdsFileEntry" type="hidden" />
+		<aui:input name="rowIdsFolder" type="hidden" />
 	</aui:form>
 
 	<c:if test="<%= !portletTitleBasedNavigation && showHeader && (folder != null) %>">
 		<liferay-ui:header
 			backURL="<%= redirect %>"
 			localizeTitle="<%= false %>"
-			title="<%= fileVersion.getTitle() %>"
+			title="<%= documentTitle %>"
 		/>
 	</c:if>
 
-	<c:if test="<%= !portletTitleBasedNavigation && dlPortletInstanceSettingsHelper.isShowActions() %>">
-		<div class="btn-group">
+	<c:choose>
+		<c:when test="<%= portletTitleBasedNavigation %>">
+			<div class="contextual-sidebar sidebar-light sidebar-preview">
 
-			<%
-			for (ToolbarItem toolbarItem : dlViewFileVersionDisplayContext.getToolbarItems()) {
-			%>
+				<%
+					request.setAttribute("info_panel.jsp-fileEntry", fileEntry);
+					request.setAttribute("info_panel.jsp-fileVersion", fileVersion);
+					request.setAttribute("info_panel_file_entry.jsp-hideActions", true);
+				%>
 
-				<liferay-ui:toolbar-item
-					toolbarItem="<%= toolbarItem %>"
+				<liferay-util:include page="/document_library/info_panel_file_entry.jsp" servletContext="<%= application %>" />
+			</div>
+		</c:when>
+		<c:otherwise>
+			<liferay-frontend:sidebar-panel>
+
+				<%
+					request.setAttribute("info_panel.jsp-fileEntry", fileEntry);
+					request.setAttribute("info_panel.jsp-fileVersion", fileVersion);
+				%>
+
+				<liferay-util:include page="/document_library/info_panel_file_entry.jsp" servletContext="<%= application %>" />
+			</liferay-frontend:sidebar-panel>
+		</c:otherwise>
+	</c:choose>
+
+	<div class="<%= portletTitleBasedNavigation ? "contextual-sidebar-content" : "sidenav-content" %>">
+		<div class="alert alert-danger hide" id="<portlet:namespace />openMSOfficeError"></div>
+
+		<c:if test="<%= !portletTitleBasedNavigation %>">
+			<div>
+				<liferay-frontend:management-bar-sidenav-toggler-button
+					label="info"
 				/>
 
-			<%
-			}
-			%>
+				<c:if test="<%= dlPortletInstanceSettingsHelper.isShowActions() %>">
 
-		</div>
-	</c:if>
+					<%
+						for (ToolbarItem toolbarItem : dlViewFileVersionDisplayContext.getToolbarItems()) {
+					%>
 
-	<c:if test="<%= portletTitleBasedNavigation %>">
-		<div class="contextual-sidebar sidebar-light sidebar-preview">
+					<liferay-ui:toolbar-item
+						toolbarItem="<%= toolbarItem %>"
+					/>
 
-			<%
-			request.setAttribute("info_panel.jsp-fileEntry", fileEntry);
-			request.setAttribute("info_panel.jsp-fileVersion", fileVersion);
-			request.setAttribute("info_panel_file_entry.jsp-hideActions", true);
-			%>
+					<%
+						}
+					%>
 
-			<liferay-util:include page="/document_library/info_panel_file_entry.jsp" servletContext="<%= application %>" />
-		</div>
-	</c:if>
-
-	<div class="contextual-sidebar-content">
-		<div class="alert alert-danger hide" id="<portlet:namespace />openMSOfficeError"></div>
+				</c:if>
+			</div>
+		</c:if>
 
 		<c:if test="<%= (fileEntry.getLock() != null) && DLFileEntryPermission.contains(permissionChecker, fileEntry, ActionKeys.UPDATE) %>">
 			<c:choose>
@@ -194,23 +236,14 @@ if (portletTitleBasedNavigation) {
 			</c:if>
 
 			<c:if test="<%= showComments && fileEntry.isRepositoryCapabilityProvided(CommentCapability.class) %>">
-				<liferay-ui:panel
-					collapsible="<%= true %>"
-					cssClass="lfr-document-library-comments panel-group"
-					extended="<%= true %>"
-					markupView="lexicon"
-					persistState="<%= true %>"
-					title="<%= dlViewFileVersionDisplayContext.getDiscussionLabel(locale) %>"
-				>
-					<liferay-comment:discussion
-						className="<%= dlViewFileVersionDisplayContext.getDiscussionClassName() %>"
-						classPK="<%= dlViewFileVersionDisplayContext.getDiscussionClassPK() %>"
-						formName="fm2"
-						ratingsEnabled="<%= dlPortletInstanceSettings.isEnableCommentRatings() %>"
-						redirect="<%= currentURL %>"
-						userId="<%= fileEntry.getUserId() %>"
-					/>
-				</liferay-ui:panel>
+				<liferay-comment:discussion
+					className="<%= dlViewFileVersionDisplayContext.getDiscussionClassName() %>"
+					classPK="<%= dlViewFileVersionDisplayContext.getDiscussionClassPK() %>"
+					formName="fm2"
+					ratingsEnabled="<%= dlPortletInstanceSettings.isEnableCommentRatings() %>"
+					redirect="<%= currentURL %>"
+					userId="<%= PortalUtil.getValidUserId(fileEntry.getCompanyId(), fileEntry.getUserId()) %>"
+				/>
 			</c:if>
 		</div>
 	</div>
@@ -224,6 +257,47 @@ if (portletTitleBasedNavigation) {
 
 	<liferay-util:include page="/document_library/version_details.jsp" servletContext="<%= application %>" />
 </c:if>
+
+<portlet:renderURL var="selectFolderURL" windowState="<%= LiferayWindowState.POP_UP.toString() %>"><portlet:param name="mvcRenderCommandName" value="/document_library/select_folder" /><portlet:param name="folderId" value="<%= String.valueOf(folderId) %>" /></portlet:renderURL>
+
+<portlet:actionURL name="/document_library/edit_entry" var="editEntryURL" />
+
+<aui:script>
+	function <portlet:namespace />move(selectedItems, parameterName, parameterValue) {
+		var namespace = '<portlet:namespace />';
+
+		Liferay.Util.selectEntity(
+			{
+				dialog: {
+					constrain: true,
+					destroyOnHide: true,
+					modal: true,
+					width: 680
+				},
+				id: namespace + 'selectFolder',
+				title: '<liferay-ui:message arguments="<%= 1 %>" key="select-destination-folder-for-x-items" translateArguments="<%= false %>" />',
+				uri: '<%= selectFolderURL.toString() %>'
+			},
+			function(event) {
+				var form = document.getElementById(namespace + 'fm');
+
+				if (parameterName && parameterValue) {
+					form.elements[namespace + parameterName].value = parameterValue;
+				}
+
+				var actionUrl = '<%= editEntryURL.toString() %>';
+
+				form.setAttribute('action', actionUrl);
+				form.setAttribute('enctype', 'multipart/form-data');
+
+				form.elements[namespace + 'cmd'].value = 'move';
+				form.elements[namespace + 'newFolderId'].value = event.folderid;
+
+				submitForm(form, actionUrl, false);
+			}
+		);
+	}
+</aui:script>
 
 <%
 boolean addPortletBreadcrumbEntries = ParamUtil.getBoolean(request, "addPortletBreadcrumbEntries", true);

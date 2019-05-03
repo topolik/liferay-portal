@@ -26,24 +26,28 @@ import java.util.concurrent.TimeoutException;
 public class BuildDatabaseUtil {
 
 	public static BuildDatabase getBuildDatabase() {
-		return getBuildDatabase(true);
+		return getBuildDatabase(null, true);
 	}
 
-	public static BuildDatabase getBuildDatabase(boolean download) {
+	public static BuildDatabase getBuildDatabase(
+		String baseDirPath, boolean download) {
+
 		if (_buildDatabase != null) {
 			return _buildDatabase;
 		}
 
-		String workspace = System.getenv("WORKSPACE");
+		if (baseDirPath == null) {
+			baseDirPath = System.getenv("WORKSPACE");
 
-		if (workspace == null) {
-			throw new RuntimeException("Please set WORKSPACE");
+			if (baseDirPath == null) {
+				throw new RuntimeException("Please set WORKSPACE");
+			}
 		}
 
-		File baseDir = new File(workspace);
+		File baseDir = new File(baseDirPath);
 
 		if (!baseDir.exists()) {
-			baseDir.mkdir();
+			baseDir.mkdirs();
 		}
 
 		String distNodes = System.getenv("DIST_NODES");
@@ -62,7 +66,7 @@ public class BuildDatabaseUtil {
 		File baseDir, String distNodes, String distPath) {
 
 		File buildDatabaseFile = new File(
-			baseDir, BuildDatabase.BUILD_DATABASE_FILE_NAME);
+			baseDir, BuildDatabase.FILE_NAME_BUILD_DATABASE);
 
 		if (buildDatabaseFile.exists()) {
 			return;
@@ -91,7 +95,7 @@ public class BuildDatabaseUtil {
 
 				String command = JenkinsResultsParserUtil.combine(
 					"time rsync -Iqs --timeout=1200 ", distNode, ":", distPath,
-					"/", BuildDatabase.BUILD_DATABASE_FILE_NAME, " ",
+					"/", BuildDatabase.FILE_NAME_BUILD_DATABASE, " ",
 					JenkinsResultsParserUtil.getCanonicalPath(
 						buildDatabaseFile));
 
@@ -105,7 +109,7 @@ public class BuildDatabaseUtil {
 					throw new RuntimeException(
 						JenkinsResultsParserUtil.combine(
 							"Unable to download ",
-							BuildDatabase.BUILD_DATABASE_FILE_NAME));
+							BuildDatabase.FILE_NAME_BUILD_DATABASE));
 				}
 
 				break;
@@ -115,7 +119,7 @@ public class BuildDatabaseUtil {
 					throw new RuntimeException(
 						JenkinsResultsParserUtil.combine(
 							"Unable to get ",
-							BuildDatabase.BUILD_DATABASE_FILE_NAME, " file"),
+							BuildDatabase.FILE_NAME_BUILD_DATABASE, " file"),
 						e);
 				}
 

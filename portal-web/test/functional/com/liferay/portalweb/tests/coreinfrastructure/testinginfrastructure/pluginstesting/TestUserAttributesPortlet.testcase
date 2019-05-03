@@ -16,10 +16,9 @@ definition {
 	@priority = "4"
 	test ViewUserAttributes {
 		ProductMenu.gotoPortlet(
-			category = "Build",
+			category = "Site Builder",
 			panel = "Site Administration",
-			portlet = "Pages"
-		);
+			portlet = "Pages");
 
 		SitePages.addPublicPage(pageName = "Test User Attributes Page");
 

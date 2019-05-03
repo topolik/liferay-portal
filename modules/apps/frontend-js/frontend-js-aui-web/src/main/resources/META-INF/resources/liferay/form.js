@@ -242,9 +242,11 @@ AUI.add(
 						var field = formNode.one('.' + instance.formValidator.get('errorClass'));
 
 						if (field) {
+							var fieldWrapper = field.ancestor('form > div');
+
 							var formTabs = formNode.one('.lfr-nav');
 
-							if (formTabs) {
+							if (fieldWrapper && formTabs) {
 								var tabs = formTabs.all('.tab');
 								var tabsNamespace = formTabs.getAttribute('data-tabs-namespace');
 
@@ -254,8 +256,6 @@ AUI.add(
 										return tab.getAttribute('data-tab-name');
 									}
 								)
-
-								var fieldWrapper = field.ancestor('form > div');
 
 								var fieldWrapperId = fieldWrapper.getAttribute('id').slice(0, -TABS_SECTION_STR.length);
 
@@ -398,6 +398,9 @@ AUI.add(
 					return instance._INSTANCES[id];
 				},
 
+				/*
+				* @deprecated since 7.2, unused
+				*/
 				register: function(config) {
 					var instance = this;
 

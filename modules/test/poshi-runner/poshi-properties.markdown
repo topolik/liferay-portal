@@ -244,6 +244,10 @@ command name, the test case file's name, or a comma-delimited list of both that
 runs sequentially. To run sequentially, the tests must be configured with proper
 teardowns.
 
+### test.poshi.script.validation
+
+Sets a boolean to determine if additional Poshi Script validation will be run.
+
 ### test.poshi.warnings.file.name
 
 Sets the path to a file that contains valid Poshi warnings. This is used

@@ -130,8 +130,7 @@ public class BookmarksPortletToolbarContributor
 
 		urlMenuItem.setLabel(
 			LanguageUtil.get(
-				_portal.getHttpServletRequest(portletRequest),
-				(folder != null) ? "subfolder" : "folder"));
+				_portal.getHttpServletRequest(portletRequest), "folder"));
 
 		PortletDisplay portletDisplay = themeDisplay.getPortletDisplay();
 
@@ -199,13 +198,6 @@ public class BookmarksPortletToolbarContributor
 		}
 
 		return menuItems;
-	}
-
-	@Reference(unbind = "-")
-	protected void setBookmarksFolderService(
-		BookmarksFolderService bookmarksFolderService) {
-
-		_bookmarksFolderService = bookmarksFolderService;
 	}
 
 	private BookmarksFolder _getFolder(
@@ -276,6 +268,7 @@ public class BookmarksPortletToolbarContributor
 	private ModelResourcePermission<BookmarksFolder>
 		_bookmarksFolderModelResourcePermission;
 
+	@Reference
 	private BookmarksFolderService _bookmarksFolderService;
 
 	@Reference

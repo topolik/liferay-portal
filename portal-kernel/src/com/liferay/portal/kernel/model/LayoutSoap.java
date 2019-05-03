@@ -36,6 +36,7 @@ public class LayoutSoap implements Serializable {
 
 		soapModel.setMvccVersion(model.getMvccVersion());
 		soapModel.setUuid(model.getUuid());
+		soapModel.setHeadId(model.getHeadId());
 		soapModel.setPlid(model.getPlid());
 		soapModel.setGroupId(model.getGroupId());
 		soapModel.setCompanyId(model.getCompanyId());
@@ -44,8 +45,6 @@ public class LayoutSoap implements Serializable {
 		soapModel.setCreateDate(model.getCreateDate());
 		soapModel.setModifiedDate(model.getModifiedDate());
 		soapModel.setParentPlid(model.getParentPlid());
-		soapModel.setLeftPlid(model.getLeftPlid());
-		soapModel.setRightPlid(model.getRightPlid());
 		soapModel.setPrivateLayout(model.isPrivateLayout());
 		soapModel.setLayoutId(model.getLayoutId());
 		soapModel.setParentLayoutId(model.getParentLayoutId());
@@ -141,6 +140,14 @@ public class LayoutSoap implements Serializable {
 		_uuid = uuid;
 	}
 
+	public long getHeadId() {
+		return _headId;
+	}
+
+	public void setHeadId(long headId) {
+		_headId = headId;
+	}
+
 	public long getPlid() {
 		return _plid;
 	}
@@ -203,22 +210,6 @@ public class LayoutSoap implements Serializable {
 
 	public void setParentPlid(long parentPlid) {
 		_parentPlid = parentPlid;
-	}
-
-	public long getLeftPlid() {
-		return _leftPlid;
-	}
-
-	public void setLeftPlid(long leftPlid) {
-		_leftPlid = leftPlid;
-	}
-
-	public long getRightPlid() {
-		return _rightPlid;
-	}
-
-	public void setRightPlid(long rightPlid) {
-		_rightPlid = rightPlid;
 	}
 
 	public boolean getPrivateLayout() {
@@ -441,6 +432,7 @@ public class LayoutSoap implements Serializable {
 
 	private long _mvccVersion;
 	private String _uuid;
+	private long _headId;
 	private long _plid;
 	private long _groupId;
 	private long _companyId;
@@ -449,8 +441,6 @@ public class LayoutSoap implements Serializable {
 	private Date _createDate;
 	private Date _modifiedDate;
 	private long _parentPlid;
-	private long _leftPlid;
-	private long _rightPlid;
 	private boolean _privateLayout;
 	private long _layoutId;
 	private long _parentLayoutId;

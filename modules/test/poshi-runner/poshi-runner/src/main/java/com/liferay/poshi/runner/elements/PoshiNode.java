@@ -132,4 +132,22 @@ public interface PoshiNode<A extends Node, B extends PoshiNode<A, B>>
 
 	public String toPoshiScript();
 
+	public default void validatePoshiScript()
+		throws PoshiScriptParserException {
+
+		String originalPoshiScript = getPoshiScript();
+		String generatedPoshiScript = toPoshiScript();
+
+		originalPoshiScript = originalPoshiScript.replaceAll("\\s+", "");
+
+		generatedPoshiScript = generatedPoshiScript.replaceAll("\\s+", "");
+
+		if (!originalPoshiScript.equals(generatedPoshiScript)) {
+			PoshiScriptParserException pspe = new PoshiScriptParserException(
+				PoshiScriptParserException.TRANSLATION_LOSS_MESSAGE, this);
+
+			throw pspe;
+		}
+	}
+
 }

@@ -24,6 +24,13 @@ import com.liferay.petra.string.StringBundler;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,6 +45,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "DataLayoutColumn")
 public class DataLayoutColumn {
 
+	@Schema
 	public Integer getColumnSize() {
 		return columnSize;
 	}
@@ -53,6 +61,9 @@ public class DataLayoutColumn {
 		try {
 			columnSize = columnSizeUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -62,6 +73,7 @@ public class DataLayoutColumn {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Integer columnSize;
 
+	@Schema
 	public String[] getFieldNames() {
 		return fieldNames;
 	}
@@ -77,6 +89,9 @@ public class DataLayoutColumn {
 		try {
 			fieldNames = fieldNamesUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -86,27 +101,57 @@ public class DataLayoutColumn {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String[] fieldNames;
 
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
+
+		if (!(object instanceof DataLayoutColumn)) {
+			return false;
+		}
+
+		DataLayoutColumn dataLayoutColumn = (DataLayoutColumn)object;
+
+		return Objects.equals(toString(), dataLayoutColumn.toString());
+	}
+
+	@Override
+	public int hashCode() {
+		String string = toString();
+
+		return string.hashCode();
+	}
+
 	public String toString() {
 		StringBundler sb = new StringBundler();
 
 		sb.append("{");
 
-		sb.append("\"columnSize\": ");
+		if (columnSize != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
 
-		sb.append(columnSize);
-		sb.append(", ");
+			sb.append("\"columnSize\": ");
 
-		sb.append("\"fieldNames\": ");
-
-		if (fieldNames == null) {
-			sb.append("null");
+			sb.append(columnSize);
 		}
-		else {
+
+		if (fieldNames != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"fieldNames\": ");
+
 			sb.append("[");
 
 			for (int i = 0; i < fieldNames.length; i++) {
 				sb.append("\"");
-				sb.append(fieldNames[i]);
+
+				sb.append(_escape(fieldNames[i]));
+
 				sb.append("\"");
 
 				if ((i + 1) < fieldNames.length) {
@@ -115,6 +160,41 @@ public class DataLayoutColumn {
 			}
 
 			sb.append("]");
+		}
+
+		sb.append("}");
+
+		return sb.toString();
+	}
+
+	private static String _escape(Object object) {
+		String string = String.valueOf(object);
+
+		return string.replaceAll("\"", "\\\\\"");
+	}
+
+	private static String _toJSON(Map<String, ?> map) {
+		StringBuilder sb = new StringBuilder("{");
+
+		@SuppressWarnings("unchecked")
+		Set set = map.entrySet();
+
+		@SuppressWarnings("unchecked")
+		Iterator<Map.Entry<String, ?>> iterator = set.iterator();
+
+		while (iterator.hasNext()) {
+			Map.Entry<String, ?> entry = iterator.next();
+
+			sb.append("\"");
+			sb.append(entry.getKey());
+			sb.append("\":");
+			sb.append("\"");
+			sb.append(entry.getValue());
+			sb.append("\"");
+
+			if (iterator.hasNext()) {
+				sb.append(",");
+			}
 		}
 
 		sb.append("}");

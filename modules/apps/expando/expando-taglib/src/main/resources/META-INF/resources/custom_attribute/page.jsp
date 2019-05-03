@@ -293,39 +293,38 @@ ExpandoBridge expandoBridge = ExpandoBridgeFactoryUtil.getExpandoBridge(company.
 							</c:choose>
 						</c:when>
 						<c:when test="<%= type == ExpandoColumnConstants.GEOLOCATION %>">
-
-							<%
-							JSONObject geolocationJSONObject = JSONFactoryUtil.createJSONObject(value.toString());
-							%>
-
 							<div id="<portlet:namespace />CoordinatesContainer">
 								<div class="glyphicon glyphicon-map-marker" id="<%= portletDisplay.getNamespace()+"ExpandoAttribute--" + name + "--Location" %>">
 								</div>
+
+								<%
+								JSONObject geolocationJSONObject = JSONFactoryUtil.createJSONObject(value.toString());
+								String mapDisplayName = HtmlUtil.getAUICompatibleId(name);
+								%>
 
 								<liferay-map:map-display
 									geolocation="<%= true %>"
 									latitude='<%= geolocationJSONObject.getDouble("latitude", 0) %>'
 									longitude='<%= geolocationJSONObject.getDouble("longitude", 0) %>'
-									name='<%= "ExpandoAttribute--" + name +"--" %>'
+									name='<%= "ExpandoAttribute--" + mapDisplayName +"--" %>'
 								/>
 							</div>
 
-							<aui:script use="liferay-map-base">
-								var inputName = "<%= portletDisplay.getNamespace()+"ExpandoAttribute--" + HtmlUtil.escapeJS(name) + "--" %>";
-
+							<aui:script require="map-common/js/MapBase.es as MapBase">
 								var geolocationField = {
 									init: function() {
 										Liferay.MapBase.get(
-											inputName,
+											"<%= portletDisplay.getNamespace()+"ExpandoAttribute--" + mapDisplayName + "--" %>",
 											function(map) {
 												map.on('positionChange', geolocationField.onPositionChange, geolocationField);
 											}
 										);
 									},
 									onPositionChange: function(event) {
-										var location = event.newVal.location;
-
+										var inputName = "<%= portletDisplay.getNamespace()+"ExpandoAttribute--" + HtmlUtil.escapeJS(name) + "--" %>";
 										var inputNode = document.querySelector('[name="' + inputName + '"]');
+
+										var location = event.newVal.location;
 
 										if (inputNode) {
 											inputNode.setAttribute(
@@ -805,21 +804,41 @@ ExpandoBridge expandoBridge = ExpandoBridgeFactoryUtil.getExpandoBridge(company.
 				</c:if>
 
 				<c:if test="<%= (type == ExpandoColumnConstants.GEOLOCATION) && (editable || Validator.isNotNull(sb.toString())) %>">
-
-					<%
-					JSONObject geolocationJSONObject = JSONFactoryUtil.createJSONObject(value.toString());
-					%>
-
 					<div id="<portlet:namespace />CoordinatesContainer">
 						<div class="glyphicon glyphicon-map-marker" id="<%= portletDisplay.getNamespace()+"ExpandoAttribute--" + name + "--Location" %>">
 						</div>
+
+						<%
+						JSONObject geolocationJSONObject = JSONFactoryUtil.createJSONObject(value.toString());
+						String mapDisplayName = HtmlUtil.getAUICompatibleId(name);
+						%>
 
 						<liferay-map:map-display
 							geolocation="<%= true %>"
 							latitude='<%= geolocationJSONObject.getDouble("latitude", 0) %>'
 							longitude='<%= geolocationJSONObject.getDouble("longitude", 0) %>'
-							name='<%= "ExpandoAttribute--" + name +"--" %>'
+							name='<%= "ExpandoAttribute--" + mapDisplayName +"--" %>'
 						/>
+
+						<aui:script require="map-common/js/MapBase.es as MapBase">
+							Liferay.MapBase.get(
+								"<%= portletDisplay.getNamespace()+"ExpandoAttribute--" + mapDisplayName + "--" %>",
+								function(map) {
+									map.once(
+										'positionChange',
+										function(event) {
+											var inputName = "<%= portletDisplay.getNamespace()+"ExpandoAttribute--" + HtmlUtil.escapeJS(name) + "--" %>";
+
+											var locationNode = document.getElementById(inputName + 'Location');
+
+											if (locationNode) {
+												locationNode.innerHTML = event.newVal.address;
+											}
+										}
+									);
+								}
+							);
+						</aui:script>
 					</div>
 				</c:if>
 			</c:otherwise>

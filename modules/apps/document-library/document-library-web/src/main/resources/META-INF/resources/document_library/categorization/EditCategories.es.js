@@ -17,7 +17,9 @@ class EditCategories extends Component {
 	 * @inheritDoc
 	 */
 	attached() {
-		this._bulkStatusComponent =	Liferay.component(this.portletNamespace + 'BulkStatus');
+		this._assetVocabularyCategories = new Map();
+
+		this._bulkStatusComponent =	Liferay.component(this.namespace + 'BulkStatus');
 	}
 
 	/**
@@ -33,6 +35,10 @@ class EditCategories extends Component {
 	created() {
 		this.append = true;
 		this.dataSource = [];
+		this.urlCategories = `/bulk-rest/v1.0/sites/${this.groupIds[0]}/taxonomy-vocabularies/common`;
+
+		this._feedbackErrorClass = 'form-feedback-item';
+		this._requiredVocabularyErrorMarkupText = '<div class="' + this._feedbackErrorClass + '">' + Liferay.Language.get('this-field-is-required') + '</div>';
 	}
 
 	/**
@@ -49,13 +55,55 @@ class EditCategories extends Component {
 	}
 
 	/**
+	 * Checks if the vocabulary is empty or not.
+	 *
+	 * @param  {String} vocabularyId
+	 * @return {Boolean} true if it has a category, false if is empty.
+	 */
+	_checkRequiredVocabulary(vocabularyId) {
+		let inputNode = this._getVocabularyInputNode(vocabularyId);
+		let valid = true;
+
+		if (inputNode.value) {
+			inputNode.parentElement.parentElement.classList.remove('has-error');
+		}
+		else {
+			inputNode.parentElement.parentElement.classList.add('has-error');
+
+			let feedbackErrorNode = inputNode.parentElement.querySelector('.' + this._feedbackErrorClass);
+
+			if (!feedbackErrorNode) {
+				inputNode.parentElement.insertAdjacentHTML(
+					'beforeend',
+					this._requiredVocabularyErrorMarkupText
+				);
+			}
+
+			valid = false;
+		}
+
+		return valid;
+	}
+
+	/**
+	 * Checks if the vocabulary have errors
+	 *
+	 * @private
+	 * @review
+	 * @return {Boolean} true if it has a error, false if has not error.
+	 */
+	_checkErrors() {
+		return !!this.element.querySelector('.has-error');
+	}
+
+	/**
 	 * Creates the ajax request.
 	 *
 	 * @param {String} url Url of the request
 	 * @param {Object} bodyData The body of the request
 	 * @param {Function} callback Callback function
 	 */
-	_fetchCategoriesRequest(url, bodyData, callback) {
+	_fetchCategoriesRequest(url, method, bodyData) {
 		let body = JSON.stringify(bodyData);
 
 		let headers = new Headers();
@@ -65,17 +113,12 @@ class EditCategories extends Component {
 			body,
 			credentials: 'include',
 			headers,
-			method: 'POST'
+			method
 		};
 
-		fetch(url, request)
+		return fetch(this.pathModule + url, request)
 			.then(
 				response => response.json()
-			)
-			.then(
-				response => {
-					callback(response);
-				}
 			)
 			.catch(
 				(xhr) => {
@@ -94,25 +137,33 @@ class EditCategories extends Component {
 	_getCommonCategories() {
 		this.loading = true;
 
-		let bodyData = {
-			folderId: this.folderId,
-			repositoryId: this.repositoryId,
-			selectAll: this.selectAll,
-			selection: this.fileEntries
-		};
+		let selection = this._getSelection();
 
-		this._fetchCategoriesRequest(
-			this.urlCategories,
-			bodyData,
-			response => {
-				if (response) {
-					this.description = response.description;
-					this.groupIds = response.groupIds;
+		Promise.all(
+			[
+				this._fetchCategoriesRequest(this.urlCategories, 'POST', selection),
+				this._fetchCategoriesRequest(this.urlSelection, 'POST', selection)
+			]
+		).then(
+			([responseCategories, responseSelection]) => {
+				if (responseCategories && responseSelection) {
 					this.loading = false;
+					this.description = this._getDescription(responseSelection.size);
 					this.multiple = (this.fileEntries.length > 1) || this.selectAll;
-					this.vocabularies = this._parseVocabularies(response.vocabularies);
+					this.vocabularies = this._parseVocabularies(responseCategories.items || []);
 				}
 			}
+		);
+	}
+
+	_getDescription(size) {
+		if (size === 1) {
+			return Liferay.Language.get('you-are-editing-the-categories-for-the-selected-item');
+		}
+
+		return Liferay.Util.sub(
+			Liferay.Language.get('you-are-editing-the-common-categories-for-x-items.-select-edit-or-replace-current-categories'),
+			size
 		);
 	}
 
@@ -124,20 +175,45 @@ class EditCategories extends Component {
 	 */
 	_getFinalCategories() {
 		let finalCategories = [];
-		let inputElementName = this.namespace + this.hiddenInput;
 
-		this.vocabularies.forEach(
-			vocabulary => {
-				let inputNode = document.getElementById(inputElementName + vocabulary.id);
-
-				if (inputNode.value) {
-					let categoryIds = inputNode.value.split(',').map(Number);
-					finalCategories = finalCategories.concat(categoryIds);
-				}
+		this._assetVocabularyCategories.forEach(
+			category => {
+				const categoryIds = category.map(item => item.value);
+				finalCategories = finalCategories.concat(categoryIds);
 			}
 		);
 
 		return finalCategories;
+	}
+
+	_getSelection() {
+		return {
+			documentIds: this.fileEntries,
+			selectionScope: {
+				folderId: this.folderId,
+				repositoryId: this.repositoryId,
+				selectAll: this.selectAll
+			}
+		};
+	}
+
+	/**
+	 * Gets the input where categories are saved for a vocabulary.
+	 *
+	 * @param  {String} vocabularyId [description]
+	 * @return {DOMElement} input node.
+	 */
+	_getVocabularyInputNode(vocabularyId) {
+		return document.getElementById(this.namespace + this.hiddenInput + vocabularyId);
+	}
+
+	_handleInputFocus(event) {
+		const dataProvider = event.target.refs.autocomplete.refs.dataProvider;
+		const modal = this.element.querySelector('.modal');
+
+		if (modal && dataProvider && !modal.contains(dataProvider.element)) {
+			modal.appendChild(dataProvider.element);
+		}
 	}
 
 	/**
@@ -150,68 +226,93 @@ class EditCategories extends Component {
 		this.append = event.target.value === 'add';
 	}
 
+	_handleSelectedItemsChange(event) {
+		const vocabularyId = event.vocabularyId;
+
+		this._assetVocabularyCategories.set(vocabularyId, event.selectedItems);
+
+		if (this._requiredVocabularies.includes(parseInt(vocabularyId, 10))) {
+			setTimeout(
+				() => {
+					this._checkRequiredVocabulary(vocabularyId);
+				},
+				0
+			);
+		}
+	}
+
 	/**
 	 * Sends request to backend services
 	 * to update the categories.
+	 * @param {!Event} event
 	 *
 	 * @private
 	 * @review
 	 */
-	_handleSaveBtnClick() {
-		let finalCategories = this._getFinalCategories();
+	_handleFormSubmit(event) {
+		event.preventDefault();
 
-		let addedCategories = [];
-
-		if (!this.append) {
-			addedCategories = finalCategories;
-		}
-		else {
-			addedCategories = finalCategories.filter(
-				categoryId => this.initialCategories.indexOf(categoryId) == -1
-			);
-		}
-
-		let removedCategories = this.initialCategories.filter(
-			category => finalCategories.indexOf(category) == -1
-		);
-
-		let bodyData = {
-			append: this.append,
-			folderId: this.folderId,
-			repositoryId: this.repositoryId,
-			selectAll: this.selectAll,
-			selection: this.fileEntries,
-			toAddCategoryIds: addedCategories,
-			toRemoveCategoryIds: removedCategories
-		};
-
-		let instance = this;
-
-		this._fetchCategoriesRequest(
-			this.urlUpdateCategories,
-			bodyData,
-			response => {
-				instance.close();
-
-				if (instance._bulkStatusComponent) {
-					instance._bulkStatusComponent.startWatch();
+		setTimeout(
+			() => {
+				if (this._checkErrors()) {
+					return;
 				}
-			}
+
+				let finalCategories = this._getFinalCategories();
+
+				let addedCategories = [];
+
+				if (!this.append) {
+					addedCategories = finalCategories;
+				}
+				else {
+					addedCategories = finalCategories.filter(
+						categoryId => this.initialCategories.indexOf(categoryId) == -1
+					);
+				}
+
+				let removedCategories = this.initialCategories.filter(
+					category => finalCategories.indexOf(category) == -1
+				);
+
+				let instance = this;
+
+				this._fetchCategoriesRequest(
+					this.urlUpdateCategories,
+					this.append ? 'PATCH' : 'PUT',
+					{
+						documentBulkSelection: this._getSelection(),
+						taxonomyCategoryIdsToAdd: addedCategories,
+						taxonomyCategoryIdsToRemove: removedCategories
+					}
+				).then(
+					response => {
+						instance.close();
+
+						if (instance._bulkStatusComponent) {
+							instance._bulkStatusComponent.startWatch();
+						}
+					}
+				);
+			},
+			250
 		);
 	}
 
 	_parseVocabularies(vocabularies) {
 		let initialCategories = [];
+		let requiredVocabularies = [];
 		let vocabulariesList = [];
 
 		vocabularies.forEach(
 			vocabulary => {
-				let categories = this._parseCategories(vocabulary.categories);
+				let categories = this._parseCategories(vocabulary.taxonomyCategories || []);
 
 				let categoryIds = categories.map(item => item.value);
 
 				let obj = {
-					id: vocabulary.vocabularyId.toString(),
+					id: vocabulary.taxonomyVocabularyId.toString(),
+					required: vocabulary.required,
 					selectedCategoryIds: categoryIds.join(','),
 					selectedItems: categories,
 					singleSelect: !vocabulary.multiValued,
@@ -220,11 +321,16 @@ class EditCategories extends Component {
 
 				vocabulariesList.push(obj);
 
+				if (vocabulary.required) {
+					requiredVocabularies.push(vocabulary.taxonomyVocabularyId);
+				}
+
 				initialCategories = initialCategories.concat(categoryIds);
 			}
 		);
 
 		this.initialCategories = initialCategories;
+		this._requiredVocabularies = requiredVocabularies;
 
 		return vocabulariesList;
 	}
@@ -243,8 +349,8 @@ class EditCategories extends Component {
 			categories.forEach(
 				item => {
 					let itemObj = {
-						'label': item.name,
-						'value': item.categoryId
+						'label': item.taxonomyCategoryName,
+						'value': item.taxonomyCategoryId
 					};
 
 					categoriesObjList.push(itemObj);
@@ -299,7 +405,7 @@ EditCategories.STATE = {
 	 *
 	 * @type {List<String>}
 	 */
-	groupIds: Config.array().value([]),
+	groupIds: Config.array().required(),
 
 	/**
 	* Hidden input name
@@ -346,6 +452,16 @@ EditCategories.STATE = {
 	 * @type {string}
 	 */
 	namespace: Config.string().required(),
+
+	/**
+	 * PathModule
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {String}
+	 */
+	pathModule: Config.string().required(),
 
 	/**
 	 * RepositoryId
@@ -404,7 +520,18 @@ EditCategories.STATE = {
 	 * @review
 	 * @type {String}
 	 */
-	urlCategories: Config.string().required(),
+	urlCategories: Config.string(),
+
+	/**
+	 * Url to backend service that provides
+	 * the selection description.
+	 *
+	 * @instance
+	 * @memberof EditTags
+	 * @review
+	 * @type {String}
+	 */
+	urlSelection: Config.string().value('/bulk-rest/v1.0/bulk-selection'),
 
 	/**
 	 * Url to backend service that updates
@@ -415,7 +542,7 @@ EditCategories.STATE = {
 	 * @review
 	 * @type {String}
 	 */
-	urlUpdateCategories: Config.string().required(),
+	urlUpdateCategories: Config.string().value('/bulk-rest/v1.0/taxonomy-categories/batch'),
 
 	/**
 	 * List of vocabularies

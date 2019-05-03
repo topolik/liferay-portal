@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -82,20 +83,23 @@ public class AssetCategoriesSelectorPortlet extends MVCPortlet {
 				List<AssetCategory> categories = getCategories(resourceRequest);
 
 				for (AssetCategory category : categories) {
-					JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
 					List<AssetCategory> childCategories =
 						_assetCategoryService.getChildCategories(
 							category.getCategoryId());
 
-					jsonObject.put("categoryId", category.getCategoryId());
-					jsonObject.put("childrenCount", childCategories.size());
-					jsonObject.put("hasChildren", !childCategories.isEmpty());
-					jsonObject.put("name", category.getName());
-					jsonObject.put(
-						"parentCategoryId", category.getParentCategoryId());
-					jsonObject.put(
-						"titleCurrentValue", category.getTitleCurrentValue());
+					JSONObject jsonObject = JSONUtil.put(
+						"categoryId", category.getCategoryId()
+					).put(
+						"childrenCount", childCategories.size()
+					).put(
+						"hasChildren", !childCategories.isEmpty()
+					).put(
+						"name", category.getName()
+					).put(
+						"parentCategoryId", category.getParentCategoryId()
+					).put(
+						"titleCurrentValue", category.getTitleCurrentValue()
+					);
 
 					jsonArray.put(jsonObject);
 				}
@@ -140,13 +144,7 @@ public class AssetCategoriesSelectorPortlet extends MVCPortlet {
 			parentCategoryId, vocabularyId, start, end, null);
 	}
 
-	@Reference(unbind = "-")
-	protected void setAssetCategoryService(
-		AssetCategoryService assetCategoryService) {
-
-		_assetCategoryService = assetCategoryService;
-	}
-
+	@Reference
 	private AssetCategoryService _assetCategoryService;
 
 }

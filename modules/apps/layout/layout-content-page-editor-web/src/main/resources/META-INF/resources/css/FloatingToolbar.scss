@@ -1,15 +1,17 @@
 @import "variables";
 
 .fragments-editor__floating-toolbar {
-	display: inline-block;
-	padding: $fragmentsEditorSpacing;
+	display: block;
+	height: 0;
+	left: -1px;
 	position: absolute;
-	text-align: right;
-	z-index: $floatingToolbarZIndex;
+	top: -1px;
+	width: 0;
 
-	&-buttons.popover,
-	&-panel.popover {
-		position: static;
+	&-buttons,
+	&-panel {
+		position: absolute;
+		z-index: $floatingToolbarZIndex;
 	}
 
 	&-buttons {
@@ -24,12 +26,22 @@
 				opacity: 1;
 			}
 		}
+
+		& > .popover {
+			padding: $fragmentsEditorSpacing;
+			position: static;
+			white-space: nowrap;
+		}
 	}
 
 	&-panel {
-		margin-top: $fragmentsEditorSpacing;
-		min-width: $floatingToolbarPanelMinWidth;
-		padding: $fragmentsEditorSpacing * 2;
+		padding: 0 $fragmentsEditorSpacing;
+
+		& > .popover {
+			min-width: $floatingToolbarPanelMinWidth;
+			padding: $fragmentsEditorSpacing * 2;
+			position: static;
+		}
 
 		.btn, .form-group, .form-group-autofit {
 			margin-bottom: $fragmentsEditorSpacing * 2;
@@ -57,20 +69,19 @@
 			transition: border-color ease 0.2s;
 			will-change: border-color;
 
-			&-hover, &-selected {
+			&-selected, &:hover {
 				border-color: #F1F2F5;
 			}
 
 			&-inner {
 				border: none;
-				box-shadow: inset 0 0 0 1px #CDCED9;
 				height: $paletteItemSize;
 				overflow: hidden;
 				width: $paletteItemSize;
-			}
 
-			&-selected .palette-item-inner {
-				background-image: none;
+				&.bg-white {
+					box-shadow: inset 0 0 0 1px #CDCED9;
+				}
 			}
 		}
 
@@ -80,7 +91,15 @@
 		}
 	}
 
-	&--mapped-field .lexicon-icon {
-		fill: $fragmentEditableFieldGridMappedColor;
+	&--mapped-field {
+		.fragments-editor__floating-toolbar-buttons {
+			.btn.active, .btn:hover {
+				background-color: $fragmentEditableFieldGridMappedColorFaded;
+			}
+
+			.lexicon-icon {
+				fill: $fragmentEditableFieldGridMappedColor;
+			}
+		}
 	}
 }

@@ -23,7 +23,9 @@ definition {
 
 		var key_fieldName = "${fieldName}";
 
-		Click(locator1 = "Form#SIDEBAR_ELLIPSIS");
+		while (IsElementNotPresent(locator1 = "Form#SIDEBAR_MENUITEM_REMOVE_FIELD")) {
+			Click(locator1 = "Form#SIDEBAR_ELLIPSIS");
+		}
 
 		Click(locator1 = "Form#SIDEBAR_MENUITEM_REMOVE_FIELD");
 
@@ -42,29 +44,31 @@ definition {
 
 	macro gotoEditFormByName {
 		AssertClick(
+			key_formName = "${formName}",
 			locator1 = "FormsAdmin#FORMS_TABLE_NAME",
-			value1 = "${formName}",
-			key_formName = "${formName}"
-		);
+			value1 = "${formName}");
 	}
 
 	macro gotoFormBuilder {
 		var key_assetTitle = "Form";
 
-		AssertClick(locator1 = "NavBar#ASSET_TITLE_LINK", value1 = "Form");
+		AssertClick(
+			locator1 = "NavBar#ASSET_TITLE_LINK",
+			value1 = "Form");
 	}
 
 	macro gotoPermissions {
 		LexiconEntry.gotoEntryMenuItem(
 			menuItem = "Permissions",
-			rowEntry = "${formName}"
-		);
+			rowEntry = "${formName}");
 
 		SelectFrame(locator1 = "IFrame#DIALOG");
 	}
 
 	macro gotoPreviewForm {
-		AssertClick(locator1 = "Button#PREVIEW", value1 = "Preview Form");
+		AssertClick(
+			locator1 = "Button#PREVIEW",
+			value1 = "Preview Form");
 	}
 
 	macro gotoPublishCopyURLLink {
@@ -84,7 +88,9 @@ definition {
 	macro gotoRules {
 		var key_assetTitle = "Rules";
 
-		AssertClick(locator1 = "NavBar#ASSET_TITLE_LINK", value1 = "Rules");
+		AssertClick(
+			locator1 = "NavBar#ASSET_TITLE_LINK",
+			value1 = "Rules");
 	}
 
 	macro gotoSettings {
@@ -109,6 +115,8 @@ definition {
 
 	macro openPublishURL {
 		FormsAdminNavigator.gotoPublishCopyURLLink();
+
+		Pause(locator1 = "2000");
 
 		var publishFormURL = selenium.getElementValue("Form#PUBLISH_FORM_PUBLIC_URL");
 

@@ -171,10 +171,10 @@ public class LayoutSiteNavigationMenuItemType
 		Layout layout = _fetchLayout(siteNavigationMenuItem);
 
 		if (layout.isPublicLayout()) {
-			return LanguageUtil.get(locale, "public-pages");
+			return LanguageUtil.get(locale, "public-page");
 		}
 
-		return LanguageUtil.get(locale, "private-pages");
+		return LanguageUtil.get(locale, "private-page");
 	}
 
 	@Override
@@ -288,14 +288,11 @@ public class LayoutSiteNavigationMenuItemType
 			SiteNavigationMenuItem importedSiteNavigationMenuItem)
 		throws PortalException {
 
-		Layout layout = null;
+		Layout layout = _getLayout(importedSiteNavigationMenuItem);
 
-		try {
-			layout = _getLayout(importedSiteNavigationMenuItem);
-		}
-		catch (NoSuchLayoutException nsle) {
+		if (layout == null) {
 			if (ExportImportThreadLocal.isPortletImportInProcess()) {
-				throw nsle;
+				throw new NoSuchLayoutException();
 			}
 
 			return false;
@@ -428,9 +425,7 @@ public class LayoutSiteNavigationMenuItemType
 			layoutUuid, siteNavigationMenuItem.getGroupId(), privateLayout);
 	}
 
-	private Layout _getLayout(SiteNavigationMenuItem siteNavigationMenuItem)
-		throws PortalException {
-
+	private Layout _getLayout(SiteNavigationMenuItem siteNavigationMenuItem) {
 		UnicodeProperties typeSettingsProperties = new UnicodeProperties();
 
 		typeSettingsProperties.fastLoad(
@@ -441,8 +436,16 @@ public class LayoutSiteNavigationMenuItemType
 		boolean privateLayout = GetterUtil.getBoolean(
 			typeSettingsProperties.get("privateLayout"));
 
-		return _layoutLocalService.getLayoutByUuidAndGroupId(
+		Layout layout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
 			layoutUuid, siteNavigationMenuItem.getGroupId(), privateLayout);
+
+		if ((layout == null) && ExportImportThreadLocal.isImportInProcess()) {
+			layout = _layoutLocalService.fetchLayoutByUuidAndGroupId(
+				layoutUuid, siteNavigationMenuItem.getGroupId(),
+				!privateLayout);
+		}
+
+		return layout;
 	}
 
 	private boolean _isUseCustomName(

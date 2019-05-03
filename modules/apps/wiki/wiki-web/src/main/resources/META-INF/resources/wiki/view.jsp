@@ -126,7 +126,7 @@ if (portletTitleBasedNavigation) {
 
 		<liferay-frontend:info-bar-buttons>
 			<liferay-frontend:info-bar-sidenav-toggler-button
-				icon="info-circle"
+				icon="info-circle-open"
 				label="info"
 			/>
 		</liferay-frontend:info-bar-buttons>
@@ -374,29 +374,16 @@ if (portletTitleBasedNavigation) {
 							</div>
 
 							<c:if test="<%= wikiPortletInstanceSettingsHelper.isEnableComments() %>">
-								<liferay-ui:panel-container
-									extended="<%= false %>"
-									markupView="lexicon"
-									persistState="<%= true %>"
-								>
-									<liferay-ui:panel
-										collapsible="<%= true %>"
-										extended="<%= true %>"
-										id='<%= liferayPortletResponse.getNamespace() + "wikiCommentsPanel" %>'
-										markupView="lexicon"
-										persistState="<%= true %>"
-										title="comments"
-									>
-										<liferay-comment:discussion
-											className="<%= WikiPage.class.getName() %>"
-											classPK="<%= wikiPage.getResourcePrimKey() %>"
-											formName="fm2"
-											ratingsEnabled="<%= wikiPortletInstanceSettingsHelper.isEnableCommentRatings() %>"
-											redirect="<%= currentURL %>"
-											userId="<%= wikiPage.getUserId() %>"
-										/>
-									</liferay-ui:panel>
-								</liferay-ui:panel-container>
+								<div id="<portlet:namespace />wikiCommentsPanel">
+									<liferay-comment:discussion
+										className="<%= WikiPage.class.getName() %>"
+										classPK="<%= wikiPage.getResourcePrimKey() %>"
+										formName="fm2"
+										ratingsEnabled="<%= wikiPortletInstanceSettingsHelper.isEnableCommentRatings() %>"
+										redirect="<%= currentURL %>"
+										userId="<%= wikiPage.getUserId() %>"
+									/>
+								</div>
 							</c:if>
 						</c:if>
 					</div>

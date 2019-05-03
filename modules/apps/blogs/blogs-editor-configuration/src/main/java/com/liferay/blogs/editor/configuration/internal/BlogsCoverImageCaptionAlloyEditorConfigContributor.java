@@ -18,8 +18,8 @@ import com.liferay.blogs.constants.BlogsPortletKeys;
 import com.liferay.portal.kernel.editor.configuration.BaseEditorConfigContributor;
 import com.liferay.portal.kernel.editor.configuration.EditorConfigContributor;
 import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 
@@ -48,55 +48,48 @@ public class BlogsCoverImageCaptionAlloyEditorConfigContributor
 		RequestBackedPortletURLFactory requestBackedPortletURLFactory) {
 
 		jsonObject.put(
-			"extraPlugins", "ae_placeholder,ae_selectionregion,ae_uicore");
-
-		jsonObject.put("toolbars", getToolbarsJSONObject());
+			"extraPlugins", "ae_placeholder,ae_selectionregion,ae_uicore"
+		).put(
+			"toolbars", getToolbarsJSONObject()
+		);
 	}
 
 	protected JSONObject getToolbarsJSONObject() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("styles", getToolbarsStylesJSONObject());
-
-		return jsonObject;
+		return JSONUtil.put("styles", getToolbarsStylesJSONObject());
 	}
 
 	protected JSONObject getToolbarsStylesJSONObject() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("selections", getToolbarStylesSelectionsJSONArray());
-		jsonObject.put("tabIndex", 1);
-
-		return jsonObject;
+		return JSONUtil.put(
+			"selections", getToolbarStylesSelectionsJSONArray()
+		).put(
+			"tabIndex", 1
+		);
 	}
 
 	protected JSONArray getToolbarStylesSelectionsJSONArray() {
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(getToolbarStylesSelectionsLinkJSONObject());
-		jsonArray.put(getToolbarStylesSelectionsTextJSONObject());
-
-		return jsonArray;
+		return JSONUtil.putAll(
+			getToolbarStylesSelectionsLinkJSONObject(),
+			getToolbarStylesSelectionsTextJSONObject());
 	}
 
 	protected JSONObject getToolbarStylesSelectionsLinkJSONObject() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("buttons", toJSONArray("['linkEdit']"));
-		jsonObject.put("name", "link");
-		jsonObject.put("test", "AlloyEditor.SelectionTest.link");
-
-		return jsonObject;
+		return JSONUtil.put(
+			"buttons", toJSONArray("['linkEdit']")
+		).put(
+			"name", "link"
+		).put(
+			"test", "AlloyEditor.SelectionTest.link"
+		);
 	}
 
 	protected JSONObject getToolbarStylesSelectionsTextJSONObject() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("buttons", toJSONArray("['link']"));
-		jsonObject.put("name", "text");
-		jsonObject.put("test", "AlloyEditor.SelectionTest.text");
-
-		return jsonObject;
+		return JSONUtil.put(
+			"buttons", toJSONArray("['link']")
+		).put(
+			"name", "text"
+		).put(
+			"test", "AlloyEditor.SelectionTest.text"
+		);
 	}
 
 }

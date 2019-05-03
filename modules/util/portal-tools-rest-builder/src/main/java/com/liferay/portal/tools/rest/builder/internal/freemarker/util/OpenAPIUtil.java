@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.tools.rest.builder.internal.freemarker.tool.java.JavaMethodSignature;
 import com.liferay.portal.tools.rest.builder.internal.freemarker.tool.java.parser.GraphQLOpenAPIParser;
+import com.liferay.portal.tools.rest.builder.internal.freemarker.tool.java.parser.util.OpenAPIParserUtil;
 import com.liferay.portal.vulcan.yaml.config.ConfigYAML;
 import com.liferay.portal.vulcan.yaml.openapi.Components;
 import com.liferay.portal.vulcan.yaml.openapi.Info;
@@ -60,6 +61,20 @@ public class OpenAPIUtil {
 		return "v" + matcher.replaceFirst("");
 	}
 
+	public static String formatSingular(String s) {
+		if (s.endsWith("ses")) {
+			s = s.substring(0, s.length() - 3) + "s";
+		}
+		else if (s.endsWith("ies")) {
+			s = s.substring(0, s.length() - 3) + "y";
+		}
+		else if (s.endsWith("s")) {
+			s = s.substring(0, s.length() - 1);
+		}
+
+		return s;
+	}
+
 	public static Map<String, Schema> getAllSchemas(OpenAPIYAML openAPIYAML) {
 		Map<String, Schema> allSchemas = new TreeMap<>();
 
@@ -82,6 +97,10 @@ public class OpenAPIUtil {
 				if (items != null) {
 					propertySchemas = items.getPropertySchemas();
 				}
+				else if (schema.getAllOfSchemas() != null) {
+					propertySchemas = OpenAPIParserUtil.getAllOfPropertySchemas(
+						schema);
+				}
 				else {
 					propertySchemas = schema.getPropertySchemas();
 				}
@@ -92,6 +111,10 @@ public class OpenAPIUtil {
 
 				String schemaName = StringUtil.upperCaseFirstLetter(
 					entry.getKey());
+
+				if (items != null) {
+					schemaName = formatSingular(schemaName);
+				}
 
 				allSchemas.put(schemaName, schema);
 
@@ -104,11 +127,14 @@ public class OpenAPIUtil {
 
 						Iterator<String> iterator = keys.iterator();
 
-						allSchemas.put(
-							StringUtil.upperCaseFirstLetter(iterator.next()),
-							oneOfSchema);
+						String schemaKey = StringUtil.upperCaseFirstLetter(
+							iterator.next());
 
-						queue.add(schemas);
+						if (!allSchemas.containsKey(schemaKey)) {
+							allSchemas.put(schemaKey, oneOfSchema);
+
+							queue.add(schemas);
+						}
 					}
 				}
 

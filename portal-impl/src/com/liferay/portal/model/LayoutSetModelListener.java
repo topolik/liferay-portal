@@ -26,19 +26,23 @@ public class LayoutSetModelListener extends BaseModelListener<LayoutSet> {
 
 	@Override
 	public void onAfterRemove(LayoutSet layoutSet) {
+		if ((layoutSet == null) || !layoutSet.isHead()) {
+			return;
+		}
+
 		clearCache(layoutSet);
 	}
 
 	@Override
 	public void onAfterUpdate(LayoutSet layoutSet) {
+		if ((layoutSet == null) || !layoutSet.isHead()) {
+			return;
+		}
+
 		clearCache(layoutSet);
 	}
 
 	protected void clearCache(LayoutSet layoutSet) {
-		if (layoutSet == null) {
-			return;
-		}
-
 		if (!layoutSet.isPrivateLayout()) {
 			CacheUtil.clearCache(layoutSet.getCompanyId());
 		}

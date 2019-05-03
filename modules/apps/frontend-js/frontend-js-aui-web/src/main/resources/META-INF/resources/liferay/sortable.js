@@ -1,3 +1,10 @@
+/**
+ * The Sortable Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-sortable
+ */
+
 AUI.add(
 	'liferay-sortable',
 	function(A) {

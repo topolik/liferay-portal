@@ -15,6 +15,7 @@
 package com.liferay.headless.form.internal.graphql.mutation.v1_0;
 
 import com.liferay.headless.form.dto.v1_0.Form;
+import com.liferay.headless.form.dto.v1_0.FormDocument;
 import com.liferay.headless.form.dto.v1_0.FormRecord;
 import com.liferay.headless.form.resource.v1_0.FormDocumentResource;
 import com.liferay.headless.form.resource.v1_0.FormRecordResource;
@@ -23,6 +24,7 @@ import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.service.CompanyLocalServiceUtil;
+import com.liferay.portal.vulcan.multipart.MultipartBody;
 
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLInvokeDetached;
@@ -66,7 +68,7 @@ public class Mutation {
 	@GraphQLField
 	@GraphQLInvokeDetached
 	public Form postFormEvaluateContext(
-			@GraphQLName("form-id") Long formId, @GraphQLName("Form") Form form)
+			@GraphQLName("formId") Long formId, @GraphQLName("form") Form form)
 		throws Exception {
 
 		return _applyComponentServiceObjects(
@@ -77,22 +79,25 @@ public class Mutation {
 
 	@GraphQLField
 	@GraphQLInvokeDetached
-	public Form postFormUploadFile(
-			@GraphQLName("form-id") Long formId, @GraphQLName("Form") Form form)
+	@GraphQLName("postFormFormDocumentFormIdMultipartBody")
+	public FormDocument postFormFormDocument(
+			@GraphQLName("formId") Long formId,
+			@GraphQLName("multipartBody") MultipartBody multipartBody)
 		throws Exception {
 
 		return _applyComponentServiceObjects(
 			_formResourceComponentServiceObjects,
 			this::_populateResourceContext,
-			formResource -> formResource.postFormUploadFile(formId, form));
+			formResource -> formResource.postFormFormDocument(
+				formId, multipartBody));
 	}
 
 	@GraphQLInvokeDetached
-	public boolean deleteFormDocument(
-			@GraphQLName("form-document-id") Long formDocumentId)
+	public void deleteFormDocument(
+			@GraphQLName("formDocumentId") Long formDocumentId)
 		throws Exception {
 
-		return _applyComponentServiceObjects(
+		_applyVoidComponentServiceObjects(
 			_formDocumentResourceComponentServiceObjects,
 			this::_populateResourceContext,
 			formDocumentResource -> formDocumentResource.deleteFormDocument(
@@ -101,8 +106,8 @@ public class Mutation {
 
 	@GraphQLInvokeDetached
 	public FormRecord putFormRecord(
-			@GraphQLName("form-record-id") Long formRecordId,
-			@GraphQLName("FormRecord") FormRecord formRecord)
+			@GraphQLName("formRecordId") Long formRecordId,
+			@GraphQLName("formRecord") FormRecord formRecord)
 		throws Exception {
 
 		return _applyComponentServiceObjects(
@@ -115,8 +120,8 @@ public class Mutation {
 	@GraphQLField
 	@GraphQLInvokeDetached
 	public FormRecord postFormFormRecord(
-			@GraphQLName("form-id") Long formId,
-			@GraphQLName("FormRecord") FormRecord formRecord)
+			@GraphQLName("formId") Long formId,
+			@GraphQLName("formRecord") FormRecord formRecord)
 		throws Exception {
 
 		return _applyComponentServiceObjects(
@@ -139,6 +144,25 @@ public class Mutation {
 			unsafeConsumer.accept(resource);
 
 			return unsafeFunction.apply(resource);
+		}
+		finally {
+			componentServiceObjects.ungetService(resource);
+		}
+	}
+
+	private <T, E1 extends Throwable, E2 extends Throwable> void
+			_applyVoidComponentServiceObjects(
+				ComponentServiceObjects<T> componentServiceObjects,
+				UnsafeConsumer<T, E1> unsafeConsumer,
+				UnsafeConsumer<T, E2> unsafeFunction)
+		throws E1, E2 {
+
+		T resource = componentServiceObjects.getService();
+
+		try {
+			unsafeConsumer.accept(resource);
+
+			unsafeFunction.accept(resource);
 		}
 		finally {
 			componentServiceObjects.ungetService(resource);

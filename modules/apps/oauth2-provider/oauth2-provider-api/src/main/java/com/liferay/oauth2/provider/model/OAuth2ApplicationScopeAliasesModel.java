@@ -159,33 +159,4 @@ public interface OAuth2ApplicationScopeAliasesModel
 	 */
 	public void setOAuth2ApplicationId(long oAuth2ApplicationId);
 
-	/**
-	 * Returns the scope aliases of this o auth2 application scope aliases.
-	 *
-	 * @return the scope aliases of this o auth2 application scope aliases
-	 */
-	@AutoEscape
-	public String getScopeAliases();
-
-	/**
-	 * Sets the scope aliases of this o auth2 application scope aliases.
-	 *
-	 * @param scopeAliases the scope aliases of this o auth2 application scope aliases
-	 */
-	public void setScopeAliases(String scopeAliases);
-
-	/**
-	 * Returns the scope aliases hash of this o auth2 application scope aliases.
-	 *
-	 * @return the scope aliases hash of this o auth2 application scope aliases
-	 */
-	public long getScopeAliasesHash();
-
-	/**
-	 * Sets the scope aliases hash of this o auth2 application scope aliases.
-	 *
-	 * @param scopeAliasesHash the scope aliases hash of this o auth2 application scope aliases
-	 */
-	public void setScopeAliasesHash(long scopeAliasesHash);
-
 }

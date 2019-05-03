@@ -36,20 +36,6 @@ public class SegmentsEntryLocalServiceWrapper
 		_segmentsEntryLocalService = segmentsEntryLocalService;
 	}
 
-	@Override
-	public com.liferay.segments.model.SegmentsEntry addSegmentsEntry(
-			java.util.Map<java.util.Locale, String> nameMap,
-			java.util.Map<java.util.Locale, String> descriptionMap,
-			boolean active, String criteria, String key, String source,
-			String type,
-			com.liferay.portal.kernel.service.ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return _segmentsEntryLocalService.addSegmentsEntry(
-			nameMap, descriptionMap, active, criteria, key, source, type,
-			serviceContext);
-	}
-
 	/**
 	 * Adds the segments entry to the database. Also notifies the appropriate model listeners.
 	 *
@@ -61,6 +47,20 @@ public class SegmentsEntryLocalServiceWrapper
 		com.liferay.segments.model.SegmentsEntry segmentsEntry) {
 
 		return _segmentsEntryLocalService.addSegmentsEntry(segmentsEntry);
+	}
+
+	@Override
+	public com.liferay.segments.model.SegmentsEntry addSegmentsEntry(
+			String segmentsEntryKey,
+			java.util.Map<java.util.Locale, String> nameMap,
+			java.util.Map<java.util.Locale, String> descriptionMap,
+			boolean active, String criteria, String source, String type,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _segmentsEntryLocalService.addSegmentsEntry(
+			segmentsEntryKey, nameMap, descriptionMap, active, criteria, source,
+			type, serviceContext);
 	}
 
 	/**
@@ -231,10 +231,26 @@ public class SegmentsEntryLocalServiceWrapper
 
 	@Override
 	public com.liferay.segments.model.SegmentsEntry fetchSegmentsEntry(
-		long groupId, String key, boolean includeAncestorSegmentsEntries) {
+		long groupId, String segmentsEntryKey,
+		boolean includeAncestorSegmentsEntries) {
 
 		return _segmentsEntryLocalService.fetchSegmentsEntry(
-			groupId, key, includeAncestorSegmentsEntries);
+			groupId, segmentsEntryKey, includeAncestorSegmentsEntries);
+	}
+
+	/**
+	 * Returns the segments entry matching the UUID and group.
+	 *
+	 * @param uuid the segments entry's UUID
+	 * @param groupId the primary key of the group
+	 * @return the matching segments entry, or <code>null</code> if a matching segments entry could not be found
+	 */
+	@Override
+	public com.liferay.segments.model.SegmentsEntry
+		fetchSegmentsEntryByUuidAndGroupId(String uuid, long groupId) {
+
+		return _segmentsEntryLocalService.fetchSegmentsEntryByUuidAndGroupId(
+			uuid, groupId);
 	}
 
 	@Override
@@ -245,11 +261,13 @@ public class SegmentsEntryLocalServiceWrapper
 	}
 
 	@Override
-	public com.liferay.segments.model.SegmentsEntry getDefaultSegmentsEntry(
-			long groupId)
-		throws com.liferay.portal.kernel.exception.PortalException {
+	public com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery
+		getExportActionableDynamicQuery(
+			com.liferay.exportimport.kernel.lar.PortletDataContext
+				portletDataContext) {
 
-		return _segmentsEntryLocalService.getDefaultSegmentsEntry(groupId);
+		return _segmentsEntryLocalService.getExportActionableDynamicQuery(
+			portletDataContext);
 	}
 
 	@Override
@@ -275,17 +293,6 @@ public class SegmentsEntryLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _segmentsEntryLocalService.getPersistedModel(primaryKeyObj);
-	}
-
-	@Override
-	public java.util.List<com.liferay.segments.model.SegmentsEntry>
-		getSegmentsEntries(
-			boolean active, String type, int start, int end,
-			com.liferay.portal.kernel.util.OrderByComparator
-				<com.liferay.segments.model.SegmentsEntry> orderByComparator) {
-
-		return _segmentsEntryLocalService.getSegmentsEntries(
-			active, type, start, end, orderByComparator);
 	}
 
 	/**
@@ -321,6 +328,17 @@ public class SegmentsEntryLocalServiceWrapper
 
 	@Override
 	public java.util.List<com.liferay.segments.model.SegmentsEntry>
+		getSegmentsEntries(
+			long groupId, boolean active, String type, int start, int end,
+			com.liferay.portal.kernel.util.OrderByComparator
+				<com.liferay.segments.model.SegmentsEntry> orderByComparator) {
+
+		return _segmentsEntryLocalService.getSegmentsEntries(
+			groupId, active, type, start, end, orderByComparator);
+	}
+
+	@Override
+	public java.util.List<com.liferay.segments.model.SegmentsEntry>
 		getSegmentsEntriesBySource(
 			String source, int start, int end,
 			com.liferay.portal.kernel.util.OrderByComparator
@@ -328,6 +346,42 @@ public class SegmentsEntryLocalServiceWrapper
 
 		return _segmentsEntryLocalService.getSegmentsEntriesBySource(
 			source, start, end, orderByComparator);
+	}
+
+	/**
+	 * Returns all the segments entries matching the UUID and company.
+	 *
+	 * @param uuid the UUID of the segments entries
+	 * @param companyId the primary key of the company
+	 * @return the matching segments entries, or an empty list if no matches were found
+	 */
+	@Override
+	public java.util.List<com.liferay.segments.model.SegmentsEntry>
+		getSegmentsEntriesByUuidAndCompanyId(String uuid, long companyId) {
+
+		return _segmentsEntryLocalService.getSegmentsEntriesByUuidAndCompanyId(
+			uuid, companyId);
+	}
+
+	/**
+	 * Returns a range of segments entries matching the UUID and company.
+	 *
+	 * @param uuid the UUID of the segments entries
+	 * @param companyId the primary key of the company
+	 * @param start the lower bound of the range of segments entries
+	 * @param end the upper bound of the range of segments entries (not inclusive)
+	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
+	 * @return the range of matching segments entries, or an empty list if no matches were found
+	 */
+	@Override
+	public java.util.List<com.liferay.segments.model.SegmentsEntry>
+		getSegmentsEntriesByUuidAndCompanyId(
+			String uuid, long companyId, int start, int end,
+			com.liferay.portal.kernel.util.OrderByComparator
+				<com.liferay.segments.model.SegmentsEntry> orderByComparator) {
+
+		return _segmentsEntryLocalService.getSegmentsEntriesByUuidAndCompanyId(
+			uuid, companyId, start, end, orderByComparator);
 	}
 
 	/**
@@ -363,6 +417,23 @@ public class SegmentsEntryLocalServiceWrapper
 		return _segmentsEntryLocalService.getSegmentsEntry(segmentsEntryId);
 	}
 
+	/**
+	 * Returns the segments entry matching the UUID and group.
+	 *
+	 * @param uuid the segments entry's UUID
+	 * @param groupId the primary key of the group
+	 * @return the matching segments entry
+	 * @throws PortalException if a matching segments entry could not be found
+	 */
+	@Override
+	public com.liferay.segments.model.SegmentsEntry
+			getSegmentsEntryByUuidAndGroupId(String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return _segmentsEntryLocalService.getSegmentsEntryByUuidAndGroupId(
+			uuid, groupId);
+	}
+
 	@Override
 	public com.liferay.portal.kernel.search.BaseModelSearchResult
 		<com.liferay.segments.model.SegmentsEntry> searchSegmentsEntries(
@@ -387,16 +458,16 @@ public class SegmentsEntryLocalServiceWrapper
 
 	@Override
 	public com.liferay.segments.model.SegmentsEntry updateSegmentsEntry(
-			long segmentsEntryId,
+			long segmentsEntryId, String segmentsEntryKey,
 			java.util.Map<java.util.Locale, String> nameMap,
 			java.util.Map<java.util.Locale, String> descriptionMap,
-			boolean active, String criteria, String key,
+			boolean active, String criteria,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return _segmentsEntryLocalService.updateSegmentsEntry(
-			segmentsEntryId, nameMap, descriptionMap, active, criteria, key,
-			serviceContext);
+			segmentsEntryId, segmentsEntryKey, nameMap, descriptionMap, active,
+			criteria, serviceContext);
 	}
 
 	/**

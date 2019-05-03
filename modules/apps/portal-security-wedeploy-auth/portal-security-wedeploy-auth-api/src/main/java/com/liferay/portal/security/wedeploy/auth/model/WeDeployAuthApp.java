@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 	"com.liferay.portal.security.wedeploy.auth.model.impl.WeDeployAuthAppImpl"
 )
 @ProviderType
-public interface WeDeployAuthApp extends WeDeployAuthAppModel, PersistedModel {
+public interface WeDeployAuthApp extends PersistedModel, WeDeployAuthAppModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

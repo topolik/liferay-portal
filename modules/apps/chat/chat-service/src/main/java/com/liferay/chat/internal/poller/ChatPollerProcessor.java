@@ -29,6 +29,7 @@ import com.liferay.portal.kernel.exception.NoSuchUserException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.ContactConstants;
@@ -133,13 +134,11 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 			long userId = (Long)buddy[8];
 			String userUuid = (String)buddy[9];
 
-			JSONObject curUserJSONObject = JSONFactoryUtil.createJSONObject();
-
 			Status buddyStatus = StatusLocalServiceUtil.getUserStatus(userId);
 
 			awake = buddyStatus.isAwake();
 
-			curUserJSONObject.put("awake", awake);
+			JSONObject curUserJSONObject = JSONUtil.put("awake", awake);
 
 			String displayURL = StringPool.BLANK;
 
@@ -168,23 +167,30 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 			String fullName = ContactConstants.getFullName(
 				firstName, middleName, lastName);
 
-			curUserJSONObject.put("fullName", fullName);
-
-			curUserJSONObject.put("groupId", groupId);
-			curUserJSONObject.put("portraitId", portraitId);
+			curUserJSONObject.put(
+				"fullName", fullName
+			).put(
+				"groupId", groupId
+			).put(
+				"portraitId", portraitId
+			);
 
 			String portraitURL = UserConstants.getPortraitURL(
 				StringPool.BLANK, male, portraitId, userUuid);
 
-			curUserJSONObject.put("portraitURL", portraitURL);
-
-			curUserJSONObject.put("screenName", screenName);
+			curUserJSONObject.put(
+				"portraitURL", portraitURL
+			).put(
+				"screenName", screenName
+			);
 
 			String statusMessage = buddyStatus.getMessage();
 
-			curUserJSONObject.put("statusMessage", statusMessage);
-
-			curUserJSONObject.put("userId", userId);
+			curUserJSONObject.put(
+				"statusMessage", statusMessage
+			).put(
+				"userId", userId
+			);
 
 			buddiesJSONArray.put(curUserJSONObject);
 		}
@@ -222,20 +228,24 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 
 			_processedEntryIds.add(entry.getEntryId());
 
-			JSONObject entryJSONObject = JSONFactoryUtil.createJSONObject();
-
-			entryJSONObject.put("createDate", entry.getCreateDate());
-			entryJSONObject.put("entryId", entry.getEntryId());
-			entryJSONObject.put("fromUserId", entry.getFromUserId());
+			JSONObject entryJSONObject = JSONUtil.put(
+				"createDate", entry.getCreateDate()
+			).put(
+				"entryId", entry.getEntryId()
+			).put(
+				"fromUserId", entry.getFromUserId()
+			);
 
 			if (entry.getFromUserId() != pollerRequest.getUserId()) {
 				try {
 					User fromUser = _userLocalService.getUserById(
 						entry.getFromUserId());
 
-					entryJSONObject.put("fromFullName", fromUser.getFullName());
 					entryJSONObject.put(
-						"fromPortraitId", fromUser.getPortraitId());
+						"fromFullName", fromUser.getFullName()
+					).put(
+						"fromPortraitId", fromUser.getPortraitId()
+					);
 				}
 				catch (NoSuchUserException nsue) {
 
@@ -249,9 +259,13 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 				}
 			}
 
-			entryJSONObject.put("content", HtmlUtil.escape(entry.getContent()));
-			entryJSONObject.put("flag", entry.getFlag());
-			entryJSONObject.put("toUserId", entry.getToUserId());
+			entryJSONObject.put(
+				"content", HtmlUtil.escape(entry.getContent())
+			).put(
+				"flag", entry.getFlag()
+			).put(
+				"toUserId", entry.getToUserId()
+			);
 
 			entriesJSONArray.put(entryJSONObject);
 		}
@@ -287,18 +301,6 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 		}
 	}
 
-	@Reference(unbind = "-")
-	protected void setLayoutSetLocalService(
-		LayoutSetLocalService layoutSetLocalService) {
-
-		_layoutSetLocalService = layoutSetLocalService;
-	}
-
-	@Reference(unbind = "-")
-	protected void setUserLocalService(UserLocalService userLocalService) {
-		_userLocalService = userLocalService;
-	}
-
 	protected void updateStatus(PollerRequest pollerRequest) throws Exception {
 		int online = getInteger(pollerRequest, "online");
 		int awake = getInteger(pollerRequest, "awake");
@@ -326,12 +328,15 @@ public class ChatPollerProcessor extends BasePollerProcessor {
 	@Reference
 	private Http _http;
 
+	@Reference
 	private LayoutSetLocalService _layoutSetLocalService;
 
 	@Reference
 	private Portal _portal;
 
 	private final Set<Long> _processedEntryIds = new HashSet<>();
+
+	@Reference
 	private UserLocalService _userLocalService;
 
 }

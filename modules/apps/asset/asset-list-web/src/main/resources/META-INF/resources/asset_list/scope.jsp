@@ -22,115 +22,111 @@ List<Group> selectedGroups = editAssetListDisplayContext.getSelectedGroups();
 PortletURL portletURL = editAssetListDisplayContext.getPortletURL();
 %>
 
-<portlet:actionURL name="/asset_list/add_scope_group" var="addGroupURL">
-	<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
-	<portlet:param name="assetListEntryId" value="<%= String.valueOf(editAssetListDisplayContext.getAssetListEntryId()) %>" />
-</portlet:actionURL>
+<aui:input name="TypeSettingsProperties--groupIds--" type="hidden" value="<%= StringUtil.merge(editAssetListDisplayContext.getSelectedGroupIds()) %>" />
 
-<liferay-frontend:edit-form
-	action="<%= addGroupURL %>"
-	method="post"
-	name="fm"
+<liferay-util:buffer
+	var="removeLinkIcon"
 >
-	<aui:input name="redirect" type="hidden" value="<%= currentURL %>" />
-	<aui:input name="groupId" type="hidden" value="" />
+	<liferay-ui:icon
+		icon="times-circle"
+		markupView="lexicon"
+		message="remove"
+	/>
+</liferay-util:buffer>
 
-	<liferay-frontend:edit-form-body>
-		<h1 class="sheet-title">
-			<liferay-ui:message key="scope" />
-		</h1>
+<liferay-ui:search-container
+	compactEmptyResultsMessage="<%= true %>"
+	emptyResultsMessage="none"
+	headerNames="name,type,null"
+	iteratorURL="<%= portletURL %>"
+	total="<%= selectedGroups.size() %>"
+>
+	<liferay-ui:search-container-results
+		results="<%= selectedGroups %>"
+	/>
 
-		<liferay-ui:search-container
-			compactEmptyResultsMessage="<%= true %>"
-			emptyResultsMessage="none"
-			iteratorURL="<%= portletURL %>"
-			total="<%= selectedGroups.size() %>"
-		>
-			<liferay-ui:search-container-results
-				results="<%= selectedGroups %>"
-			/>
+	<liferay-ui:search-container-row
+		className="com.liferay.portal.kernel.model.Group"
+		keyProperty="groupId"
+		modelVar="group"
+	>
+		<liferay-ui:search-container-column-text
+			name="name"
+			truncate="<%= true %>"
+			value="<%= group.getScopeDescriptiveName(themeDisplay) %>"
+		/>
 
-			<liferay-ui:search-container-row
-				className="com.liferay.portal.kernel.model.Group"
-				keyProperty="groupId"
-				modelVar="group"
-			>
-				<liferay-ui:search-container-column-text
-					name="name"
-					truncate="<%= true %>"
-					value="<%= group.getScopeDescriptiveName(themeDisplay) %>"
-				/>
+		<liferay-ui:search-container-column-text
+			name="type"
+			value="<%= LanguageUtil.get(request, group.getScopeLabel(themeDisplay)) %>"
+		/>
 
-				<liferay-ui:search-container-column-text
-					name="type"
-					value="<%= LanguageUtil.get(request, group.getScopeLabel(themeDisplay)) %>"
-				/>
+		<liferay-ui:search-container-column-text>
+			<a class="modify-link" data-rowId="<%= group.getGroupId() %>" href="javascript:;"><%= removeLinkIcon %></a>
+		</liferay-ui:search-container-column-text>
+	</liferay-ui:search-container-row>
 
-				<liferay-ui:search-container-column-text>
-					<portlet:actionURL name="/asset_list/delete_scope_group" var="deleteScopeGroupURL">
-						<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
-						<portlet:param name="assetListEntryId" value="<%= String.valueOf(editAssetListDisplayContext.getAssetListEntryId()) %>" />
-						<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-					</portlet:actionURL>
+	<liferay-ui:search-iterator
+		markupView="lexicon"
+		paginate="<%= false %>"
+	/>
+</liferay-ui:search-container>
 
-					<liferay-ui:icon
-						icon="times-circle"
-						markupView="lexicon"
-						url="<%= deleteScopeGroupURL %>"
-					/>
-				</liferay-ui:search-container-column-text>
-			</liferay-ui:search-container-row>
+<liferay-ui:icon-menu
+	cssClass="select-existing-selector"
+	direction="right"
+	message="select"
+	showArrow="<%= false %>"
+	showWhenSingleIcon="<%= true %>"
+>
 
-			<liferay-ui:search-iterator
-				markupView="lexicon"
-				paginate="<%= false %>"
-			/>
-		</liferay-ui:search-container>
+	<%
+	for (Group group : editAssetListDisplayContext.getAvailableGroups()) {
+		if (selectedGroups.contains(group)) {
+			continue;
+		}
 
-		<liferay-ui:icon-menu
-			cssClass="select-existing-selector"
-			direction="right"
-			message="select"
-			showArrow="<%= false %>"
-			showWhenSingleIcon="<%= true %>"
-		>
+		String onClick = "addRow('" + group.getGroupId() + "', '" + HtmlUtil.escapeJS(HtmlUtil.escape(group.getDescriptiveName(themeDisplay.getLocale()))) + "', '" + group.getScopeLabel(themeDisplay) + "');";
+	%>
 
-			<%
-			for (Group group : editAssetListDisplayContext.getAvailableGroups()) {
-				if (selectedGroups.contains(group)) {
-					continue;
-				}
-			%>
+		<liferay-ui:icon
+			message="<%= group.getScopeDescriptiveName(themeDisplay) %>"
+			onClick="<%= onClick %>"
+			url="javascript:;"
+		/>
 
-				<portlet:actionURL name="/asset_list/add_scope_group" var="addScopeGroupURL">
-					<portlet:param name="redirect" value="<%= portletURL.toString() %>" />
-					<portlet:param name="assetListEntryId" value="<%= String.valueOf(editAssetListDisplayContext.getAssetListEntryId()) %>" />
-					<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-				</portlet:actionURL>
+	<%
+	}
+	%>
 
-				<liferay-ui:icon
-					id='<%= "scope" + group.getGroupId() %>'
-					message="<%= group.getScopeDescriptiveName(themeDisplay) %>"
-					method="post"
-					url="<%= addScopeGroupURL %>"
-				/>
+	<liferay-ui:icon
+		cssClass="highlited scope-selector"
+		id="selectManageableGroup"
+		message='<%= LanguageUtil.get(request, "other-site") + StringPool.TRIPLE_PERIOD %>'
+		method="get"
+		url="javascript:;"
+	/>
+</liferay-ui:icon-menu>
 
-			<%
-			}
-			%>
+<aui:script use="liferay-search-container">
+	var searchContainer = Liferay.SearchContainer.get('<portlet:namespace />groupsSearchContainer');
 
-			<liferay-ui:icon
-				cssClass="highlited scope-selector"
-				id="selectManageableGroup"
-				message='<%= LanguageUtil.get(request, "other-site") + StringPool.TRIPLE_PERIOD %>'
-				method="get"
-				url="javascript:;"
-			/>
-		</liferay-ui:icon-menu>
-	</liferay-frontend:edit-form-body>
-</liferay-frontend:edit-form>
+	searchContainer.get('contentBox').delegate(
+		'click',
+		function(event) {
+			var link = event.currentTarget;
 
-<aui:script>
+			var tr = link.ancestor('tr');
+
+			searchContainer.deleteRow(tr, link.getAttribute('data-rowId'));
+
+			searchContainer.updateDataStore();
+
+			updateGroupIds();
+		},
+		'.modify-link'
+	);
+
 	var selectManageableGroupIcon = document.getElementById('<portlet:namespace />selectManageableGroup');
 
 	if (selectManageableGroupIcon) {
@@ -150,17 +146,48 @@ PortletURL portletURL = editAssetListDisplayContext.getPortletURL();
 						uri: '<%= editAssetListDisplayContext.getGroupItemSelectorURL() %>'
 					},
 					function(event) {
-						Liferay.Util.postForm(
-							document.<portlet:namespace />fm,
-							{
-								data: {
-									groupId: event.groupid
-								}
-							}
-						);
+						var entityId = event.groupid;
+
+						var searchContainerData = searchContainer.getData();
+
+						if (searchContainerData.indexOf(entityId) == -1) {
+							addRow(entityId, event.groupdescriptivename, event.groupscopelabel);
+						}
 					}
 				);
 			}
 		);
 	}
+
+	Liferay.provide(
+		window,
+		'addRow',
+		function(groupId, name, scopeLabel) {
+			var rowColumns = [];
+
+			rowColumns.push('<span class="truncate-text">' + name + '</span>');
+			rowColumns.push(scopeLabel);
+			rowColumns.push('<a class="modify-link" data-rowId="' + groupId + '" href="javascript:;"><%= UnicodeFormatter.toString(removeLinkIcon) %></a>');
+
+			searchContainer.addRow(rowColumns, groupId);
+
+			searchContainer.updateDataStore();
+
+			updateGroupIds();
+		}
+	);
+
+	Liferay.provide(
+		window,
+		'updateGroupIds',
+		function() {
+			var groupIds = document.getElementById('<portlet:namespace />groupIds');
+
+			if (groupIds) {
+				var searchContainerData = searchContainer.getData();
+
+				groupIds.setAttribute('value', searchContainerData.split(','));
+			}
+		}
+	);
 </aui:script>

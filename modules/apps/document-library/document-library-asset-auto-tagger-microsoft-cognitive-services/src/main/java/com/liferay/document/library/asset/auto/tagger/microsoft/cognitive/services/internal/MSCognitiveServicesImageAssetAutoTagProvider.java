@@ -16,7 +16,6 @@ package com.liferay.document.library.asset.auto.tagger.microsoft.cognitive.servi
 
 import com.liferay.asset.auto.tagger.AssetAutoTagProvider;
 import com.liferay.document.library.asset.auto.tagger.microsoft.cognitive.services.internal.configuration.MSCognitiveServicesAssetAutoTagProviderCompanyConfiguration;
-import com.liferay.document.library.asset.auto.tagger.microsoft.cognitive.services.internal.constants.MSCognitiveServicesAssetAutoTagProviderConstants;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -30,21 +29,23 @@ import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.repository.capabilities.TemporaryFileEntriesCapability;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.repository.model.FileVersion;
-import com.liferay.portal.kernel.settings.CompanyServiceSettingsLocator;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.InetAddressUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.osgi.service.component.annotations.Component;
@@ -61,7 +62,7 @@ public class MSCognitiveServicesImageAssetAutoTagProvider
 	implements AssetAutoTagProvider<FileEntry> {
 
 	@Override
-	public List<String> getTagNames(FileEntry fileEntry) {
+	public Collection<String> getTagNames(FileEntry fileEntry) {
 		try {
 			MSCognitiveServicesAssetAutoTagProviderCompanyConfiguration
 				msCognitiveServicesAssetAutoTagProviderCompanyConfiguration =
@@ -74,6 +75,10 @@ public class MSCognitiveServicesImageAssetAutoTagProvider
 
 				return Collections.emptyList();
 			}
+
+			checkAPIEndpoint(
+				msCognitiveServicesAssetAutoTagProviderCompanyConfiguration.
+					apiEndpoint());
 
 			FileVersion fileVersion = fileEntry.getFileVersion();
 
@@ -95,15 +100,27 @@ public class MSCognitiveServicesImageAssetAutoTagProvider
 		}
 	}
 
+	protected void checkAPIEndpoint(String apiEndpoint)
+		throws MalformedURLException, UnknownHostException {
+
+		URL url = new URL(apiEndpoint);
+
+		if (InetAddressUtil.isLocalInetAddress(
+				InetAddressUtil.getInetAddressByName(url.getHost()))) {
+
+			throw new SecurityException(
+				"Microsoft Cognitive Services Image Auto Tagging API " +
+					"endpoint is a local address");
+		}
+	}
+
 	private MSCognitiveServicesAssetAutoTagProviderCompanyConfiguration
 			_getConfiguration(FileEntry fileEntry)
 		throws ConfigurationException {
 
-		return _configurationProvider.getConfiguration(
+		return _configurationProvider.getCompanyConfiguration(
 			MSCognitiveServicesAssetAutoTagProviderCompanyConfiguration.class,
-			new CompanyServiceSettingsLocator(
-				fileEntry.getCompanyId(),
-				MSCognitiveServicesAssetAutoTagProviderConstants.SERVICE_NAME));
+			fileEntry.getCompanyId());
 	}
 
 	private boolean _isSupportedFormat(FileEntry fileEntry) {

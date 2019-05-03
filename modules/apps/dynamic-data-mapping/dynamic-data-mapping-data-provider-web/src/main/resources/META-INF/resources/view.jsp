@@ -23,10 +23,10 @@ String displayStyle = ddmDataProviderDisplayContext.getDisplayStyle();
 PortletURL portletURL = ddmDataProviderDisplayContext.getPortletURL();
 portletURL.setParameter("displayStyle", displayStyle);
 
-portletDisplay.setShowBackIcon(true);
+portletDisplay.setShowBackIcon(ddmDataProviderDisplayContext.isShowBackIcon());
 portletDisplay.setURLBack(backURL);
 
-renderResponse.setTitle(LanguageUtil.get(request, "data-providers"));
+renderResponse.setTitle(ddmDataProviderDisplayContext.getTitle());
 %>
 
 <liferay-ui:error exception="<%= RequiredDataProviderInstanceException.MustNotDeleteDataProviderInstanceReferencedByDataProviderInstanceLinks.class %>" message="the-data-provider-cannot-be-deleted-because-it-is-required-by-one-or-more-forms" />

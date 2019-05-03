@@ -18,6 +18,7 @@ import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.kernel.search.facet.Facet;
@@ -80,21 +81,15 @@ public class ModifiedFacetedSearcherTest extends BaseFacetedSearcherTestCase {
 	}
 
 	protected static JSONObject createDataJSONObject(String... ranges) {
-		JSONObject dataJSONObject = JSONFactoryUtil.createJSONObject();
-
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
 		for (String range : ranges) {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("range", range);
+			JSONObject jsonObject = JSONUtil.put("range", range);
 
 			jsonArray.put(jsonObject);
 		}
 
-		dataJSONObject.put("ranges", jsonArray);
-
-		return dataJSONObject;
+		return JSONUtil.put("ranges", jsonArray);
 	}
 
 	protected static void setConfigurationRanges(

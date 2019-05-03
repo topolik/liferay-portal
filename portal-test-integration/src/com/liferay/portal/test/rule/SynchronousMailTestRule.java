@@ -14,23 +14,44 @@
 
 package com.liferay.portal.test.rule;
 
-import com.liferay.portal.kernel.test.rule.BaseTestRule;
-import com.liferay.portal.kernel.test.rule.callback.SynchronousDestinationTestCallback.SyncHandler;
-import com.liferay.portal.test.rule.callback.SynchronousMailTestCallback;
+import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
+import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule.SyncHandler;
+import com.liferay.portal.test.mail.MailServiceTestUtil;
+
+import org.junit.runner.Description;
 
 /**
  * @author Manuel de la Peña
  * @author Roberto Díaz
  * @author Shuyang Zhou
  */
-public class SynchronousMailTestRule
-	extends BaseTestRule<SyncHandler, SyncHandler> {
+public class SynchronousMailTestRule extends SynchronousDestinationTestRule {
 
 	public static final SynchronousMailTestRule INSTANCE =
 		new SynchronousMailTestRule();
 
+	@Override
+	public void afterClass(Description description, SyncHandler syncHandler)
+		throws Exception {
+
+		MailServiceTestUtil.stop();
+	}
+
+	@Override
+	public void afterMethod(
+		Description description, SyncHandler syncHandler, Object target) {
+
+		MailServiceTestUtil.clearMessages();
+	}
+
+	@Override
+	public SyncHandler beforeClass(Description description) throws Throwable {
+		MailServiceTestUtil.start();
+
+		return null;
+	}
+
 	private SynchronousMailTestRule() {
-		super(SynchronousMailTestCallback.INSTANCE);
 	}
 
 }

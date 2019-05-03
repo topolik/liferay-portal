@@ -1,3 +1,10 @@
+/**
+ * The Autocomplete Input Caretoffset Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-autocomplete-input-caretoffset
+ */
+
 AUI.add(
 	'liferay-autocomplete-input-caretoffset',
 	function(A) {

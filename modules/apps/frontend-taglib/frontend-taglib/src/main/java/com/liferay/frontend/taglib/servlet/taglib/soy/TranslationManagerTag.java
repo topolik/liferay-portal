@@ -18,6 +18,7 @@ import com.liferay.frontend.taglib.soy.servlet.taglib.ComponentRendererTag;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -36,7 +37,7 @@ public class TranslationManagerTag extends ComponentRendererTag {
 	@Override
 	public int doStartTag() {
 		JSONArray availableLocalesJSONArray = JSONFactoryUtil.createJSONArray();
-		JSONObject localesJSONObject = JSONFactoryUtil.createJSONObject();
+		JSONArray localesJSONArray = JSONFactoryUtil.createJSONArray();
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
 			WebKeys.THEME_DISPLAY);
@@ -47,26 +48,27 @@ public class TranslationManagerTag extends ComponentRendererTag {
 		for (Locale locale : locales) {
 			String languageId = LocaleUtil.toLanguageId(locale);
 
-			if (ArrayUtil.contains(_availableLocales, locale)) {
-				availableLocalesJSONArray.put(languageId);
-			}
-
-			JSONObject localeJSONObject = JSONFactoryUtil.createJSONObject();
-
 			String w3cLanguageId = LocaleUtil.toW3cLanguageId(locale);
 
-			localeJSONObject.put("code", w3cLanguageId);
-			localeJSONObject.put("icon", StringUtil.toLowerCase(w3cLanguageId));
+			JSONObject localeJSONObject = JSONUtil.put(
+				"code", w3cLanguageId
+			).put(
+				"icon", StringUtil.toLowerCase(w3cLanguageId)
+			).put(
+				"id", languageId
+			).put(
+				"label", locale.getDisplayName(themeDisplay.getLocale())
+			);
 
-			localeJSONObject.put("id", languageId);
-			localeJSONObject.put(
-				"name", locale.getDisplayName(themeDisplay.getLocale()));
+			if (ArrayUtil.contains(_availableLocales, locale)) {
+				availableLocalesJSONArray.put(localeJSONObject);
+			}
 
-			localesJSONObject.put(languageId, localeJSONObject);
+			localesJSONArray.put(localeJSONObject);
 		}
 
 		putValue("availableLocales", availableLocalesJSONArray);
-		putValue("locales", localesJSONObject);
+		putValue("locales", localesJSONArray);
 
 		putValue("pathThemeImages", themeDisplay.getPathThemeImages());
 

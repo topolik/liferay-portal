@@ -14,15 +14,16 @@
 
 package com.liferay.layout.content.page.editor.web.internal.portlet.action;
 
-import com.liferay.asset.display.contributor.AssetDisplayContributor;
-import com.liferay.asset.display.contributor.AssetDisplayContributorTracker;
-import com.liferay.asset.display.contributor.AssetDisplayField;
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
+import com.liferay.info.display.contributor.InfoDisplayContributor;
+import com.liferay.info.display.contributor.InfoDisplayContributorTracker;
+import com.liferay.info.display.contributor.InfoDisplayField;
 import com.liferay.layout.content.page.editor.constants.ContentPageEditorPortletKeys;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
@@ -60,11 +61,11 @@ public class GetAssetMappingFieldsMVCResourceCommand
 
 		long classNameId = ParamUtil.getLong(resourceRequest, "classNameId");
 
-		AssetDisplayContributor assetDisplayContributor =
-			_assetDisplayContributorTracker.getAssetDisplayContributor(
+		InfoDisplayContributor infoDisplayContributor =
+			_infoDisplayContributorTracker.getInfoDisplayContributor(
 				_portal.getClassName(classNameId));
 
-		if (assetDisplayContributor == null) {
+		if (infoDisplayContributor == null) {
 			JSONPortletResponseUtil.writeJSON(
 				resourceRequest, resourceResponse,
 				JSONFactoryUtil.createJSONArray());
@@ -90,16 +91,18 @@ public class GetAssetMappingFieldsMVCResourceCommand
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
-		Set<AssetDisplayField> assetEntryFields =
-			assetDisplayContributor.getAssetDisplayFields(
+		Set<InfoDisplayField> infoDisplayFields =
+			infoDisplayContributor.getInfoDisplayFields(
 				assetEntry.getClassTypeId(), themeDisplay.getLocale());
 
-		for (AssetDisplayField assetEntryField : assetEntryFields) {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("key", assetEntryField.getKey());
-			jsonObject.put("label", assetEntryField.getLabel());
-			jsonObject.put("type", assetEntryField.getType());
+		for (InfoDisplayField infoDisplayField : infoDisplayFields) {
+			JSONObject jsonObject = JSONUtil.put(
+				"key", infoDisplayField.getKey()
+			).put(
+				"label", infoDisplayField.getLabel()
+			).put(
+				"type", infoDisplayField.getType()
+			);
 
 			jsonArray.put(jsonObject);
 		}
@@ -109,10 +112,10 @@ public class GetAssetMappingFieldsMVCResourceCommand
 	}
 
 	@Reference
-	private AssetDisplayContributorTracker _assetDisplayContributorTracker;
+	private AssetEntryLocalService _assetEntryLocalService;
 
 	@Reference
-	private AssetEntryLocalService _assetEntryLocalService;
+	private InfoDisplayContributorTracker _infoDisplayContributorTracker;
 
 	@Reference
 	private Portal _portal;

@@ -1,4 +1,5 @@
 create table SegmentsEntry (
+	uuid_ VARCHAR(75) null,
 	segmentsEntryId LONG not null primary key,
 	groupId LONG,
 	companyId LONG,
@@ -6,13 +7,14 @@ create table SegmentsEntry (
 	userName VARCHAR(75) null,
 	createDate DATE null,
 	modifiedDate DATE null,
+	segmentsEntryKey VARCHAR(75) null,
 	name STRING null,
 	description STRING null,
 	active_ BOOLEAN,
 	criteria TEXT null,
-	key_ VARCHAR(75) null,
 	source VARCHAR(75) null,
-	type_ VARCHAR(75) null
+	type_ VARCHAR(75) null,
+	lastPublishDate DATE null
 );
 
 create table SegmentsEntryRel (
@@ -29,6 +31,7 @@ create table SegmentsEntryRel (
 );
 
 create table SegmentsExperience (
+	uuid_ VARCHAR(75) null,
 	segmentsExperienceId LONG not null primary key,
 	groupId LONG,
 	companyId LONG,
@@ -41,5 +44,6 @@ create table SegmentsExperience (
 	classPK LONG,
 	name STRING null,
 	priority INTEGER,
-	active_ BOOLEAN
+	active_ BOOLEAN,
+	lastPublishDate DATE null
 );

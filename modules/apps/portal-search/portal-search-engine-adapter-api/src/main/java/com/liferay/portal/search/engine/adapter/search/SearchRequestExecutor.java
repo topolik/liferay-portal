@@ -31,4 +31,7 @@ public interface SearchRequestExecutor {
 	public SearchSearchResponse executeSearchRequest(
 		SearchSearchRequest searchSearchRequest);
 
+	public SuggestSearchResponse executeSearchRequest(
+		SuggestSearchRequest suggestSearchRequest);
+
 }

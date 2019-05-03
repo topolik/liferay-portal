@@ -19,6 +19,7 @@ import com.liferay.item.selector.ItemSelectorCriterion;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.portlet.PortletURLWrapper;
@@ -107,15 +108,15 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 			populateConfigJSONObject(
 				jsonObject, _inputEditorTaglibAttributes, null, null);
 
-		JSONObject expectedJSONObject = JSONFactoryUtil.createJSONObject();
-
-		expectedJSONObject.put(
+		JSONObject expectedJSONObject = JSONUtil.put(
 			"filebrowserImageBrowseLinkUrl",
-			"itemSelectorPortletURLWithUrlSelectionViews");
-		expectedJSONObject.put(
+			"itemSelectorPortletURLWithUrlSelectionViews"
+		).put(
 			"filebrowserImageBrowseUrl",
-			"itemSelectorPortletURLWithUrlSelectionViews");
-		expectedJSONObject.put("removePlugins", "plugin1,ae_addimages");
+			"itemSelectorPortletURLWithUrlSelectionViews"
+		).put(
+			"removePlugins", "plugin1,ae_addimages"
+		);
 
 		JSONAssert.assertEquals(
 			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
@@ -169,15 +170,15 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 				jsonObject, _inputEditorTaglibAttributes, new ThemeDisplay(),
 				requestBackedPortletURLFactory);
 
-		JSONObject expectedJSONObject = JSONFactoryUtil.createJSONObject();
-
-		expectedJSONObject.put(
+		JSONObject expectedJSONObject = JSONUtil.put(
 			"filebrowserImageBrowseLinkUrl",
-			"itemSelectorPortletURLWithWikiUrlAndUploadSelectionViews");
-		expectedJSONObject.put(
+			"itemSelectorPortletURLWithWikiUrlAndUploadSelectionViews"
+		).put(
 			"filebrowserImageBrowseUrl",
-			"itemSelectorPortletURLWithWikiUrlAndUploadSelectionViews");
-		expectedJSONObject.put("removePlugins", "plugin1");
+			"itemSelectorPortletURLWithWikiUrlAndUploadSelectionViews"
+		).put(
+			"removePlugins", "plugin1"
+		);
 
 		JSONAssert.assertEquals(
 			expectedJSONObject.toJSONString(), jsonObject.toJSONString(), true);
@@ -252,15 +253,13 @@ public class WikiAttachmentImageCreoleEditorConfigContributorTest
 	protected JSONObject getJSONObjectWithDefaultItemSelectorURL()
 		throws Exception {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put(
-			"filebrowserImageBrowseLinkUrl", "defaultItemSelectorPortletURL");
-		jsonObject.put(
-			"filebrowserImageBrowseUrl", "defaultItemSelectorPortletURL");
-		jsonObject.put("removePlugins", "plugin1");
-
-		return jsonObject;
+		return JSONUtil.put(
+			"filebrowserImageBrowseLinkUrl", "defaultItemSelectorPortletURL"
+		).put(
+			"filebrowserImageBrowseUrl", "defaultItemSelectorPortletURL"
+		).put(
+			"removePlugins", "plugin1"
+		);
 	}
 
 	protected void setAllowBrowseDocuments(boolean allowBrowseDocuments) {

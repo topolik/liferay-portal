@@ -32,8 +32,23 @@ public class PortalTopLevelBuildData
 	}
 
 	@Override
+	public String getPortalGitHubBranchName() {
+		return getGitHubBranchName(getPortalGitHubURL());
+	}
+
+	@Override
+	public String getPortalGitHubRepositoryName() {
+		return getGitHubRepositoryName(getPortalGitHubURL());
+	}
+
+	@Override
 	public String getPortalGitHubURL() {
 		return getString("portal_github_url");
+	}
+
+	@Override
+	public String getPortalGitHubUsername() {
+		return getGitHubUsername(getPortalGitHubURL());
 	}
 
 	@Override
@@ -61,8 +76,8 @@ public class PortalTopLevelBuildData
 
 		super(runID, jobName, buildURL);
 
-		setPortalGitHubURL(DEFAULT_PORTAL_GITHUB_URL);
-		setPortalUpstreamBranchName(DEFAULT_PORTAL_UPSTREAM_BRANCH_NAME);
+		setPortalGitHubURL(URL_PORTAL_GITHUB_BRANCH_DEFAULT);
+		setPortalUpstreamBranchName(NAME_PORTAL_UPSTREAM_BRANCH_DEFAULT);
 
 		validateKeys(_REQUIRED_KEYS);
 	}

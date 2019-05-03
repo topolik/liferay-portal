@@ -143,7 +143,9 @@ import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutFriendlyURLModel;
 import com.liferay.portal.kernel.model.LayoutModel;
 import com.liferay.portal.kernel.model.LayoutSetModel;
+import com.liferay.portal.kernel.model.LayoutSetVersionModel;
 import com.liferay.portal.kernel.model.LayoutTypePortletConstants;
+import com.liferay.portal.kernel.model.LayoutVersionModel;
 import com.liferay.portal.kernel.model.ModelHintsUtil;
 import com.liferay.portal.kernel.model.PortletConstants;
 import com.liferay.portal.kernel.model.PortletPreferencesModel;
@@ -190,6 +192,8 @@ import com.liferay.portal.model.impl.GroupModelImpl;
 import com.liferay.portal.model.impl.LayoutFriendlyURLModelImpl;
 import com.liferay.portal.model.impl.LayoutModelImpl;
 import com.liferay.portal.model.impl.LayoutSetModelImpl;
+import com.liferay.portal.model.impl.LayoutSetVersionModelImpl;
+import com.liferay.portal.model.impl.LayoutVersionModelImpl;
 import com.liferay.portal.model.impl.PortletPreferencesModelImpl;
 import com.liferay.portal.model.impl.ReleaseModelImpl;
 import com.liferay.portal.model.impl.ResourcePermissionModelImpl;
@@ -247,6 +251,8 @@ import java.sql.Types;
 
 import java.text.Format;
 
+import java.time.ZoneId;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -278,6 +284,9 @@ public class DataFactory {
 		List<String> models = ModelHintsUtil.getModels();
 
 		models.add(UserPersonalSite.class.getName());
+
+		models.add(_getMBDiscussionCombinedClassName(BlogsEntry.class));
+		models.add(_getMBDiscussionCombinedClassName(WikiPage.class));
 
 		for (String model : models) {
 			ClassNameModel classNameModel = new ClassNameModelImpl();
@@ -950,19 +959,21 @@ public class DataFactory {
 	public void initContext(Properties properties)
 		throws FileNotFoundException {
 
+		TimeZone timeZone = TimeZone.getDefault();
+
 		String timeZoneId = properties.getProperty("sample.sql.db.time.zone");
 
 		if (Validator.isNotNull(timeZoneId)) {
-			TimeZone timeZone = TimeZone.getTimeZone(timeZoneId);
+			timeZone = TimeZone.getTimeZone(ZoneId.of(timeZoneId));
 
-			if (timeZone != null) {
-				TimeZone.setDefault(timeZone);
-
-				_simpleDateFormat =
-					FastDateFormatFactoryUtil.getSimpleDateFormat(
-						"yyyy-MM-dd HH:mm:ss", timeZone);
-			}
+			TimeZone.setDefault(timeZone);
 		}
+		else {
+			properties.setProperty("sample.sql.db.time.zone", timeZone.getID());
+		}
+
+		_simpleDateFormat = FastDateFormatFactoryUtil.getSimpleDateFormat(
+			"yyyy-MM-dd HH:mm:ss", timeZone);
 
 		_maxAssetCategoryCount = GetterUtil.getInteger(
 			properties.getProperty("sample.sql.max.asset.category.count"));
@@ -2156,7 +2167,12 @@ public class DataFactory {
 		LayoutModel layoutModel = new LayoutModelImpl();
 
 		layoutModel.setUuid(SequentialUUID.generate());
-		layoutModel.setPlid(_counter.get());
+
+		long plid = _counter.get();
+
+		layoutModel.setPlid(plid);
+		layoutModel.setHeadId(-plid);
+
 		layoutModel.setGroupId(groupId);
 		layoutModel.setCompanyId(_companyId);
 		layoutModel.setUserId(_sampleUserId);
@@ -2198,6 +2214,43 @@ public class DataFactory {
 		return layoutSetModels;
 	}
 
+	public List<LayoutSetVersionModel> newLayoutSetVersionModels(
+		List<LayoutSetModel> layoutSetModels) {
+
+		List<LayoutSetVersionModel> layoutSetVersionModels = new ArrayList<>(
+			layoutSetModels.size());
+
+		layoutSetModels.forEach(
+			layoutSetModel -> {
+				layoutSetVersionModels.add(
+					newLayoutSetVersionModel(layoutSetModel));
+			});
+
+		return layoutSetVersionModels;
+	}
+
+	public LayoutVersionModel newLayoutVersionModel(LayoutModel layoutModel) {
+		LayoutVersionModel layoutVersionModel = new LayoutVersionModelImpl();
+
+		layoutVersionModel.setLayoutVersionId(_counter.get());
+		layoutVersionModel.setUuid(SequentialUUID.generate());
+		layoutVersionModel.setPlid(layoutModel.getPlid());
+		layoutVersionModel.setGroupId(layoutModel.getGroupId());
+		layoutVersionModel.setCompanyId(_companyId);
+		layoutVersionModel.setUserId(_sampleUserId);
+		layoutVersionModel.setUserName(_SAMPLE_USER_NAME);
+		layoutVersionModel.setCreateDate(new Date());
+		layoutVersionModel.setModifiedDate(new Date());
+		layoutVersionModel.setLayoutId(layoutModel.getLayoutId());
+		layoutVersionModel.setName(layoutModel.getName());
+		layoutVersionModel.setType(layoutModel.getType());
+		layoutVersionModel.setFriendlyURL(layoutModel.getFriendlyURL());
+		layoutVersionModel.setTypeSettings(layoutModel.getTypeSettings());
+		layoutVersionModel.setLastPublishDate(new Date());
+
+		return layoutVersionModel;
+	}
+
 	public List<MBCategoryModel> newMBCategoryModels(long groupId) {
 		List<MBCategoryModel> mbCategoryModels = new ArrayList<>(
 			_maxMBCategoryCount);
@@ -2207,6 +2260,32 @@ public class DataFactory {
 		}
 
 		return mbCategoryModels;
+	}
+
+	public AssetEntryModel newMBDiscussionAssetEntryModel(
+		BlogsEntryModel blogsEntryModel) {
+
+		ClassNameModel classNameModel = _classNameModels.get(
+			_getMBDiscussionCombinedClassName(BlogsEntry.class));
+
+		return newAssetEntryModel(
+			blogsEntryModel.getGroupId(), blogsEntryModel.getCreateDate(),
+			blogsEntryModel.getModifiedDate(), classNameModel.getClassNameId(),
+			blogsEntryModel.getEntryId(), "", 0, true, false, "",
+			String.valueOf(blogsEntryModel.getGroupId()));
+	}
+
+	public AssetEntryModel newMBDiscussionAssetEntryModel(
+		WikiPageModel wikiPageModel) {
+
+		ClassNameModel classNameModel = _classNameModels.get(
+			_getMBDiscussionCombinedClassName(WikiPage.class));
+
+		return newAssetEntryModel(
+			wikiPageModel.getGroupId(), wikiPageModel.getCreateDate(),
+			wikiPageModel.getModifiedDate(), classNameModel.getClassNameId(),
+			wikiPageModel.getResourcePrimKey(), "", 0, true, false, "",
+			String.valueOf(wikiPageModel.getGroupId()));
 	}
 
 	public MBDiscussionModel newMBDiscussionModel(
@@ -3415,7 +3494,11 @@ public class DataFactory {
 
 		LayoutSetModel layoutSetModel = new LayoutSetModelImpl();
 
-		layoutSetModel.setLayoutSetId(_counter.get());
+		long layoutSetId = _counter.get();
+
+		layoutSetModel.setLayoutSetId(layoutSetId);
+		layoutSetModel.setHeadId(-layoutSetId);
+
 		layoutSetModel.setGroupId(groupId);
 		layoutSetModel.setCompanyId(_companyId);
 		layoutSetModel.setCreateDate(new Date());
@@ -3426,6 +3509,28 @@ public class DataFactory {
 		layoutSetModel.setPageCount(pageCount);
 
 		return layoutSetModel;
+	}
+
+	protected LayoutSetVersionModel newLayoutSetVersionModel(
+		LayoutSetModel layoutSetModel) {
+
+		LayoutSetVersionModel layoutSetVersionModel =
+			new LayoutSetVersionModelImpl();
+
+		layoutSetVersionModel.setLayoutSetVersionId(_counter.get());
+		layoutSetVersionModel.setLayoutSetId(layoutSetModel.getLayoutSetId());
+		layoutSetVersionModel.setGroupId(layoutSetModel.getGroupId());
+		layoutSetVersionModel.setCompanyId(layoutSetModel.getCompanyId());
+		layoutSetVersionModel.setCreateDate(new Date());
+		layoutSetVersionModel.setModifiedDate(new Date());
+		layoutSetVersionModel.setPrivateLayout(
+			layoutSetModel.getPrivateLayout());
+		layoutSetVersionModel.setThemeId(layoutSetModel.getThemeId());
+		layoutSetVersionModel.setColorSchemeId(
+			layoutSetModel.getColorSchemeId());
+		layoutSetVersionModel.setPageCount(layoutSetModel.getPageCount());
+
+		return layoutSetVersionModel;
 	}
 
 	protected MBCategoryModel newMBCategoryModel(long groupId, int index) {
@@ -3811,6 +3916,12 @@ public class DataFactory {
 		}
 	}
 
+	private String _getMBDiscussionCombinedClassName(Class<?> clazz) {
+		return StringBundler.concat(
+			MBDiscussion.class.getName(), StringPool.UNDERLINE,
+			clazz.getName());
+	}
+
 	private String _getResourcePermissionModelName(String... classNames) {
 		if (ArrayUtil.isEmpty(classNames)) {
 			return StringPool.BLANK;
@@ -3932,8 +4043,7 @@ public class DataFactory {
 	private List<RoleModel> _roleModels;
 	private final long _sampleUserId;
 	private UserModel _sampleUserModel;
-	private Format _simpleDateFormat =
-		FastDateFormatFactoryUtil.getSimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private Format _simpleDateFormat;
 	private RoleModel _siteMemberRoleModel;
 	private final SimpleCounter _socialActivityCounter;
 	private final SimpleCounter _timeCounter;

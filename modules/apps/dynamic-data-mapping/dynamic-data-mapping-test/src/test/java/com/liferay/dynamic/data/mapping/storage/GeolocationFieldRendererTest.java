@@ -18,6 +18,7 @@ import com.liferay.dynamic.data.mapping.storage.impl.GeolocationFieldRenderer;
 import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.JavaDetector;
@@ -83,10 +84,11 @@ public class GeolocationFieldRendererTest extends PowerMockito {
 	}
 
 	protected Field createField() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("latitude", 9.8765);
-		jsonObject.put("longitude", 1.2345);
+		JSONObject jsonObject = JSONUtil.put(
+			"latitude", 9.8765
+		).put(
+			"longitude", 1.2345
+		);
 
 		return new Field("field", jsonObject.toString());
 	}

@@ -138,11 +138,11 @@ public class AssetListEntryPersistenceTest {
 
 		newAssetListEntry.setModifiedDate(RandomTestUtil.nextDate());
 
+		newAssetListEntry.setAssetListEntryKey(RandomTestUtil.randomString());
+
 		newAssetListEntry.setTitle(RandomTestUtil.randomString());
 
 		newAssetListEntry.setType(RandomTestUtil.nextInt());
-
-		newAssetListEntry.setTypeSettings(RandomTestUtil.randomString());
 
 		newAssetListEntry.setLastPublishDate(RandomTestUtil.nextDate());
 
@@ -174,12 +174,12 @@ public class AssetListEntryPersistenceTest {
 			Time.getShortTimestamp(existingAssetListEntry.getModifiedDate()),
 			Time.getShortTimestamp(newAssetListEntry.getModifiedDate()));
 		Assert.assertEquals(
+			existingAssetListEntry.getAssetListEntryKey(),
+			newAssetListEntry.getAssetListEntryKey());
+		Assert.assertEquals(
 			existingAssetListEntry.getTitle(), newAssetListEntry.getTitle());
 		Assert.assertEquals(
 			existingAssetListEntry.getType(), newAssetListEntry.getType());
-		Assert.assertEquals(
-			existingAssetListEntry.getTypeSettings(),
-			newAssetListEntry.getTypeSettings());
 		Assert.assertEquals(
 			Time.getShortTimestamp(existingAssetListEntry.getLastPublishDate()),
 			Time.getShortTimestamp(newAssetListEntry.getLastPublishDate()));
@@ -217,6 +217,15 @@ public class AssetListEntryPersistenceTest {
 		_persistence.countByGroupId(RandomTestUtil.nextLong());
 
 		_persistence.countByGroupId(0L);
+	}
+
+	@Test
+	public void testCountByG_ALEK() throws Exception {
+		_persistence.countByG_ALEK(RandomTestUtil.nextLong(), "");
+
+		_persistence.countByG_ALEK(0L, "null");
+
+		_persistence.countByG_ALEK(0L, (String)null);
 	}
 
 	@Test
@@ -278,8 +287,8 @@ public class AssetListEntryPersistenceTest {
 		return OrderByComparatorFactoryUtil.create(
 			"AssetListEntry", "uuid", true, "assetListEntryId", true, "groupId",
 			true, "companyId", true, "userId", true, "userName", true,
-			"createDate", true, "modifiedDate", true, "title", true, "type",
-			true, "lastPublishDate", true);
+			"createDate", true, "modifiedDate", true, "assetListEntryKey", true,
+			"title", true, "type", true, "lastPublishDate", true);
 	}
 
 	@Test
@@ -522,6 +531,17 @@ public class AssetListEntryPersistenceTest {
 				existingAssetListEntry, "getOriginalGroupId", new Class<?>[0]));
 		Assert.assertTrue(
 			Objects.equals(
+				existingAssetListEntry.getAssetListEntryKey(),
+				ReflectionTestUtil.invoke(
+					existingAssetListEntry, "getOriginalAssetListEntryKey",
+					new Class<?>[0])));
+
+		Assert.assertEquals(
+			Long.valueOf(existingAssetListEntry.getGroupId()),
+			ReflectionTestUtil.<Long>invoke(
+				existingAssetListEntry, "getOriginalGroupId", new Class<?>[0]));
+		Assert.assertTrue(
+			Objects.equals(
 				existingAssetListEntry.getTitle(),
 				ReflectionTestUtil.invoke(
 					existingAssetListEntry, "getOriginalTitle",
@@ -547,11 +567,11 @@ public class AssetListEntryPersistenceTest {
 
 		assetListEntry.setModifiedDate(RandomTestUtil.nextDate());
 
+		assetListEntry.setAssetListEntryKey(RandomTestUtil.randomString());
+
 		assetListEntry.setTitle(RandomTestUtil.randomString());
 
 		assetListEntry.setType(RandomTestUtil.nextInt());
-
-		assetListEntry.setTypeSettings(RandomTestUtil.randomString());
 
 		assetListEntry.setLastPublishDate(RandomTestUtil.nextDate());
 

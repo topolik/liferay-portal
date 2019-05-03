@@ -16,16 +16,34 @@ package com.liferay.frontend.taglib.clay.servlet.taglib.soy;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.soy.base.BaseClayTag;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
+import com.liferay.portal.kernel.util.ListUtil;
+import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.jsp.JspException;
+
 /**
  * @author Chema Balsas
  */
 public class DropdownActionsTag extends BaseClayTag {
+
+	@Override
+	public int doEndTag() throws JspException {
+		Map<String, Object> context = getContext();
+
+		List<DropdownItem> dropdownItems = (List<DropdownItem>)context.get(
+			"items");
+
+		if (ListUtil.isEmpty(dropdownItems)) {
+			return EVAL_PAGE;
+		}
+
+		return super.doEndTag();
+	}
 
 	@Override
 	public int doStartTag() {
@@ -43,6 +61,10 @@ public class DropdownActionsTag extends BaseClayTag {
 			button.put("type", (String)context.get("buttonType"));
 
 			putValue("button", button);
+		}
+
+		if (PortalUtil.isRightToLeft(request)) {
+			putValue("preferredAlign", "BottomRight");
 		}
 
 		return super.doStartTag();

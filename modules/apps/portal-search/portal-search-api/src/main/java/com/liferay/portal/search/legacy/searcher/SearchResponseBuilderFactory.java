@@ -20,26 +20,22 @@ import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.search.searcher.SearchResponseBuilder;
 
 /**
- * Provides a search response builder that can build a search response based off
- * a legacy search context. For backward compatibility only. New code should use
- * {@link com.liferay.portal.search.searcher.SearchResponseBuilderFactory}.
+ * Creates a search response builder for building a search response from a
+ * legacy search context. This is for backward compatibility only; new code
+ * should use {@link
+ * com.liferay.portal.search.searcher.SearchResponseBuilderFactory}.
  *
  * @author André de Oliveira
- *
- * @review
  */
 @ProviderType
 public interface SearchResponseBuilderFactory {
 
 	/**
-	 * Provides a search response builder based off a legacy search context.
+	 * Creates a search response builder from a legacy search context.
 	 *
-	 * @param searchContext the search context
+	 * @param  searchContext the search context
 	 * @return the search response builder
-	 *
-	 * @review
 	 */
-	public SearchResponseBuilder getSearchResponseBuilder(
-		SearchContext searchContext);
+	public SearchResponseBuilder builder(SearchContext searchContext);
 
 }

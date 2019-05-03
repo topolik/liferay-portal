@@ -65,7 +65,7 @@ public class AssetEntryUsageCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(27);
+		StringBundler sb = new StringBundler(23);
 
 		sb.append("{uuid=");
 		sb.append(uuid);
@@ -73,24 +73,20 @@ public class AssetEntryUsageCacheModel
 		sb.append(assetEntryUsageId);
 		sb.append(", groupId=");
 		sb.append(groupId);
-		sb.append(", companyId=");
-		sb.append(companyId);
-		sb.append(", userId=");
-		sb.append(userId);
-		sb.append(", userName=");
-		sb.append(userName);
 		sb.append(", createDate=");
 		sb.append(createDate);
 		sb.append(", modifiedDate=");
 		sb.append(modifiedDate);
 		sb.append(", assetEntryId=");
 		sb.append(assetEntryId);
-		sb.append(", classNameId=");
-		sb.append(classNameId);
-		sb.append(", classPK=");
-		sb.append(classPK);
-		sb.append(", portletId=");
-		sb.append(portletId);
+		sb.append(", containerType=");
+		sb.append(containerType);
+		sb.append(", containerKey=");
+		sb.append(containerKey);
+		sb.append(", plid=");
+		sb.append(plid);
+		sb.append(", type=");
+		sb.append(type);
 		sb.append(", lastPublishDate=");
 		sb.append(lastPublishDate);
 		sb.append("}");
@@ -111,15 +107,6 @@ public class AssetEntryUsageCacheModel
 
 		assetEntryUsageImpl.setAssetEntryUsageId(assetEntryUsageId);
 		assetEntryUsageImpl.setGroupId(groupId);
-		assetEntryUsageImpl.setCompanyId(companyId);
-		assetEntryUsageImpl.setUserId(userId);
-
-		if (userName == null) {
-			assetEntryUsageImpl.setUserName("");
-		}
-		else {
-			assetEntryUsageImpl.setUserName(userName);
-		}
 
 		if (createDate == Long.MIN_VALUE) {
 			assetEntryUsageImpl.setCreateDate(null);
@@ -136,15 +123,17 @@ public class AssetEntryUsageCacheModel
 		}
 
 		assetEntryUsageImpl.setAssetEntryId(assetEntryId);
-		assetEntryUsageImpl.setClassNameId(classNameId);
-		assetEntryUsageImpl.setClassPK(classPK);
+		assetEntryUsageImpl.setContainerType(containerType);
 
-		if (portletId == null) {
-			assetEntryUsageImpl.setPortletId("");
+		if (containerKey == null) {
+			assetEntryUsageImpl.setContainerKey("");
 		}
 		else {
-			assetEntryUsageImpl.setPortletId(portletId);
+			assetEntryUsageImpl.setContainerKey(containerKey);
 		}
+
+		assetEntryUsageImpl.setPlid(plid);
+		assetEntryUsageImpl.setType(type);
 
 		if (lastPublishDate == Long.MIN_VALUE) {
 			assetEntryUsageImpl.setLastPublishDate(null);
@@ -165,20 +154,17 @@ public class AssetEntryUsageCacheModel
 		assetEntryUsageId = objectInput.readLong();
 
 		groupId = objectInput.readLong();
-
-		companyId = objectInput.readLong();
-
-		userId = objectInput.readLong();
-		userName = objectInput.readUTF();
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
 
 		assetEntryId = objectInput.readLong();
 
-		classNameId = objectInput.readLong();
+		containerType = objectInput.readLong();
+		containerKey = objectInput.readUTF();
 
-		classPK = objectInput.readLong();
-		portletId = objectInput.readUTF();
+		plid = objectInput.readLong();
+
+		type = objectInput.readInt();
 		lastPublishDate = objectInput.readLong();
 	}
 
@@ -194,49 +180,36 @@ public class AssetEntryUsageCacheModel
 		objectOutput.writeLong(assetEntryUsageId);
 
 		objectOutput.writeLong(groupId);
-
-		objectOutput.writeLong(companyId);
-
-		objectOutput.writeLong(userId);
-
-		if (userName == null) {
-			objectOutput.writeUTF("");
-		}
-		else {
-			objectOutput.writeUTF(userName);
-		}
-
 		objectOutput.writeLong(createDate);
 		objectOutput.writeLong(modifiedDate);
 
 		objectOutput.writeLong(assetEntryId);
 
-		objectOutput.writeLong(classNameId);
+		objectOutput.writeLong(containerType);
 
-		objectOutput.writeLong(classPK);
-
-		if (portletId == null) {
+		if (containerKey == null) {
 			objectOutput.writeUTF("");
 		}
 		else {
-			objectOutput.writeUTF(portletId);
+			objectOutput.writeUTF(containerKey);
 		}
 
+		objectOutput.writeLong(plid);
+
+		objectOutput.writeInt(type);
 		objectOutput.writeLong(lastPublishDate);
 	}
 
 	public String uuid;
 	public long assetEntryUsageId;
 	public long groupId;
-	public long companyId;
-	public long userId;
-	public String userName;
 	public long createDate;
 	public long modifiedDate;
 	public long assetEntryId;
-	public long classNameId;
-	public long classPK;
-	public String portletId;
+	public long containerType;
+	public String containerKey;
+	public long plid;
+	public int type;
 	public long lastPublishDate;
 
 }

@@ -634,14 +634,19 @@ public class LayoutTypePortletImpl
 			}
 		}
 
-		if (!strict &&
-			((PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(),
-				portletId) > 0) ||
-			 (PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
-				 PortletKeys.PREFS_OWNER_TYPE_USER, layout.getPlid(),
-				 portletId) > 0))) {
+		if (strict) {
+			return false;
+		}
 
+		long count1 =
+			PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
+				PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(),
+				portletId);
+		long count2 =
+			PortletPreferencesLocalServiceUtil.getPortletPreferencesCount(
+				PortletKeys.PREFS_OWNER_TYPE_USER, layout.getPlid(), portletId);
+
+		if ((count1 > 0) || (count2 > 0)) {
 			return true;
 		}
 
@@ -1196,9 +1201,6 @@ public class LayoutTypePortletImpl
 			return;
 		}
 
-		setTypeSettingsProperty(
-			LayoutTypePortletConstants.LAYOUT_TEMPLATE_ID, newLayoutTemplateId);
-
 		List<String> newColumns = newLayoutTemplate.getColumns();
 
 		LayoutTemplate oldLayoutTemplate = getLayoutTemplate();
@@ -1206,6 +1208,9 @@ public class LayoutTypePortletImpl
 		List<String> oldColumns = oldLayoutTemplate.getColumns();
 
 		reorganizePortlets(newColumns, oldColumns);
+
+		setTypeSettingsProperty(
+			LayoutTypePortletConstants.LAYOUT_TEMPLATE_ID, newLayoutTemplateId);
 	}
 
 	@Override
@@ -1315,13 +1320,10 @@ public class LayoutTypePortletImpl
 				return null;
 			}
 
-			PermissionChecker permissionChecker =
-				PermissionThreadLocal.getPermissionChecker();
-
 			if (checkPermission &&
 				!PortletPermissionUtil.contains(
-					permissionChecker, layout, portlet,
-					ActionKeys.ADD_TO_PAGE)) {
+					PermissionThreadLocal.getPermissionChecker(), layout,
+					portlet, ActionKeys.ADD_TO_PAGE)) {
 
 				return null;
 			}

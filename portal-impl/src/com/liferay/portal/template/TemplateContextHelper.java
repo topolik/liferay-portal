@@ -74,6 +74,7 @@ import com.liferay.portal.kernel.util.InetAddressUtil;
 import com.liferay.portal.kernel.util.JavaConstants;
 import com.liferay.portal.kernel.util.ListMergeable;
 import com.liferay.portal.kernel.util.LocaleUtil;
+import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.ParamUtil_IW;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.PrefsPropsUtil;
@@ -94,7 +95,6 @@ import com.liferay.portal.struts.TilesUtil;
 import java.io.IOException;
 import java.io.InputStream;
 
-import java.net.InetAddress;
 import java.net.URL;
 
 import java.util.Collections;
@@ -292,7 +292,17 @@ public class TemplateContextHelper {
 			Layout layout = themeDisplay.getLayout();
 			List<Layout> layouts = themeDisplay.getLayouts();
 
-			contextObjects.put("bodyCssClass", StringPool.BLANK);
+			HttpServletRequest originalRequest =
+				PortalUtil.getOriginalServletRequest(request);
+
+			String namespace = PortalUtil.getPortletNamespace(
+				ParamUtil.getString(request, "p_p_id"));
+
+			String bodyCssClass = ParamUtil.getString(
+				originalRequest, namespace + "bodyCssClass");
+
+			contextObjects.put("bodyCssClass", bodyCssClass);
+
 			contextObjects.put("colorScheme", themeDisplay.getColorScheme());
 			contextObjects.put("company", themeDisplay.getCompany());
 			contextObjects.put("layout", layout);
@@ -377,16 +387,6 @@ public class TemplateContextHelper {
 
 	public void removeHelperUtilities(ClassLoader classLoader) {
 		_helperUtilitiesMaps.remove(classLoader);
-	}
-
-	/**
-	 * @deprecated As of Judson (7.1.x), with no direct replacement
-	 */
-	@Deprecated
-	public interface PACL {
-
-		public TemplateControlContext getTemplateControlContext();
-
 	}
 
 	protected void populateCommonHelperUtilities(
@@ -954,16 +954,6 @@ public class TemplateContextHelper {
 			return _http.decodeURL(url);
 		}
 
-		/**
-		 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-		 *             #decodeURL(String)}
-		 */
-		@Deprecated
-		@Override
-		public String decodeURL(String url, boolean unescapeSpaces) {
-			return _http.decodeURL(url, unescapeSpaces);
-		}
-
 		@Override
 		public String encodeParameters(String url) {
 			return _http.encodeParameters(url);
@@ -1395,7 +1385,7 @@ public class TemplateContextHelper {
 				URL url = new URL(location);
 
 				if (InetAddressUtil.isLocalInetAddress(
-						InetAddress.getByName(url.getHost()))) {
+						InetAddressUtil.getInetAddressByName(url.getHost()))) {
 
 					return true;
 				}

@@ -1,0 +1,254 @@
+components:
+    schemas:
+        DocumentBulkSelection:
+            properties:
+                documentIds:
+                    items:
+                        type: string
+                    type: array
+                selectionScope:
+                    properties:
+                        folderId:
+                            format: int64
+                            type: integer
+                        repositoryId:
+                            format: int64
+                            type: integer
+                        selectAll:
+                            type: boolean
+                    type: object
+        GenericError:
+            description: https://www.schema.org/GenericError
+            properties:
+                message:
+                    type: string
+            type: object
+        Keyword:
+            properties:
+                name:
+                    type: string
+        KeywordBulkSelection:
+            allOf:
+                - $ref: "#/components/schemas/DocumentBulkSelection"
+                - properties:
+                      keywordsToAdd:
+                          items:
+                              type: string
+                          type: array
+                      keywordsToRemove:
+                          items:
+                              type: string
+                          type: array
+        Selection:
+            properties:
+                size:
+                    format: int64
+                    type: integer
+        Status:
+            properties:
+                actionInProgress:
+                    type: boolean
+            type: object
+        TaxonomyCategory:
+            properties:
+                taxonomyCategoryId:
+                    format: int64
+                    type: integer
+                taxonomyCategoryName:
+                    type: string
+        TaxonomyCategoryBulkSelection:
+            allOf:
+                - $ref: "#/components/schemas/DocumentBulkSelection"
+                - properties:
+                      taxonomyCategoryIdsToAdd:
+                          items:
+                              format: int64
+                              type: integer
+                          type: array
+                      taxonomyCategoryIdsToRemove:
+                          items:
+                              format: int64
+                              type: integer
+                          type: array
+        TaxonomyVocabulary:
+            properties:
+                multiValued:
+                    type: boolean
+                name:
+                    type: string
+                required:
+                    type: boolean
+                taxonomyCategories:
+                    items:
+                        $ref: "#/components/schemas/TaxonomyCategory"
+                    type: array
+                taxonomyVocabularyId:
+                    format: int64
+                    type: integer
+info:
+    description: ""
+    title: ""
+    version: v1.0
+openapi: "3.0.1"
+paths:
+    "/bulk-selection":
+        post:
+            operationId: postBulkSelection
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/DocumentBulkSelection"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/DocumentBulkSelection"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Selection"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Selection"
+                    description: ""
+            tags: ["Selection"]
+    "/keywords/batch":
+        patch:
+            operationId: patchKeywordBatch
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/KeywordBulkSelection"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/KeywordBulkSelection"
+            responses:
+                200:
+                    content:
+                        {}
+                    description: ""
+            tags: ["Keyword"]
+        put:
+            operationId: putKeywordBatch
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/KeywordBulkSelection"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/KeywordBulkSelection"
+            responses:
+                200:
+                    content:
+                        {}
+                    description: ""
+            tags: ["Keyword"]
+    "/keywords/common":
+        post:
+            operationId: postKeywordsCommonPage
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/DocumentBulkSelection"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/DocumentBulkSelection"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/Keyword"
+                                type: array
+                        application/xml:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/Keyword"
+                                type: array
+                    description: ""
+            tags: ["Keyword"]
+    "/sites/{siteId}/taxonomy-vocabularies/common":
+        post:
+            operationId: postSiteTaxonomyVocabulariesCommonPage
+            parameters:
+                - in: path
+                  name: siteId
+                  required: true
+                  schema:
+                      format: int64
+                      type: integer
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/DocumentBulkSelection"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/DocumentBulkSelection"
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/TaxonomyVocabulary"
+                                type: array
+                        application/xml:
+                            schema:
+                                items:
+                                    $ref: "#/components/schemas/TaxonomyVocabulary"
+                                type: array
+                    description: ""
+            tags: ["TaxonomyVocabulary"]
+    "/status":
+        get:
+            operationId: getStatus
+            responses:
+                200:
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Status"
+                        application/xml:
+                            schema:
+                                $ref: "#/components/schemas/Status"
+                    description: ""
+            tags: ["Status"]
+    "/taxonomy-categories/batch":
+        patch:
+            operationId: patchTaxonomyCategoryBatch
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/TaxonomyCategoryBulkSelection"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/TaxonomyCategoryBulkSelection"
+            responses:
+                200:
+                    content:
+                        {}
+                    description: ""
+            tags: ["TaxonomyCategory"]
+        put:
+            operationId: putTaxonomyCategoryBatch
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/TaxonomyCategoryBulkSelection"
+                    application/xml:
+                        schema:
+                            $ref: "#/components/schemas/TaxonomyCategoryBulkSelection"
+            responses:
+                200:
+                    content:
+                        {}
+                    description: ""
+            tags: ["TaxonomyCategory"]

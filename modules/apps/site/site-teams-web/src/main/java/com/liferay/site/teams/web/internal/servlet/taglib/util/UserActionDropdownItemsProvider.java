@@ -16,6 +16,7 @@ package com.liferay.site.teams.web.internal.servlet.taglib.util;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -23,7 +24,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletURL;
@@ -54,12 +54,14 @@ public class UserActionDropdownItemsProvider {
 	public List<DropdownItem> getActionDropdownItems() {
 		return new DropdownItemList() {
 			{
-				add(_getDeleteTeamUsers());
+				add(_getDeleteTeamUsersUnsafeConsumer());
 			}
 		};
 	}
 
-	private Consumer<DropdownItem> _getDeleteTeamUsers() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getDeleteTeamUsersUnsafeConsumer() {
+
 		PortletURL deleteTeamUsersURL = _renderResponse.createActionURL();
 
 		deleteTeamUsersURL.setParameter(

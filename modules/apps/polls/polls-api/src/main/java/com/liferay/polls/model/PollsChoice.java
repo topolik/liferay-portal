@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.polls.model.impl.PollsChoiceImpl")
 @ProviderType
-public interface PollsChoice extends PollsChoiceModel, PersistedModel {
+public interface PollsChoice extends PersistedModel, PollsChoiceModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

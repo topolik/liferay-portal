@@ -19,8 +19,7 @@ import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
 import com.liferay.oauth2.provider.constants.ClientProfile;
 import com.liferay.oauth2.provider.constants.GrantType;
 import com.liferay.oauth2.provider.model.OAuth2Application;
-import com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases;
-import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalServiceUtil;
+import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalService;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.service.OAuth2AuthorizationServiceUtil;
 import com.liferay.petra.string.StringPool;
@@ -45,16 +44,21 @@ public class OAuth2AdminPortletDisplayContext
 
 	public OAuth2AdminPortletDisplayContext(
 		OAuth2ApplicationService oAuth2ApplicationService,
+		OAuth2ApplicationScopeAliasesLocalService
+			oAuth2ApplicationScopeAliasesLocalService,
 		OAuth2ProviderConfiguration oAuth2ProviderConfiguration,
 		PortletRequest portletRequest, ThemeDisplay themeDisplay,
-		DLURLHelper dlurlHelper) {
+		DLURLHelper dlURLHelper) {
 
 		_oAuth2ProviderConfiguration = oAuth2ProviderConfiguration;
 
 		super.oAuth2ApplicationService = oAuth2ApplicationService;
 		super.portletRequest = portletRequest;
 		super.themeDisplay = themeDisplay;
-		super.dlurlHelper = dlurlHelper;
+		super.dlURLHelper = dlURLHelper;
+
+		this.oAuth2ApplicationScopeAliasesLocalService =
+			oAuth2ApplicationScopeAliasesLocalService;
 	}
 
 	public List<GrantType> getGrantTypes(
@@ -114,20 +118,9 @@ public class OAuth2AdminPortletDisplayContext
 	public int getScopeAliasesSize(OAuth2Application oAuth2Application)
 		throws PortalException {
 
-		long oAuth2ApplicationScopeAliasesId =
-			oAuth2Application.getOAuth2ApplicationScopeAliasesId();
-
-		if (oAuth2ApplicationScopeAliasesId <= 0) {
-			return 0;
-		}
-
-		OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases =
-			OAuth2ApplicationScopeAliasesLocalServiceUtil.
-				getOAuth2ApplicationScopeAliases(
-					oAuth2ApplicationScopeAliasesId);
-
 		List<String> scopeAliasesList =
-			oAuth2ApplicationScopeAliases.getScopeAliasesList();
+			oAuth2ApplicationScopeAliasesLocalService.getScopeAliasesList(
+				oAuth2Application.getOAuth2ApplicationScopeAliasesId());
 
 		return scopeAliasesList.size();
 	}
@@ -139,6 +132,9 @@ public class OAuth2AdminPortletDisplayContext
 
 		return clientProfiles;
 	}
+
+	protected final OAuth2ApplicationScopeAliasesLocalService
+		oAuth2ApplicationScopeAliasesLocalService;
 
 	private final OAuth2ProviderConfiguration _oAuth2ProviderConfiguration;
 

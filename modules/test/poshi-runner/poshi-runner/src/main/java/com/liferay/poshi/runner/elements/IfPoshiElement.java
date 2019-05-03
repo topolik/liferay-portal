@@ -51,7 +51,7 @@ public class IfPoshiElement extends PoshiElement {
 
 	@Override
 	public String getPoshiLogDescriptor() {
-		return getBlockName();
+		return getBlockName(getPoshiScript());
 	}
 
 	@Override
@@ -149,7 +149,7 @@ public class IfPoshiElement extends PoshiElement {
 					conditionName);
 
 				sb.append(" (");
-				sb.append(poshiElement.getPoshiScript());
+				sb.append(poshiElement.toPoshiScript());
 				sb.append(")");
 
 				break;

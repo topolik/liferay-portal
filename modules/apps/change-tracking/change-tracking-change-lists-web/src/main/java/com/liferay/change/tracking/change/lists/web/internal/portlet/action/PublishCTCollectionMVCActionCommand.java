@@ -51,9 +51,11 @@ public class PublishCTCollectionMVCActionCommand extends BaseMVCActionCommand {
 
 		long ctCollectionId = ParamUtil.getLong(
 			actionRequest, "ctCollectionId");
+		boolean ignoreCollision = ParamUtil.getBoolean(
+			actionRequest, "ignoreCollision");
 
 		_ctEngineManager.publishCTCollection(
-			themeDisplay.getUserId(), ctCollectionId);
+			themeDisplay.getUserId(), ctCollectionId, ignoreCollision);
 	}
 
 	@Reference

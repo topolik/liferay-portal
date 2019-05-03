@@ -34,7 +34,7 @@ public class GoogleJavascriptMinifierTest {
 		GoogleJavaScriptMinifier googleJavaScriptMinifier =
 			new GoogleJavaScriptMinifier();
 
-		String code = "function(){ var abcd; var efgh; }";
+		String code = "function(){ var invalidFunctionExpression; }";
 
 		try (CaptureHandler captureHandler =
 				JDKLoggerTestUtil.configureJDKLogger(
@@ -42,7 +42,7 @@ public class GoogleJavascriptMinifierTest {
 
 			String minifiedJS = googleJavaScriptMinifier.compress("test", code);
 
-			Assert.assertEquals(0, minifiedJS.length());
+			Assert.assertEquals(44, minifiedJS.length());
 
 			List<LogRecord> logRecords = captureHandler.getLogRecords();
 

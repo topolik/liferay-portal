@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface SyncDLFileVersionDiff
-	extends SyncDLFileVersionDiffModel, PersistedModel {
+	extends PersistedModel, SyncDLFileVersionDiffModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

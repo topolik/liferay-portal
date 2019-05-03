@@ -14,6 +14,9 @@
 
 package com.liferay.portal.dao.jdbc.aop;
 
+import com.liferay.petra.function.UnsafeSupplier;
+import com.liferay.portal.kernel.aop.AopMethodInvocation;
+import com.liferay.portal.kernel.aop.ChainableMethodAdvice;
 import com.liferay.portal.kernel.dao.jdbc.aop.DynamicDataSourceTargetSource;
 import com.liferay.portal.kernel.dao.jdbc.aop.MasterDataSource;
 import com.liferay.portal.kernel.dao.jdbc.aop.Operation;
@@ -22,8 +25,8 @@ import com.liferay.portal.kernel.test.rule.CodeCoverageAssertor;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.spring.aop.AopInvocationHandler;
-import com.liferay.portal.spring.aop.AopMethodInvocation;
-import com.liferay.portal.spring.aop.ChainableMethodAdvice;
+import com.liferay.portal.spring.transaction.TransactionAttributeAdapter;
+import com.liferay.portal.spring.transaction.TransactionExecutor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
@@ -36,6 +39,8 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import org.springframework.transaction.PlatformTransactionManager;
+
 /**
  * @author Shuyang Zhou
  */
@@ -47,9 +52,6 @@ public class DynamicDataSourceAdviceTest {
 
 	@Before
 	public void setUp() throws Exception {
-		DynamicDataSourceAdvice dynamicDataSourceAdvice =
-			new DynamicDataSourceAdvice();
-
 		_dynamicDataSourceTargetSource =
 			new DefaultDynamicDataSourceTargetSource();
 
@@ -77,17 +79,37 @@ public class DynamicDataSourceAdviceTest {
 
 		_dynamicDataSourceTargetSource.setWriteDataSource(_writeDataSource);
 
-		dynamicDataSourceAdvice.setDynamicDataSourceTargetSource(
-			_dynamicDataSourceTargetSource);
+		DynamicDataSourceAdvice dynamicDataSourceAdvice =
+			new DynamicDataSourceAdvice(_dynamicDataSourceTargetSource);
 
 		Constructor<AopInvocationHandler> constructor =
 			AopInvocationHandler.class.getDeclaredConstructor(
-				Object.class, ChainableMethodAdvice[].class);
+				Object.class, ChainableMethodAdvice[].class,
+				TransactionExecutor.class);
 
 		constructor.setAccessible(true);
 
 		_aopInvocationHandler = constructor.newInstance(
-			_testClass, new ChainableMethodAdvice[] {dynamicDataSourceAdvice});
+			_testClass, new ChainableMethodAdvice[] {dynamicDataSourceAdvice},
+			new TransactionExecutor() {
+
+				@Override
+				public <T> T execute(
+						TransactionAttributeAdapter transactionAttributeAdapter,
+						UnsafeSupplier<T, Throwable> unsafeSupplier)
+					throws Throwable {
+
+					return unsafeSupplier.get();
+				}
+
+				@Override
+				public PlatformTransactionManager
+					getPlatformTransactionManager() {
+
+					return null;
+				}
+
+			});
 	}
 
 	@Test

@@ -4,11 +4,11 @@ import {Config} from 'metal-state';
 
 import './FragmentEntryLinkContent.es';
 import templates from './FragmentEntryLink.soy';
-import {CLEAR_ACTIVE_ITEM, REMOVE_FRAGMENT_ENTRY_LINK, UPDATE_ACTIVE_ITEM, UPDATE_HOVERED_ITEM} from '../../actions/actions.es';
-import {FRAGMENTS_EDITOR_ITEM_TYPES} from '../../utils/constants';
+import {MOVE_FRAGMENT_ENTRY_LINK, REMOVE_FRAGMENT_ENTRY_LINK} from '../../actions/actions.es';
 import {getConnectedComponent} from '../../store/ConnectedComponent.es';
-import {getItemMoveDirection} from '../../utils/FragmentsEditorGetUtils.es';
-import {removeItem, shouldClearFocus} from '../../utils/FragmentsEditorUpdateUtils.es';
+import {getFragmentColumn, getFragmentRowIndex, getItemMoveDirection, getItemPath, getTargetBorder, itemIsInPath} from '../../utils/FragmentsEditorGetUtils.es';
+import {FRAGMENTS_EDITOR_ITEM_TYPES, FRAGMENTS_EDITOR_ROW_TYPES} from '../../utils/constants';
+import {moveItem, moveRow, removeItem, setIn} from '../../utils/FragmentsEditorUpdateUtils.es';
 import {shouldUpdatePureComponent} from '../../utils/FragmentsEditorComponentUtils.es';
 
 /**
@@ -19,16 +19,46 @@ class FragmentEntryLink extends Component {
 
 	/**
 	 * @inheritdoc
+	 * @param {object} state
+	 * @return {object}
 	 * @review
 	 */
-	rendered() {
-		if (
-			(this.activeItemType === FRAGMENTS_EDITOR_ITEM_TYPES.fragment) &&
-			(this.activeItemId === this.fragmentEntryLinkId) &&
-			this.element
-		) {
-			this.element.focus();
-		}
+	prepareStateForRender(state) {
+		const hoveredPath = getItemPath(
+			state.hoveredItemId,
+			state.hoveredItemType,
+			state.layoutData.structure
+		);
+
+		const fragmentEntryLinkInHoveredPath = itemIsInPath(
+			hoveredPath,
+			state.fragmentEntryLinkId,
+			FRAGMENTS_EDITOR_ITEM_TYPES.fragment
+		);
+
+		let nextState = setIn(
+			state,
+			['_fragmentEntryLinkRowType'],
+			state.rowType
+		);
+
+		nextState = setIn(
+			nextState,
+			['_fragmentsEditorItemTypes'],
+			FRAGMENTS_EDITOR_ITEM_TYPES
+		);
+
+		nextState = setIn(
+			nextState,
+			['_fragmentsEditorRowTypes'],
+			FRAGMENTS_EDITOR_ROW_TYPES
+		);
+
+		return setIn(
+			nextState,
+			['_hovered'],
+			fragmentEntryLinkInHoveredPath
+		);
 	}
 
 	/**
@@ -41,56 +71,6 @@ class FragmentEntryLink extends Component {
 	}
 
 	/**
-	 * Callback executed when a fragment lose the focus
-	 * @private
-	 */
-	_handleFragmentFocusOut() {
-		requestAnimationFrame(
-			() => {
-				if (shouldClearFocus(this.element)) {
-					this.store.dispatchAction(CLEAR_ACTIVE_ITEM);
-				}
-			}
-		);
-	}
-
-	/**
-	 * Callback executed when a fragment is clicked
-	 * @param {Object} event
-	 * @private
-	 */
-	_handleFragmentClick(event) {
-		event.stopPropagation();
-
-		this.store.dispatchAction(
-			UPDATE_ACTIVE_ITEM,
-			{
-				activeItemId: this.fragmentEntryLinkId,
-				activeItemType: FRAGMENTS_EDITOR_ITEM_TYPES.fragment
-			}
-		);
-	}
-
-	/**
-	 * Callback executed when a fragment starts being hovered.
-	 * @param {Object} event
-	 * @private
-	 */
-	_handleFragmentHoverStart(event) {
-		event.stopPropagation();
-
-		if (this.store) {
-			this.store.dispatchAction(
-				UPDATE_HOVERED_ITEM,
-				{
-					hoveredItemId: this.fragmentEntryLinkId,
-					hoveredItemType: FRAGMENTS_EDITOR_ITEM_TYPES.fragment
-				}
-			);
-		}
-	}
-
-	/**
 	 * Handle fragment keyup event so it can emit when it
 	 * should be moved or selected.
 	 * @param {KeyboardEvent} event
@@ -98,17 +78,53 @@ class FragmentEntryLink extends Component {
 	 * @review
 	 */
 	_handleFragmentKeyUp(event) {
-		event.stopPropagation();
+		if (!this.fragmentEditorEnabled) {
+			event.stopPropagation();
 
-		const direction = getItemMoveDirection(event.which);
+			const direction = getItemMoveDirection(event.keyCode);
+			const {fragmentEntryLinkRowType} = event.delegateTarget.dataset;
 
-		this.emit(
-			'moveFragment',
-			{
-				direction,
-				fragmentEntryLinkId: this.fragmentEntryLinkId
+			if (direction) {
+				if (fragmentEntryLinkRowType === FRAGMENTS_EDITOR_ROW_TYPES.sectionRow) {
+					moveRow(
+						direction,
+						getFragmentRowIndex(
+							this.layoutData.structure,
+							this.fragmentEntryLinkId
+						),
+						this.store,
+						this.layoutData.structure
+					);
+				}
+				else {
+					const column = getFragmentColumn(
+						this.layoutData.structure,
+						this.fragmentEntryLinkId
+					);
+					const fragmentIndex = column.fragmentEntryLinkIds.indexOf(
+						this.fragmentEntryLinkId
+					);
+					const targetFragmentEntryLinkId = column.fragmentEntryLinkIds[
+						fragmentIndex + direction
+					];
+
+					if (direction && targetFragmentEntryLinkId) {
+						const moveItemPayload = {
+							fragmentEntryLinkId: this.fragmentEntryLinkId,
+							targetBorder: getTargetBorder(direction),
+							targetItemId: targetFragmentEntryLinkId,
+							targetItemType: FRAGMENTS_EDITOR_ITEM_TYPES.fragment
+						};
+
+						moveItem(
+							this.store,
+							MOVE_FRAGMENT_ENTRY_LINK,
+							moveItemPayload
+						);
+					}
+				}
 			}
-		);
+		}
 	}
 
 	/**
@@ -161,6 +177,15 @@ FragmentEntryLink.STATE = {
 		.value(''),
 
 	/**
+	 * Row type
+	 * @instance
+	 * @memberOf FragmentEntryLink
+	 * @review
+	 * @type {string}
+	 */
+	rowType: Config.string(),
+
+	/**
 	 * Shows FragmentEntryLink control toolbar
 	 * @default true
 	 * @instance
@@ -188,10 +213,18 @@ const ConnectedFragmentEntryLink = getConnectedComponent(
 		'activeItemId',
 		'activeItemType',
 		'defaultLanguageId',
+		'dropTargetItemId',
+		'dropTargetItemType',
+		'dropTargetBorder',
+		'fragmentEditorEnabled',
+		'hoveredItemId',
+		'hoveredItemType',
 		'imageSelectorURL',
 		'languageId',
+		'layoutData',
 		'portletNamespace',
 		'selectedMappingTypes',
+		'selectedSidebarPanelId',
 		'spritemap'
 	]
 );

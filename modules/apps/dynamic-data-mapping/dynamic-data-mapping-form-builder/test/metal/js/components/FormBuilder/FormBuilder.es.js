@@ -122,6 +122,7 @@ describe(
 				component = new Builder(
 					{
 						fieldTypes,
+						namespace: '_namespace_',
 						pages,
 						paginationMode: 'wizard',
 						rules: [],
@@ -162,6 +163,20 @@ describe(
 				sidebar.emit(
 					'fieldAdded',
 					{
+						data: {
+							target: {
+								parentElement: {
+									parentElement: {
+										classList: [
+											'row',
+											{
+												value: 'row'
+											}
+										]
+									}
+								}
+							}
+						},
 						fieldType: mockFieldType
 					}
 				);
@@ -526,6 +541,7 @@ describe(
 				const builderComponent = new Builder(
 					{
 						fieldTypes,
+						namespace: '_namespace_',
 						pages: componentPages,
 						paginationMode: 'wizard',
 						rules: [],

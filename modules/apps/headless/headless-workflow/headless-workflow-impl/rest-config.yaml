@@ -1,8 +1,0 @@
-apiDir: "../headless-workflow-api/src/main/java"
-apiPackagePath: "com.liferay.headless.workflow"
-application:
-    baseURI: "/headless-workflow"
-    className: "HeadlessWorkflowApplication"
-    name: "Liferay.Headless.Workflow"
-author: "Javier Gamarra"
-testDir: "../headless-workflow-test/src/testIntegration/java"

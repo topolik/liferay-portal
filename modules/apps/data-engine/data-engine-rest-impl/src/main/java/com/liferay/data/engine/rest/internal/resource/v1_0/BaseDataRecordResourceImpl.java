@@ -30,8 +30,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 
-import java.net.URI;
-
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,7 +47,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 /**
@@ -63,16 +61,17 @@ public abstract class BaseDataRecordResourceImpl implements DataRecordResource {
 	@GET
 	@Parameters(
 		value = {
+			@Parameter(in = ParameterIn.PATH, name = "dataRecordCollectionId"),
 			@Parameter(in = ParameterIn.QUERY, name = "page"),
 			@Parameter(in = ParameterIn.QUERY, name = "pageSize")
 		}
 	)
-	@Path("/data-record-collections/{data-record-collection-id}/data-records")
-	@Produces("application/json")
+	@Path("/data-record-collections/{dataRecordCollectionId}/data-records")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "DataRecord")})
 	public Page<DataRecord> getDataRecordCollectionDataRecordsPage(
-			@NotNull @PathParam("data-record-collection-id") Long
-				dataRecordCollectionId,
+			@NotNull @Parameter(hidden = true)
+			@PathParam("dataRecordCollectionId") Long dataRecordCollectionId,
 			@Context Pagination pagination)
 		throws Exception {
 
@@ -80,14 +79,19 @@ public abstract class BaseDataRecordResourceImpl implements DataRecordResource {
 	}
 
 	@Override
-	@Consumes("application/json")
+	@Consumes({"application/json", "application/xml"})
 	@POST
-	@Path("/data-record-collections/{data-record-collection-id}/data-records")
-	@Produces("application/json")
+	@Parameters(
+		value = {
+			@Parameter(in = ParameterIn.PATH, name = "dataRecordCollectionId")
+		}
+	)
+	@Path("/data-record-collections/{dataRecordCollectionId}/data-records")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "DataRecord")})
 	public DataRecord postDataRecordCollectionDataRecord(
-			@NotNull @PathParam("data-record-collection-id") Long
-				dataRecordCollectionId,
+			@NotNull @Parameter(hidden = true)
+			@PathParam("dataRecordCollectionId") Long dataRecordCollectionId,
 			DataRecord dataRecord)
 		throws Exception {
 
@@ -95,37 +99,67 @@ public abstract class BaseDataRecordResourceImpl implements DataRecordResource {
 	}
 
 	@Override
-	@DELETE
-	@Path("/data-records/{data-record-id}")
+	@GET
+	@Parameters(
+		value = {
+			@Parameter(in = ParameterIn.PATH, name = "dataRecordCollectionId")
+		}
+	)
+	@Path(
+		"/data-record-collections/{dataRecordCollectionId}/data-records/export"
+	)
 	@Produces("application/json")
 	@Tags(value = {@Tag(name = "DataRecord")})
-	public boolean deleteDataRecord(
-			@NotNull @PathParam("data-record-id") Long dataRecordId)
+	public String getDataRecordCollectionDataRecordExport(
+			@NotNull @Parameter(hidden = true)
+			@PathParam("dataRecordCollectionId") Long dataRecordCollectionId)
 		throws Exception {
 
-		return false;
+		return StringPool.BLANK;
+	}
+
+	@Override
+	@DELETE
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "dataRecordId")}
+	)
+	@Path("/data-records/{dataRecordId}")
+	@Produces("application/json")
+	@Tags(value = {@Tag(name = "DataRecord")})
+	public void deleteDataRecord(
+			@NotNull @Parameter(hidden = true) @PathParam("dataRecordId") Long
+				dataRecordId)
+		throws Exception {
 	}
 
 	@Override
 	@GET
-	@Path("/data-records/{data-record-id}")
-	@Produces("application/json")
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "dataRecordId")}
+	)
+	@Path("/data-records/{dataRecordId}")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "DataRecord")})
 	public DataRecord getDataRecord(
-			@NotNull @PathParam("data-record-id") Long dataRecordId)
+			@NotNull @Parameter(hidden = true) @PathParam("dataRecordId") Long
+				dataRecordId)
 		throws Exception {
 
 		return new DataRecord();
 	}
 
 	@Override
-	@Consumes("application/json")
+	@Consumes({"application/json", "application/xml"})
 	@PUT
-	@Path("/data-records/{data-record-id}")
-	@Produces("application/json")
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "dataRecordId")}
+	)
+	@Path("/data-records/{dataRecordId}")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "DataRecord")})
 	public DataRecord putDataRecord(
-			@NotNull @PathParam("data-record-id") Long dataRecordId,
+			@NotNull @Parameter(hidden = true) @PathParam("dataRecordId") Long
+				dataRecordId,
 			DataRecord dataRecord)
 		throws Exception {
 
@@ -136,34 +170,15 @@ public abstract class BaseDataRecordResourceImpl implements DataRecordResource {
 		this.contextCompany = contextCompany;
 	}
 
-	protected String getJAXRSLink(String methodName, Object... values) {
-		String baseURIString = String.valueOf(contextUriInfo.getBaseUri());
-
-		if (baseURIString.endsWith(StringPool.FORWARD_SLASH)) {
-			baseURIString = baseURIString.substring(
-				0, baseURIString.length() - 1);
-		}
-
-		URI resourceURI = UriBuilder.fromResource(
-			BaseDataRecordResourceImpl.class
-		).build();
-
-		URI methodURI = UriBuilder.fromMethod(
-			BaseDataRecordResourceImpl.class, methodName
-		).build(
-			values
-		);
-
-		return baseURIString + resourceURI.toString() + methodURI.toString();
-	}
-
-	protected void preparePatch(DataRecord dataRecord) {
+	protected void preparePatch(
+		DataRecord dataRecord, DataRecord existingDataRecord) {
 	}
 
 	protected <T, R> List<R> transform(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction) {
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction) {
 
-		return TransformUtil.transform(list, unsafeFunction);
+		return TransformUtil.transform(collection, unsafeFunction);
 	}
 
 	protected <T, R> R[] transform(
@@ -174,10 +189,11 @@ public abstract class BaseDataRecordResourceImpl implements DataRecordResource {
 	}
 
 	protected <T, R> R[] transformToArray(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction,
-		Class<?> clazz) {
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction, Class<?> clazz) {
 
-		return TransformUtil.transformToArray(list, unsafeFunction, clazz);
+		return TransformUtil.transformToArray(
+			collection, unsafeFunction, clazz);
 	}
 
 	protected <T, R> List<R> transformToList(

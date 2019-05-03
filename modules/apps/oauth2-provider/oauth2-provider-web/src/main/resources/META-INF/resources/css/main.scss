@@ -1,6 +1,9 @@
 $grayLineColor: #E7E7ED;
 $grayTextColor: #6B6C7E;
 
+$removedItemHighlightColor: #FFEEF0;
+$addedItemHighlightColor: #E6FFED;
+
 .assign-scopes-modal {
 	max-width: 100%;
 
@@ -17,6 +20,30 @@ $grayTextColor: #6B6C7E;
 	.padlock {
 		flex: 1;
 	}
+}
+
+.removed-scope {
+	background-color: $removedItemHighlightColor;
+}
+
+.removed-scope.panel .list-group-item {
+	background-color: $removedItemHighlightColor;
+}
+
+.added-scope {
+	background-color: $addedItemHighlightColor;
+}
+
+.badge.removed-scope-alias {
+	background-color: #FFEEF0 !important;
+	border-color: #FF0000 !important;
+	border-width: 1px !important;
+}
+
+.badge.added-scope-alias {
+	background-color: #E6FFED !important;
+	border-color: #00FF00 !important;
+	border-width: 1px !important;
 }
 
 .portlet-oauth2-provider-admin {
@@ -46,7 +73,7 @@ $grayTextColor: #6B6C7E;
 			margin-top: 1.6rem;
 		}
 		.input-text-wrapper {
-			margin-right: 4rem;
+			margin-right: 5rem;
 		}
 	}
 

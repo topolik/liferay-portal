@@ -15,31 +15,38 @@
 package com.liferay.asset.list.service.impl;
 
 import com.liferay.asset.list.constants.AssetListActionKeys;
-import com.liferay.asset.list.constants.AssetListConstants;
 import com.liferay.asset.list.model.AssetListEntry;
 import com.liferay.asset.list.service.base.AssetListEntryServiceBaseImpl;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.dao.orm.custom.sql.CustomSQL;
 import com.liferay.portal.kernel.dao.orm.WildcardMode;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
-import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
-import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.OrderByComparator;
-import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.util.List;
+
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Jürgen Kappler
  */
+@Component(
+	property = {
+		"json.web.service.context.name=assetlist",
+		"json.web.service.context.path=AssetListEntry"
+	},
+	service = AopService.class
+)
 public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 
 	@Override
 	public void addAssetEntrySelection(
-			long assetListEntryId, long assetEntryId,
+			long assetListEntryId, long assetEntryId, long segmentsEntryId,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -50,7 +57,23 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 			getPermissionChecker(), assetListEntry, ActionKeys.UPDATE);
 
 		assetListEntryLocalService.addAssetEntrySelection(
-			assetListEntryId, assetEntryId, serviceContext);
+			assetListEntryId, assetEntryId, segmentsEntryId, serviceContext);
+	}
+
+	@Override
+	public void addAssetEntrySelections(
+			long assetListEntryId, long[] assetEntryIds, long segmentsEntryId,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		AssetListEntry assetListEntry =
+			assetListEntryLocalService.getAssetListEntry(assetListEntryId);
+
+		_assetListEntryModelResourcePermission.check(
+			getPermissionChecker(), assetListEntry, ActionKeys.UPDATE);
+
+		assetListEntryLocalService.addAssetEntrySelections(
+			assetListEntryId, assetEntryIds, segmentsEntryId, serviceContext);
 	}
 
 	@Override
@@ -95,7 +118,8 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 	}
 
 	@Override
-	public void deleteAssetEntrySelection(long assetListEntryId, int position)
+	public void deleteAssetEntrySelection(
+			long assetListEntryId, long segmentsEntryId, int position)
 		throws PortalException {
 
 		AssetListEntry assetListEntry =
@@ -105,7 +129,7 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 			getPermissionChecker(), assetListEntry, ActionKeys.UPDATE);
 
 		assetListEntryLocalService.deleteAssetEntrySelection(
-			assetListEntryId, position);
+			assetListEntryId, segmentsEntryId, position);
 	}
 
 	@Override
@@ -137,6 +161,21 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 	}
 
 	@Override
+	public void deleteAssetListEntry(
+			long assetListEntryId, long segmentsEntryId)
+		throws PortalException {
+
+		AssetListEntry assetListEntry =
+			assetListEntryLocalService.getAssetListEntry(assetListEntryId);
+
+		_assetListEntryModelResourcePermission.check(
+			getPermissionChecker(), assetListEntry, ActionKeys.UPDATE);
+
+		assetListEntryLocalService.deleteAssetListEntry(
+			assetListEntryId, segmentsEntryId);
+	}
+
+	@Override
 	public AssetListEntry fetchAssetListEntry(long assetListEntryId)
 		throws PortalException {
 
@@ -148,7 +187,7 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 				getPermissionChecker(), assetListEntry, ActionKeys.VIEW);
 		}
 
-		return assetListEntryLocalService.fetchAssetListEntry(assetListEntryId);
+		return assetListEntry;
 	}
 
 	@Override
@@ -156,7 +195,7 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 		long groupId, int start, int end,
 		OrderByComparator<AssetListEntry> orderByComparator) {
 
-		return assetListEntryPersistence.findByGroupId(
+		return assetListEntryPersistence.filterFindByGroupId(
 			groupId, start, end, orderByComparator);
 	}
 
@@ -165,7 +204,7 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 		long groupId, String title, int start, int end,
 		OrderByComparator<AssetListEntry> orderByComparator) {
 
-		return assetListEntryPersistence.findByG_LikeT(
+		return assetListEntryPersistence.filterFindByG_LikeT(
 			groupId,
 			_customSQL.keywords(title, false, WildcardMode.SURROUND)[0], start,
 			end, orderByComparator);
@@ -173,19 +212,63 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 
 	@Override
 	public int getAssetListEntriesCount(long groupId) {
-		return assetListEntryPersistence.countByGroupId(groupId);
+		return assetListEntryPersistence.filterCountByGroupId(groupId);
 	}
 
 	@Override
 	public int getAssetListEntriesCount(long groupId, String title) {
-		return assetListEntryPersistence.countByG_LikeT(
+		return assetListEntryPersistence.filterCountByG_LikeT(
 			groupId,
 			_customSQL.keywords(title, false, WildcardMode.SURROUND)[0]);
 	}
 
 	@Override
+	public AssetListEntry getAssetListEntry(long assetListEntryId)
+		throws PortalException {
+
+		AssetListEntry assetListEntry =
+			assetListEntryLocalService.getAssetListEntry(assetListEntryId);
+
+		_assetListEntryModelResourcePermission.check(
+			getPermissionChecker(), assetListEntry, ActionKeys.VIEW);
+
+		return assetListEntry;
+	}
+
+	@Override
+	public AssetListEntry getAssetListEntry(
+			long groupId, String assetListEntryKey)
+		throws PortalException {
+
+		AssetListEntry assetListEntry =
+			assetListEntryLocalService.getAssetListEntry(
+				groupId, assetListEntryKey);
+
+		_assetListEntryModelResourcePermission.check(
+			getPermissionChecker(), assetListEntry, ActionKeys.VIEW);
+
+		return assetListEntry;
+	}
+
+	@Override
+	public AssetListEntry getAssetListEntryByUuidAndGroupId(
+			String uuid, long groupId)
+		throws PortalException {
+
+		AssetListEntry assetListEntry =
+			assetListEntryLocalService.getAssetListEntryByUuidAndGroupId(
+				uuid, groupId);
+
+		_assetListEntryModelResourcePermission.check(
+			getPermissionChecker(), assetListEntry, ActionKeys.VIEW);
+
+		return assetListEntry;
+	}
+
+	@Override
 	public void moveAssetEntrySelection(
-			long assetListEntryId, int position, int newPosition)
+			long assetListEntryId, long segmentsEntryId, int position,
+			int newPosition)
 		throws PortalException {
 
 		AssetListEntry assetListEntry =
@@ -195,7 +278,23 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 			getPermissionChecker(), assetListEntry, ActionKeys.UPDATE);
 
 		assetListEntryLocalService.moveAssetEntrySelection(
-			assetListEntryId, position, newPosition);
+			assetListEntryId, segmentsEntryId, position, newPosition);
+	}
+
+	@Override
+	public void updateAssetListEntry(
+			long assetListEntryId, long segmentsEntryId, String typeSettings,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		AssetListEntry assetListEntry =
+			assetListEntryLocalService.getAssetListEntry(assetListEntryId);
+
+		_assetListEntryModelResourcePermission.check(
+			getPermissionChecker(), assetListEntry, ActionKeys.UPDATE);
+
+		assetListEntryLocalService.updateAssetListEntry(
+			assetListEntryId, segmentsEntryId, typeSettings, serviceContext);
 	}
 
 	@Override
@@ -214,8 +313,8 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 	}
 
 	@Override
-	public AssetListEntry updateAssetListEntryTypeSettings(
-			long assetListEntryId, String typeSettings)
+	public void updateAssetListEntryTypeSettings(
+			long assetListEntryId, long segmentsEntryId, String typeSettings)
 		throws PortalException {
 
 		AssetListEntry assetListEntry =
@@ -224,38 +323,20 @@ public class AssetListEntryServiceImpl extends AssetListEntryServiceBaseImpl {
 		_assetListEntryModelResourcePermission.check(
 			getPermissionChecker(), assetListEntry, ActionKeys.UPDATE);
 
-		return assetListEntryLocalService.updateAssetListEntryTypeSettings(
-			assetListEntryId, typeSettings);
+		assetListEntryLocalService.updateAssetListEntryTypeSettings(
+			assetListEntryId, segmentsEntryId, typeSettings);
 	}
 
-	@Override
-	public AssetListEntry updateAssetListEntryTypeSettingsProperties(
-			long assetListEntryId, String typeSettingsProperties)
-		throws PortalException {
+	@Reference(
+		target = "(model.class.name=com.liferay.asset.list.model.AssetListEntry)"
+	)
+	private ModelResourcePermission<AssetListEntry>
+		_assetListEntryModelResourcePermission;
 
-		AssetListEntry assetListEntry =
-			assetListEntryLocalService.getAssetListEntry(assetListEntryId);
-
-		_assetListEntryModelResourcePermission.check(
-			getPermissionChecker(), assetListEntry, ActionKeys.UPDATE);
-
-		return assetListEntryLocalService.
-			updateAssetListEntryTypeSettingsProperties(
-				assetListEntryId, typeSettingsProperties);
-	}
-
-	private static volatile ModelResourcePermission<AssetListEntry>
-		_assetListEntryModelResourcePermission =
-			ModelResourcePermissionFactory.getInstance(
-				AssetListEntryServiceImpl.class,
-				"_assetListEntryModelResourcePermission", AssetListEntry.class);
-	private static volatile PortletResourcePermission
-		_portletResourcePermission =
-			PortletResourcePermissionFactory.getInstance(
-				AssetListEntryServiceImpl.class, "_portletResourcePermission",
-				AssetListConstants.RESOURCE_NAME);
-
-	@ServiceReference(type = CustomSQL.class)
+	@Reference
 	private CustomSQL _customSQL;
+
+	@Reference(target = "(resource.name=com.liferay.asset.list)")
+	private PortletResourcePermission _portletResourcePermission;
 
 }

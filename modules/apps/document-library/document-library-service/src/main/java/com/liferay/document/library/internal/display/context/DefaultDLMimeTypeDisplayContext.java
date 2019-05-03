@@ -39,17 +39,17 @@ public class DefaultDLMimeTypeDisplayContext
 	@Override
 	public String getCssClassFileMimeType(String mimeType) {
 		if (_containsMimeType(_dlConfiguration.codeFileMimeTypes(), mimeType)) {
-			return "file-icon-color-7";
+			return "file-icon-color-0";
 		}
 		else if (_containsMimeType(
 					_dlConfiguration.compressedFileMimeTypes(), mimeType)) {
 
-			return "file-icon-color-1";
+			return "file-icon-color-0";
 		}
 		else if (_containsMimeType(
 					_dlConfiguration.multimediaFileMimeTypes(), mimeType)) {
 
-			return "file-icon-color-3";
+			return "file-icon-color-5";
 		}
 		else if (_containsMimeType(
 					_dlConfiguration.presentationFileMimeTypes(), mimeType)) {
@@ -69,10 +69,53 @@ public class DefaultDLMimeTypeDisplayContext
 		else if (_containsMimeType(
 					_dlConfiguration.vectorialFileMimeTypes(), mimeType)) {
 
-			return "file-icon-color-5";
+			return "file-icon-color-3";
 		}
 
 		return "file-icon-color-0";
+	}
+
+	@Override
+	public String getIconFileMimeType(String mimeType) {
+		if (_containsMimeType(_dlConfiguration.codeFileMimeTypes(), mimeType)) {
+			return "document-code";
+		}
+		else if (_containsMimeType(
+					_dlConfiguration.compressedFileMimeTypes(), mimeType)) {
+
+			return "document-compressed";
+		}
+		else if (_containsMimeType(
+					_dlConfiguration.multimediaFileMimeTypes(), mimeType)) {
+
+			if (mimeType.startsWith("image")) {
+				return "document-image";
+			}
+
+			return "document-multimedia";
+		}
+		else if (_containsMimeType(
+					_dlConfiguration.presentationFileMimeTypes(), mimeType)) {
+
+			return "document-presentation";
+		}
+		else if (_containsMimeType(
+					_dlConfiguration.spreadSheetFileMimeTypes(), mimeType)) {
+
+			return "document-table";
+		}
+		else if (_containsMimeType(
+					_dlConfiguration.textFileMimeTypes(), mimeType)) {
+
+			return "document-text";
+		}
+		else if (_containsMimeType(
+					_dlConfiguration.vectorialFileMimeTypes(), mimeType)) {
+
+			return "document-vector";
+		}
+
+		return "document-default";
 	}
 
 	@Activate

@@ -17,7 +17,6 @@ package com.liferay.segments.web.internal.display.context;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.EmptyOnClickRowChecker;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -27,7 +26,6 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
-import com.liferay.portal.kernel.search.SortFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -74,15 +72,13 @@ public class SegmentsDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData(
-								"action", "deleteSegmentsEntries");
-							dropdownItem.setIcon("times");
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "delete"));
-							dropdownItem.setQuickAction(true);
-						}));
+					dropdownItem -> {
+						dropdownItem.putData("action", "deleteSegmentsEntries");
+						dropdownItem.setIcon("times-circle");
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "delete"));
+						dropdownItem.setQuickAction(true);
+					});
 			}
 		};
 	}
@@ -90,8 +86,7 @@ public class SegmentsDisplayContext {
 	public String getAvailableActions(SegmentsEntry segmentsEntry)
 		throws PortalException {
 
-		if (!segmentsEntry.isDefaultSegment() &&
-			SegmentsEntryPermission.contains(
+		if (SegmentsEntryPermission.contains(
 				_themeDisplay.getPermissionChecker(), segmentsEntry,
 				ActionKeys.DELETE)) {
 
@@ -300,13 +295,13 @@ public class SegmentsDisplayContext {
 	private OrderByComparator<SegmentsEntry> _getOrderByComparator() {
 		boolean orderByAsc = false;
 
-		String orderByCol = _getOrderByCol();
-
 		String orderByType = getOrderByType();
 
 		if (orderByType.equals("asc")) {
 			orderByAsc = true;
 		}
+
+		String orderByCol = _getOrderByCol();
 
 		OrderByComparator<SegmentsEntry> orderByComparator = null;
 
@@ -325,27 +320,23 @@ public class SegmentsDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								Objects.equals(
-									_getOrderByCol(), "modified-date"));
-							dropdownItem.setHref(
-								_getPortletURL(), "orderByCol",
-								"modified-date");
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "modified-date"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setActive(
+							Objects.equals(_getOrderByCol(), "modified-date"));
+						dropdownItem.setHref(
+							_getPortletURL(), "orderByCol", "modified-date");
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "modified-date"));
+					});
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								Objects.equals(_getOrderByCol(), "name"));
-							dropdownItem.setHref(
-								_getPortletURL(), "orderByCol", "name");
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "name"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setActive(
+							Objects.equals(_getOrderByCol(), "name"));
+						dropdownItem.setHref(
+							_getPortletURL(), "orderByCol", "name");
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "name"));
+					});
 			}
 		};
 	}
@@ -369,17 +360,29 @@ public class SegmentsDisplayContext {
 	}
 
 	private Sort _getSort() {
-		String orderByCol = _getOrderByCol();
+		boolean orderByAsc = false;
 
-		if (orderByCol.equals("name")) {
-			return SortFactoryUtil.getSort(
-				SegmentsEntry.class, Sort.STRING_TYPE, Field.NAME,
-				getOrderByType());
+		String orderByType = getOrderByType();
+
+		if (orderByType.equals("asc")) {
+			orderByAsc = true;
 		}
 
-		return SortFactoryUtil.getSort(
-			SegmentsEntry.class, Sort.LONG_TYPE, Field.MODIFIED_DATE,
-			getOrderByType());
+		String orderByCol = _getOrderByCol();
+
+		Sort sort = null;
+
+		if (orderByCol.equals("name")) {
+			String sortFieldName = Field.getSortableFieldName(
+				"localized_name_".concat(_themeDisplay.getLanguageId()));
+
+			sort = new Sort(sortFieldName, Sort.STRING_TYPE, orderByAsc);
+		}
+		else {
+			sort = new Sort(Field.MODIFIED_DATE, Sort.LONG_TYPE, orderByAsc);
+		}
+
+		return sort;
 	}
 
 	private boolean _hasResults() throws PortalException {

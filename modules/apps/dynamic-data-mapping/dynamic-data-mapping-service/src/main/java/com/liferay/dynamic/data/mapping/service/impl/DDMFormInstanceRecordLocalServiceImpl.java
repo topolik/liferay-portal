@@ -414,6 +414,14 @@ public class DDMFormInstanceRecordLocalServiceImpl
 				serviceContext);
 		}
 
+		// Asset
+
+		updateAsset(
+			userId, ddmFormInstanceRecord, ddmFormInstanceRecordVersion,
+			serviceContext.getAssetCategoryIds(),
+			serviceContext.getAssetTagNames(), serviceContext.getLocale(),
+			serviceContext.getAssetPriority());
+
 		if (isKeepFormInstanceRecordVersionLabel(
 				ddmFormInstanceRecord.getFormInstanceRecordVersion(),
 				ddmFormInstanceRecordVersion, serviceContext)) {
@@ -474,10 +482,11 @@ public class DDMFormInstanceRecordLocalServiceImpl
 				formInstanceRecordVersion.getFormInstanceRecordId());
 
 		if (status == WorkflowConstants.STATUS_APPROVED) {
-			if (DLUtil.compareVersions(
-					formInstanceRecord.getVersion(),
-					formInstanceRecordVersion.getVersion()) <= 0) {
+			int value = DLUtil.compareVersions(
+				formInstanceRecord.getVersion(),
+				formInstanceRecordVersion.getVersion());
 
+			if (value <= 0) {
 				formInstanceRecord.setVersionUserId(
 					formInstanceRecordVersion.getUserId());
 				formInstanceRecord.setVersionUserName(
@@ -623,10 +632,7 @@ public class DDMFormInstanceRecordLocalServiceImpl
 	}
 
 	protected Indexer<DDMFormInstanceRecord> getDDMFormInstanceRecordIndexer() {
-		Indexer<DDMFormInstanceRecord> indexer =
-			indexerRegistry.nullSafeGetIndexer(DDMFormInstanceRecord.class);
-
-		return indexer;
+		return indexerRegistry.nullSafeGetIndexer(DDMFormInstanceRecord.class);
 	}
 
 	protected DDMStorageAdapter getDDMStorageAdapter() {

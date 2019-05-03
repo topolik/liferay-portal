@@ -92,6 +92,28 @@
 		</sequential>
 	</macrodef>
 
+	<macrodef name="update-websphere-java-opts">
+		<sequential>
+			<replace
+				file="${app.server.websphere.instance.dir}/config/cells/liferay-cell/nodes/liferay-node/servers/server1/server.xml"
+			>
+				<replacefilter
+					token="maximumHeapSize=&quot;1024&quot;"
+					value="initialHeapSize=&quot;6144&quot; maximumHeapSize=&quot;6144&quot;"
+				/>
+			</replace>
+
+			<replace
+				file="${app.server.websphere.instance.dir}/config/cells/liferay-cell/nodes/liferay-node/servers/server1/server.xml"
+			>
+				<replacefilter
+					token="-Xquickstart -Dfile.encoding=UTF-8 -Duser.timezone=GMT"
+					value="-Dfile.encoding=UTF-8 -Duser.timezone=GMT -Xquickstart -XX:MaxNewSize=1536m -XX:NewSize=1536m -XX:SurvivorRatio=7"
+				/>
+			</replace>
+		</sequential>
+	</macrodef>
+
 	<target name="build-dist-glassfish">
 		<app-server-properties-update>
 			app.server.type=glassfish
@@ -1319,7 +1341,7 @@ this task.
 					<replacevalue><![CDATA[JAVA_OPTS="]]></replacevalue>
 				</replace>
 
-				<echo append="true" file="${app.server.jboss.bin.dir}/standalone.conf">${line.separator}<![CDATA[JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xmx1024m -XX:MaxMetaspaceSize=512m"]]></echo>
+				<echo append="true" file="${app.server.jboss.bin.dir}/standalone.conf">${line.separator}<![CDATA[JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"]]></echo>
 
 				<replace
 					file="${app.server.jboss.dir}/standalone/configuration/standalone.xml"
@@ -1368,7 +1390,7 @@ this task.
 						<replacevalue><![CDATA[JAVA_OPTS="]]></replacevalue>
 					</replace>
 
-					<echo append="true" file="${app.server.jboss.bin.dir}/standalone.conf">${line.separator}<![CDATA[JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xmx1024m -XX:MaxMetaspaceSize=512m"]]></echo>
+					<echo append="true" file="${app.server.jboss.bin.dir}/standalone.conf">${line.separator}<![CDATA[JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"]]></echo>
 
 					<replace
 						file="${app.server.jboss.instance.dir}/configuration/standalone.xml"
@@ -1424,7 +1446,7 @@ this task.
 			<replacetoken><![CDATA[:JAVA_OPTS_SET]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
-					set "JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xmx1024m -XX:MaxMetaspaceSize=384m"
+					set "JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 
 					:JAVA_OPTS_SET
 				]]>
@@ -1943,18 +1965,23 @@ wrapper.java.additional.11="-Dfile.encoding=UTF-8"]]></replacevalue>
 	</target>
 
 	<target name="unzip-tomcat">
-		<for list="${app.server.tomcat.legacy.versions}" param="app.server.tomcat.legacy.version">
-			<sequential>
-				<var name="app.server.tomcat.legacy.dir" value="${app.server.parent.dir}/tomcat-@{app.server.tomcat.legacy.version}" />
+		<if>
+			<equals arg1="${app.server.tomcat.legacy.cleanup.enabled}" arg2="true" />
+			<then>
+				<for list="${app.server.tomcat.legacy.versions}" param="app.server.tomcat.legacy.version">
+					<sequential>
+						<var name="app.server.tomcat.legacy.dir" value="${app.server.parent.dir}/tomcat-@{app.server.tomcat.legacy.version}" />
 
-				<if>
-					<available file="${app.server.tomcat.legacy.dir}" type="dir" />
-					<then>
-						<delete dir="${app.server.tomcat.legacy.dir}" />
-					</then>
-				</if>
-			</sequential>
-		</for>
+						<if>
+							<available file="${app.server.tomcat.legacy.dir}" type="dir" />
+							<then>
+								<delete dir="${app.server.tomcat.legacy.dir}" />
+							</then>
+						</if>
+					</sequential>
+				</for>
+			</then>
+		</if>
 
 		<delete dir="${app.server.tomcat.dir}" />
 
@@ -2216,7 +2243,7 @@ closeTemplate()
 							@echo off
 
 							set "MW_HOME=${app.server.weblogic.dir.windows}"
-							set "USER_MEM_ARGS=-Xmx1024m -XX:MetaspaceSize=256m"
+							set "USER_MEM_ARGS=-Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 							set "WL_HOME=${app.server.weblogic.wlserver.dir.windows}"
 
 							call %MW_HOME%/oracle_common/common/bin/commEnv.cmd
@@ -2238,7 +2265,7 @@ closeTemplate()
 							@echo off
 
 							set "MW_HOME=${app.server.weblogic.dir.windows}"
-							set "USER_MEM_ARGS=-Xmx1024m -XX:MetaspaceSize=256m"
+							set "USER_MEM_ARGS=-Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 							set "WL_HOME=${app.server.weblogic.wlserver.dir.windows}"
 
 							call %WL_HOME%/common/bin/commEnv.cmd
@@ -2266,7 +2293,7 @@ closeTemplate()
 							set DERBY_FLAG="false"
 							set "JAVA_OPTIONS=%JAVA_OPTIONS% -Dfile.encoding=UTF-8 -Duser.timezone=GMT -da:org.apache.lucene... -da:org.aspectj..."
 							set "MW_HOME=${app.server.weblogic.dir.windows}"
-							set "USER_MEM_ARGS=-Xmx1024m -XX:PermSize=512m"
+							set "USER_MEM_ARGS=-Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 						]]>
 					</replacevalue>
 				</replace>
@@ -2393,7 +2420,7 @@ closeTemplate()
 							#!/bin/sh
 
 							export MW_HOME="${app.server.weblogic.dir}"
-							export USER_MEM_ARGS="-Xmx1024m -XX:MetaspaceSize=256m"
+							export USER_MEM_ARGS="-Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 							export WL_HOME="${app.server.weblogic.wlserver.dir}"
 
 							${source.command} ${MW_HOME}/oracle_common/common/bin/commEnv.sh
@@ -2408,7 +2435,7 @@ closeTemplate()
 							#!/bin/sh
 
 							export MW_HOME="${app.server.weblogic.dir}"
-							export USER_MEM_ARGS="-Xmx1024m -XX:MetaspaceSize=256m"
+							export USER_MEM_ARGS="-Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 							export WL_HOME="${app.server.weblogic.wlserver.dir}"
 
 							${source.command} ${WL_HOME}/common/bin/commEnv.sh
@@ -2440,7 +2467,7 @@ closeTemplate()
 							export DERBY_FLAG="false"
 							export JAVA_OPTIONS="${JAVA_OPTIONS} -Dfile.encoding=UTF-8 -Duser.timezone=GMT -da:org.apache.lucene... -da:org.aspectj... "
 							export MW_HOME="${app.server.weblogic.dir}"
-							export USER_MEM_ARGS="-Xmx1024m -XX:MetaspaceSize=512m"
+							export USER_MEM_ARGS="-Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 						]]>
 					</replacevalue>
 				</replace>
@@ -2555,6 +2582,13 @@ this task.
 						<include name="**/*.sh" />
 					</fileset>
 				</chmod>
+
+				<replace
+					file="${app.server.weblogic.instance.dir}/startWebLogic.sh"
+				>
+					<replacetoken><![CDATA[-Xmx1024m]]></replacetoken>
+					<replacevalue><![CDATA[-Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7]]></replacevalue>
+				</replace>
 			</then>
 			<elseif>
 				<os family="windows" />
@@ -3122,6 +3156,8 @@ and put it in ${app.server.parent.dir}. Then rerun this task.
 			<replacetoken><![CDATA[<secureSessionCookie xmi:id="SecureSessionCookie_1" cookieDomain="*" cookieName="JSESSIONID" cookiePath="/"/>]]></replacetoken>
 			<replacevalue><![CDATA[]]></replacevalue>
 		</replace>
+
+		<update-websphere-java-opts />
 	</target>
 
 	<target name="unzip-websphere-custom">
@@ -3205,6 +3241,8 @@ this task.
 				</replace>
 			</then>
 		</if>
+
+		<update-websphere-java-opts />
 	</target>
 
 	<target name="unzip-wildfly">
@@ -3340,7 +3378,7 @@ this task.
 
 		<echo append="true" file="${app.server.wildfly.bin.dir}/standalone.conf">
 			<![CDATA[
-				JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xmx1024m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=200m"
+				JAVA_OPTS="$JAVA_OPTS -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 			]]>
 		</echo>
 
@@ -3357,7 +3395,7 @@ this task.
 			<replacetoken><![CDATA[:JAVA_OPTS_SET]]></replacetoken>
 			<replacevalue>
 				<![CDATA[
-					set "JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xmx1024m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=200m"
+					set "JAVA_OPTS=%JAVA_OPTS% -Dfile.encoding=UTF-8 -Djava.net.preferIPv4Stack=true -Djboss.as.management.blocking.timeout=480 -Duser.timezone=GMT -Xms2560m -Xmx2560m -XX:MaxNewSize=1536m -XX:MaxMetaspaceSize=512m -XX:MetaspaceSize=512m -XX:NewSize=1536m -XX:SurvivorRatio=7"
 
 					:JAVA_OPTS_SET
 				]]>

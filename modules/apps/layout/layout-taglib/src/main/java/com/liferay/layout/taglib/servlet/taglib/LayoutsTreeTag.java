@@ -18,6 +18,7 @@ import com.liferay.layout.taglib.internal.servlet.ServletContextUtil;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutSetBranch;
@@ -48,6 +49,82 @@ public class LayoutsTreeTag extends IncludeTag {
 	@Override
 	public int doStartTag() {
 		return EVAL_BODY_INCLUDE;
+	}
+
+	public long getGroupId() {
+		return _groupId;
+	}
+
+	public LayoutSetBranch getLayoutSetBranch() {
+		return _layoutSetBranch;
+	}
+
+	public String getLinkTemplate() {
+		return _linkTemplate;
+	}
+
+	public PortletURL getPortletURL() {
+		return _portletURL;
+	}
+
+	public Map<String, PortletURL> getPortletURLs() {
+		return _portletURLs;
+	}
+
+	public String getRootLinkTemplate() {
+		return _rootLinkTemplate;
+	}
+
+	public String getRootNodeName() {
+		return _rootNodeName;
+	}
+
+	public String getScriptPosition() {
+		return _scriptPosition;
+	}
+
+	public String getSelectedLayoutIds() {
+		return _selectedLayoutIds;
+	}
+
+	public Long getSelPlid() {
+		return _selPlid;
+	}
+
+	public String getTreeId() {
+		return _treeId;
+	}
+
+	public boolean isCheckContentDisplayPage() {
+		return _checkContentDisplayPage;
+	}
+
+	public boolean isDefaultStateChecked() {
+		return _defaultStateChecked;
+	}
+
+	public boolean isDraggableTree() {
+		return _draggableTree;
+	}
+
+	public boolean isExpandFirstNode() {
+		return _expandFirstNode;
+	}
+
+	public boolean isIncomplete() {
+		return _incomplete;
+	}
+
+	public boolean isPrivateLayout() {
+		return _privateLayout;
+	}
+
+	public boolean isSaveState() {
+		return _saveState;
+	}
+
+	public boolean isSelectableTree() {
+		return _selectableTree;
 	}
 
 	public void setCheckContentDisplayPage(boolean checkContentDisplayPage) {
@@ -222,9 +299,7 @@ public class LayoutsTreeTag extends IncludeTag {
 		}
 
 		for (Map.Entry<String, PortletURL> entry : portletURLs.entrySet()) {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("name", entry.getKey());
+			JSONObject jsonObject = JSONUtil.put("name", entry.getKey());
 
 			PortletURL portletURL = entry.getValue();
 

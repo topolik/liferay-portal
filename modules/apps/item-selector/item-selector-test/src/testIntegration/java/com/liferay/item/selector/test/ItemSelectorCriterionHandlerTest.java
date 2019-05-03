@@ -21,7 +21,6 @@ import com.liferay.item.selector.ItemSelectorView;
 import com.liferay.item.selector.ItemSelectorViewReturnTypeProvider;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -88,7 +87,7 @@ public class ItemSelectorCriterionHandlerTest {
 				new TestItemSelectorCriterion();
 
 			itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-				Arrays.asList(new TestItemSelectorReturnType()));
+				new TestItemSelectorReturnType());
 
 			List<ItemSelectorView<TestItemSelectorCriterion>>
 				itemSelectorViews =

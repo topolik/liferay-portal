@@ -10,7 +10,7 @@ import {Config} from 'metal-state';
 import {Drag, DragDrop} from 'metal-drag-drop';
 import {
 	normalizeFieldName
-} from 'dynamic-data-mapping-form-builder/metal/js/components/LayoutProvider/util/fields.es';
+} from 'dynamic-data-mapping-form-builder/js/components/LayoutProvider/util/fields.es';
 
 /**
  * Options.
@@ -18,121 +18,14 @@ import {
  */
 
 class Options extends Component {
-	static STATE = {
-		evaluable: Config.bool().value(false),
-
-		fieldName: Config.string(),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof Options
-		 * @type {?bool}
-		 */
-
-		readOnly: Config.bool().value(false),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Options
-		 * @type {?(string|undefined)}
-		 */
-
-		tip: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Options
-		 * @type {?(string|undefined)}
-		 */
-
-		items: Config.arrayOf(
-			Config.shapeOf(
-				{
-					disabled: Config.bool().value(false),
-					label: Config.string(),
-					name: Config.string(),
-					value: Config.string()
-				}
-			)
-		).internal().valueFn('_internalItemsValueFn'),
-
-		id: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Options
-		 * @type {?(string|undefined)}
-		 */
-
-		label: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof FieldBase
-		 * @type {?(bool|undefined)}
-		 */
-
-		repeatable: Config.bool(),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof Options
-		 * @type {?bool}
-		 */
-
-		required: Config.bool().value(false),
-
-		/**
-		 * @default true
-		 * @instance
-		 * @memberof Options
-		 * @type {?bool}
-		 */
-
-		showLabel: Config.bool().value(true),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Options
-		 * @type {?(string|undefined)}
-		 */
-
-		spritemap: Config.string(),
-
-		placeholder: Config.string().value(Liferay.Language.get('enter-an-option')),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Text
-		 * @type {?(string|undefined)}
-		 */
-
-		type: Config.string().value('options'),
-
-		value: Config.object().value({}),
-
-		visible: Config.bool().value(true),
-
-		defaultOption: Config.bool().internal().value(false)
-	};
-
 	attached() {
 		let defaultOption = false;
 		const defaultOptionLabel = Liferay.Language.get('option').toLowerCase();
-		const options = this.value[this.getCurrentLanguageId()] || [];
+
+		const options = this.getCurrentLocaleValue();
 
 		if ((options.length == 1) && (options[0].label.toLowerCase() == defaultOptionLabel)) {
 			defaultOption = true;
-
-			this._handleFieldEdited({}, options);
 		}
 
 		this.setState(
@@ -144,13 +37,25 @@ class Options extends Component {
 		this._createDragDrop();
 	}
 
-	/**
-	 * @inheritDoc
-	 */
+	deleteOption(deletedIndex) {
+		const {editingLanguageId} = this;
+		let {value} = this;
 
-	disposeInternal() {
-		super.disposeInternal();
-		this.disposeDragAndDrop();
+		for (const languageId in value) {
+			value = {
+				...value,
+				[languageId]: value[languageId].filter(
+					(option, currentIndex) => currentIndex !== deletedIndex
+				)
+			};
+		}
+
+		this.setState(
+			{
+				items: this.getItems(value[editingLanguageId])
+			},
+			() => this._handleFieldEdited({}, value)
+		);
 	}
 
 	disposeDragAndDrop() {
@@ -159,55 +64,10 @@ class Options extends Component {
 		}
 	}
 
-	willReceiveState(changes) {
-		if (changes.value) {
-			const {items} = this;
-			let changed = false;
+	disposeInternal() {
+		super.disposeInternal();
 
-			const options = this.getItems(changes.value.newVal[this.getCurrentLanguageId()]);
-
-			if (options.length !== items.length) {
-				changed = true;
-			}
-			else {
-				options.find(
-					(option, index) => {
-						if (!items[index]) {
-							changed = true;
-						}
-						else if (
-							items[index].label !== option.label ||
-							items[index].value !== option.value
-						) {
-							changed = true;
-						}
-
-						return changed;
-					}
-				);
-			}
-
-			if (changed) {
-				this.setState(
-					{
-						items: options
-					}
-				);
-			}
-		}
-	}
-
-	deleteOption(deletedIndex) {
-		const currentLanguage = this.getCurrentLanguageId();
-		const options = [...this.value[currentLanguage]].filter((option, currentIndex) => currentIndex !== deletedIndex);
-
-		this._handleFieldEdited({}, options);
-
-		this.setState(
-			{
-				items: this.getItems(options)
-			}
-		);
+		this.disposeDragAndDrop();
 	}
 
 	findOptionByValue(options, name, limit = options.length) {
@@ -218,22 +78,38 @@ class Options extends Component {
 		);
 	}
 
-	getCurrentLanguageId() {
-		return themeDisplay.getLanguageId();
+	getCurrentLocaleValue() {
+		const {defaultLanguageId, editingLanguageId} = this;
+		let value = [];
+
+		if (this.value && this.value[editingLanguageId]) {
+			value = this.value[editingLanguageId];
+		}
+		else if (this.value && this.value[defaultLanguageId]) {
+			value = this.value[defaultLanguageId];
+		}
+
+		return value;
 	}
 
 	getFieldIndex(element) {
 		return parseInt(dom.closest(element, '.ddm-field-options').dataset.index, 10);
 	}
 
-	getItems(options) {
-		return [
-			...options,
-			{
-				label: '',
-				value: ''
-			}
-		].map(
+	getItems(options = []) {
+		const {defaultLanguageId, editingLanguageId} = this;
+		const items = options.filter(({value}) => !!value);
+
+		if (defaultLanguageId === editingLanguageId) {
+			items.push(
+				{
+					label: '',
+					value: ''
+				}
+			);
+		}
+
+		return items.map(
 			option => {
 				return {
 					...option,
@@ -244,30 +120,39 @@ class Options extends Component {
 	}
 
 	moveOption(sourceIndex, targetIndex) {
-		let options = [...this.value[this.getCurrentLanguageId()]];
+		const {editingLanguageId} = this;
+		let {value} = this;
 
-		if (sourceIndex < options.length) {
-			options.splice(
-				targetIndex,
-				0,
-				{
-					...options[sourceIndex]
-				}
-			);
+		for (const languageId in value) {
+			const options = [...value[languageId]];
 
-			options = options.filter(
-				(option, index) => {
-					return sourceIndex > targetIndex ? index != (sourceIndex + 1) : index != sourceIndex;
-				}
-			);
+			if (sourceIndex < options.length) {
+				options.splice(
+					targetIndex,
+					0,
+					{
+						...options[sourceIndex]
+					}
+				);
 
-			this._handleFieldEdited({}, options);
+				value = {
+					...value,
+					[languageId]: options.filter(
+						(option, index) => {
+							return sourceIndex > targetIndex ?
+								index != (sourceIndex + 1) :
+								index != sourceIndex;
+						}
+					)
+				};
+			}
 		}
 
 		this.setState(
 			{
-				items: this.getItems(options)
-			}
+				items: this.getItems(value[editingLanguageId])
+			},
+			() => this._handleFieldEdited({}, value)
 		);
 	}
 
@@ -314,7 +199,43 @@ class Options extends Component {
 	}
 
 	shouldGenerateOptionValue(option) {
-		return option.value === '' || (new RegExp(`^${normalizeFieldName(option.label)}\\d*$`)).test(option.value);
+		const {defaultLanguageId, editingLanguageId} = this;
+
+		return (
+			defaultLanguageId === editingLanguageId &&
+			(
+				option.value === '' ||
+				(new RegExp(`^${normalizeFieldName(option.label)}\\d*$`)).test(option.value)
+			)
+		);
+	}
+
+	syncEditingLanguageId(editingLanguageId) {
+		const {defaultLanguageId} = this;
+
+		if (
+			defaultLanguageId !== editingLanguageId &&
+			!this.value[editingLanguageId]
+		) {
+			this.setState(
+				{
+					value: {
+						...this.value,
+						[editingLanguageId]: this.value[defaultLanguageId]
+							.filter(({value}) => !!value)
+					}
+				},
+				() => this._handleFieldEdited({}, this.value)
+			);
+		}
+	}
+
+	syncValue() {
+		this.setState(
+			{
+				items: this.getItems(this.getCurrentLocaleValue())
+			}
+		);
 	}
 
 	_createDragDrop() {
@@ -322,7 +243,7 @@ class Options extends Component {
 			{
 				container: this.element,
 				dragPlaceholder: Drag.Placeholder.CLONE,
-				handles: '.ddm-options-drag',
+				handles: '.ddm-options-drag:not(.disabled)',
 				sources: '.ddm-field-options',
 				targets: '.ddm-options-target',
 				useShim: false
@@ -333,8 +254,8 @@ class Options extends Component {
 		this._dragAndDrop.on(DragDrop.Events.DRAG, this._handleDragEvent.bind(this));
 	}
 
-	_handleDragEvent({source}) {
-		source.classList.add('ddm-source-dragging');
+	_getOptionIndex({name}) {
+		return parseInt(name.replace('option', ''), 10);
 	}
 
 	_handleDragDropEvent({target, source}) {
@@ -352,11 +273,26 @@ class Options extends Component {
 		}
 	}
 
+	_handleDragEvent({source}) {
+		source.classList.add('ddm-source-dragging');
+	}
+
+	_handleFieldEdited({originalEvent}, value) {
+		this.emit(
+			'fieldEdited',
+			{
+				fieldInstance: this,
+				originalEvent,
+				value
+			}
+		);
+	}
+
 	_handleOptionBlurred(event) {
 		const {value} = this;
 		const normalizedValue = this.normalizeValue(value, true);
 
-		this._handleFieldEdited(event, normalizedValue[this.getCurrentLanguageId()]);
+		this._handleFieldEdited(event, normalizedValue);
 	}
 
 	_handleOptionDeleted(event) {
@@ -366,13 +302,10 @@ class Options extends Component {
 		this.deleteOption(deletedIndex);
 	}
 
-	_getOptionIndex({name}) {
-		return parseInt(name.replace('option', ''), 10);
-	}
-
 	_handleOptionEdited(event, property) {
+		const {defaultLanguageId, editingLanguageId} = this;
 		const {fieldInstance, value} = event;
-		let options = this.value[this.getCurrentLanguageId()];
+		let options = this.getCurrentLocaleValue();
 
 		const optionExists = options.some(
 			(option, index) => {
@@ -386,6 +319,7 @@ class Options extends Component {
 					return index === this._getOptionIndex(fieldInstance) ? (
 						{
 							...option,
+							edited: property === 'label',
 							[property]: value
 						}
 					) : option;
@@ -406,25 +340,48 @@ class Options extends Component {
 			options = this.normalizeOptions(options);
 		}
 
+		let newValue = {
+			...this.value,
+			[editingLanguageId]: options
+		};
+
+		if (defaultLanguageId === editingLanguageId) {
+			const generateLabels = (languageId, options) => {
+				return options.map(
+					({label, value}, index) => {
+						const option = newValue[languageId][index];
+
+						if (option && option.edited) {
+							label = option.label;
+						}
+
+						return {
+							edited: option && option.edited,
+							label,
+							value
+						};
+					}
+				);
+			};
+
+			for (const languageId in this.value) {
+				if (defaultLanguageId === languageId) {
+					continue;
+				}
+
+				newValue = {
+					...newValue,
+					[languageId]: generateLabels(languageId, options)
+				};
+			}
+		}
+
 		this.setState(
 			{
-				value: {
-					...this.value,
-					[this.getCurrentLanguageId()]: options
-				}
+				value: newValue
 			},
-			() => {
-				this._handleFieldEdited(event, options);
-			}
+			() => this._handleFieldEdited(event, newValue)
 		);
-	}
-
-	_handleOptionValueEdited(event) {
-		this._handleOptionEdited(event, 'value');
-	}
-
-	_handleOptionLabelEdited(event) {
-		this._handleOptionEdited(event, 'label');
 	}
 
 	_handleOptionFocused({originalEvent: {target}}) {
@@ -439,23 +396,190 @@ class Options extends Component {
 		}
 	}
 
-	_handleFieldEdited({originalEvent}, options) {
-		this.emit(
-			'fieldEdited',
-			{
-				fieldInstance: this,
-				originalEvent,
-				value: options
-			}
-		);
+	_handleOptionLabelEdited(event) {
+		this._handleOptionEdited(event, 'label');
+	}
+
+	_handleOptionValueEdited(event) {
+		this._handleOptionEdited(event, 'value');
 	}
 
 	_internalItemsValueFn() {
-		const options = this.value[this.getCurrentLanguageId()];
+		const options = this.getCurrentLocaleValue();
 
 		return this.getItems(options || []);
 	}
+
+	_setValue(value = {}) {
+		const {defaultLanguageId} = this;
+		const formattedValue = {...value};
+
+		for (const languageId in value) {
+			if (defaultLanguageId !== languageId) {
+				formattedValue[languageId] = formattedValue[languageId]
+					.filter(({value}) => !!value);
+			}
+		}
+
+		return formattedValue;
+	}
 }
+
+Options.STATE = {
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Options
+	 * @type {?string}
+	 */
+
+	defaultLanguageId: Config.string(),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof Options
+	 * @type {?bool}
+	 */
+
+	defaultOption: Config.bool().internal().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Options
+	 * @type {?string}
+	 */
+
+	editingLanguageId: Config.string(),
+
+	/**
+	 * @default 'boolean'
+	 * @instance
+	 * @memberof Options
+	 * @type {?(boolean|undefined)}
+	 */
+
+	evaluable: Config.bool().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Options
+	 * @type {?string}
+	 */
+
+	fieldName: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Options
+	 * @type {?(string|undefined)}
+	 */
+
+	items: Config.arrayOf(
+		Config.shapeOf(
+			{
+				disabled: Config.bool().value(false),
+				label: Config.string(),
+				name: Config.string(),
+				value: Config.string()
+			}
+		)
+	).internal().valueFn('_internalItemsValueFn'),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Options
+	 * @type {?(string|undefined)}
+	 */
+
+	label: Config.string(),
+
+	/**
+	 * @default enter-an-option
+	 * @instance
+	 * @memberof Options
+	 * @type {?(string)}
+	 */
+
+	placeholder: Config.string().value(Liferay.Language.get('enter-an-option')),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof Options
+	 * @type {?bool}
+	 */
+
+	readOnly: Config.bool().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof FieldBase
+	 * @type {?(bool|undefined)}
+	 */
+
+	repeatable: Config.bool(),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof Options
+	 * @type {?bool}
+	 */
+
+	required: Config.bool().value(false),
+
+	/**
+	 * @default true
+	 * @instance
+	 * @memberof Options
+	 * @type {?bool}
+	 */
+
+	showLabel: Config.bool().value(true),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Options
+	 * @type {?(string|undefined)}
+	 */
+
+	spritemap: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Options
+	 * @type {?(string|undefined)}
+	 */
+
+	tip: Config.string(),
+
+	/**
+	 * @default options
+	 * @instance
+	 * @memberof Options
+	 * @type {?(string|undefined)}
+	 */
+
+	type: Config.string().value('options'),
+
+	/**
+	 * @default {}
+	 * @instance
+	 * @memberof Options
+	 * @type {?string}
+	 */
+
+	value: Config.object().setter('_setValue').value({})
+};
 
 Soy.register(Options, templates);
 

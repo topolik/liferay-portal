@@ -29,7 +29,6 @@ import com.liferay.wiki.item.selector.constants.WikiItemSelectorViewConstants;
 import com.liferay.wiki.item.selector.criterion.WikiAttachmentItemSelectorCriterion;
 import com.liferay.wiki.item.selector.criterion.WikiPageItemSelectorCriterion;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -93,37 +92,27 @@ public abstract class BaseWikiLinksCKEditorConfigContributor
 
 	protected abstract ItemSelectorReturnType getItemSelectorReturnType();
 
-	protected WikiAttachmentItemSelectorCriterion
-		getWikiAttachmentItemSelectorCriterion(long wikiPageResourcePrimKey) {
+	protected ItemSelectorCriterion getWikiAttachmentItemSelectorCriterion(
+		long wikiPageResourcePrimKey) {
 
-		WikiAttachmentItemSelectorCriterion itemSelectorCriterion =
+		ItemSelectorCriterion itemSelectorCriterion =
 			new WikiAttachmentItemSelectorCriterion(wikiPageResourcePrimKey);
 
-		List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
-			new ArrayList<>();
-
-		desiredItemSelectorReturnTypes.add(new URLItemSelectorReturnType());
-
 		itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
+			new URLItemSelectorReturnType());
 
 		return itemSelectorCriterion;
 	}
 
-	protected WikiPageItemSelectorCriterion getWikiPageItemSelectorCriterion(
+	protected ItemSelectorCriterion getWikiPageItemSelectorCriterion(
 		long nodeId) {
 
-		WikiPageItemSelectorCriterion itemSelectorCriterion =
+		ItemSelectorCriterion itemSelectorCriterion =
 			new WikiPageItemSelectorCriterion(
 				nodeId, WorkflowConstants.STATUS_APPROVED);
 
-		List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
-			new ArrayList<>();
-
-		desiredItemSelectorReturnTypes.add(getItemSelectorReturnType());
-
 		itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
+			getItemSelectorReturnType());
 
 		return itemSelectorCriterion;
 	}

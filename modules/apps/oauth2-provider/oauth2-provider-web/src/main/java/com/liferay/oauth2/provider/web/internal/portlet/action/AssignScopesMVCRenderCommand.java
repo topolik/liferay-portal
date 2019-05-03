@@ -19,11 +19,16 @@ import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
 import com.liferay.oauth2.provider.scope.liferay.ApplicationDescriptorLocator;
 import com.liferay.oauth2.provider.scope.liferay.ScopeDescriptorLocator;
 import com.liferay.oauth2.provider.scope.liferay.ScopeLocator;
+import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalService;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
+import com.liferay.oauth2.provider.service.OAuth2ScopeGrantLocalService;
 import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
 import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderWebKeys;
 import com.liferay.oauth2.provider.web.internal.display.context.AssignScopesDisplayContext;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -58,16 +63,25 @@ public class AssignScopesMVCRenderCommand implements MVCRenderCommand {
 	public String render(
 		RenderRequest renderRequest, RenderResponse renderResponse) {
 
-		AssignScopesDisplayContext assignScopesDisplayContext =
-			new AssignScopesDisplayContext(
-				_oAuth2ApplicationService, _oAuth2ProviderConfiguration,
-				renderRequest, getThemeDisplay(renderRequest),
-				_applicationDescriptorLocator, _scopeDescriptorLocator,
-				_scopeLocator, _dlurlHelper);
+		try {
+			AssignScopesDisplayContext assignScopesDisplayContext =
+				new AssignScopesDisplayContext(
+					_oAuth2ApplicationService,
+					_oAuth2ApplicationScopeAliasesLocalService,
+					_oAuth2ScopeGrantLocalService, _oAuth2ProviderConfiguration,
+					renderRequest, getThemeDisplay(renderRequest),
+					_applicationDescriptorLocator, _scopeDescriptorLocator,
+					_scopeLocator, _dlURLHelper);
 
-		renderRequest.setAttribute(
-			OAuth2ProviderWebKeys.OAUTH2_ADMIN_PORTLET_DISPLAY_CONTEXT,
-			assignScopesDisplayContext);
+			renderRequest.setAttribute(
+				OAuth2ProviderWebKeys.OAUTH2_ADMIN_PORTLET_DISPLAY_CONTEXT,
+				assignScopesDisplayContext);
+		}
+		catch (PortalException pe) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(pe.getMessage(), pe);
+			}
+		}
 
 		return "/admin/edit_application.jsp";
 	}
@@ -82,16 +96,26 @@ public class AssignScopesMVCRenderCommand implements MVCRenderCommand {
 		return (ThemeDisplay)portletRequest.getAttribute(WebKeys.THEME_DISPLAY);
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		AssignScopesMVCRenderCommand.class);
+
 	@Reference
 	private ApplicationDescriptorLocator _applicationDescriptorLocator;
 
 	@Reference
-	private DLURLHelper _dlurlHelper;
+	private DLURLHelper _dlURLHelper;
+
+	@Reference
+	private OAuth2ApplicationScopeAliasesLocalService
+		_oAuth2ApplicationScopeAliasesLocalService;
 
 	@Reference
 	private OAuth2ApplicationService _oAuth2ApplicationService;
 
 	private OAuth2ProviderConfiguration _oAuth2ProviderConfiguration;
+
+	@Reference
+	private OAuth2ScopeGrantLocalService _oAuth2ScopeGrantLocalService;
 
 	@Reference
 	private ScopeDescriptorLocator _scopeDescriptorLocator;

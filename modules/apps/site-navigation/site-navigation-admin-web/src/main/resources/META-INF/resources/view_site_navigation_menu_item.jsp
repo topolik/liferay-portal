@@ -62,9 +62,11 @@ request.setAttribute("edit_site_navigation_menu.jsp-siteNavigationMenuItemId", s
 					</div>
 				</div>
 
-				<div class="card-col-field lfr-card-actions-column">
-					<liferay-util:include page="/site_navigation_menu_item_action.jsp" servletContext="<%= application %>" />
-				</div>
+				<c:if test="<%= siteNavigationAdminDisplayContext.hasUpdatePermission() %>">
+					<div class="card-col-field lfr-card-actions-column">
+						<liferay-util:include page="/site_navigation_menu_item_action.jsp" servletContext="<%= application %>" />
+					</div>
+				</c:if>
 			</div>
 		</div>
 	</div>

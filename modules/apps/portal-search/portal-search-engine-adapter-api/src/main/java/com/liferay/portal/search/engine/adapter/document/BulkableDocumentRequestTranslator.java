@@ -14,21 +14,20 @@
 
 package com.liferay.portal.search.engine.adapter.document;
 
+import aQute.bnd.annotation.ProviderType;
+
 /**
  * @author Michael C. Han
  */
-public interface BulkableDocumentRequestTranslator<R, S, T, U> {
+@ProviderType
+public interface BulkableDocumentRequestTranslator {
 
-	public R translate(
-		DeleteDocumentRequest deleteDocumentRequest,
-		U searchEngineAdapterRequest);
+	public <T> T translate(DeleteDocumentRequest deleteDocumentRequest);
 
-	public S translate(
-		IndexDocumentRequest indexDocumentRequest,
-		U searchEngineAdapterRequest);
+	public <T> T translate(GetDocumentRequest getDocumentRequest);
 
-	public T translate(
-		UpdateDocumentRequest updateDocumentRequest,
-		U searchEngineAdapterRequest);
+	public <T> T translate(IndexDocumentRequest indexDocumentRequest);
+
+	public <T> T translate(UpdateDocumentRequest updateDocumentRequest);
 
 }

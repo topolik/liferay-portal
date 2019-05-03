@@ -60,4 +60,8 @@ public interface OAuth2ScopeGrant
 
 			};
 
+	public java.util.List<String> getScopeAliasesList();
+
+	public void setScopeAliasesList(java.util.List<String> scopeAliasesList);
+
 }

@@ -15,14 +15,17 @@
 package com.liferay.journal.web.internal.asset.util;
 
 import com.liferay.asset.kernel.model.AssetEntry;
+import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
 import com.liferay.asset.model.AssetEntryUsage;
 import com.liferay.asset.util.AssetEntryUsageActionMenuContributor;
+import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.web.internal.security.permission.resource.JournalArticlePermission;
+import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
@@ -30,13 +33,14 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
+import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -65,12 +69,6 @@ public class JournalArticleAssetEntryUsageActionMenuContributor
 	public List<DropdownItem> getAssetEntryUsageActionMenu(
 		AssetEntryUsage assetEntryUsage, HttpServletRequest request) {
 
-		if (assetEntryUsage.getClassNameId() != _portal.getClassNameId(
-				Layout.class)) {
-
-			return Collections.emptyList();
-		}
-
 		AssetEntry assetEntry = _assetEntryLocalService.fetchEntry(
 			assetEntryUsage.getAssetEntryId());
 
@@ -96,86 +94,98 @@ public class JournalArticleAssetEntryUsageActionMenuContributor
 						dropdownItem -> {
 							dropdownItem.setHref(
 								_getURL(
-									approvedArticle,
-									assetEntryUsage.getClassPK(),
-									assetEntryUsage.getPortletId(), request));
+									assetEntryUsage,
+									AssetRendererFactory.TYPE_LATEST_APPROVED,
+									request));
 							dropdownItem.setLabel(
 								LanguageUtil.get(
 									resourceBundle, "view-in-page"));
-							dropdownItem.setTarget("_blank");
 						});
 				}
 
-				boolean hasUpdatePermission = false;
+				if (article.isDraft() || article.isPending() ||
+					article.isScheduled()) {
 
-				try {
-					hasUpdatePermission = JournalArticlePermission.contains(
-						themeDisplay.getPermissionChecker(), article,
-						ActionKeys.UPDATE);
-				}
-				catch (PortalException pe) {
-					_log.error("Unable to check article permission", pe);
-				}
+					try {
+						if (JournalArticlePermission.contains(
+								themeDisplay.getPermissionChecker(), article,
+								ActionKeys.UPDATE)) {
 
-				if (article.isDraft() && hasUpdatePermission) {
-					add(
-						dropdownItem -> {
-							dropdownItem.setHref(
-								_getURL(
-									article, assetEntryUsage.getClassPK(),
-									assetEntryUsage.getPortletId(), request));
-							dropdownItem.setLabel(
-								LanguageUtil.get(
-									resourceBundle, "preview-draft-in-page"));
-							dropdownItem.setTarget("_blank");
-						});
-				}
+							String key = "preview-draft-in-page";
 
-				if (article.isPending() && hasUpdatePermission) {
-					add(
-						dropdownItem -> {
-							dropdownItem.setHref(
-								_getURL(
-									article, assetEntryUsage.getClassPK(),
-									assetEntryUsage.getPortletId(), request));
-							dropdownItem.setLabel(
-								LanguageUtil.get(
-									resourceBundle, "preview-pending-in-page"));
-							dropdownItem.setTarget("_blank");
-						});
-				}
+							if (article.isPending()) {
+								key = "preview-pending-in-page";
+							}
+							else if (article.isScheduled()) {
+								key = "preview-scheduled-in-page";
+							}
 
-				if (article.isScheduled() && hasUpdatePermission) {
-					add(
-						dropdownItem -> {
-							dropdownItem.setHref(
-								_getURL(
-									article, assetEntryUsage.getClassPK(),
-									assetEntryUsage.getPortletId(), request));
-							dropdownItem.setLabel(
-								LanguageUtil.get(
-									resourceBundle,
-									"preview-scheduled-in-page"));
-							dropdownItem.setTarget("_blank");
-						});
+							String label = LanguageUtil.get(
+								resourceBundle, key);
+
+							add(
+								dropdownItem -> {
+									dropdownItem.setHref(
+										_getURL(
+											assetEntryUsage,
+											AssetRendererFactory.TYPE_LATEST,
+											request));
+									dropdownItem.setLabel(label);
+								});
+						}
+					}
+					catch (PortalException pe) {
+						_log.error("Unable to check article permission", pe);
+					}
 				}
 			}
 		};
 	}
 
 	private String _getURL(
-		JournalArticle article, long plid, String portletId,
-		HttpServletRequest request) {
+			AssetEntryUsage assetEntryUsage, int previewAssetEntryType,
+			HttpServletRequest request)
+		throws PortalException {
 
-		PortletURL portletURL = PortletURLFactoryUtil.create(
-			request, portletId, plid, PortletRequest.RENDER_PHASE);
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
-		if (!article.isApproved()) {
+		String layoutURL = null;
+
+		if (assetEntryUsage.getContainerType() == _portal.getClassNameId(
+				FragmentEntryLink.class)) {
+
+			Layout layout = _layoutLocalService.fetchLayout(
+				assetEntryUsage.getPlid());
+
+			layoutURL = _portal.getLayoutFriendlyURL(layout, themeDisplay);
+
+			layoutURL = _http.setParameter(
+				layoutURL, "previewAssetEntryId",
+				String.valueOf(assetEntryUsage.getAssetEntryId()));
+			layoutURL = _http.setParameter(
+				layoutURL, "previewAssetEntryType",
+				String.valueOf(previewAssetEntryType));
+		}
+		else {
+			PortletURL portletURL = PortletURLFactoryUtil.create(
+				request, assetEntryUsage.getContainerKey(),
+				assetEntryUsage.getPlid(), PortletRequest.RENDER_PHASE);
+
 			portletURL.setParameter(
-				"previewArticleId", String.valueOf(article.getId()));
+				"previewAssetEntryId",
+				String.valueOf(assetEntryUsage.getAssetEntryId()));
+			portletURL.setParameter(
+				"previewAssetEntryType", String.valueOf(previewAssetEntryType));
+
+			layoutURL = portletURL.toString();
 		}
 
-		return portletURL.toString() + "#portlet_" + portletId;
+		String portletURLString = _http.setParameter(
+			layoutURL, "p_l_back_url", themeDisplay.getURLCurrent());
+
+		return portletURLString + "#portlet_" +
+			assetEntryUsage.getContainerKey();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -185,7 +195,17 @@ public class JournalArticleAssetEntryUsageActionMenuContributor
 	private AssetEntryLocalService _assetEntryLocalService;
 
 	@Reference
+	private Http _http;
+
+	@Reference
 	private JournalArticleLocalService _journalArticleLocalService;
+
+	@Reference
+	private LayoutLocalService _layoutLocalService;
+
+	@Reference
+	private LayoutPageTemplateEntryLocalService
+		_layoutPageTemplateEntryLocalService;
 
 	@Reference
 	private Portal _portal;

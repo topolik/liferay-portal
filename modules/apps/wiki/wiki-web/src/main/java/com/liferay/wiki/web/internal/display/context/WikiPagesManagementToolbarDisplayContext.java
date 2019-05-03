@@ -19,7 +19,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -85,26 +84,25 @@ public class WikiPagesManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData("action", "deletePages");
+					dropdownItem -> {
+						dropdownItem.putData("action", "deletePages");
 
-							if (_trashHelper.isTrashEnabled(
-									_themeDisplay.getScopeGroupId())) {
+						if (_trashHelper.isTrashEnabled(
+								_themeDisplay.getScopeGroupId())) {
 
-								dropdownItem.setIcon("trash");
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										_request, "move-to-recycle-bin"));
-							}
-							else {
-								dropdownItem.setIcon("times");
-								dropdownItem.setLabel(
-									LanguageUtil.get(_request, "delete"));
-							}
+							dropdownItem.setIcon("trash");
+							dropdownItem.setLabel(
+								LanguageUtil.get(
+									_request, "move-to-recycle-bin"));
+						}
+						else {
+							dropdownItem.setIcon("times-circle");
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, "delete"));
+						}
 
-							dropdownItem.setQuickAction(true);
-						}));
+						dropdownItem.setQuickAction(true);
+					});
 			}
 		};
 	}
@@ -179,26 +177,23 @@ public class WikiPagesManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				addGroup(
-					SafeConsumer.ignore(
-						dropdownGroupItem -> {
-							dropdownGroupItem.setDropdownItems(
-								_getFilterNavigationDropdownItems());
-							dropdownGroupItem.setLabel(
-								LanguageUtil.get(
-									_request, "filter-by-navigation"));
-						}));
+					dropdownGroupItem -> {
+						dropdownGroupItem.setDropdownItems(
+							_getFilterNavigationDropdownItems());
+						dropdownGroupItem.setLabel(
+							LanguageUtil.get(_request, "filter-by-navigation"));
+					});
 
 				String keywords = ParamUtil.getString(_request, "keywords");
 
 				if (Validator.isNull(keywords)) {
 					addGroup(
-						SafeConsumer.ignore(
-							dropdownGroupItem -> {
-								dropdownGroupItem.setDropdownItems(
-									_getOrderByDropdownItems());
-								dropdownGroupItem.setLabel(
-									LanguageUtil.get(_request, "order-by"));
-							}));
+						dropdownGroupItem -> {
+							dropdownGroupItem.setDropdownItems(
+								_getOrderByDropdownItems());
+							dropdownGroupItem.setLabel(
+								LanguageUtil.get(_request, "order-by"));
+						});
 				}
 			}
 		};
@@ -211,25 +206,21 @@ public class WikiPagesManagementToolbarDisplayContext {
 
 				if (!navigation.equals("all-pages")) {
 					add(
-						SafeConsumer.ignore(
-							labelItem -> {
-								PortletURL removeLabelURL =
-									PortletURLUtil.clone(
-										_getPortletURL(),
-										_liferayPortletResponse);
+						labelItem -> {
+							PortletURL removeLabelURL = PortletURLUtil.clone(
+								_getPortletURL(), _liferayPortletResponse);
 
-								removeLabelURL.setParameter(
-									"navigation", (String)null);
+							removeLabelURL.setParameter(
+								"navigation", (String)null);
 
-								labelItem.putData(
-									"removeLabelURL",
-									removeLabelURL.toString());
+							labelItem.putData(
+								"removeLabelURL", removeLabelURL.toString());
 
-								labelItem.setCloseable(true);
+							labelItem.setCloseable(true);
 
-								labelItem.setLabel(
-									LanguageUtil.get(_request, navigation));
-							}));
+							labelItem.setLabel(
+								LanguageUtil.get(_request, navigation));
+						});
 				}
 			}
 		};
@@ -317,22 +308,21 @@ public class WikiPagesManagementToolbarDisplayContext {
 
 				for (String navigationKey : navigationKeys) {
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setActive(
-									navigation.equals(navigationKey));
+						dropdownItem -> {
+							dropdownItem.setActive(
+								navigation.equals(navigationKey));
 
-								PortletURL navigationPortletURL =
-									PortletURLUtil.clone(
-										portletURL, _liferayPortletResponse);
+							PortletURL navigationPortletURL =
+								PortletURLUtil.clone(
+									portletURL, _liferayPortletResponse);
 
-								dropdownItem.setHref(
-									navigationPortletURL, "navigation",
-									navigationKey);
+							dropdownItem.setHref(
+								navigationPortletURL, "navigation",
+								navigationKey);
 
-								dropdownItem.setLabel(
-									LanguageUtil.get(_request, navigationKey));
-							}));
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, navigationKey));
+						});
 				}
 			}
 		};
@@ -364,23 +354,20 @@ public class WikiPagesManagementToolbarDisplayContext {
 					String orderByCol = orderByColEntry.getKey();
 
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setActive(
-									orderByCol.equals(_getOrderByCol()));
+						dropdownItem -> {
+							dropdownItem.setActive(
+								orderByCol.equals(_getOrderByCol()));
 
-								PortletURL orderByPortletURL =
-									PortletURLUtil.clone(
-										portletURL, _liferayPortletResponse);
+							PortletURL orderByPortletURL = PortletURLUtil.clone(
+								portletURL, _liferayPortletResponse);
 
-								dropdownItem.setHref(
-									orderByPortletURL, "orderByCol",
-									orderByCol);
+							dropdownItem.setHref(
+								orderByPortletURL, "orderByCol", orderByCol);
 
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										_request, orderByColEntry.getValue()));
-							}));
+							dropdownItem.setLabel(
+								LanguageUtil.get(
+									_request, orderByColEntry.getValue()));
+						});
 				}
 			}
 		};

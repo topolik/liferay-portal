@@ -9,8 +9,23 @@
 </thead>
 <tbody>
 <tr>
+	<td>INFO_MESSAGE</td>
+	<td>//div[@class='portlet-msg-info']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SAML_CONNECTION_ACTION_BUTTON</td>
+	<td>//tr[contains(.,'${key_samlEntityID}')]//a[contains(@id,'ConnectionsSearchContainer')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SAML_ENABLED_CHECKBOX</td>
 	<td>//input[contains(@id,'saml-enabled') and @type='checkbox']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SAML_KEEP_ALIVE_URL</td>
+	<td>//input[contains(@name,'SamlAdminPortlet_ExpandoAttribute--keepAliveUR')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -56,7 +71,7 @@
 </tr>
 <tr>
 	<td>CERTIFICATE_AND_PRIVATE_KEY_KEY_PASSWORD_FIELD</td>
-	<td>//input[contains(@id,'saml-keystore-credential-password')]</td>
+	<td>//input[contains(@id,'credential-password')]</td>
 	<td></td>
 </tr>
 <tr>

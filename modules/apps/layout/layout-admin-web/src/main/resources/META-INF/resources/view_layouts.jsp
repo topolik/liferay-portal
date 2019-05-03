@@ -18,6 +18,8 @@
 
 <liferay-ui:success key='<%= portletDisplay.getPortletName() + "layoutUpdated" %>' message='<%= LanguageUtil.get(resourceBundle, "the-page-was-updated-succesfully") %>' />
 
+<liferay-ui:success key="layoutPublished" message="the-page-was-published-succesfully" />
+
 <liferay-ui:error embed="<%= false %>" exception="<%= GroupInheritContentException.class %>" message="this-page-cannot-be-deleted-and-cannot-have-child-pages-because-it-is-associated-to-a-site-template" />
 
 <clay:navigation-bar
@@ -87,7 +89,7 @@
 <aui:script sandbox="<%= true %>">
 	var deleteSelectedPages = function() {
 		if (confirm('<liferay-ui:message key="are-you-sure-you-want-to-delete-this" />')) {
-			submitForm($(document.<portlet:namespace />fm));
+			submitForm(document.<portlet:namespace />fm);
 		}
 	};
 

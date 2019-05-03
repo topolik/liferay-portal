@@ -15,102 +15,84 @@
 package com.liferay.data.engine.rest.resource.v1_0.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
-import com.liferay.data.engine.rest.dto.v1_0.DataDefinition;
+import com.liferay.data.engine.rest.client.dto.v1_0.DataDefinition;
+import com.liferay.data.engine.rest.client.dto.v1_0.DataDefinitionPermission;
+import com.liferay.data.engine.rest.client.dto.v1_0.LocalizedValue;
+import com.liferay.data.engine.rest.resource.v1_0.test.util.DataDefinitionTestUtil;
+import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.portal.kernel.model.Role;
+import com.liferay.portal.kernel.model.RoleConstants;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
+import com.liferay.portal.kernel.test.util.RoleTestUtil;
 
-import java.util.Objects;
-
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 /**
  * @author Jeyvison Nascimento
  */
-@Ignore
 @RunWith(Arquillian.class)
 public class DataDefinitionResourceTest
 	extends BaseDataDefinitionResourceTestCase {
 
-	protected void assertValid(DataDefinition dataDefinition) {
-		boolean valid = false;
+	@Override
+	public void testPostDataDefinitionDataDefinitionPermission()
+		throws Exception {
 
-		if (Objects.equals(
-				dataDefinition.getContentSpaceId(), testGroup.getGroupId()) &&
-			(dataDefinition.getDateCreated() != null) &&
-			(dataDefinition.getDateModified() != null) &&
-			(dataDefinition.getId() != null)) {
+		super.testPostDataDefinitionDataDefinitionPermission();
 
-			valid = true;
-		}
+		DDMStructure ddmStructure = DataDefinitionTestUtil.addDDMStructure(
+			testGroup);
 
-		Assert.assertTrue(valid);
+		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
+
+		invokePostDataDefinitionDataDefinitionPermission(
+			ddmStructure.getStructureId(), _OPERATION_SAVE_PERMISSION,
+			new DataDefinitionPermission() {
+				{
+					view = true;
+					roleNames = new String[] {role.getName()};
+				}
+			});
 	}
 
 	@Override
-	protected boolean equals(
-		DataDefinition dataDefinition1, DataDefinition dataDefinition2) {
+	public void testPostSiteDataDefinitionPermission() throws Exception {
+		super.testPostSiteDataDefinitionPermission();
 
-		if (Objects.equals(
-				dataDefinition1.getDateCreated(),
-				dataDefinition2.getDateCreated()) &&
-			Objects.equals(dataDefinition1.getId(), dataDefinition2.getId())) {
+		Role role = RoleTestUtil.addRole(RoleConstants.TYPE_REGULAR);
 
-			return true;
-		}
-
-		return false;
+		invokePostSiteDataDefinitionPermission(
+			testGroup.getGroupId(), _OPERATION_SAVE_PERMISSION,
+			new DataDefinitionPermission() {
+				{
+					addDataDefinition = true;
+					roleNames = new String[] {role.getName()};
+				}
+			});
 	}
 
+	@Override
+	protected String[] getAdditionalAssertFieldNames() {
+		return new String[] {"name"};
+	}
+
+	@Override
 	protected DataDefinition randomDataDefinition() {
 		return new DataDefinition() {
 			{
+				name = new LocalizedValue[] {
+					new LocalizedValue() {
+						{
+							key = "en_US";
+							value = RandomTestUtil.randomString();
+						}
+					}
+				};
+				siteId = testGroup.getGroupId();
 			}
 		};
 	}
 
-	protected DataDefinition testDeleteDataDefinition_addDataDefinition()
-		throws Exception {
-
-		return invokePostContentSpaceDataDefinition(
-			testGroup.getGroupId(), randomDataDefinition());
-	}
-
-	protected DataDefinition
-			testGetContentSpaceDataDefinitionsPage_addDataDefinition(
-				Long contentSpaceId, DataDefinition dataDefinition)
-		throws Exception {
-
-		return invokePostContentSpaceDataDefinition(
-			contentSpaceId, dataDefinition);
-	}
-
-	protected Long testGetContentSpaceDataDefinitionsPage_getGroupId()
-		throws Exception {
-
-		return testGroup.getGroupId();
-	}
-
-	protected DataDefinition testGetDataDefinition_addDataDefinition()
-		throws Exception {
-
-		return invokePostContentSpaceDataDefinition(
-			testGroup.getGroupId(), randomDataDefinition());
-	}
-
-	protected DataDefinition
-			testPostContentSpaceDataDefinition_addDataDefinition(
-				DataDefinition dataDefinition)
-		throws Exception {
-
-		return invokePostContentSpaceDataDefinition(
-			testGroup.getGroupId(), dataDefinition);
-	}
-
-	protected DataDefinition testPutDataDefinition_addDataDefinition()
-		throws Exception {
-
-		return invokePostContentSpaceDataDefinition(
-			testGroup.getGroupId(), randomDataDefinition());
-	}
+	private static final String _OPERATION_SAVE_PERMISSION = "save";
 
 }

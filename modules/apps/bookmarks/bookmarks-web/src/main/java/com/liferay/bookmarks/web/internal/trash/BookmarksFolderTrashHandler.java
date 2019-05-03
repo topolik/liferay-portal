@@ -16,7 +16,7 @@ package com.liferay.bookmarks.web.internal.trash;
 
 import com.liferay.bookmarks.model.BookmarksFolder;
 import com.liferay.bookmarks.service.BookmarksFolderLocalService;
-import com.liferay.bookmarks.web.internal.asset.BookmarksFolderAssetRenderer;
+import com.liferay.bookmarks.web.internal.asset.model.BookmarksFolderAssetRenderer;
 import com.liferay.bookmarks.web.internal.util.BookmarksUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.ContainerModel;
@@ -207,13 +207,7 @@ public class BookmarksFolderTrashHandler extends BookmarksBaseTrashHandler {
 			permissionChecker, folder, actionId);
 	}
 
-	@Reference(unbind = "-")
-	protected void setBookmarksFolderLocalService(
-		BookmarksFolderLocalService bookmarksFolderLocalService) {
-
-		_bookmarksFolderLocalService = bookmarksFolderLocalService;
-	}
-
+	@Reference
 	private BookmarksFolderLocalService _bookmarksFolderLocalService;
 
 	@Reference(

@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.model.WorkflowedModel;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.WebKeys;
+import com.liferay.taglib.util.LexiconUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -68,6 +69,44 @@ public abstract class BaseVerticalCard
 	}
 
 	@Override
+	public String getStickerCssClass() {
+		if (!(baseModel instanceof AuditedModel)) {
+			return StringPool.BLANK;
+		}
+
+		AuditedModel auditedModel = (AuditedModel)baseModel;
+
+		User user = UserLocalServiceUtil.fetchUser(auditedModel.getUserId());
+
+		if (user == null) {
+			return StringPool.BLANK;
+		}
+
+		return "sticker-user-icon " + LexiconUtil.getUserColorCssClass(user);
+	}
+
+	@Override
+	public String getStickerIcon() {
+		if (!(baseModel instanceof AuditedModel)) {
+			return StringPool.BLANK;
+		}
+
+		AuditedModel auditedModel = (AuditedModel)baseModel;
+
+		User user = UserLocalServiceUtil.fetchUser(auditedModel.getUserId());
+
+		if (user == null) {
+			return StringPool.BLANK;
+		}
+
+		if (user.getPortraitId() == 0) {
+			return "user";
+		}
+
+		return StringPool.BLANK;
+	}
+
+	@Override
 	public String getStickerImageSrc() {
 		try {
 			if (!(baseModel instanceof AuditedModel)) {
@@ -83,28 +122,15 @@ public abstract class BaseVerticalCard
 				return StringPool.BLANK;
 			}
 
+			if (user.getPortraitId() <= 0) {
+				return null;
+			}
+
 			return user.getPortraitURL(themeDisplay);
 		}
 		catch (Exception e) {
 			return StringPool.BLANK;
 		}
-	}
-
-	@Override
-	public String getStickerLabel() {
-		if (!(baseModel instanceof AuditedModel)) {
-			return StringPool.BLANK;
-		}
-
-		AuditedModel auditedModel = (AuditedModel)baseModel;
-
-		User user = UserLocalServiceUtil.fetchUser(auditedModel.getUserId());
-
-		if (user == null) {
-			return StringPool.BLANK;
-		}
-
-		return user.getInitials();
 	}
 
 	@Override

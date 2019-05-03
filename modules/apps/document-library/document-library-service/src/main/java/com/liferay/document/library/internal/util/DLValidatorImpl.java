@@ -65,9 +65,11 @@ public final class DLValidatorImpl implements DLValidator {
 				name, blacklistChar, StringPool.UNDERLINE);
 		}
 
-		name = replaceDLCharLastBlacklist(name);
+		name = _replaceDLCharLastBlacklist(name);
 
-		return replaceDLNameBlacklist(name);
+		name = _replaceDLNameBlacklist(name);
+
+		return _replaceDLWebDAVSubstitutionChar(name);
 	}
 
 	@Override
@@ -261,7 +263,7 @@ public final class DLValidatorImpl implements DLValidator {
 			DLConfiguration.class, properties);
 	}
 
-	protected String replaceDLCharLastBlacklist(String title) {
+	private String _replaceDLCharLastBlacklist(String title) {
 		String previousTitle = null;
 
 		while (!title.equals(previousTitle)) {
@@ -287,7 +289,7 @@ public final class DLValidatorImpl implements DLValidator {
 		return title;
 	}
 
-	protected String replaceDLNameBlacklist(String title) {
+	private String _replaceDLNameBlacklist(String title) {
 		String extension = FileUtil.getExtension(title);
 		String nameWithoutExtension = FileUtil.stripExtension(title);
 
@@ -306,6 +308,12 @@ public final class DLValidatorImpl implements DLValidator {
 		}
 
 		return title;
+	}
+
+	private String _replaceDLWebDAVSubstitutionChar(String title) {
+		return StringUtil.replace(
+			title, PropsValues.DL_WEBDAV_SUBSTITUTION_CHAR,
+			StringPool.UNDERLINE);
 	}
 
 	private volatile DLConfiguration _dlConfiguration;

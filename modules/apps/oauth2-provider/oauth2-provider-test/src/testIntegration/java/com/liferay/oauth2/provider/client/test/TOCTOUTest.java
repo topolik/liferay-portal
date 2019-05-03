@@ -16,7 +16,6 @@ package com.liferay.oauth2.provider.client.test;
 
 import com.liferay.oauth2.provider.constants.GrantType;
 import com.liferay.oauth2.provider.model.OAuth2Application;
-import com.liferay.oauth2.provider.model.OAuth2ApplicationScopeAliases;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationLocalService;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalService;
 import com.liferay.oauth2.provider.test.internal.TestRunnablePostHandlingApplication;
@@ -189,18 +188,15 @@ public class TOCTOUTest extends BaseClientTestCase {
 						oAuth2AScopeAliasesLocalServiceServiceReference);
 
 			try {
-				OAuth2ApplicationScopeAliases oAuth2ApplicationScopeAliases =
-					oAuth2ApplicationScopeAliasesLocalService.
-						getOAuth2ApplicationScopeAliases(
-							oAuth2Application.
-								getOAuth2ApplicationScopeAliasesId());
-
 				oAuth2Application =
 					oAuth2ApplicationLocalService.updateScopeAliases(
 						oAuth2Application.getUserId(),
 						oAuth2Application.getUserName(),
 						oAuth2Application.getOAuth2ApplicationId(),
-						oAuth2ApplicationScopeAliases.getScopeAliasesList());
+						oAuth2ApplicationScopeAliasesLocalService.
+							getScopeAliasesList(
+								oAuth2Application.
+									getOAuth2ApplicationScopeAliasesId()));
 
 				return oAuth2Application;
 			}

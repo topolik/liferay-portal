@@ -75,8 +75,8 @@ public class AssetListEntryAssetEntryRelModelImpl
 		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"assetListEntryId", Types.BIGINT}, {"segmentsEntryId", Types.BIGINT},
-		{"assetEntryId", Types.BIGINT}, {"position", Types.INTEGER},
+		{"assetListEntryId", Types.BIGINT}, {"assetEntryId", Types.BIGINT},
+		{"segmentsEntryId", Types.BIGINT}, {"position", Types.INTEGER},
 		{"lastPublishDate", Types.TIMESTAMP}
 	};
 
@@ -93,14 +93,14 @@ public class AssetListEntryAssetEntryRelModelImpl
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("assetListEntryId", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("segmentsEntryId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("assetEntryId", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("segmentsEntryId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("position", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table AssetListEntryAssetEntryRel (uuid_ VARCHAR(75) null,assetListEntryAssetEntryRelId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,assetListEntryId LONG,segmentsEntryId LONG,assetEntryId LONG,position INTEGER,lastPublishDate DATE null)";
+		"create table AssetListEntryAssetEntryRel (uuid_ VARCHAR(75) null,assetListEntryAssetEntryRelId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,assetListEntryId LONG,assetEntryId LONG,segmentsEntryId LONG,position INTEGER,lastPublishDate DATE null)";
 
 	public static final String TABLE_SQL_DROP =
 		"drop table AssetListEntryAssetEntryRel";
@@ -117,21 +117,6 @@ public class AssetListEntryAssetEntryRelModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.entity.cache.enabled.com.liferay.asset.list.model.AssetListEntryAssetEntryRel"),
-		true);
-
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.finder.cache.enabled.com.liferay.asset.list.model.AssetListEntryAssetEntryRel"),
-		true);
-
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.column.bitmask.enabled.com.liferay.asset.list.model.AssetListEntryAssetEntryRel"),
-		true);
-
 	public static final long ASSETLISTENTRYID_COLUMN_BITMASK = 1L;
 
 	public static final long COMPANYID_COLUMN_BITMASK = 2L;
@@ -140,11 +125,17 @@ public class AssetListEntryAssetEntryRelModelImpl
 
 	public static final long POSITION_COLUMN_BITMASK = 8L;
 
-	public static final long UUID_COLUMN_BITMASK = 16L;
+	public static final long SEGMENTSENTRYID_COLUMN_BITMASK = 16L;
 
-	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"lock.expiration.time.com.liferay.asset.list.model.AssetListEntryAssetEntryRel"));
+	public static final long UUID_COLUMN_BITMASK = 32L;
+
+	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
+		_entityCacheEnabled = entityCacheEnabled;
+	}
+
+	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
+		_finderCacheEnabled = finderCacheEnabled;
+	}
 
 	public AssetListEntryAssetEntryRelModelImpl() {
 	}
@@ -310,17 +301,17 @@ public class AssetListEntryAssetEntryRelModelImpl
 			(BiConsumer<AssetListEntryAssetEntryRel, Long>)
 				AssetListEntryAssetEntryRel::setAssetListEntryId);
 		attributeGetterFunctions.put(
-			"segmentsEntryId", AssetListEntryAssetEntryRel::getSegmentsEntryId);
-		attributeSetterBiConsumers.put(
-			"segmentsEntryId",
-			(BiConsumer<AssetListEntryAssetEntryRel, Long>)
-				AssetListEntryAssetEntryRel::setSegmentsEntryId);
-		attributeGetterFunctions.put(
 			"assetEntryId", AssetListEntryAssetEntryRel::getAssetEntryId);
 		attributeSetterBiConsumers.put(
 			"assetEntryId",
 			(BiConsumer<AssetListEntryAssetEntryRel, Long>)
 				AssetListEntryAssetEntryRel::setAssetEntryId);
+		attributeGetterFunctions.put(
+			"segmentsEntryId", AssetListEntryAssetEntryRel::getSegmentsEntryId);
+		attributeSetterBiConsumers.put(
+			"segmentsEntryId",
+			(BiConsumer<AssetListEntryAssetEntryRel, Long>)
+				AssetListEntryAssetEntryRel::setSegmentsEntryId);
 		attributeGetterFunctions.put(
 			"position", AssetListEntryAssetEntryRel::getPosition);
 		attributeSetterBiConsumers.put(
@@ -511,16 +502,6 @@ public class AssetListEntryAssetEntryRelModelImpl
 	}
 
 	@Override
-	public long getSegmentsEntryId() {
-		return _segmentsEntryId;
-	}
-
-	@Override
-	public void setSegmentsEntryId(long segmentsEntryId) {
-		_segmentsEntryId = segmentsEntryId;
-	}
-
-	@Override
 	public long getAssetEntryId() {
 		return _assetEntryId;
 	}
@@ -528,6 +509,28 @@ public class AssetListEntryAssetEntryRelModelImpl
 	@Override
 	public void setAssetEntryId(long assetEntryId) {
 		_assetEntryId = assetEntryId;
+	}
+
+	@Override
+	public long getSegmentsEntryId() {
+		return _segmentsEntryId;
+	}
+
+	@Override
+	public void setSegmentsEntryId(long segmentsEntryId) {
+		_columnBitmask |= SEGMENTSENTRYID_COLUMN_BITMASK;
+
+		if (!_setOriginalSegmentsEntryId) {
+			_setOriginalSegmentsEntryId = true;
+
+			_originalSegmentsEntryId = _segmentsEntryId;
+		}
+
+		_segmentsEntryId = segmentsEntryId;
+	}
+
+	public long getOriginalSegmentsEntryId() {
+		return _originalSegmentsEntryId;
 	}
 
 	@Override
@@ -615,9 +618,9 @@ public class AssetListEntryAssetEntryRelModelImpl
 		assetListEntryAssetEntryRelImpl.setModifiedDate(getModifiedDate());
 		assetListEntryAssetEntryRelImpl.setAssetListEntryId(
 			getAssetListEntryId());
+		assetListEntryAssetEntryRelImpl.setAssetEntryId(getAssetEntryId());
 		assetListEntryAssetEntryRelImpl.setSegmentsEntryId(
 			getSegmentsEntryId());
-		assetListEntryAssetEntryRelImpl.setAssetEntryId(getAssetEntryId());
 		assetListEntryAssetEntryRelImpl.setPosition(getPosition());
 		assetListEntryAssetEntryRelImpl.setLastPublishDate(
 			getLastPublishDate());
@@ -680,12 +683,12 @@ public class AssetListEntryAssetEntryRelModelImpl
 
 	@Override
 	public boolean isEntityCacheEnabled() {
-		return ENTITY_CACHE_ENABLED;
+		return _entityCacheEnabled;
 	}
 
 	@Override
 	public boolean isFinderCacheEnabled() {
-		return FINDER_CACHE_ENABLED;
+		return _finderCacheEnabled;
 	}
 
 	@Override
@@ -712,6 +715,12 @@ public class AssetListEntryAssetEntryRelModelImpl
 			assetListEntryAssetEntryRelModelImpl._assetListEntryId;
 
 		assetListEntryAssetEntryRelModelImpl._setOriginalAssetListEntryId =
+			false;
+
+		assetListEntryAssetEntryRelModelImpl._originalSegmentsEntryId =
+			assetListEntryAssetEntryRelModelImpl._segmentsEntryId;
+
+		assetListEntryAssetEntryRelModelImpl._setOriginalSegmentsEntryId =
 			false;
 
 		assetListEntryAssetEntryRelModelImpl._originalPosition =
@@ -776,10 +785,10 @@ public class AssetListEntryAssetEntryRelModelImpl
 		assetListEntryAssetEntryRelCacheModel.assetListEntryId =
 			getAssetListEntryId();
 
+		assetListEntryAssetEntryRelCacheModel.assetEntryId = getAssetEntryId();
+
 		assetListEntryAssetEntryRelCacheModel.segmentsEntryId =
 			getSegmentsEntryId();
-
-		assetListEntryAssetEntryRelCacheModel.assetEntryId = getAssetEntryId();
 
 		assetListEntryAssetEntryRelCacheModel.position = getPosition();
 
@@ -869,6 +878,8 @@ public class AssetListEntryAssetEntryRelModelImpl
 	private static final Class<?>[] _escapedModelInterfaces = new Class[] {
 		AssetListEntryAssetEntryRel.class, ModelWrapper.class
 	};
+	private static boolean _entityCacheEnabled;
+	private static boolean _finderCacheEnabled;
 
 	private String _uuid;
 	private String _originalUuid;
@@ -887,8 +898,10 @@ public class AssetListEntryAssetEntryRelModelImpl
 	private long _assetListEntryId;
 	private long _originalAssetListEntryId;
 	private boolean _setOriginalAssetListEntryId;
-	private long _segmentsEntryId;
 	private long _assetEntryId;
+	private long _segmentsEntryId;
+	private long _originalSegmentsEntryId;
+	private boolean _setOriginalSegmentsEntryId;
 	private int _position;
 	private int _originalPosition;
 	private boolean _setOriginalPosition;

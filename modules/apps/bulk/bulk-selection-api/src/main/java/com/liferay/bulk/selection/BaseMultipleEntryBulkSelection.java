@@ -14,20 +14,16 @@
 
 package com.liferay.bulk.selection;
 
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 
 import java.io.Serializable;
 
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.ResourceBundle;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 /**
  * @author Adolfo Pérez
@@ -46,13 +42,13 @@ public abstract class BaseMultipleEntryBulkSelection<T>
 	}
 
 	@Override
-	public String describe(Locale locale) {
-		ResourceBundle resourceBundle =
-			_resourceBundleLoader.loadResourceBundle(locale);
+	public <E extends PortalException> void forEach(
+			UnsafeConsumer<T, E> unsafeConsumer)
+		throws PortalException {
 
-		return _language.format(
-			resourceBundle, "these-changes-will-be-applied-to-x-items",
-			_entryIds.length);
+		for (long entryId : _entryIds) {
+			unsafeConsumer.accept(fetchEntry(entryId));
+		}
 	}
 
 	@Override
@@ -61,24 +57,13 @@ public abstract class BaseMultipleEntryBulkSelection<T>
 	}
 
 	@Override
-	public boolean isMultiple() {
-		return true;
+	public long getSize() {
+		return _entryIds.length;
 	}
 
 	@Override
 	public Serializable serialize() {
 		return StringUtil.merge(_entryIds, StringPool.COMMA);
-	}
-
-	@Override
-	public Stream<T> stream() {
-		LongStream longStream = Arrays.stream(_entryIds);
-
-		return longStream.mapToObj(
-			this::fetchEntry
-		).filter(
-			Objects::nonNull
-		);
 	}
 
 	protected abstract T fetchEntry(long entryId);

@@ -14,7 +14,6 @@
 
 package com.liferay.segments.test.util;
 
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -22,9 +21,13 @@ import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.segments.constants.SegmentsConstants;
+import com.liferay.segments.criteria.Criteria;
+import com.liferay.segments.criteria.CriteriaSerializer;
 import com.liferay.segments.model.SegmentsEntry;
+import com.liferay.segments.model.SegmentsExperience;
 import com.liferay.segments.service.SegmentsEntryLocalServiceUtil;
 import com.liferay.segments.service.SegmentsEntryRelLocalServiceUtil;
+import com.liferay.segments.service.SegmentsExperienceLocalServiceUtil;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -41,12 +44,13 @@ public class SegmentsTestUtil {
 		return addSegmentsEntry(groupId, RandomTestUtil.randomString());
 	}
 
-	public static SegmentsEntry addSegmentsEntry(long groupId, String key)
+	public static SegmentsEntry addSegmentsEntry(
+			long groupId, String segmentsEntryKey)
 		throws PortalException {
 
 		return addSegmentsEntry(
-			groupId, RandomTestUtil.randomString(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(), key,
+			groupId, segmentsEntryKey, RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(), _EMPTY_CRITERIA_STRING,
 			RandomTestUtil.randomString());
 	}
 
@@ -55,7 +59,7 @@ public class SegmentsTestUtil {
 		throws PortalException {
 
 		SegmentsEntry segmentsEntry = addSegmentsEntry(
-			groupId, StringPool.BLANK, className);
+			groupId, _EMPTY_CRITERIA_STRING, className);
 
 		SegmentsEntryRelLocalServiceUtil.addSegmentsEntryRel(
 			segmentsEntry.getSegmentsEntryId(),
@@ -71,18 +75,19 @@ public class SegmentsTestUtil {
 
 		return addSegmentsEntry(
 			groupId, RandomTestUtil.randomString(),
-			RandomTestUtil.randomString(), criteria,
-			RandomTestUtil.randomString(), type);
+			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+			criteria, type);
 	}
 
 	public static SegmentsEntry addSegmentsEntry(
-			long groupId, final String name, final String description,
-			String criteria, String key, String type)
+			long groupId, String segmentsEntryKey, String name,
+			String description, String criteria, String type)
 		throws PortalException {
 
 		return addSegmentsEntry(
-			name, description, criteria, key, SegmentsConstants.SOURCE_DEFAULT,
-			type, ServiceContextTestUtil.getServiceContext(groupId));
+			segmentsEntryKey, name, description, criteria,
+			SegmentsConstants.SOURCE_DEFAULT, type,
+			ServiceContextTestUtil.getServiceContext(groupId));
 	}
 
 	public static SegmentsEntry addSegmentsEntry(ServiceContext serviceContext)
@@ -90,14 +95,14 @@ public class SegmentsTestUtil {
 
 		return addSegmentsEntry(
 			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-			RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+			RandomTestUtil.randomString(), _EMPTY_CRITERIA_STRING,
 			SegmentsConstants.SOURCE_DEFAULT, RandomTestUtil.randomString(),
 			serviceContext);
 	}
 
 	public static SegmentsEntry addSegmentsEntry(
-			final String name, final String description, String criteria,
-			String key, String source, String type,
+			String segmentsEntryKey, String name, String description,
+			String criteria, String source, String type,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -110,8 +115,54 @@ public class SegmentsTestUtil {
 		descriptionMap.put(LocaleUtil.getDefault(), description);
 
 		return SegmentsEntryLocalServiceUtil.addSegmentsEntry(
-			nameMap, descriptionMap, true, criteria, key, source, type,
+			segmentsEntryKey, nameMap, descriptionMap, true, criteria, source,
+			type, serviceContext);
+	}
+
+	public static SegmentsExperience addSegmentsExperience(
+			long groupId, long classNameId, long classPK)
+		throws PortalException {
+
+		SegmentsEntry segmentsEntry = addSegmentsEntry(groupId);
+
+		return addSegmentsExperience(
+			groupId, segmentsEntry.getSegmentsEntryId(), classNameId, classPK);
+	}
+
+	public static SegmentsExperience addSegmentsExperience(
+			long groupId, long segmentsEntryId, long classNameId, long classPK)
+		throws PortalException {
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(groupId);
+
+		return addSegmentsExperience(
+			segmentsEntryId, classNameId, classPK, serviceContext);
+	}
+
+	public static SegmentsExperience addSegmentsExperience(
+			long segmentsEntryId, long classNameId, long classPK,
+			ServiceContext serviceContext)
+		throws PortalException {
+
+		return SegmentsExperienceLocalServiceUtil.addSegmentsExperience(
+			segmentsEntryId, classNameId, classPK,
+			RandomTestUtil.randomLocaleStringMap(), true, serviceContext);
+	}
+
+	public static SegmentsExperience addSegmentsExperience(
+			long classNameId, long classPK, ServiceContext serviceContext)
+		throws PortalException {
+
+		SegmentsEntry segmentsEntry = addSegmentsEntry(
+			serviceContext.getScopeGroupId());
+
+		return addSegmentsExperience(
+			segmentsEntry.getSegmentsEntryId(), classNameId, classPK,
 			serviceContext);
 	}
+
+	private static final String _EMPTY_CRITERIA_STRING =
+		CriteriaSerializer.serialize(new Criteria());
 
 }

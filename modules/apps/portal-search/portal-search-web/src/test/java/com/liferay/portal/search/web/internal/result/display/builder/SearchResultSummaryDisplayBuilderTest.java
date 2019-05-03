@@ -28,7 +28,6 @@ import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistry;
 import com.liferay.portal.kernel.search.Summary;
-import com.liferay.portal.kernel.search.test.SearchTestUtil;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.security.permission.ResourceActions;
 import com.liferay.portal.kernel.test.util.PropsTestUtil;
@@ -376,7 +375,7 @@ public class SearchResultSummaryDisplayBuilderTest {
 		Indexer<?> indexer = Mockito.mock(Indexer.class);
 
 		Mockito.doReturn(
-			new Summary(Locale.US, null, null)
+			new Summary(LocaleUtil.US, null, null)
 		).when(
 			indexer
 		).getSummary(
@@ -439,7 +438,7 @@ public class SearchResultSummaryDisplayBuilderTest {
 
 	protected void setUpAssetRenderer() throws Exception {
 		Mockito.doReturn(
-			SearchTestUtil.SUMMARY_CONTENT
+			_SUMMARY_CONTENT
 		).when(
 			assetRenderer
 		).getSearchSummary(
@@ -447,7 +446,7 @@ public class SearchResultSummaryDisplayBuilderTest {
 		);
 
 		Mockito.doReturn(
-			SearchTestUtil.SUMMARY_TITLE
+			_SUMMARY_TITLE
 		).when(
 			assetRenderer
 		).getTitle(
@@ -462,7 +461,7 @@ public class SearchResultSummaryDisplayBuilderTest {
 	}
 
 	protected void setUpLocaleThreadLocal() {
-		LocaleThreadLocal.setThemeDisplayLocale(Locale.US);
+		LocaleThreadLocal.setThemeDisplayLocale(LocaleUtil.US);
 	}
 
 	protected void setUpProps() {
@@ -549,7 +548,7 @@ public class SearchResultSummaryDisplayBuilderTest {
 	@Mock
 	protected IndexerRegistry indexerRegistry;
 
-	protected Locale locale = Locale.US;
+	protected Locale locale = LocaleUtil.US;
 
 	@Mock
 	protected PermissionChecker permissionChecker;
@@ -558,5 +557,10 @@ public class SearchResultSummaryDisplayBuilderTest {
 	protected PortletURLFactory portletURLFactory;
 
 	protected ThemeDisplay themeDisplay;
+
+	private static final String _SUMMARY_CONTENT =
+		RandomTestUtil.randomString();
+
+	private static final String _SUMMARY_TITLE = RandomTestUtil.randomString();
 
 }

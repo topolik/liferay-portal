@@ -1,3 +1,4 @@
+import 'clay-progress-bar';
 import Ajax from 'metal-ajax';
 import Component from 'metal-component';
 import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
@@ -16,6 +17,7 @@ import templates from './AdaptiveMediaProgress.soy';
  */
 
 class AdaptiveMediaProgress extends PortletBase {
+
 	/**
 	 * @inheritDoc
 	 */
@@ -84,7 +86,8 @@ class AdaptiveMediaProgress extends PortletBase {
 				if (this.percentage_ >= 100) {
 					this.onProgressBarComplete_();
 				}
-			} catch(e) {
+			}
+			catch (e) {
 				clearInterval(this.intervalId_);
 			}
 		});
@@ -109,13 +112,8 @@ class AdaptiveMediaProgress extends PortletBase {
 	 * @protected
 	 */
 	updateProgressBar_(adaptedImages, totalImages) {
-		let percentage = Math.round(adaptedImages / totalImages * 100) || 0;
-
-		this.progressBarClass_ = (percentage >= 100) ? 'progress-bar-success' : '';
-		this.progressBarLabel_ = percentage + '%';
-		this.progressBarValue_ = percentage;
-		this.progressBarTooltip_ = this.tooltip ? this.tooltip : adaptedImages + "/" + totalImages;
-		this.percentage_ = percentage;
+		this.percentage_ = Math.round(adaptedImages / totalImages * 100) || 0;
+		this.progressBarTooltip_ = this.tooltip ? this.tooltip : adaptedImages + '/' + totalImages;
 	}
 }
 
@@ -126,6 +124,7 @@ class AdaptiveMediaProgress extends PortletBase {
  * @type {!Object}
  */
 AdaptiveMediaProgress.STATE = {
+
 	/**
 	 * Number of adapted images in the platform.
 	 *
@@ -186,39 +185,6 @@ AdaptiveMediaProgress.STATE = {
 	},
 
 	/**
-	 * The progress bar class.
-	 *
-	 * @memberof AdaptiveMediaProgress
-	 * @protected
-	 * @type {String}
-	 */
-	progressBarClass_: {
-		validator: core.isString
-	},
-
-	/**
-	 * The progress bar label.
-	 *
-	 * @memberof AdaptiveMediaProgress
-	 * @protected
-	 * @type {String}
-	 */
-	progressBarLabel_: {
-		validator: core.isString
-	},
-
-	/**
-	 * The progress bar value.
-	 *
-	 * @memberof AdaptiveMediaProgress
-	 * @protected
-	 * @type {Number}
-	 */
-	progressBarValue_: {
-		validator: core.isNumber
-	},
-
-	/**
 	 * The progress bar tooltip. If AdaptiveMediaProgress.tooltip
 	 * is defined, this will be used.
 	 *
@@ -244,6 +210,16 @@ AdaptiveMediaProgress.STATE = {
 	},
 
 	/**
+	 * The path to the SVG spritemap file containing the icons.
+	 * @memberof AdaptiveMediaProgress
+	 * @protected
+	 * @type {String}
+	 */
+	spritemap: {
+		validator: core.isString
+	},
+
+	/**
 	 * Number of images present in the platform.
 	 *
 	 * @instance
@@ -262,7 +238,7 @@ AdaptiveMediaProgress.STATE = {
 	 * @type {String}
 	 */
 	tooltip: {
-		validator: core.isString,
+		validator: core.isString
 	},
 
 	/**
@@ -289,6 +265,7 @@ AdaptiveMediaProgress.STATE = {
 };
 
 // Register component
+
 Soy.register(AdaptiveMediaProgress, templates);
 
 export default AdaptiveMediaProgress;

@@ -20,7 +20,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -155,14 +154,12 @@ public class AnnouncementsAdminViewManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				addGroup(
-					SafeConsumer.ignore(
-						dropdownGroupItem -> {
-							dropdownGroupItem.setDropdownItems(
-								_getFilterNavigationDropdownItems());
-							dropdownGroupItem.setLabel(
-								LanguageUtil.get(
-									_request, "filter-by-navigation"));
-						}));
+					dropdownGroupItem -> {
+						dropdownGroupItem.setDropdownItems(
+							_getFilterNavigationDropdownItems());
+						dropdownGroupItem.setLabel(
+							LanguageUtil.get(_request, "filter-by-navigation"));
+					});
 			}
 		};
 	}
@@ -174,29 +171,24 @@ public class AnnouncementsAdminViewManagementToolbarDisplayContext {
 
 				if (Validator.isNotNull(distributionScope)) {
 					add(
-						SafeConsumer.ignore(
-							labelItem -> {
-								PortletURL removeLabelURL =
-									PortletURLUtil.clone(
-										_currentURLObj,
-										_liferayPortletResponse);
+						labelItem -> {
+							PortletURL removeLabelURL = PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse);
 
-								removeLabelURL.setParameter(
-									"distributionScope", (String)null);
+							removeLabelURL.setParameter(
+								"distributionScope", (String)null);
 
-								labelItem.putData(
-									"removeLabelURL",
-									removeLabelURL.toString());
+							labelItem.putData(
+								"removeLabelURL", removeLabelURL.toString());
 
-								labelItem.setCloseable(true);
+							labelItem.setCloseable(true);
 
-								String currentDistributionScopeLabel =
-									_announcementsAdminViewDisplayContext.
-										getCurrentDistributionScopeLabel();
+							String currentDistributionScopeLabel =
+								_announcementsAdminViewDisplayContext.
+									getCurrentDistributionScopeLabel();
 
-								labelItem.setLabel(
-									currentDistributionScopeLabel);
-							}));
+							labelItem.setLabel(currentDistributionScopeLabel);
+						});
 				}
 			}
 		};

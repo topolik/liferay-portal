@@ -17,6 +17,9 @@
 <%@ include file="/init.jsp" %>
 
 <%
+long previewAssetEntryId = ParamUtil.getLong(request, "previewAssetEntryId");
+int previewAssetEntryType = ParamUtil.getInteger(request, "previewAssetEntryType");
+
 AssetEntryResult assetEntryResult = (AssetEntryResult)request.getAttribute("view.jsp-assetEntryResult");
 %>
 
@@ -38,7 +41,12 @@ AssetEntryResult assetEntryResult = (AssetEntryResult)request.getAttribute("view
 		AssetRenderer<?> assetRenderer = null;
 
 		try {
-			assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK());
+			if (previewAssetEntryId == assetEntry.getEntryId()) {
+				assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK(), previewAssetEntryType);
+			}
+			else {
+				assetRenderer = assetRendererFactory.getAssetRenderer(assetEntry.getClassPK());
+			}
 		}
 		catch (Exception e) {
 			if (_log.isWarnEnabled()) {
@@ -46,7 +54,7 @@ AssetEntryResult assetEntryResult = (AssetEntryResult)request.getAttribute("view
 			}
 		}
 
-		if ((assetRenderer == null) || !assetRenderer.isDisplayable()) {
+		if ((assetRenderer == null) || (!assetRenderer.isDisplayable() && (previewAssetEntryId <= 0))) {
 			continue;
 		}
 
@@ -54,7 +62,7 @@ AssetEntryResult assetEntryResult = (AssetEntryResult)request.getAttribute("view
 		request.setAttribute("view.jsp-assetRenderer", assetRenderer);
 	%>
 
-		<li class="list-group-item list-group-item-flex">
+		<li class="list-group-item list-group-item-flex <%= (previewAssetEntryId == assetEntry.getEntryId()) ? "active" : StringPool.BLANK %>">
 			<c:if test="<%= assetPublisherDisplayContext.isShowAuthor() %>">
 				<div class="autofit-col">
 					<span class="inline-item">

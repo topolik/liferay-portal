@@ -18,6 +18,7 @@ import com.liferay.journal.constants.JournalConstants;
 import com.liferay.journal.internal.upgrade.util.JournalArticleImageUpgradeUtil;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Image;
@@ -28,6 +29,7 @@ import com.liferay.portal.kernel.upgrade.UpgradeException;
 import com.liferay.portal.kernel.upgrade.UpgradeProcess;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LoggingTimer;
+import com.liferay.portal.kernel.util.MimeTypesUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 
 import java.sql.ResultSet;
@@ -116,6 +118,15 @@ public class UpgradeImageTypeContent extends UpgradeProcess {
 	@Override
 	protected void doUpgrade() throws Exception {
 		copyJournalArticleImagesToJournalRepository();
+		dropJournalArticleImageTable();
+	}
+
+	protected void dropJournalArticleImageTable() throws Exception {
+		runSQL(connection, "drop table JournalArticleImage");
+
+		if (_log.isInfoEnabled()) {
+			_log.info("Deleted table JournalArticleImage");
+		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -140,9 +151,11 @@ public class UpgradeImageTypeContent extends UpgradeProcess {
 
 		@Override
 		public Boolean call() throws Exception {
+			String fileName = String.valueOf(_articleImageId);
+
 			FileEntry fileEntry =
 				PortletFileRepositoryUtil.fetchPortletFileEntry(
-					_groupId, _folderId, String.valueOf(_articleImageId));
+					_groupId, _folderId, fileName);
 
 			if (fileEntry != null) {
 				return null;
@@ -155,16 +168,20 @@ public class UpgradeImageTypeContent extends UpgradeProcess {
 					return null;
 				}
 
+				String mimeType = MimeTypesUtil.getContentType(
+					fileName + StringPool.PERIOD + image.getType());
+
 				PortletFileRepositoryUtil.addPortletFileEntry(
 					_groupId, _userId, JournalArticle.class.getName(),
 					_resourcePrimaryKey, JournalConstants.SERVICE_NAME,
-					_folderId, image.getTextObj(),
-					String.valueOf(_articleImageId), image.getType(), false);
+					_folderId, image.getTextObj(), fileName, mimeType, false);
+
+				_imageLocalService.deleteImage(image.getImageId());
 			}
 			catch (Exception e) {
 				_log.error(
-					"Unable to add the journal article image " +
-						_articleImageId + " into the file repository",
+					"Unable to add the journal article image " + fileName +
+						" into the file repository",
 					e);
 
 				return false;

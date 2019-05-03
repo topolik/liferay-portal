@@ -15,9 +15,13 @@
 package com.liferay.frontend.js.jquery.web.internal.servlet.taglib;
 
 import com.liferay.frontend.js.jquery.web.configuration.JSJQueryConfiguration;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.servlet.taglib.BaseDynamicInclude;
 import com.liferay.portal.kernel.servlet.taglib.DynamicInclude;
+import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.url.builder.AbsolutePortalURLBuilder;
 import com.liferay.portal.url.builder.AbsolutePortalURLBuilderFactory;
 
@@ -57,20 +61,44 @@ public class JQueryTopHeadDynamicInclude extends BaseDynamicInclude {
 
 		PrintWriter printWriter = response.getWriter();
 
+		StringBundler sb = new StringBundler();
+
 		AbsolutePortalURLBuilder absolutePortalURLBuilder =
 			_absolutePortalURLBuilderFactory.getAbsolutePortalURLBuilder(
 				request);
 
-		for (String fileName : _FILE_NAMES) {
-			printWriter.print("<script data-senna-track=\"permanent\" src=\"");
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
-			printWriter.print(
-				absolutePortalURLBuilder.forModule(
-					_bundleContext.getBundle(), fileName
-				).build());
+		if (themeDisplay.isThemeJsFastLoad()) {
+			sb.append("<script data-senna-track=\"permanent\" src=\"");
+			sb.append(
+				_portal.getStaticResourceURL(
+					request, _portal.getPathContext() + "/combo",
+					"minifierType=js", _lastModified));
 
-			printWriter.println("\" type=\"text/javascript\"></script>");
+			for (String fileName : _FILE_NAMES) {
+				sb.append("&");
+				sb.append(
+					absolutePortalURLBuilder.forModule(
+						_bundleContext.getBundle(), fileName
+					).build());
+			}
+
+			sb.append("\" type=\"text/javascript\"></script>");
 		}
+		else {
+			for (String fileName : _FILE_NAMES) {
+				sb.append("<script data-senna-track=\"permanent\" src=\"");
+				sb.append(
+					absolutePortalURLBuilder.forModule(
+						_bundleContext.getBundle(), fileName
+					).build());
+				sb.append("\" type=\"text/javascript\"></script>");
+			}
+		}
+
+		printWriter.println(sb.toString());
 	}
 
 	@Override
@@ -87,6 +115,8 @@ public class JQueryTopHeadDynamicInclude extends BaseDynamicInclude {
 
 		_bundleContext = bundleContext;
 
+		_lastModified = System.currentTimeMillis();
+
 		_jsJQueryConfiguration = ConfigurableUtil.createConfigurable(
 			JSJQueryConfiguration.class, properties);
 	}
@@ -100,5 +130,9 @@ public class JQueryTopHeadDynamicInclude extends BaseDynamicInclude {
 
 	private BundleContext _bundleContext;
 	private volatile JSJQueryConfiguration _jsJQueryConfiguration;
+	private long _lastModified;
+
+	@Reference
+	private Portal _portal;
 
 }

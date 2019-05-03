@@ -32,7 +32,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface SocialActivityAchievement
-	extends SocialActivityAchievementModel, PersistedModel {
+	extends PersistedModel, SocialActivityAchievementModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

@@ -20,8 +20,8 @@ import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeCon
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryService;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
@@ -89,9 +90,7 @@ public class AddLayoutPageTemplateEntryMVCActionCommand
 				addSuccessMessage(actionRequest, actionResponse);
 			}
 
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put(
+			JSONObject jsonObject = JSONUtil.put(
 				"redirectURL",
 				getRedirectURL(actionRequest, layoutPageTemplateEntry));
 
@@ -127,12 +126,26 @@ public class AddLayoutPageTemplateEntryMVCActionCommand
 		Layout layout = _layoutLocalService.getLayout(
 			layoutPageTemplateEntry.getPlid());
 
+		Layout draftLayout = _layoutLocalService.fetchLayout(
+			_portal.getClassNameId(Layout.class), layout.getPlid());
+
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		String layoutFullURL = _portal.getLayoutFullURL(layout, themeDisplay);
+		String layoutFullURL = _portal.getLayoutFullURL(
+			draftLayout, themeDisplay);
 
-		return _http.setParameter(layoutFullURL, "p_l_mode", Constants.EDIT);
+		layoutFullURL = _http.setParameter(
+			layoutFullURL, "p_l_mode", Constants.EDIT);
+
+		String backURL = ParamUtil.getString(actionRequest, "backURL");
+
+		if (Validator.isNotNull(backURL)) {
+			layoutFullURL = _http.setParameter(
+				layoutFullURL, "p_l_back_url", backURL);
+		}
+
+		return layoutFullURL;
 	}
 
 	@Reference

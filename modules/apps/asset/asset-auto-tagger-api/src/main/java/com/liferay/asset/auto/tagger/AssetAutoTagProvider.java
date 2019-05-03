@@ -14,7 +14,7 @@
 
 package com.liferay.asset.auto.tagger;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Tags assets in conjunction with {@link AssetAutoTagger}. Implementations of
@@ -52,6 +52,6 @@ public interface AssetAutoTagProvider<T> {
 	 * @param  model the model
 	 * @return the tag names for the model
 	 */
-	public List<String> getTagNames(T model);
+	public Collection<String> getTagNames(T model);
 
 }

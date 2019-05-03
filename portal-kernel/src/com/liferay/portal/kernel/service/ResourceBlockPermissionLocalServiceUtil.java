@@ -17,7 +17,6 @@ package com.liferay.portal.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for ResourceBlockPermission. This utility wraps
@@ -221,22 +220,6 @@ public class ResourceBlockPermissionLocalServiceUtil {
 		return getService().getActionableDynamicQuery();
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 #getAvailableResourceBlockPermissionActionIds(String, long,
-	 List)}
-	 */
-	@Deprecated
-	public static java.util.Map<Long, java.util.Set<String>>
-			getAvailableResourceBlockPermissionActionIds(
-				long[] roleIds, String name, long primKey,
-				java.util.List<String> actionIds)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().getAvailableResourceBlockPermissionActionIds(
-			roleIds, name, primKey, actionIds);
-	}
-
 	public static java.util.Map<Long, java.util.Set<String>>
 			getAvailableResourceBlockPermissionActionIds(
 				String name, long primKey, java.util.List<String> actionIds)
@@ -354,9 +337,6 @@ public class ResourceBlockPermissionLocalServiceUtil {
 				(ResourceBlockPermissionLocalService)
 					PortalBeanLocatorUtil.locate(
 						ResourceBlockPermissionLocalService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				ResourceBlockPermissionLocalServiceUtil.class, "_service");
 		}
 
 		return _service;

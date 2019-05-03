@@ -26,6 +26,11 @@ import graphql.annotations.annotationTypes.GraphQLName;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -40,21 +45,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "Grid")
 public class Grid {
 
-	@Schema(description = "https://www.schema.org/FormFieldOptions")
-	public Columns[] getColumns() {
+	@Schema(description = "https://www.schema.org/FormFieldOption")
+	public Column[] getColumns() {
 		return columns;
 	}
 
-	public void setColumns(Columns[] columns) {
+	public void setColumns(Column[] columns) {
 		this.columns = columns;
 	}
 
 	@JsonIgnore
 	public void setColumns(
-		UnsafeSupplier<Columns[], Exception> columnsUnsafeSupplier) {
+		UnsafeSupplier<Column[], Exception> columnsUnsafeSupplier) {
 
 		try {
 			columns = columnsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
@@ -63,8 +71,9 @@ public class Grid {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Columns[] columns;
+	protected Column[] columns;
 
+	@Schema
 	public Long getId() {
 		return id;
 	}
@@ -78,6 +87,9 @@ public class Grid {
 		try {
 			id = idUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -87,19 +99,22 @@ public class Grid {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long id;
 
-	@Schema(description = "https://www.schema.org/FormFieldOptions")
-	public Rows[] getRows() {
+	@Schema(description = "https://www.schema.org/FormFieldOption")
+	public Row[] getRows() {
 		return rows;
 	}
 
-	public void setRows(Rows[] rows) {
+	public void setRows(Row[] rows) {
 		this.rows = rows;
 	}
 
 	@JsonIgnore
-	public void setRows(UnsafeSupplier<Rows[], Exception> rowsUnsafeSupplier) {
+	public void setRows(UnsafeSupplier<Row[], Exception> rowsUnsafeSupplier) {
 		try {
 			rows = rowsUnsafeSupplier.get();
+		}
+		catch (RuntimeException re) {
+			throw re;
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
@@ -108,23 +123,46 @@ public class Grid {
 
 	@GraphQLField
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
-	protected Rows[] rows;
+	protected Row[] rows;
+
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
+
+		if (!(object instanceof Grid)) {
+			return false;
+		}
+
+		Grid grid = (Grid)object;
+
+		return Objects.equals(toString(), grid.toString());
+	}
+
+	@Override
+	public int hashCode() {
+		String string = toString();
+
+		return string.hashCode();
+	}
 
 	public String toString() {
 		StringBundler sb = new StringBundler();
 
 		sb.append("{");
 
-		sb.append("\"columns\": ");
+		if (columns != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
 
-		if (columns == null) {
-			sb.append("null");
-		}
-		else {
+			sb.append("\"columns\": ");
+
 			sb.append("[");
 
 			for (int i = 0; i < columns.length; i++) {
-				sb.append(columns[i]);
+				sb.append(String.valueOf(columns[i]));
 
 				if ((i + 1) < columns.length) {
 					sb.append(", ");
@@ -134,23 +172,27 @@ public class Grid {
 			sb.append("]");
 		}
 
-		sb.append(", ");
+		if (id != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
 
-		sb.append("\"id\": ");
+			sb.append("\"id\": ");
 
-		sb.append(id);
-		sb.append(", ");
-
-		sb.append("\"rows\": ");
-
-		if (rows == null) {
-			sb.append("null");
+			sb.append(id);
 		}
-		else {
+
+		if (rows != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"rows\": ");
+
 			sb.append("[");
 
 			for (int i = 0; i < rows.length; i++) {
-				sb.append(rows[i]);
+				sb.append(String.valueOf(rows[i]));
 
 				if ((i + 1) < rows.length) {
 					sb.append(", ");
@@ -158,6 +200,41 @@ public class Grid {
 			}
 
 			sb.append("]");
+		}
+
+		sb.append("}");
+
+		return sb.toString();
+	}
+
+	private static String _escape(Object object) {
+		String string = String.valueOf(object);
+
+		return string.replaceAll("\"", "\\\\\"");
+	}
+
+	private static String _toJSON(Map<String, ?> map) {
+		StringBuilder sb = new StringBuilder("{");
+
+		@SuppressWarnings("unchecked")
+		Set set = map.entrySet();
+
+		@SuppressWarnings("unchecked")
+		Iterator<Map.Entry<String, ?>> iterator = set.iterator();
+
+		while (iterator.hasNext()) {
+			Map.Entry<String, ?> entry = iterator.next();
+
+			sb.append("\"");
+			sb.append(entry.getKey());
+			sb.append("\":");
+			sb.append("\"");
+			sb.append(entry.getValue());
+			sb.append("\"");
+
+			if (iterator.hasNext()) {
+				sb.append(",");
+			}
 		}
 
 		sb.append("}");

@@ -117,7 +117,7 @@ public class PortletBagFactory {
 
 		Map<String, Object> properties = new HashMap<>();
 
-		properties.put("javax.portlet.name", portlet.getPortletId());
+		properties.put("javax.portlet.name", portlet.getPortletName());
 
 		Registry registry = RegistryUtil.getRegistry();
 
@@ -200,7 +200,7 @@ public class PortletBagFactory {
 			registry, portlet, properties, serviceRegistrations);
 
 		PortletBag portletBag = new PortletBagImpl(
-			portlet.getPortletId(), _servletContext, portletInstance,
+			portlet.getPortletName(), _servletContext, portletInstance,
 			portlet.getResourceBundle(), friendlyURLMapperTracker,
 			serviceRegistrations);
 

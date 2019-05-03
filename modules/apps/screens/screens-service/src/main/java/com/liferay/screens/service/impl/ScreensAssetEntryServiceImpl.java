@@ -36,6 +36,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
@@ -250,14 +251,10 @@ public class ScreensAssetEntryServiceImpl
 		BlogsEntry blogsEntry = _blogsEntryService.getEntry(
 			assetEntry.getClassPK());
 
-		JSONObject blogsEntryJSONObject = JSONFactoryUtil.createJSONObject();
-
-		blogsEntryJSONObject.put(
+		return JSONUtil.put(
 			"blogsEntry",
 			JSONFactoryUtil.createJSONObject(
 				JSONFactoryUtil.looseSerialize(blogsEntry)));
-
-		return blogsEntryJSONObject;
 	}
 
 	protected JSONObject getFileEntryJSONObject(AssetEntry assetEntry)
@@ -266,15 +263,13 @@ public class ScreensAssetEntryServiceImpl
 		FileEntry fileEntry = dlAppService.getFileEntry(
 			assetEntry.getClassPK());
 
-		JSONObject fileEntryJSONObject = JSONFactoryUtil.createJSONObject();
-
-		fileEntryJSONObject.put(
+		return JSONUtil.put(
 			"fileEntry",
 			JSONFactoryUtil.createJSONObject(
-				JSONFactoryUtil.looseSerialize(fileEntry)));
-		fileEntryJSONObject.put("url", getFileEntryPreviewURL(fileEntry));
-
-		return fileEntryJSONObject;
+				JSONFactoryUtil.looseSerialize(fileEntry))
+		).put(
+			"url", getFileEntryPreviewURL(fileEntry)
+		);
 	}
 
 	protected String getFileEntryPreviewURL(FileEntry fileEntry) {
@@ -315,10 +310,7 @@ public class ScreensAssetEntryServiceImpl
 				journalArticleResource.getArticleId());
 		}
 
-		JSONObject journalArticleJSONObject =
-			JSONFactoryUtil.createJSONObject();
-
-		journalArticleJSONObject.put(
+		JSONObject journalArticleJSONObject = JSONUtil.put(
 			"DDMStructure",
 			JSONFactoryUtil.createJSONObject(
 				JSONFactoryUtil.looseSerialize(
@@ -327,9 +319,11 @@ public class ScreensAssetEntryServiceImpl
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
 			JSONFactoryUtil.looseSerialize(journalArticle));
 
-		journalArticleJSONObject.put("modelAttributes", jsonObject);
 		journalArticleJSONObject.put(
-			"modelValues", jsonObject.getString("content"));
+			"modelAttributes", jsonObject
+		).put(
+			"modelValues", jsonObject.getString("content")
+		);
 
 		jsonObject.remove("content");
 
@@ -341,14 +335,10 @@ public class ScreensAssetEntryServiceImpl
 
 		User user = userService.getUserById(assetEntry.getClassPK());
 
-		JSONObject userJSONObject = JSONFactoryUtil.createJSONObject();
-
-		userJSONObject.put(
+		return JSONUtil.put(
 			"user",
 			JSONFactoryUtil.createJSONObject(
 				JSONFactoryUtil.looseSerialize(user)));
-
-		return userJSONObject;
 	}
 
 	protected JSONArray toJSONArray(
@@ -372,12 +362,19 @@ public class ScreensAssetEntryServiceImpl
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject(
 			JSONFactoryUtil.looseSerialize(assetEntry));
 
-		jsonObject.put("className", assetEntry.getClassName());
-		jsonObject.put("description", assetEntry.getDescription(locale));
-		jsonObject.put("locale", String.valueOf(locale));
-		jsonObject.put("object", getAssetObjectJSONObject(assetEntry, locale));
-		jsonObject.put("summary", assetEntry.getSummary(locale));
-		jsonObject.put("title", assetEntry.getTitle(locale));
+		jsonObject.put(
+			"className", assetEntry.getClassName()
+		).put(
+			"description", assetEntry.getDescription(locale)
+		).put(
+			"locale", String.valueOf(locale)
+		).put(
+			"object", getAssetObjectJSONObject(assetEntry, locale)
+		).put(
+			"summary", assetEntry.getSummary(locale)
+		).put(
+			"title", assetEntry.getTitle(locale)
+		);
 
 		return jsonObject;
 	}

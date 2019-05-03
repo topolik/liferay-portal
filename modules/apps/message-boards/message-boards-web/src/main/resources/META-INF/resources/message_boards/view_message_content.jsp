@@ -65,7 +65,7 @@ if (portletTitleBasedNavigation) {
 					direction="left-side"
 					icon="<%= StringPool.BLANK %>"
 					markupView="lexicon"
-					message="<%= StringPool.BLANK %>"
+					message="actions"
 					showWhenSingleIcon="<%= true %>"
 				>
 					<c:if test="<%= !thread.isLocked() && !thread.isInTrash() && MBMessagePermission.contains(permissionChecker, message, ActionKeys.PERMISSIONS) %>">
@@ -288,7 +288,7 @@ if (portletTitleBasedNavigation) {
 	MBMessage rootMessage = treeWalker.getRoot();
 	%>
 
-	<c:if test="<%= !thread.isLocked() && !thread.isDraft() && MBCategoryPermission.contains(permissionChecker, scopeGroupId, rootMessage.getCategoryId(), ActionKeys.REPLY_TO_MESSAGE) %>">
+	<c:if test="<%= thread.isApproved() && !thread.isLocked() && !thread.isDraft() && MBCategoryPermission.contains(permissionChecker, scopeGroupId, rootMessage.getCategoryId(), ActionKeys.REPLY_TO_MESSAGE) %>">
 
 		<%
 		String taglibReplyToMessageURL = "javascript:" + liferayPortletResponse.getNamespace() + "addReplyToMessage('" + rootMessage.getMessageId() + "', '');";

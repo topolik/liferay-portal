@@ -15,6 +15,7 @@
 package com.liferay.poshi.runner.elements;
 
 import com.liferay.poshi.runner.script.PoshiScriptParserException;
+import com.liferay.poshi.runner.util.Validator;
 
 import org.dom4j.Attribute;
 import org.dom4j.tree.DefaultAttribute;
@@ -32,6 +33,14 @@ public class PoshiElementAttribute
 			attribute.getNamespace());
 	}
 
+	public PoshiElementAttribute(
+		String name, String value, String poshiScript) {
+
+		super(name, value);
+
+		setPoshiScript(poshiScript);
+	}
+
 	@Override
 	public PoshiElementAttribute clone(Attribute attribute) {
 		return null;
@@ -46,10 +55,6 @@ public class PoshiElementAttribute
 
 	@Override
 	public String getPoshiScript() {
-		if (_poshiScript == null) {
-			return toPoshiScript();
-		}
-
 		return _poshiScript;
 	}
 
@@ -78,6 +83,15 @@ public class PoshiElementAttribute
 		sb.append("\"");
 
 		return sb.toString();
+	}
+
+	@Override
+	public void validatePoshiScript() throws PoshiScriptParserException {
+		if (Validator.isNull(getPoshiScript())) {
+			return;
+		}
+
+		PoshiNode.super.validatePoshiScript();
 	}
 
 	private String _poshiScript;

@@ -26,34 +26,6 @@ public class BooleanClauseFactoryUtil {
 		return getBooleanClauseFactory().create(query, occur);
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link create(Query,
-	 *             String)}
-	 */
-	@Deprecated
-	public static BooleanClause<Query> create(
-		SearchContext searchContext, Query query, String occur) {
-
-		BooleanClauseFactory booleanClauseFactory = getBooleanClauseFactory(
-			searchContext);
-
-		return booleanClauseFactory.create(query, occur);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link create(String,
-	 *             String, String)}
-	 */
-	@Deprecated
-	public static BooleanClause<Query> create(
-		SearchContext searchContext, String field, String value, String occur) {
-
-		BooleanClauseFactory booleanClauseFactory = getBooleanClauseFactory(
-			searchContext);
-
-		return booleanClauseFactory.create(field, value, occur);
-	}
-
 	public static BooleanClause<Query> create(
 		String field, String value, String occur) {
 
@@ -91,17 +63,6 @@ public class BooleanClauseFactoryUtil {
 	}
 
 	public static BooleanClauseFactory getBooleanClauseFactory() {
-		return _booleanClauseFactory;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             getBooleanClauseFactory()}
-	 */
-	@Deprecated
-	public static BooleanClauseFactory getBooleanClauseFactory(
-		SearchContext searchContext) {
-
 		return _booleanClauseFactory;
 	}
 

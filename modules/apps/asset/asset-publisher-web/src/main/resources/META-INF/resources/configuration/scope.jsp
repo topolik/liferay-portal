@@ -66,7 +66,7 @@ List<Group> selectedGroups = GroupLocalServiceUtil.getGroups(assetPublisherDispl
 			</liferay-portlet:actionURL>
 
 			<liferay-ui:icon
-				icon="times"
+				icon="times-circle"
 				markupView="lexicon"
 				url="<%= deleteURL %>"
 			/>
@@ -123,15 +123,11 @@ List<Group> selectedGroups = GroupLocalServiceUtil.getGroups(assetPublisherDispl
 <%
 ItemSelector itemSelector = (ItemSelector)request.getAttribute(AssetPublisherWebKeys.ITEM_SELECTOR);
 
-SiteItemSelectorCriterion siteItemSelectorCriterion = new SiteItemSelectorCriterion();
+ItemSelectorCriterion itemSelectorCriterion = new SiteItemSelectorCriterion();
 
-List<ItemSelectorReturnType> desiredItemSelectorReturnTypes = new ArrayList<ItemSelectorReturnType>();
+itemSelectorCriterion.setDesiredItemSelectorReturnTypes(new SiteItemSelectorReturnType());
 
-desiredItemSelectorReturnTypes.add(new SiteItemSelectorReturnType());
-
-siteItemSelectorCriterion.setDesiredItemSelectorReturnTypes(desiredItemSelectorReturnTypes);
-
-PortletURL itemSelectorURL = itemSelector.getItemSelectorURL(RequestBackedPortletURLFactoryUtil.create(renderRequest), eventName, siteItemSelectorCriterion);
+PortletURL itemSelectorURL = itemSelector.getItemSelectorURL(RequestBackedPortletURLFactoryUtil.create(renderRequest), eventName, itemSelectorCriterion);
 
 itemSelectorURL.setParameter("plid", String.valueOf(layout.getPlid()));
 itemSelectorURL.setParameter("groupId", String.valueOf(layout.getGroupId()));

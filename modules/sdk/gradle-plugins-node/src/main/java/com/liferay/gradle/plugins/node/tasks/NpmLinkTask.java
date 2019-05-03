@@ -29,6 +29,7 @@ public class NpmLinkTask extends BaseNpmCommandTask {
 	public NpmLinkTask() {
 		exclude(_EXCLUDE_DIR_NAMES);
 		include(_INCLUDES);
+		setNpmCommand(_NPM_COMMAND);
 
 		Project project = getProject();
 
@@ -38,11 +39,6 @@ public class NpmLinkTask extends BaseNpmCommandTask {
 	@Input
 	public String getDependencyName() {
 		return GradleUtil.toString(_dependencyName);
-	}
-
-	@Override
-	public String getNpmCommand() {
-		return "link";
 	}
 
 	public void setDependencyName(Object dependencyName) {
@@ -60,12 +56,15 @@ public class NpmLinkTask extends BaseNpmCommandTask {
 	}
 
 	private static final String[] _EXCLUDE_DIR_NAMES = {
-		"bin", "build", "classes", "node_modules", "test-classes", "tmp"
+		"bin", "build", "classes", "node_modules", "node_modules_cache",
+		"test-classes", "tmp"
 	};
 
 	private static final String[] _INCLUDES = {
 		"**/*.*rc", "**/*.css", "**/*.js", "**/*.json", "**/*.jsx", "**/*.soy"
 	};
+
+	private static final String _NPM_COMMAND = "link";
 
 	private Object _dependencyName;
 

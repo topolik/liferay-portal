@@ -28,19 +28,15 @@ public class TicketTable {
 	public static final String TABLE_NAME = "Ticket";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"ticketId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"createDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT},
-		{"key_", Types.VARCHAR},
-		{"type_", Types.INTEGER},
-		{"extraInfo", Types.CLOB},
-		{"expirationDate", Types.TIMESTAMP}
+		{"mvccVersion", Types.BIGINT}, {"ticketId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"createDate", Types.TIMESTAMP},
+		{"classNameId", Types.BIGINT}, {"classPK", Types.BIGINT},
+		{"key_", Types.VARCHAR}, {"type_", Types.INTEGER},
+		{"extraInfo", Types.CLOB}, {"expirationDate", Types.TIMESTAMP}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -64,7 +60,8 @@ TABLE_COLUMNS_MAP.put("extraInfo", Types.CLOB);
 TABLE_COLUMNS_MAP.put("expirationDate", Types.TIMESTAMP);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table Ticket (mvccVersion LONG default 0 not null,ticketId LONG not null primary key,companyId LONG,createDate DATE null,classNameId LONG,classPK LONG,key_ VARCHAR(75) null,type_ INTEGER,extraInfo TEXT null,expirationDate DATE null)";
+	public static final String TABLE_SQL_CREATE =
+"create table Ticket (mvccVersion LONG default 0 not null,ticketId LONG not null primary key,companyId LONG,createDate DATE null,classNameId LONG,classPK LONG,key_ VARCHAR(75) null,type_ INTEGER,extraInfo TEXT null,expirationDate DATE null)";
 
 	public static final String TABLE_SQL_DROP = "drop table Ticket";
 

@@ -25,7 +25,7 @@ function getFormKey(form) {
 function getFieldPayload({form, name}) {
 	return {
 		fieldName: name,
-		formId: getFormKey(form),
+		formId: getFormKey(form)
 	};
 }
 
@@ -36,11 +36,12 @@ function getFieldPayload({form, name}) {
  */
 function getFormPayload(form) {
 	let payload = {
-		formId: getFormKey(form),
+		formId: getFormKey(form)
 	};
 
 	if (form.dataset.analyticsAssetTitle) {
-		payload = {...payload, title: form.dataset.analyticsAssetTitle};
+		payload = {...payload,
+			title: form.dataset.analyticsAssetTitle};
 	}
 
 	return payload;
@@ -68,7 +69,9 @@ function trackFieldBlurred(analytics) {
 	const onBlur = ({target}) => {
 		const {form} = target;
 
-		if (!form || !isTrackableForm(form)) return;
+		if (!form || !isTrackableForm(form)) {
+			return;
+		}
 
 		const payload = getFieldPayload(target);
 
@@ -83,7 +86,7 @@ function trackFieldBlurred(analytics) {
 
 		analytics.send('fieldBlurred', applicationId, {
 			...payload,
-			focusDuration,
+			focusDuration
 		});
 
 		performance.clearMarks('focusDuration');
@@ -103,7 +106,9 @@ function trackFieldFocused(analytics) {
 	const onFocus = ({target}) => {
 		const {form} = target;
 
-		if (!form || !isTrackableForm(form)) return;
+		if (!form || !isTrackableForm(form)) {
+			return;
+		}
 
 		const payload = getFieldPayload(target);
 
@@ -124,8 +129,15 @@ function trackFieldFocused(analytics) {
  * @param {object} The Analytics client instance
  */
 function trackFormSubmitted(analytics) {
-	const onSubmit = ({target}) => {
-		if (!isTrackableForm(target)) return;
+	const onSubmit = event => {
+		const {target} = event;
+
+		if (
+			!isTrackableForm(target) ||
+			(isTrackableForm(target) && event.defaultPrevented)
+		) {
+			return;
+		}
 
 		analytics.send('formSubmitted', applicationId, getFormPayload(target));
 	};

@@ -1,0 +1,241 @@
+{namespace com.liferay.layout.content.page.editor.web.SidebarPageStructurePanel}
+
+/**
+ * SidebarPageStructurePanel
+ */
+{template .render}
+	{@param? _expandedNodes: ?}
+	{@param? _handleElementRemoveButtonClick: any}
+	{@param? _handleElementClick: any}
+	{@param? activeItemId: string}
+	{@param? hoveredItemId: string}
+	{@param? layoutData: ?}
+	{@param? structure: [
+		active: bool,
+		children: list<?>,
+		elementId: string,
+		elementType: string,
+		expanded: bool,
+		hovered: bool,
+		key: string,
+		label: string,
+		removable: bool
+	]}
+	{@param? spritemap: string}
+
+	<div
+		class="fragments-editor-sidebar-section__structure-panel"
+		data-active-item-id="{$activeItemId}"
+		data-expanded-nodes="{$_expandedNodes}"
+		data-hovered-item-id="{$hoveredItemId}"
+		data-layout-data="{$layoutData}"
+	>
+		<nav>
+			<div class="collapse show">
+				{if $spritemap and $structure}
+					{call .treeNode}
+						{param handleElementRemoveButtonClick: $_handleElementRemoveButtonClick /}
+						{param handleElementClick: $_handleElementClick /}
+						{param node: $structure /}
+						{param spritemap: $spritemap /}
+					{/call}
+				{/if}
+			</div>
+		</nav>
+	</div>
+{/template}
+
+/**
+ * Tree root
+ */
+{template .treeNode}
+	{@param? handleElementClick: any}
+	{@param? handleElementRemoveButtonClick: any}
+	{@param node: [
+		active: bool,
+		children: list<?>,
+		elementId: string,
+		elementType: string,
+		expanded: bool,
+		hovered: bool,
+		key: string,
+		label: string,
+		removable: bool
+	]}
+	{@param spritemap: string}
+
+	<ul class="nav nav-stacked" key="{$node.key}">
+		<li class="nav-item">
+			{let $itemClasses kind="text"}
+				d-flex
+				{sp}fragments-editor-sidebar-section__structure-panel__item
+				{sp}justify-content-between
+				{sp}my-1
+				{sp}p-1
+				{sp}rounded
+
+				{if $node.active}
+					{sp}active
+				{/if}
+
+				{if $node.hovered}
+					{sp}hovered
+				{/if}
+			{/let}
+
+			<div class="{$itemClasses}">
+				{call .itemName}
+					{param handleElementClick: $handleElementClick /}
+					{param node: $node /}
+					{param spritemap: $spritemap /}
+				{/call}
+
+				{if $node.removable}
+					{call .removeIcon}
+						{param handleClick: $handleElementRemoveButtonClick /}
+						{param node: $node /}
+						{param spritemap: $spritemap /}
+					{/call}
+				{/if}
+			</div>
+
+			{if $node.children and (length($node.children) > 0)}
+				{let $childrenClasses kind="text"}
+					collapse
+					{sp}pl-3
+
+					{if $node.expanded}
+						{sp}show
+					{/if}
+				{/let}
+
+				<div class="{$childrenClasses}">
+					{foreach $nodeChild in $node.children}
+						{call .treeNode}
+							{param handleElementRemoveButtonClick: $handleElementRemoveButtonClick /}
+							{param handleElementClick: $handleElementClick /}
+							{param key: $nodeChild.key /}
+							{param node: $nodeChild /}
+							{param spritemap: $spritemap /}
+						{/call}
+					{/foreach}
+				</div>
+			{/if}
+		</li>
+	</ul>
+{/template}
+
+/**
+ * Collapse Icon
+ */
+{template .collapseIcon}
+	{@param node: [
+		expanded: bool
+	]}
+	{@param? spritemap: string}
+
+	<span class="btn btn-sm btn-unstyled py-1">
+		{let $angleDirection kind="text"}
+			{if $node.expanded}
+				down
+			{else}
+				right
+			{/if}
+		{/let}
+
+		<svg class="lexicon-icon lexicon-icon-angle-{$angleDirection}">
+			<use xlink:href="{$spritemap}#angle-{$angleDirection}"></use>
+		</svg>
+	</span>
+{/template}
+
+{template .itemName}
+	{@param node: [
+		children: list<?>,
+		elementId: string,
+		elementType: string,
+		expanded: bool,
+		key: string,
+		label: string
+	]}
+	{@param? handleElementClick: any}
+	{@param? spritemap: string}
+
+	{let $itemNameClasses kind="text"}
+		btn
+		{sp}btn-unstyled
+		{sp}flex-grow-1
+		{sp}text-truncate
+
+		{if (not $node.children) or (length($node.children) == 0)}
+			{sp}fragments-editor-sidebar-section__structure-panel__item-name--padded
+		{/if}
+	{/let}
+
+	{let $itemNameButtonAttributes kind="attributes"}
+		class="{$itemNameClasses}"
+		data-onclick="{$handleElementClick}"
+		type="button"
+
+		{if $node.elementId and $node.elementType}
+			data-element-id="{$node.elementId}"
+			data-element-type="{$node.elementType}"
+			data-fragments-editor-item-id="{$node.elementId}"
+			data-fragments-editor-item-type="{$node.elementType}"
+		{/if}
+
+		{if $node.children and length($node.children) > 0}
+			aria-controls="{$node.key}"
+			data-node-key="{$node.key}"
+
+			{if $node.expanded}
+				aria-expanded="true"
+			{else}
+				aria-expanded="false"
+			{/if}
+		{/if}
+	{/let}
+
+	<button {$itemNameButtonAttributes}>
+		{if $node.children and length($node.children) > 0}
+			{call .collapseIcon}
+				{param node: $node /}
+				{param spritemap: $spritemap /}
+			{/call}
+		{/if}
+
+		{$node.label}
+	</button>
+{/template}
+
+/**
+ * Remove icon
+ */
+{template .removeIcon}
+	{@param handleClick: any}
+	{@param node: [
+		elementId: string,
+		elementType: string
+	]}
+	{@param spritemap: string}
+
+	{let $removeButtonClasses kind="text"}
+		btn
+		{sp}btn-sm
+		{sp}btn-unstyled
+		{sp}fragments-editor-sidebar-section__structure-panel__item-remove-btn
+		{sp}py-1
+	{/let}
+
+	<button
+		class="{$removeButtonClasses}"
+		data-onclick="{$handleClick}"
+		data-element-id="{$node.elementId}"
+		data-element-type="{$node.elementType}"
+		type="button"
+	>
+		<svg class="lexicon-icon lexicon-icon-times-circle">
+			<use xlink:href="{$spritemap}#times-circle"></use>
+		</svg>
+	</button>
+{/template}

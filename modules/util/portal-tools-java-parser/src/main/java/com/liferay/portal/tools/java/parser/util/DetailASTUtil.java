@@ -23,6 +23,7 @@ import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Hugo Huijser
@@ -30,6 +31,10 @@ import java.util.List;
 public class DetailASTUtil {
 
 	public static final int ALL_TYPES = -1;
+
+	public static boolean equals(DetailAST detailAST1, DetailAST detailAST2) {
+		return Objects.equals(detailAST1.toString(), detailAST2.toString());
+	}
 
 	public static List<DetailAST> getAllChildTokens(
 		DetailAST detailAST, boolean recursive, int... tokenTypes) {
@@ -46,10 +51,17 @@ public class DetailASTUtil {
 			DetailAST slistDetailAST = detailAST.findFirstToken(
 				TokenTypes.SLIST);
 
-			DetailAST previousSiblingDetailAST =
-				slistDetailAST.getPreviousSibling();
+			if (slistDetailAST != null) {
+				DetailAST previousSiblingDetailAST =
+					slistDetailAST.getPreviousSibling();
 
-			return previousSiblingDetailAST.findFirstToken(TokenTypes.COLON);
+				return previousSiblingDetailAST.findFirstToken(
+					TokenTypes.COLON);
+			}
+
+			DetailAST lastChildDetailAST = detailAST.getLastChild();
+
+			return lastChildDetailAST.findFirstToken(TokenTypes.COLON);
 		}
 
 		if (detailAST.getType() == TokenTypes.DO_WHILE) {
@@ -144,6 +156,13 @@ public class DetailASTUtil {
 
 	public static Position getEndPosition(
 		DetailAST detailAST, FileContents fileContents) {
+
+		if (detailAST.getType() == TokenTypes.LABELED_STAT) {
+			DetailAST firstChildDetailAST = detailAST.getFirstChild();
+
+			return getEndPosition(
+				firstChildDetailAST.getNextSibling(), fileContents);
+		}
 
 		DetailAST closingDetailAST = getClosingDetailAST(detailAST);
 

@@ -13,22 +13,19 @@ definition {
 		User.firstLoginPG();
 
 		ProductMenu.gotoPortlet(
-			category = "Build",
+			category = "Site Builder",
 			panel = "Site Administration",
-			portlet = "Pages"
-		);
+			portlet = "Pages");
 
 		SitePages.addPublicPage(
 			pageName = "Documents and Media Page",
-			sitePageType = "Widget Page"
-		);
+			sitePageType = "Widget Page");
 
 		SitePages.configurePage(
 			columnName = "1 Column",
 			pageName = "Documents and Media Page",
 			privacy = "Public Pages",
-			sitePageType = "Widget Page"
-		);
+			sitePageType = "Widget Page");
 
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
@@ -44,28 +41,26 @@ definition {
 			userEmailAddress = "userea@liferay.com",
 			userFirstName = "userfn",
 			userLastName = "userln",
-			userScreenName = "usersn"
-		);
+			userScreenName = "usersn");
 
 		ProductMenu.gotoPortlet(
 			category = "Users",
 			panel = "Control Panel",
-			portlet = "Users and Organizations"
-		);
+			portlet = "Users and Organizations");
 
 		User.editPasswordCP(
 			password = "password",
 			userEmailAddress = "userea@liferay.com",
-			userScreenName = "usersn"
-		);
+			userScreenName = "usersn");
 
 		ProductMenu.gotoPortlet(
 			category = "Users",
 			panel = "Control Panel",
-			portlet = "Users and Organizations"
-		);
+			portlet = "Users and Organizations");
 
-		User.assignRegularRoleCP(roleTitle = "Administrator", userScreenName = "usersn");
+		User.assignRegularRoleCP(
+			roleTitle = "Administrator",
+			userScreenName = "usersn");
 	}
 
 	tearDown {
@@ -89,22 +84,22 @@ definition {
 	test ViewNoWebsiteNotificationForNewDocumentInFolder {
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
-		NotificationsPortlet.gotoNotificationDelivery(notificationCount = "0");
+		Navigator.gotoNotifications();
+
+		Portlet.gotoPortletOptions(portletOption = "Configuration");
 
 		IFrame.selectConfigurationFrame();
 
 		NotificationsPortlet.disableUserDeliveries(
 			actionType = "Adds",
 			contentType = "Documents and Media",
-			notificationType = "Website"
-		);
+			notificationType = "Website");
 
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
 		DMFolder.addPG(
 			dmFolderDescription = "DM Folder Description",
-			dmFolderName = "DM Folder Name"
-		);
+			dmFolderName = "DM Folder Name");
 
 		LexiconEntry.changeDisplayStyle(displayStyle = "list");
 
@@ -116,7 +111,9 @@ definition {
 
 		User.logoutPG();
 
-		User.loginUserPG(password = "test", userEmailAddress = "userea@liferay.com");
+		User.loginUserPG(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
 
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
@@ -127,14 +124,15 @@ definition {
 		DMDocument.addPG(
 			dmDocumentDescription = "DM Document Description",
 			dmDocumentFile = "Document_1.docx",
-			dmDocumentTitle = "DM Document Title"
-		);
+			dmDocumentTitle = "DM Document Title");
 
 		Notifications.viewBadgeCount(notificationCount = "0");
 
 		User.logoutPG();
 
-		User.loginUserPG(password = "test", userEmailAddress = "test@liferay.com");
+		User.loginUserPG(
+			password = "test",
+			userEmailAddress = "test@liferay.com");
 
 		Notifications.viewBadgeCount(notificationCount = "0");
 	}
@@ -143,22 +141,22 @@ definition {
 	test ViewNoWebsiteNotificationForUpdatedDocumentInFolder {
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
-		NotificationsPortlet.gotoNotificationDelivery(notificationCount = "0");
+		Navigator.gotoNotifications();
+
+		Portlet.gotoPortletOptions(portletOption = "Configuration");
 
 		IFrame.selectConfigurationFrame();
 
 		NotificationsPortlet.disableUserDeliveries(
 			actionType = "Updates",
 			contentType = "Documents and Media",
-			notificationType = "Website"
-		);
+			notificationType = "Website");
 
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
 		DMFolder.addPG(
 			dmFolderDescription = "DM Folder Description",
-			dmFolderName = "DM Folder Name"
-		);
+			dmFolderName = "DM Folder Name");
 
 		LexiconEntry.changeDisplayStyle(displayStyle = "list");
 
@@ -169,14 +167,15 @@ definition {
 		DMDocument.addPG(
 			dmDocumentDescription = "DM Document Description",
 			dmDocumentFile = "Document_1.docx",
-			dmDocumentTitle = "DM Document Title"
-		);
+			dmDocumentTitle = "DM Document Title");
 
 		Notifications.viewBadgeCount(notificationCount = "0");
 
 		User.logoutPG();
 
-		User.loginUserPG(password = "test", userEmailAddress = "userea@liferay.com");
+		User.loginUserPG(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
 
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
@@ -186,14 +185,15 @@ definition {
 
 		DMDocument.editPG(
 			dmDocumentTitle = "DM Document Title",
-			dmDocumentTitleEdit = "DM Document Title Edit"
-		);
+			dmDocumentTitleEdit = "DM Document Title Edit");
 
 		Notifications.viewBadgeCount(notificationCount = "0");
 
 		User.logoutPG();
 
-		User.loginUserPG(password = "test", userEmailAddress = "test@liferay.com");
+		User.loginUserPG(
+			password = "test",
+			userEmailAddress = "test@liferay.com");
 
 		Notifications.viewBadgeCount(notificationCount = "0");
 	}
@@ -204,8 +204,7 @@ definition {
 
 		DMFolder.addPG(
 			dmFolderDescription = "DM Folder Description",
-			dmFolderName = "DM Folder Name"
-		);
+			dmFolderName = "DM Folder Name");
 
 		LexiconEntry.changeDisplayStyle(displayStyle = "list");
 
@@ -217,7 +216,9 @@ definition {
 
 		User.logoutPG();
 
-		User.loginUserPG(password = "test", userEmailAddress = "userea@liferay.com");
+		User.loginUserPG(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
 
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
@@ -228,14 +229,15 @@ definition {
 		DMDocument.addPG(
 			dmDocumentDescription = "DM Document Description",
 			dmDocumentFile = "Document_1.docx",
-			dmDocumentTitle = "DM Document Title"
-		);
+			dmDocumentTitle = "DM Document Title");
 
 		Notifications.viewBadgeCount(notificationCount = "0");
 
 		User.logoutPG();
 
-		User.loginUserPG(password = "test", userEmailAddress = "test@liferay.com");
+		User.loginUserPG(
+			password = "test",
+			userEmailAddress = "test@liferay.com");
 
 		Notifications.viewBadgeCount(notificationCount = "1");
 
@@ -244,8 +246,7 @@ definition {
 		Notifications.viewNewContent(
 			assetType = "document",
 			contentBody = "DM Document Title",
-			user = "userfn userln"
-		);
+			user = "userfn userln");
 
 		Notifications.navigateToContent(contentBody = "DM Document Title");
 
@@ -260,8 +261,7 @@ definition {
 
 		DMFolder.addPG(
 			dmFolderDescription = "DM Folder Description",
-			dmFolderName = "DM Folder Name"
-		);
+			dmFolderName = "DM Folder Name");
 
 		LexiconEntry.changeDisplayStyle(displayStyle = "list");
 
@@ -272,14 +272,15 @@ definition {
 		DMDocument.addPG(
 			dmDocumentDescription = "DM Document Description",
 			dmDocumentFile = "Document_1.docx",
-			dmDocumentTitle = "DM Document Title"
-		);
+			dmDocumentTitle = "DM Document Title");
 
 		Notifications.viewBadgeCount(notificationCount = "0");
 
 		User.logoutPG();
 
-		User.loginUserPG(password = "test", userEmailAddress = "userea@liferay.com");
+		User.loginUserPG(
+			password = "test",
+			userEmailAddress = "userea@liferay.com");
 
 		Navigator.gotoPage(pageName = "Documents and Media Page");
 
@@ -289,14 +290,15 @@ definition {
 
 		DMDocument.editPG(
 			dmDocumentTitle = "DM Document Title",
-			dmDocumentTitleEdit = "DM Document Title Edit"
-		);
+			dmDocumentTitleEdit = "DM Document Title Edit");
 
 		Notifications.viewBadgeCount(notificationCount = "0");
 
 		User.logoutPG();
 
-		User.loginUserPG(password = "test", userEmailAddress = "test@liferay.com");
+		User.loginUserPG(
+			password = "test",
+			userEmailAddress = "test@liferay.com");
 
 		Notifications.viewBadgeCount(notificationCount = "1");
 
@@ -305,8 +307,7 @@ definition {
 		Notifications.viewUpdatedContent(
 			assetType = "document",
 			contentBody = "DM Document Title Edit",
-			user = "userfn userln"
-		);
+			user = "userfn userln");
 
 		Notifications.navigateToContent(contentBody = "DM Document Title Edit");
 

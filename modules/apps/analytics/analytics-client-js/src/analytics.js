@@ -1,26 +1,29 @@
 import {LocalStorageMechanism, Storage} from 'metal-storage';
 import middlewares from './middlewares/defaults';
 
-// Gateways
-import AsahClient from './AsahClient/AsahClient';
+// Gateway
+
+import Client from './client';
 
 import defaultPlugins from './plugins/defaults';
-import fingerprint from './utils/fingerprint';
 import hash from './utils/hash';
 import uuidv1 from 'uuid/v1';
 
 // Constants
+
 const ENV = window || global;
 const FLUSH_INTERVAL = 2000;
 const REQUEST_TIMEOUT = 5000;
 
 // Local Storage keys
+
 const STORAGE_KEY_EVENTS = 'ac_client_batch';
 const STORAGE_KEY_CONTEXTS = 'ac_client_context';
 const STORAGE_KEY_USER_ID = 'ac_client_user_id';
 const STORAGE_KEY_IDENTITY_HASH = 'ac_client_identity';
 
 // Creates LocalStorage wrapper
+
 const storage = new Storage(new LocalStorageMechanism());
 
 let instance = null;
@@ -32,6 +35,7 @@ let instance = null;
  * regular intervals.
  */
 class Analytics {
+
 	/**
 	 * Returns an Analytics instance and triggers the automatic flush loop
 	 * @param {object} config object to instantiate the Analytics tool
@@ -43,17 +47,17 @@ class Analytics {
 
 		const {endpointUrl, flushInterval} = config;
 
-		const asahClient = new AsahClient(endpointUrl);
+		const client = new Client(endpointUrl);
 
-		instance.client = asahClient;
+		instance.client = client;
 
 		instance._sendData = userId => {
-			return asahClient.send(instance, userId);
+			return client.send(instance, userId);
 		};
 
 		instance.config = config;
 
-		instance.asahIdentityEndpoint = `${endpointUrl}/identity`;
+		instance.identityEndpoint = `${endpointUrl}/identity`;
 
 		instance.events = storage.get(STORAGE_KEY_EVENTS) || [];
 		instance.contexts = storage.get(STORAGE_KEY_CONTEXTS) || [];
@@ -92,6 +96,26 @@ class Analytics {
 			.forEach(disposer => disposer());
 	}
 
+	_isNewUserIdRequired() {
+		const storedUserId = storage.get(STORAGE_KEY_USER_ID);
+
+		if (!storedUserId) {
+			return true;
+		}
+
+		const identityHash = storage.get(STORAGE_KEY_IDENTITY_HASH);
+
+		// During logout or session expiration, identiy object becomes undefined
+		// because the client object is being instatiated on every page navigation,
+		// in such cases, we force a new user ID token.
+
+		if (identityHash && !this.config.identity) {
+			return true;
+		}
+
+		return false;
+	}
+
 	/**
 	 * Persists the event queue to the LocalStorage
 	 * @protected
@@ -119,7 +143,7 @@ class Analytics {
 			contextHash,
 			eventDate,
 			eventId,
-			properties,
+			properties
 		};
 	}
 
@@ -142,11 +166,19 @@ class Analytics {
 	}
 
 	/**
-	 * Returns an unique identifier for an user
+	 * Returns an unique identifier for an user, additionaly it stores
+	 * the generated token to the local storage cache and clears
+	 * previously stored identiy hash.
 	 * @return {string} The generated id
 	 */
 	_generateUserId() {
-		return uuidv1();
+		const userId = uuidv1();
+
+		this._persist(STORAGE_KEY_USER_ID, userId);
+
+		storage.remove(STORAGE_KEY_IDENTITY_HASH);
+
+		return userId;
 	}
 
 	_getContext() {
@@ -160,23 +192,20 @@ class Analytics {
 
 	/**
 	 * Gets the userId for the existing analytics user. Previously generated ids
-	 * are stored and retrieved before generating a new one and attempting to update
-	 * the Identity Service.
+	 * are stored and retrieved before generating a new one. If a anonymous
+	 * navigation is started after a identified navigation, the user ID token
+	 * is regenerated.
 	 * @return {Promise} A promise resolved with the stored or generated userId
 	 */
 	_getUserId() {
-		let userId = storage.get(STORAGE_KEY_USER_ID);
+		const newUserIdRequired = this._isNewUserIdRequired();
 
-		if (userId) {
-			return Promise.resolve(userId);
-		} else {
-			userId = this._generateUserId();
-
-			this._persist(STORAGE_KEY_USER_ID, userId);
-
-			return Promise.resolve(userId);
+		if (newUserIdRequired) {
+			return Promise.resolve(this._generateUserId());
 		}
-	}
+
+		return Promise.resolve(storage.get(STORAGE_KEY_USER_ID));
+}
 
 	/**
 	 * Sends the identity information and user id to the Identity Service.
@@ -188,22 +217,15 @@ class Analytics {
 		const {dataSourceId} = this.config;
 
 		const bodyData = {
-			...fingerprint(),
 			dataSourceId,
 			identity,
-			userId,
+			userId
 		};
 
 		const storedIdentityHash = storage.get(STORAGE_KEY_IDENTITY_HASH);
-		let newIdentityHash = hash(bodyData);
+		const newIdentityHash = hash(bodyData);
 
 		if (newIdentityHash !== storedIdentityHash) {
-			const newUserId = this._generateUserId();
-
-			bodyData.userId = newUserId;
-			newIdentityHash = hash(bodyData);
-
-			instance._persist(STORAGE_KEY_USER_ID, newUserId);
 			instance._persist(STORAGE_KEY_IDENTITY_HASH, newIdentityHash);
 
 			const body = JSON.stringify(bodyData);
@@ -217,10 +239,10 @@ class Analytics {
 				credentials: 'same-origin',
 				headers,
 				method: 'POST',
-				mode: 'cors',
+				mode: 'cors'
 			};
 
-			return fetch(this.asahIdentityEndpoint, request).then(
+			return fetch(this.identityEndpoint, request).then(
 				() => newIdentityHash
 			);
 		}
@@ -245,13 +267,8 @@ class Analytics {
 			);
 
 			result = Promise.race([
-				this._getUserId().then(userId =>
-					Promise.all([
-						this._sendIdentity(this.config.identity, userId),
-						instance._sendData(userId),
-					])
-				),
-				this._timeout(REQUEST_TIMEOUT),
+				this._getUserId().then(userId => instance._sendData(userId)),
+				this._timeout(REQUEST_TIMEOUT)
 			])
 				.then(() => {
 					const events = this.events.filter(
@@ -263,7 +280,8 @@ class Analytics {
 				})
 				.catch(console.error)
 				.then(() => (this.isFlushInProgress = false));
-		} else {
+		}
+		else {
 			result = Promise.resolve();
 		}
 
@@ -311,7 +329,8 @@ class Analytics {
 					return this._getEventKey(evt) === eventKey;
 				});
 			});
-		} else {
+		}
+		else {
 			this.events.length = 0;
 		}
 
@@ -352,7 +371,7 @@ class Analytics {
 				applicationId,
 				eventProps,
 				currentContextHash
-			),
+			)
 		];
 
 		this._persist(STORAGE_KEY_EVENTS, this.events);
@@ -413,8 +432,9 @@ class Analytics {
 }
 
 // Exposes Analytics.create to the global scope
+
 ENV.Analytics = {
-	create: Analytics.create,
+	create: Analytics.create
 };
 
 export {Analytics};

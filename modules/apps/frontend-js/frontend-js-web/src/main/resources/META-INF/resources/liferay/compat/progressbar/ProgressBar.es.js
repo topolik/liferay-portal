@@ -5,6 +5,7 @@ import templates from './ProgressBar.soy';
 
 /**
  * UI Component that renders a progress bar.
+ * @deprecated since 7.2
  */
 
 class ProgressBar extends Component {

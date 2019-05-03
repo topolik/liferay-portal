@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 	"com.liferay.portal.security.service.access.policy.model.impl.SAPEntryImpl"
 )
 @ProviderType
-public interface SAPEntry extends SAPEntryModel, PersistedModel {
+public interface SAPEntry extends PersistedModel, SAPEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

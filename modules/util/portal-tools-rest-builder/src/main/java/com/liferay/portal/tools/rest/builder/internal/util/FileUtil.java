@@ -74,7 +74,15 @@ public class FileUtil {
 
 					String content = read(file);
 
-					if (!content.contains("@generated")) {
+					if (StringUtil.endsWith(file.getName(), ".java") &&
+						!content.contains("@generated")) {
+
+						return FileVisitResult.CONTINUE;
+					}
+
+					if (StringUtil.endsWith(file.getName(), ".properties") &&
+						!content.contains("# This is a generated file.")) {
+
 						return FileVisitResult.CONTINUE;
 					}
 

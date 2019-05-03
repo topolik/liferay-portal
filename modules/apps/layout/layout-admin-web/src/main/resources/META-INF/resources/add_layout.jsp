@@ -17,12 +17,14 @@
 <%@ include file="/init.jsp" %>
 
 <%
+long sourcePlid = ParamUtil.getLong(request, "sourcePlid");
+
 List<SiteNavigationMenu> autoSiteNavigationMenus = layoutsAdminDisplayContext.getAutoSiteNavigationMenus();
 %>
 
 <div class="container-fluid-1280 pt-2">
 	<liferay-frontend:edit-form
-		action="<%= layoutsAdminDisplayContext.getAddLayoutURL() %>"
+		action="<%= (sourcePlid <= 0) ? layoutsAdminDisplayContext.getAddLayoutURL() : layoutsAdminDisplayContext.getCopyLayoutURL(sourcePlid) %>"
 		method="post"
 		name="fm"
 		onSubmit="event.preventDefault();"
@@ -76,11 +78,11 @@ List<SiteNavigationMenu> autoSiteNavigationMenus = layoutsAdminDisplayContext.ge
 </div>
 
 <aui:script require="metal-uri/src/Uri">
-	var form = document.getElementById('<portlet:namespace />fm');
+	var form = document.<portlet:namespace />fm;
 
 	var Uri = metalUriSrcUri.default;
 
-	$(form).on(
+	form.addEventListener(
 		'submit',
 		function(event) {
 			var formData = new FormData();

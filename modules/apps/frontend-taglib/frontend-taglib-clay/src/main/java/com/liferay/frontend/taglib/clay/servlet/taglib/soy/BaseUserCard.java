@@ -58,11 +58,6 @@ public abstract class BaseUserCard
 	}
 
 	@Override
-	public String getInitials() {
-		return user.getInitials();
-	}
-
-	@Override
 	public String getName() {
 		return HtmlUtil.escape(user.getFullName());
 	}

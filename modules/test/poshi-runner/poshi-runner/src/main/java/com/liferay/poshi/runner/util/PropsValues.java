@@ -167,6 +167,9 @@ public class PropsValues {
 
 	public static final String TEST_NAME = PropsUtil.get("test.name");
 
+	public static final boolean TEST_POSHI_SCRIPT_VALIDATION =
+		GetterUtil.getBoolean("test.poshi.script.validation");
+
 	public static final String TEST_POSHI_WARNINGS_FILE_NAME = PropsUtil.get(
 		"test.poshi.warnings.file.name");
 

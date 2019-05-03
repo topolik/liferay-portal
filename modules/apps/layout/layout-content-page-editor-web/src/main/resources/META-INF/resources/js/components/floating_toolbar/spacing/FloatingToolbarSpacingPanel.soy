@@ -10,14 +10,22 @@
 	{@param? _handleColumnSpacingOptionMousedown: any}
 	{@param? _handleContainerPaddingOptionChange: any}
 	{@param? _handleContainerTypeOptionChange: any}
-	{@param? _paddingSizes: list<string>}
-	{@param? _sectionColumnsCount: number}
-	{@param? _selectedPaddingSizes: [
-		horizontal: string,
-		vertical: string
-	]}
+	{@param? _handleNumberOfColumnsOptionChange: any}
+	{@param? _numberOfColumnsOptions: ?}
+	{@param? _paddingOptions: list<[
+		label: string,
+		paddingSize: string
+	]>}
 
 	<div class="floating-toolbar-spacing-panel">
+		<div class="form-group">
+			{call .numberOfColumnsOptions}
+				{param handleNumberOfColumnsOptionChange: $_handleNumberOfColumnsOptionChange /}
+				{param numberOfColumnsOptions: $_numberOfColumnsOptions /}
+				{param item: $item /}
+			{/call}
+		</div>
+
 		<div class="form-group">
 			{call .containerTypeOptions}
 				{param containerTypes: $_containerTypes /}
@@ -26,7 +34,7 @@
 			{/call}
 		</div>
 
-		{if $_paddingSizes and $_selectedPaddingSizes}
+		{if $_paddingOptions}
 			<div class="form-group-autofit">
 				{let $verticalContainerPaddingLabel kind="text"}
 					{msg desc=""}padding-vertical{/msg}
@@ -36,8 +44,8 @@
 					{param label: $verticalContainerPaddingLabel /}
 					{param paddingDirectionId: 'Vertical' /}
 					{param handleContainerPaddingOptionChange: $_handleContainerPaddingOptionChange /}
-					{param paddingSizes: $_paddingSizes /}
-					{param selectedPaddingSize: $_selectedPaddingSizes.vertical ?: '1' /}
+					{param paddingOptions: $_paddingOptions /}
+					{param selectedPaddingSize: $item.config.paddingVertical /}
 				{/call}
 
 				{let $horizontalContainerPaddingLabel kind="text"}
@@ -48,13 +56,13 @@
 					{param label: $horizontalContainerPaddingLabel /}
 					{param paddingDirectionId: 'Horizontal' /}
 					{param handleContainerPaddingOptionChange: $_handleContainerPaddingOptionChange /}
-					{param paddingSizes: $_paddingSizes /}
-					{param selectedPaddingSize: $_selectedPaddingSizes.horizontal ?: '1' /}
+					{param paddingOptions: $_paddingOptions /}
+					{param selectedPaddingSize: $item.config.paddingHorizontal /}
 				{/call}
 			</div>
 		{/if}
 
-		{if $_sectionColumnsCount > 1}
+		{if length($item.columns) > 1}
 			<div class="form-group">
 				{call .columnSpacingOptions}
 					{param handleColumnSpacingOptionChange: $_handleColumnSpacingOptionChange /}
@@ -67,54 +75,61 @@
 {/template}
 
 /**
- * Container padding options
+ * Columns number
  */
-{template .containerPaddingOptions}
-	{@param label: string}
-	{@param paddingDirectionId: string}
-	{@param paddingSizes: list<string>}
-	{@param selectedPaddingSize: string}
-	{@param? handleContainerPaddingOptionChange: any}
+{template .numberOfColumnsOptions}
+	{@param item: [
+		columns: list<?>
+	]}
+	{@param? numberOfColumnsOptions: list<[
+		label: string,
+		numberOfColumnId: string
+	]>}
+	{@param? handleNumberOfColumnsOptionChange: any}
 
-	<div class="form-group-item">
-		<label for="floatingToolbarSpacingPanelPadding{$paddingDirectionId}Option">
-			{$label}
+	{if $numberOfColumnsOptions}
+		<label for="floatingToolbarSpacingPanelNumberOfColumnsOption">
+			{msg desc=""}number-of-columns{/msg}
 		</label>
 
 		<select
 			class="form-control form-control-sm"
-			data-onchange="{$handleContainerPaddingOptionChange}"
-			data-padding-direction-id="{$paddingDirectionId}"
-			id="floatingToolbarSpacingPanelPadding{$paddingDirectionId}Option"
+			data-onchange="{$handleNumberOfColumnsOptionChange}"
+			id="floatingToolbarSpacingPanelNumberOfColumnsOption"
 		>
-			{foreach $paddingSize in $paddingSizes}
-				{call .containerPaddingOption}
-					{param key: $paddingSize /}
-					{param paddingSize: $paddingSize /}
-					{param selectedPaddingSize: $selectedPaddingSize /}
+			{foreach $numberOfColumnsOption in $numberOfColumnsOptions}
+				{call .numberOfColumnsOption}
+					{param item: $item /}
+					{param key: $numberOfColumnsOption.numberOfColumnId /}
+					{param numberOfColumnsOption: $numberOfColumnsOption /}
 				{/call}
 			{/foreach}
 		</select>
-	</div>
+	{/if}
 {/template}
 
 /**
- * Container padding option
+ * Columns number option
  */
-{template .containerPaddingOption}
-	{@param paddingSize: string}
-	{@param selectedPaddingSize: string}
+{template .numberOfColumnsOption}
+	{@param numberOfColumnsOption: [
+		label: string,
+		numberOfColumnId: string
+	]}
+	{@param item: [
+		columns: list<?>
+	]}
 
 	{let $optionAttributes kind="attributes"}
-		value="{$paddingSize}"
+		value="{$numberOfColumnsOption.numberOfColumnId}"
 
-		{if $paddingSize == $selectedPaddingSize}
+		{if $item.columns and length($item.columns) == $numberOfColumnsOption.numberOfColumnId}
 			selected
 		{/if}
 	{/let}
 
 	<option {$optionAttributes}>
-		x{$paddingSize}
+		{$numberOfColumnsOption.label}
 	</option>
 {/template}
 
@@ -142,6 +157,64 @@
 		] /}
 		{param label: $spacingCheckboxLabel /}
 	{/call}
+{/template}
+
+/**
+ * Container padding options
+ */
+{template .containerPaddingOptions}
+	{@param label: string}
+	{@param paddingDirectionId: string}
+	{@param paddingOptions: list<[
+		label: string,
+		paddingSize: string
+	]>}
+	{@param selectedPaddingSize: string}
+	{@param? handleContainerPaddingOptionChange: any}
+
+	<div class="form-group-item">
+		<label for="floatingToolbarSpacingPanelPadding{$paddingDirectionId}Option">
+			{$label}
+		</label>
+
+		<select
+			class="form-control form-control-sm"
+			data-onchange="{$handleContainerPaddingOptionChange}"
+			data-padding-direction-id="{$paddingDirectionId}"
+			id="floatingToolbarSpacingPanelPadding{$paddingDirectionId}Option"
+		>
+			{foreach $paddingOption in $paddingOptions}
+				{call .containerPaddingOption}
+					{param key: $paddingOption.paddingSize /}
+					{param paddingOption: $paddingOption /}
+					{param selectedPaddingSize: $selectedPaddingSize /}
+				{/call}
+			{/foreach}
+		</select>
+	</div>
+{/template}
+
+/**
+ * Container padding option
+ */
+{template .containerPaddingOption}
+	{@param paddingOption: [
+		label: string,
+		paddingSize: string
+	]}
+	{@param selectedPaddingSize: string}
+
+	{let $optionAttributes kind="attributes"}
+		value="{$paddingOption.paddingSize}"
+
+		{if $paddingOption.paddingSize == $selectedPaddingSize}
+			selected
+		{/if}
+	{/let}
+
+	<option {$optionAttributes}>
+		{$paddingOption.label}
+	</option>
 {/template}
 
 /**

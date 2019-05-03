@@ -248,19 +248,4 @@ public interface LayoutPageTemplateStructureModel
 	@Override
 	public void setClassPK(long classPK);
 
-	/**
-	 * Returns the data of this layout page template structure.
-	 *
-	 * @return the data of this layout page template structure
-	 */
-	@AutoEscape
-	public String getData();
-
-	/**
-	 * Sets the data of this layout page template structure.
-	 *
-	 * @param data the data of this layout page template structure
-	 */
-	public void setData(String data);
-
 }

@@ -1,23 +1,34 @@
 {
-	"babel": {
-		"presets": [
-			"env"
-		]
+	"csfConfig": {
+		"path:**/*.js": {
+			"js": {
+				"lint": {
+					"rules": {
+						"no-console": 0
+					}
+				}
+			}
+		},
+		"path:**/*.jsp": {
+			"js": {
+				"lint": {
+					"rules": {
+						"no-console": 0
+					}
+				}
+			}
+		}
 	},
 	"dependencies": {
-		"metal-dom": "^2.6.4",
-		"metal-events": "^2.6.4",
-		"metal-state": "^2.16.7"
-	},
-	"devDependencies": {
-		"babel-cli": "^6.26.0",
-		"babel-preset-env": "^1.7.0",
-		"liferay-npm-bundler": "^2.4.0",
-		"liferay-npm-bundler-preset-liferay-dev": "^1.1.0"
+		"metal-dom": "2.16.8",
+		"metal-events": "2.16.8",
+		"metal-state": "2.16.8"
 	},
 	"name": "users-admin-web",
 	"scripts": {
-		"build": "babel --source-maps -d classes/META-INF/resources src/main/resources/META-INF/resources && liferay-npm-bundler"
+		"build": "liferay-npm-scripts build",
+		"checkFormat": "liferay-npm-scripts lint",
+		"format": "liferay-npm-scripts format"
 	},
-	"version": "4.0.0"
+	"version": "5.0.0"
 }

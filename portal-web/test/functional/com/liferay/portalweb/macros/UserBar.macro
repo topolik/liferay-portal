@@ -1,72 +1,33 @@
 definition {
-	var key_panel = "user";
+	@description = "Navigate to a dropdown item in the User Personal Bar."
+	macro gotoDropdownItem {
+		if (IsElementPresent(locator1 = "UserBar#USER_AVATAR_IMAGE")) {
+			Click(locator1 = "UserBar#USER_AVATAR_IMAGE");
 
-	@description = "Navigate to My Dashboard."
-	macro gotoDashboard {
-		Navigator.openURL();
+			var key_dropdownItem = "${dropdownItem}";
 
-		if (IsElementNotPresent(locator1 = "ProductMenu#PANEL_EXPANDED", key_category = "${key_category}")) {
-			if (IsElementPresent(locator1 = "UserBar#USER_AVATAR_IMAGE")) {
-				Click(locator1 = "UserBar#USER_AVATAR_IMAGE");
-
-				Pause(locator1 = "5000");
-
-				AssertClick(locator1 = "UserBar#USER_DASHBOARD", value1 = "My Dashboard");
-			}
+			AssertClick(
+				locator1 = "UserBar#USER_AVATAR_DROPDOWN_ITEM",
+				value1 = "${dropdownItem}");
 		}
 		else {
-			AssertClick(locator1 = "UserBar#USER_DASHBOARD", value1 = "My Dashboard");
-		}
-	}
+			var key_dropdownItem = "${dropdownItem}";
 
-	@description = "Navigate to Account via the User Bar."
-	macro gotoMyAccount {
-		Navigator.openURL();
-
-		if (IsElementNotPresent(locator1 = "ProductMenu#PANEL_EXPANDED", key_category = "${key_category}")) {
-			if (IsElementPresent(locator1 = "UserBar#USER_AVATAR_IMAGE")) {
-				Click(locator1 = "UserBar#USER_AVATAR_IMAGE");
-
-				ProductMenuHelper.expandCategory(category = "My Account");
-
-				ProductMenuHelper.gotoPortlet(portlet = "Account Settings");
-			}
-		}
-		else {
-			ProductMenuHelper.expandCategory(category = "My Account");
-
-			ProductMenuHelper.gotoPortlet(portlet = "Account Settings");
-		}
-	}
-
-	@description = "Navigate to My Profile."
-	macro gotoProfile {
-		Navigator.openURL();
-
-		if (IsElementNotPresent(locator1 = "ProductMenu#PANEL_EXPANDED", key_category = "${key_category}")) {
-			if (IsElementPresent(locator1 = "UserBar#USER_AVATAR_IMAGE")) {
-				Click(locator1 = "UserBar#USER_AVATAR_IMAGE");
-
-				AssertClick(locator1 = "UserBar#USER_PROFILE", value1 = "My Profile");
-			}
-		}
-		else {
-			AssertClick(locator1 = "UserBar#USER_PROFILE", value1 = "My Profile");
+			AssertClick(
+				locator1 = "UserBar#USER_AVATAR_DROPDOWN_ITEM",
+				value1 = "${dropdownItem}");
 		}
 	}
 
 	macro signOut {
-		if (IsElementPresent(locator1 = "UserBar#USER_AVATAR_IMAGE")) {
-			if (IsElementNotPresent(locator1 = "ProductMenu#PANEL_EXPANDED", key_category = "${key_category}")) {
-				Click(locator1 = "UserBar#USER_AVATAR_IMAGE");
-			}
+		if (IsElementNotPresent(locator1 = "UserBar#USER_SIGN_IN")) {
+			Click(locator1 = "UserBar#USER_AVATAR_IMAGE");
 
-			AssertVisible(
-				locator1 = "ProductMenu#PANEL_EXPANDED",
-				key_category = "${key_category}"
-			);
+			AssertVisible(locator1 = "UserBar#USER_AVATAR_DROPDOWN_PORTAL_OPEN");
 
-			Click(locator1 = "UserBar#USER_SIGN_OUT");
+			ScrollWebElementIntoView(locator1 = "UserBar#USER_AVATAR_DROPDOWN_SIGNOUT");
+
+			Click(locator1 = "UserBar#USER_AVATAR_DROPDOWN_SIGNOUT");
 		}
 	}
 }

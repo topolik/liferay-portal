@@ -21,6 +21,7 @@ import com.liferay.petra.reflect.ReflectionUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.SingleVMPool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -33,7 +34,7 @@ import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.template.TemplateResourceLoader;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.template.BaseSingleTemplateManager;
+import com.liferay.portal.template.BaseTemplateManager;
 import com.liferay.portal.template.RestrictedTemplate;
 import com.liferay.portal.template.TemplateContextHelper;
 import com.liferay.portal.template.freemarker.configuration.FreeMarkerEngineConfiguration;
@@ -105,7 +106,7 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 	property = "language.type=" + TemplateConstants.LANG_TYPE_FTL,
 	service = TemplateManager.class
 )
-public class FreeMarkerManager extends BaseSingleTemplateManager {
+public class FreeMarkerManager extends BaseTemplateManager {
 
 	public static BeansWrapper getBeansWrapper() {
 		Thread currentThread = Thread.currentThread();
@@ -262,9 +263,25 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 			Field field = ReflectionUtil.getDeclaredField(
 				Configuration.class, "cache");
 
+			PortalCache<TemplateResource, TemplateCache.MaybeMissingTemplate>
+				portalCache = null;
+
+			if (_freeMarkerTemplateResourceCache.isEnabled()) {
+				portalCache =
+					(PortalCache
+						<TemplateResource, TemplateCache.MaybeMissingTemplate>)
+							_singleVMPool.getPortalCache(
+								StringBundler.concat(
+									TemplateResource.class.getName(),
+									StringPool.POUND,
+									TemplateConstants.LANG_TYPE_FTL));
+
+				_freeMarkerTemplateResourceCache.setSecondLevelPortalCache(
+					portalCache);
+			}
+
 			TemplateCache templateCache = new LiferayTemplateCache(
-				_configuration, _freeMarkerEngineConfiguration,
-				templateResourceLoader, _singleVMPool);
+				_configuration, templateResourceLoader, portalCache);
 
 			field.set(_configuration, templateCache);
 		}
@@ -281,7 +298,8 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 		_configuration.setObjectWrapper(
 			new LiferayObjectWrapper(
 				_freeMarkerEngineConfiguration.allowedClasses(),
-				_freeMarkerEngineConfiguration.restrictedClasses()));
+				_freeMarkerEngineConfiguration.restrictedClasses(),
+				_freeMarkerEngineConfiguration.restrictedMethods()));
 
 		try {
 			_configuration.setSetting("auto_import", _getMacroLibrary());
@@ -349,14 +367,12 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 
 	@Override
 	protected Template doGetTemplate(
-		TemplateResource templateResource,
-		TemplateResource errorTemplateResource, boolean restricted,
+		TemplateResource templateResource, boolean restricted,
 		Map<String, Object> helperUtilities) {
 
 		Template template = new FreeMarkerTemplate(
-			templateResource, errorTemplateResource, helperUtilities,
-			_configuration, templateContextHelper,
-			_freeMarkerEngineConfiguration.resourceModificationCheck());
+			templateResource, helperUtilities, _configuration,
+			templateContextHelper, _freeMarkerTemplateResourceCache);
 
 		if (restricted) {
 			template = new RestrictedTemplate(
@@ -478,6 +494,10 @@ public class FreeMarkerManager extends BaseSingleTemplateManager {
 	private volatile FreeMarkerBundleClassloader _freeMarkerBundleClassloader;
 	private volatile FreeMarkerEngineConfiguration
 		_freeMarkerEngineConfiguration;
+
+	@Reference
+	private FreeMarkerTemplateResourceCache _freeMarkerTemplateResourceCache;
+
 	private SingleVMPool _singleVMPool;
 	private final Map<String, String> _taglibMappings =
 		new ConcurrentHashMap<>();

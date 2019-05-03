@@ -1,5 +1,5 @@
-import React from 'react';
 import CriteriaGroup from 'components/criteria_builder/CriteriaGroup.es';
+import React from 'react';
 import {cleanup, render} from 'react-testing-library';
 
 const connectDnd = jest.fn(el => el);

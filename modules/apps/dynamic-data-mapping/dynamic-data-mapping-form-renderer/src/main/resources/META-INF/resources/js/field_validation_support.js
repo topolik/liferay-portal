@@ -74,6 +74,14 @@ AUI.add(
 						}
 					);
 				}
+				else if (['checkbox_multiple', 'radio'].indexOf(instance.get('type')) !== -1) {
+					setTimeout(
+						function() {
+							instance.showPendingErrorMessage();
+						},
+						100
+					);
+				}
 				else {
 					instance.showErrorMessage();
 				}

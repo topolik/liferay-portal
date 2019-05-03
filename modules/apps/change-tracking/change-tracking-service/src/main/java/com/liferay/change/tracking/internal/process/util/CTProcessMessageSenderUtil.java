@@ -42,13 +42,13 @@ import org.osgi.util.tracker.ServiceTracker;
 public class CTProcessMessageSenderUtil {
 
 	public static void logCTEntryCollision(
-		boolean collisionIgnored, CTEntry ctEntry) {
+		CTEntry ctEntry, boolean ignoreCollision) {
 
 		if (ctEntry == null) {
 			return;
 		}
 
-		if (collisionIgnored) {
+		if (ignoreCollision) {
 			_sendBackgroundTaskStatusMessage(
 				new Date(), Level.WARN,
 				"collision-detected-for-x-x-ignore-collision-is-selected",
@@ -136,9 +136,9 @@ public class CTProcessMessageSenderUtil {
 
 		Map<String, Serializable> messageParameters = new HashMap<>();
 
-		messageParameters.put("className", ctEntry.getClassName());
-		messageParameters.put("classPK", ctEntry.getClassPK());
 		messageParameters.put("ctEntryId", ctEntry.getCtEntryId());
+		messageParameters.put("modelClassName", ctEntry.getModelClassName());
+		messageParameters.put("modelClassPK", ctEntry.getModelClassPK());
 
 		return messageParameters;
 	}

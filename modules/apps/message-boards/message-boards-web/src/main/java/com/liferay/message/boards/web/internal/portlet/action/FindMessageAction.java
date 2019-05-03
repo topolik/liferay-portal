@@ -54,9 +54,7 @@ public class FindMessageAction extends FindStrutsAction {
 	}
 
 	@Override
-	public void setPrimaryKeyParameter(PortletURL portletURL, long primaryKey)
-		throws Exception {
-
+	public void setPrimaryKeyParameter(PortletURL portletURL, long primaryKey) {
 		portletURL.setParameter(
 			getPrimaryKeyParameterName(), String.valueOf(primaryKey));
 	}
@@ -74,24 +72,12 @@ public class FindMessageAction extends FindStrutsAction {
 		return _portletPageFinder;
 	}
 
-	@Reference(unbind = "-")
-	protected void setMBMessageLocalService(
-		MBMessageLocalService mbMessageLocalService) {
-
-		_mbMessageLocalService = mbMessageLocalService;
-	}
+	@Reference
+	private MBMessageLocalService _mbMessageLocalService;
 
 	@Reference(
-		target = "(model.class.name=com.liferay.message.boards.model.MBMessage)",
-		unbind = "-"
+		target = "(model.class.name=com.liferay.message.boards.model.MBMessage)"
 	)
-	protected void setPortletLayoutFinder(
-		PortletLayoutFinder portletPageFinder) {
-
-		_portletPageFinder = portletPageFinder;
-	}
-
-	private MBMessageLocalService _mbMessageLocalService;
 	private PortletLayoutFinder _portletPageFinder;
 
 }

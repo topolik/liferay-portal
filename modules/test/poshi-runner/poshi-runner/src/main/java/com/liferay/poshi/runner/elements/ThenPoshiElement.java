@@ -50,18 +50,11 @@ public class ThenPoshiElement extends PoshiElement {
 
 	@Override
 	public int getPoshiScriptLineNumber() {
-		Class<?> thenPoshiElementClass = ThenPoshiElement.class;
-		Class<?> thisClass = getClass();
-
-		if (thenPoshiElementClass != thisClass) {
+		if (this instanceof ElsePoshiElement) {
 			return super.getPoshiScriptLineNumber();
 		}
 
 		PoshiElement parentPoshiElement = (PoshiElement)getParent();
-
-		if (parentPoshiElement == null) {
-			return 1;
-		}
 
 		return parentPoshiElement.getPoshiScriptLineNumber();
 	}
@@ -75,6 +68,10 @@ public class ThenPoshiElement extends PoshiElement {
 		for (String poshiScriptSnippet : getPoshiScriptSnippets(blockContent)) {
 			add(PoshiNodeFactory.newPoshiNode(this, poshiScriptSnippet));
 		}
+	}
+
+	@Override
+	public void validatePoshiScript() throws PoshiScriptParserException {
 	}
 
 	protected ThenPoshiElement() {

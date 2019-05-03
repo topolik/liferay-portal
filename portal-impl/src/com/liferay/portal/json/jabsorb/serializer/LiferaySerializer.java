@@ -391,7 +391,7 @@ public class LiferaySerializer extends AbstractSerializer {
 					try {
 						value = ser.unmarshall(
 							serializerState, field.getType(),
-							serializableJSONObject.get(fieldName));
+							_getSafe(serializableJSONObject, fieldName));
 					}
 					catch (Exception e) {
 						if (_log.isDebugEnabled()) {
@@ -418,6 +418,31 @@ public class LiferaySerializer extends AbstractSerializer {
 		}
 
 		return javaClassInstance;
+	}
+
+	private static Object _getSafe(JSONObject jsonObject, String name) {
+		Object object = jsonObject.get(name);
+
+		if (object instanceof Integer) {
+			Integer jsonInteger = (Integer)object;
+
+			Integer cachedInteger = Integer.valueOf(jsonInteger.intValue());
+
+			if (jsonInteger == cachedInteger) {
+				return new Integer(jsonInteger.intValue());
+			}
+		}
+		else if (object instanceof Long) {
+			Long jsonLong = (Long)object;
+
+			Long cachedLong = Long.valueOf(jsonLong.longValue());
+
+			if (jsonLong == cachedLong) {
+				return new Long(jsonLong.intValue());
+			}
+		}
+
+		return object;
 	}
 
 	private static final Class<?>[] _JSON_CLASSES = {JSONObject.class};

@@ -19,6 +19,7 @@ import aQute.bnd.annotation.ProviderType;
 import com.liferay.portal.kernel.search.SearchContext;
 import com.liferay.portal.search.aggregation.Aggregation;
 import com.liferay.portal.search.aggregation.pipeline.PipelineAggregation;
+import com.liferay.portal.search.filter.ComplexQueryPart;
 import com.liferay.portal.search.query.Query;
 import com.liferay.portal.search.sort.Sort;
 import com.liferay.portal.search.stats.StatsRequest;
@@ -27,87 +28,107 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Builds a search request to be used when performing a search.
+ * Builds a search request that can be used for executing a search.
  *
  * @author André de Oliveira
- *
- * @review
  */
 @ProviderType
 public interface SearchRequestBuilder {
 
-	public void addAggregation(Aggregation aggregation);
+	public SearchRequestBuilder addAggregation(Aggregation aggregation);
 
-	public void addPipelineAggregation(PipelineAggregation pipelineAggregation);
+	public SearchRequestBuilder addComplexQueryPart(
+		ComplexQueryPart complexQueryPart);
+
+	public SearchRequestBuilder addFederatedSearchRequest(
+		SearchRequest searchRequest);
+
+	public SearchRequestBuilder addIndex(String index);
+
+	public SearchRequestBuilder addPipelineAggregation(
+		PipelineAggregation pipelineAggregation);
 
 	/**
-	 * Adds fields to include in search results as a map of keys and values.
+	 * Adds fields to include in the search results as a map of keys and values.
 	 *
-	 * @param selectedFieldNames the fields to return
-	 * @return the same builder
-	 *
-	 * @review
+	 * @param  selectedFieldNames the names of the fields to return
+	 * @return the search request builder
 	 */
 	public SearchRequestBuilder addSelectedFieldNames(
 		String... selectedFieldNames);
+
+	public SearchRequestBuilder basicFacetSelection(
+		boolean basicFacetSelection);
 
 	/**
 	 * Builds the search request.
 	 *
 	 * @return the search request
-	 *
-	 * @review
 	 */
 	public SearchRequest build();
+
+	public SearchRequestBuilder emptySearchEnabled(boolean emptySearchEnabled);
 
 	public SearchRequestBuilder entryClassNames(String... entryClassNames);
 
 	/**
-	 * Enables explanation for each hit on how its score was computed.
+	 * Enables explanation of how each hit's score was computed.
 	 *
-	 * @param explain whether to explain scores
-	 * @return the same builder
-	 *
-	 * @review
+	 * @param  explain whether to explain scores
+	 * @return the search request builder
 	 */
 	public SearchRequestBuilder explain(boolean explain);
 
+	public SearchRequestBuilder federatedSearchKey(String federatedSearchKey);
+
+	public SearchRequestBuilder fields(String... fields);
+
+	public SearchRequestBuilder from(Integer from);
+
+	public SearchRequestBuilder getFederatedSearchRequestBuilder(
+		String federatedSearchKey);
+
+	public SearchRequestBuilder highlightEnabled(boolean highlightEnabled);
+
+	public SearchRequestBuilder highlightFields(String... highlightFields);
+
 	/**
-	 * Enables inclusion of the search engine's response string with results.
+	 * Enables inclusion of the search engine's response string with the
+	 * returned results.
 	 *
-	 * @param includeResponseString whether to include the response string
-	 * @return the same builder
-	 *
-	 * @review
+	 * @param  includeResponseString whether to include the response string
+	 * @return the search request builder
 	 */
 	public SearchRequestBuilder includeResponseString(
 		boolean includeResponseString);
 
+	public SearchRequestBuilder indexes(String... indexes);
+
 	public SearchRequestBuilder modelIndexerClasses(Class<?>... classes);
 
+	public SearchRequestBuilder postFilterQuery(Query query);
+
 	public SearchRequestBuilder query(Query query);
+
+	public SearchRequestBuilder queryString(String queryString);
 
 	/**
 	 * Provides a secondary query to reorder the top documents returned.
 	 *
-	 * @param rescoreQuery the rescore query
-	 * @return the same builder
-	 *
-	 * @review
+	 * @param  rescoreQuery the rescore query
+	 * @return the search request builder
 	 */
 	public SearchRequestBuilder rescoreQuery(Query rescoreQuery);
+
+	public SearchRequestBuilder size(Integer size);
 
 	public SearchRequestBuilder sorts(Sort... sorts);
 
 	/**
-	 * Provides a map of field names and the metric aggregations that are to be
-	 * computed for each field.
+	 * Provides the metric aggregations to be computed for each field.
 	 *
-	 * @param statsMap the map containing the stats that are enabled for each
-	 *        field.
-	 * @return the same builder
-	 *
-	 * @review
+	 * @param  statsRequests the stats that are enabled for each field
+	 * @return the search request builder
 	 */
 	public SearchRequestBuilder statsRequests(StatsRequest... statsRequests);
 

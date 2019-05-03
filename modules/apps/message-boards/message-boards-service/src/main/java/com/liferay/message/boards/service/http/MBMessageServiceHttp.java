@@ -149,8 +149,8 @@ public class MBMessageServiceHttp {
 			java.io.File file, boolean anonymous, double priority,
 			boolean allowPingbacks,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
-		throws java.io.FileNotFoundException,
-			   com.liferay.portal.kernel.exception.PortalException {
+		throws com.liferay.portal.kernel.exception.PortalException,
+			   java.io.FileNotFoundException {
 
 		try {
 			MethodKey methodKey = new MethodKey(

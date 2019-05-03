@@ -18,18 +18,14 @@ import com.liferay.asset.kernel.AssetRendererFactoryRegistryUtil;
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.asset.kernel.model.AssetRendererFactory;
 import com.liferay.asset.kernel.service.AssetEntryLocalService;
-import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.DocumentContributor;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.LocaleUtil;
-import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.util.LocalizationUtil;
 
 import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -90,31 +86,15 @@ public class AssetEntryDocumentContributor implements DocumentContributor {
 
 		document.addLocalizedKeyword(
 			"localized_title",
-			_populateMap(assetEntry, assetEntry.getTitleMap()), true, true);
+			LocalizationUtil.populateLocalizationMap(
+				assetEntry.getTitleMap(), assetEntry.getDefaultLanguageId(),
+				assetEntry.getGroupId()),
+			true, true);
 		document.addNumber("viewCount", assetEntry.getViewCount());
 		document.addKeyword("visible", assetEntry.isVisible());
 	}
 
 	@Reference
 	protected AssetEntryLocalService assetEntryLocalService;
-
-	private Map<Locale, String> _populateMap(
-		AssetEntry assetEntry, Map<Locale, String> map) {
-
-		String defaultValue = map.get(
-			LocaleUtil.fromLanguageId(assetEntry.getDefaultLanguageId()));
-
-		for (Locale availableLocale :
-				LanguageUtil.getAvailableLocales(assetEntry.getGroupId())) {
-
-			if (!map.containsKey(availableLocale) ||
-				Validator.isNull(map.get(availableLocale))) {
-
-				map.put(availableLocale, defaultValue);
-			}
-		}
-
-		return map;
-	}
 
 }

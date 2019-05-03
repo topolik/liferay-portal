@@ -18,11 +18,8 @@ import com.liferay.portal.search.engine.adapter.document.BulkableDocumentRequest
 import com.liferay.portal.search.engine.adapter.document.IndexDocumentRequest;
 import com.liferay.portal.search.engine.adapter.document.IndexDocumentResponse;
 
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.rest.RestStatus;
 
 import org.osgi.service.component.annotations.Component;
@@ -40,30 +37,24 @@ public class IndexDocumentRequestExecutorImpl
 		IndexDocumentRequest indexDocumentRequest) {
 
 		IndexRequestBuilder indexRequestBuilder =
-			_bulkableDocumentRequestTranslator.translate(
-				indexDocumentRequest, null);
+			_bulkableDocumentRequestTranslator.translate(indexDocumentRequest);
 
 		IndexResponse indexResponse = indexRequestBuilder.get();
 
 		RestStatus restStatus = indexResponse.status();
 
-		IndexDocumentResponse indexDocumentResponse = new IndexDocumentResponse(
+		return new IndexDocumentResponse(
 			restStatus.getStatus(), indexResponse.getId());
-
-		return indexDocumentResponse;
 	}
 
 	@Reference(target = "(search.engine.impl=Elasticsearch)", unbind = "-")
 	protected void setBulkableDocumentRequestTranslator(
-		BulkableDocumentRequestTranslator
-			<DeleteRequestBuilder, IndexRequestBuilder, UpdateRequestBuilder,
-			 BulkRequestBuilder> bulkableDocumentRequestTranslator) {
+		BulkableDocumentRequestTranslator bulkableDocumentRequestTranslator) {
 
 		_bulkableDocumentRequestTranslator = bulkableDocumentRequestTranslator;
 	}
 
 	private BulkableDocumentRequestTranslator
-		<DeleteRequestBuilder, IndexRequestBuilder, UpdateRequestBuilder,
-		 BulkRequestBuilder> _bulkableDocumentRequestTranslator;
+		_bulkableDocumentRequestTranslator;
 
 }

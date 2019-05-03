@@ -355,15 +355,16 @@ public class SiteAdministrationPanelCategoryDisplayContext {
 		Group group = getGroup();
 
 		Layout layout = LayoutLocalServiceUtil.fetchFirstLayout(
-			group.getGroupId(), false,
-			LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
+			group.getGroupId(), false, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
+			false);
 
 		if ((layout != null) && !layout.isHidden()) {
 			return true;
 		}
 
 		layout = LayoutLocalServiceUtil.fetchFirstLayout(
-			group.getGroupId(), true, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
+			group.getGroupId(), true, LayoutConstants.DEFAULT_PARENT_LAYOUT_ID,
+			false);
 
 		if ((layout != null) && !layout.isHidden()) {
 			return true;

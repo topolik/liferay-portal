@@ -28,31 +28,22 @@ public class GroupTable {
 	public static final String TABLE_NAME = "Group_";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"uuid_", Types.VARCHAR},
-		{"groupId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"creatorUserId", Types.BIGINT},
-		{"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT},
-		{"parentGroupId", Types.BIGINT},
-		{"liveGroupId", Types.BIGINT},
-		{"treePath", Types.VARCHAR},
-		{"groupKey", Types.VARCHAR},
-		{"name", Types.VARCHAR},
-		{"description", Types.VARCHAR},
-		{"type_", Types.INTEGER},
-		{"typeSettings", Types.CLOB},
-		{"manualMembership", Types.BOOLEAN},
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"creatorUserId", Types.BIGINT}, {"classNameId", Types.BIGINT},
+		{"classPK", Types.BIGINT}, {"parentGroupId", Types.BIGINT},
+		{"liveGroupId", Types.BIGINT}, {"treePath", Types.VARCHAR},
+		{"groupKey", Types.VARCHAR}, {"name", Types.VARCHAR},
+		{"description", Types.VARCHAR}, {"type_", Types.INTEGER},
+		{"typeSettings", Types.CLOB}, {"manualMembership", Types.BOOLEAN},
 		{"membershipRestriction", Types.INTEGER},
-		{"friendlyURL", Types.VARCHAR},
-		{"site", Types.BOOLEAN},
+		{"friendlyURL", Types.VARCHAR}, {"site", Types.BOOLEAN},
 		{"remoteStagingGroupCount", Types.INTEGER},
-		{"inheritContent", Types.BOOLEAN},
-		{"active_", Types.BOOLEAN}
+		{"inheritContent", Types.BOOLEAN}, {"active_", Types.BOOLEAN}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -100,7 +91,8 @@ TABLE_COLUMNS_MAP.put("inheritContent", Types.BOOLEAN);
 TABLE_COLUMNS_MAP.put("active_", Types.BOOLEAN);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table Group_ (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,groupId LONG not null primary key,companyId LONG,creatorUserId LONG,classNameId LONG,classPK LONG,parentGroupId LONG,liveGroupId LONG,treePath STRING null,groupKey VARCHAR(150) null,name STRING null,description STRING null,type_ INTEGER,typeSettings TEXT null,manualMembership BOOLEAN,membershipRestriction INTEGER,friendlyURL VARCHAR(255) null,site BOOLEAN,remoteStagingGroupCount INTEGER,inheritContent BOOLEAN,active_ BOOLEAN)";
+	public static final String TABLE_SQL_CREATE =
+"create table Group_ (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,groupId LONG not null primary key,companyId LONG,creatorUserId LONG,classNameId LONG,classPK LONG,parentGroupId LONG,liveGroupId LONG,treePath STRING null,groupKey VARCHAR(150) null,name STRING null,description STRING null,type_ INTEGER,typeSettings TEXT null,manualMembership BOOLEAN,membershipRestriction INTEGER,friendlyURL VARCHAR(255) null,site BOOLEAN,remoteStagingGroupCount INTEGER,inheritContent BOOLEAN,active_ BOOLEAN)";
 
 	public static final String TABLE_SQL_DROP = "drop table Group_";
 

@@ -16,7 +16,6 @@ package com.liferay.frontend.taglib.clay.servlet.taglib.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -66,13 +65,12 @@ public class BaseManagementToolbarDisplayContext
 
 				if (filterNavigationDropdownItems != null) {
 					addGroup(
-						SafeConsumer.ignore(
-							dropdownGroupItem -> {
-								dropdownGroupItem.setDropdownItems(
-									filterNavigationDropdownItems);
-								dropdownGroupItem.setLabel(
-									getFilterNavigationDropdownItemsLabel());
-							}));
+						dropdownGroupItem -> {
+							dropdownGroupItem.setDropdownItems(
+								filterNavigationDropdownItems);
+							dropdownGroupItem.setLabel(
+								getFilterNavigationDropdownItemsLabel());
+						});
 				}
 
 				List<DropdownItem> orderByDropdownItems =
@@ -80,13 +78,12 @@ public class BaseManagementToolbarDisplayContext
 
 				if (orderByDropdownItems != null) {
 					addGroup(
-						SafeConsumer.ignore(
-							dropdownGroupItem -> {
-								dropdownGroupItem.setDropdownItems(
-									orderByDropdownItems);
-								dropdownGroupItem.setLabel(
-									getOrderByDropdownItemsLabel());
-							}));
+						dropdownGroupItem -> {
+							dropdownGroupItem.setDropdownItems(
+								orderByDropdownItems);
+							dropdownGroupItem.setLabel(
+								getOrderByDropdownItemsLabel());
+						});
 				}
 			}
 		};

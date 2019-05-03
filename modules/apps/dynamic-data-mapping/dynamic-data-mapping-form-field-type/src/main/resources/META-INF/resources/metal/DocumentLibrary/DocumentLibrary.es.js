@@ -5,151 +5,145 @@ import Soy from 'metal-soy';
 import templates from './DocumentLibrary.soy.js';
 import {Config} from 'metal-state';
 
-class DocumentLibrary extends Component {
-	static STATE = {
+class DocumentLibrary extends Component {}
 
-		/**
-		 * @default 'string'
-		 * @instance
-		 * @memberof Text
-		 * @type {?(string|undefined)}
-		 */
+DocumentLibrary.STATE = {
 
-		dataType: Config.string().value('date'),
+	/**
+	 * @default 'string'
+	 * @instance
+	 * @memberof Text
+	 * @type {?(string|undefined)}
+	 */
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(string|undefined)}
-		 */
+	dataType: Config.string().value('date'),
 
-		fieldName: Config.string(),
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(string|undefined)}
+	 */
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(string|undefined)}
-		 */
+	fieldName: Config.string(),
 
-		id: Config.string(),
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(string|undefined)}
+	 */
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(string|undefined)}
-		 */
+	id: Config.string(),
 
-		label: Config.string(),
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(string|undefined)}
+	 */
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(string|undefined)}
-		 */
+	label: Config.string(),
 
-		name: Config.string().required(),
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(string|undefined)}
+	 */
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(string|undefined)}
-		 */
+	name: Config.string().required(),
 
-		placeholder: Config.string(),
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(string|undefined)}
+	 */
 
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?bool}
-		 */
+	placeholder: Config.string(),
 
-		readOnly: Config.bool().value(false),
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?bool}
+	 */
 
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(bool|undefined)}
-		 */
+	readOnly: Config.bool().value(false),
 
-		required: Config.bool().value(false),
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof FieldBase
+	 * @type {?(bool|undefined)}
+	 */
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof FieldBase
-		 * @type {?(bool|undefined)}
-		 */
+	repeatable: Config.bool(),
 
-		repeatable: Config.bool(),
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(bool|undefined)}
+	 */
 
-		/**
-		 * @default true
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(bool|undefined)}
-		 */
+	required: Config.bool().value(false),
 
-		showLabel: Config.bool().value(true),
+	/**
+	 * @default true
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(bool|undefined)}
+	 */
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(string|undefined)}
-		 */
+	showLabel: Config.bool().value(true),
 
-		spritemap: Config.string(),
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(string|undefined)}
+	 */
 
-		strings: {
-			value: {
-				select: Liferay.Language.get('select')
-			}
-		},
+	spritemap: Config.string(),
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(string|undefined)}
-		 */
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(string|undefined)}
+	 */
 
-		tip: Config.string(),
+	tip: Config.string(),
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof FieldBase
-		 * @type {?(string|undefined)}
-		 */
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof FieldBase
+	 * @type {?(string|undefined)}
+	 */
 
-		tooltip: Config.string(),
+	tooltip: Config.string(),
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Text
-		 * @type {?(string|undefined)}
-		 */
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Text
+	 * @type {?(string|undefined)}
+	 */
 
-		type: Config.string().value('document_library'),
+	type: Config.string().value('document_library'),
 
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof DocumentLibrary
-		 * @type {?(string|undefined)}
-		 */
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof DocumentLibrary
+	 * @type {?(string|undefined)}
+	 */
 
-		value: Config.object()
-	};
-}
+	value: Config.object()
+};
 
 Soy.register(DocumentLibrary, templates);
 

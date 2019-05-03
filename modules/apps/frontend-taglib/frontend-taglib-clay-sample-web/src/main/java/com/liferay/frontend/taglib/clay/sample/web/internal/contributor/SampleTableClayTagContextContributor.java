@@ -15,8 +15,6 @@
 package com.liferay.frontend.taglib.clay.sample.web.internal.contributor;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.contributor.ClayTagContextContributor;
-import com.liferay.frontend.taglib.clay.servlet.taglib.model.table.Field;
-import com.liferay.frontend.taglib.clay.servlet.taglib.model.table.Schema;
 
 import java.util.Map;
 
@@ -38,22 +36,8 @@ public class SampleTableClayTagContextContributor
 
 	@Override
 	public void populate(Map<String, Object> context) {
-		Schema schema = _getSchema();
-
-		context.put("schema", schema.toMap());
-
 		context.put("selectable", true);
 		context.put("tableClasses", "sample-table");
-	}
-
-	private Schema _getSchema() {
-		Schema schema = new Schema();
-
-		schema.addField(new Field("name", "Name"));
-		schema.addField(new Field("calories", "Calories", "number"));
-		schema.addField(new Field("portion", "Portion", "number"));
-
-		return schema;
 	}
 
 }

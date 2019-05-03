@@ -105,6 +105,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -2097,7 +2098,29 @@ public class ServiceBuilder {
 
 	private void _addIndexMetadata(
 		Map<String, List<IndexMetadata>> indexMetadatasMap, String tableName,
-		IndexMetadata indexMetadata) {
+		List<String> pkEntityColumnDBNames, IndexMetadata indexMetadata) {
+
+		if ((pkEntityColumnDBNames != null) &&
+			(pkEntityColumnDBNames.size() > 1)) {
+
+			String[] columnNames = indexMetadata.getColumnNames();
+
+			if (columnNames.length <= pkEntityColumnDBNames.size()) {
+				boolean redundant = true;
+
+				for (int i = 0; i < columnNames.length; i++) {
+					if (!columnNames[i].equals(pkEntityColumnDBNames.get(i))) {
+						redundant = false;
+
+						break;
+					}
+				}
+
+				if (redundant) {
+					return;
+				}
+			}
+		}
 
 		List<IndexMetadata> indexMetadatas = indexMetadatasMap.get(tableName);
 
@@ -3179,7 +3202,7 @@ public class ServiceBuilder {
 		JavaClass javaClass = _getJavaClass(
 			StringBundler.concat(
 				_outputPath, "/service/impl/", entity.getName(),
-				sessionType != _SESSION_TYPE_REMOTE ? "Local" : "",
+				(sessionType != _SESSION_TYPE_REMOTE) ? "Local" : "",
 				"ServiceImpl.java"));
 
 		List<JavaMethod> methods = _getMethods(javaClass);
@@ -3546,6 +3569,7 @@ public class ServiceBuilder {
 		try (UnsyncBufferedReader unsyncBufferedReader =
 				new UnsyncBufferedReader(new FileReader(sqlFile))) {
 
+			iterate:
 			while (true) {
 				String indexSQL = unsyncBufferedReader.readLine();
 
@@ -3562,6 +3586,8 @@ public class ServiceBuilder {
 				IndexMetadata indexMetadata =
 					IndexMetadataFactoryUtil.createIndexMetadata(indexSQL);
 
+				List<String> pkEntityColumnDBNames = null;
+
 				Entity entity = _getEntityByTableName(
 					indexMetadata.getTableName());
 
@@ -3570,11 +3596,37 @@ public class ServiceBuilder {
 						indexMetadata.getIndexName(),
 						indexMetadata.getTableName(), indexMetadata.isUnique(),
 						indexMetadata.getColumnNames());
+
+					for (String columnName : indexMetadata.getColumnNames()) {
+						EntityColumn entityColumn =
+							_fetchEntityColumnByColumnDBName(
+								entity, columnName);
+
+						if (entityColumn == null) {
+							System.out.println(
+								StringBundler.concat(
+									"Removing index ",
+									indexMetadata.getIndexName(),
+									" because column \"", columnName,
+									"\" does not exist"));
+
+							continue iterate;
+						}
+					}
+
+					pkEntityColumnDBNames = entity.getPKEntityColumnDBNames();
+				}
+				else {
+					EntityMapping entityMapping = _entityMappings.get(
+						indexMetadata.getTableName());
+
+					pkEntityColumnDBNames =
+						_getEntityMappingPKEntityColumnDBNames(entityMapping);
 				}
 
 				_addIndexMetadata(
 					indexMetadatasMap, indexMetadata.getTableName(),
-					indexMetadata);
+					pkEntityColumnDBNames, indexMetadata);
 			}
 		}
 
@@ -3628,7 +3680,7 @@ public class ServiceBuilder {
 
 				_addIndexMetadata(
 					indexMetadatasMap, indexMetadata.getTableName(),
-					indexMetadata);
+					entity.getPKEntityColumnDBNames(), indexMetadata);
 			}
 		}
 
@@ -4104,6 +4156,24 @@ public class ServiceBuilder {
 		_deleteFile("docroot/WEB-INF/src/META-INF/misc-spring.xml");
 	}
 
+	private EntityColumn _fetchEntityColumnByColumnDBName(
+		Entity entity, String columnDBName) {
+
+		for (EntityColumn entityColumn : entity.getFinderEntityColumns()) {
+			if (columnDBName.equals(entityColumn.getDBName())) {
+				return entityColumn;
+			}
+		}
+
+		for (EntityColumn entityColumn : entity.getEntityColumns()) {
+			if (columnDBName.equals(entityColumn.getDBName())) {
+				return entityColumn;
+			}
+		}
+
+		return null;
+	}
+
 	private String _fixHbmXml(String content) throws IOException {
 		try (UnsyncBufferedReader unsyncBufferedReader =
 				new UnsyncBufferedReader(new UnsyncStringReader(content))) {
@@ -4351,17 +4421,20 @@ public class ServiceBuilder {
 			}
 		}
 
+		List<String> mappingPKEntityColumnDBNames =
+			_getEntityMappingPKEntityColumnDBNames(entityMapping);
+
 		String tableName = entityMapping.getTableName();
 
 		for (Entity entity : entities) {
-			List<EntityColumn> pkEntityColumns = entity.getPKEntityColumns();
-
-			for (EntityColumn entityColumn : pkEntityColumns) {
+			for (String dbName : entity.getPKEntityColumnDBNames()) {
 				IndexMetadata indexMetadata =
 					IndexMetadataFactoryUtil.createIndexMetadata(
-						false, tableName, entityColumn.getDBName());
+						false, tableName, dbName);
 
-				_addIndexMetadata(indexMetadatasMap, tableName, indexMetadata);
+				_addIndexMetadata(
+					indexMetadatasMap, tableName, mappingPKEntityColumnDBNames,
+					indexMetadata);
 			}
 		}
 	}
@@ -4727,6 +4800,8 @@ public class ServiceBuilder {
 	private String _getDeleteUADEntityMethodName(
 		JavaClass javaClass, String entityName) {
 
+		List<String> methodNames = new ArrayList<>();
+
 		for (JavaMethod javaMethod : javaClass.getMethods(false)) {
 			String javaMethodName = javaMethod.getName();
 
@@ -4739,13 +4814,23 @@ public class ServiceBuilder {
 					if (StringUtil.equals(
 							parameterType.getValue(), entityName)) {
 
-						return javaMethodName;
+						methodNames.add(javaMethodName);
 					}
 				}
 			}
 		}
 
-		return "delete" + entityName;
+		String deleteEntityMethodName = "delete" + entityName;
+
+		if (methodNames.isEmpty() ||
+			methodNames.contains(deleteEntityMethodName)) {
+
+			return deleteEntityMethodName;
+		}
+
+		methodNames.sort(null);
+
+		return methodNames.get(0);
 	}
 
 	private Entity _getEntityByTableName(String tableName) {
@@ -4761,16 +4846,47 @@ public class ServiceBuilder {
 	private EntityColumn _getEntityColumnByColumnDBName(
 		Entity entity, String columnDBName) {
 
-		for (EntityColumn entityColumn : entity.getFinderEntityColumns()) {
-			if (columnDBName.equals(entityColumn.getDBName())) {
-				return entityColumn;
-			}
+		EntityColumn entityColumn = _fetchEntityColumnByColumnDBName(
+			entity, columnDBName);
+
+		if (entityColumn != null) {
+			return entityColumn;
 		}
 
 		throw new IllegalArgumentException(
 			StringBundler.concat(
 				"No entity column exist with column database name ",
 				columnDBName, " for entity ", entity.getName()));
+	}
+
+	private List<String> _getEntityMappingPKEntityColumnDBNames(
+			EntityMapping entityMapping)
+		throws Exception {
+
+		if (entityMapping == null) {
+			return null;
+		}
+
+		List<String> mappingPKEntityColumnDBNames = new ArrayList<>();
+
+		for (int i = 0; i < 3; i++) {
+			Entity entity = getEntity(entityMapping.getEntityName(i));
+
+			if (entity == null) {
+				return null;
+			}
+
+			String entityName = entity.getName();
+
+			if (entityName.equals("Company")) {
+				continue;
+			}
+
+			mappingPKEntityColumnDBNames.addAll(
+				entity.getPKEntityColumnDBNames());
+		}
+
+		return mappingPKEntityColumnDBNames;
 	}
 
 	private String _getFileContent(String fileName) throws IOException {
@@ -6111,21 +6227,43 @@ public class ServiceBuilder {
 			String localizedPKEntityColumn = entityElement.attributeValue(
 				"localized-pk-entity-column");
 
-			for (EntityFinder entityFinder : entityFinders) {
+			ListIterator<EntityFinder> listIterator =
+				entityFinders.listIterator();
+
+			while (listIterator.hasNext()) {
+				EntityFinder entityFinder = listIterator.next();
+
 				String finderName = entityFinder.getName();
 
-				if (entityFinder.isUnique() && !finderName.equals("HeadId")) {
-					if ((localizedPKEntityColumn != null) &&
-						entityFinder.hasEntityColumn(localizedPKEntityColumn)) {
+				if (finderName.equals("HeadId") ||
+					((localizedPKEntityColumn != null) &&
+					 entityFinder.hasEntityColumn(localizedPKEntityColumn))) {
 
-						continue;
-					}
-
-					List<EntityColumn> finderEntityColumns =
-						entityFinder.getEntityColumns();
-
-					finderEntityColumns.add(headEntityColumn);
+					continue;
 				}
+
+				// Finder for both draft and head
+
+				listIterator.set(
+					new EntityFinder(
+						entityFinder.getName(), "Collection", false,
+						entityFinder.getWhere(), entityFinder.getDBWhere(),
+						entityFinder.isDBIndex(),
+						new ArrayList<>(entityFinder.getEntityColumns())));
+
+				List<EntityColumn> finderEntityColumns =
+					entityFinder.getEntityColumns();
+
+				finderEntityColumns.add(headEntityColumn);
+
+				// Finder for either draft or head
+
+				listIterator.add(
+					new EntityFinder(
+						entityFinder.getName() + "_Head",
+						entityFinder.getReturnType(), entityFinder.isUnique(),
+						entityFinder.getWhere(), entityFinder.getDBWhere(),
+						entityFinder.isDBIndex(), finderEntityColumns));
 			}
 		}
 

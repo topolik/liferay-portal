@@ -8,6 +8,7 @@ import {isInputNode} from 'map-common/js/validators.es';
  * @review
  */
 class GoogleMapsSearch extends State {
+
 	/**
 	 * Creates a new search handler using Google Map's API
 	 * @param  {Array} args List of arguments to be passed to State
@@ -47,7 +48,7 @@ class GoogleMapsSearch extends State {
 				this._autocomplete,
 				'place_changed',
 				this._handlePlaceChanged
-			),
+			)
 		];
 	}
 
@@ -70,9 +71,9 @@ class GoogleMapsSearch extends State {
 						address: place.formatted_address,
 						location: {
 							lat: geolocation.lat(),
-							lng: geolocation.lng(),
-						},
-					},
+							lng: geolocation.lng()
+						}
+					}
 				}
 			);
 		}
@@ -86,12 +87,13 @@ class GoogleMapsSearch extends State {
  * @type {!Object}
  */
 GoogleMapsSearch.STATE = {
+
 	/**
 	 * Input element that will be used for searching addresses.
 	 * @review
 	 * @type {HTMLInputElement}
 	 */
-	inputNode: Config.validator(isInputNode).value(null),
+	inputNode: Config.validator(isInputNode).value(null)
 };
 
 export default GoogleMapsSearch;

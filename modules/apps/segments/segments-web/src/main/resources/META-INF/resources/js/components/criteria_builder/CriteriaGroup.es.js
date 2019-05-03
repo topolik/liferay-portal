@@ -1,13 +1,13 @@
-import React, {Component, Fragment} from 'react';
-import {PropTypes} from 'prop-types';
-import CriteriaRow from './CriteriaRow.es';
 import ClayIcon from '../shared/ClayIcon.es';
-import {CONJUNCTIONS} from '../../utils/constants.es';
-import {DragSource as dragSource} from 'react-dnd';
-import {DragTypes} from '../../utils/drag-types.es';
+import Conjunction from './Conjunction.es';
+import CriteriaRow from './CriteriaRow.es';
 import DropZone from './DropZone.es';
 import EmptyDropZone from './EmptyDropZone.es';
 import getCN from 'classnames';
+import React, {Component, Fragment} from 'react';
+import {CONJUNCTIONS} from '../../utils/constants.es';
+import {DragSource as dragSource} from 'react-dnd';
+import {DragTypes} from '../../utils/drag-types.es';
 import {
 	generateGroupId,
 	getChildGroupIds,
@@ -15,7 +15,7 @@ import {
 	insertAtIndex,
 	replaceAtIndex
 } from '../../utils/utils.es';
-import Conjunction from './Conjunction.es';
+import {PropTypes} from 'prop-types';
 
 /**
  * Passes the required values to the drop target.
@@ -59,6 +59,7 @@ class CriteriaGroup extends Component {
 		criteria: PropTypes.object,
 		dragging: PropTypes.bool,
 		editing: PropTypes.bool,
+		emptyContributors: PropTypes.bool,
 		entityName: PropTypes.string,
 		groupId: PropTypes.string,
 		index: PropTypes.number,
@@ -318,6 +319,7 @@ class CriteriaGroup extends Component {
 			criteria,
 			dragging,
 			editing,
+			emptyContributors,
 			groupId,
 			onMove,
 			propertyKey,
@@ -325,13 +327,16 @@ class CriteriaGroup extends Component {
 		} = this.props;
 
 		const classes = getCN(
-			'criteria-group-root',
+			{
+				'criteria-group-root': criteria
+			},
 			`criteria-group-item${root ? '-root' : ''}`,
 			`color--${propertyKey}`,
 			{
 				'dnd-drag': dragging
 			}
 		);
+		const singleRow = criteria && criteria.items && criteria.items.length === 1;
 
 		return connectDragPreview(
 			<div
@@ -339,6 +344,7 @@ class CriteriaGroup extends Component {
 			>
 				{this._isCriteriaEmpty() ?
 					<EmptyDropZone
+						emptyContributors={emptyContributors}
 						onCriterionAdd={this._handleCriterionAdd}
 						propertyKey={propertyKey}
 					/> :
@@ -352,7 +358,7 @@ class CriteriaGroup extends Component {
 							propertyKey={propertyKey}
 						/>
 
-						{editing && !root && connectDragSource(
+						{editing && singleRow && !root && connectDragSource(
 							<div className="criteria-group-drag-icon drag-icon">
 								<ClayIcon iconName="drag" />
 							</div>

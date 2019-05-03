@@ -16,6 +16,7 @@ package com.liferay.site.memberships.web.internal.servlet.taglib.util;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.LiferayWindowState;
@@ -27,7 +28,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletURL;
@@ -61,7 +61,7 @@ public class UserActionDropdownItemsProvider {
 						_themeDisplay.getScopeGroupId(),
 						ActionKeys.ASSIGN_USER_ROLES)) {
 
-					add(_getAssignSiteRolesActionConsumer());
+					add(_getAssignSiteRolesActionUnsafeConsumer());
 				}
 
 				if (GroupPermissionUtil.contains(
@@ -74,13 +74,14 @@ public class UserActionDropdownItemsProvider {
 					!SiteMembershipPolicyUtil.isMembershipRequired(
 						_user.getUserId(), _themeDisplay.getScopeGroupId())) {
 
-					add(_getDeleteGroupUsersActionConsumer());
+					add(_getDeleteGroupUsersActionUnsafeConsumer());
 				}
 			}
 		};
 	}
 
-	private Consumer<DropdownItem> _getAssignSiteRolesActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getAssignSiteRolesActionUnsafeConsumer()
 		throws Exception {
 
 		PortletURL assignSiteRolesURL = _renderResponse.createRenderURL();
@@ -110,7 +111,9 @@ public class UserActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getDeleteGroupUsersActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getDeleteGroupUsersActionUnsafeConsumer() {
+
 		PortletURL deleteGroupUsersURL = _renderResponse.createActionURL();
 
 		deleteGroupUsersURL.setParameter(

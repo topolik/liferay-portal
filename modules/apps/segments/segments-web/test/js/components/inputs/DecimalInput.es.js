@@ -1,5 +1,5 @@
-import React from 'react';
 import DecimalInput from 'components/inputs/DecimalInput.es';
+import React from 'react';
 import {cleanup, fireEvent, render} from 'react-testing-library';
 import {testControlledInput} from 'test/utils';
 

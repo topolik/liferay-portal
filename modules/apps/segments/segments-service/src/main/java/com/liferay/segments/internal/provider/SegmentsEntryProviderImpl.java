@@ -21,6 +21,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.BaseModel;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.StringBundler;
@@ -39,7 +40,6 @@ import com.liferay.segments.service.SegmentsEntryRelLocalService;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Stream;
 
 import org.osgi.framework.BundleContext;
@@ -100,7 +100,7 @@ public class SegmentsEntryProviderImpl implements SegmentsEntryProvider {
 		}
 
 		List<BaseModel<?>> results = oDataRetriever.getResults(
-			segmentsEntry.getCompanyId(), filterString, Locale.getDefault(),
+			segmentsEntry.getCompanyId(), filterString, LocaleUtil.getDefault(),
 			start, end);
 
 		Stream<BaseModel<?>> stream = results.stream();
@@ -137,21 +137,25 @@ public class SegmentsEntryProviderImpl implements SegmentsEntryProvider {
 		}
 
 		return oDataRetriever.getResultsCount(
-			segmentsEntry.getCompanyId(), filterString, Locale.getDefault());
-	}
-
-	@Override
-	public long[] getSegmentsEntryIds(String className, long classPK) {
-		return getSegmentsEntryIds(className, classPK, null);
+			segmentsEntry.getCompanyId(), filterString,
+			LocaleUtil.getDefault());
 	}
 
 	@Override
 	public long[] getSegmentsEntryIds(
-		String className, long classPK, Context context) {
+		long groupId, String className, long classPK) {
+
+		return getSegmentsEntryIds(groupId, className, classPK, null);
+	}
+
+	@Override
+	public long[] getSegmentsEntryIds(
+		long groupId, String className, long classPK, Context context) {
 
 		List<SegmentsEntry> segmentsEntries =
 			_segmentsEntryLocalService.getSegmentsEntries(
-				true, className, QueryUtil.ALL_POS, QueryUtil.ALL_POS, null);
+				groupId, true, className, QueryUtil.ALL_POS, QueryUtil.ALL_POS,
+				null);
 
 		if (segmentsEntries.isEmpty()) {
 			return new long[0];
@@ -164,14 +168,6 @@ public class SegmentsEntryProviderImpl implements SegmentsEntryProvider {
 				className, classPK, context, segmentsEntry)
 		).sorted(
 			(segmentsEntry1, segmentsEntry2) -> {
-				if (segmentsEntry1.isDefaultSegment()) {
-					return 1;
-				}
-
-				if (segmentsEntry2.isDefaultSegment()) {
-					return -1;
-				}
-
 				Date modifiedDate = segmentsEntry2.getModifiedDate();
 
 				return modifiedDate.compareTo(segmentsEntry1.getModifiedDate());
@@ -229,10 +225,6 @@ public class SegmentsEntryProviderImpl implements SegmentsEntryProvider {
 	private boolean _isMember(
 		String className, long classPK, Context context,
 		SegmentsEntry segmentsEntry) {
-
-		if (segmentsEntry.isDefaultSegment()) {
-			return true;
-		}
 
 		if (_segmentsEntryRelLocalService.hasSegmentsEntryRel(
 				segmentsEntry.getSegmentsEntryId(),
@@ -297,10 +289,11 @@ public class SegmentsEntryProviderImpl implements SegmentsEntryProvider {
 			boolean matchesModel = false;
 
 			try {
-				if (oDataRetriever.getResultsCount(
-						segmentsEntry.getCompanyId(), sb.toString(),
-						Locale.getDefault()) > 0) {
+				int count = oDataRetriever.getResultsCount(
+					segmentsEntry.getCompanyId(), sb.toString(),
+					LocaleUtil.getDefault());
 
+				if (count > 0) {
 					matchesModel = true;
 				}
 			}

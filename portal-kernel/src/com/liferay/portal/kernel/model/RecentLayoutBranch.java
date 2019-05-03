@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
 @ImplementationClassName("com.liferay.portal.model.impl.RecentLayoutBranchImpl")
 @ProviderType
 public interface RecentLayoutBranch
-	extends RecentLayoutBranchModel, PersistedModel {
+	extends PersistedModel, RecentLayoutBranchModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

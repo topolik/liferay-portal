@@ -250,7 +250,7 @@
 				{param spritemap: $spritemap /}
 			{/call}
 		{else}
-			<div class="sheet-text text-center text-strong empty-production-view">
+			<div class="empty-production-view sheet-text text-center text-strong">
 				{msg desc=""}no-change-list-has-been-published-yet{/msg}
 			</div>
 		{/if}
@@ -319,7 +319,7 @@
 							{foreach $changeListsDropdownMenuItem in $changeListsDropdownMenu}
 								<a class="dropdown-item"  data-collection-id="{$changeListsDropdownMenuItem.ctCollectionId}" href="#" onclick="{$_handleClickRecentCollections}">{$changeListsDropdownMenuItem.label}</a>
 							{/foreach}
-							<a class="dropdown-item dropdown-item-last" href="{$urlSelectChangeList}" data-qa-id="selectChangeListMenuItem">{$changeListsDropdownMenuTitle}</a>
+							<a class="dropdown-item dropdown-item-last" data-qa-id="selectChangeListMenuItem" href="{$urlSelectChangeList}">{$changeListsDropdownMenuTitle}</a>
 							<a class="dropdown-item" data-collection-id="{$productionCTCollectionId}" data-production="true" data-qa-id="selectProductionChangeListMenuItem" href="#" onclick="{$_handleClickRecentCollections}">{$changeListsProductionDropdownMenuTitle}</a>
 						</div>
 					</div>
@@ -341,7 +341,7 @@
 							{if $headerButton}
 								<div class="btn-group-item">
 									<div class="flex-col">
-										<button class="btn btn-default btn-primary" {if $headerButtonDisabled} disabled {/if} onclick="{$_handleClickPublish}" data-qa-id="headerButton" id="" type="button">
+										<button class="btn btn-default btn-primary" {if $headerButtonDisabled} disabled {/if} data-qa-id="headerButton" id="" onclick="{$_handleClickPublish}" type="button">
 											<span class="lfr-btn-label">{$headerButton.label}</span>
 										</button>
 									</div>
@@ -574,13 +574,13 @@
 	<div class="btn-group-item">
 		{if $collisionsLoading}
 			<span class="change-lists-helper float-right lfr-portal-tooltip"
-				  title="{msg desc=""}collision-detection{/msg}">
+					title="{msg desc=""}collision-detection{/msg}">
 				{call .smallLoading /}
 			</span>
 		{else}
 			{if $collisionsCount > 0}
 				<span class="change-lists-helper float-right lfr-portal-tooltip"
-					  title="{$collisionsTooltip}">
+						title="{$collisionsTooltip}">
 					{call ClayIcon.render}
 						{param spritemap: $spritemap /}
 						{param symbol: 'exclamation-circle' /}
@@ -588,7 +588,7 @@
 				</span>
 			{else}
 				<span class="change-lists-helper float-right lfr-portal-tooltip"
-					  title="{msg desc=""}no-collisions{/msg}">
+						title="{msg desc=""}no-collisions{/msg}">
 					{call ClayIcon.render}
 						{param spritemap: $spritemap /}
 						{param symbol: 'check-circle' /}

@@ -546,7 +546,8 @@ public abstract class EmptyLinesCheck extends BaseFileCheck {
 
 				String nextLine = matcher.group(1);
 
-				if (nextLine.startsWith("package ") ||
+				if (nextLine.startsWith("import ") ||
+					nextLine.startsWith("package ") ||
 					nextLine.startsWith("/*")) {
 
 					continue;
@@ -682,7 +683,7 @@ public abstract class EmptyLinesCheck extends BaseFileCheck {
 	private static final Pattern _missingEmptyLinePattern4 = Pattern.compile(
 		"[^{:/\n]\n\t*(for|if|try) [({]");
 	private static final Pattern _missingEmptyLinePattern5 = Pattern.compile(
-		"[\t\n]\\}\n[\t ]*(?!(/\\*|\\}|\\)|//|catch |else |finally |while ))" +
+		"[\t\n]\\}\n[\t ]*(?!(/?\\*|\\}|\\)|//|catch |else |finally |while ))" +
 			"\\S");
 	private static final Pattern _missingEmptyLinePattern6 = Pattern.compile(
 		"[^:\\{\\s]\n\t*(break|continue|return|throw)[ ;]");

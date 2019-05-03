@@ -12,61 +12,28 @@ definition {
 
 	tearDown {
 		var testPortalInstance = PropsUtil.get("test.portal.instance");
+
+		if ("${testPortalInstance}" == "true") {
+			PortalInstances.tearDownCP();
+		}
 	}
 
-	@description = "Enable and Disable Change List"
+	@description = "Change list cannot be enabled when staging is turned on"
 	@priority = "5"
-	test EnableDisableChangeList {
+	test CannotEnableChangeListWhenStagingIsTurnedOn {
 		ProductMenu.gotoPortlet(
-			category = "Change Lists",
-			panel = "Control Panel",
-			portlet = "Settings"
-		);
+			category = "Publishing",
+			panel = "Site Administration",
+			portlet = "Staging");
 
-		ChangeList.enableChangeList();
-
-		ProductMenu.gotoPortlet(
-			category = "Change Lists",
-			panel = "Control Panel",
-			portlet = "Settings"
-		);
-
-		ChangeList.disableChangeList();
-
-		AssertElementPresent(locator1 = "ChangeListSettings#DISABLED_SAVE_AND_GO_TO_OVERVIEW_BUTTON");
-	}
-
-	@description = "Enable Change List and go to Overview"
-	@priority = "5"
-	test EnableChangeListAndGoToOverview {
-		ProductMenu.gotoPortlet(
-			category = "Change Lists",
-			panel = "Control Panel",
-			portlet = "Settings"
-		);
-
-		ChangeList.enableChangeList(
-			gotoOverview = "true"
-		);
-
-		AssertTextEquals(
-			locator1 = "ChangeList#OVERVIEW_PAGE_TITLE",
-			value1 = "Select Change List"
-		);
-
-		ChangeList.viewNoStagingMenuitemsNotAvailable();
+		Staging.activateStagingCP(siteName = "Liferay");
 
 		ProductMenu.gotoPortlet(
 			category = "Change Lists",
 			panel = "Control Panel",
-			portlet = "Settings"
-		);
+			portlet = "Settings");
 
-		ChangeList.disableChangeList();
-
-		AssertElementPresent(locator1 = "ChangeListSettings#DISABLED_SAVE_AND_GO_TO_OVERVIEW_BUTTON");
-
-		AssertElementNotPresent(locator1 = "Icon#HEADER_VERTICAL_ELLIPSIS");
+		Alert.viewWarningSpecific(warningMessage = "Staging is enabled for at least one site in the current virtual instance. Staging and change lists cannot be used together.");
 	}
 
 	@description = "Check Supported Content Types"
@@ -75,17 +42,67 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Change Lists",
 			panel = "Control Panel",
-			portlet = "Settings"
-		);
+			portlet = "Settings");
 
 		for (var changeListContentType : list "Web Content") {
 			var key_changeListContentType = "${changeListContentType}";
 
 			AssertHTMLSourceTextPresent(
 				locator1 = "ChangeListSettings#SUPPORTED_CONTENT_TYPES",
-				value1 = "${changeListContentType}"
-			);
+				value1 = "${changeListContentType}");
 		}
 
+	}
+
+	@description = "Enable Change List and go to Overview"
+	@priority = "5"
+	test EnableChangeListAndGoToOverview {
+		ProductMenu.gotoPortlet(
+			category = "Change Lists",
+			panel = "Control Panel",
+			portlet = "Settings");
+
+		ChangeList.enableChangeList(gotoOverview = "true");
+
+		AssertTextEquals(
+			locator1 = "ChangeList#OVERVIEW_PAGE_TITLE",
+			value1 = "Select Change List");
+
+		AssertElementPresent(
+			locator1 = "ChangeList#PRODUCTION_CARD_TITLE",
+			value1 = "Work on Production");
+
+		ChangeList.viewNoStagingMenuitemsNotAvailable();
+
+		ProductMenu.gotoPortlet(
+			category = "Change Lists",
+			panel = "Control Panel",
+			portlet = "Settings");
+
+		ChangeList.disableChangeList();
+
+		AssertElementPresent(locator1 = "ChangeListSettings#DISABLED_SAVE_AND_GO_TO_OVERVIEW_BUTTON");
+
+		AssertElementNotPresent(locator1 = "Icon#HEADER_VERTICAL_ELLIPSIS");
+	}
+
+	@description = "Enable and Disable Change List"
+	@priority = "5"
+	test EnableDisableChangeList {
+		ProductMenu.gotoPortlet(
+			category = "Change Lists",
+			panel = "Control Panel",
+			portlet = "Settings");
+
+		ChangeList.enableChangeList();
+
+		ProductMenu.gotoPortlet(
+			category = "Change Lists",
+			panel = "Control Panel",
+			portlet = "Settings");
+
+		ChangeList.disableChangeList();
+
+		AssertElementPresent(locator1 = "ChangeListSettings#DISABLED_SAVE_AND_GO_TO_OVERVIEW_BUTTON");
 	}
 }

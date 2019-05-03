@@ -17,7 +17,6 @@ package com.liferay.wiki.web.internal.display.context;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -74,26 +73,25 @@ public class WikiNodesManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData("action", "deleteNodes");
+					dropdownItem -> {
+						dropdownItem.putData("action", "deleteNodes");
 
-							if (_trashHelper.isTrashEnabled(
-									_themeDisplay.getScopeGroupId())) {
+						if (_trashHelper.isTrashEnabled(
+								_themeDisplay.getScopeGroupId())) {
 
-								dropdownItem.setIcon("trash");
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										_request, "move-to-recycle-bin"));
-							}
-							else {
-								dropdownItem.setIcon("times");
-								dropdownItem.setLabel(
-									LanguageUtil.get(_request, "delete"));
-							}
+							dropdownItem.setIcon("trash");
+							dropdownItem.setLabel(
+								LanguageUtil.get(
+									_request, "move-to-recycle-bin"));
+						}
+						else {
+							dropdownItem.setIcon("times-circle");
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, "delete"));
+						}
 
-							dropdownItem.setQuickAction(true);
-						}));
+						dropdownItem.setQuickAction(true);
+					});
 			}
 		};
 	}
@@ -218,16 +216,15 @@ public class WikiNodesManagementToolbarDisplayContext {
 					String orderByCol = orderByColEntry.getKey();
 
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setActive(
-									orderByCol.equals(_getOrderByCol()));
-								dropdownItem.setHref(
-									_getPortletURL(), "orderByCol", orderByCol);
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										_request, orderByColEntry.getValue()));
-							}));
+						dropdownItem -> {
+							dropdownItem.setActive(
+								orderByCol.equals(_getOrderByCol()));
+							dropdownItem.setHref(
+								_getPortletURL(), "orderByCol", orderByCol);
+							dropdownItem.setLabel(
+								LanguageUtil.get(
+									_request, orderByColEntry.getValue()));
+						});
 				}
 			}
 		};

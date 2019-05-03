@@ -673,7 +673,7 @@ public abstract class BaseWebDriverImpl implements LiferaySelenium, WebDriver {
 			throw new Exception(
 				"Actual text \"" + text +
 					"\" does not contain expected text (case insensitive) \"" +
-						text + "\" at \"" + locator + "\"");
+						pattern + "\" at \"" + locator + "\"");
 		}
 	}
 

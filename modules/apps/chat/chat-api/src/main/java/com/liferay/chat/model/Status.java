@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.chat.model.impl.StatusImpl")
 @ProviderType
-public interface Status extends StatusModel, PersistedModel {
+public interface Status extends PersistedModel, StatusModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

@@ -34,7 +34,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.UserConstants;
-import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -71,7 +70,7 @@ import org.osgi.service.component.annotations.ServiceScope;
  */
 @Component(
 	property = {
-		"osgi.jaxrs.application.select=(osgi.jaxrs.name=change-tracking-application)",
+		"osgi.jaxrs.application.select=(osgi.jaxrs.name=Liferay.Change.Tracking.REST)",
 		"osgi.jaxrs.resource=true"
 	},
 	scope = ServiceScope.PROTOTYPE, service = CTProcessResource.class
@@ -153,13 +152,8 @@ public class CTProcessResource {
 			portalKernelBackgroundTaskOptional =
 				_fetchPortalKernelBackgroundTaskOptional(backgroundTask);
 
-		if (portalKernelBackgroundTaskOptional.isPresent()) {
-			return Optional.of(
-				backgroundTaskExecutor.getBackgroundTaskDisplay(
-					portalKernelBackgroundTaskOptional.get()));
-		}
-
-		return Optional.empty();
+		return portalKernelBackgroundTaskOptional.map(
+			backgroundTaskExecutor::getBackgroundTaskDisplay);
 	}
 
 	private CTProcessModel _getCTProcessModel(CTProcess ctProcess) {
@@ -337,9 +331,6 @@ public class CTProcessResource {
 
 	@Reference
 	private BackgroundTaskManager _backgroundTaskManager;
-
-	@Reference
-	private CompanyLocalService _companyLocalService;
 
 	@Reference
 	private CTCollectionLocalService _ctCollectionLocalService;

@@ -1,3 +1,10 @@
+/**
+ * The Restore Entry Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-restore-entry
+ */
+
 AUI.add(
 	'liferay-restore-entry',
 	function(A) {

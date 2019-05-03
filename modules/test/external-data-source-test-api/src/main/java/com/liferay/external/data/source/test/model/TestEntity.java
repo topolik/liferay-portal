@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 	"com.liferay.external.data.source.test.model.impl.TestEntityImpl"
 )
 @ProviderType
-public interface TestEntity extends TestEntityModel, PersistedModel {
+public interface TestEntity extends PersistedModel, TestEntityModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

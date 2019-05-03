@@ -49,9 +49,14 @@ renderResponse.setTitle(assetTagsDisplayContext.getAssetTitle());
 			AssetTagException ate = (AssetTagException)errorException;
 			%>
 
-			<c:if test="<%= ate.getType() == AssetTagException.INVALID_CHARACTER %>">
-				<liferay-ui:message arguments='<%= new String[] {"tag-name", StringUtil.merge(AssetHelper.INVALID_CHARACTERS, StringPool.SPACE)} %>' key="the-x-cannot-contain-the-following-invalid-characters-x" />
-			</c:if>
+			<c:choose>
+				<c:when test="<%= ate.getType() == AssetTagException.INVALID_CHARACTER %>">
+					<liferay-ui:message arguments='<%= new String[] {"tag-name", StringUtil.merge(AssetHelper.INVALID_CHARACTERS, StringPool.SPACE)} %>' key="the-x-cannot-contain-the-following-invalid-characters-x" />
+				</c:when>
+				<c:when test="<%= ate.getType() == AssetTagException.MAX_LENGTH %>">
+					<liferay-ui:message arguments='<%= new String[] {"tag-name", String.valueOf(ModelHintsUtil.getMaxLength(AssetTag.class.getName(), "name"))} %>' key="the-x-cannot-contain-more-than-x-characters" />
+				</c:when>
+			</c:choose>
 		</liferay-ui:error>
 
 		<liferay-ui:error exception="<%= AssetTagNameException.class %>" message="tag-name-cannot-be-an-empty-string" />

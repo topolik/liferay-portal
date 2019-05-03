@@ -16,6 +16,7 @@
 		<check name="BNDBundleCheck" />
 		<check name="BNDCapabilityCheck" />
 		<check name="BNDDefinitionKeysCheck" />
+		<check name="BNDDeprecatedAppBNDsCheck" />
 		<check name="BNDImportsCheck">
 			<property name="enabled" value="false" />
 		</check>
@@ -48,6 +49,7 @@
 	</source-processor>
 	<source-processor name="ConfigSourceProcessor">
 		<check name="ConfigDefinitionKeysCheck" />
+		<check name="WhitespaceCheck" />
 	</source-processor>
 	<source-processor name="CQLSourceProcessor">
 		<check name="CQLKeywordCheck" />
@@ -157,9 +159,9 @@
 		<check name="JavaExceptionCheck" />
 		<check name="JavaForLoopCheck" />
 		<check name="JavaHibernateSQLCheck" />
-		<check name="JavaIfStatementCheck" />
 		<check name="JavaIllegalImportsCheck">
 			<property name="enabled" value="false" />
+			<property name="enforceJavaUtilFunctionImports" value="false" />
 		</check>
 		<check name="JavaImportsCheck" />
 		<check name="JavaIndexableCheck" />
@@ -259,6 +261,9 @@
 		</check>
 		<check name="JavaFinderCacheCheck" />
 		<check name="JavaFinderImplCustomSQLCheck" />
+		<check name="JavaInternalPackageCheck">
+			<property name="enabled" value="false" />
+		</check>
 		<check name="JavaLogClassNameCheck" />
 		<check name="JavaLogLevelCheck" />
 		<check name="JavaLogParametersCheck">
@@ -288,6 +293,7 @@
 		<check name="JavaVerifyUpgradeConnectionCheck" />
 		<check name="JavaXMLSecurityCheck" />
 		<check name="LanguageKeysCheck" />
+		<check name="LocaleUtilCheck" />
 		<check name="ResourceBundleCheck" />
 		<check name="StringMethodsCheck" />
 		<check name="SubstringCheck" />
@@ -300,10 +306,10 @@
 		<check name="JSONLineBreakCheck">
 			<property name="enabled" value="false" />
 		</check>
-		<check name="JSONPropertyOrderCheck" />
-		<check name="JSONScriptsCheck">
+		<check name="JSONPackageJSONCheck">
 			<property name="enabled" value="false" />
 		</check>
+		<check name="JSONPropertyOrderCheck" />
 		<check name="JSONValidationCheck" />
 		<check name="JSONWhitespaceCheck">
 			<property name="allowLeadingSpaces" value="true" />
@@ -360,6 +366,7 @@
 		<check name="JSPLanguageKeysCheck" />
 		<check name="JSPSendRedirectCheck" />
 		<check name="JSPStringMethodsCheck" />
+		<check name="LocaleUtilCheck" />
 		<check name="ResourceBundleCheck" />
 		<check name="SubstringCheck" />
 	</source-processor>
@@ -394,7 +401,16 @@
 		<check name="WhitespaceCheck" />
 	</source-processor>
 	<source-processor name="PoshiSourceProcessor">
+		<check name="PoshiAnnotationsOrderCheck">
+			<property name="enabled" value="false" />
+		</check>
+		<check name="PoshiCommandsOrderCheck">
+			<property name="enabled" value="false" />
+		</check>
 		<check name="PoshiIndentationCheck" />
+		<check name="PoshiParametersOrderCheck">
+			<property name="enabled" value="false" />
+		</check>
 		<check name="PoshiStylingCheck" />
 		<check name="PoshiWhitespaceCheck" />
 	</source-processor>

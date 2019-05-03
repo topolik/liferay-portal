@@ -1,19 +1,17 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import ClayButton from '../shared/ClayButton.es';
-import ClaySpinner from '../shared/ClaySpinner.es';
-import debounce from 'lodash.debounce';
+import ClayToggle from '../shared/ClayToggle.es';
+import ContributorBuilder from '../criteria_builder/ContributorBuilder.es';
+import PropTypes from 'prop-types';
+import React, {Component} from 'react';
 import ThemeContext from '../../ThemeContext.es';
 import TitleEditor from '../title_editor/TitleEditor.es';
-import {getPluralMessage, sub} from '../../utils/utils.es';
+import {FieldArray, withFormik} from 'formik';
 import {
 	SOURCES,
 	SUPPORTED_CONJUNCTIONS,
 	SUPPORTED_OPERATORS,
 	SUPPORTED_PROPERTY_TYPES
 } from '../../utils/constants.es';
-import {FieldArray, withFormik} from 'formik';
-import ContributorBuilder from '../criteria_builder/ContributorBuilder.es';
 
 const DEFAULT_SEGMENT_NAME = Liferay.Language.get('unnamed-segment');
 
@@ -43,9 +41,10 @@ class SegmentEdit extends Component {
 		portletNamespace: PropTypes.string,
 		previewMembersURL: PropTypes.string,
 		propertyGroups: PropTypes.array,
-		redirect: PropTypes.string,
+		redirect: PropTypes.string.isRequired,
 		requestMembersCountURL: PropTypes.string,
 		setValues: PropTypes.func,
+		showInEditMode: PropTypes.bool,
 		source: PropTypes.string,
 		validateForm: PropTypes.func,
 		values: PropTypes.object
@@ -53,67 +52,30 @@ class SegmentEdit extends Component {
 
 	static defaultProps = {
 		contributors: [],
-		initialMembersCount: 0,
 		initialSegmentActive: true,
 		portletNamespace: ''
 	};
 
 	state = {
-		membersCount: this.props.initialMembersCount,
-		membersCountLoading: false
-	};
-
-	constructor(props) {
-		super(props);
-
-		this._debouncedFetchMembersCount = debounce(
-			this._fetchMembersCount,
-			500
-		);
-	}
-
-	_fetchMembersCount = () => {
-		const formElement = document.getElementById(this.props.formId);
-
-		const formData = new FormData(formElement);
-
-		fetch(
-			this.props.requestMembersCountURL,
-			{
-				body: formData,
-				method: 'POST'
-			}
-		).then(
-			response => response.json()
-		).then(
-			membersCount => {
-				this.setState(
-					{
-						membersCount,
-						membersCountLoading: false
-					}
-				);
-			}
-		).catch(
-			() => {
-				this.setState({membersCountLoading: false});
-
-				Liferay.Util.openToast(
-					{
-						message: Liferay.Language.get('an-unexpected-error-occurred'),
-						title: Liferay.Language.get('error'),
-						type: 'danger'
-					}
-				);
-			}
-		);
+		changesUnsaved: false,
+		editing: this.props.showInEditMode
 	};
 
 	_handleQueryChange = () => {
-		this.setState({membersCountLoading: true});
-
-		this._debouncedFetchMembersCount();
+		this.setState(
+			{
+				changesUnsaved: true
+			},
+		);
 	};
+
+	_handleCriteriaEdit = () => {
+		this.setState(
+			{
+				editing: !this.state.editing
+			}
+		);
+	}
 
 	_handleSegmentNameBlur = event => {
 		const {
@@ -144,34 +106,32 @@ class SegmentEdit extends Component {
 	);
 
 	_renderContributors = () => {
-		const {contributors, propertyGroups} = this.props;
+		const {contributors, formId, initialMembersCount, previewMembersURL, propertyGroups, requestMembersCountURL, values} = this.props;
+
+		const {editing} = this.state;
+
+		const emptyContributors = this._isQueryEmpty();
 
 		return (
 			(propertyGroups && contributors) ?
 				<ContributorBuilder
+					editing={editing}
+					emptyContributors={emptyContributors}
+					formId={formId}
 					initialContributors={contributors}
+					membersCount={initialMembersCount}
 					onQueryChange={this._handleQueryChange}
+					previewMembersURL={previewMembersURL}
 					propertyGroups={propertyGroups}
+					requestMembersCountURL={requestMembersCountURL}
 					supportedConjunctions={SUPPORTED_CONJUNCTIONS}
 					supportedOperators={SUPPORTED_OPERATORS}
 					supportedPropertyTypes={SUPPORTED_PROPERTY_TYPES}
+					values={values}
 				/> :
 				null
 		);
 	};
-
-	_handlePreviewClick = url => () => {
-		Liferay.Util.openWindow(
-			{
-				dialog: {
-					bodyContent: `<iframe frameborder="0" width="100%" height="100%" src="${url}"></iframe>`,
-					destroyOnHide: true
-				},
-				id: 'segment-members-dialog',
-				title: sub(Liferay.Language.get('x-members'), [this.props.values.name])
-			}
-		);
-	}
 
 	/**
 	 * Validates fields with validation and prevents the default form submission
@@ -217,15 +177,18 @@ class SegmentEdit extends Component {
 			handleChange,
 			locale,
 			portletNamespace,
-			previewMembersURL,
 			redirect,
 			source,
 			values
 		} = this.props;
 
-		const {membersCount, membersCountLoading} = this.state;
+		const {changesUnsaved, editing} = this.state;
 
 		const {assetsPath} = this.context;
+
+		const disabledCancel = !editing;
+		const disabledSave = !editing || this._isQueryEmpty();
+		const editingToggleDisabled = changesUnsaved;
 
 		return (
 			<div className="segment-edit-page-root">
@@ -276,24 +239,15 @@ class SegmentEdit extends Component {
 						</div>
 
 						<div className="form-header-section-right">
-							<div className="btn-group mr-3">
-								<div className="btn-group-item">
-									<ClaySpinner
-										className="mr-4"
-										loading={membersCountLoading}
-										size="sm"
-									/>
-
-									<ClayButton
-										className="members-count-button"
-										label={getPluralMessage(
-											Liferay.Language.get('x-member'),
-											Liferay.Language.get('x-members'),
-											membersCount
-										)}
-										onClick={this._handlePreviewClick(previewMembersURL)}
-										size="sm"
-										type="button"
+							<div className="btn-group">
+								<div className="btn-group-item mr-2">
+									<ClayToggle
+										checked={editing}
+										className="toggle-editing"
+										disabled={editingToggleDisabled}
+										iconOff="pencil"
+										iconOn="pencil"
+										onChange={this._handleCriteriaEdit}
 									/>
 								</div>
 							</div>
@@ -301,6 +255,7 @@ class SegmentEdit extends Component {
 							<div className="btn-group">
 								<div className="btn-group-item">
 									<ClayButton
+										disabled={disabledCancel}
 										href={redirect}
 										label={Liferay.Language.get('cancel')}
 										size="sm"
@@ -309,7 +264,7 @@ class SegmentEdit extends Component {
 
 								<div className="btn-group-item">
 									<ClayButton
-										disabled={this._isQueryEmpty()}
+										disabled={disabledSave}
 										label={Liferay.Language.get('save')}
 										onClick={this._handleValidate}
 										size="sm"

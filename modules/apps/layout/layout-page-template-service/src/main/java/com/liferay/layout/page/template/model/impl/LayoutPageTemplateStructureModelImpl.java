@@ -76,8 +76,7 @@ public class LayoutPageTemplateStructureModelImpl
 		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT}, {"classPK", Types.BIGINT},
-		{"data_", Types.VARCHAR}
+		{"classNameId", Types.BIGINT}, {"classPK", Types.BIGINT}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
@@ -94,11 +93,10 @@ public class LayoutPageTemplateStructureModelImpl
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("classNameId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("classPK", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("data_", Types.VARCHAR);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table LayoutPageTemplateStructure (uuid_ VARCHAR(75) null,layoutPageTemplateStructureId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,data_ STRING null)";
+		"create table LayoutPageTemplateStructure (uuid_ VARCHAR(75) null,layoutPageTemplateStructureId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG)";
 
 	public static final String TABLE_SQL_DROP =
 		"drop table LayoutPageTemplateStructure";
@@ -314,12 +312,6 @@ public class LayoutPageTemplateStructureModelImpl
 			"classPK",
 			(BiConsumer<LayoutPageTemplateStructure, Long>)
 				LayoutPageTemplateStructure::setClassPK);
-		attributeGetterFunctions.put(
-			"data", LayoutPageTemplateStructure::getData);
-		attributeSetterBiConsumers.put(
-			"data",
-			(BiConsumer<LayoutPageTemplateStructure, String>)
-				LayoutPageTemplateStructure::setData);
 
 		_attributeGetterFunctions = Collections.unmodifiableMap(
 			attributeGetterFunctions);
@@ -540,21 +532,6 @@ public class LayoutPageTemplateStructureModelImpl
 	}
 
 	@Override
-	public String getData() {
-		if (_data == null) {
-			return "";
-		}
-		else {
-			return _data;
-		}
-	}
-
-	@Override
-	public void setData(String data) {
-		_data = data;
-	}
-
-	@Override
 	public StagedModelType getStagedModelType() {
 		return new StagedModelType(
 			PortalUtil.getClassNameId(
@@ -608,7 +585,6 @@ public class LayoutPageTemplateStructureModelImpl
 		layoutPageTemplateStructureImpl.setModifiedDate(getModifiedDate());
 		layoutPageTemplateStructureImpl.setClassNameId(getClassNameId());
 		layoutPageTemplateStructureImpl.setClassPK(getClassPK());
-		layoutPageTemplateStructureImpl.setData(getData());
 
 		layoutPageTemplateStructureImpl.resetOriginalValues();
 
@@ -758,14 +734,6 @@ public class LayoutPageTemplateStructureModelImpl
 
 		layoutPageTemplateStructureCacheModel.classPK = getClassPK();
 
-		layoutPageTemplateStructureCacheModel.data = getData();
-
-		String data = layoutPageTemplateStructureCacheModel.data;
-
-		if ((data != null) && (data.length() == 0)) {
-			layoutPageTemplateStructureCacheModel.data = null;
-		}
-
 		return layoutPageTemplateStructureCacheModel;
 	}
 
@@ -862,7 +830,6 @@ public class LayoutPageTemplateStructureModelImpl
 	private long _classPK;
 	private long _originalClassPK;
 	private boolean _setOriginalClassPK;
-	private String _data;
 	private long _columnBitmask;
 	private LayoutPageTemplateStructure _escapedModel;
 

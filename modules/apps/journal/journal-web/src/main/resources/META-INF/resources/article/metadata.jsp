@@ -24,7 +24,7 @@ JournalEditArticleDisplayContext journalEditArticleDisplayContext = new JournalE
 
 <liferay-ui:error-marker
 	key="<%= WebKeys.ERROR_SECTION %>"
-	value="categorization"
+	value="metadata"
 />
 
 <aui:model-context bean="<%= article %>" model="<%= JournalArticle.class %>" />
@@ -60,7 +60,7 @@ if (article != null) {
 DDMStructure ddmStructure = journalEditArticleDisplayContext.getDDMStructure();
 %>
 
-<div class="mb-3">
+<div class="pb-3">
 	<liferay-asset:asset-categories-selector
 		className="<%= JournalArticle.class.getName() %>"
 		classPK="<%= classPK %>"
@@ -69,7 +69,7 @@ DDMStructure ddmStructure = journalEditArticleDisplayContext.getDDMStructure();
 	/>
 </div>
 
-<div class="mb-3">
+<div class="pb-3">
 	<liferay-asset:asset-tags-selector
 		className="<%= JournalArticle.class.getName() %>"
 		classPK="<%= classPK %>"

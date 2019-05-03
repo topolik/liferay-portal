@@ -1,8 +1,8 @@
+import 'jest-dom/extend-expect';
 import React from 'react';
 import SegmentEdit from 'components/segment_edit/SegmentEdit.es';
-import {SOURCES} from 'utils/constants.es';
 import {cleanup, render} from 'react-testing-library';
-import 'jest-dom/extend-expect';
+import {SOURCES} from 'utils/constants.es';
 
 const SOURCE_ICON_TESTID = 'source-icon';
 
@@ -17,6 +17,7 @@ describe(
 				const {asFragment} = render(
 					<SegmentEdit
 						locale="en_US"
+						redirect="/test-url"
 					/>
 				);
 
@@ -32,6 +33,7 @@ describe(
 				const {getByTestId} = render(
 					<SegmentEdit
 						locale="en_US"
+						redirect="/test-url"
 						source={name}
 					/>
 				);
@@ -50,6 +52,7 @@ describe(
 				const {getByTestId} = render(
 					<SegmentEdit
 						locale="en_US"
+						redirect="/test-url"
 						source={name}
 					/>
 				);

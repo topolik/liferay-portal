@@ -46,6 +46,7 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -70,7 +71,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Consumer;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletURL;
@@ -347,18 +347,14 @@ public class DDLDisplayContext {
 	}
 
 	public String getOrderByCol() {
-		String orderByCol = ParamUtil.getString(
+		return ParamUtil.getString(
 			_ddlRequestHelper.getRenderRequest(), "orderByCol",
 			"modified-date");
-
-		return orderByCol;
 	}
 
 	public String getOrderByType() {
-		String orderByType = ParamUtil.getString(
+		return ParamUtil.getString(
 			_ddlRequestHelper.getRenderRequest(), "orderByType", "asc");
-
-		return orderByType;
 	}
 
 	public PortletURL getPortletURL() {
@@ -771,7 +767,9 @@ public class DDLDisplayContext {
 		return _ddlRequestHelper.getLocale();
 	}
 
-	protected Consumer<DropdownItem> getOrderByDropdownItem(String orderByCol) {
+	protected UnsafeConsumer<DropdownItem, Exception> getOrderByDropdownItem(
+		String orderByCol) {
+
 		return dropdownItem -> {
 			dropdownItem.setActive(orderByCol.equals(getOrderByCol()));
 			dropdownItem.setHref(getPortletURL(), "orderByCol", orderByCol);

@@ -74,7 +74,7 @@ if (Validator.isNotNull(keywords)) {
 		<liferay-ui:icon
 			data="<%= data %>"
 			icon="cards2"
-			linkCssClass='<%= displayStyle.equals("icon") ? "display-style active" : "display-style" %>'
+			linkCssClass='<%= displayStyle.equals("icon") ? "display-style" : "display-style active" %>'
 			markupView="lexicon"
 			url="javascript:;"
 		/>
@@ -86,7 +86,7 @@ if (Validator.isNotNull(keywords)) {
 		<liferay-ui:icon
 			data="<%= data %>"
 			icon="list"
-			linkCssClass='<%= displayStyle.equals("descriptive") ? "display-style active" : "display-style" %>'
+			linkCssClass='<%= displayStyle.equals("descriptive") ? "display-style" : "display-style active" %>'
 			markupView="lexicon"
 			url="javascript:;"
 		/>
@@ -96,14 +96,14 @@ if (Validator.isNotNull(keywords)) {
 <div class="add-content-button">
 
 	<%
-	PortletURL redirectURL = PortletURLFactoryUtil.create(request, portletDisplay.getId(), PortletRequest.RENDER_PHASE);
+	String redirectURL = PortalUtil.getLayoutFullURL(layout, themeDisplay);
 
-	redirectURL.setParameter("mvcPath", "/add_content_redirect.jsp");
-	redirectURL.setWindowState(LiferayWindowState.POP_UP);
+	redirectURL = HttpUtil.addParameter(redirectURL, "portletResource", portletDisplay.getId());
 	%>
 
 	<liferay-asset:asset-add-button
-		redirect="<%= redirectURL.toString() %>"
+		redirect="<%= redirectURL %>"
+		useDialog="<%= false %>"
 	/>
 </div>
 

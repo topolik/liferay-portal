@@ -17,7 +17,6 @@ package com.liferay.knowledge.base.web.internal.display.context;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.knowledge.base.constants.KBActionKeys;
 import com.liferay.knowledge.base.constants.KBFolderConstants;
 import com.liferay.knowledge.base.model.KBArticle;
@@ -465,18 +464,16 @@ public class KBAdminManagementToolbarDisplayContext {
 
 				for (String orderByCol : orderColumns) {
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setActive(
-									orderByCol.equals(_getOrderByCol()));
-								dropdownItem.setHref(
-									_getCurrentSortingURL(), "orderByCol",
-									orderByCol);
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										_request,
-										orderColumnsMap.get(orderByCol)));
-							}));
+						dropdownItem -> {
+							dropdownItem.setActive(
+								orderByCol.equals(_getOrderByCol()));
+							dropdownItem.setHref(
+								_getCurrentSortingURL(), "orderByCol",
+								orderByCol);
+							dropdownItem.setLabel(
+								LanguageUtil.get(
+									_request, orderColumnsMap.get(orderByCol)));
+						});
 				}
 			}
 		};

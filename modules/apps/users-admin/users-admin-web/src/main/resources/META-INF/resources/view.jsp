@@ -58,7 +58,7 @@ else {
 
 <liferay-ui:error exception="<%= CompanyMaxUsersException.class %>" message="unable-to-activate-user-because-that-would-exceed-the-maximum-number-of-users-allowed" />
 
-<c:if test="<%= !usersListView.equals(UserConstants.LIST_VIEW_TREE) %>">
+<c:if test="<%= !portletName.equals(UsersAdminPortletKeys.MY_ORGANIZATIONS) && !usersListView.equals(UserConstants.LIST_VIEW_TREE) %>">
 	<clay:navigation-bar
 		inverted="<%= true %>"
 		navigationItems="<%= userDisplayContext.getViewNavigationItems(portletName) %>"
@@ -112,21 +112,17 @@ else {
 		if (((cmd == '<%= Constants.DEACTIVATE %>') && confirm('<%= UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-deactivate-the-selected-users") %>')) || ((cmd == '<%= Constants.DELETE %>') && confirm('<%= UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-permanently-delete-the-selected-users") %>')) || (cmd == '<%= Constants.RESTORE %>')) {
 			var form = document.<portlet:namespace />fm;
 
-			var usersRedirect = Liferay.Util.getFormElement(form, 'usersRedirect');
-
-			if (usersRedirect) {
-				Liferay.Util.postForm(
-					form,
-					{
-						data: {
-							'<%= Constants.CMD %>': cmd,
-							deleteUserIds: Liferay.Util.listCheckedExcept(form, '<portlet:namespace />allRowIds', '<portlet:namespace />rowIdsUser'),
-							redirect: usersRedirect.value
-						},
-						url: '<portlet:actionURL name="/users_admin/edit_user" />'
-					}
-				);
-			}
+			Liferay.Util.postForm(
+				form,
+				{
+					data: {
+						deleteUserIds: Liferay.Util.listCheckedExcept(form, '<portlet:namespace />allRowIds', '<portlet:namespace />rowIdsUser'),
+						redirect: '<%= currentURL %>',
+						'<%= Constants.CMD %>': cmd
+					},
+					url: '<portlet:actionURL name="/users_admin/edit_user" />'
+				}
+			);
 		}
 	}
 
@@ -195,8 +191,8 @@ else {
 			form,
 			{
 				data: {
-					'<%= Constants.CMD %>': '<%= Constants.DELETE %>',
-					deleteOrganizationIds: organizationIds
+					deleteOrganizationIds: organizationIds,
+					'<%= Constants.CMD %>': '<%= Constants.DELETE %>'
 				},
 				url: '<portlet:actionURL name="/users_admin/edit_organization" />'
 			}
@@ -227,7 +223,7 @@ else {
 			function(response) {
 				callback(response);
 			}
-		)
+		);
 	}
 
 	function <portlet:namespace />showUsers(status) {

@@ -16,8 +16,11 @@ package com.liferay.source.formatter.checks;
 
 import com.liferay.petra.string.CharPool;
 import com.liferay.portal.tools.ToolsUtil;
+import com.liferay.source.formatter.checks.util.PoshiSourceUtil;
 
 import java.io.IOException;
+
+import java.util.regex.Pattern;
 
 /**
  * @author Alan Huang
@@ -37,6 +40,12 @@ public class PoshiStylingCheck extends BaseFileCheck {
 	private void _checkLineBreak(String fileName, String content) {
 		int x = -1;
 
+		int[] multiLineCommentsPositions =
+			PoshiSourceUtil.getMultiLinePositions(
+				content, _multiLineCommentsPattern);
+		int[] multiLineStringPositions = PoshiSourceUtil.getMultiLinePositions(
+			content, _multiLineStringPattern);
+
 		while (true) {
 			x = content.indexOf(CharPool.SEMICOLON, x + 1);
 
@@ -45,7 +54,11 @@ public class PoshiStylingCheck extends BaseFileCheck {
 			}
 
 			if ((content.charAt(x + 1) != CharPool.NEW_LINE) &&
-				!ToolsUtil.isInsideQuotes(content, x)) {
+				!ToolsUtil.isInsideQuotes(content, x) &&
+				!PoshiSourceUtil.isInsideMultiLines(
+					getLineNumber(content, x), multiLineCommentsPositions) &&
+				!PoshiSourceUtil.isInsideMultiLines(
+					getLineNumber(content, x), multiLineStringPositions)) {
 
 				addMessage(
 					fileName, "There should be a line break after ';'",
@@ -53,5 +66,10 @@ public class PoshiStylingCheck extends BaseFileCheck {
 			}
 		}
 	}
+
+	private static final Pattern _multiLineCommentsPattern = Pattern.compile(
+		"[ \t]/\\*.*?\\*/", Pattern.DOTALL);
+	private static final Pattern _multiLineStringPattern = Pattern.compile(
+		"'''.*?'''", Pattern.DOTALL);
 
 }

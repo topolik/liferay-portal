@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.subscription.model.impl.SubscriptionImpl")
 @ProviderType
-public interface Subscription extends SubscriptionModel, PersistedModel {
+public interface Subscription extends PersistedModel, SubscriptionModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

@@ -85,9 +85,9 @@ public class ViewUsersManagementToolbarDisplayContext {
 									"javascript:",
 									_renderResponse.getNamespace(),
 									"deleteUsers('", Constants.RESTORE, "');"));
-							dropdownItem.setIcon("icon-undo");
+							dropdownItem.setIcon("undo");
 							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "restore"));
+								LanguageUtil.get(_request, "activate"));
 							dropdownItem.setQuickAction(true);
 						});
 				}

@@ -17,11 +17,11 @@ package com.liferay.portal.security.auth;
 import com.liferay.portal.kernel.security.auth.FullNameGenerator;
 import com.liferay.portal.kernel.security.auth.FullNameGeneratorFactory;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.SyntheticBundleRule;
+import com.liferay.portal.test.rule.SyntheticBundleClassTestRule;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.ClassRule;
@@ -38,7 +38,8 @@ public class FullNameGeneratorFactoryTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			new SyntheticBundleRule("bundle.fullnamegeneratorfactory"));
+			new SyntheticBundleClassTestRule(
+				"bundle.fullnamegeneratorfactory"));
 
 	@Test
 	public void testGetFullName() {
@@ -58,12 +59,12 @@ public class FullNameGeneratorFactoryTest {
 		Assert.assertEquals(
 			"Jacques",
 			fullNameGenerator.getLocalizedFullName(
-				"James", "middle", "lastname", Locale.FRENCH, 1, 1));
+				"James", "middle", "lastname", LocaleUtil.FRENCH, 1, 1));
 
 		Assert.assertNotEquals(
 			"Jacques",
 			fullNameGenerator.getLocalizedFullName(
-				"Tom", "middle", "lastname", Locale.CHINESE, 1, 1));
+				"Tom", "middle", "lastname", LocaleUtil.CHINESE, 1, 1));
 	}
 
 	@Test

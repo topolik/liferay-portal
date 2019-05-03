@@ -18,6 +18,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebServiceMode;
 import com.liferay.portal.kernel.model.Portlet;
@@ -44,11 +45,11 @@ public class PortletServiceImpl extends PortletServiceBaseImpl {
 			PortletApp portletApp = portlet.getPortletApp();
 
 			if (portletApp.isWARFile()) {
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-				jsonObject.put("portlet_name", portlet.getPortletName());
-				jsonObject.put(
-					"servlet_context_name", portletApp.getServletContextName());
+				JSONObject jsonObject = JSONUtil.put(
+					"portlet_name", portlet.getPortletName()
+				).put(
+					"servlet_context_name", portletApp.getServletContextName()
+				);
 
 				jsonArray.put(jsonObject);
 			}

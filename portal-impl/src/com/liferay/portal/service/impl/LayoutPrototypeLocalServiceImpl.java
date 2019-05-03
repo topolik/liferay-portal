@@ -114,26 +114,6 @@ public class LayoutPrototypeLocalServiceImpl
 		return layoutPrototype;
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #addLayoutPrototype(long, long, Map, Map, boolean,
-	 *             ServiceContext)}
-	 */
-	@Deprecated
-	@Override
-	public LayoutPrototype addLayoutPrototype(
-			long userId, long companyId, Map<Locale, String> nameMap,
-			String description, boolean active, ServiceContext serviceContext)
-		throws PortalException {
-
-		Map<Locale, String> descriptionMap = new HashMap<>();
-
-		descriptionMap.put(LocaleUtil.getDefault(), description);
-
-		return addLayoutPrototype(
-			userId, companyId, nameMap, descriptionMap, active, serviceContext);
-	}
-
 	@Override
 	@SystemEvent(
 		action = SystemEventConstants.ACTION_SKIP,
@@ -146,9 +126,9 @@ public class LayoutPrototypeLocalServiceImpl
 		// Group
 
 		if (!CompanyThreadLocal.isDeleteInProcess() &&
-			(layoutPersistence.countByC_L(
-				layoutPrototype.getCompanyId(), layoutPrototype.getUuid()) >
-					0)) {
+			(layoutPersistence.countByC_L_Head(
+				layoutPrototype.getCompanyId(), layoutPrototype.getUuid(),
+				false) > 0)) {
 
 			throw new RequiredLayoutPrototypeException();
 		}
@@ -310,26 +290,6 @@ public class LayoutPrototypeLocalServiceImpl
 		layoutPersistence.update(layout);
 
 		return layoutPrototype;
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #updateLayoutPrototype(long, Map, Map, boolean,
-	 *             ServiceContext)}
-	 */
-	@Deprecated
-	@Override
-	public LayoutPrototype updateLayoutPrototype(
-			long layoutPrototypeId, Map<Locale, String> nameMap,
-			String description, boolean active, ServiceContext serviceContext)
-		throws PortalException {
-
-		Map<Locale, String> descriptionMap = new HashMap<>();
-
-		descriptionMap.put(LocaleUtil.getDefault(), description);
-
-		return updateLayoutPrototype(
-			layoutPrototypeId, nameMap, descriptionMap, active, null);
 	}
 
 }

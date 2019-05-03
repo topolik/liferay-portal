@@ -26,12 +26,15 @@ import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Miguel Pastor
+ *
+ * @deprecated As of Mueller (7.2.x), with no direct replacement
  */
 @Component(
 	immediate = true,
 	property = "verify.process.name=com.liferay.polls.service",
 	service = VerifyProcess.class
 )
+@Deprecated
 public class PollsServiceVerifyProcess extends VerifyProcess {
 
 	@Override

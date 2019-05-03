@@ -38,12 +38,19 @@ import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.InetAddressUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+
+import java.net.InetAddress;
+import java.net.URL;
+import java.net.URLConnection;
 
 import java.security.GeneralSecurityException;
 
@@ -263,19 +270,44 @@ public class DLOpenerGoogleDriveManagerImpl
 
 	private File _getContentFile(long userId, FileEntry fileEntry) {
 		try {
+			Credential credential = _getCredential(
+				fileEntry.getCompanyId(), userId);
+
 			Drive drive = new Drive.Builder(
-				_netHttpTransport, _jsonFactory,
-				_getCredential(fileEntry.getCompanyId(), userId)
+				_netHttpTransport, _jsonFactory, credential
 			).build();
 
 			Drive.Files driveFiles = drive.files();
 
-			Drive.Files.Export driveFilesExport = driveFiles.export(
-				_getGoogleDriveFileId(fileEntry), fileEntry.getMimeType());
+			Drive.Files.Get get = driveFiles.get(
+				_getGoogleDriveFileId(fileEntry));
 
-			try (InputStream is =
-					driveFilesExport.executeMediaAsInputStream()) {
+			get.setFields("exportLinks");
 
+			com.google.api.services.drive.model.File file = get.execute();
+
+			Map<String, String> exportLinks = file.getExportLinks();
+
+			URL url = new URL(exportLinks.get(fileEntry.getMimeType()));
+
+			if (!StringUtil.startsWith(url.getProtocol(), Http.HTTP)) {
+				throw new SecurityException(
+					"Only HTTP links are allowed: " + url);
+			}
+
+			if (InetAddressUtil.isLocalInetAddress(
+					InetAddress.getByName(url.getHost()))) {
+
+				throw new SecurityException(
+					"Local links are not allowed: " + url);
+			}
+
+			URLConnection urlConnection = url.openConnection();
+
+			urlConnection.setRequestProperty(
+				"Authorization", "Bearer " + credential.getAccessToken());
+
+			try (InputStream is = urlConnection.getInputStream()) {
 				return FileUtil.createTempFile(is);
 			}
 		}

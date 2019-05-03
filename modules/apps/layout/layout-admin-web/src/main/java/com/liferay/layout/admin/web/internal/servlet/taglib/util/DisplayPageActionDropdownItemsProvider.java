@@ -20,6 +20,7 @@ import com.liferay.layout.admin.web.internal.security.permission.resource.Layout
 import com.liferay.layout.page.template.constants.LayoutPageTemplateEntryTypeConstants;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryServiceUtil;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -38,7 +39,6 @@ import com.liferay.taglib.security.PermissionsURLTag;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletURL;
@@ -72,16 +72,16 @@ public class DisplayPageActionDropdownItemsProvider {
 						_themeDisplay.getPermissionChecker(),
 						_layoutPageTemplateEntry, ActionKeys.UPDATE)) {
 
-					add(_getEditDisplayPageActionConsumer());
-					add(_getConfigureDisplayPageActionConsumer());
-					add(_getRenameDisplayPageActionConsumer());
+					add(_getEditDisplayPageActionUnsafeConsumer());
+					add(_getConfigureDisplayPageActionUnsafeConsumer());
+					add(_getRenameDisplayPageActionUnsafeConsumer());
 				}
 
 				if (LayoutPageTemplateEntryPermission.contains(
 						_themeDisplay.getPermissionChecker(),
 						_layoutPageTemplateEntry, ActionKeys.PERMISSIONS)) {
 
-					add(_getPermissionsDisplayPageActionConsumer());
+					add(_getPermissionsDisplayPageActionUnsafeConsumer());
 				}
 
 				if (_layoutPageTemplateEntry.isApproved() &&
@@ -94,32 +94,41 @@ public class DisplayPageActionDropdownItemsProvider {
 						_themeDisplay.getPermissionChecker(),
 						_layoutPageTemplateEntry, ActionKeys.UPDATE)) {
 
-					add(_getMarkAsDefaultDisplayPageActionConsumer());
+					add(_getMarkAsDefaultDisplayPageActionUnsafeConsumer());
 				}
 
 				if (LayoutPageTemplateEntryPermission.contains(
 						_themeDisplay.getPermissionChecker(),
 						_layoutPageTemplateEntry, ActionKeys.DELETE)) {
 
-					add(_getDeleteLayoutPrototypeActionConsumer());
+					add(_getDeleteLayoutPrototypeActionUnsafeConsumer());
 				}
 			}
 		};
 	}
 
-	private Consumer<DropdownItem> _getConfigureDisplayPageActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getConfigureDisplayPageActionUnsafeConsumer() {
+
 		return dropdownItem -> {
+			Layout draftLayout = LayoutLocalServiceUtil.fetchLayout(
+				PortalUtil.getClassNameId(Layout.class),
+				_layoutPageTemplateEntry.getPlid());
+
 			dropdownItem.setHref(
 				_renderResponse.createRenderURL(), "mvcRenderCommandName",
 				"/layout/edit_layout", "redirect",
 				_themeDisplay.getURLCurrent(), "backURL",
 				_themeDisplay.getURLCurrent(), "selPlid",
-				_layoutPageTemplateEntry.getPlid());
+				draftLayout.getPlid());
+
 			dropdownItem.setLabel(LanguageUtil.get(_request, "configure"));
 		};
 	}
 
-	private Consumer<DropdownItem> _getDeleteLayoutPrototypeActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getDeleteLayoutPrototypeActionUnsafeConsumer() {
+
 		PortletURL deleteDisplayPageURL = _renderResponse.createActionURL();
 
 		deleteDisplayPageURL.setParameter(
@@ -141,7 +150,8 @@ public class DisplayPageActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getEditDisplayPageActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getEditDisplayPageActionUnsafeConsumer()
 		throws Exception {
 
 		if (Objects.equals(
@@ -159,8 +169,15 @@ public class DisplayPageActionDropdownItemsProvider {
 			Group layoutPrototypeGroup = layoutPrototype.getGroup();
 
 			return dropdownItem -> {
-				dropdownItem.setHref(
-					layoutPrototypeGroup.getDisplayURL(_themeDisplay, true));
+				String layoutFullURL = layoutPrototypeGroup.getDisplayURL(
+					_themeDisplay, true);
+
+				layoutFullURL = HttpUtil.setParameter(
+					layoutFullURL, "p_l_back_url",
+					_themeDisplay.getURLCurrent());
+
+				dropdownItem.setHref(layoutFullURL);
+
 				dropdownItem.setLabel(LanguageUtil.get(_request, "edit"));
 			};
 		}
@@ -168,19 +185,26 @@ public class DisplayPageActionDropdownItemsProvider {
 		Layout layout = LayoutLocalServiceUtil.fetchLayout(
 			_layoutPageTemplateEntry.getPlid());
 
-		String layoutFullURL = PortalUtil.getLayoutFullURL(
-			layout, _themeDisplay);
+		Layout draftLayout = LayoutLocalServiceUtil.fetchLayout(
+			PortalUtil.getClassNameId(Layout.class), layout.getPlid());
 
 		return dropdownItem -> {
-			dropdownItem.setHref(
-				HttpUtil.setParameter(
-					layoutFullURL, "p_l_mode", Constants.EDIT));
+			String layoutFullURL = PortalUtil.getLayoutFullURL(
+				draftLayout, _themeDisplay);
+
+			layoutFullURL = HttpUtil.setParameter(
+				layoutFullURL, "p_l_back_url", _themeDisplay.getURLCurrent());
+			layoutFullURL = HttpUtil.setParameter(
+				layoutFullURL, "p_l_mode", Constants.EDIT);
+
+			dropdownItem.setHref(layoutFullURL);
+
 			dropdownItem.setLabel(LanguageUtil.get(_request, "edit"));
 		};
 	}
 
-	private Consumer<DropdownItem>
-		_getMarkAsDefaultDisplayPageActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getMarkAsDefaultDisplayPageActionUnsafeConsumer() {
 
 		PortletURL markAsDefaultDisplayPageURL =
 			_renderResponse.createActionURL();
@@ -223,7 +247,7 @@ public class DisplayPageActionDropdownItemsProvider {
 				message = LanguageUtil.format(
 					_request,
 					"do-you-want-to-replace-x-for-x-as-the-default-display-" +
-						"page",
+						"page-template",
 					new String[] {
 						_layoutPageTemplateEntry.getName(),
 						defaultLayoutPageTemplateEntry.getName()
@@ -246,7 +270,8 @@ public class DisplayPageActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getPermissionsDisplayPageActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getPermissionsDisplayPageActionUnsafeConsumer()
 		throws Exception {
 
 		String permissionsDisplayPageURL = PermissionsURLTag.doTag(
@@ -264,7 +289,9 @@ public class DisplayPageActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getRenameDisplayPageActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getRenameDisplayPageActionUnsafeConsumer() {
+
 		PortletURL updateDisplayPageURL = _renderResponse.createActionURL();
 
 		updateDisplayPageURL.setParameter(

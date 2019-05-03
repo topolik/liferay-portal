@@ -1,43 +1,26 @@
-import {HIDE_SIDEBAR, TOGGLE_SIDEBAR} from '../actions/actions.es';
+import {UPDATE_SELECTED_SIDEBAR_PANEL_ID} from '../actions/actions.es';
 import {setIn} from '../utils/FragmentsEditorUpdateUtils.es';
 
 /**
- * @param {!object} state
- * @param {!string} actionType
+ * @param {object} state
+ * @param {object} action
+ * @param {string} action.type
+ * @param {string} [action.sidebarPanelId='']
  * @return {object}
  * @review
  */
-function hideFragmentsEditorSidebarReducer(state, actionType) {
+function updateSelectedSidebarPanelId(state, action) {
 	let nextState = state;
 
-	if (actionType === HIDE_SIDEBAR) {
-		nextState = setIn(nextState, ['fragmentsEditorSidebarVisible'], false);
-	}
-
-	return nextState;
-}
-
-/**
- * @param {!object} state
- * @param {!string} actionType
- * @return {object}
- * @review
- */
-function toggleFragmentsEditorSidebarReducer(state, actionType) {
-	let nextState = state;
-
-	if (actionType === TOGGLE_SIDEBAR) {
+	if (action.type === UPDATE_SELECTED_SIDEBAR_PANEL_ID) {
 		nextState = setIn(
 			nextState,
-			['fragmentsEditorSidebarVisible'],
-			!nextState.fragmentsEditorSidebarVisible
+			['selectedSidebarPanelId'],
+			action.sidebarPanelId || ''
 		);
 	}
 
 	return nextState;
 }
 
-export {
-	hideFragmentsEditorSidebarReducer,
-	toggleFragmentsEditorSidebarReducer
-};
+export {updateSelectedSidebarPanelId};

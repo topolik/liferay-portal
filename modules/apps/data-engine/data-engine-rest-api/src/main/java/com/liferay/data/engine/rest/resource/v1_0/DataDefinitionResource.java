@@ -15,6 +15,7 @@
 package com.liferay.data.engine.rest.resource.v1_0;
 
 import com.liferay.data.engine.rest.dto.v1_0.DataDefinition;
+import com.liferay.data.engine.rest.dto.v1_0.DataDefinitionPermission;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
@@ -32,21 +33,31 @@ import javax.annotation.Generated;
 @Generated("")
 public interface DataDefinitionResource {
 
-	public Page<DataDefinition> getContentSpaceDataDefinitionsPage(
-			Long contentSpaceId, String keywords, Pagination pagination)
-		throws Exception;
-
-	public DataDefinition postContentSpaceDataDefinition(
-			Long contentSpaceId, DataDefinition dataDefinition)
-		throws Exception;
-
-	public boolean deleteDataDefinition(Long dataDefinitionId) throws Exception;
+	public void deleteDataDefinition(Long dataDefinitionId) throws Exception;
 
 	public DataDefinition getDataDefinition(Long dataDefinitionId)
 		throws Exception;
 
 	public DataDefinition putDataDefinition(
 			Long dataDefinitionId, DataDefinition dataDefinition)
+		throws Exception;
+
+	public void postDataDefinitionDataDefinitionPermission(
+			Long dataDefinitionId, String operation,
+			DataDefinitionPermission dataDefinitionPermission)
+		throws Exception;
+
+	public void postSiteDataDefinitionPermission(
+			Long siteId, String operation,
+			DataDefinitionPermission dataDefinitionPermission)
+		throws Exception;
+
+	public Page<DataDefinition> getSiteDataDefinitionsPage(
+			Long siteId, String keywords, Pagination pagination)
+		throws Exception;
+
+	public DataDefinition postSiteDataDefinition(
+			Long siteId, DataDefinition dataDefinition)
 		throws Exception;
 
 	public void setContextCompany(Company contextCompany);

@@ -18,6 +18,7 @@ import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.bulk.selection.BulkSelection;
 import com.liferay.bulk.selection.BulkSelectionFactory;
 import com.liferay.document.library.kernel.service.DLAppService;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.repository.RepositoryProvider;
@@ -27,7 +28,6 @@ import com.liferay.portal.kernel.repository.model.RepositoryModelOperation;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 
 import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * @author Adolfo Pérez
@@ -57,23 +57,23 @@ public class FolderFolderBulkSelection
 	}
 
 	@Override
+	public long getSize() throws PortalException {
+		return _dlAppService.getFoldersCount(_repositoryId, _folderId);
+	}
+
+	@Override
 	public BulkSelection<AssetEntry> toAssetEntryBulkSelection() {
 		throw new UnsupportedOperationException("Folder is not an asset");
 	}
 
 	@Override
-	protected int getEntriesCount() throws PortalException {
-		return _dlAppService.getFoldersCount(_repositoryId, _folderId);
-	}
-
-	@Override
-	protected RepositoryModelOperation getRepositoryModelOperation(
-		Consumer<? super Folder> action) {
+	protected <E extends PortalException> RepositoryModelOperation
+		getRepositoryModelOperation(UnsafeConsumer<? super Folder, E> action) {
 
 		return new BaseRepositoryModelOperation() {
 
 			@Override
-			public void execute(Folder folder) {
+			public void execute(Folder folder) throws E {
 				action.accept(folder);
 			}
 

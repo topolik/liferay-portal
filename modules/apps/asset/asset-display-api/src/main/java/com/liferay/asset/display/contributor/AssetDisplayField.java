@@ -15,14 +15,17 @@
 package com.liferay.asset.display.contributor;
 
 import com.liferay.petra.lang.HashUtil;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 
 import java.util.Objects;
 
 /**
  * @author Jürgen Kappler
+ * @deprecated As of Judson (7.1.x), replaced by {@link
+ *             com.liferay.info.display.contributor.InfoDisplayField}
  */
+@Deprecated
 public class AssetDisplayField {
 
 	public AssetDisplayField(String key, String label) {
@@ -79,13 +82,13 @@ public class AssetDisplayField {
 	}
 
 	public JSONObject toJSONObject() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("key", getKey());
-		jsonObject.put("label", getLabel());
-		jsonObject.put("type", getType());
-
-		return jsonObject;
+		return JSONUtil.put(
+			"key", getKey()
+		).put(
+			"label", getLabel()
+		).put(
+			"type", getType()
+		);
 	}
 
 	private static final String _TYPE = "text";

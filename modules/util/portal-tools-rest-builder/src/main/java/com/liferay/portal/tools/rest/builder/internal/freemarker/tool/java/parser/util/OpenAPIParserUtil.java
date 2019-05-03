@@ -15,6 +15,7 @@
 package com.liferay.portal.tools.rest.builder.internal.freemarker.tool.java.parser.util;
 
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.TextFormatter;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.tools.rest.builder.internal.freemarker.tool.java.JavaMethodParameter;
 import com.liferay.portal.tools.rest.builder.internal.freemarker.tool.java.JavaMethodSignature;
@@ -40,6 +41,36 @@ import java.util.TreeSet;
  * @author Peter Shin
  */
 public class OpenAPIParserUtil {
+
+	public static Map<String, Schema> getAllOfPropertySchemas(Schema schema) {
+		List<Schema> allOfSchemas = schema.getAllOfSchemas();
+
+		if (allOfSchemas.size() == 1) {
+			return schema.getPropertySchemas();
+		}
+
+		Map<String, Schema> propertySchemas = new HashMap<>();
+
+		for (Schema allOfSchema : allOfSchemas) {
+			if (allOfSchema.getReference() != null) {
+				Schema itemSchema = new Schema();
+
+				String reference = allOfSchema.getReference();
+
+				itemSchema.setReference(reference);
+
+				propertySchemas.put(
+					StringUtil.lowerCaseFirstLetter(
+						getReferenceName(reference)),
+					itemSchema);
+			}
+			else {
+				propertySchemas.putAll(allOfSchema.getPropertySchemas());
+			}
+		}
+
+		return propertySchemas;
+	}
 
 	public static String getArguments(
 		List<JavaMethodParameter> javaMethodParameters) {
@@ -137,9 +168,6 @@ public class OpenAPIParserUtil {
 				javaDataType = javaDataTypeMap.get(
 					getReferenceName(items.getReference()));
 			}
-			else if (Objects.equals(items.getType(), "object")) {
-				javaDataType = Object.class.getName();
-			}
 
 			return getArrayClassName(javaDataType);
 		}
@@ -162,6 +190,14 @@ public class OpenAPIParserUtil {
 
 				if (_openAPIDataTypeMap.containsKey(key)) {
 					javaDataType = Map.class.getName();
+				}
+			}
+			else if (schema.getItems() != null) {
+				Items items = schema.getItems();
+
+				if (items.getReference() != null) {
+					javaDataType = javaDataTypeMap.get(
+						getReferenceName(items.getReference()));
 				}
 			}
 
@@ -267,6 +303,10 @@ public class OpenAPIParserUtil {
 		return schemaNames;
 	}
 
+	public static String getSchemaVarName(String schemaName) {
+		return TextFormatter.format(schemaName, TextFormatter.I);
+	}
+
 	public static boolean hasHTTPMethod(
 		JavaMethodSignature javaMethodSignature, String... httpMethods) {
 
@@ -281,40 +321,9 @@ public class OpenAPIParserUtil {
 		return false;
 	}
 
-	public static boolean isSchemaParameter(
-		JavaMethodParameter javaMethodParameter, OpenAPIYAML openAPIYAML) {
-
-		String simpleClassName = javaMethodParameter.getParameterType();
-
-		if (simpleClassName.startsWith("[")) {
-			simpleClassName = getElementClassName(simpleClassName);
-		}
-
-		if (simpleClassName.endsWith(">")) {
-			simpleClassName = simpleClassName.substring(
-				0, simpleClassName.indexOf("<"));
-		}
-
-		if (simpleClassName.indexOf('.') != -1) {
-			simpleClassName = simpleClassName.substring(
-				simpleClassName.lastIndexOf(".") + 1);
-		}
-
-		Map<String, Schema> schemas = OpenAPIUtil.getAllSchemas(openAPIYAML);
-
-		if (schemas.containsKey(simpleClassName)) {
-			return true;
-		}
-
-		return false;
-	}
-
 	private static final Map<Map.Entry<String, String>, String>
 		_openAPIDataTypeMap = new HashMap<Map.Entry<String, String>, String>() {
 			{
-
-				// https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.1.md#dataTypes
-
 				put(
 					new AbstractMap.SimpleImmutableEntry<>("boolean", null),
 					Boolean.class.getName());
@@ -330,6 +339,9 @@ public class OpenAPIParserUtil {
 				put(
 					new AbstractMap.SimpleImmutableEntry<>("number", "double"),
 					Double.class.getName());
+				put(
+					new AbstractMap.SimpleImmutableEntry<>("object", null),
+					Object.class.getName());
 				put(
 					new AbstractMap.SimpleImmutableEntry<>("string", null),
 					String.class.getName());

@@ -68,7 +68,8 @@ public class MultipartBody {
 	}
 
 	public <T> Optional<T> getValueAsInstanceOptional(
-		String key, Class<T> clazz) {
+			String key, Class<T> clazz)
+		throws IOException {
 
 		String valueAsString = getValueAsString(key);
 
@@ -76,16 +77,15 @@ public class MultipartBody {
 			return Optional.empty();
 		}
 
-		try {
-			return Optional.ofNullable(_parseValue(valueAsString, clazz));
-		}
-		catch (IOException ioe) {
-			return Optional.empty();
-		}
+		return Optional.ofNullable(_parseValue(valueAsString, clazz));
 	}
 
 	public String getValueAsString(String key) {
 		return _values.get(key);
+	}
+
+	public Map<String, String> getValues() {
+		return _values;
 	}
 
 	public interface ObjectMapperProvider {

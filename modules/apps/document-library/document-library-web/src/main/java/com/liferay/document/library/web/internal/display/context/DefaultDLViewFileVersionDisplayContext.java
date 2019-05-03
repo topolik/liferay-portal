@@ -80,14 +80,14 @@ public class DefaultDLViewFileVersionDisplayContext
 			ResourceBundle resourceBundle, StorageEngine storageEngine,
 			DLTrashUtil dlTrashUtil,
 			DLPreviewRendererProvider dlPreviewRendererProvider,
-			VersioningStrategy versioningStrategy, DLURLHelper dlurlHelper)
+			VersioningStrategy versioningStrategy, DLURLHelper dlURLHelper)
 		throws PortalException {
 
 		this(
 			request, fileShortcut.getFileVersion(), fileShortcut,
 			dlMimeTypeDisplayContext, resourceBundle, storageEngine,
 			dlTrashUtil, dlPreviewRendererProvider, versioningStrategy,
-			dlurlHelper);
+			dlURLHelper);
 	}
 
 	public DefaultDLViewFileVersionDisplayContext(
@@ -97,12 +97,12 @@ public class DefaultDLViewFileVersionDisplayContext
 		ResourceBundle resourceBundle, StorageEngine storageEngine,
 		DLTrashUtil dlTrashUtil,
 		DLPreviewRendererProvider dlPreviewRendererProvider,
-		VersioningStrategy versioningStrategy, DLURLHelper dlurlHelper) {
+		VersioningStrategy versioningStrategy, DLURLHelper dlURLHelper) {
 
 		this(
 			request, fileVersion, null, dlMimeTypeDisplayContext,
 			resourceBundle, storageEngine, dlTrashUtil,
-			dlPreviewRendererProvider, versioningStrategy, dlurlHelper);
+			dlPreviewRendererProvider, versioningStrategy, dlURLHelper);
 	}
 
 	@Override
@@ -176,6 +176,16 @@ public class DefaultDLViewFileVersionDisplayContext
 	}
 
 	@Override
+	public String getIconFileMimeType() {
+		if (_dlMimeTypeDisplayContext == null) {
+			return "document-default";
+		}
+
+		return _dlMimeTypeDisplayContext.getIconFileMimeType(
+			_fileVersion.getMimeType());
+	}
+
+	@Override
 	public Menu getMenu() throws PortalException {
 		Menu menu = new Menu();
 
@@ -200,13 +210,13 @@ public class DefaultDLViewFileVersionDisplayContext
 
 		_uiItemsBuilder.addEditToolbarItem(toolbarItems);
 
-		_uiItemsBuilder.addMoveToolbarItem(toolbarItems);
-
 		_uiItemsBuilder.addCheckoutToolbarItem(toolbarItems);
 
 		_uiItemsBuilder.addCancelCheckoutToolbarItem(toolbarItems);
 
 		_uiItemsBuilder.addCheckinToolbarItem(toolbarItems);
+
+		_uiItemsBuilder.addMoveToolbarItem(toolbarItems);
 
 		_uiItemsBuilder.addPermissionsToolbarItem(toolbarItems);
 
@@ -313,7 +323,7 @@ public class DefaultDLViewFileVersionDisplayContext
 		ResourceBundle resourceBundle, StorageEngine storageEngine,
 		DLTrashUtil dlTrashUtil,
 		DLPreviewRendererProvider dlPreviewRendererProvider,
-		VersioningStrategy versioningStrategy, DLURLHelper dlurlHelper) {
+		VersioningStrategy versioningStrategy, DLURLHelper dlURLHelper) {
 
 		try {
 			_fileVersion = fileVersion;
@@ -337,12 +347,12 @@ public class DefaultDLViewFileVersionDisplayContext
 			if (fileShortcut == null) {
 				_uiItemsBuilder = new UIItemsBuilder(
 					request, fileVersion, _resourceBundle, dlTrashUtil,
-					versioningStrategy, dlurlHelper);
+					versioningStrategy, dlURLHelper);
 			}
 			else {
 				_uiItemsBuilder = new UIItemsBuilder(
 					request, fileShortcut, _resourceBundle, dlTrashUtil,
-					versioningStrategy, dlurlHelper);
+					versioningStrategy, dlURLHelper);
 			}
 		}
 		catch (PortalException pe) {
@@ -369,25 +379,37 @@ public class DefaultDLViewFileVersionDisplayContext
 		if (isActionsVisible()) {
 			_uiItemsBuilder.addDownloadMenuItem(menuItems);
 
-			_uiItemsBuilder.addOpenInMsOfficeMenuItem(menuItems);
-
 			_uiItemsBuilder.addViewOriginalFileMenuItem(menuItems);
+
+			_uiItemsBuilder.addOpenInMsOfficeMenuItem(menuItems);
 
 			_uiItemsBuilder.addEditMenuItem(menuItems);
 
-			_uiItemsBuilder.addMoveMenuItem(menuItems);
-
 			_uiItemsBuilder.addCheckoutMenuItem(menuItems);
+
+			_uiItemsBuilder.addCancelCheckoutMenuItem(menuItems);
 
 			_uiItemsBuilder.addCheckinMenuItem(menuItems);
 
-			_uiItemsBuilder.addCancelCheckoutMenuItem(menuItems);
+			_uiItemsBuilder.addMoveMenuItem(menuItems);
+
+			MenuItem menuItem = null;
+
+			if (!menuItems.isEmpty()) {
+				menuItem = menuItems.get(menuItems.size() - 1);
+			}
 
 			_uiItemsBuilder.addPermissionsMenuItem(menuItems);
 
 			_uiItemsBuilder.addDeleteMenuItem(menuItems);
 
 			_uiItemsBuilder.addPublishMenuItem(menuItems, true);
+
+			if ((menuItem != null) &&
+				(menuItem != menuItems.get(menuItems.size() - 1))) {
+
+				menuItem.setSeparator(true);
+			}
 		}
 
 		return menuItems;

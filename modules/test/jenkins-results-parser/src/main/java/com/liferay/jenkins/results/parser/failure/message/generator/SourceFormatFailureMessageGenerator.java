@@ -37,14 +37,12 @@ public class SourceFormatFailureMessageGenerator
 
 		start = consoleText.lastIndexOf("\n", start);
 
-		int end = start + _CHARACTER_LIMIT;
+		int end = start + CHARS_CONSOLE_TEXT_SNIPPET_SIZE_MAX;
 
 		end = consoleText.lastIndexOf("\n", end);
 
 		return getConsoleTextSnippetElement(consoleText, false, start, end);
 	}
-
-	private static final int _CHARACTER_LIMIT = 2500;
 
 	private static final String _TOKEN_FORMATTING_ISSUES = "formatting issues:";
 

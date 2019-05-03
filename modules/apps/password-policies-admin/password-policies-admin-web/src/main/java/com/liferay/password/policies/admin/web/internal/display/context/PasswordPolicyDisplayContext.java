@@ -16,7 +16,6 @@ package com.liferay.password.policies.admin.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
@@ -99,45 +98,41 @@ public class PasswordPolicyDisplayContext {
 					_hasPermission(ActionKeys.UPDATE)) {
 
 					add(
-						SafeConsumer.ignore(
-							navigationItem -> {
-								navigationItem.setActive(
-									tabs1.equals("details"));
+						navigationItem -> {
+							navigationItem.setActive(tabs1.equals("details"));
 
-								PortletURL detailsURL = PortletURLUtil.clone(
-									portletURL, _renderResponse);
+							PortletURL detailsURL = PortletURLUtil.clone(
+								portletURL, _renderResponse);
 
-								detailsURL.setParameter(
-									"mvcPath", "/edit_password_policy.jsp");
-								detailsURL.setParameter("tabs1", "details");
+							detailsURL.setParameter(
+								"mvcPath", "/edit_password_policy.jsp");
+							detailsURL.setParameter("tabs1", "details");
 
-								navigationItem.setHref(detailsURL.toString());
+							navigationItem.setHref(detailsURL.toString());
 
-								navigationItem.setLabel(
-									LanguageUtil.get(_request, "details"));
-							}));
+							navigationItem.setLabel(
+								LanguageUtil.get(_request, "details"));
+						});
 				}
 
 				if (_hasPermission(ActionKeys.ASSIGN_MEMBERS)) {
 					add(
-						SafeConsumer.ignore(
-							navigationItem -> {
-								navigationItem.setActive(
-									tabs1.equals("assignees"));
+						navigationItem -> {
+							navigationItem.setActive(tabs1.equals("assignees"));
 
-								PortletURL assigneesURL = PortletURLUtil.clone(
-									portletURL, _renderResponse);
+							PortletURL assigneesURL = PortletURLUtil.clone(
+								portletURL, _renderResponse);
 
-								assigneesURL.setParameter(
-									"mvcPath",
-									"/edit_password_policy_assignments.jsp");
-								assigneesURL.setParameter("tabs1", "assignees");
+							assigneesURL.setParameter(
+								"mvcPath",
+								"/edit_password_policy_assignments.jsp");
+							assigneesURL.setParameter("tabs1", "assignees");
 
-								navigationItem.setHref(assigneesURL.toString());
+							navigationItem.setHref(assigneesURL.toString());
 
-								navigationItem.setLabel(
-									LanguageUtil.get(_request, "assignees"));
-							}));
+							navigationItem.setLabel(
+								LanguageUtil.get(_request, "assignees"));
+						});
 				}
 			}
 		};

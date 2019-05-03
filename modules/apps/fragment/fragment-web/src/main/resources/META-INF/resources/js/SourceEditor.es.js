@@ -15,6 +15,7 @@ class SourceEditor extends Component {
 	/**
 	 * Callback that propagates the <code>contentChanged</code> event when the
 	 * internal Ace Editor is modified.
+	 *
 	 * @param {!Event} event
 	 */
 	_handleContentChanged(event) {
@@ -30,17 +31,18 @@ class SourceEditor extends Component {
 
 /**
  * State definition.
+ *
  * @static
  * @type {!Object}
  */
 SourceEditor.STATE = {
 
 	/**
-	 * List of tags to support custom autocomplete in the HTML editor
+	 * List of tags for custom autocompletion in the HTML editor.
+	 *
 	 * @default []
 	 * @instance
 	 * @memberOf SourceEditor
-	 * @review
 	 * @type Array
 	 */
 	autocompleteTags: Config.arrayOf(
@@ -54,6 +56,7 @@ SourceEditor.STATE = {
 
 	/**
 	 * Initial content sent to the editor.
+	 *
 	 * @default undefined
 	 * @instance
 	 * @memberOf SourceEditor
@@ -63,6 +66,7 @@ SourceEditor.STATE = {
 
 	/**
 	 * Path of the available icons.
+	 *
 	 * @default undefined
 	 * @instance
 	 * @memberOf SourceEditor
@@ -72,6 +76,7 @@ SourceEditor.STATE = {
 
 	/**
 	 * Syntax used for the Ace Editor that is rendered on the interface.
+	 *
 	 * @default undefined
 	 * @instance
 	 * @memberOf SourceEditor

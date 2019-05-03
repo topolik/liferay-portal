@@ -52,6 +52,7 @@ public class OAuth2ScopeGrantWrapper
 		attributes.put("applicationName", getApplicationName());
 		attributes.put("bundleSymbolicName", getBundleSymbolicName());
 		attributes.put("scope", getScope());
+		attributes.put("scopeAliases", getScopeAliases());
 
 		return attributes;
 	}
@@ -94,6 +95,12 @@ public class OAuth2ScopeGrantWrapper
 
 		if (scope != null) {
 			setScope(scope);
+		}
+
+		String scopeAliases = (String)attributes.get("scopeAliases");
+
+		if (scopeAliases != null) {
+			setScopeAliases(scopeAliases);
 		}
 	}
 
@@ -165,6 +172,21 @@ public class OAuth2ScopeGrantWrapper
 	@Override
 	public String getScope() {
 		return model.getScope();
+	}
+
+	/**
+	 * Returns the scope aliases of this o auth2 scope grant.
+	 *
+	 * @return the scope aliases of this o auth2 scope grant
+	 */
+	@Override
+	public String getScopeAliases() {
+		return model.getScopeAliases();
+	}
+
+	@Override
+	public java.util.List<String> getScopeAliasesList() {
+		return model.getScopeAliasesList();
 	}
 
 	@Override
@@ -243,6 +265,21 @@ public class OAuth2ScopeGrantWrapper
 	@Override
 	public void setScope(String scope) {
 		model.setScope(scope);
+	}
+
+	/**
+	 * Sets the scope aliases of this o auth2 scope grant.
+	 *
+	 * @param scopeAliases the scope aliases of this o auth2 scope grant
+	 */
+	@Override
+	public void setScopeAliases(String scopeAliases) {
+		model.setScopeAliases(scopeAliases);
+	}
+
+	@Override
+	public void setScopeAliasesList(java.util.List<String> scopeAliasesList) {
+		model.setScopeAliasesList(scopeAliasesList);
 	}
 
 	@Override

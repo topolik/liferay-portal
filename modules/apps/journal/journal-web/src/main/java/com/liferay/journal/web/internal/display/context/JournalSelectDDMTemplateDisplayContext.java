@@ -72,8 +72,26 @@ public class JournalSelectDDMTemplateDisplayContext {
 		return _ddmTemplateId;
 	}
 
+	public String getDisplayStyle() {
+		if (_displayStyle != null) {
+			return _displayStyle;
+		}
+
+		_displayStyle = ParamUtil.getString(_request, "displayStyle", "icon");
+
+		return _displayStyle;
+	}
+
 	public String getEventName() {
-		return _renderResponse.getNamespace() + "selectDDMTemplate";
+		if (_eventName != null) {
+			return _eventName;
+		}
+
+		_eventName = ParamUtil.getString(
+			_request, "eventName",
+			_renderResponse.getNamespace() + "selectDDMTemplate");
+
+		return _eventName;
 	}
 
 	public String getOrderByCol() {
@@ -124,17 +142,29 @@ public class JournalSelectDDMTemplateDisplayContext {
 		templateSearch.setOrderByComparator(orderByComparator);
 		templateSearch.setOrderByType(orderByType);
 
-		long[] groupIds = PortalUtil.getCurrentAndAncestorSiteGroupIds(
-			themeDisplay.getScopeGroupId());
+		List<DDMTemplate> results = null;
 
-		List<DDMTemplate> results = DDMTemplateServiceUtil.search(
-			themeDisplay.getCompanyId(), groupIds,
-			new long[] {PortalUtil.getClassNameId(DDMStructure.class)},
-			new long[] {getDDMStructureId()},
-			PortalUtil.getClassNameId(JournalArticle.class.getName()),
-			_getKeywords(), StringPool.BLANK, StringPool.BLANK,
-			WorkflowConstants.STATUS_ANY, templateSearch.getStart(),
-			templateSearch.getEnd(), templateSearch.getOrderByComparator());
+		if (Validator.isNotNull(_getKeywords())) {
+			long[] groupIds = PortalUtil.getCurrentAndAncestorSiteGroupIds(
+				themeDisplay.getScopeGroupId());
+
+			results = DDMTemplateServiceUtil.search(
+				themeDisplay.getCompanyId(), groupIds,
+				new long[] {PortalUtil.getClassNameId(DDMStructure.class)},
+				new long[] {getDDMStructureId()},
+				PortalUtil.getClassNameId(JournalArticle.class.getName()),
+				_getKeywords(), StringPool.BLANK, StringPool.BLANK,
+				WorkflowConstants.STATUS_ANY, templateSearch.getStart(),
+				templateSearch.getEnd(), templateSearch.getOrderByComparator());
+		}
+		else {
+			results = DDMTemplateServiceUtil.getTemplates(
+				themeDisplay.getCompanyId(), themeDisplay.getScopeGroupId(),
+				PortalUtil.getClassNameId(DDMStructure.class),
+				getDDMStructureId(),
+				PortalUtil.getClassNameId(JournalArticle.class.getName()), true,
+				WorkflowConstants.STATUS_ANY);
+		}
 
 		templateSearch.setResults(results);
 
@@ -210,6 +240,8 @@ public class JournalSelectDDMTemplateDisplayContext {
 
 	private Long _ddmStructureId;
 	private Long _ddmTemplateId;
+	private String _displayStyle;
+	private String _eventName;
 	private String _keywords;
 	private String _orderByCol;
 	private String _orderByType;

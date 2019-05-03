@@ -17,9 +17,6 @@ class SaturationComponent extends Component {
 	 * @inheritDoc
 	 */
 	attached() {
-
-		// Debounced version of requestImageEditorPreview
-
 		this.requestImageEditorPreview_ = debounce(this.requestImageEditorPreview, 50);
 
 		this.cache_ = {};
@@ -34,6 +31,7 @@ class SaturationComponent extends Component {
 
 	/**
 	 * Applies a saturation filter to the image.
+	 *
 	 * @param  {ImageData} imageData The image data representation of the image.
 	 * @return {CancellablePromise} A promise that resolves when the webworker
 	 * finishes processing the image.
@@ -44,6 +42,7 @@ class SaturationComponent extends Component {
 
 	/**
 	 * Applies a saturation filter to the image.
+	 *
 	 * @param  {ImageData} imageData The image data representation of the image.
 	 * @return {CancellablePromise} A promise that resolves when the webworker
 	 * finishes processing the image.
@@ -74,6 +73,7 @@ class SaturationComponent extends Component {
 
 	/**
 	 * Spawns a webworker to process the image in a different thread.
+	 *
 	 * @param  {Object} message The image and saturation value.
 	 * @return {CancellablePromise} A promise that resolves when the webworker
 	 * finishes processing the image.
@@ -91,6 +91,7 @@ class SaturationComponent extends Component {
 
 /**
  * State definition.
+ *
  * @static
  * @type {!Object}
  */
@@ -98,6 +99,7 @@ SaturationComponent.STATE = {
 
 	/**
 	 * Path of this module.
+	 *
 	 * @type {String}
 	 */
 	modulePath: {
@@ -107,6 +109,7 @@ SaturationComponent.STATE = {
 	/**
 	 * Injected method that notifies the editor that this component wants to
 	 * generate a preview version of the image.
+	 *
 	 * @type {Function}
 	 */
 	requestImageEditorPreview: {

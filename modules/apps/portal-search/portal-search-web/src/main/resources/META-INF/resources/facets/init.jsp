@@ -15,7 +15,6 @@
 --%>
 
 <%@ include file="/init.jsp" %>
-
 <%@ page import="com.liferay.asset.kernel.service.AssetCategoryLocalServiceUtil" %><%@
 page import="com.liferay.portal.search.web.internal.facet.display.builder.AssetCategoriesSearchFacetDisplayBuilder" %><%@
 page import="com.liferay.portal.search.web.internal.facet.display.builder.AssetCategoryPermissionCheckerImpl" %><%@
@@ -32,6 +31,7 @@ page import="com.liferay.portal.search.web.internal.facet.display.context.AssetT
 page import="com.liferay.portal.search.web.internal.facet.display.context.AssetTagsSearchFacetTermDisplayContext" %><%@
 page import="com.liferay.portal.search.web.internal.facet.display.context.FolderSearchFacetDisplayContext" %><%@
 page import="com.liferay.portal.search.web.internal.facet.display.context.FolderSearchFacetTermDisplayContext" %><%@
+page import="com.liferay.portal.search.web.internal.facet.display.context.FolderSearcher" %><%@
 page import="com.liferay.portal.search.web.internal.facet.display.context.FolderTitleLookupImpl" %><%@
 page import="com.liferay.portal.search.web.internal.facet.display.context.ScopeSearchFacetDisplayContext" %><%@
 page import="com.liferay.portal.search.web.internal.facet.display.context.ScopeSearchFacetTermDisplayContext" %><%@
@@ -51,7 +51,7 @@ JSONObject dataJSONObject = facetConfiguration.getData();
 
 FacetCollector facetCollector = facet.getFacetCollector();
 
-String cssClass = "search-facet search-".concat(HtmlUtil.escapeAttribute(facetConfiguration.getDisplayStyle()));
+String cssClass = "search-facet search-";
 %>
 
 <%!

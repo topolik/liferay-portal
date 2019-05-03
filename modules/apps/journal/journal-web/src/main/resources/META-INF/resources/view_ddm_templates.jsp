@@ -76,77 +76,89 @@ if (ddmStructure != null) {
 			row.setData(rowData);
 			%>
 
-			<liferay-ui:search-container-column-text
-				name="id"
-				property="templateId"
-			/>
+			<c:choose>
+				<c:when test='<%= Objects.equals(journalDDMTemplateDisplayContext.getDisplayStyle(), "icon") %>'>
 
-			<liferay-ui:search-container-column-text
-				cssClass="table-cell-content"
-				href="<%= rowHREF %>"
-				name="name"
-				value="<%= HtmlUtil.escape(ddmTemplate.getName(locale)) %>"
-			/>
+					<%
+					row.setCssClass("entry-card lfr-asset-item " + row.getCssClass());
+					%>
 
-			<liferay-ui:search-container-column-text
-				cssClass="table-cell-content"
-				name="description"
-			>
-				<c:choose>
-					<c:when test="<%= ddmTemplate.isSmallImage() %>">
-						<img alt="<%= HtmlUtil.escape(ddmTemplate.getName(locale)) %>" class="lfr-ddm-small-image-view" src="<%= HtmlUtil.escapeAttribute(ddmTemplate.getTemplateImageURL(themeDisplay)) %>" />
-					</c:when>
-					<c:otherwise>
-						<%= HtmlUtil.escape(ddmTemplate.getDescription(locale)) %>
-					</c:otherwise>
-				</c:choose>
-			</liferay-ui:search-container-column-text>
+					<liferay-ui:search-container-column-text>
+						<clay:vertical-card
+							verticalCard="<%= new JournalDDMTemplateVerticalCard(ddmTemplate, renderRequest, renderResponse, searchContainer.getRowChecker()) %>"
+						/>
+					</liferay-ui:search-container-column-text>
+				</c:when>
+				<c:otherwise>
+					<liferay-ui:search-container-column-text
+						name="id"
+						property="templateId"
+					/>
 
-			<c:if test="<%= journalDDMTemplateDisplayContext.getClassPK() <= 0 %>">
+					<liferay-ui:search-container-column-text
+						cssClass="table-cell-content"
+						href="<%= rowHREF %>"
+						name="name"
+						value="<%= HtmlUtil.escape(ddmTemplate.getName(locale)) %>"
+					/>
 
-				<%
-				String ddmStructureName = StringPool.BLANK;
+					<liferay-ui:search-container-column-text
+						cssClass="table-cell-content"
+						name="description"
+						value="<%= HtmlUtil.escape(ddmTemplate.getDescription(locale)) %>"
+					/>
 
-				if (ddmTemplate.getClassPK() > 0) {
-					DDMStructure curDDMStructure = DDMStructureLocalServiceUtil.fetchDDMStructure(ddmTemplate.getClassPK());
+					<c:if test="<%= journalDDMTemplateDisplayContext.getClassPK() <= 0 %>">
 
-					if (curDDMStructure != null) {
-						ddmStructureName = curDDMStructure.getName(locale);
-					}
-				}
-				%>
+						<%
+						String ddmStructureName = StringPool.BLANK;
 
-				<liferay-ui:search-container-column-text
-					name="structure"
-					value="<%= HtmlUtil.escape(ddmStructureName) %>"
-				/>
-			</c:if>
+						if (ddmTemplate.getClassPK() > 0) {
+							DDMStructure curDDMStructure = DDMStructureLocalServiceUtil.fetchDDMStructure(ddmTemplate.getClassPK());
 
-			<liferay-ui:search-container-column-text
-				name="language"
-				value='<%= LanguageUtil.get(request, HtmlUtil.escape(ddmTemplate.getLanguage()) + "[stands-for]") %>'
-			/>
+							if (curDDMStructure != null) {
+								ddmStructureName = curDDMStructure.getName(locale);
+							}
+						}
+						%>
 
-			<%
-			Group group = GroupLocalServiceUtil.getGroup(ddmTemplate.getGroupId());
-			%>
+						<liferay-ui:search-container-column-text
+							name="structure"
+							value="<%= HtmlUtil.escape(ddmStructureName) %>"
+						/>
+					</c:if>
 
-			<liferay-ui:search-container-column-text
-				name="scope"
-				value="<%= LanguageUtil.get(request, group.getScopeLabel(themeDisplay)) %>"
-			/>
+					<liferay-ui:search-container-column-text
+						name="language"
+						value='<%= LanguageUtil.get(request, HtmlUtil.escape(ddmTemplate.getLanguage()) + "[stands-for]") %>'
+					/>
 
-			<liferay-ui:search-container-column-date
-				name="modified-date"
-				value="<%= ddmTemplate.getModifiedDate() %>"
-			/>
+					<%
+					Group group = GroupLocalServiceUtil.getGroup(ddmTemplate.getGroupId());
+					%>
 
-			<liferay-ui:search-container-column-jsp
-				path="/ddm_template_action.jsp"
-			/>
+					<liferay-ui:search-container-column-text
+						name="scope"
+						value="<%= LanguageUtil.get(request, group.getScopeLabel(themeDisplay)) %>"
+					/>
+
+					<liferay-ui:search-container-column-date
+						name="modified-date"
+						value="<%= ddmTemplate.getModifiedDate() %>"
+					/>
+
+					<liferay-ui:search-container-column-text>
+						<clay:dropdown-actions
+							defaultEventHandler="<%= JournalWebConstants.JOURNAL_DDM_TEMPLATE_ELEMENTS_DEFAULT_EVENT_HANDLER %>"
+							dropdownItems="<%= journalDDMTemplateDisplayContext.getDDMTemplateActionDropdownItems(ddmTemplate) %>"
+						/>
+					</liferay-ui:search-container-column-text>
+				</c:otherwise>
+			</c:choose>
 		</liferay-ui:search-container-row>
 
 		<liferay-ui:search-iterator
+			displayStyle="<%= journalDDMTemplateDisplayContext.getDisplayStyle() %>"
 			markupView="lexicon"
 		/>
 	</liferay-ui:search-container>
@@ -155,4 +167,9 @@ if (ddmStructure != null) {
 <liferay-frontend:component
 	componentId="<%= journalDDMTemplateManagementToolbarDisplayContext.getDefaultEventHandler() %>"
 	module="js/DDMTemplatesManagementToolbarDefaultEventHandler.es"
+/>
+
+<liferay-frontend:component
+	componentId="<%= JournalWebConstants.JOURNAL_DDM_TEMPLATE_ELEMENTS_DEFAULT_EVENT_HANDLER %>"
+	module="js/DDMTemplateElementsDefaultEventHandler.es"
 />

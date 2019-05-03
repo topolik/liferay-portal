@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import java.util.Collection;
 import java.util.Dictionary;
-import java.util.function.Supplier;
 
 import org.apache.felix.utils.extender.Extension;
 import org.apache.felix.utils.log.Logger;
@@ -37,20 +36,18 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class ConfiguratorExtension implements Extension {
 
 	public ConfiguratorExtension(
-		ConfigurationAdmin configurationAdmin, Logger logger, String namespace,
-		Collection<NamedConfigurationContent> namedConfigurationContents,
-		Collection<ConfigurationDescriptionFactory>
-			configurationDescriptionFactories) {
+		ConfigurationAdmin configurationAdmin, Logger logger,
+		String bundleSymbolicName,
+		Collection<NamedConfigurationContent> namedConfigurationContents) {
 
 		_configurationAdmin = configurationAdmin;
 		_logger = logger;
-		_namespace = namespace;
+		_bundleSymbolicName = bundleSymbolicName;
 		_configurationContents = namedConfigurationContents;
-		_configurationDescriptionFactories = configurationDescriptionFactories;
 	}
 
 	@Override
-	public void destroy() throws Exception {
+	public void destroy() {
 	}
 
 	@Override
@@ -59,56 +56,27 @@ public class ConfiguratorExtension implements Extension {
 				_configurationContents) {
 
 			try {
-				_createConfiguration(namedConfigurationContent);
+				_process(namedConfigurationContent);
 			}
 			catch (IOException ioe) {
-				continue;
+				_logger.log(Logger.LOG_WARNING, ioe.getMessage(), ioe);
 			}
 		}
 	}
 
-	private boolean _configurationExists(String filter)
-		throws InvalidSyntaxException, IOException {
-
-		Configuration[] configurations = _configurationAdmin.listConfigurations(
-			filter);
-
-		if (ArrayUtil.isNotEmpty(configurations)) {
-			return true;
-		}
-
-		return false;
-	}
-
-	private void _createConfiguration(
-			NamedConfigurationContent namedConfigurationContent)
-		throws Exception {
-
-		for (ConfigurationDescriptionFactory configurationDescriptionFactory :
-				_configurationDescriptionFactories) {
-
-			ConfigurationDescription configurationDescription =
-				configurationDescriptionFactory.create(
-					namedConfigurationContent);
-
-			if (configurationDescription == null) {
-				continue;
-			}
-
-			_process(configurationDescription);
-		}
-	}
-
-	private void _process(ConfigurationDescription configurationDescription)
+	private void _process(NamedConfigurationContent namedConfigurationContent)
 		throws InvalidSyntaxException, IOException {
 
 		Configuration configuration = null;
 		String configuratorURL = null;
 
-		if (configurationDescription.getFactoryPid() == null) {
-			String pid = configurationDescription.getPid();
+		if (namedConfigurationContent.getFactoryPid() == null) {
+			String pid = namedConfigurationContent.getPid();
 
-			if (_configurationExists("(service.pid=" + pid + ")")) {
+			if (ArrayUtil.isNotEmpty(
+					_configurationAdmin.listConfigurations(
+						"(service.pid=" + pid + ")"))) {
+
 				return;
 			}
 
@@ -117,31 +85,29 @@ public class ConfiguratorExtension implements Extension {
 		}
 		else {
 			configuratorURL =
-				_namespace + "#" + configurationDescription.getPid();
+				_bundleSymbolicName + "#" + namedConfigurationContent.getPid();
 
-			if (_configurationExists(
-					"(configurator.url=" + configuratorURL + ")")) {
+			if (ArrayUtil.isNotEmpty(
+					_configurationAdmin.listConfigurations(
+						"(configurator.url=" + configuratorURL + ")"))) {
 
 				return;
 			}
 
 			configuration = _configurationAdmin.createFactoryConfiguration(
-				configurationDescription.getFactoryPid(), StringPool.QUESTION);
+				namedConfigurationContent.getFactoryPid(), StringPool.QUESTION);
 		}
 
 		Dictionary<String, Object> properties = null;
 
-		Supplier<Dictionary<String, Object>> propertiesSupplier =
-			configurationDescription.getPropertiesSupplier();
-
 		try {
-			properties = propertiesSupplier.get();
+			properties = namedConfigurationContent.getProperties();
 		}
 		catch (Throwable t) {
 			_logger.log(
 				Logger.LOG_WARNING,
 				StringBundler.concat(
-					"Supplier from description ", configurationDescription,
+					"Supplier from description ", namedConfigurationContent,
 					" threw an exception: "),
 				t);
 
@@ -155,11 +121,9 @@ public class ConfiguratorExtension implements Extension {
 		configuration.update(properties);
 	}
 
+	private final String _bundleSymbolicName;
 	private final ConfigurationAdmin _configurationAdmin;
 	private final Collection<NamedConfigurationContent> _configurationContents;
-	private final Collection<ConfigurationDescriptionFactory>
-		_configurationDescriptionFactories;
 	private final Logger _logger;
-	private final String _namespace;
 
 }

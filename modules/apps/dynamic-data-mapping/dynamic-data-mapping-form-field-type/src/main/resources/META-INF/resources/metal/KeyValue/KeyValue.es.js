@@ -8,147 +8,14 @@ import templates from './KeyValue.soy.js';
 import {Config} from 'metal-state';
 import {
 	normalizeFieldName
-} from 'dynamic-data-mapping-form-builder/metal/js/components/LayoutProvider/util/fields.es';
+} from 'dynamic-data-mapping-form-builder/js/components/LayoutProvider/util/fields.es';
 
 /**
- * KeywordValue.
+ * KeyValue.
  * @extends Component
  */
 
-class KeywordValue extends Component {
-	static STATE = {
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Text
-		 * @type {?(string|undefined)}
-		 */
-
-		fieldName: Config.string(),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?bool}
-		 */
-
-		generateKeyword: Config.bool().value(true),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?(string|undefined)}
-		 */
-
-		id: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?(string|undefined)}
-		*/
-
-		keyword: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?(string|undefined)}
-		 */
-
-		label: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?string}
-		 */
-
-		predefinedValue: Config.string().value('Option 1'),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?bool}
-		 */
-
-		readOnly: Config.bool().value(false),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof FieldBase
-		 * @type {?(bool|undefined)}
-		 */
-
-		repeatable: Config.bool(),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?bool}
-		 */
-
-		required: Config.bool().value(false),
-
-		/**
-		 * @default true
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?bool}
-		 */
-
-		showLabel: Config.bool().value(true),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?(string|undefined)}
-		 */
-
-		spritemap: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof FieldBase
-		 * @type {?(string|undefined)}
-		 */
-
-		tip: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Text
-		 * @type {?(string|undefined)}
-		 */
-
-		type: Config.string().value('key-value'),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof KeywordValue
-		 * @type {?(bool)}
-		 */
-
-		value: Config.string(),
-
-		_keyword: Config.string().internal().valueFn('_internalKeywordFn'),
-
-		_value: Config.string().internal().valueFn('_internalValueFn')
-	}
-
+class KeyValue extends Component {
 	willReceiveState(changes) {
 		if (changes.keyword) {
 			this.setState(
@@ -274,6 +141,148 @@ class KeywordValue extends Component {
 	}
 }
 
-Soy.register(KeywordValue, templates);
+KeyValue.STATE = {
 
-export default KeywordValue;
+	_keyword: Config.string().internal().valueFn('_internalKeywordFn'),
+
+	_value: Config.string().internal().valueFn('_internalValueFn'),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Text
+	 * @type {?(string|undefined)}
+	 */
+
+	fieldName: Config.string(),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?bool}
+	 */
+
+	generateKeyword: Config.bool().value(true),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?(string|undefined)}
+	 */
+
+	id: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?(string|undefined)}
+	*/
+
+	keyword: Config.string(),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?boolean}
+	*/
+
+	keywordReadOnly: Config.bool().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?(string|undefined)}
+	 */
+
+	label: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Select
+	 * @type {?string}
+	 */
+
+	predefinedValue: Config.string().value('Option 1'),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?bool}
+	 */
+
+	readOnly: Config.bool().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof FieldBase
+	 * @type {?(bool|undefined)}
+	 */
+
+	repeatable: Config.bool(),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?bool}
+	 */
+
+	required: Config.bool().value(false),
+
+	/**
+	 * @default true
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?bool}
+	 */
+
+	showLabel: Config.bool().value(true),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?(string|undefined)}
+	 */
+
+	spritemap: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof FieldBase
+	 * @type {?(string|undefined)}
+	 */
+
+	tip: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Text
+	 * @type {?(string|undefined)}
+	 */
+
+	type: Config.string().value('key-value'),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof KeyValue
+	 * @type {?(bool)}
+	 */
+
+	value: Config.string()
+};
+
+Soy.register(KeyValue, templates);
+
+export default KeyValue;

@@ -17,8 +17,10 @@ package com.liferay.poshi.runner.elements;
 import com.liferay.poshi.runner.PoshiRunnerContext;
 import com.liferay.poshi.runner.script.PoshiScriptParserException;
 import com.liferay.poshi.runner.util.RegexUtil;
+import com.liferay.poshi.runner.util.Validator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -151,7 +153,7 @@ public class ExecutePoshiElement extends PoshiElement {
 
 			boolean functionAttributeAdded = false;
 
-			for (String functionAttributeName : _FUNCTION_ATTRIBUTE_NAMES) {
+			for (String functionAttributeName : _functionAttributeNames) {
 				if (parameter.startsWith(functionAttributeName)) {
 					String name = getNameFromAssignment(parameter);
 
@@ -159,7 +161,7 @@ public class ExecutePoshiElement extends PoshiElement {
 
 					value = StringEscapeUtils.unescapeXml(value);
 
-					addAttribute(name, value);
+					add(new PoshiElementAttribute(name, value, parameter));
 
 					functionAttributeAdded = true;
 
@@ -170,8 +172,6 @@ public class ExecutePoshiElement extends PoshiElement {
 			if (functionAttributeAdded) {
 				continue;
 			}
-
-			parameter = "var " + parameter + ";";
 
 			add(PoshiNodeFactory.newPoshiNode(this, parameter));
 		}
@@ -197,7 +197,9 @@ public class ExecutePoshiElement extends PoshiElement {
 
 			String fileExtension = getFileExtension();
 
-			if (fileExtension.equals("function")) {
+			if (fileExtension.equals("function") &&
+				Validator.isNotNull(attributeValue("selenium"))) {
+
 				String poshiElementAttributeValue =
 					poshiElementAttribute.getValue();
 
@@ -364,10 +366,6 @@ public class ExecutePoshiElement extends PoshiElement {
 
 	private static final String _ELEMENT_NAME = "execute";
 
-	private static final String[] _FUNCTION_ATTRIBUTE_NAMES = {
-		"locator1", "locator2", "value1", "value2"
-	};
-
 	private static final String _UTILITY_INVOCATION_REGEX =
 		"(echo|fail|takeScreenshot)\\(.*?\\)";
 
@@ -375,6 +373,8 @@ public class ExecutePoshiElement extends PoshiElement {
 		"^[\\s]*(\\w*\\s*=\\s*\"[ \\t\\S]*?\"|\\w*\\s*=\\s*'''.*?'''|" +
 			"\\w*\\s=\\s*[\\w\\.]*\\(.*?\\))[\\s]*$",
 		Pattern.DOTALL);
+	private static final List<String> _functionAttributeNames = Arrays.asList(
+		"locator1", "locator2", "value1", "value2");
 	private static final Pattern _statementPattern = Pattern.compile(
 		"^" + INVOCATION_REGEX + STATEMENT_END_REGEX, Pattern.DOTALL);
 	private static final Pattern _utilityInvocationStatementPattern =

@@ -1,3 +1,5 @@
+import com.liferay.gradle.plugins.node.tasks.ExecuteNpmTask
+import com.liferay.gradle.plugins.node.tasks.NpmRunTask
 import com.liferay.gradle.util.FileUtil
 import com.liferay.gradle.util.GradleUtil
 import com.liferay.gradle.util.copy.StripPathSegmentsAction
@@ -191,6 +193,39 @@ gradle.beforeProject {
 			}
 		}
 
+		pluginManager.withPlugin("com.liferay.js.module.config.generator") {
+			downloadLiferayModuleConfigGenerator {
+				enabled = false
+			}
+		}
+
+		pluginManager.withPlugin("com.liferay.js.transpiler") {
+			downloadMetalCli {
+				enabled = false
+			}
+		}
+
+		pluginManager.withPlugin("com.liferay.node") {
+			afterEvaluate {
+				tasks.withType(ExecuteNpmTask) {
+					if (npmInstall.packageLockJsonFile == null) {
+						scriptFile = new File(rootDir, "yarn-1.13.0.js")
+					}
+				}
+
+				tasks.withType(NpmRunTask) {
+					npmCommand = "run"
+				}
+			}
+
+			npmInstall {
+				if (npmInstall.packageLockJsonFile == null) {
+					enabled = false
+					nodeModulesDir = new File(rootDir, "node_modules")
+				}
+			}
+		}
+
 		pluginManager.withPlugin("com.liferay.osgi.plugin") {
 			afterEvaluate {
 				bundle.jarBuilderFactory.contextClassLoader = buildscript.classLoader
@@ -255,6 +290,12 @@ gradle.beforeProject {
 				startTestableTomcat {
 					deleteLiferayHome = false
 				}
+			}
+		}
+
+		pluginManager.withPlugin("com.liferay.soy.translation") {
+			replaceSoyTranslation {
+				enabled = false
 			}
 		}
 

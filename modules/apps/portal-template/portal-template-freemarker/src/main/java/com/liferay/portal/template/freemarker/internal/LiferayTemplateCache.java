@@ -14,14 +14,11 @@
 
 package com.liferay.portal.template.freemarker.internal;
 
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.cache.PortalCache;
-import com.liferay.portal.kernel.cache.SingleVMPool;
 import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateResource;
 import com.liferay.portal.kernel.template.TemplateResourceLoader;
 import com.liferay.portal.template.TemplateResourceThreadLocal;
-import com.liferay.portal.template.freemarker.configuration.FreeMarkerEngineConfiguration;
 
 import freemarker.cache.TemplateCache;
 
@@ -41,43 +38,31 @@ public class LiferayTemplateCache extends TemplateCache {
 
 	public LiferayTemplateCache(
 			Configuration configuration,
-			FreeMarkerEngineConfiguration freeMarkerEngineConfiguration,
 			TemplateResourceLoader templateResourceLoader,
-			SingleVMPool singleVMPool)
+			PortalCache<TemplateResource, MaybeMissingTemplate> portalCache)
 		throws Exception {
 
 		super(null, configuration);
 
 		_configuration = configuration;
-		_freeMarkerEngineConfiguration = freeMarkerEngineConfiguration;
 		_templateResourceLoader = templateResourceLoader;
+		_portalCache = portalCache;
 
-		String portalCacheName = TemplateResource.class.getName();
-
-		portalCacheName = portalCacheName.concat(
-			StringPool.POUND
-		).concat(
-			TemplateConstants.LANG_TYPE_FTL
-		);
-
-		_portalCache =
-			(PortalCache<TemplateResource, Object>)singleVMPool.getPortalCache(
-				portalCacheName);
-
-		_constructor =
-			TemplateCache.MaybeMissingTemplate.class.getDeclaredConstructor(
-				Template.class);
+		_constructor = MaybeMissingTemplate.class.getDeclaredConstructor(
+			Template.class);
 
 		_constructor.setAccessible(true);
 	}
 
 	@Override
 	public void clear() {
-		_portalCache.removeAll();
+		if (_portalCache != null) {
+			_portalCache.removeAll();
+		}
 	}
 
 	@Override
-	public TemplateCache.MaybeMissingTemplate getTemplate(
+	public MaybeMissingTemplate getTemplate(
 			String templateId, Locale locale, Object customLookupCondition,
 			String encoding, boolean parse)
 		throws IOException {
@@ -117,12 +102,14 @@ public class LiferayTemplateCache extends TemplateCache {
 				"Unable to find FreeMarker template with ID " + templateId);
 		}
 
-		Object object = _portalCache.get(templateResource);
+		MaybeMissingTemplate maybeMissingTemplate = null;
 
-		if ((object != null) &&
-			(object instanceof TemplateCache.MaybeMissingTemplate)) {
+		if (_portalCache != null) {
+			maybeMissingTemplate = _portalCache.get(templateResource);
 
-			return (TemplateCache.MaybeMissingTemplate)object;
+			if (maybeMissingTemplate != null) {
+				return maybeMissingTemplate;
+			}
 		}
 
 		Template template = new Template(
@@ -130,12 +117,9 @@ public class LiferayTemplateCache extends TemplateCache {
 			_configuration);
 
 		try {
-			TemplateCache.MaybeMissingTemplate maybeMissingTemplate =
-				_constructor.newInstance(template);
+			maybeMissingTemplate = _constructor.newInstance(template);
 
-			if (_freeMarkerEngineConfiguration.resourceModificationCheck() !=
-					0) {
-
+			if (_portalCache != null) {
 				_portalCache.put(templateResource, maybeMissingTemplate);
 			}
 
@@ -147,9 +131,9 @@ public class LiferayTemplateCache extends TemplateCache {
 	}
 
 	private final Configuration _configuration;
-	private final Constructor<TemplateCache.MaybeMissingTemplate> _constructor;
-	private final FreeMarkerEngineConfiguration _freeMarkerEngineConfiguration;
-	private final PortalCache<TemplateResource, Object> _portalCache;
+	private final Constructor<MaybeMissingTemplate> _constructor;
+	private final PortalCache<TemplateResource, MaybeMissingTemplate>
+		_portalCache;
 	private final TemplateResourceLoader _templateResourceLoader;
 
 }

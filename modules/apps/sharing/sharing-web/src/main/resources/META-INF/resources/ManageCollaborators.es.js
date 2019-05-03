@@ -2,11 +2,12 @@ import 'clay-button';
 import 'clay-select';
 import 'clay-sticker';
 import {ClayStripe} from 'clay-alert';
-import dom from 'metal-dom';
 import Soy from 'metal-soy';
 import {Config} from 'metal-state';
 import templates from './ManageCollaborators.soy';
 import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
+
+const mapToPair = (map) => Array.from(map, pair => pair.join(','));
 
 /**
  * Handles actions to delete or change permissions of the
@@ -21,6 +22,7 @@ class ManageCollaborators extends PortletBase {
 		this._deleteSharingEntryIds = [];
 		this._sharingEntryIdsAndPermissions = new Map();
 		this._sharingEntryIdsAndExpirationDate = new Map();
+		this._sharingEntryIdsAndShareables = new Map();
 
 		let tomorrow = new Date();
 		tomorrow = tomorrow.setDate(tomorrow.getDate() + 1);
@@ -37,7 +39,7 @@ class ManageCollaborators extends PortletBase {
 	 * is after today, false in other case.
 	 */
 	_checkExpirationDate(expirationDate) {
-		let date = new Date(expirationDate);
+		const date = new Date(expirationDate);
 		return date >= new Date(this._tomorrowDate);
 	}
 
@@ -76,8 +78,10 @@ class ManageCollaborators extends PortletBase {
 	 * @return {Object} Collaborator
 	 */
 	_getCollaborator(collaboratorId) {
+		const collaboratorIdNumber = Number(collaboratorId);
+
 		let collaborator = this.collaborators.find(
-			collaborator => collaborator.id === collaboratorId
+			collaborator => collaborator.userId === collaboratorIdNumber
 		);
 
 		return collaborator;
@@ -116,17 +120,44 @@ class ManageCollaborators extends PortletBase {
 		let sharingEntryExpirationDate = event.target.value;
 		let sharingEntryId = event.target.dataset.sharingentryId;
 
+		let collaborator = this._getCollaborator(collaboratorId);
 		let dateError = !this._checkExpirationDate(sharingEntryExpirationDate);
 
+		collaborator.sharingEntryExpirationDateError = dateError;
+
 		if (!dateError) {
+			collaborator.sharingEntryExpirationDateTooltip = this._getTooltipDate(sharingEntryExpirationDate);
+
 			this._sharingEntryIdsAndExpirationDate.set(sharingEntryId, sharingEntryExpirationDate);
 		}
 
-		let collaborator = this._getCollaborator(collaboratorId);
-		collaborator.sharingEntryExpirationDateError = dateError;
-
 		this.collaborators = this.collaborators;
-		this._findExpirationDateError();
+
+		setTimeout(() => this._findExpirationDateError(), 0);
+	}
+
+	/**
+	 * Get shareable permissions
+	 *
+	 * @param {Event} event
+	 * @protected
+	 */
+	_handleChangeShareable(event) {
+		const target = event.delegateTarget;
+
+		const collaboratorId = target.dataset.collaboratorId;
+		const shareable = target.checked;
+		const sharingEntryId = target.dataset.sharingentryId;
+
+		let collaborator = this._getCollaborator(collaboratorId);
+
+		if (collaborator) {
+			collaborator.sharingEntryShareable = shareable;
+
+			this.collaborators = this.collaborators;
+		}
+
+		this._sharingEntryIdsAndShareables.set(sharingEntryId, shareable);
 	}
 
 	/**
@@ -136,50 +167,61 @@ class ManageCollaborators extends PortletBase {
 	 * @protected
 	 */
 	_handleDeleteCollaborator(event) {
-		let collaboratorId = event.delegateTarget.dataset.collaboratorId;
-		let sharingEntryId = event.delegateTarget.dataset.sharingentryId;
+		const target = event.delegateTarget;
+
+		const collaboratorId = Number(target.dataset.collaboratorId);
+		const sharingEntryId = target.dataset.sharingentryId;
+
+		event.stopPropagation();
 
 		this.collaborators = this.collaborators.filter(
-			collaborator => collaborator.id != collaboratorId
+			collaborator => collaborator.userId != collaboratorId
 		);
 
 		this._deleteSharingEntryIds.push(sharingEntryId);
 	}
 
 	/**
-	 * Remove the expiration date
+	 * Enable and disable the expiration date field
 	 * @param  {Event} event
 	 * @protected
 	 */
-	_handleDeleteExpirationDate(event) {
-		let collaboratorId = event.currentTarget.dataset.collaboratorid;
+	_handleEnableDisableExpirationDate(event) {
+		const target = event.delegateTarget;
+
+		const collaboratorId = target.dataset.collaboratorId;
+		const enabled = target.checked;
 
 		let collaborator = this._getCollaborator(collaboratorId);
 
 		if (collaborator) {
-			let sharingEntryExpirationDate = null;
+			const sharingEntryExpirationDate = enabled ? this._tomorrowDate : '';
+			collaborator.enabledExpirationDate = enabled;
 
-			collaborator.expanded = false;
+			if (!enabled) {
+				collaborator.sharingEntryExpirationDateError = false;
+				this._findExpirationDateError();
+			}
+
 			collaborator.sharingEntryExpirationDate = sharingEntryExpirationDate;
-			collaborator.sharingEntryExpirationDateError = false;
-			collaborator.sharingEntryExpirationDateTooltip = null;
+			collaborator.sharingEntryExpirationDateTooltip = this._getTooltipDate(sharingEntryExpirationDate);
 
 			this._sharingEntryIdsAndExpirationDate.set(collaborator.sharingEntryId, sharingEntryExpirationDate);
 
 			this.collaborators = this.collaborators;
-
-			this._findExpirationDateError();
 		}
 	}
 
 	/**
-	 * Toggles the class 'active'
+	 * Expand configuration for sharing permissions and expiration
 	 *
 	 * @param {Event} event
 	 * @protected
 	 */
-	_handleHoverCollaborator(event) {
-		dom.toggleClasses(event.delegateTarget, 'active');
+	_handleExpandCollaborator(event) {
+		if (!event.target.matches('select,option,button')) {
+			this.expandedCollaboratorId = event.delegateTarget.dataset.collaboratorid;
+		}
 	}
 
 	/**
@@ -189,9 +231,6 @@ class ManageCollaborators extends PortletBase {
 	 * @protected
 	 */
 	_handleSaveButtonClick() {
-		let expirationDates = Array.from(this._sharingEntryIdsAndExpirationDate, (id, date) => id + ',' + date);
-		let permissions = Array.from(this._sharingEntryIdsAndPermissions, (id, key) => id + ',' + key);
-
 		if (this._findExpirationDateError()) {
 			return;
 		}
@@ -200,8 +239,9 @@ class ManageCollaborators extends PortletBase {
 			this.actionUrl,
 			{
 				deleteSharingEntryIds: this._deleteSharingEntryIds,
-				sharingEntryIdActionIdPairs: permissions,
-				sharingEntryIdExpirationDatePairs: expirationDates
+				sharingEntryIdActionIdPairs: mapToPair(this._sharingEntryIdsAndPermissions),
+				sharingEntryIdExpirationDatePairs: mapToPair(this._sharingEntryIdsAndExpirationDate),
+				sharingEntryIdShareablePairs: mapToPair(this._sharingEntryIdsAndShareables)
 			}
 		)
 			.then(
@@ -238,33 +278,6 @@ class ManageCollaborators extends PortletBase {
 	}
 
 	/**
-	 * Hides or show the block where the expiration
-	 * date can be edited.
-	 *
-	 * @param  {Event} event
-	 * @protected
-	 */
-	_hideShowExpirationDateBlock(event) {
-		let collaboratorId = event.currentTarget.dataset.collaboratorid;
-
-		let collaborator = this._getCollaborator(collaboratorId);
-
-		collaborator.expanded = !collaborator.expanded;
-
-		if (collaborator.expanded && !collaborator.sharingEntryExpirationDate) {
-			collaborator.sharingEntryExpirationDate = this._tomorrowDate;
-			collaborator.sharingEntryExpirationDateTooltip = this._getTooltipDate(this._tomorrowDate);
-
-			this._sharingEntryIdsAndExpirationDate.set(
-				collaborator.sharingEntryId,
-				collaborator.sharingEntryExpirationDate
-			);
-		}
-
-		this.collaborators = this.collaborators;
-	}
-
-	/**
 	 * Get the formatted date that has to be shown
 	 * in the tooltip.
 	 *
@@ -272,7 +285,10 @@ class ManageCollaborators extends PortletBase {
 	 * @return {String}                [description]
 	 */
 	_getTooltipDate(expirationDate) {
-		return new Date(expirationDate).toLocaleDateString(Liferay.ThemeDisplay.getBCP47LanguageId());
+		return Liferay.Util.sub(
+			Liferay.Language.get('until-x'),
+			new Date(expirationDate).toLocaleDateString(Liferay.ThemeDisplay.getBCP47LanguageId())
+		);
 	}
 
 	/**
@@ -330,7 +346,34 @@ ManageCollaborators.STATE = {
 	 * List of collaborators
 	 * @type {Array.<Object>}
 	 */
-	collaborators: Config.array().required(),
+	collaborators: Config.arrayOf(
+		Config.shapeOf(
+			{
+				fullName: Config.string(),
+				sharingEntryExpirationDate: Config.string(),
+				sharingEntryExpirationDateTooltip: Config.string(),
+				sharingEntryId: Config.string(),
+				sharingEntryPermissionDisplaySelectOptions: Config.arrayOf(
+					Config.shapeOf(
+						{
+							label: Config.string(),
+							selected: Config.bool(),
+							value: Config.string()
+						}
+					)
+				),
+				sharingEntryShareable: Config.bool(),
+				userId: Config.number()
+			}
+		)
+	).required(),
+
+	/**
+	 * Id of the expanded collaborator
+	 * @memberof ManageCollaborators
+	 * @type {String}
+	 */
+	expandedCollaboratorId: Config.string(),
 
 	/**
 	 * Id of the dialog

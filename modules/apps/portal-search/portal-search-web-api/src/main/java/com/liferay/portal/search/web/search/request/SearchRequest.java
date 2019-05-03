@@ -17,7 +17,7 @@ package com.liferay.portal.search.web.search.request;
 import aQute.bnd.annotation.ProviderType;
 
 /**
- * @author André de Oliveira
+ * @author     André de Oliveira
  * @deprecated As of Mueller (7.2.x), with no direct replacement
  */
 @Deprecated

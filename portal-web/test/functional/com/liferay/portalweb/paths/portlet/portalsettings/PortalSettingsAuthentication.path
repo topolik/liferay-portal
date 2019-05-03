@@ -122,7 +122,12 @@
 </tr>
 <tr>
 	<td>AUTHENTICATION_CAS_TEST_CAS_CONFIGURATION_BUTTON</td>
-	<td>//button[contains(.,'Test CAS Configuration')]</td>
+	<td>//span[contains(.,'Test CAS Configuration')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VERTICAL_ELLIPSIS</td>
+	<td>//a[span/*[contains(@class,'lexicon-icon-ellipsis-v')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -456,7 +461,7 @@
 </tr>
 <tr>
 	<td>AUTHENTICATION_OPEN_SSO_TEST_OPEN_SSO_CONFIGURATION_BUTTON</td>
-	<td>//button[contains(.,'Test OpenSSO Configuration')]</td>
+	<td>//a[contains(.,'Test OpenSSO Configuration')]</td>
 	<td></td>
 </tr>
 </tbody>

@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.wiki.model.impl.WikiNodeImpl")
 @ProviderType
-public interface WikiNode extends WikiNodeModel, PersistedModel {
+public interface WikiNode extends PersistedModel, WikiNodeModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

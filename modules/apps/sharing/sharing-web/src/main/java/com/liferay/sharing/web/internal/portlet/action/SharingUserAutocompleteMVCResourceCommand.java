@@ -14,16 +14,21 @@
 
 package com.liferay.sharing.web.internal.portlet.action;
 
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCResourceCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCResourceCommand;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
+import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -32,6 +37,7 @@ import com.liferay.portal.kernel.util.comparator.UserScreenNameComparator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.sharing.constants.SharingPortletKeys;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -66,7 +72,15 @@ public class SharingUserAutocompleteMVCResourceCommand
 		HttpServletRequest request = _portal.getHttpServletRequest(
 			resourceRequest);
 
-		JSONArray usersJSONArray = getUsersJSONArray(request);
+		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
+		if (!themeDisplay.isSignedIn()) {
+			throw new PrincipalException.MustBeAuthenticated(
+				themeDisplay.getUserId());
+		}
+
+		JSONArray usersJSONArray = _getUsersJSONArray(request);
 
 		HttpServletResponse response = _portal.getHttpServletResponse(
 			resourceResponse);
@@ -77,7 +91,33 @@ public class SharingUserAutocompleteMVCResourceCommand
 			resourceRequest, resourceResponse, usersJSONArray);
 	}
 
-	protected JSONArray getUsersJSONArray(HttpServletRequest request)
+	private List<User> _getUsers(
+		HttpServletRequest request, ThemeDisplay themeDisplay) {
+
+		String query = ParamUtil.getString(request, "query");
+
+		PermissionChecker permissionChecker =
+			themeDisplay.getPermissionChecker();
+
+		if (permissionChecker.isCompanyAdmin()) {
+			return _userLocalService.search(
+				themeDisplay.getCompanyId(), query,
+				WorkflowConstants.STATUS_APPROVED, new LinkedHashMap<>(), 0, 20,
+				new UserScreenNameComparator());
+		}
+
+		User user = themeDisplay.getUser();
+
+		if (ArrayUtil.isEmpty(user.getGroupIds())) {
+			return Collections.emptyList();
+		}
+
+		return _userLocalService.searchSocial(
+			themeDisplay.getCompanyId(), user.getGroupIds(), query, 0, 20,
+			new UserScreenNameComparator());
+	}
+
+	private JSONArray _getUsersJSONArray(HttpServletRequest request)
 		throws PortalException {
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
@@ -92,27 +132,28 @@ public class SharingUserAutocompleteMVCResourceCommand
 				continue;
 			}
 
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+			JSONObject jsonObject = JSONUtil.put(
+				"emailAddress", user.getEmailAddress()
+			).put(
+				"fullName", user.getFullName()
+			);
 
-			jsonObject.put("emailAddress", user.getEmailAddress());
-			jsonObject.put("fullName", user.getFullName());
-			jsonObject.put("portraitURL", user.getPortraitURL(themeDisplay));
+			String portraitURL = StringPool.BLANK;
+
+			if (user.getPortraitId() > 0) {
+				portraitURL = user.getPortraitURL(themeDisplay);
+			}
+
+			jsonObject.put(
+				"portraitURL", portraitURL
+			).put(
+				"userId", Long.valueOf(user.getUserId())
+			);
 
 			jsonArray.put(jsonObject);
 		}
 
 		return jsonArray;
-	}
-
-	private List<User> _getUsers(
-		HttpServletRequest request, ThemeDisplay themeDisplay) {
-
-		String query = ParamUtil.getString(request, "query");
-
-		return _userLocalService.search(
-			themeDisplay.getCompanyId(), query,
-			WorkflowConstants.STATUS_APPROVED, new LinkedHashMap<>(), 0, 20,
-			new UserScreenNameComparator());
 	}
 
 	@Reference

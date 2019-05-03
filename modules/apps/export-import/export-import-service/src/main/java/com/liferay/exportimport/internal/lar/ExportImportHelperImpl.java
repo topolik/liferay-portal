@@ -49,6 +49,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Group;
@@ -60,8 +61,11 @@ import com.liferay.portal.kernel.model.StagedGroupedModel;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
+import com.liferay.portal.kernel.module.configuration.ConfigurationException;
+import com.liferay.portal.kernel.module.configuration.ConfigurationProvider;
 import com.liferay.portal.kernel.portlet.PortletIdCodec;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.xml.SecureXMLFactoryProviderUtil;
 import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.LayoutLocalService;
@@ -745,10 +749,11 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 		}
 
 		if (ArrayUtil.contains(selectedPlids, 0)) {
-			JSONObject layoutJSONObject = JSONFactoryUtil.createJSONObject();
-
-			layoutJSONObject.put("includeChildren", true);
-			layoutJSONObject.put("plid", 0);
+			JSONObject layoutJSONObject = JSONUtil.put(
+				"includeChildren", true
+			).put(
+				"plid", 0
+			);
 
 			jsonArray.put(layoutJSONObject);
 		}
@@ -1660,6 +1665,19 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 	}
 
 	protected ZipWriter getZipWriter(String fileName) {
+		long companyId = CompanyThreadLocal.getCompanyId();
+
+		try {
+			_exportImportServiceConfiguration =
+				_configurationProvider.getCompanyConfiguration(
+					ExportImportServiceConfiguration.class, companyId);
+		}
+		catch (ConfigurationException ce) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(ce.getMessage());
+			}
+		}
+
 		if (!ExportImportThreadLocal.isStagingInProcess() ||
 			(_exportImportServiceConfiguration.
 				stagingDeleteTempLarOnFailure() &&
@@ -1699,10 +1717,11 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 			selectedLayoutIds, layout.getLayoutId());
 
 		if (checked) {
-			JSONObject layoutJSONObject = JSONFactoryUtil.createJSONObject();
-
-			layoutJSONObject.put("includeChildren", includeChildren);
-			layoutJSONObject.put("plid", layout.getPlid());
+			JSONObject layoutJSONObject = JSONUtil.put(
+				"includeChildren", includeChildren
+			).put(
+				"plid", layout.getPlid()
+			);
 
 			layoutsJSONArray.put(layoutJSONObject);
 		}
@@ -1900,6 +1919,9 @@ public class ExportImportHelperImpl implements ExportImportHelper {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ExportImportHelperImpl.class);
+
+	@Reference
+	private ConfigurationProvider _configurationProvider;
 
 	private DLFileEntryLocalService _dlFileEntryLocalService;
 	private ExportImportServiceConfiguration _exportImportServiceConfiguration;

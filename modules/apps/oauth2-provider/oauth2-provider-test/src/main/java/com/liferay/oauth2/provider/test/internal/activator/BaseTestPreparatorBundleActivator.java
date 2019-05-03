@@ -34,7 +34,10 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.HashMapDictionary;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.security.service.access.policy.model.SAPEntry;
+import com.liferay.portal.security.service.access.policy.service.SAPEntryLocalService;
 
 import java.io.IOException;
 
@@ -43,8 +46,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -272,28 +278,55 @@ public abstract class BaseTestPreparatorBundleActivator
 			bundleContext.getServiceReference(
 				OAuth2ApplicationLocalService.class);
 
-		_oAuth2ApplicationLocalService = bundleContext.getService(
+		OAuth2ApplicationLocalService oAuth2ApplicationLocalService =
+			bundleContext.getService(serviceReference);
+
+		autoCloseables.add(() -> bundleContext.ungetService(serviceReference));
+
+		OAuth2Application oAuth2Application =
+			oAuth2ApplicationLocalService.addOAuth2Application(
+				companyId, user.getUserId(), user.getLogin(), availableGrants,
+				clientId, 0, clientSecret, "test oauth application",
+				Collections.singletonList("token_introspection"),
+				"http://localhost:8080", 0, "test application",
+				"http://localhost:8080", redirectUris, availableScopes,
+				new ServiceContext());
+
+		autoCloseables.add(
+			() -> oAuth2ApplicationLocalService.deleteOAuth2Application(
+				oAuth2Application.getOAuth2ApplicationId()));
+
+		return oAuth2Application;
+	}
+
+	protected void createServiceAccessProfile(
+		long userId, String allowedServiceSignatures, boolean defaultSAPEntry,
+		boolean enabled, String name) {
+
+		ServiceReference<SAPEntryLocalService> serviceReference =
+			bundleContext.getServiceReference(SAPEntryLocalService.class);
+
+		SAPEntryLocalService sapEntryLocalService = bundleContext.getService(
 			serviceReference);
 
 		try {
-			OAuth2Application oAuth2Application =
-				_oAuth2ApplicationLocalService.addOAuth2Application(
-					companyId, user.getUserId(), user.getLogin(),
-					availableGrants, clientId, 0, clientSecret,
-					"test oauth application",
-					Collections.singletonList("token_introspection"),
-					"http://localhost:8080", 0, "test application",
-					"http://localhost:8080", redirectUris, availableScopes,
-					new ServiceContext());
+			autoCloseables.add(
+				() -> bundleContext.ungetService(serviceReference));
+
+			Map<Locale, String> titleMap = new HashMap<>();
+
+			titleMap.put(LocaleUtil.getDefault(), name);
+
+			SAPEntry sapEntry = sapEntryLocalService.addSAPEntry(
+				userId, allowedServiceSignatures, defaultSAPEntry, enabled,
+				name, titleMap, new ServiceContext());
 
 			autoCloseables.add(
-				() -> _oAuth2ApplicationLocalService.deleteOAuth2Application(
-					oAuth2Application.getOAuth2ApplicationId()));
-
-			return oAuth2Application;
+				() -> sapEntryLocalService.deleteSAPEntry(
+					sapEntry.getSapEntryId()));
 		}
-		finally {
-			bundleContext.ungetService(serviceReference);
+		catch (PortalException pe) {
+			throw new RuntimeException(pe);
 		}
 	}
 
@@ -455,10 +488,6 @@ public abstract class BaseTestPreparatorBundleActivator
 			properties = new HashMapDictionary<>();
 		}
 
-		if (properties.get("auth.verifier.guest.allowed") == null) {
-			properties.put("auth.verifier.guest.allowed", "false");
-		}
-
 		properties.put("oauth2.test.application", "true");
 		properties.put("osgi.jaxrs.application.base", "/oauth2-test/" + path);
 		properties.put(
@@ -611,7 +640,5 @@ public abstract class BaseTestPreparatorBundleActivator
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		BaseTestPreparatorBundleActivator.class);
-
-	private OAuth2ApplicationLocalService _oAuth2ApplicationLocalService;
 
 }

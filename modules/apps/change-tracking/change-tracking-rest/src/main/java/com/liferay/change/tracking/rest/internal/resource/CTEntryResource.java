@@ -18,14 +18,24 @@ import com.liferay.change.tracking.CTEngineManager;
 import com.liferay.change.tracking.model.CTCollection;
 import com.liferay.change.tracking.model.CTEntry;
 import com.liferay.change.tracking.rest.internal.model.entry.CTEntryModel;
+import com.liferay.change.tracking.rest.internal.util.CTJaxRsUtil;
+import com.liferay.change.tracking.service.CTEntryLocalService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.OrderByComparator;
+import com.liferay.portal.kernel.util.OrderByComparatorFactoryUtil;
+import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.vulcan.pagination.Page;
 import com.liferay.portal.vulcan.pagination.Pagination;
 import com.liferay.portal.vulcan.util.TransformUtil;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -44,7 +54,7 @@ import org.osgi.service.component.annotations.ServiceScope;
  */
 @Component(
 	property = {
-		"osgi.jaxrs.application.select=(osgi.jaxrs.name=change-tracking-application)",
+		"osgi.jaxrs.application.select=(osgi.jaxrs.name=Liferay.Change.Tracking.REST)",
 		"osgi.jaxrs.resource=true"
 	},
 	scope = ServiceScope.PROTOTYPE, service = CTEntryResource.class
@@ -53,11 +63,25 @@ import org.osgi.service.component.annotations.ServiceScope;
 public class CTEntryResource {
 
 	@GET
+	@Path("/{ctEntryId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Page<CTEntryModel> getCollectionCTEntryModels(
+	public CTEntryModel getCTEntryModel(
+		@PathParam("ctEntryId") long ctEntryId) {
+
+		return _getCTEntryModel(_ctEntryLocalService.fetchCTEntry(ctEntryId));
+	}
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Page<CTEntryModel> searchCollectionCTEntryModels(
 		@PathParam("collectionId") long ctCollectionId,
+		@QueryParam("groupId") String groupIdFilter,
+		@QueryParam("userId") String userIdFilter,
+		@QueryParam("classNameId") String classNameIdFilter,
+		@QueryParam("changeType") String changeTypeFilter,
 		@QueryParam("collision") String collisionFilter,
-		@Context Pagination pagination) {
+		@QueryParam("status") String statusFilter,
+		@QueryParam("sort") String sort, @Context Pagination pagination) {
 
 		Optional<CTCollection> ctCollectionOptional =
 			_ctEngineManager.getCTCollectionOptional(ctCollectionId);
@@ -67,28 +91,70 @@ public class CTEntryResource {
 				"Unable to get change tacking collection " + ctCollectionId);
 		}
 
-		List<CTEntry> ctEntries = null;
-		int totalCount = 0;
+		Boolean collision = null;
 
-		if (GetterUtil.getBoolean(collisionFilter)) {
-			ctEntries = _ctEngineManager.getCollidingCTEntries(ctCollectionId);
+		if (Validator.isNotNull(collisionFilter)) {
+			collision = GetterUtil.getBoolean(collisionFilter);
+		}
 
-			totalCount = ctEntries.size();
+		QueryDefinition<CTEntry> queryDefinition = new QueryDefinition<>();
+
+		if (Validator.isNotNull(statusFilter)) {
+			queryDefinition.setStatus(GetterUtil.getInteger(statusFilter));
 		}
 		else {
-			QueryDefinition<CTEntry> queryDefinition = new QueryDefinition<>();
-
-			if (pagination != null) {
-				queryDefinition.setEnd(pagination.getEndPosition());
-				queryDefinition.setStart(pagination.getStartPosition());
-			}
-
-			ctEntries = _ctEngineManager.getCTEntries(
-				ctCollectionId, queryDefinition);
-			totalCount = _ctEngineManager.getCTEntriesCount(ctCollectionId);
+			queryDefinition.setStatus(WorkflowConstants.STATUS_DRAFT);
 		}
 
+		if (pagination != null) {
+			queryDefinition.setEnd(pagination.getEndPosition());
+			queryDefinition.setStart(pagination.getStartPosition());
+		}
+
+		if (Validator.isNotNull(sort)) {
+			OrderByComparator<CTEntry> orderByComparator =
+				OrderByComparatorFactoryUtil.create(
+					"CTEntry",
+					CTJaxRsUtil.checkSortColumns(sort, _orderByColumnNames));
+
+			queryDefinition.setOrderByComparator(orderByComparator);
+		}
+
+		List<CTEntry> ctEntries = _ctEngineManager.getCTEntries(
+			ctCollectionOptional.get(),
+			GetterUtil.getLongValues(_getFiltersArray(groupIdFilter)),
+			GetterUtil.getLongValues(_getFiltersArray(userIdFilter)),
+			GetterUtil.getLongValues(_getFiltersArray(classNameIdFilter)),
+			GetterUtil.getIntegerValues(_getFiltersArray(changeTypeFilter)),
+			collision, queryDefinition);
+
+		int totalCount = _ctEngineManager.getCTEntriesCount(
+			ctCollectionOptional.get(),
+			GetterUtil.getLongValues(_getFiltersArray(groupIdFilter)),
+			GetterUtil.getLongValues(_getFiltersArray(userIdFilter)),
+			GetterUtil.getLongValues(_getFiltersArray(classNameIdFilter)),
+			GetterUtil.getIntegerValues(_getFiltersArray(changeTypeFilter)),
+			collision, queryDefinition);
+
 		return _getPage(ctEntries, totalCount, pagination);
+	}
+
+	private CTEntryModel _getCTEntryModel(CTEntry ctEntry) {
+		if (ctEntry == null) {
+			return CTEntryModel.EMPTY_CT_ENTRY_MODEL;
+		}
+
+		return CTEntryModel.forCTEntry(ctEntry);
+	}
+
+	private String[] _getFiltersArray(String filterString) {
+		if (Validator.isNull(filterString)) {
+			return new String[0];
+		}
+
+		filterString = filterString.trim();
+
+		return filterString.split(StringPool.COMMA);
 	}
 
 	private Page<CTEntryModel> _getPage(
@@ -103,7 +169,13 @@ public class CTEntryResource {
 			pagination, totalCount);
 	}
 
+	private static final Set<String> _orderByColumnNames = new HashSet<>(
+		Arrays.asList("createDate", "modifiedDate", "title"));
+
 	@Reference
 	private CTEngineManager _ctEngineManager;
+
+	@Reference
+	private CTEntryLocalService _ctEntryLocalService;
 
 }

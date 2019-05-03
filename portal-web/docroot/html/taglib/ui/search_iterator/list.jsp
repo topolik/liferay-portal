@@ -342,11 +342,17 @@ if (iteratorURL != null) {
 </div>
 
 <c:if test="<%= (rowChecker != null) && !resultRows.isEmpty() && Validator.isNotNull(rowChecker.getAllRowsId()) && allRowsIsChecked %>">
-	<aui:script>
-		var container = $(document.<%= rowChecker.getFormName() %>).find('#<%= namespace + id %>SearchContainer');
+	<script>
+		(function() {
+			var form = document.<%= rowChecker.getFormName() %>;
 
-		container.find('input[name="<%= rowChecker.getAllRowsId() %>"]').prop('checked', true);
-	</aui:script>
+			var allRowsIdCheckbox = form.querySelector('#<%= namespace + id %>SearchContainer input[name="<%= rowChecker.getAllRowsId() %>"]');
+
+			if (allRowsIdCheckbox) {
+				allRowsIdCheckbox.checked = true;
+			}
+		})();
+	</script>
 </c:if>
 
 <c:if test="<%= Validator.isNotNull(id) %>">

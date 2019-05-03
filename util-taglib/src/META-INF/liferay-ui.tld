@@ -319,20 +319,8 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Deprecated as of 7.0.0, with no direct replacement.</description>
-			<name>containerIcon</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
 			<description>The name of the container that the entry is in, such as the name of a folder.</description>
 			<name>containerName</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-		</attribute>
-		<attribute>
-			<description>Deprecated as of 7.0.0, with no direct replacement.</description>
-			<name>containerSrc</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
@@ -2087,6 +2075,12 @@
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
+		<attribute>
+			<name>reverse</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
+		</attribute>
 	</tag>
 	<tag>
 		<name>input-permissions-params</name>
@@ -2141,6 +2135,7 @@
 		</attribute>
 	</tag>
 	<tag>
+		<description>Deprecated as of 7.2.0, with no direct replacement.</description>
 		<name>input-scheduler</name>
 		<tag-class>com.liferay.taglib.ui.InputSchedulerTag</tag-class>
 		<body-content>JSP</body-content>
@@ -2601,6 +2596,7 @@
 		</attribute>
 	</tag>
 	<tag>
+		<description>Deprecated as of 7.2.0, with no direct replacement.</description>
 		<name>organization-search-form</name>
 		<tag-class>com.liferay.taglib.ui.OrganizationSearchFormTag</tag-class>
 		<body-content>JSP</body-content>
@@ -3706,6 +3702,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<description>Deprecated as of 7.2.0, with no direct replacement.</description>
 			<name>servletContext</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -4394,6 +4391,11 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
+			<name>size</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
 			<name>user</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -4420,6 +4422,7 @@
 		</attribute>
 	</tag>
 	<tag>
+		<description>Deprecated as of 7.2.0, with no direct replacement.</description>
 		<name>user-search-form</name>
 		<tag-class>com.liferay.taglib.ui.UserSearchFormTag</tag-class>
 		<body-content>JSP</body-content>

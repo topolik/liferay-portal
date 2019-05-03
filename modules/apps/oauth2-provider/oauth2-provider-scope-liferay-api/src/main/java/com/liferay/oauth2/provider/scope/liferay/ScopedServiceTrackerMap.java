@@ -15,15 +15,14 @@
 package com.liferay.oauth2.provider.scope.liferay;
 
 /**
- * Represents a ServiceTrackerMap that also checks for company specialization. A
- * service is the best match if it is registered for both the company and the
- * key. If not such a service exists the best next candidate would be if it
- * matches only the key. If no service is registered for the key then a service
- * registered for the company only will be searched.
+ * Represents a {@code ServiceTrackerMap} that also checks for portal instance
+ * specialization. A best match is registered for both the portal instance and
+ * the key. If no such service exists, the next best matches only the key. If no
+ * service is registered for the key, a service registered for the portal
+ * instance matches.
  *
  * @author Carlos Sierra Andrés
  * @see    com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap
- * @review
  */
 public interface ScopedServiceTrackerMap<T> {
 

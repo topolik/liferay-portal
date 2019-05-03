@@ -27,10 +27,10 @@ import com.liferay.portal.kernel.service.PortalPreferencesLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortletKeys;
-import com.liferay.portal.kernel.util.SetUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.segments.constants.SegmentsConstants;
 import com.liferay.segments.internal.asah.client.AsahFaroBackendClient;
@@ -51,7 +51,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import javax.portlet.PortletPreferences;
@@ -99,17 +98,16 @@ public class AsahFaroBackendIndividualSegmentsCheckerUtil {
 		try {
 			if (segmentsEntry == null) {
 				_segmentsEntryLocalService.addSegmentsEntry(
-					nameMap, Collections.emptyMap(), true, null,
-					individualSegment.getId(),
-					SegmentsConstants.SOURCE_ASAH_FARO_BACKEND,
+					individualSegment.getId(), nameMap, Collections.emptyMap(),
+					true, null, SegmentsConstants.SOURCE_ASAH_FARO_BACKEND,
 					User.class.getName(), serviceContext);
 
 				return;
 			}
 
 			_segmentsEntryLocalService.updateSegmentsEntry(
-				segmentsEntry.getSegmentsEntryId(), nameMap, null, true, null,
-				individualSegment.getId(), serviceContext);
+				segmentsEntry.getSegmentsEntryId(), individualSegment.getId(),
+				nameMap, null, true, null, serviceContext);
 		}
 		catch (PortalException pe) {
 			_log.error(
@@ -159,7 +157,7 @@ public class AsahFaroBackendIndividualSegmentsCheckerUtil {
 
 		try {
 			individualResults = _asahFaroBackendClient.getIndividualResults(
-				segmentsEntry.getKey(), 1, _DELTA,
+				segmentsEntry.getSegmentsEntryKey(), 1, _DELTA,
 				Collections.singletonList(OrderByField.desc("dateModified")));
 
 			int totalElements = individualResults.getTotal();
@@ -168,7 +166,7 @@ public class AsahFaroBackendIndividualSegmentsCheckerUtil {
 				_log.debug(
 					totalElements +
 						" individuals found for individual segment " +
-							segmentsEntry.getKey());
+							segmentsEntry.getSegmentsEntryKey());
 			}
 
 			if (totalElements == 0) {
@@ -195,7 +193,7 @@ public class AsahFaroBackendIndividualSegmentsCheckerUtil {
 				}
 
 				individualResults = _asahFaroBackendClient.getIndividualResults(
-					segmentsEntry.getKey(), curPage, _DELTA,
+					segmentsEntry.getSegmentsEntryKey(), curPage, _DELTA,
 					Collections.singletonList(
 						OrderByField.desc("dateModified")));
 			}
@@ -203,7 +201,7 @@ public class AsahFaroBackendIndividualSegmentsCheckerUtil {
 		catch (RuntimeException re) {
 			_log.error(
 				"Unable to retrieve individuals for individual segment " +
-					segmentsEntry.getKey(),
+					segmentsEntry.getSegmentsEntryKey(),
 				re);
 		}
 	}
@@ -305,19 +303,30 @@ public class AsahFaroBackendIndividualSegmentsCheckerUtil {
 	}
 
 	private Optional<Long> _getUserIdOptional(Individual individual) {
-		Map<String, Set<String>> dataSourceIndividualPKs =
+		List<Individual.DataSourceIndividualPK> dataSourceIndividualPKs =
 			individual.getDataSourceIndividualPKs();
 
-		Set<String> individualUuids = dataSourceIndividualPKs.get(
-			_asahFaroBackendClient.getDataSourceId());
+		Stream<Individual.DataSourceIndividualPK> dataSourceIndividualPKStream =
+			dataSourceIndividualPKs.stream();
 
-		if (SetUtil.isEmpty(individualUuids)) {
+		List<String> individualUuids = dataSourceIndividualPKStream.filter(
+			dataSourceIndividualPK -> Objects.equals(
+				_asahFaroBackendClient.getDataSourceId(),
+				dataSourceIndividualPK.getDataSourceId())
+		).findFirst(
+		).map(
+			Individual.DataSourceIndividualPK::getIndividualPKs
+		).orElse(
+			Collections.emptyList()
+		);
+
+		if (ListUtil.isEmpty(individualUuids)) {
 			return Optional.empty();
 		}
 
-		Stream<String> stream = individualUuids.stream();
+		Stream<String> individualUuidStream = individualUuids.stream();
 
-		return stream.map(
+		return individualUuidStream.map(
 			individualUuid -> _userLocalService.fetchUserByUuidAndCompanyId(
 				individualUuid, _portal.getDefaultCompanyId())
 		).filter(

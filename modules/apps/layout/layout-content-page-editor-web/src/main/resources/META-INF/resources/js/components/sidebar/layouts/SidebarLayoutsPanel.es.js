@@ -3,7 +3,7 @@ import {Config} from 'metal-state';
 import Soy from 'metal-soy';
 
 import {
-	ADD_SECTION,
+	ADD_ROW,
 	CLEAR_DROP_TARGET,
 	UPDATE_DROP_TARGET
 } from '../../../actions/actions.es';
@@ -36,24 +36,24 @@ class SidebarLayoutsPanel extends Component {
 	/**
 	 * Handles dragLayout event and dispatches action to update drag target
 	 * @param {object} eventData
-	 * @param {string} eventData.hoveredSectionBorder
-	 * @param {string} eventData.hoveredSectionId
+	 * @param {string} eventData.hoveredRowBorder
+	 * @param {string} eventData.hoveredRowId
 	 */
 	_handleDragLayout(eventData) {
-		const {hoveredSectionBorder, hoveredSectionId} = eventData;
+		const {hoveredRowBorder, hoveredRowId} = eventData;
 
-		this.store.dispatchAction(
-			UPDATE_DROP_TARGET,
+		this.store.dispatch(
 			{
-				dropTargetBorder: hoveredSectionBorder,
-				dropTargetItemId: hoveredSectionId,
-				dropTargetItemType: FRAGMENTS_EDITOR_ITEM_TYPES.section
+				dropTargetBorder: hoveredRowBorder,
+				dropTargetItemId: hoveredRowId,
+				dropTargetItemType: FRAGMENTS_EDITOR_ITEM_TYPES.row,
+				type: UPDATE_DROP_TARGET
 			}
 		);
 	}
 
 	/**
-	 * Handles dropLayout event and dispatches action to add a section
+	 * Handles dropLayout event and dispatches action to add a row
 	 * @param {!object} eventData
 	 * @param {!number} eventData.layoutIndex
 	 * @private
@@ -62,13 +62,15 @@ class SidebarLayoutsPanel extends Component {
 	_handleDropLayout(eventData) {
 		const layoutColumns = this._layouts[eventData.layoutIndex].columns;
 
-		this.store.dispatchAction(
-			ADD_SECTION,
+		this.store.dispatch(
 			{
-				layoutColumns
+				layoutColumns,
+				type: ADD_ROW
 			}
-		).dispatchAction(
-			CLEAR_DROP_TARGET
+		).dispatch(
+			{
+				type: CLEAR_DROP_TARGET
+			}
 		);
 
 		requestAnimationFrame(
@@ -85,8 +87,10 @@ class SidebarLayoutsPanel extends Component {
 	 * @review
 	 */
 	_handleLeaveLayoutTarget() {
-		this.store.dispatchAction(
-			CLEAR_DROP_TARGET
+		this.store.dispatch(
+			{
+				type: CLEAR_DROP_TARGET
+			}
 		);
 	}
 
@@ -165,28 +169,9 @@ SidebarLayoutsPanel.STATE = {
 			},
 			{
 				columns: [
-					'8',
-					'4'
-				]
-			},
-			{
-				columns: [
-					'4',
-					'8'
-				]
-			},
-			{
-				columns: [
 					'4',
 					'4',
 					'4'
-				]
-			},
-			{
-				columns: [
-					'3',
-					'6',
-					'3'
 				]
 			},
 			{

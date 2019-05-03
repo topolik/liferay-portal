@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.sync.model.impl.SyncDeviceImpl")
 @ProviderType
-public interface SyncDevice extends SyncDeviceModel, PersistedModel {
+public interface SyncDevice extends PersistedModel, SyncDeviceModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

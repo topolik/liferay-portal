@@ -8,7 +8,7 @@ import {openToast} from 'frontend-js-web/liferay/toast/commands/OpenToast.es';
 import templates from './PublishChangeList.soy';
 
 /**
- * Handles the publish change list dialog
+ * Handles the Change Lists publication dialog.
  */
 class PublishChangeList extends Component {
 
@@ -52,7 +52,7 @@ class PublishChangeList extends Component {
 			method: this.urlPublishChangeList.type
 		};
 
-		let url = this.urlPublishChangeList.href + '?userId=' + Liferay.ThemeDisplay.getUserId();
+		let url = this.urlPublishChangeList.href + '?userId=' + Liferay.ThemeDisplay.getUserId() + '&ignoreCollision=' + this.ignoreCollision;
 
 		fetch(url, init)
 			.then(
@@ -60,7 +60,7 @@ class PublishChangeList extends Component {
 					if (response.status === 202) {
 						openToast(
 							{
-								message: Liferay.Util.sub(Liferay.Language.get('publishing-x-has-started-successfully'), this.changeListName),
+								message: Liferay.Util.sub(Liferay.Language.get('publishing-x-has-started-successfully'), AUI().Lang.String.escapeHTML(this.changeListName)),
 								title: Liferay.Language.get('success'),
 								type: 'success'
 							}
@@ -74,7 +74,7 @@ class PublishChangeList extends Component {
 								data => {
 									openToast(
 										{
-											message: Liferay.Util.sub(Liferay.Language.get('an-error-occured-when-trying-publishing-x-x'), this.changeListName, data.message),
+											message: Liferay.Util.sub(Liferay.Language.get('an-error-occured-when-trying-publishing-x-x'), AUI().Lang.String.escapeHTML(this.changeListName), data.message),
 											title: Liferay.Language.get('error'),
 											type: 'danger'
 										}
@@ -88,7 +88,7 @@ class PublishChangeList extends Component {
 				error => {
 					const message = typeof error === 'string' ?
 						error :
-						Liferay.Util.sub(Liferay.Language.get('an-error-occured-when-trying-publishing-x'), this.changeListName);
+						Liferay.Util.sub(Liferay.Language.get('an-error-occured-when-trying-publishing-x'), AUI().Lang.String.escapeHTML(this.changeListName));
 
 					openToast(
 						{
@@ -101,10 +101,20 @@ class PublishChangeList extends Component {
 			);
 	}
 
+	_handleIgnoreCollisionChange(event) {
+		if (event.target.checked) {
+			this.ignoreCollision = true;
+		}
+		else {
+			this.ignoreCollision = false;
+		}
+	}
+
 }
 
 /**
  * State definition.
+ *
  * @ignore
  * @static
  * @type {!Object}
@@ -115,12 +125,13 @@ PublishChangeList.STATE = {
 
 	changeListName: Config.string(),
 
+	ignoreCollision: Config.bool(),
+
 	/**
-	 * Path to images.
+	 * Path to the images.
 	 *
 	 * @instance
 	 * @memberOf PublishChangeList
-	 * @review
 	 * @type {String}
 	 */
 	spritemap: Config.string().required(),

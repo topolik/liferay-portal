@@ -12,8 +12,8 @@ class Sharing extends PortletBase {
 
 		this._classNameId = config.classNameId;
 		this._classPK = config.classPK;
+		this._dialogId = config.dialogId;
 		this._refererPortletNamespace = config.refererPortletNamespace;
-		this._sharingDialogId = config.sharingDialogId;
 		this._userEmailAddresses = [];
 	}
 
@@ -32,11 +32,13 @@ class Sharing extends PortletBase {
 			res => res.json()
 		).then(
 			users => users.map(
-				({emailAddress, fullName, portraitURL}) => ({
+				({emailAddress, fullName, portraitURL, userId}) => ({
 					emailAddress,
 					fullName,
 					label: fullName,
 					portraitURL,
+					spritemap: this.spritemap,
+					userId: userId,
 					value: emailAddress
 				})
 			)
@@ -73,7 +75,7 @@ class Sharing extends PortletBase {
 	 * @review
 	 */
 	_closeDialog() {
-		const sharingDialog = Liferay.Util.getWindow(this._sharingDialogId);
+		const sharingDialog = Liferay.Util.getWindow(this._dialogId);
 
 		if (sharingDialog && sharingDialog.hide) {
 			sharingDialog.hide();
@@ -96,6 +98,86 @@ class Sharing extends PortletBase {
 	}
 
 	/**
+	 * Validates if the email addresses introduced is valid
+	 * and exists as a user.
+	 *
+	 * @param {!Event} event
+	 * @private
+	 * @review
+	 */
+	_handleEmailAddressAdded(event) {
+		let {item, selectedItems} = event.data;
+
+		this._userEmailAddresses = selectedItems;
+
+		this.emailAddressErrorMessage = '';
+		this._inputValue = '';
+
+		let itemAdded = item.value;
+
+		if (!this._isEmailAddressValid(itemAdded)) {
+			this.emailAddressErrorMessage = Liferay.Language.get('please-enter-a-valid-email-address');
+			this._inputValue = itemAdded;
+			this._userEmailAddresses.pop();
+		}
+		else {
+			this.fetch(
+				this.sharingVerifyEmailAddressURL,
+				{
+					emailAddress: itemAdded
+				}
+			).then(
+				response => response.json()
+			).then(
+				result => {
+					let {userExists} = result;
+
+					if (!userExists) {
+						this.emailAddressErrorMessage = Liferay.Util.sub(Liferay.Language.get('user-x-does-not-exist'), itemAdded);
+
+						this._userEmailAddresses = this._userEmailAddresses.filter(
+							item => item.value != itemAdded
+						);
+
+						setTimeout(
+							() => {
+								this._inputValue = itemAdded;
+							},
+							0
+						);
+					}
+				}
+			);
+		}
+	}
+
+	/**
+	 * When input has been cleared removes the errors.
+	 *
+	 * @param  {!Event} event
+	 * @private
+	 * @review
+	 */
+	_handleEmailInputChange(event) {
+		if (!event.data.value) {
+			this._inputValue = '';
+			this.emailAddressErrorMessage = '';
+		}
+	}
+
+	/**
+	 * Checks wether the input has emails or not.
+	 *
+	 * @param {!Event} event
+	 * @private
+	 * @review
+	 */
+	_handleEmailRemoved(event) {
+		this._userEmailAddresses = event.data.selectedItems;
+		this._validateRequiredEmailAddress();
+	}
+
+	/**
 	 * Save the share permisions
 	 * @param {!Event} event
 	 * @private
@@ -104,7 +186,7 @@ class Sharing extends PortletBase {
 	_handleSubmit(event) {
 		event.preventDefault();
 
-		if (!this.submitting && this._validateEmails()) {
+		if (!this.submitting && this._validateRequiredEmailAddress()) {
 			this.submitting = true;
 
 			this.fetch(
@@ -178,33 +260,27 @@ class Sharing extends PortletBase {
 	}
 
 	/**
-	 * Validates if there are email addresses and all are valid
-	 * @return {Boolean} value isn't emtpy
+	 * Check if a passed email has a valid format
 	 * @private
 	 * @review
+	 * @return {Boolean} is valid or not
 	 */
-	_validateEmails() {
-		const empty = this._userEmailAddresses.length === 0;
+	_isEmailAddressValid(email) {
+		const emailRegex = /.+@.+\..+/i;
 
-		this.emailErrorMessage = empty ?
-			Liferay.Language.get('this-field-is-required') :
-			''
-		;
+		return emailRegex.test(email);
+	}
 
-		let valid = false;
+	/**
+	 * Check if the userEmailAddresses is filled and show error message
+	 * @private
+	 * @review
+	 * @return {Boolean} is valid or not
+	 */
+	_validateRequiredEmailAddress() {
+		const valid = !!this._userEmailAddresses.length;
 
-		if (!empty) {
-			const emailRegex = /.+@.+\..+/i;
-
-			valid = this._userEmailAddresses.every(
-				({value}) => emailRegex.test(value)
-			);
-
-			this.emailErrorMessage = valid ?
-				'' :
-				Liferay.Language.get('please-enter-a-valid-email-address')
-			;
-		}
+		this.emailAddressErrorMessage = valid ? '' : Liferay.Language.get('this-field-is-required');
 
 		return valid;
 	}
@@ -217,11 +293,13 @@ class Sharing extends PortletBase {
  * @type {!Object}
  */
 Sharing.STATE = {
-	emailErrorMessage: Config.string().value(''),
+	_inputValue: Config.string().internal(),
+	emailAddressErrorMessage: Config.string().value(''),
 	shareable: Config.bool().value(true),
 	shareActionURL: Config.string().required(),
 	sharingEntryPermissionDisplayActionId: Config.string().required(),
 	sharingUserAutocompleteURL: Config.string().required(),
+	sharingVerifyEmailAddressURL: Config.string().required(),
 	spritemap: Config.string().required(),
 	submitting: Config.bool().value(false)
 };

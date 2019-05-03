@@ -1,6 +1,6 @@
 Bundle-Name: Liferay Portal Search API
 Bundle-SymbolicName: com.liferay.portal.search.api
-Bundle-Version: 3.0.0
+Bundle-Version: 4.0.0
 Export-Package:\
 	com.liferay.portal.search.aggregation,\
 	com.liferay.portal.search.aggregation.bucket,\
@@ -30,6 +30,7 @@ Export-Package:\
 	com.liferay.portal.search.hits,\
 	com.liferay.portal.search.index,\
 	com.liferay.portal.search.indexer,\
+	com.liferay.portal.search.legacy.document,\
 	com.liferay.portal.search.legacy.searcher,\
 	com.liferay.portal.search.legacy.stats,\
 	com.liferay.portal.search.localization,\
@@ -48,7 +49,7 @@ Export-Package:\
 	com.liferay.portal.search.suggest,\
 	com.liferay.portal.search.summary
 Import-Package:\
-	com.liferay.portal.kernel.search;version="[7.1.0,8)",\
+	com.liferay.portal.kernel.search;version="[7.1.0,8.1.0)",\
 	\
 	*
 -dsannotations-options: inherit

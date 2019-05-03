@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.ReleaseImpl")
 @ProviderType
-public interface Release extends ReleaseModel, PersistedModel {
+public interface Release extends PersistedModel, ReleaseModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

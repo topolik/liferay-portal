@@ -24,6 +24,13 @@ import com.liferay.petra.string.StringBundler;
 import graphql.annotations.annotationTypes.GraphQLField;
 import graphql.annotations.annotationTypes.GraphQLName;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import javax.annotation.Generated;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,6 +45,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "Creator")
 public class Creator {
 
+	@Schema
 	public String getAdditionalName() {
 		return additionalName;
 	}
@@ -53,6 +61,9 @@ public class Creator {
 		try {
 			additionalName = additionalNameUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -62,6 +73,7 @@ public class Creator {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String additionalName;
 
+	@Schema
 	public String getFamilyName() {
 		return familyName;
 	}
@@ -77,6 +89,9 @@ public class Creator {
 		try {
 			familyName = familyNameUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -86,6 +101,7 @@ public class Creator {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String familyName;
 
+	@Schema
 	public String getGivenName() {
 		return givenName;
 	}
@@ -101,6 +117,9 @@ public class Creator {
 		try {
 			givenName = givenNameUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -110,6 +129,7 @@ public class Creator {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String givenName;
 
+	@Schema
 	public Long getId() {
 		return id;
 	}
@@ -123,6 +143,9 @@ public class Creator {
 		try {
 			id = idUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -132,6 +155,7 @@ public class Creator {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected Long id;
 
+	@Schema
 	public String getImage() {
 		return image;
 	}
@@ -147,6 +171,9 @@ public class Creator {
 		try {
 			image = imageUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -156,6 +183,7 @@ public class Creator {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String image;
 
+	@Schema
 	public String getName() {
 		return name;
 	}
@@ -169,6 +197,9 @@ public class Creator {
 		try {
 			name = nameUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -178,6 +209,7 @@ public class Creator {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String name;
 
+	@Schema
 	public String getProfileURL() {
 		return profileURL;
 	}
@@ -193,6 +225,9 @@ public class Creator {
 		try {
 			profileURL = profileURLUnsafeSupplier.get();
 		}
+		catch (RuntimeException re) {
+			throw re;
+		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -202,56 +237,161 @@ public class Creator {
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	protected String profileURL;
 
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
+
+		if (!(object instanceof Creator)) {
+			return false;
+		}
+
+		Creator creator = (Creator)object;
+
+		return Objects.equals(toString(), creator.toString());
+	}
+
+	@Override
+	public int hashCode() {
+		String string = toString();
+
+		return string.hashCode();
+	}
+
 	public String toString() {
 		StringBundler sb = new StringBundler();
 
 		sb.append("{");
 
-		sb.append("\"additionalName\": ");
+		if (additionalName != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
 
-		sb.append("\"");
-		sb.append(additionalName);
-		sb.append("\"");
-		sb.append(", ");
+			sb.append("\"additionalName\": ");
 
-		sb.append("\"familyName\": ");
+			sb.append("\"");
 
-		sb.append("\"");
-		sb.append(familyName);
-		sb.append("\"");
-		sb.append(", ");
+			sb.append(_escape(additionalName));
 
-		sb.append("\"givenName\": ");
+			sb.append("\"");
+		}
 
-		sb.append("\"");
-		sb.append(givenName);
-		sb.append("\"");
-		sb.append(", ");
+		if (familyName != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
 
-		sb.append("\"id\": ");
+			sb.append("\"familyName\": ");
 
-		sb.append(id);
-		sb.append(", ");
+			sb.append("\"");
 
-		sb.append("\"image\": ");
+			sb.append(_escape(familyName));
 
-		sb.append("\"");
-		sb.append(image);
-		sb.append("\"");
-		sb.append(", ");
+			sb.append("\"");
+		}
 
-		sb.append("\"name\": ");
+		if (givenName != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
 
-		sb.append("\"");
-		sb.append(name);
-		sb.append("\"");
-		sb.append(", ");
+			sb.append("\"givenName\": ");
 
-		sb.append("\"profileURL\": ");
+			sb.append("\"");
 
-		sb.append("\"");
-		sb.append(profileURL);
-		sb.append("\"");
+			sb.append(_escape(givenName));
+
+			sb.append("\"");
+		}
+
+		if (id != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"id\": ");
+
+			sb.append(id);
+		}
+
+		if (image != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"image\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(image));
+
+			sb.append("\"");
+		}
+
+		if (name != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"name\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(name));
+
+			sb.append("\"");
+		}
+
+		if (profileURL != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"profileURL\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(profileURL));
+
+			sb.append("\"");
+		}
+
+		sb.append("}");
+
+		return sb.toString();
+	}
+
+	private static String _escape(Object object) {
+		String string = String.valueOf(object);
+
+		return string.replaceAll("\"", "\\\\\"");
+	}
+
+	private static String _toJSON(Map<String, ?> map) {
+		StringBuilder sb = new StringBuilder("{");
+
+		@SuppressWarnings("unchecked")
+		Set set = map.entrySet();
+
+		@SuppressWarnings("unchecked")
+		Iterator<Map.Entry<String, ?>> iterator = set.iterator();
+
+		while (iterator.hasNext()) {
+			Map.Entry<String, ?> entry = iterator.next();
+
+			sb.append("\"");
+			sb.append(entry.getKey());
+			sb.append("\":");
+			sb.append("\"");
+			sb.append(entry.getValue());
+			sb.append("\"");
+
+			if (iterator.hasNext()) {
+				sb.append(",");
+			}
+		}
 
 		sb.append("}");
 

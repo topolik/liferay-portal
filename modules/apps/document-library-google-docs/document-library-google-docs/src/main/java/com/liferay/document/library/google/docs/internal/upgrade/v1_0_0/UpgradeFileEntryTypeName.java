@@ -17,6 +17,7 @@ package com.liferay.document.library.google.docs.internal.upgrade.v1_0_0;
 import com.liferay.document.library.google.docs.internal.util.GoogleDocsConstants;
 import com.liferay.document.library.kernel.model.DLFileEntryType;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalService;
+import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.RestrictionsFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -28,6 +29,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import java.sql.SQLException;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * @author Alejandro Tardín
@@ -71,14 +73,22 @@ public class UpgradeFileEntryTypeName extends UpgradeProcess {
 				UpgradeProcessUtil.getDefaultLanguageId(
 					dlFileEntryType.getCompanyId()));
 
-			String name = dlFileEntryType.getName(locale);
+			boolean hasDefaultName = Objects.equals(
+				"Google Docs", dlFileEntryType.getName(locale));
 
-			if (name.equals("Google Docs")) {
+			if (hasDefaultName) {
 				dlFileEntryType.setName(
 					GoogleDocsConstants.DL_FILE_ENTRY_TYPE_NAME, locale);
-				dlFileEntryType.setDescription(
-					GoogleDocsConstants.DL_FILE_ENTRY_TYPE_NAME, locale);
+			}
 
+			boolean hasDefaultDescription = Objects.equals(
+				"Google Docs", dlFileEntryType.getDescription(locale));
+
+			if (hasDefaultDescription) {
+				dlFileEntryType.setDescription(StringPool.BLANK, locale);
+			}
+
+			if (hasDefaultName || hasDefaultDescription) {
 				_dlFileEntryTypeLocalService.updateDLFileEntryType(
 					dlFileEntryType);
 			}

@@ -78,8 +78,8 @@ public class AssetListEntryModelImpl
 		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"title", Types.VARCHAR}, {"type_", Types.INTEGER},
-		{"typeSettings", Types.CLOB}, {"lastPublishDate", Types.TIMESTAMP}
+		{"assetListEntryKey", Types.VARCHAR}, {"title", Types.VARCHAR},
+		{"type_", Types.INTEGER}, {"lastPublishDate", Types.TIMESTAMP}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
@@ -94,14 +94,14 @@ public class AssetListEntryModelImpl
 		TABLE_COLUMNS_MAP.put("userName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
+		TABLE_COLUMNS_MAP.put("assetListEntryKey", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("title", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("type_", Types.INTEGER);
-		TABLE_COLUMNS_MAP.put("typeSettings", Types.CLOB);
 		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table AssetListEntry (uuid_ VARCHAR(75) null,assetListEntryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,title VARCHAR(75) null,type_ INTEGER,typeSettings TEXT null,lastPublishDate DATE null)";
+		"create table AssetListEntry (uuid_ VARCHAR(75) null,assetListEntryId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,assetListEntryKey VARCHAR(75) null,title VARCHAR(75) null,type_ INTEGER,lastPublishDate DATE null)";
 
 	public static final String TABLE_SQL_DROP = "drop table AssetListEntry";
 
@@ -117,32 +117,27 @@ public class AssetListEntryModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.entity.cache.enabled.com.liferay.asset.list.model.AssetListEntry"),
-		true);
+	public static final long ASSETLISTENTRYKEY_COLUMN_BITMASK = 1L;
 
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.finder.cache.enabled.com.liferay.asset.list.model.AssetListEntry"),
-		true);
+	public static final long COMPANYID_COLUMN_BITMASK = 2L;
 
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"value.object.column.bitmask.enabled.com.liferay.asset.list.model.AssetListEntry"),
-		true);
+	public static final long GROUPID_COLUMN_BITMASK = 4L;
 
-	public static final long COMPANYID_COLUMN_BITMASK = 1L;
+	public static final long TITLE_COLUMN_BITMASK = 8L;
 
-	public static final long GROUPID_COLUMN_BITMASK = 2L;
+	public static final long TYPE_COLUMN_BITMASK = 16L;
 
-	public static final long TITLE_COLUMN_BITMASK = 4L;
+	public static final long UUID_COLUMN_BITMASK = 32L;
 
-	public static final long TYPE_COLUMN_BITMASK = 8L;
+	public static final long ASSETLISTENTRYID_COLUMN_BITMASK = 64L;
 
-	public static final long UUID_COLUMN_BITMASK = 16L;
+	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
+		_entityCacheEnabled = entityCacheEnabled;
+	}
 
-	public static final long ASSETLISTENTRYID_COLUMN_BITMASK = 32L;
+	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
+		_finderCacheEnabled = finderCacheEnabled;
+	}
 
 	/**
 	 * Converts the soap model instance into a normal model instance.
@@ -165,9 +160,9 @@ public class AssetListEntryModelImpl
 		model.setUserName(soapModel.getUserName());
 		model.setCreateDate(soapModel.getCreateDate());
 		model.setModifiedDate(soapModel.getModifiedDate());
+		model.setAssetListEntryKey(soapModel.getAssetListEntryKey());
 		model.setTitle(soapModel.getTitle());
 		model.setType(soapModel.getType());
-		model.setTypeSettings(soapModel.getTypeSettings());
 		model.setLastPublishDate(soapModel.getLastPublishDate());
 
 		return model;
@@ -195,10 +190,6 @@ public class AssetListEntryModelImpl
 
 		return models;
 	}
-
-	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
-		com.liferay.asset.list.service.util.ServiceProps.get(
-			"lock.expiration.time.com.liferay.asset.list.model.AssetListEntry"));
 
 	public AssetListEntryModelImpl() {
 	}
@@ -335,6 +326,12 @@ public class AssetListEntryModelImpl
 		attributeSetterBiConsumers.put(
 			"modifiedDate",
 			(BiConsumer<AssetListEntry, Date>)AssetListEntry::setModifiedDate);
+		attributeGetterFunctions.put(
+			"assetListEntryKey", AssetListEntry::getAssetListEntryKey);
+		attributeSetterBiConsumers.put(
+			"assetListEntryKey",
+			(BiConsumer<AssetListEntry, String>)
+				AssetListEntry::setAssetListEntryKey);
 		attributeGetterFunctions.put("title", AssetListEntry::getTitle);
 		attributeSetterBiConsumers.put(
 			"title",
@@ -343,12 +340,6 @@ public class AssetListEntryModelImpl
 		attributeSetterBiConsumers.put(
 			"type",
 			(BiConsumer<AssetListEntry, Integer>)AssetListEntry::setType);
-		attributeGetterFunctions.put(
-			"typeSettings", AssetListEntry::getTypeSettings);
-		attributeSetterBiConsumers.put(
-			"typeSettings",
-			(BiConsumer<AssetListEntry, String>)
-				AssetListEntry::setTypeSettings);
 		attributeGetterFunctions.put(
 			"lastPublishDate", AssetListEntry::getLastPublishDate);
 		attributeSetterBiConsumers.put(
@@ -518,6 +509,32 @@ public class AssetListEntryModelImpl
 
 	@JSON
 	@Override
+	public String getAssetListEntryKey() {
+		if (_assetListEntryKey == null) {
+			return "";
+		}
+		else {
+			return _assetListEntryKey;
+		}
+	}
+
+	@Override
+	public void setAssetListEntryKey(String assetListEntryKey) {
+		_columnBitmask |= ASSETLISTENTRYKEY_COLUMN_BITMASK;
+
+		if (_originalAssetListEntryKey == null) {
+			_originalAssetListEntryKey = _assetListEntryKey;
+		}
+
+		_assetListEntryKey = assetListEntryKey;
+	}
+
+	public String getOriginalAssetListEntryKey() {
+		return GetterUtil.getString(_originalAssetListEntryKey);
+	}
+
+	@JSON
+	@Override
 	public String getTitle() {
 		if (_title == null) {
 			return "";
@@ -563,22 +580,6 @@ public class AssetListEntryModelImpl
 
 	public int getOriginalType() {
 		return _originalType;
-	}
-
-	@JSON
-	@Override
-	public String getTypeSettings() {
-		if (_typeSettings == null) {
-			return "";
-		}
-		else {
-			return _typeSettings;
-		}
-	}
-
-	@Override
-	public void setTypeSettings(String typeSettings) {
-		_typeSettings = typeSettings;
 	}
 
 	@JSON
@@ -638,9 +639,9 @@ public class AssetListEntryModelImpl
 		assetListEntryImpl.setUserName(getUserName());
 		assetListEntryImpl.setCreateDate(getCreateDate());
 		assetListEntryImpl.setModifiedDate(getModifiedDate());
+		assetListEntryImpl.setAssetListEntryKey(getAssetListEntryKey());
 		assetListEntryImpl.setTitle(getTitle());
 		assetListEntryImpl.setType(getType());
-		assetListEntryImpl.setTypeSettings(getTypeSettings());
 		assetListEntryImpl.setLastPublishDate(getLastPublishDate());
 
 		assetListEntryImpl.resetOriginalValues();
@@ -692,12 +693,12 @@ public class AssetListEntryModelImpl
 
 	@Override
 	public boolean isEntityCacheEnabled() {
-		return ENTITY_CACHE_ENABLED;
+		return _entityCacheEnabled;
 	}
 
 	@Override
 	public boolean isFinderCacheEnabled() {
-		return FINDER_CACHE_ENABLED;
+		return _finderCacheEnabled;
 	}
 
 	@Override
@@ -717,6 +718,9 @@ public class AssetListEntryModelImpl
 		assetListEntryModelImpl._setOriginalCompanyId = false;
 
 		assetListEntryModelImpl._setModifiedDate = false;
+
+		assetListEntryModelImpl._originalAssetListEntryKey =
+			assetListEntryModelImpl._assetListEntryKey;
 
 		assetListEntryModelImpl._originalTitle = assetListEntryModelImpl._title;
 
@@ -774,6 +778,14 @@ public class AssetListEntryModelImpl
 			assetListEntryCacheModel.modifiedDate = Long.MIN_VALUE;
 		}
 
+		assetListEntryCacheModel.assetListEntryKey = getAssetListEntryKey();
+
+		String assetListEntryKey = assetListEntryCacheModel.assetListEntryKey;
+
+		if ((assetListEntryKey != null) && (assetListEntryKey.length() == 0)) {
+			assetListEntryCacheModel.assetListEntryKey = null;
+		}
+
 		assetListEntryCacheModel.title = getTitle();
 
 		String title = assetListEntryCacheModel.title;
@@ -783,14 +795,6 @@ public class AssetListEntryModelImpl
 		}
 
 		assetListEntryCacheModel.type = getType();
-
-		assetListEntryCacheModel.typeSettings = getTypeSettings();
-
-		String typeSettings = assetListEntryCacheModel.typeSettings;
-
-		if ((typeSettings != null) && (typeSettings.length() == 0)) {
-			assetListEntryCacheModel.typeSettings = null;
-		}
 
 		Date lastPublishDate = getLastPublishDate();
 
@@ -873,6 +877,8 @@ public class AssetListEntryModelImpl
 	private static final Class<?>[] _escapedModelInterfaces = new Class[] {
 		AssetListEntry.class, ModelWrapper.class
 	};
+	private static boolean _entityCacheEnabled;
+	private static boolean _finderCacheEnabled;
 
 	private String _uuid;
 	private String _originalUuid;
@@ -888,12 +894,13 @@ public class AssetListEntryModelImpl
 	private Date _createDate;
 	private Date _modifiedDate;
 	private boolean _setModifiedDate;
+	private String _assetListEntryKey;
+	private String _originalAssetListEntryKey;
 	private String _title;
 	private String _originalTitle;
 	private int _type;
 	private int _originalType;
 	private boolean _setOriginalType;
-	private String _typeSettings;
 	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private AssetListEntry _escapedModel;

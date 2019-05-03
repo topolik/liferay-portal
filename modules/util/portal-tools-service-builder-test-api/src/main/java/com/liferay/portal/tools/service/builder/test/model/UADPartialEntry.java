@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 	"com.liferay.portal.tools.service.builder.test.model.impl.UADPartialEntryImpl"
 )
 @ProviderType
-public interface UADPartialEntry extends UADPartialEntryModel, PersistedModel {
+public interface UADPartialEntry extends PersistedModel, UADPartialEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

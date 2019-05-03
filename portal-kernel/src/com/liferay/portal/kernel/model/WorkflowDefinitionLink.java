@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface WorkflowDefinitionLink
-	extends WorkflowDefinitionLinkModel, PersistedModel {
+	extends PersistedModel, WorkflowDefinitionLinkModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

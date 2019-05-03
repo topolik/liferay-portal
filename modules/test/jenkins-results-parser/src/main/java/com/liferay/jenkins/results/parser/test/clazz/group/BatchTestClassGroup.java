@@ -109,6 +109,13 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 		portalGitWorkingDirectory =
 			portalTestClassJob.getPortalGitWorkingDirectory();
 
+		String portalBranchName =
+			portalGitWorkingDirectory.getUpstreamBranchName();
+
+		if (portalBranchName.endsWith("-private")) {
+			testPrivatePortalBranch = true;
+		}
+
 		if (portalTestClassJob instanceof TestSuiteJob) {
 			TestSuiteJob testSuiteJob = (TestSuiteJob)portalTestClassJob;
 
@@ -132,7 +139,7 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 			return Integer.parseInt(axisMaxSize);
 		}
 
-		return _DEFAULT_AXIS_MAX_SIZE;
+		return _AXES_SIZE_MAX_DEFAULT;
 	}
 
 	protected String getFirstMatchingPropertyName(
@@ -381,6 +388,7 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 	protected final List<PathMatcher> includesPathMatchers = new ArrayList<>();
 	protected final Properties jobProperties;
 	protected final PortalGitWorkingDirectory portalGitWorkingDirectory;
+	protected boolean testPrivatePortalBranch;
 	protected boolean testReleaseBundle;
 	protected boolean testRelevantChanges;
 	protected boolean testRelevantIntegrationUnitOnly;
@@ -499,7 +507,7 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 			return;
 		}
 
-		testReleaseBundle = _DEFAULT_TEST_RELEASE_BUNDLE;
+		testReleaseBundle = _ENABLE_TEST_RELEASE_BUNDLE_DEFAULT;
 	}
 
 	private void _setTestRelevantChanges() {
@@ -511,7 +519,7 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 			return;
 		}
 
-		testRelevantChanges = _DEFAULT_TEST_RELEVANT_CHANGES;
+		testRelevantChanges = _ENABLE_TEST_RELEVANT_CHANGES_DEFAULT;
 	}
 
 	private void _setTestRelevantIntegrationUnitOnly() {
@@ -524,10 +532,10 @@ public abstract class BatchTestClassGroup extends BaseTestClassGroup {
 		testRelevantIntegrationUnitOnly = false;
 	}
 
-	private static final int _DEFAULT_AXIS_MAX_SIZE = 5000;
+	private static final int _AXES_SIZE_MAX_DEFAULT = 5000;
 
-	private static final boolean _DEFAULT_TEST_RELEASE_BUNDLE = false;
+	private static final boolean _ENABLE_TEST_RELEASE_BUNDLE_DEFAULT = false;
 
-	private static final boolean _DEFAULT_TEST_RELEVANT_CHANGES = false;
+	private static final boolean _ENABLE_TEST_RELEVANT_CHANGES_DEFAULT = false;
 
 }

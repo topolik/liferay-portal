@@ -33,7 +33,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface ResourceTypePermission
-	extends ResourceTypePermissionModel, PersistedModel {
+	extends PersistedModel, ResourceTypePermissionModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

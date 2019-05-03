@@ -18,7 +18,6 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Contact;
-import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Organization;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.RoleConstants;
@@ -154,31 +153,42 @@ public class UserPermissionImpl
 						return true;
 					}
 
-					Group organizationGroup = organization.getGroup();
+					Organization curOrganization = organization;
 
-					// Organization administrators can only manage normal users.
-					// Owners can only manage normal users and administrators.
+					while (curOrganization != null) {
 
-					if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
-							user.getUserId(), organizationGroup.getGroupId(),
-							RoleConstants.ORGANIZATION_OWNER, true)) {
+						// Organization owners can manage all users
 
-						continue;
-					}
-					else if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
-								user.getUserId(),
-								organizationGroup.getGroupId(),
+						if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
+								permissionChecker.getUserId(),
+								curOrganization.getGroupId(),
+								RoleConstants.ORGANIZATION_OWNER, true)) {
+
+							return true;
+						}
+
+						// Organization administrators can only manage normal
+						// users
+
+						if (UserGroupRoleLocalServiceUtil.hasUserGroupRole(
+								permissionChecker.getUserId(),
+								curOrganization.getGroupId(),
 								RoleConstants.ORGANIZATION_ADMINISTRATOR,
 								true) &&
-							 !UserGroupRoleLocalServiceUtil.hasUserGroupRole(
-								 permissionChecker.getUserId(),
-								 organizationGroup.getGroupId(),
-								 RoleConstants.ORGANIZATION_OWNER, true)) {
+							!UserGroupRoleLocalServiceUtil.hasUserGroupRole(
+								user.getUserId(), organization.getGroupId(),
+								RoleConstants.ORGANIZATION_ADMINISTRATOR,
+								true) &&
+							!UserGroupRoleLocalServiceUtil.hasUserGroupRole(
+								user.getUserId(), organization.getGroupId(),
+								RoleConstants.ORGANIZATION_OWNER, true)) {
 
-						continue;
+							return true;
+						}
+
+						curOrganization =
+							curOrganization.getParentOrganization();
 					}
-
-					return true;
 				}
 			}
 		}

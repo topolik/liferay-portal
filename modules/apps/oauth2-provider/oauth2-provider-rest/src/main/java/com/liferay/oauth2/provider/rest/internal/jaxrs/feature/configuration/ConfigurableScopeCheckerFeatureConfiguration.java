@@ -38,14 +38,14 @@ public interface ConfigurableScopeCheckerFeatureConfiguration {
 		id = "osgi.jaxrs.application.select",
 		name = "osgi-jaxrs-application-select"
 	)
-	public String osgiJAXRSSelect();
+	public String osgiJaxRsSelect();
 
 	@Meta.AD(
 		deflt = "Liferay.OAuth2.HTTP.configurable.request.checker",
 		description = "osgi-jaxrs-name-description", id = "osgi.jaxrs.name",
 		name = "osgi-jaxrs-name"
 	)
-	public String osgiJAXRSName();
+	public String osgiJaxRsName();
 
 	@Meta.AD(
 		deflt = "", description = "patterns-description", id = "patters",

@@ -16,7 +16,6 @@ package com.liferay.oauth2.provider.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
@@ -86,21 +85,20 @@ public abstract class BaseOAuth2ManagementToolbarDisplayContext {
 						orderColumnsMap.entrySet()) {
 
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								String orderByCol = orderByColEntry.getKey();
+						dropdownItem -> {
+							String orderByCol = orderByColEntry.getKey();
 
-								dropdownItem.setActive(
-									orderByCol.equals(getOrderByCol()));
-								dropdownItem.setHref(
-									getCurrentSortingURL(), "orderByCol",
-									orderByCol);
+							dropdownItem.setActive(
+								orderByCol.equals(getOrderByCol()));
+							dropdownItem.setHref(
+								getCurrentSortingURL(), "orderByCol",
+								orderByCol);
 
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										httpServletRequest,
-										orderByColEntry.getValue()));
-							}));
+							dropdownItem.setLabel(
+								LanguageUtil.get(
+									httpServletRequest,
+									orderByColEntry.getValue()));
+						});
 				}
 			}
 		};

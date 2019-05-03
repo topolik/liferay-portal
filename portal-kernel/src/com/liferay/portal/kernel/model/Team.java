@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.TeamImpl")
 @ProviderType
-public interface Team extends TeamModel, PersistedModel {
+public interface Team extends PersistedModel, TeamModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

@@ -22,37 +22,6 @@ import com.liferay.portal.kernel.model.User;
  */
 public class UserLockoutException extends PortalException {
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by the inner classes
-	 */
-	@Deprecated
-	public UserLockoutException() {
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by the inner classes
-	 */
-	@Deprecated
-	public UserLockoutException(String msg) {
-		super(msg);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by the inner classes
-	 */
-	@Deprecated
-	public UserLockoutException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by the inner classes
-	 */
-	@Deprecated
-	public UserLockoutException(Throwable cause) {
-		super(cause);
-	}
-
 	public static class LDAPLockout extends UserLockoutException {
 
 		public LDAPLockout(String fullUserDN, String ldapMessage) {
@@ -88,6 +57,10 @@ public class UserLockoutException extends PortalException {
 		public final PasswordPolicy passwordPolicy;
 		public final User user;
 
+	}
+
+	private UserLockoutException(String msg) {
+		super(msg);
 	}
 
 }

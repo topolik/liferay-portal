@@ -28,29 +28,20 @@ public class AddressTable {
 	public static final String TABLE_NAME = "Address";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"uuid_", Types.VARCHAR},
-		{"addressId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT},
-		{"street1", Types.VARCHAR},
-		{"street2", Types.VARCHAR},
-		{"street3", Types.VARCHAR},
-		{"city", Types.VARCHAR},
-		{"zip", Types.VARCHAR},
-		{"regionId", Types.BIGINT},
-		{"countryId", Types.BIGINT},
-		{"typeId", Types.BIGINT},
-		{"mailing", Types.BOOLEAN},
-		{"primary_", Types.BOOLEAN}
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"addressId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
+		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
+		{"classNameId", Types.BIGINT}, {"classPK", Types.BIGINT},
+		{"street1", Types.VARCHAR}, {"street2", Types.VARCHAR},
+		{"street3", Types.VARCHAR}, {"city", Types.VARCHAR},
+		{"zip", Types.VARCHAR}, {"regionId", Types.BIGINT},
+		{"countryId", Types.BIGINT}, {"typeId", Types.BIGINT},
+		{"mailing", Types.BOOLEAN}, {"primary_", Types.BOOLEAN}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -94,7 +85,8 @@ TABLE_COLUMNS_MAP.put("mailing", Types.BOOLEAN);
 TABLE_COLUMNS_MAP.put("primary_", Types.BOOLEAN);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table Address (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,addressId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,street1 VARCHAR(75) null,street2 VARCHAR(75) null,street3 VARCHAR(75) null,city VARCHAR(75) null,zip VARCHAR(75) null,regionId LONG,countryId LONG,typeId LONG,mailing BOOLEAN,primary_ BOOLEAN)";
+	public static final String TABLE_SQL_CREATE =
+"create table Address (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,addressId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,street1 VARCHAR(75) null,street2 VARCHAR(75) null,street3 VARCHAR(75) null,city VARCHAR(75) null,zip VARCHAR(75) null,regionId LONG,countryId LONG,typeId LONG,mailing BOOLEAN,primary_ BOOLEAN)";
 
 	public static final String TABLE_SQL_DROP = "drop table Address";
 

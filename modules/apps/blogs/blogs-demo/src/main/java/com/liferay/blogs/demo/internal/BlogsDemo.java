@@ -50,11 +50,11 @@ public class BlogsDemo extends BasePortalInstanceLifecycleListener {
 
 		User user1 = _basicUserDemoDataCreator.create(
 			company.getCompanyId(), "nikki.prudencio@liferay.com");
-		Group guestGroup = _groupLocalService.getGroup(
+		Group group = _groupLocalService.getGroup(
 			company.getCompanyId(), "Guest");
 
 		BlogsEntry blogsEntry1 = randomBlogsEntryDemoDataCreator.create(
-			user1.getUserId(), guestGroup.getGroupId());
+			user1.getUserId(), group.getGroupId());
 
 		_multipleCommentDemoDataCreator.create(blogsEntry1);
 
@@ -62,15 +62,15 @@ public class BlogsDemo extends BasePortalInstanceLifecycleListener {
 			company.getCompanyId(), "sergio.gonzalez@liferay.com");
 
 		BlogsEntry blogsEntry2 = randomBlogsEntryDemoDataCreator.create(
-			user2.getUserId(), guestGroup.getGroupId());
+			user2.getUserId(), group.getGroupId());
 
 		_multipleCommentDemoDataCreator.create(blogsEntry2);
 
 		User user3 = _siteAdminUserDemoDataCreator.create(
-			guestGroup.getGroupId(), "sharon.choi@liferay.com");
+			group.getGroupId(), "sharon.choi@liferay.com");
 
 		BlogsEntry blogsEntry3 = randomBlogsEntryDemoDataCreator.create(
-			user3.getUserId(), guestGroup.getGroupId());
+			user3.getUserId(), group.getGroupId());
 
 		_multipleCommentDemoDataCreator.create(blogsEntry3);
 
@@ -87,7 +87,7 @@ public class BlogsDemo extends BasePortalInstanceLifecycleListener {
 			User user = _getRandomElement(users);
 
 			BlogsEntry blogsEntry = blogsEntryDemoDataCreator.create(
-				user.getUserId(), guestGroup.getGroupId());
+				user.getUserId(), group.getGroupId());
 
 			_multipleCommentDemoDataCreator.create(blogsEntry);
 		}
@@ -108,23 +108,11 @@ public class BlogsDemo extends BasePortalInstanceLifecycleListener {
 		_siteAdminUserDemoDataCreator.delete();
 	}
 
-	@Reference(unbind = "-")
-	protected void setBasicUserDemoDataCreator(
-		BasicUserDemoDataCreator basicUserDemoDataCreator) {
-
-		_basicUserDemoDataCreator = basicUserDemoDataCreator;
-	}
-
 	@Reference(target = "(source=creative-commons)", unbind = "-")
 	protected void setCreativeCommonsBlogsEntryDemoDataCreator(
 		BlogsEntryDemoDataCreator blogsEntryDemoDataCreator) {
 
 		_blogsEntryDemoDataCreators.add(blogsEntryDemoDataCreator);
-	}
-
-	@Reference(unbind = "-")
-	protected void setGroupLocalService(GroupLocalService groupLocalService) {
-		_groupLocalService = groupLocalService;
 	}
 
 	@Reference(target = "(source=lorem-ipsum)", unbind = "-")
@@ -134,42 +122,29 @@ public class BlogsDemo extends BasePortalInstanceLifecycleListener {
 		_blogsEntryDemoDataCreators.add(blogsEntryDemoDataCreator);
 	}
 
-	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED, unbind = "-")
-	protected void setModuleServiceLifecycle(
-		ModuleServiceLifecycle moduleServiceLifecycle) {
-	}
-
-	@Reference(unbind = "-")
-	protected void setMultipleCommentDemoDataCreator(
-		MultipleCommentDemoDataCreator multipleCommentDemoDataCreator) {
-
-		_multipleCommentDemoDataCreator = multipleCommentDemoDataCreator;
-	}
-
-	@Reference(unbind = "-")
-	protected void setOmniAdminUserDemoDataCreator(
-		OmniAdminUserDemoDataCreator omniAdminUserDemoDataCreator) {
-
-		_omniAdminUserDemoDataCreator = omniAdminUserDemoDataCreator;
-	}
-
-	@Reference(unbind = "-")
-	protected void setSiteAdminUserDemoDataCreator(
-		SiteAdminUserDemoDataCreator siteAdminUserDemoDataCreator) {
-
-		_siteAdminUserDemoDataCreator = siteAdminUserDemoDataCreator;
-	}
-
 	private <T> T _getRandomElement(List<T> list) {
 		return list.get(RandomUtil.nextInt(list.size()));
 	}
 
+	@Reference
 	private BasicUserDemoDataCreator _basicUserDemoDataCreator;
+
 	private final List<BlogsEntryDemoDataCreator> _blogsEntryDemoDataCreators =
 		new ArrayList<>();
+
+	@Reference
 	private GroupLocalService _groupLocalService;
+
+	@Reference(target = ModuleServiceLifecycle.PORTAL_INITIALIZED)
+	private ModuleServiceLifecycle _moduleServiceLifecycle;
+
+	@Reference
 	private MultipleCommentDemoDataCreator _multipleCommentDemoDataCreator;
+
+	@Reference
 	private OmniAdminUserDemoDataCreator _omniAdminUserDemoDataCreator;
+
+	@Reference
 	private SiteAdminUserDemoDataCreator _siteAdminUserDemoDataCreator;
 
 }

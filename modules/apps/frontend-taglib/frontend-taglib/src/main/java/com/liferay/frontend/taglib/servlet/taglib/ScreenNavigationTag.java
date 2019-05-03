@@ -65,12 +65,60 @@ public class ScreenNavigationTag extends IncludeTag {
 		return super.doStartTag();
 	}
 
+	public String getContainerCssClass() {
+		return _containerCssClass;
+	}
+
+	public String getContainerWrapperCssClass() {
+		return _containerWrapperCssClass;
+	}
+
+	public Object getContext() {
+		return _context;
+	}
+
+	public String getFullContainerCssClass() {
+		return _fullContainerCssClass;
+	}
+
+	public String getHeaderContainerCssClass() {
+		return _headerContainerCssClass;
+	}
+
+	public String getId() {
+		return _id;
+	}
+
+	public String getKey() {
+		return _key;
+	}
+
+	public String getMenubarCssClass() {
+		return _menubarCssClass;
+	}
+
+	public Object getModelBean() {
+		return _modelBean;
+	}
+
 	public Object getModelContext() {
 		if (Validator.isNotNull(_modelBean)) {
 			return _modelBean;
 		}
 
 		return _context;
+	}
+
+	public String getNavCssClass() {
+		return _navCssClass;
+	}
+
+	public PortletURL getPortletURL() {
+		return _portletURL;
+	}
+
+	public boolean isInverted() {
+		return _inverted;
 	}
 
 	public void setContainerCssClass(String containerCssClass) {
@@ -95,6 +143,10 @@ public class ScreenNavigationTag extends IncludeTag {
 
 	public void setId(String id) {
 		_id = id;
+	}
+
+	public void setInverted(boolean inverted) {
+		_inverted = inverted;
 	}
 
 	public void setKey(String key) {
@@ -134,6 +186,7 @@ public class ScreenNavigationTag extends IncludeTag {
 		_fullContainerCssClass = "col-md-12";
 		_headerContainerCssClass = "container";
 		_id = null;
+		_inverted = false;
 		_key = null;
 		_menubarCssClass =
 			"menubar menubar-transparent menubar-vertical-expand-md";
@@ -190,6 +243,8 @@ public class ScreenNavigationTag extends IncludeTag {
 		request.setAttribute(
 			"liferay-frontend:screen-navigation:containerWrapperCssClass",
 			_containerWrapperCssClass);
+		request.setAttribute(
+			"liferay-frontend:screen-navigation:inverted", _inverted);
 		request.setAttribute(
 			"liferay-frontend:screen-navigation:menubarCssClass",
 			_menubarCssClass);
@@ -302,6 +357,7 @@ public class ScreenNavigationTag extends IncludeTag {
 	private String _fullContainerCssClass = "col-md-12";
 	private String _headerContainerCssClass = "container";
 	private String _id;
+	private boolean _inverted;
 	private String _key;
 	private String _menubarCssClass =
 		"menubar menubar-transparent menubar-vertical-expand-md";

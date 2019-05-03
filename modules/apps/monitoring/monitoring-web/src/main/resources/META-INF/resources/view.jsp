@@ -17,8 +17,17 @@
 <%@ include file="/init.jsp" %>
 
 <%
-String displayStyle = ParamUtil.getString(request, "displayStyle", "list");
 String orderByType = ParamUtil.getString(request, "orderByType", "asc");
+
+List<UserTracker> userTrackers = null;
+
+if (PropsValues.LIVE_USERS_ENABLED && PropsValues.SESSION_TRACKER_MEMORY_ENABLED) {
+	Map<String, UserTracker> sessionUsers = LiveUsers.getSessionUsers(company.getCompanyId());
+
+	userTrackers = new ArrayList<UserTracker>(sessionUsers.values());
+
+	userTrackers = ListUtil.sort(userTrackers, new UserTrackerModifiedDateComparator(orderByType.equals("asc")));
+}
 
 PortletURL portletURL = renderResponse.createRenderURL();
 
@@ -46,6 +55,7 @@ sortingURL.setParameter("orderByType", orderByType.equals("asc") ? "desc" : "asc
 />
 
 <clay:management-toolbar
+	disabled="<%= ListUtil.isEmpty(userTrackers) %>"
 	selectable="<%= false %>"
 	showSearch="<%= false %>"
 	sortingOrder="<%= orderByType %>"
@@ -54,16 +64,7 @@ sortingURL.setParameter("orderByType", orderByType.equals("asc") ? "desc" : "asc
 
 <div class="container-fluid-1280">
 	<c:choose>
-		<c:when test="<%= PropsValues.LIVE_USERS_ENABLED && PropsValues.SESSION_TRACKER_MEMORY_ENABLED %>">
-
-			<%
-			Map<String, UserTracker> sessionUsers = LiveUsers.getSessionUsers(company.getCompanyId());
-
-			List<UserTracker> userTrackers = new ArrayList<UserTracker>(sessionUsers.values());
-
-			userTrackers = ListUtil.sort(userTrackers, new UserTrackerModifiedDateComparator(orderByType.equals("asc")));
-			%>
-
+		<c:when test="<%= userTrackers != null %>">
 			<liferay-ui:search-container
 				emptyResultsMessage="there-are-no-live-sessions"
 				headerNames="session-id,user-id,name,screen-name,last-request,num-of-hits"

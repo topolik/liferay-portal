@@ -18,18 +18,15 @@ import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureVersion;
 import com.liferay.dynamic.data.mapping.service.DDMStructureVersionLocalService;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.search.spi.model.index.contributor.ModelDocumentContributor;
 
 import java.util.Locale;
-import java.util.Map;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -92,7 +89,10 @@ public class DDMStructureModelDocumentContributor
 
 		document.addLocalizedKeyword(
 			"localized_name",
-			_populateMap(ddmStructure, ddmStructure.getNameMap()), true, true);
+			LocalizationUtil.populateLocalizationMap(
+				ddmStructure.getNameMap(), ddmStructure.getDefaultLanguageId(),
+				ddmStructure.getGroupId()),
+			true, true);
 	}
 
 	protected String[] getLanguageIds(
@@ -110,25 +110,6 @@ public class DDMStructureModelDocumentContributor
 
 	@Reference
 	protected DDMStructureVersionLocalService ddmStructureVersionLocalService;
-
-	private Map<Locale, String> _populateMap(
-		DDMStructure ddmStructure, Map<Locale, String> map) {
-
-		String defaultValue = map.get(
-			LocaleUtil.fromLanguageId(ddmStructure.getDefaultLanguageId()));
-
-		for (Locale availableLocale :
-				LanguageUtil.getAvailableLocales(ddmStructure.getGroupId())) {
-
-			if (!map.containsKey(availableLocale) ||
-				Validator.isNull(map.get(availableLocale))) {
-
-				map.put(availableLocale, defaultValue);
-			}
-		}
-
-		return map;
-	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		DDMStructureModelDocumentContributor.class);

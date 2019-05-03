@@ -34,6 +34,7 @@ import com.liferay.dynamic.data.mapping.test.util.DDMFormTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMFormValuesTestUtil;
 import com.liferay.dynamic.data.mapping.test.util.DDMStructureTestUtil;
 import com.liferay.exportimport.test.util.lar.BaseStagedModelDataHandlerTestCase;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.StagedModel;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
@@ -187,23 +188,16 @@ public class DDMFormInstanceRecordStagedModelDataHandlerTest
 
 		localizedValue.addString(locale, fieldValue);
 
-		DDMFormFieldValue ddmFormFieldValue =
-			DDMFormValuesTestUtil.createDDMFormFieldValue(
-				fieldName, localizedValue);
-
-		return ddmFormFieldValue;
+		return DDMFormValuesTestUtil.createDDMFormFieldValue(
+			fieldName, localizedValue);
 	}
 
 	@Override
-	protected StagedModel getStagedModel(String uuid, Group group) {
-		try {
-			return DDMFormInstanceRecordLocalServiceUtil.
-				fetchDDMFormInstanceRecordByUuidAndGroupId(
-					uuid, group.getGroupId());
-		}
-		catch (Exception e) {
-			return null;
-		}
+	protected StagedModel getStagedModel(String uuid, Group group)
+		throws PortalException {
+
+		return DDMFormInstanceRecordLocalServiceUtil.
+			getDDMFormInstanceRecordByUuidAndGroupId(uuid, group.getGroupId());
 	}
 
 	@Override

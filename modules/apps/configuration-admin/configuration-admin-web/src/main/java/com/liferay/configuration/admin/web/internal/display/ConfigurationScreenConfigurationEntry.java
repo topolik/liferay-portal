@@ -15,8 +15,10 @@
 package com.liferay.configuration.admin.web.internal.display;
 
 import com.liferay.configuration.admin.display.ConfigurationScreen;
+import com.liferay.petra.lang.HashUtil;
 
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.portlet.PortletURL;
 import javax.portlet.RenderRequest;
@@ -33,6 +35,28 @@ public class ConfigurationScreenConfigurationEntry
 
 		_configurationScreen = configurationScreen;
 		_locale = locale;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof ConfigurationEntry)) {
+			return false;
+		}
+
+		ConfigurationEntry configurationEntry = (ConfigurationEntry)obj;
+
+		if (Objects.equals(getCategory(), configurationEntry.getCategory()) &&
+			Objects.equals(getKey(), configurationEntry.getKey()) &&
+			Objects.equals(getScope(), configurationEntry.getScope())) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	@Override
@@ -67,6 +91,16 @@ public class ConfigurationScreenConfigurationEntry
 	@Override
 	public String getScope() {
 		return _configurationScreen.getScope();
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = HashUtil.hash(0, getCategory());
+
+		hash = HashUtil.hash(hash, getKey());
+		hash = HashUtil.hash(hash, getScope());
+
+		return hash;
 	}
 
 	private final ConfigurationScreen _configurationScreen;

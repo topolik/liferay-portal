@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.ObjectClassDefinition;
@@ -93,17 +94,22 @@ public class ConfigurationModelToDDMFormConverter {
 	}
 
 	protected void addOptionalDDMFormFields(DDMForm ddmForm) {
-		AttributeDefinition[] optionalAttributeDefinitions =
+		AttributeDefinition[] optionalAttributeDefinitions = ArrayUtil.filter(
 			_configurationModel.getAttributeDefinitions(
-				ObjectClassDefinition.OPTIONAL);
+				ObjectClassDefinition.OPTIONAL),
+			_requiredInputPredicate.negate());
 
 		addDDMFormFields(optionalAttributeDefinitions, ddmForm, false);
 	}
 
 	protected void addRequiredDDMFormFields(DDMForm ddmForm) {
-		AttributeDefinition[] requiredAttributeDefinitions =
+		AttributeDefinition[] requiredAttributeDefinitions = ArrayUtil.append(
 			_configurationModel.getAttributeDefinitions(
-				ObjectClassDefinition.REQUIRED);
+				ObjectClassDefinition.REQUIRED),
+			ArrayUtil.filter(
+				_configurationModel.getAttributeDefinitions(
+					ObjectClassDefinition.OPTIONAL),
+				_requiredInputPredicate));
 
 		addDDMFormFields(requiredAttributeDefinitions, ddmForm, true);
 	}
@@ -388,6 +394,15 @@ public class ConfigurationModelToDDMFormConverter {
 
 	private final ConfigurationModel _configurationModel;
 	private final Locale _locale;
+
+	private Predicate<AttributeDefinition> _requiredInputPredicate =
+		attributeDefinition -> {
+			Map<String, String> extensionAttributes = _getExtensionAttributes(
+				attributeDefinition);
+
+			return Boolean.valueOf(extensionAttributes.get("required-input"));
+		};
+
 	private final ResourceBundle _resourceBundle;
 
 }

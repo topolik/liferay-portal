@@ -1,3 +1,10 @@
+/**
+ * The Input Move Boxes Touch Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-input-move-boxes-touch
+ */
+
 AUI.add(
 	'liferay-input-move-boxes-touch',
 	function(A) {

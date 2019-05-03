@@ -14,8 +14,33 @@
 	<td></td>
 </tr>
 <tr>
+	<td>ACTIVE_CHANGE_LIST_STATUS</td>
+	<td>//td[contains(.,'${key_changeListName}')]//following-sibling::td//span[contains(@class,'label-info')]//span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CHANGE_LIST_ADDED</td>
+	<td>//div[contains(@data-qa-id,'changesAdded')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CHANGE_LIST_DELETED</td>
+	<td>//div[contains(@data-qa-id,'changesDeleted')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CHANGE_LIST_MODIFIED</td>
+	<td>//div[contains(@data-qa-id,'changesModified')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>CHANGE_LIST_NAME</td>
 	<td>//input[contains(@name,'name')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>CHANGE_LIST_NAME_CARD_VIEW</td>
+	<td>//span[contains(@data-qa-id,'headerSubTitle')][normalize-space(text())='${key_changeListName}']</td>
 	<td></td>
 </tr>
 <tr>
@@ -31,6 +56,11 @@
 <tr>
 	<td>CHECK_CIRCLE</td>
 	<td>//td[contains(.,'${key_contentTitle}')]//following-sibling::td//span[span/*[name()='svg'][contains(@class,'lexicon-icon')]]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>COLLISTION_DETECTED</td>
+	<td>//span[contains(@data-title,'Collision detected')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -50,7 +80,7 @@
 </tr>
 <tr>
 	<td>LATEST_CHANGES_CONTENT_TYPE</td>
-	<td>//div[contains(@id,'change-entry-content-type') and contains(.,'${key_contentType}')]</td>
+	<td>//div[contains(@id,'change-entry-title') and contains(.,'${key_contentTitle}')]//parent::td//following-sibling::td//div[contains(@id,'change-entry-content-type')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -96,6 +126,16 @@
 <tr>
 	<td>OVERVIEW_PUBLISHED_BY</td>
 	<td>//div[contains(@data-qa-id,'publishedBy')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>PRODUCTION_CARD_TITLE</td>
+	<td>//span[contains(@class,'work-on-production')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>VIEW_CHANGE_LIST_NAME_HISTORY</td>
+	<td>//tr[contains(.,'${key_contentTitle}')]//td[contains(@class,'change-list-title')]</td>
 	<td></td>
 </tr>
 </tbody>

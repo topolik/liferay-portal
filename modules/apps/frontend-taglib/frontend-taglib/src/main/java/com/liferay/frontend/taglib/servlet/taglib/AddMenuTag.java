@@ -145,6 +145,18 @@ public class AddMenuTag extends IncludeTag {
 		return EVAL_BODY_INCLUDE;
 	}
 
+	public int getMaxItems() {
+		return _maxItems;
+	}
+
+	public String getViewMoreURL() {
+		return _viewMoreURL;
+	}
+
+	public boolean isInline() {
+		return _inline;
+	}
+
 	public void setAddMenuItems(List<AddMenuItem> addMenuItems) {
 		_addMenuItems = addMenuItems;
 	}
@@ -183,11 +195,8 @@ public class AddMenuTag extends IncludeTag {
 	}
 
 	protected List<AddMenuItem> getAddMenuItems() {
-		List<AddMenuItem> addMenuItems =
-			(List<AddMenuItem>)request.getAttribute(
-				"liferay-frontend:add-menu:addMenuItems");
-
-		return addMenuItems;
+		return (List<AddMenuItem>)request.getAttribute(
+			"liferay-frontend:add-menu:addMenuItems");
 	}
 
 	@Override

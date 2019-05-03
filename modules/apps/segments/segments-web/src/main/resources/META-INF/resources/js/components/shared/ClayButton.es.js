@@ -1,12 +1,13 @@
-import React, {Component} from 'react';
-import {PropTypes} from 'prop-types';
 import ClayIcon from './ClayIcon.es';
 import getCN from 'classnames';
+import React, {Component} from 'react';
+import {PropTypes} from 'prop-types';
 
 class ClayButton extends Component {
 	static propTypes = {
 		borderless: PropTypes.bool,
 		className: PropTypes.string,
+		disabled: PropTypes.bool,
 		href: PropTypes.string,
 		iconName: PropTypes.string,
 		label: PropTypes.string,
@@ -43,6 +44,7 @@ class ClayButton extends Component {
 		const {
 			borderless,
 			className,
+			disabled,
 			href,
 			iconName,
 			label,
@@ -61,7 +63,8 @@ class ClayButton extends Component {
 			{
 				[`btn-${size}`]: size,
 				'btn-monospaced': monospaced,
-				'btn-outline-borderless': borderless
+				'btn-outline-borderless': borderless,
+				'disabled': href && disabled
 			},
 			className
 		);
@@ -71,6 +74,7 @@ class ClayButton extends Component {
 		) : (
 			<button
 				className={classes}
+				disabled={disabled}
 				type={type}
 				{...otherProps}
 			>

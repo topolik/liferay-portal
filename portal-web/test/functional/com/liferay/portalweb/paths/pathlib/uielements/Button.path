@@ -65,7 +65,12 @@
 </tr>
 <tr>
 	<td>ANY_DISABLED</td>
-	<td>//*[contains(@class,'btn') and contains(@class,'disabled')][contains(.,'${key_text}')]</td>
+	<td>//*[contains(@class,'btn')][normalize-space(text())='${key_text}'][@disabled='']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>ANY_ENABLED</td>
+	<td>//*[contains(@class,'btn')][normalize-space(text())='${key_text}'][not(@disabled='')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -154,8 +159,13 @@
 	<td></td>
 </tr>
 <tr>
+	<td>CLOSE_MESSAGE_FLOAT</td>
+	<td>//div[contains(@class,'alert-dismissible')][contains(@class,'show')]//button[@aria-label='Close']</td>
+	<td></td>
+</tr>
+<tr>
 	<td>COLOR_EFFECT</td>
-	<td>//a[contains(@class, 'btn')][*[name()='svg'][@data-icon='effects']]</td>
+	<td>//button[*[name()='svg'][contains(@class,'lexicon-icon-effects')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -185,12 +195,17 @@
 </tr>
 <tr>
 	<td>CREATE_CERTIFICATE</td>
-	<td>//button[contains(.,'Create Certificate')]</td>
+	<td>//button[contains(@onclick,'${key_certificateUsage}')]/span[contains(.,'Create Certificate')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DELETE</td>
 	<td>//*[@data-qa-id='deleteButton'] | //button[contains(.,'Delete')] | //button[contains(.,'delete')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>DELETE_CERTIFICATE</td>
+	<td>//button[contains(.,'Delete Certificate')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -215,12 +230,12 @@
 </tr>
 <tr>
 	<td>DOWNLOAD</td>
-	<td>//a[contains(@class,'btn') and contains(.,'Download')] | //button[contains(.,'Download')]</td>
+	<td>//a[2][contains(@class,'btn') and contains(.,'Download')] | //button[contains(.,'Download')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>DOWNLOAD_CERTIFICATE</td>
-	<td>//a[contains(.,'Download Certificate')]</td>
+	<td>//a[contains(@href,'${key_certificateUsage}')]/span[contains(.,'Download Certificate')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -325,7 +340,7 @@
 </tr>
 <tr>
 	<td>LOCALIZATION</td>
-	<td>//div[label[contains(.,'${key_fieldName}')]]//div[contains(@class,'localized')]//button[contains(@class,'localized')] | //div[contains(@class,'ddm-container')]//div[contains(@class,'localized')]//button[contains(@class,'localized')]</td>
+	<td>//div[label[contains(.,'${key_fieldName}')]]//div[contains(@class,'localized')]//button[contains(@class,'localized')] | //div[contains(@class,'form-group')]//div[contains(@class,'localized')]//button[contains(@class,'localized')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -379,6 +394,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>PENCIL</td>
+	<td>//*[contains(@class,'btn')]//*[contains(@class,'pencil')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>PERMISSIONS</td>
 	<td>//a[contains(.,'Permissions') and contains(@class,'btn')] | //button[contains(.,'Permissions')]</td>
 	<td></td>
@@ -405,7 +425,7 @@
 </tr>
 <tr>
 	<td>PUBLISH</td>
-	<td>//button[span[contains(.,'Publish')]]</td>
+	<td>//button[span[contains(.,'Publish')]] | //div[contains(@class,'button-holder')]//button[contains(text(),'Publish')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -435,7 +455,7 @@
 </tr>
 <tr>
 	<td>REPLACE_CERTIFICATE</td>
-	<td>//button[contains(.,'Replace Certificate')]</td>
+	<td>//button[contains(@onclick,'${key_certificateUsage}')]/span[contains(.,'Replace Certificate')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -515,7 +535,7 @@
 </tr>
 <tr>
 	<td>SELECT_CATEGORIES</td>
-	<td>//button[contains(.,'Select Categories')] | //button[@title='Select Categories']</td>
+	<td>//button[contains(@class,'btn-secondary')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -580,12 +600,12 @@
 </tr>
 <tr>
 	<td>SUBSCRIBE</td>
-	<td>//button[contains(.,'Subscribe')]</td>
+	<td>//button[contains(.,'Subscribe')] | //a[contains(.,'Subscribe')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>TRANSFORM</td>
-	<td>//div[a/*[name()='svg'][@data-icon='transform']]</td>
+	<td>//button[*[name()='svg'][contains(@class,'lexicon-icon-transform')]]</td>
 	<td></td>
 </tr>
 <tr>
@@ -600,7 +620,7 @@
 </tr>
 <tr>
 	<td>UNPUBLISH</td>
-	<td>//button[contains(@id,'publish') and contains(.,'Unpublish')]</td>
+	<td>//button[contains(@id,'publish') and contains(.,'Unpublish')] | //button[contains(@class,'btn-primary') and contains(.,'Unpublish')]</td>
 	<td></td>
 </tr>
 <tr>

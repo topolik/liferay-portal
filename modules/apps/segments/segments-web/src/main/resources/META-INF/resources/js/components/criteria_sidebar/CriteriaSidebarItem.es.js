@@ -1,10 +1,10 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import ClayIcon from '../shared/ClayIcon.es';
-import {DragSource as dragSource} from 'react-dnd';
-import {PROPERTY_TYPES} from '../../utils/constants.es';
-import {DragTypes} from '../../utils/drag-types.es';
 import getCN from 'classnames';
+import PropTypes from 'prop-types';
+import React, {Component} from 'react';
+import {DragSource as dragSource} from 'react-dnd';
+import {DragTypes} from '../../utils/drag-types.es';
+import {PROPERTY_TYPES} from '../../utils/constants.es';
 
 const TYPE_ICON_MAP = {
 	[PROPERTY_TYPES.BOOLEAN]: 'text',

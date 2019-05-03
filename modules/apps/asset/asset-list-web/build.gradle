@@ -20,10 +20,10 @@ dependencies {
 	compileOnly project(":apps:item-selector:item-selector-api")
 	compileOnly project(":apps:item-selector:item-selector-criteria-api")
 	compileOnly project(":apps:layout:layout-page-template-api")
+	compileOnly project(":apps:segments:segments-api")
 	compileOnly project(":apps:site:site-item-selector-api")
 	compileOnly project(":apps:staging:staging-api")
+	compileOnly project(":core:petra:petra-function")
 	compileOnly project(":core:petra:petra-lang")
 	compileOnly project(":core:petra:petra-string")
-
-	jsCompile project(":apps:asset:asset-taglib")
 }

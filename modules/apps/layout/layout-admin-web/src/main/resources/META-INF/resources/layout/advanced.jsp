@@ -58,24 +58,6 @@ String curTarget = GetterUtil.getString(layoutTypeSettings.getProperty("target")
 		currentLogoURL='<%= (selLayout.getIconImageId() == 0) ? themeDisplay.getPathThemeImages() + "/spacer.png" : themeDisplay.getPathImage() + "/logo?img_id=" + selLayout.getIconImageId() + "&t=" + WebServerServletTokenUtil.getToken(selLayout.getIconImageId()) %>'
 		defaultLogo="<%= selLayout.getIconImageId() == 0 %>"
 		defaultLogoURL='<%= themeDisplay.getPathThemeImages() + "/spacer.png" %>'
-		editLogoFn='<%= liferayPortletResponse.getNamespace() + "editLayoutLogo" %>'
-		logoDisplaySelector='<%= ".layout-logo-" + selLayout.getPlid() %>'
 		tempImageFileName="<%= String.valueOf(selLayout.getPlid()) %>"
 	/>
 </aui:field-wrapper>
-
-<aui:script>
-	function <portlet:namespace />editLayoutLogo(logoURL, deleteLogo) {
-		var $ = AUI.$;
-
-		var layoutLogo = $('.layout-logo-<%= selLayout.getPlid() %>');
-
-		if (!layoutLogo.length) {
-			layoutLogo = $('<img alt="<liferay-ui:message escapeAttribute="<%= true %>" key="logo" />" class="layout-logo-<%= selLayout.getPlid() %>" src="' + logoURL + '" />');
-
-			$('#layout_<%= selLayout.getLayoutId() %> span').prepend(layoutLogo);
-		}
-
-		layoutLogo.toggleClass('hide', deleteLogo);
-	}
-</aui:script>

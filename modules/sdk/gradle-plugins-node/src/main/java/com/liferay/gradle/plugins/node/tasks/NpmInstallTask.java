@@ -16,6 +16,7 @@ package com.liferay.gradle.plugins.node.tasks;
 
 import com.liferay.gradle.plugins.node.internal.util.FileUtil;
 import com.liferay.gradle.plugins.node.internal.util.GradleUtil;
+import com.liferay.gradle.plugins.node.internal.util.NodePluginUtil;
 import com.liferay.gradle.util.OSDetector;
 import com.liferay.gradle.util.Validator;
 
@@ -25,14 +26,10 @@ import java.io.File;
 import java.io.IOException;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +52,10 @@ import org.gradle.api.tasks.OutputDirectory;
 public class NpmInstallTask extends ExecuteNpmTask {
 
 	public NpmInstallTask() {
+		Project project = getProject();
+
+		_nodeModulesDir = project.file("node_modules");
+
 		_removeShrinkwrappedUrls = new Callable<Boolean>() {
 
 			@Override
@@ -113,9 +114,7 @@ public class NpmInstallTask extends ExecuteNpmTask {
 
 	@OutputDirectory
 	public File getNodeModulesDir() {
-		Project project = getProject();
-
-		return project.file("node_modules");
+		return GradleUtil.toFile(getProject(), _nodeModulesDir);
 	}
 
 	@Input
@@ -193,6 +192,10 @@ public class NpmInstallTask extends ExecuteNpmTask {
 		_nodeModulesDigestFile = nodeModulesDigestFile;
 	}
 
+	public void setNodeModulesDir(Object nodeModulesDir) {
+		_nodeModulesDir = nodeModulesDir;
+	}
+
 	public void setNodeVersion(Object nodeVersion) {
 		_nodeVersion = nodeVersion;
 	}
@@ -264,77 +267,23 @@ public class NpmInstallTask extends ExecuteNpmTask {
 	protected List<String> getCompleteArgs() {
 		List<String> completeArgs = super.getCompleteArgs();
 
-		if (_npmCacheVerify) {
-			completeArgs.add("cache");
-			completeArgs.add("verify");
-		}
-		else if (isUseNpmCI() && (getPackageLockJsonFile() != null)) {
-			completeArgs.add("ci");
+		if (!NodePluginUtil.isYarnScriptFile(getScriptFile())) {
+			if (_npmCacheVerify) {
+				completeArgs.add("cache");
+				completeArgs.add("verify");
+			}
+			else if (isUseNpmCI() && (getPackageLockJsonFile() != null)) {
+				completeArgs.add("ci");
+			}
+			else {
+				completeArgs.add("install");
+			}
 		}
 		else {
 			completeArgs.add("install");
 		}
 
 		return completeArgs;
-	}
-
-	private static void _createBinDirLinks(Logger logger, File nodeModulesDir)
-		throws IOException {
-
-		JsonSlurper jsonSlurper = new JsonSlurper();
-
-		Path nodeModulesDirPath = nodeModulesDir.toPath();
-
-		Path nodeModulesBinDirPath = nodeModulesDirPath.resolve(
-			_NODE_MODULES_BIN_DIR_NAME);
-
-		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
-				nodeModulesDirPath, _directoryStreamFilter)) {
-
-			for (Path dirPath : directoryStream) {
-				Path packageJsonPath = dirPath.resolve("package.json");
-
-				if (Files.notExists(packageJsonPath)) {
-					continue;
-				}
-
-				Map<String, Object> packageJsonMap =
-					(Map<String, Object>)jsonSlurper.parse(
-						packageJsonPath.toFile());
-
-				Object binObject = packageJsonMap.get("bin");
-
-				if (!(binObject instanceof Map<?, ?>)) {
-					continue;
-				}
-
-				Map<String, String> binJsonMap = (Map<String, String>)binObject;
-
-				if (binJsonMap.isEmpty()) {
-					continue;
-				}
-
-				Files.createDirectories(nodeModulesBinDirPath);
-
-				for (Map.Entry<String, String> entry : binJsonMap.entrySet()) {
-					String linkFileName = entry.getKey();
-					String linkTargetFileName = entry.getValue();
-
-					Path linkPath = nodeModulesBinDirPath.resolve(linkFileName);
-					Path linkTargetPath = dirPath.resolve(linkTargetFileName);
-
-					Files.deleteIfExists(linkPath);
-
-					Files.createSymbolicLink(linkPath, linkTargetPath);
-
-					if (logger.isInfoEnabled()) {
-						logger.info(
-							"Created binary symbolic link {} which targets {}",
-							linkPath, linkTargetPath);
-					}
-				}
-			}
-		}
 	}
 
 	private static String _getNodeModulesCacheDigest(
@@ -407,12 +356,12 @@ public class NpmInstallTask extends ExecuteNpmTask {
 			FileUtil.syncDir(
 				project, nodeModulesCacheDir, nodeModulesDir, nativeSync);
 
-			_removeBinDirLinks(logger, nodeModulesDir);
+			FileUtil.removeBinDirLinks(logger, nodeModulesDir);
 		}
 		else {
 			npmInstallTask._npmInstall(reset);
 
-			_removeBinDirLinks(logger, nodeModulesDir);
+			FileUtil.removeBinDirLinks(logger, nodeModulesDir);
 
 			if (logger.isLifecycleEnabled()) {
 				logger.lifecycle(
@@ -425,41 +374,8 @@ public class NpmInstallTask extends ExecuteNpmTask {
 		}
 
 		if (!OSDetector.isWindows()) {
-			_createBinDirLinks(logger, nodeModulesDir);
+			FileUtil.createBinDirLinks(logger, nodeModulesDir);
 		}
-	}
-
-	private static void _removeBinDirLinks(
-			final Logger logger, File nodeModulesDir)
-		throws IOException {
-
-		Files.walkFileTree(
-			nodeModulesDir.toPath(),
-			new SimpleFileVisitor<Path>() {
-
-				@Override
-				public FileVisitResult preVisitDirectory(
-						Path dirPath, BasicFileAttributes basicFileAttributes)
-					throws IOException {
-
-					String dirName = String.valueOf(dirPath.getFileName());
-
-					if (dirName.equals(_NODE_MODULES_BIN_DIR_NAME)) {
-						if (logger.isInfoEnabled()) {
-							logger.info(
-								"Removing binary symbolic links from {}",
-								dirPath);
-						}
-
-						FileUtil.deleteSymbolicLinks(dirPath);
-
-						return FileVisitResult.SKIP_SUBTREE;
-					}
-
-					return FileVisitResult.CONTINUE;
-				}
-
-			});
 	}
 
 	private File _getExistentFile(String fileName) {
@@ -583,21 +499,10 @@ public class NpmInstallTask extends ExecuteNpmTask {
 		Files.write(shrinkwrapJsonPath, json.getBytes(StandardCharsets.UTF_8));
 	}
 
-	private static final String _NODE_MODULES_BIN_DIR_NAME = ".bin";
-
-	private static final DirectoryStream.Filter<Path> _directoryStreamFilter =
-		new DirectoryStream.Filter<Path>() {
-
-			@Override
-			public boolean accept(Path path) throws IOException {
-				return Files.isDirectory(path);
-			}
-
-		};
-
 	private Object _nodeModulesCacheDir;
 	private boolean _nodeModulesCacheNativeSync = true;
 	private Object _nodeModulesDigestFile;
+	private Object _nodeModulesDir;
 	private Object _nodeVersion;
 	private boolean _npmCacheVerify;
 	private Object _npmVersion;

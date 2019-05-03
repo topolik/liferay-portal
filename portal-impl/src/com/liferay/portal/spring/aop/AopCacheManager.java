@@ -19,125 +19,199 @@ import com.liferay.portal.dao.jdbc.aop.DynamicDataSourceAdvice;
 import com.liferay.portal.increment.BufferedIncrementAdvice;
 import com.liferay.portal.internal.cluster.ClusterableAdvice;
 import com.liferay.portal.internal.cluster.SPIClusterableAdvice;
+import com.liferay.portal.kernel.aop.ChainableMethodAdvice;
 import com.liferay.portal.kernel.dao.jdbc.aop.DynamicDataSourceTargetSource;
-import com.liferay.portal.kernel.monitoring.ServiceMonitoringControl;
 import com.liferay.portal.kernel.resiliency.spi.SPIUtil;
 import com.liferay.portal.kernel.util.InfrastructureUtil;
-import com.liferay.portal.messaging.async.AsyncAdvice;
-import com.liferay.portal.monitoring.statistics.service.ServiceMonitorAdvice;
 import com.liferay.portal.resiliency.service.PortalResiliencyAdvice;
 import com.liferay.portal.search.IndexableAdvice;
 import com.liferay.portal.security.access.control.AccessControlAdvice;
 import com.liferay.portal.service.ServiceContextAdvice;
 import com.liferay.portal.spring.transaction.TransactionExecutor;
-import com.liferay.portal.spring.transaction.TransactionInterceptor;
 import com.liferay.portal.systemevent.SystemEventAdvice;
 import com.liferay.portal.util.PropsValues;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
+import com.liferay.registry.ServiceReference;
+import com.liferay.registry.ServiceTracker;
+import com.liferay.registry.ServiceTrackerCustomizer;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Preston Crary
  */
 public class AopCacheManager {
 
-	public static AopInvocationHandler create(
-		Object target, ChainableMethodAdvice[] chainableMethodAdvices) {
+	public static synchronized AopInvocationHandler create(
+		Object target, TransactionExecutor transactionExecutor) {
 
 		AopInvocationHandler aopInvocationHandler = new AopInvocationHandler(
-			target, chainableMethodAdvices);
+			target,
+			_chainableMethodAdvices.toArray(
+				new ChainableMethodAdvice[_chainableMethodAdvices.size()]),
+			transactionExecutor);
 
 		_aopInvocationHandlers.add(aopInvocationHandler);
 
 		return aopInvocationHandler;
 	}
 
-	public static ChainableMethodAdvice[] createChainableMethodAdvices(
-		TransactionExecutor transactionExecutor,
-		ServiceMonitoringControl serviceMonitoringControl) {
+	public static synchronized void destroy(
+		AopInvocationHandler aopInvocationHandler) {
 
-		List<ChainableMethodAdvice> chainableMethodAdvices = new ArrayList<>(
-			14);
+		_aopInvocationHandlers.remove(aopInvocationHandler);
+	}
 
-		if (SPIUtil.isSPI()) {
-			chainableMethodAdvices.add(new SPIClusterableAdvice());
-		}
+	private static List<ChainableMethodAdvice>
+		_createStaticChainableMethodAdvices() {
+
+		List<ChainableMethodAdvice> chainableMethodAdvices = new ArrayList<>();
+
+		chainableMethodAdvices.add(new AccessControlAdvice());
+
+		chainableMethodAdvices.add(new BufferedIncrementAdvice());
 
 		if (PropsValues.CLUSTER_LINK_ENABLED) {
 			chainableMethodAdvices.add(new ClusterableAdvice());
 		}
 
-		chainableMethodAdvices.add(new AccessControlAdvice());
+		DynamicDataSourceTargetSource dynamicDataSourceTargetSource =
+			InfrastructureUtil.getDynamicDataSourceTargetSource();
+
+		if (dynamicDataSourceTargetSource != null) {
+			chainableMethodAdvices.add(
+				new DynamicDataSourceAdvice(dynamicDataSourceTargetSource));
+		}
+
+		chainableMethodAdvices.add(new IndexableAdvice());
 
 		if (PropsValues.PORTAL_RESILIENCY_ENABLED) {
 			chainableMethodAdvices.add(new PortalResiliencyAdvice());
 		}
 
-		chainableMethodAdvices.add(
-			new ServiceMonitorAdvice(serviceMonitoringControl));
-
-		AsyncAdvice asyncAdvice = new AsyncAdvice();
-
-		asyncAdvice.setDefaultDestinationName("liferay/async_service");
-
-		chainableMethodAdvices.add(asyncAdvice);
-
-		chainableMethodAdvices.add(new ThreadLocalCacheAdvice());
-
-		chainableMethodAdvices.add(new BufferedIncrementAdvice());
-
-		chainableMethodAdvices.add(new IndexableAdvice());
-
-		chainableMethodAdvices.add(new SystemEventAdvice());
+		chainableMethodAdvices.add(new RetryAdvice());
 
 		chainableMethodAdvices.add(new ServiceContextAdvice());
 
-		chainableMethodAdvices.add(new RetryAdvice());
-
-		TransactionInterceptor transactionInterceptor =
-			new TransactionInterceptor();
-
-		transactionInterceptor.setTransactionExecutor(transactionExecutor);
-
-		DynamicDataSourceTargetSource dynamicDataSourceTargetSource =
-			InfrastructureUtil.getDynamicDataSourceTargetSource();
-
-		if (dynamicDataSourceTargetSource != null) {
-			DynamicDataSourceAdvice dynamicDataSourceAdvice =
-				new DynamicDataSourceAdvice();
-
-			dynamicDataSourceAdvice.setDynamicDataSourceTargetSource(
-				dynamicDataSourceTargetSource);
-
-			chainableMethodAdvices.add(dynamicDataSourceAdvice);
+		if (SPIUtil.isSPI()) {
+			chainableMethodAdvices.add(new SPIClusterableAdvice());
 		}
 
-		chainableMethodAdvices.add(transactionInterceptor);
+		chainableMethodAdvices.add(new SystemEventAdvice());
 
-		return chainableMethodAdvices.toArray(
-			new ChainableMethodAdvice[chainableMethodAdvices.size()]);
-	}
+		chainableMethodAdvices.add(new ThreadLocalCacheAdvice());
 
-	public static void destroy(AopInvocationHandler aopInvocationHandler) {
-		_aopInvocationHandlers.remove(aopInvocationHandler);
-	}
+		chainableMethodAdvices.sort(_CHAINABLE_METHOD_ADVICE_COMPARATOR);
 
-	public static void reset() {
-		for (AopInvocationHandler aopInvocationHandler :
-				_aopInvocationHandlers) {
-
-			aopInvocationHandler.reset();
-		}
+		return chainableMethodAdvices;
 	}
 
 	private AopCacheManager() {
 	}
 
+	private static final Comparator<ChainableMethodAdvice>
+		_CHAINABLE_METHOD_ADVICE_COMPARATOR = Comparator.comparing(
+			chainableMethodAdvice -> {
+				Class<? extends ChainableMethodAdvice> clazz =
+					chainableMethodAdvice.getClass();
+
+				return clazz.getName();
+			});
+
 	private static final Set<AopInvocationHandler> _aopInvocationHandlers =
-		Collections.newSetFromMap(new ConcurrentHashMap<>());
+		new HashSet<>();
+	private static final List<ChainableMethodAdvice> _chainableMethodAdvices =
+		_createStaticChainableMethodAdvices();
+
+	private static class ChainableMethodAdviceServiceTrackerCustomizer
+		implements ServiceTrackerCustomizer
+			<ChainableMethodAdvice, ChainableMethodAdvice> {
+
+		@Override
+		public ChainableMethodAdvice addingService(
+			ServiceReference<ChainableMethodAdvice> serviceReference) {
+
+			Registry registry = RegistryUtil.getRegistry();
+
+			ChainableMethodAdvice chainableMethodAdvice = registry.getService(
+				serviceReference);
+
+			synchronized (AopCacheManager.class) {
+				int index = Collections.binarySearch(
+					_chainableMethodAdvices, chainableMethodAdvice,
+					_CHAINABLE_METHOD_ADVICE_COMPARATOR);
+
+				if (index < 0) {
+					index = -index - 1;
+				}
+
+				_chainableMethodAdvices.add(index, chainableMethodAdvice);
+
+				_reset();
+			}
+
+			return chainableMethodAdvice;
+		}
+
+		@Override
+		public void modifiedService(
+			ServiceReference<ChainableMethodAdvice> serviceReference,
+			ChainableMethodAdvice chainableMethodAdvice) {
+
+			synchronized (AopCacheManager.class) {
+				for (AopInvocationHandler aopInvocationHandler :
+						_aopInvocationHandlers) {
+
+					aopInvocationHandler.reset();
+				}
+			}
+		}
+
+		@Override
+		public void removedService(
+			ServiceReference<ChainableMethodAdvice> serviceReference,
+			ChainableMethodAdvice chainableMethodAdvice) {
+
+			synchronized (AopCacheManager.class) {
+				_chainableMethodAdvices.remove(chainableMethodAdvice);
+
+				_reset();
+			}
+
+			Registry registry = RegistryUtil.getRegistry();
+
+			registry.ungetService(serviceReference);
+		}
+
+		private static void _reset() {
+			ChainableMethodAdvice[] chainableMethodAdvices =
+				_chainableMethodAdvices.toArray(
+					new ChainableMethodAdvice[_chainableMethodAdvices.size()]);
+
+			for (AopInvocationHandler aopInvocationHandler :
+					_aopInvocationHandlers) {
+
+				aopInvocationHandler.setChainableMethodAdvices(
+					chainableMethodAdvices);
+			}
+		}
+
+	}
+
+	static {
+		Registry registry = RegistryUtil.getRegistry();
+
+		ServiceTracker<?, ?> serviceTracker = registry.trackServices(
+			ChainableMethodAdvice.class,
+			new ChainableMethodAdviceServiceTrackerCustomizer());
+
+		serviceTracker.open();
+	}
 
 }

@@ -87,7 +87,8 @@ public class SelectSiteInitializerVerticalCard implements VerticalCard {
 
 	@Override
 	public String getElementClasses() {
-		return "add-site-action-option";
+		return "add-site-action-option card-interactive " +
+			"card-interactive-secondary";
 	}
 
 	@Override

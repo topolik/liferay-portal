@@ -1,7 +1,7 @@
-import React, {Component} from 'react';
-import {PropTypes} from 'prop-types';
-import ThemeContext from '../../ThemeContext.es';
 import getCN from 'classnames';
+import React, {Component} from 'react';
+import ThemeContext from '../../ThemeContext.es';
+import {PropTypes} from 'prop-types';
 
 class ClayIcon extends Component {
 	static contextType = ThemeContext;

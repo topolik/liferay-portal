@@ -28,6 +28,15 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true, service = {})
 public class LayoutPageTemplateEntryPermission {
 
+	public static void check(
+			PermissionChecker permissionChecker, long layoutPageTemplateEntryId,
+			String actionId)
+		throws PortalException {
+
+		_layoutPageTemplateEntryModelResourcePermission.check(
+			permissionChecker, layoutPageTemplateEntryId, actionId);
+	}
+
 	public static boolean contains(
 			PermissionChecker permissionChecker,
 			LayoutPageTemplateEntry layoutPageTemplateEntry, String actionId)

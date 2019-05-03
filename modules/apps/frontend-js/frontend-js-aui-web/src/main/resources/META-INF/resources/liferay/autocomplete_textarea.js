@@ -1,3 +1,10 @@
+/**
+ * The Autocomplete Textarea Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-autocomplete-textarea
+ */
+
 AUI.add(
 	'liferay-autocomplete-textarea',
 	function(A) {

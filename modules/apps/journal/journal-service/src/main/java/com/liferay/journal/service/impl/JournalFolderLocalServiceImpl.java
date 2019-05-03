@@ -21,20 +21,21 @@ import com.liferay.dynamic.data.mapping.model.DDMStructureLink;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLinkLocalService;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalService;
 import com.liferay.journal.exception.NoSuchFolderException;
+import com.liferay.journal.internal.util.JournalTreePathUtil;
 import com.liferay.journal.internal.validation.JournalFolderModelValidator;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.model.JournalFolderConstants;
+import com.liferay.journal.service.JournalArticleLocalService;
 import com.liferay.journal.service.base.JournalFolderLocalServiceBaseImpl;
 import com.liferay.journal.util.JournalValidator;
-import com.liferay.journal.util.comparator.FolderIdComparator;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
-import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.ResourceConstants;
 import com.liferay.portal.kernel.model.SystemEventConstants;
 import com.liferay.portal.kernel.model.User;
@@ -46,8 +47,6 @@ import com.liferay.portal.kernel.search.IndexerRegistryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.social.SocialActivityManagerUtil;
 import com.liferay.portal.kernel.systemevent.SystemEvent;
-import com.liferay.portal.kernel.tree.TreeModelTasksAdapter;
-import com.liferay.portal.kernel.tree.TreePathUtil;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.OrderByComparator;
@@ -57,7 +56,6 @@ import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
-import com.liferay.portal.spring.extender.service.ServiceReference;
 import com.liferay.portal.util.PropsValues;
 import com.liferay.portal.validation.ModelValidator;
 import com.liferay.portal.validation.ModelValidatorRegistryUtil;
@@ -75,9 +73,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Juan Fernández
  */
+@Component(
+	property = "model.class.name=com.liferay.journal.model.JournalFolder",
+	service = AopService.class
+)
 public class JournalFolderLocalServiceImpl
 	extends JournalFolderLocalServiceBaseImpl {
 
@@ -171,7 +176,7 @@ public class JournalFolderLocalServiceImpl
 
 		// Entries
 
-		journalArticleLocalService.deleteArticles(
+		_journalArticleLocalService.deleteArticles(
 			folder.getGroupId(), folder.getFolderId(), includeTrashedEntries);
 
 		// Asset
@@ -203,7 +208,7 @@ public class JournalFolderLocalServiceImpl
 		// Workflow
 
 		List<DDMStructureLink> ddmStructureLinks =
-			ddmStructureLinkLocalService.getStructureLinks(
+			_ddmStructureLinkLocalService.getStructureLinks(
 				classNameLocalService.getClassNameId(JournalFolder.class),
 				folder.getFolderId());
 
@@ -221,7 +226,7 @@ public class JournalFolderLocalServiceImpl
 		}
 
 		for (DDMStructureLink ddmStructureLink : ddmStructureLinks) {
-			ddmStructureLinkLocalService.deleteStructureLink(
+			_ddmStructureLinkLocalService.deleteStructureLink(
 				ddmStructureLink.getStructureLinkId());
 
 			WorkflowDefinitionLink workflowDefinitionLink =
@@ -310,7 +315,7 @@ public class JournalFolderLocalServiceImpl
 				JournalFolderConstants.
 					RESTRICTION_TYPE_DDM_STRUCTURES_AND_WORKFLOW) {
 
-			return ddmStructureLinkLocalService.getStructureLinkStructures(
+			return _ddmStructureLinkLocalService.getStructureLinkStructures(
 				classNameLocalService.getClassNameId(JournalFolder.class),
 				folderId);
 		}
@@ -318,7 +323,7 @@ public class JournalFolderLocalServiceImpl
 		folderId = getOverridedDDMStructuresFolderId(folderId);
 
 		if (folderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			return ddmStructureLinkLocalService.getStructureLinkStructures(
+			return _ddmStructureLinkLocalService.getStructureLinkStructures(
 				classNameLocalService.getClassNameId(JournalFolder.class),
 				folderId);
 		}
@@ -326,7 +331,7 @@ public class JournalFolderLocalServiceImpl
 		long classNameId = classNameLocalService.getClassNameId(
 			JournalArticle.class);
 
-		return ddmStructureLocalService.getStructures(groupIds, classNameId);
+		return _ddmStructureLocalService.getStructures(groupIds, classNameId);
 	}
 
 	@Override
@@ -692,9 +697,7 @@ public class JournalFolderLocalServiceImpl
 
 		// Social
 
-		JSONObject extraDataJSONObject = JSONFactoryUtil.createJSONObject();
-
-		extraDataJSONObject.put("title", title);
+		JSONObject extraDataJSONObject = JSONUtil.put("title", title);
 
 		SocialActivityManagerUtil.addActivity(
 			userId, folder, SocialActivityConstants.TYPE_MOVE_TO_TRASH,
@@ -716,31 +719,9 @@ public class JournalFolderLocalServiceImpl
 			final boolean reindex)
 		throws PortalException {
 
-		TreePathUtil.rebuildTree(
-			companyId, parentFolderId, parentTreePath,
-			new TreeModelTasksAdapter<JournalFolder>() {
-
-				@Override
-				public List<JournalFolder> findTreeModels(
-					long previousId, long companyId, long parentPrimaryKey,
-					int size) {
-
-					return journalFolderPersistence.findByF_C_P_NotS(
-						previousId, companyId, parentPrimaryKey,
-						WorkflowConstants.STATUS_IN_TRASH, QueryUtil.ALL_POS,
-						size, new FolderIdComparator(true));
-				}
-
-				@Override
-				public void rebuildDependentModelsTreePaths(
-						long parentPrimaryKey, String treePath)
-					throws PortalException {
-
-					journalArticleLocalService.setTreePaths(
-						parentPrimaryKey, treePath, false);
-				}
-
-			});
+		JournalTreePathUtil.rebuildTree(
+			companyId, parentFolderId, parentTreePath, journalFolderPersistence,
+			_journalArticleLocalService);
 	}
 
 	@Override
@@ -787,9 +768,8 @@ public class JournalFolderLocalServiceImpl
 
 		// Social
 
-		JSONObject extraDataJSONObject = JSONFactoryUtil.createJSONObject();
-
-		extraDataJSONObject.put("title", folder.getName());
+		JSONObject extraDataJSONObject = JSONUtil.put(
+			"title", folder.getName());
 
 		SocialActivityManagerUtil.addActivity(
 			userId, folder, SocialActivityConstants.TYPE_RESTORE_FROM_TRASH,
@@ -807,7 +787,7 @@ public class JournalFolderLocalServiceImpl
 				JournalFolderConstants.
 					RESTRICTION_TYPE_DDM_STRUCTURES_AND_WORKFLOW) {
 
-			return ddmStructureLocalService.search(
+			return _ddmStructureLocalService.search(
 				companyId, groupIds,
 				classNameLocalService.getClassNameId(JournalFolder.class),
 				folderId, keywords, start, end, obc);
@@ -816,13 +796,13 @@ public class JournalFolderLocalServiceImpl
 		folderId = getOverridedDDMStructuresFolderId(folderId);
 
 		if (folderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			return ddmStructureLocalService.search(
+			return _ddmStructureLocalService.search(
 				companyId, groupIds,
 				classNameLocalService.getClassNameId(JournalFolder.class),
 				folderId, keywords, start, end, obc);
 		}
 
-		return ddmStructureLocalService.search(
+		return _ddmStructureLocalService.search(
 			companyId, groupIds,
 			classNameLocalService.getClassNameId(JournalArticle.class),
 			keywords, WorkflowConstants.STATUS_ANY, start, end, obc);
@@ -912,7 +892,7 @@ public class JournalFolderLocalServiceImpl
 
 		if (folderId > JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
 			originalDDMStructureIds = getDDMStructureIds(
-				ddmStructureLinkLocalService.getStructureLinks(
+				_ddmStructureLinkLocalService.getStructureLinks(
 					classNameLocalService.getClassNameId(JournalFolder.class),
 					folderId));
 
@@ -992,7 +972,7 @@ public class JournalFolderLocalServiceImpl
 		Set<Long> ddmStructureIds = SetUtil.fromArray(ddmStructureIdsArray);
 
 		List<DDMStructureLink> ddmStructureLinks =
-			ddmStructureLinkLocalService.getStructureLinks(
+			_ddmStructureLinkLocalService.getStructureLinks(
 				classNameLocalService.getClassNameId(JournalFolder.class),
 				folder.getFolderId());
 
@@ -1005,7 +985,7 @@ public class JournalFolderLocalServiceImpl
 
 		for (Long ddmStructureId : ddmStructureIds) {
 			if (!originalDDMStructureIds.contains(ddmStructureId)) {
-				ddmStructureLinkLocalService.addStructureLink(
+				_ddmStructureLinkLocalService.addStructureLink(
 					classNameLocalService.getClassNameId(JournalFolder.class),
 					folder.getFolderId(), ddmStructureId);
 			}
@@ -1013,7 +993,7 @@ public class JournalFolderLocalServiceImpl
 
 		for (Long originalDDMStructureId : originalDDMStructureIds) {
 			if (!ddmStructureIds.contains(originalDDMStructureId)) {
-				ddmStructureLinkLocalService.deleteStructureLink(
+				_ddmStructureLinkLocalService.deleteStructureLink(
 					classNameLocalService.getClassNameId(JournalFolder.class),
 					folder.getFolderId(), originalDDMStructureId);
 			}
@@ -1484,22 +1464,11 @@ public class JournalFolderLocalServiceImpl
 			folderId, groupId, parentFolderId, name);
 	}
 
-	@ServiceReference(type = DDMStructureLinkLocalService.class)
-	protected DDMStructureLinkLocalService ddmStructureLinkLocalService;
-
-	@ServiceReference(type = DDMStructureLocalService.class)
-	protected DDMStructureLocalService ddmStructureLocalService;
-
-	@ServiceReference(type = JournalValidator.class)
-	protected JournalValidator journalValidator;
-
 	/**
 	 * @deprecated As of Judson (7.1.x), with no direct replacement
 	 */
 	@Deprecated
-	@ServiceReference(
-		type = com.liferay.portal.kernel.service.SubscriptionLocalService.class
-	)
+	@Reference
 	protected com.liferay.portal.kernel.service.SubscriptionLocalService
 		subscriptionLocalService;
 
@@ -1510,10 +1479,22 @@ public class JournalFolderLocalServiceImpl
 		return (JournalFolderModelValidator)modelValidator;
 	}
 
-	@ServiceReference(type = SubscriptionLocalService.class)
+	@Reference
+	private DDMStructureLinkLocalService _ddmStructureLinkLocalService;
+
+	@Reference
+	private DDMStructureLocalService _ddmStructureLocalService;
+
+	@Reference
+	private JournalArticleLocalService _journalArticleLocalService;
+
+	@Reference
+	private JournalValidator _journalValidator;
+
+	@Reference
 	private SubscriptionLocalService _subscriptionLocalService;
 
-	@ServiceReference(type = TrashHelper.class)
+	@Reference
 	private TrashHelper _trashHelper;
 
 }

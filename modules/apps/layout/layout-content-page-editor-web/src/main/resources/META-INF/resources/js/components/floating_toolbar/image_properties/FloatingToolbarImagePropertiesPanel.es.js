@@ -3,9 +3,10 @@ import Soy, {Config} from 'metal-soy';
 
 import './FloatingToolbarImagePropertiesPanelDelegateTemplate.soy';
 import {EDITABLE_FIELD_CONFIG_KEYS, TARGET_TYPES} from '../../../utils/constants';
+import {disableSavingChangesStatusAction, enableSavingChangesStatusAction, updateLastSaveDateAction} from '../../../actions/saveChanges.es';
 import getConnectedComponent from '../../../store/ConnectedComponent.es';
 import templates from './FloatingToolbarImagePropertiesPanel.soy';
-import {UPDATE_CONFIG_ATTRIBUTES, UPDATE_LAST_SAVE_DATE, UPDATE_SAVING_CHANGES_STATUS, UPDATE_TRANSLATION_STATUS} from '../../../actions/actions.es';
+import {CLEAR_FRAGMENT_EDITOR, ENABLE_FRAGMENT_EDITOR, UPDATE_CONFIG_ATTRIBUTES, UPDATE_TRANSLATION_STATUS} from '../../../actions/actions.es';
 
 /**
  * FloatingToolbarImagePropertiesPanel
@@ -14,41 +15,42 @@ class FloatingToolbarImagePropertiesPanel extends Component {
 
 	/**
 	 * Updates fragment configuration
-	 * @param {object} config Section configuration
+	 * @param {object} config Configuration
 	 * @private
 	 * @review
 	 */
 	_updateFragmentConfig(config) {
 		this.store
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: true
-				}
-			)
-			.dispatchAction(
-				UPDATE_CONFIG_ATTRIBUTES,
+			.dispatch(enableSavingChangesStatusAction())
+			.dispatch(
 				{
 					config,
-					editableId: this.itemId,
-					fragmentEntryLinkId: this.item.fragmentEntryLinkId
+					editableId: this.item.editableId,
+					fragmentEntryLinkId: this.item.fragmentEntryLinkId,
+					type: UPDATE_CONFIG_ATTRIBUTES
 				}
 			)
-			.dispatchAction(
-				UPDATE_TRANSLATION_STATUS
-			)
-			.dispatchAction(
-				UPDATE_LAST_SAVE_DATE,
+			.dispatch(
 				{
-					lastSaveDate: new Date()
+					type: UPDATE_TRANSLATION_STATUS
 				}
 			)
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: false
-				}
-			);
+			.dispatch(updateLastSaveDateAction())
+			.dispatch(disableSavingChangesStatusAction());
+	}
+
+	/**
+	 * Handle select image button change
+	 * @private
+	 * @review
+	 */
+	_handleClearImageButtonClick() {
+		this.store.dispatch(
+			{
+				itemId: this.itemId,
+				type: CLEAR_FRAGMENT_EDITOR
+			}
+		);
 	}
 
 	/**
@@ -79,6 +81,19 @@ class FloatingToolbarImagePropertiesPanel extends Component {
 		);
 	}
 
+	/**
+	 * Handle select image button change
+	 * @private
+	 * @review
+	 */
+	_handleSelectImageButtonClick() {
+		this.store.dispatch(
+			{
+				itemId: this.itemId,
+				type: ENABLE_FRAGMENT_EDITOR
+			}
+		);
+	}
 }
 
 /**

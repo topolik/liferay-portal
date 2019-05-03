@@ -44,6 +44,11 @@ public class PoshiRunnerCommandExecutor {
 
 			evaluatePoshiConsole();
 		}
+		else if (command.equals("executePQLQuery")) {
+			populateSystemProperties();
+
+			executePQLQuery();
+		}
 		else if (command.equals("help")) {
 			commandHelp();
 		}
@@ -77,7 +82,9 @@ public class PoshiRunnerCommandExecutor {
 		sb.append("command options include:\n");
 		sb.append(
 			"\tevaluatePoshiConsole\tEvaluate the console output errors.\n");
-		sb.append("\trunPoshi\t\t\tExecute tests using Poshi Runner.\n");
+		sb.append(
+			"\texecutePQLQuery\t\tPrints test commands found by the query.\n");
+		sb.append("\trunPoshi\t\tExecute tests using Poshi Runner.\n");
 		sb.append("\tvalidatePoshi\t\tValidates the Poshi files syntax.\n");
 		sb.append(
 			"\twritePoshiProperties\tWrite the Poshi properties files.\n");
@@ -89,6 +96,12 @@ public class PoshiRunnerCommandExecutor {
 		System.out.println("Executing task: evaluatePoshiConsole");
 
 		PoshiRunnerConsoleEvaluator.main(null);
+	}
+
+	protected static void executePQLQuery() throws Exception {
+		System.out.println("Executing task: executePQLQuery");
+
+		PoshiRunnerContext.executePQLQuery();
 	}
 
 	protected static void populateSystemProperties() throws Exception {

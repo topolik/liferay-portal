@@ -28,17 +28,14 @@ public class WebDAVPropsTable {
 	public static final String TABLE_NAME = "WebDAVProps";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"webDavPropsId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT},
-		{"props", Types.CLOB}
+		{"mvccVersion", Types.BIGINT}, {"webDavPropsId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"classNameId", Types.BIGINT},
+		{"classPK", Types.BIGINT}, {"props", Types.CLOB}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -58,7 +55,8 @@ TABLE_COLUMNS_MAP.put("classPK", Types.BIGINT);
 TABLE_COLUMNS_MAP.put("props", Types.CLOB);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table WebDAVProps (mvccVersion LONG default 0 not null,webDavPropsId LONG not null primary key,companyId LONG,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,props TEXT null)";
+	public static final String TABLE_SQL_CREATE =
+"create table WebDAVProps (mvccVersion LONG default 0 not null,webDavPropsId LONG not null primary key,companyId LONG,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,props TEXT null)";
 
 	public static final String TABLE_SQL_DROP = "drop table WebDAVProps";
 

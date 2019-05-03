@@ -47,7 +47,9 @@ public class LayoutModelListener extends BaseModelListener<Layout> {
 	@Override
 	public void onBeforeRemove(Layout layout) throws ModelListenerException {
 		try {
-			if (!LayoutStagingUtil.isBranchingLayout(layout)) {
+			if ((layout == null) ||
+				!LayoutStagingUtil.isBranchingLayout(layout)) {
+
 				return;
 			}
 

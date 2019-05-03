@@ -1,5 +1,5 @@
-import React from 'react';
 import EmptyDropZone from 'components/criteria_builder/EmptyDropZone.es';
+import React from 'react';
 import {cleanup, render} from 'react-testing-library';
 
 const connectDnd = jest.fn(el => el);

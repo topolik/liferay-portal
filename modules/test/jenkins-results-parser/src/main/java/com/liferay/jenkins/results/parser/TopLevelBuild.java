@@ -21,15 +21,13 @@ import com.liferay.jenkins.results.parser.failure.message.generator.FailureMessa
 import com.liferay.jenkins.results.parser.failure.message.generator.GenericFailureMessageGenerator;
 import com.liferay.jenkins.results.parser.failure.message.generator.GitLPushFailureMessageGenerator;
 import com.liferay.jenkins.results.parser.failure.message.generator.GradleTaskFailureMessageGenerator;
+import com.liferay.jenkins.results.parser.failure.message.generator.JenkinsRegenFailureMessageGenerator;
 import com.liferay.jenkins.results.parser.failure.message.generator.PoshiTestFailureMessageGenerator;
 import com.liferay.jenkins.results.parser.failure.message.generator.PoshiValidationFailureMessageGenerator;
 import com.liferay.jenkins.results.parser.failure.message.generator.RebaseFailureMessageGenerator;
 
 import java.io.IOException;
 import java.io.StringWriter;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -301,7 +299,7 @@ public class TopLevelBuild extends BaseBuild {
 	public String getStatusSummary() {
 		long currentTimeMillis = System.currentTimeMillis();
 
-		if ((currentTimeMillis - _DOWNSTREAM_BUILDS_LISTING_INTERVAL) >=
+		if ((currentTimeMillis - _MILLIS_DOWNSTREAM_BUILDS_LISTING_INTERVAL) >=
 				_lastDownstreamBuildsListingTimestamp) {
 
 			StringBuilder sb = new StringBuilder(super.getStatusSummary());
@@ -319,70 +317,6 @@ public class TopLevelBuild extends BaseBuild {
 		}
 
 		return super.getStatusSummary();
-	}
-
-	public Map<String, StopwatchRecord> getStopwatchRecordMap() {
-		String consoleText = getConsoleText();
-
-		int consoleTextLength = consoleText.length();
-
-		consoleText = consoleText.substring(stopwatchRecordConsoleReadCursor);
-
-		for (String line : consoleText.split("\n")) {
-			Matcher matcher = stopwatchStartTimestampPattern.matcher(line);
-
-			if (matcher.matches()) {
-				Date timestamp = null;
-
-				try {
-					timestamp = stopwatchTimestampSimpleDateFormat.parse(
-						matcher.group("timestamp"));
-				}
-				catch (ParseException pe) {
-					throw new RuntimeException(
-						"Unable to parse timestamp in " + line, pe);
-				}
-
-				String stopwatchName = matcher.group("name");
-
-				stopwatchRecordMap.put(
-					stopwatchName,
-					new StopwatchRecord(stopwatchName, timestamp.getTime()));
-
-				continue;
-			}
-
-			matcher = stopwatchPattern.matcher(line);
-
-			if (matcher.matches()) {
-				long duration = Long.parseLong(matcher.group("milliseconds"));
-
-				String seconds = matcher.group("seconds");
-
-				if (seconds != null) {
-					duration += Long.parseLong(seconds) * 1000L;
-				}
-
-				String minutes = matcher.group("minutes");
-
-				if (minutes != null) {
-					duration += Long.parseLong(minutes) * 60L * 1000L;
-				}
-
-				String stopwatchName = matcher.group("name");
-
-				StopwatchRecord stopwatchRecord = stopwatchRecordMap.get(
-					stopwatchName);
-
-				if (stopwatchRecord != null) {
-					stopwatchRecord.setDuration(duration);
-				}
-			}
-		}
-
-		stopwatchRecordConsoleReadCursor = consoleTextLength;
-
-		return stopwatchRecordMap;
 	}
 
 	@Override
@@ -716,9 +650,17 @@ public class TopLevelBuild extends BaseBuild {
 					"h4", null, "This pull contains no unique failures."));
 		}
 		else {
+			String failureTitle = "Failures unique to this pull:";
+
+			if (!UpstreamFailureUtil.isUpstreamComparisonAvailable() &&
+				isCompareToUpstream()) {
+
+				failureTitle =
+					"Failures (upstream comparison is not available):";
+			}
+
 			buildFailureElements.add(
-				Dom4JUtil.getNewElement(
-					"h4", null, "Failures unique to this pull:"));
+				Dom4JUtil.getNewElement("h4", null, failureTitle));
 
 			buildFailureElements.add(
 				Dom4JUtil.getOrderedListElement(
@@ -936,7 +878,7 @@ public class TopLevelBuild extends BaseBuild {
 			topLevelBuild.getJenkinsMaster();
 
 		return JenkinsResultsParserUtil.combine(
-			TEMP_MAP_BASE_URL, topLevelBuildJenkinsMaster.getName(), "/",
+			URL_BASE_TEMP_MAP, topLevelBuildJenkinsMaster.getName(), "/",
 			topLevelBuild.getJobName(), "/",
 			String.valueOf(topLevelBuild.getBuildNumber()), "/",
 			topLevelBuild.getJobName(), "/git.", gitRepositoryType,
@@ -1051,21 +993,13 @@ public class TopLevelBuild extends BaseBuild {
 	protected Element getJenkinsReportHeadElement() {
 		Element headElement = Dom4JUtil.getNewElement("head");
 
-		String resourceFileContent = null;
+		getResourceFileContentAsElement(
+			"style", headElement, "dependencies/jenkins_report.css");
 
-		try {
-			resourceFileContent =
-				JenkinsResultsParserUtil.getResourceFileContent(
-					"dependencies/jenkins_report.css");
-		}
-		catch (IOException ioe) {
-			throw new RuntimeException(
-				"Unable to load resource jenkins_report.css", ioe);
-		}
+		Element scriptElement = getResourceFileContentAsElement(
+			"script", headElement, "dependencies/jenkins_report.js");
 
-		Dom4JUtil.addToElement(
-			headElement,
-			Dom4JUtil.getNewElement("style", null, resourceFileContent));
+		scriptElement.addAttribute("language", "javascript");
 
 		return headElement;
 	}
@@ -1220,25 +1154,12 @@ public class TopLevelBuild extends BaseBuild {
 			topLevelTableElement, getJenkinsReportTableColumnHeadersElement(),
 			getJenkinsReportTableRowElement());
 
-		Map<String, StopwatchRecord> stopwatchRecordMap =
-			getStopwatchRecordMap();
+		List<Element> jenkinsReportStopWatchRecordElements =
+			getJenkinsReportStopWatchRecordElements();
 
-		List<StopwatchRecord> stopwatchRecords = new ArrayList<>(
-			stopwatchRecordMap.size());
-
-		stopwatchRecords.addAll(stopwatchRecordMap.values());
-
-		Collections.sort(stopwatchRecords);
-
-		for (StopwatchRecord stopwatchRecord : stopwatchRecords) {
-			if (stopwatchRecord.getDuration() == null) {
-				continue;
-			}
-
-			Dom4JUtil.addToElement(
-				topLevelTableElement,
-				stopwatchRecord.getJenkinsReportTableRowElement());
-		}
+		Dom4JUtil.addToElement(
+			topLevelTableElement,
+			jenkinsReportStopWatchRecordElements.toArray());
 
 		return topLevelTableElement;
 	}
@@ -1288,11 +1209,27 @@ public class TopLevelBuild extends BaseBuild {
 	}
 
 	protected Element getMoreDetailsElement() {
-		Element moreDetailsElement = Dom4JUtil.getNewElement(
+		return Dom4JUtil.getNewElement(
 			"h5", null, "For more details click ",
 			Dom4JUtil.getNewAnchorElement(getJenkinsReportURL(), "here"), ".");
+	}
 
-		return moreDetailsElement;
+	protected Element getResourceFileContentAsElement(
+		String tagName, Element parentElement, String resourceName) {
+
+		String resourceFileContent = null;
+
+		try {
+			resourceFileContent =
+				JenkinsResultsParserUtil.getResourceFileContent(resourceName);
+		}
+		catch (IOException ioe) {
+			throw new RuntimeException(
+				"Unable to load resource " + resourceName, ioe);
+		}
+
+		return Dom4JUtil.getNewElement(
+			tagName, parentElement, resourceFileContent);
 	}
 
 	protected Element getResultElement() {
@@ -1332,7 +1269,7 @@ public class TopLevelBuild extends BaseBuild {
 		JenkinsMaster jenkinsMaster = getJenkinsMaster();
 
 		return JenkinsResultsParserUtil.combine(
-			TEMP_MAP_BASE_URL, jenkinsMaster.getName(), "/", getJobName(), "/",
+			URL_BASE_TEMP_MAP, jenkinsMaster.getName(), "/", getJobName(), "/",
 			String.valueOf(getBuildNumber()), "/", getJobName(), "/",
 			"start.properties");
 	}
@@ -1346,7 +1283,7 @@ public class TopLevelBuild extends BaseBuild {
 		JenkinsMaster jenkinsMaster = getJenkinsMaster();
 
 		return JenkinsResultsParserUtil.combine(
-			TEMP_MAP_BASE_URL, jenkinsMaster.getName(), "/", getJobName(), "/",
+			URL_BASE_TEMP_MAP, jenkinsMaster.getName(), "/", getJobName(), "/",
 			String.valueOf(getBuildNumber()), "/", getJobName(), "/",
 			"stop.properties");
 	}
@@ -1560,109 +1497,6 @@ public class TopLevelBuild extends BaseBuild {
 
 	protected static final Pattern gitRepositoryTempMapNamePattern =
 		Pattern.compile("git\\.(?<gitRepositoryType>.*)\\.properties");
-	protected static final Pattern stopwatchPattern = Pattern.compile(
-		JenkinsResultsParserUtil.combine(
-			"\\s*\\[stopwatch\\]\\s*\\[(?<name>[^:]+): ",
-			"((?<minutes>\\d+):)?((?<seconds>\\d+))?\\.",
-			"(?<milliseconds>\\d+) sec\\]"));
-	protected static final Pattern stopwatchStartTimestampPattern =
-		Pattern.compile(
-			JenkinsResultsParserUtil.combine(
-				"\\s*\\[echo\\] (?<name>.*)\\.start\\.timestamp: ",
-				"(?<timestamp>.*)$"));
-	protected static final SimpleDateFormat stopwatchTimestampSimpleDateFormat =
-		new SimpleDateFormat("MM-dd-yyyy HH:mm:ss z");
-
-	protected int stopwatchRecordConsoleReadCursor;
-	protected Map<String, StopwatchRecord> stopwatchRecordMap = new HashMap<>();
-
-	protected class StopwatchRecord implements Comparable<StopwatchRecord> {
-
-		public StopwatchRecord(String name, long startTimestamp) {
-			_name = name;
-			_startTimestamp = startTimestamp;
-		}
-
-		@Override
-		public int compareTo(StopwatchRecord stopwatchRecord) {
-			int compareToValue = _startTimestamp.compareTo(
-				stopwatchRecord.getStartTimestamp());
-
-			if (compareToValue != 0) {
-				return compareToValue;
-			}
-
-			compareToValue = _duration.compareTo(stopwatchRecord.getDuration());
-
-			if (compareToValue != 0) {
-				return compareToValue;
-			}
-
-			return _name.compareTo(stopwatchRecord.getName());
-		}
-
-		public Long getDuration() {
-			return _duration;
-		}
-
-		public String getName() {
-			return _name;
-		}
-
-		public Long getStartTimestamp() {
-			return _startTimestamp;
-		}
-
-		public void setDuration(long duration) {
-			_duration = duration;
-		}
-
-		@Override
-		public String toString() {
-			return JenkinsResultsParserUtil.combine(
-				getName(), " started at ",
-				JenkinsResultsParserUtil.toDateString(
-					new Date(getStartTimestamp()), "America/Los_Angeles"),
-				" and ran for ",
-				JenkinsResultsParserUtil.toDurationString(getDuration()), ".");
-		}
-
-		protected Element getJenkinsReportTableRowElement() {
-			Element buildInfoElement = Dom4JUtil.getNewElement("tr", null);
-
-			Dom4JUtil.getNewElement("td", buildInfoElement, getName());
-
-			Dom4JUtil.getNewElement("td", buildInfoElement, "&nbsp;");
-
-			Dom4JUtil.getNewElement("td", buildInfoElement, "&nbsp;");
-
-			Dom4JUtil.getNewElement(
-				"td", buildInfoElement,
-				toJenkinsReportDateString(
-					new Date(getStartTimestamp()),
-					getJenkinsReportTimeZoneName()));
-
-			if (getDuration() == null) {
-				Dom4JUtil.getNewElement("td", buildInfoElement, "&nbsp");
-			}
-			else {
-				Dom4JUtil.getNewElement(
-					"td", buildInfoElement,
-					JenkinsResultsParserUtil.toDurationString(getDuration()));
-			}
-
-			Dom4JUtil.getNewElement("td", buildInfoElement, "&nbsp;");
-
-			Dom4JUtil.getNewElement("td", buildInfoElement, "&nbsp;");
-
-			return buildInfoElement;
-		}
-
-		private Long _duration;
-		private final String _name;
-		private final Long _startTimestamp;
-
-	}
 
 	private Map<Map<String, String>, Integer> _getSlaveUsageByLabels() {
 		Map<Map<String, String>, Integer> slaveUsages = new HashMap<>();
@@ -1690,27 +1524,24 @@ public class TopLevelBuild extends BaseBuild {
 		return slaveUsages;
 	}
 
-	private static final long _DOWNSTREAM_BUILDS_LISTING_INTERVAL =
-		1000 * 60 * 5;
-
-	// Skip JavaParser
-
 	private static final FailureMessageGenerator[] _FAILURE_MESSAGE_GENERATORS =
 		{
 			new CompileFailureMessageGenerator(),
 			new PoshiValidationFailureMessageGenerator(),
-
 			new PoshiTestFailureMessageGenerator(),
-
 			new GitLPushFailureMessageGenerator(),
 			new GradleTaskFailureMessageGenerator(),
+			new JenkinsRegenFailureMessageGenerator(),
 			new RebaseFailureMessageGenerator(),
-
 			new CIFailureMessageGenerator(),
 			new DownstreamFailureMessageGenerator(),
-
 			new GenericFailureMessageGenerator()
 		};
+
+	// Skip JavaParser
+
+	private static final long _MILLIS_DOWNSTREAM_BUILDS_LISTING_INTERVAL =
+		1000 * 60 * 5;
 
 	private static final String _URL_CHART_JS =
 		"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js";

@@ -1,6 +1,6 @@
 import core from 'metal';
 import dom from 'metal-dom';
-import { EventHandler } from 'metal-events';
+import {EventHandler} from 'metal-events';
 
 import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
 
@@ -13,6 +13,7 @@ import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
  */
 
 class AdaptiveMediaOptionsHandler extends PortletBase {
+
 	/**
 	 * @inheritDoc
 	 */
@@ -125,6 +126,7 @@ class AdaptiveMediaOptionsHandler extends PortletBase {
  * @type {!Object}
  */
 AdaptiveMediaOptionsHandler.STATE = {
+
 	/**
 	 * Configuration entry's uuid.
 	 *

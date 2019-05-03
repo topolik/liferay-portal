@@ -17,6 +17,7 @@ package com.liferay.layout.admin.web.internal.servlet.taglib.util;
 import com.liferay.exportimport.constants.ExportImportPortletKeys;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -33,7 +34,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.taglib.security.PermissionsURLTag;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletRequest;
@@ -69,8 +69,8 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 						_layoutPrototype.getLayoutPrototypeId(),
 						ActionKeys.UPDATE)) {
 
-					add(_getEditLayoutPrototypeActionConsumer());
-					add(_getConfigureLayoutPrototypeActionConsumer());
+					add(_getEditLayoutPrototypeActionUnsafeConsumer());
+					add(_getConfigureLayoutPrototypeActionUnsafeConsumer());
 				}
 
 				if (LayoutPrototypePermissionUtil.contains(
@@ -78,7 +78,7 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 						_layoutPrototype.getLayoutPrototypeId(),
 						ActionKeys.PERMISSIONS)) {
 
-					add(_getPermissionsLayoutPrototypeActionConsumer());
+					add(_getPermissionsLayoutPrototypeActionUnsafeConsumer());
 				}
 
 				if (GroupPermissionUtil.contains(
@@ -86,8 +86,8 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 						_layoutPrototype.getGroup(),
 						ActionKeys.EXPORT_IMPORT_LAYOUTS)) {
 
-					add(_getExportLayoutPrototypeActionConsumer());
-					add(_getImportLayoutPrototypeActionConsumer());
+					add(_getExportLayoutPrototypeActionUnsafeConsumer());
+					add(_getImportLayoutPrototypeActionUnsafeConsumer());
 				}
 
 				if (LayoutPrototypePermissionUtil.contains(
@@ -95,14 +95,14 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 						_layoutPrototype.getLayoutPrototypeId(),
 						ActionKeys.DELETE)) {
 
-					add(_getDeleteLayoutPrototypeActionConsumer());
+					add(_getDeleteLayoutPrototypeActionUnsafeConsumer());
 				}
 			}
 		};
 	}
 
-	private Consumer<DropdownItem>
-		_getConfigureLayoutPrototypeActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getConfigureLayoutPrototypeActionUnsafeConsumer() {
 
 		return dropdownItem -> {
 			dropdownItem.setHref(
@@ -113,7 +113,9 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getDeleteLayoutPrototypeActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getDeleteLayoutPrototypeActionUnsafeConsumer() {
+
 		PortletURL deleteLayoutPrototypeURL = _renderResponse.createActionURL();
 
 		deleteLayoutPrototypeURL.setParameter(
@@ -135,7 +137,8 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getEditLayoutPrototypeActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getEditLayoutPrototypeActionUnsafeConsumer()
 		throws PortalException {
 
 		Group layoutPrototypeGroup = _layoutPrototype.getGroup();
@@ -147,7 +150,8 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getExportLayoutPrototypeActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getExportLayoutPrototypeActionUnsafeConsumer()
 		throws Exception {
 
 		PortletURL exportLayoutPrototypeURL =
@@ -178,7 +182,8 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem> _getImportLayoutPrototypeActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getImportLayoutPrototypeActionUnsafeConsumer()
 		throws Exception {
 
 		PortletURL importLayoutPrototypeURL =
@@ -209,8 +214,8 @@ public class LayoutPrototypeActionDropdownItemsProvider {
 		};
 	}
 
-	private Consumer<DropdownItem>
-			_getPermissionsLayoutPrototypeActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getPermissionsLayoutPrototypeActionUnsafeConsumer()
 		throws Exception {
 
 		String permissionsLayoutPrototypeURL = PermissionsURLTag.doTag(

@@ -31,9 +31,9 @@ JournalEditArticleDisplayContext journalEditArticleDisplayContext = new JournalE
 <liferay-ui:error exception="<%= ArticleExpirationDateException.class %>" message="please-enter-a-valid-expiration-date" />
 
 <div class="schedule">
-	<aui:input cssClass="form-control-sm" formName="fm1" name="displayDate" wrapperCssClass="mb-3" />
+	<aui:input formName="fm1" name="displayDate" wrapperCssClass="mb-3" />
 
-	<aui:input cssClass="form-control-sm" dateTogglerCheckboxLabel="never-expire" disabled="<%= journalEditArticleDisplayContext.isNeverExpire() %>" formName="fm1" name="expirationDate" wrapperCssClass="expiration-date mb-3" />
+	<aui:input dateTogglerCheckboxLabel="never-expire" disabled="<%= journalEditArticleDisplayContext.isNeverExpire() %>" formName="fm1" name="expirationDate" wrapperCssClass="expiration-date mb-3" />
 
-	<aui:input cssClass="form-control-sm" dateTogglerCheckboxLabel="never-review" disabled="<%= journalEditArticleDisplayContext.isNeverReview() %>" formName="fm1" name="reviewDate" wrapperCssClass="mb-3 review-date" />
+	<aui:input dateTogglerCheckboxLabel="never-review" disabled="<%= journalEditArticleDisplayContext.isNeverReview() %>" formName="fm1" name="reviewDate" wrapperCssClass="mb-3 review-date" />
 </div>

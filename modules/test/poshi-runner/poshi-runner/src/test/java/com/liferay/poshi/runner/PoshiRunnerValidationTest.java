@@ -1159,21 +1159,6 @@ public class PoshiRunnerValidationTest extends TestCase {
 
 		Assert.assertEquals(
 			"validatePropertyElement is failing", "", getExceptionMessage());
-
-		document = DocumentHelper.createDocument();
-
-		element = document.addElement("property");
-
-		element.addAttribute("line-number", "1");
-		element.addAttribute("name", "property.name");
-		element.addAttribute("value", "Tools");
-
-		PoshiRunnerValidation.validatePropertyElement(
-			element, "ValidatePossibleAttributeNames.macro");
-
-		Assert.assertEquals(
-			"validatePropertyElement is failing",
-			"Invalid property name property.name", getExceptionMessage());
 	}
 
 	@Test

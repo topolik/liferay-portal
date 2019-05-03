@@ -15,11 +15,9 @@
 package com.liferay.journal.internal.upgrade.v1_1_5;
 
 import com.liferay.journal.internal.upgrade.util.JournalArticleImageUpgradeUtil;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.jdbc.AutoBatchPreparedStatementUtil;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
-import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portletfilerepository.PortletFileRepositoryUtil;
@@ -67,16 +65,16 @@ public class UpgradeContentImages extends UpgradeProcess {
 		List<Node> imageNodes = xPath.selectNodes(contentDocument);
 
 		for (Node imageNode : imageNodes) {
-			Element imageEl = (Element)imageNode;
+			Element imageElement = (Element)imageNode;
 
-			List<Element> dynamicContentEls = imageEl.elements(
+			List<Element> dynamicContentElements = imageElement.elements(
 				"dynamic-content");
 
-			for (Element dynamicContentEl : dynamicContentEls) {
+			for (Element dynamicContentElement : dynamicContentElements) {
 				long fileEntryId = GetterUtil.getLong(
-					dynamicContentEl.attributeValue("fileEntryId"));
+					dynamicContentElement.attributeValue("fileEntryId"));
 
-				String id = dynamicContentEl.attributeValue("id");
+				String id = dynamicContentElement.attributeValue("id");
 
 				FileEntry fileEntry = null;
 
@@ -88,7 +86,8 @@ public class UpgradeContentImages extends UpgradeProcess {
 					fileEntry = _getFileEntryByFileEntryId(fileEntryId);
 				}
 				else {
-					String data = String.valueOf(dynamicContentEl.getData());
+					String data = String.valueOf(
+						dynamicContentElement.getData());
 
 					fileEntry =
 						_journalArticleImageUpgradeUtil.getFileEntryFromURL(
@@ -99,22 +98,29 @@ public class UpgradeContentImages extends UpgradeProcess {
 					continue;
 				}
 
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+				dynamicContentElement.clearContent();
 
-				jsonObject.put("alt", StringPool.BLANK);
-				jsonObject.put("groupId", fileEntry.getGroupId());
-				jsonObject.put("name", fileEntry.getFileName());
-				jsonObject.put("resourcePrimKey", resourcePrimKey);
-				jsonObject.put("title", fileEntry.getTitle());
-				jsonObject.put("type", "journal");
-				jsonObject.put("uuid", fileEntry.getUuid());
-
-				dynamicContentEl.clearContent();
-
-				dynamicContentEl.addCDATA(jsonObject.toString());
+				dynamicContentElement.addCDATA(
+					JSONUtil.put(
+						"alt",
+						GetterUtil.getString(
+							dynamicContentElement.attributeValue("alt"))
+					).put(
+						"groupId", fileEntry.getGroupId()
+					).put(
+						"name", fileEntry.getFileName()
+					).put(
+						"resourcePrimKey", resourcePrimKey
+					).put(
+						"title", fileEntry.getTitle()
+					).put(
+						"type", "journal"
+					).put(
+						"uuid", fileEntry.getUuid()
+					).toString());
 
 				if (fileEntryId <= 0) {
-					dynamicContentEl.addAttribute(
+					dynamicContentElement.addAttribute(
 						"fileEntryId",
 						String.valueOf(fileEntry.getFileEntryId()));
 				}

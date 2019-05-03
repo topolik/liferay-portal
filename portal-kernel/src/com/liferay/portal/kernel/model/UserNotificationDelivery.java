@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface UserNotificationDelivery
-	extends UserNotificationDeliveryModel, PersistedModel {
+	extends PersistedModel, UserNotificationDeliveryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

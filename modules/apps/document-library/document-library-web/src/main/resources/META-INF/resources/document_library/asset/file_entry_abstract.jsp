@@ -29,34 +29,32 @@ FileVersion fileVersion = (FileVersion)request.getAttribute(WebKeys.DOCUMENT_LIB
 	<div class="asset-summary">
 
 		<%
-		String thumbnailURL = StringPool.BLANK;
+		String previewURL = StringPool.BLANK;
 
 		if (Objects.equals(fileEntry.getVersion(), fileVersion.getVersion())) {
 			if (ImageProcessorUtil.hasImages(fileVersion)) {
-				thumbnailURL = DLURLHelperUtil.getPreviewURL(fileEntry, fileVersion, themeDisplay, "&imageThumbnail=1");
+				previewURL = DLURLHelperUtil.getPreviewURL(fileEntry, fileVersion, themeDisplay, "&imagePreview=1");
 			}
 			else if (PDFProcessorUtil.hasImages(fileVersion)) {
-				thumbnailURL = DLURLHelperUtil.getPreviewURL(fileEntry, fileVersion, themeDisplay, "&documentThumbnail=1");
+				previewURL = DLURLHelperUtil.getPreviewURL(fileEntry, fileVersion, themeDisplay, "&previewFileIndex=1");
 			}
 			else if (VideoProcessorUtil.hasVideo(fileVersion)) {
-				thumbnailURL = DLURLHelperUtil.getPreviewURL(fileEntry, fileVersion, themeDisplay, "&videoThumbnail=1");
+				previewURL = DLURLHelperUtil.getPreviewURL(fileEntry, fileVersion, themeDisplay, "&videoThumbnail=1");
 			}
 		}
 		%>
 
 		<c:choose>
-			<c:when test="<%= Validator.isNotNull(thumbnailURL) %>">
-				<div class="aspect-ratio aspect-ratio-8-to-3 aspect-ratio-bg-cover cover-image mb-3" style="background-image: url(<%= thumbnailURL %>)"></div>
+			<c:when test="<%= Validator.isNotNull(previewURL) %>">
+				<div class="aspect-ratio aspect-ratio-8-to-3 aspect-ratio-bg-cover cover-image mb-4" style="background-image: url(<%= previewURL %>)"></div>
 			</c:when>
 			<c:otherwise>
-				<div class="container">
-					<div class="aspect-ratio aspect-ratio-8-to-3 bg-light card">
-						<div class="aspect-ratio-item-center-middle aspect-ratio-item-fluid card-type-asset-icon">
-							<div class="color-dark">
-								<svg aria-hidden="true" class="lexicon-icon reference-mark user-icon-xl">
-									<use xlink:href="<%= themeDisplay.getPathThemeImages() %>/lexicon/icons.svg#<%= assetRenderer.getIconCssClass() %>" />
-								</svg>
-							</div>
+				<div class="aspect-ratio aspect-ratio-8-to-3 bg-light mb-4">
+					<div class="aspect-ratio-item-center-middle aspect-ratio-item-fluid card-type-asset-icon">
+						<div class="text-secondary">
+							<svg aria-hidden="true" class="lexicon-icon reference-mark user-icon-xl">
+								<use xlink:href="<%= themeDisplay.getPathThemeImages() %>/lexicon/icons.svg#<%= assetRenderer.getIconCssClass() %>" />
+							</svg>
 						</div>
 					</div>
 				</div>

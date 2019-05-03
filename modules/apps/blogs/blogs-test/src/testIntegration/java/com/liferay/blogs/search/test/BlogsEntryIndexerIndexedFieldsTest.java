@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
+import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.search.test.util.FieldValuesAssert;
@@ -33,7 +34,7 @@ import com.liferay.portal.search.test.util.IndexedFieldsFixture;
 import com.liferay.portal.search.test.util.IndexerFixture;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.PermissionCheckerTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import com.liferay.users.admin.test.util.search.UserSearchFixture;
 
 import java.util.HashMap;
@@ -58,18 +59,18 @@ public class BlogsEntryIndexerIndexedFieldsTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE,
+			PermissionCheckerMethodTestRule.INSTANCE,
 			SynchronousDestinationTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
-		setUpUserSearchFixture();
+		_setUpUserSearchFixture();
 
-		setUpBlogsEntryFixture();
+		_setUpBlogsEntryFixture();
 
-		setUpBlogsEntryIndexerFixture();
+		_setUpBlogsEntryIndexerFixture();
 
-		setUpIndexedFieldsFixture();
+		_setUpIndexedFieldsFixture();
 	}
 
 	@Test
@@ -91,33 +92,6 @@ public class BlogsEntryIndexerIndexedFieldsTest {
 
 		FieldValuesAssert.assertFieldValues(
 			_expectedFieldValues(blogsEntry), document, searchTerm);
-	}
-
-	protected void setUpBlogsEntryFixture() throws Exception {
-		blogsEntryFixture = new BlogsEntryFixture(_group);
-
-		_blogsEntries = blogsEntryFixture.getBlogsEntries();
-	}
-
-	protected void setUpBlogsEntryIndexerFixture() {
-		blogsEntryIndexerFixture = new IndexerFixture<>(BlogsEntry.class);
-	}
-
-	protected void setUpIndexedFieldsFixture() {
-		indexedFieldsFixture = new IndexedFieldsFixture(
-			resourcePermissionLocalService, searchEngineHelper);
-	}
-
-	protected void setUpUserSearchFixture() throws Exception {
-		userSearchFixture = new UserSearchFixture();
-
-		userSearchFixture.setUp();
-
-		_group = userSearchFixture.addGroup();
-
-		_groups = userSearchFixture.getGroups();
-
-		_users = userSearchFixture.getUsers();
 	}
 
 	protected BlogsEntryFixture blogsEntryFixture;
@@ -161,11 +135,24 @@ public class BlogsEntryIndexerIndexedFieldsTest {
 		indexedFieldsFixture.populateViewCount(
 			BlogsEntry.class, blogsEntry.getEntryId(), map);
 
+		_populateContent(blogsEntry, map);
 		_populateDates(blogsEntry, map);
 		_populateRoles(blogsEntry, map);
 		_populateTitle(blogsEntry, map);
 
 		return map;
+	}
+
+	private void _populateContent(
+		BlogsEntry blogsEntry, Map<String, String> map) {
+
+		for (Locale locale :
+				LanguageUtil.getAvailableLocales(blogsEntry.getGroupId())) {
+
+			map.put(
+				"content_" + LocaleUtil.toLanguageId(locale),
+				HtmlUtil.extractText(blogsEntry.getContent()));
+		}
 	}
 
 	private void _populateDates(
@@ -200,11 +187,39 @@ public class BlogsEntryIndexerIndexedFieldsTest {
 
 			String languageId = LocaleUtil.toLanguageId(locale);
 
-			String key = "localized_title_" + languageId;
+			String key = "title_" + languageId;
 
 			map.put(key, title);
-			map.put(key.concat("_sortable"), title);
+			map.put("localized_" + key, title);
+			map.put("localized_" + key + "_sortable", title);
 		}
+	}
+
+	private void _setUpBlogsEntryFixture() {
+		blogsEntryFixture = new BlogsEntryFixture(_group);
+
+		_blogsEntries = blogsEntryFixture.getBlogsEntries();
+	}
+
+	private void _setUpBlogsEntryIndexerFixture() {
+		blogsEntryIndexerFixture = new IndexerFixture<>(BlogsEntry.class);
+	}
+
+	private void _setUpIndexedFieldsFixture() {
+		indexedFieldsFixture = new IndexedFieldsFixture(
+			resourcePermissionLocalService, searchEngineHelper);
+	}
+
+	private void _setUpUserSearchFixture() throws Exception {
+		userSearchFixture = new UserSearchFixture();
+
+		userSearchFixture.setUp();
+
+		_group = userSearchFixture.addGroup();
+
+		_groups = userSearchFixture.getGroups();
+
+		_users = userSearchFixture.getUsers();
 	}
 
 	@DeleteAfterTestRun

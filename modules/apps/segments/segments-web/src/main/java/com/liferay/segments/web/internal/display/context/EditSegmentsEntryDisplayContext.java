@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
@@ -74,23 +75,21 @@ public class EditSegmentsEntryDisplayContext {
 			Criteria.Criterion criterion =
 				segmentsCriteriaContributor.getCriterion(getCriteria());
 
-			JSONObject jsonContributorObject =
-				JSONFactoryUtil.createJSONObject();
-
-			jsonContributorObject.put(
-				"conjunctionId", _getCriterionConjunction(criterion));
-			jsonContributorObject.put(
+			JSONObject jsonContributorObject = JSONUtil.put(
+				"conjunctionId", _getCriterionConjunction(criterion)
+			).put(
 				"conjunctionInputId",
 				_renderResponse.getNamespace() + "criterionConjunction" +
-					segmentsCriteriaContributor.getKey());
-			jsonContributorObject.put(
-				"initialQuery", _getCriterionFilterString(criterion));
-			jsonContributorObject.put(
+					segmentsCriteriaContributor.getKey()
+			).put(
+				"initialQuery", _getCriterionFilterString(criterion)
+			).put(
 				"inputId",
 				_renderResponse.getNamespace() + "criterionFilter" +
-					segmentsCriteriaContributor.getKey());
-			jsonContributorObject.put(
-				"propertyKey", segmentsCriteriaContributor.getKey());
+					segmentsCriteriaContributor.getKey()
+			).put(
+				"propertyKey", segmentsCriteriaContributor.getKey()
+			);
 
 			jsonContributorsArray.put(jsonContributorObject);
 		}
@@ -121,21 +120,18 @@ public class EditSegmentsEntryDisplayContext {
 		for (SegmentsCriteriaContributor segmentsCriteriaContributor :
 				segmentsCriteriaContributors) {
 
-			JSONObject jsonContributorObject =
-				JSONFactoryUtil.createJSONObject();
-
-			jsonContributorObject.put(
-				"entityName", segmentsCriteriaContributor.getEntityName());
-			jsonContributorObject.put(
-				"name", segmentsCriteriaContributor.getLabel(locale));
-			jsonContributorObject.put(
+			JSONObject jsonContributorObject = JSONUtil.put(
+				"entityName", segmentsCriteriaContributor.getEntityName()
+			).put(
+				"name", segmentsCriteriaContributor.getLabel(locale)
+			).put(
 				"properties",
 				JSONFactoryUtil.createJSONArray(
 					JSONFactoryUtil.looseSerializeDeep(
-						segmentsCriteriaContributor.getFields(
-							_renderRequest))));
-			jsonContributorObject.put(
-				"propertyKey", segmentsCriteriaContributor.getKey());
+						segmentsCriteriaContributor.getFields(_renderRequest)))
+			).put(
+				"propertyKey", segmentsCriteriaContributor.getKey()
+			);
 
 			jsonContributorsArray.put(jsonContributorObject);
 		}
@@ -209,6 +205,23 @@ public class EditSegmentsEntryDisplayContext {
 		return _segmentsEntryId;
 	}
 
+	public String getSegmentsEntryKey() throws PortalException {
+		if (_segmentsEntryKey != null) {
+			return _segmentsEntryKey;
+		}
+
+		SegmentsEntry segmentsEntry = getSegmentsEntry();
+
+		if (segmentsEntry == null) {
+			_segmentsEntryKey = StringPool.BLANK;
+		}
+		else {
+			_segmentsEntryKey = segmentsEntry.getSegmentsEntryKey();
+		}
+
+		return _segmentsEntryKey;
+	}
+
 	public String getSource() throws PortalException {
 		SegmentsEntry segmentsEntry = getSegmentsEntry();
 
@@ -251,6 +264,17 @@ public class EditSegmentsEntryDisplayContext {
 		return ParamUtil.getString(_request, "type", User.class.getName());
 	}
 
+	public boolean isShowInEditMode() {
+		if (_showInEditMode != null) {
+			return _showInEditMode;
+		}
+
+		_showInEditMode = ParamUtil.getBoolean(
+			_request, "showInEditMode", true);
+
+		return _showInEditMode;
+	}
+
 	private String _getCriterionConjunction(Criteria.Criterion criterion) {
 		if (criterion == null) {
 			return StringPool.BLANK;
@@ -276,8 +300,10 @@ public class EditSegmentsEntryDisplayContext {
 	private SegmentsEntry _segmentsEntry;
 	private Integer _segmentsEntryClassPKsCount;
 	private Long _segmentsEntryId;
+	private String _segmentsEntryKey;
 	private final SegmentsEntryProvider _segmentsEntryProvider;
 	private final SegmentsEntryService _segmentsEntryService;
+	private Boolean _showInEditMode;
 	private String _title;
 
 }

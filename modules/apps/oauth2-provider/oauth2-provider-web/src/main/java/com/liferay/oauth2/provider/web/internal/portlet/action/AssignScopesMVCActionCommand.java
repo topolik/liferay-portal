@@ -22,9 +22,11 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -55,7 +57,15 @@ public class AssignScopesMVCActionCommand implements MVCActionCommand {
 		String[] scopeAliases = ParamUtil.getStringValues(
 			actionRequest, "scopeAliases");
 
-		List<String> scopeAliasesList = Arrays.asList(scopeAliases);
+		List<String> scopeAliasesList = Arrays.stream(
+			scopeAliases
+		).flatMap(
+			scopeAlias -> Arrays.stream(scopeAlias.split(StringPool.SPACE))
+		).filter(
+			Validator::isNotNull
+		).collect(
+			Collectors.toList()
+		);
 
 		try {
 			_oAuth2ApplicationService.updateScopeAliases(

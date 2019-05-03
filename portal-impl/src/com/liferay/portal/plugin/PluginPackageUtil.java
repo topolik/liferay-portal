@@ -24,8 +24,6 @@ import com.liferay.portal.kernel.plugin.PluginPackage;
 import com.liferay.portal.kernel.plugin.RemotePluginPackageRepository;
 import com.liferay.portal.kernel.plugin.Screenshot;
 import com.liferay.portal.kernel.plugin.Version;
-import com.liferay.portal.kernel.search.Hits;
-import com.liferay.portal.kernel.search.HitsImpl;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -220,18 +218,6 @@ public class PluginPackageUtil {
 
 	public static RepositoryReport reloadRepositories() throws PortalException {
 		return _instance._reloadRepositories();
-	}
-
-	/**
-	 * @deprecated As of Judson (7.1.x), since 7.1.0
-	 */
-	@Deprecated
-	public static Hits search(
-			String keywords, String type, String tag, String license,
-			String repositoryURL, String status, int start, int end)
-		throws PortalException {
-
-		return new HitsImpl();
 	}
 
 	public static void unregisterInstalledPluginPackage(

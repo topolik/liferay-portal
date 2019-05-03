@@ -18,7 +18,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.knowledge.base.model.KBComment;
 import com.liferay.knowledge.base.web.internal.security.permission.resource.KBCommentPermission;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -72,7 +71,7 @@ public class KBSuggestionListManagementToolbarDisplayContext {
 				add(
 					dropdownItem -> {
 						dropdownItem.putData("action", "deleteKBComments");
-						dropdownItem.setIcon("times");
+						dropdownItem.setIcon("times-circle");
 						dropdownItem.setLabel(
 							LanguageUtil.get(_request, "delete"));
 						dropdownItem.setQuickAction(true);
@@ -110,23 +109,20 @@ public class KBSuggestionListManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				addGroup(
-					SafeConsumer.ignore(
-						dropdownGroupItem -> {
-							dropdownGroupItem.setDropdownItems(
-								_getFilterNavigationDropdownItems());
-							dropdownGroupItem.setLabel(
-								LanguageUtil.get(
-									_request, "filter-by-navigation"));
-						}));
+					dropdownGroupItem -> {
+						dropdownGroupItem.setDropdownItems(
+							_getFilterNavigationDropdownItems());
+						dropdownGroupItem.setLabel(
+							LanguageUtil.get(_request, "filter-by-navigation"));
+					});
 
 				addGroup(
-					SafeConsumer.ignore(
-						dropdownGroupItem -> {
-							dropdownGroupItem.setDropdownItems(
-								_getOrderByDropdownItems());
-							dropdownGroupItem.setLabel(
-								LanguageUtil.get(_request, "order-by"));
-						}));
+					dropdownGroupItem -> {
+						dropdownGroupItem.setDropdownItems(
+							_getOrderByDropdownItems());
+						dropdownGroupItem.setLabel(
+							LanguageUtil.get(_request, "order-by"));
+					});
 			}
 		};
 	}
@@ -138,24 +134,20 @@ public class KBSuggestionListManagementToolbarDisplayContext {
 
 				if (!navigation.equals("all")) {
 					add(
-						SafeConsumer.ignore(
-							labelItem -> {
-								PortletURL removeLabelURL =
-									PortletURLUtil.clone(
-										_currentURLObj,
-										_liferayPortletResponse);
+						labelItem -> {
+							PortletURL removeLabelURL = PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse);
 
-								removeLabelURL.setParameter(
-									"navigation", (String)null);
+							removeLabelURL.setParameter(
+								"navigation", (String)null);
 
-								labelItem.putData(
-									"removeLabelURL",
-									removeLabelURL.toString());
+							labelItem.putData(
+								"removeLabelURL", removeLabelURL.toString());
 
-								labelItem.setCloseable(true);
-								labelItem.setLabel(
-									LanguageUtil.get(_request, navigation));
-							}));
+							labelItem.setCloseable(true);
+							labelItem.setLabel(
+								LanguageUtil.get(_request, navigation));
+						});
 				}
 			}
 		};
@@ -260,19 +252,18 @@ public class KBSuggestionListManagementToolbarDisplayContext {
 						orderColumnsMap.entrySet()) {
 
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								String orderByCol = orderByColEntry.getKey();
+						dropdownItem -> {
+							String orderByCol = orderByColEntry.getKey();
 
-								dropdownItem.setActive(
-									orderByCol.equals(_getOrderByCol()));
+							dropdownItem.setActive(
+								orderByCol.equals(_getOrderByCol()));
 
-								dropdownItem.setHref(
-									_getCurrentSortingURL(), "orderByCol",
-									orderByColEntry.getValue());
-								dropdownItem.setLabel(
-									LanguageUtil.get(_request, orderByCol));
-							}));
+							dropdownItem.setHref(
+								_getCurrentSortingURL(), "orderByCol",
+								orderByColEntry.getValue());
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, orderByCol));
+						});
 				}
 			}
 		};

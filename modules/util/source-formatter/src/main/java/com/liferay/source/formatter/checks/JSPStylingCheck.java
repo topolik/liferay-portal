@@ -34,7 +34,7 @@ public class JSPStylingCheck extends StylingCheck {
 
 		_checkChaining(fileName, content);
 
-		_checkLineBreak(fileName, content);
+		content = _formatLineBreak(fileName, content);
 
 		content = _fixEmptyJavaSourceTag(content);
 
@@ -115,16 +115,6 @@ public class JSPStylingCheck extends StylingCheck {
 		}
 	}
 
-	private void _checkLineBreak(String fileName, String content) {
-		Matcher matcher = _incorrectLineBreakPattern.matcher(content);
-
-		if (matcher.find()) {
-			addMessage(
-				fileName, "There should be a line break after '}'",
-				getLineNumber(content, matcher.start(1)));
-		}
-	}
-
 	private String _fixEmptyJavaSourceTag(String content) {
 		Matcher matcher = _emptyJavaSourceTagPattern.matcher(content);
 
@@ -177,14 +167,38 @@ public class JSPStylingCheck extends StylingCheck {
 		return content;
 	}
 
+	private String _formatLineBreak(String fileName, String content) {
+		Matcher matcher = _incorrectLineBreakPattern1.matcher(content);
+
+		if (matcher.find()) {
+			addMessage(
+				fileName, "There should be a line break after '}'",
+				getLineNumber(content, matcher.start(1)));
+		}
+
+		matcher = _incorrectLineBreakPattern2.matcher(content);
+
+		while (matcher.find()) {
+			if (JSPSourceUtil.isJavaSource(content, matcher.start())) {
+				return StringUtil.replaceFirst(
+					content, matcher.group(1), StringPool.SPACE,
+					matcher.start());
+			}
+		}
+
+		return content;
+	}
+
 	private static final Pattern _chainingPattern = Pattern.compile(
 		"\\WgetClass\\(\\)\\.");
 	private static final Pattern _emptyJavaSourceTagPattern = Pattern.compile(
 		"\n\t*<%\n+\t*%>\n");
 	private static final Pattern _incorrectClosingTagPattern = Pattern.compile(
 		"\n(\t*)\t((?!<\\w).)* />\n");
-	private static final Pattern _incorrectLineBreakPattern = Pattern.compile(
+	private static final Pattern _incorrectLineBreakPattern1 = Pattern.compile(
 		"[\n\t]\\} ?(catch|else|finally) ");
+	private static final Pattern _incorrectLineBreakPattern2 = Pattern.compile(
+		"=(\n\\s*).*;\n");
 	private static final Pattern _incorrectSingleLineJavaSourcePattern =
 		Pattern.compile("(\t*)(<% (.*) %>)\n");
 

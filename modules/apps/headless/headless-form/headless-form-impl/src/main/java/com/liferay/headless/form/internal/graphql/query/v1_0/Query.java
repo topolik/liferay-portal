@@ -80,26 +80,7 @@ public class Query {
 
 	@GraphQLField
 	@GraphQLInvokeDetached
-	public Collection<Form> getContentSpaceFormsPage(
-			@GraphQLName("content-space-id") Long contentSpaceId,
-			@GraphQLName("pageSize") int pageSize,
-			@GraphQLName("page") int page)
-		throws Exception {
-
-		return _applyComponentServiceObjects(
-			_formResourceComponentServiceObjects,
-			this::_populateResourceContext,
-			formResource -> {
-				Page paginationPage = formResource.getContentSpaceFormsPage(
-					contentSpaceId, Pagination.of(pageSize, page));
-
-				return paginationPage.getItems();
-			});
-	}
-
-	@GraphQLField
-	@GraphQLInvokeDetached
-	public Form getForm(@GraphQLName("form-id") Long formId) throws Exception {
+	public Form getForm(@GraphQLName("formId") Long formId) throws Exception {
 		return _applyComponentServiceObjects(
 			_formResourceComponentServiceObjects,
 			this::_populateResourceContext,
@@ -108,19 +89,27 @@ public class Query {
 
 	@GraphQLField
 	@GraphQLInvokeDetached
-	public Form getFormFetchLatestDraft(@GraphQLName("form-id") Long formId)
+	public Collection<Form> getSiteFormsPage(
+			@GraphQLName("siteId") Long siteId,
+			@GraphQLName("pageSize") int pageSize,
+			@GraphQLName("page") int page)
 		throws Exception {
 
 		return _applyComponentServiceObjects(
 			_formResourceComponentServiceObjects,
 			this::_populateResourceContext,
-			formResource -> formResource.getFormFetchLatestDraft(formId));
+			formResource -> {
+				Page paginationPage = formResource.getSiteFormsPage(
+					siteId, Pagination.of(pageSize, page));
+
+				return paginationPage.getItems();
+			});
 	}
 
 	@GraphQLField
 	@GraphQLInvokeDetached
 	public FormDocument getFormDocument(
-			@GraphQLName("form-document-id") Long formDocumentId)
+			@GraphQLName("formDocumentId") Long formDocumentId)
 		throws Exception {
 
 		return _applyComponentServiceObjects(
@@ -133,7 +122,7 @@ public class Query {
 	@GraphQLField
 	@GraphQLInvokeDetached
 	public FormRecord getFormRecord(
-			@GraphQLName("form-record-id") Long formRecordId)
+			@GraphQLName("formRecordId") Long formRecordId)
 		throws Exception {
 
 		return _applyComponentServiceObjects(
@@ -146,7 +135,7 @@ public class Query {
 	@GraphQLField
 	@GraphQLInvokeDetached
 	public Collection<FormRecord> getFormFormRecordsPage(
-			@GraphQLName("form-id") Long formId,
+			@GraphQLName("formId") Long formId,
 			@GraphQLName("pageSize") int pageSize,
 			@GraphQLName("page") int page)
 		throws Exception {
@@ -164,8 +153,34 @@ public class Query {
 
 	@GraphQLField
 	@GraphQLInvokeDetached
-	public Collection<FormStructure> getContentSpaceFormStructuresPage(
-			@GraphQLName("content-space-id") Long contentSpaceId,
+	public FormRecord getFormFormRecordByLatestDraft(
+			@GraphQLName("formId") Long formId)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_formRecordResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			formRecordResource ->
+				formRecordResource.getFormFormRecordByLatestDraft(formId));
+	}
+
+	@GraphQLField
+	@GraphQLInvokeDetached
+	public FormStructure getFormStructure(
+			@GraphQLName("formStructureId") Long formStructureId)
+		throws Exception {
+
+		return _applyComponentServiceObjects(
+			_formStructureResourceComponentServiceObjects,
+			this::_populateResourceContext,
+			formStructureResource -> formStructureResource.getFormStructure(
+				formStructureId));
+	}
+
+	@GraphQLField
+	@GraphQLInvokeDetached
+	public Collection<FormStructure> getSiteFormStructuresPage(
+			@GraphQLName("siteId") Long siteId,
 			@GraphQLName("pageSize") int pageSize,
 			@GraphQLName("page") int page)
 		throws Exception {
@@ -175,24 +190,11 @@ public class Query {
 			this::_populateResourceContext,
 			formStructureResource -> {
 				Page paginationPage =
-					formStructureResource.getContentSpaceFormStructuresPage(
-						contentSpaceId, Pagination.of(pageSize, page));
+					formStructureResource.getSiteFormStructuresPage(
+						siteId, Pagination.of(pageSize, page));
 
 				return paginationPage.getItems();
 			});
-	}
-
-	@GraphQLField
-	@GraphQLInvokeDetached
-	public FormStructure getFormStructure(
-			@GraphQLName("form-structure-id") Long formStructureId)
-		throws Exception {
-
-		return _applyComponentServiceObjects(
-			_formStructureResourceComponentServiceObjects,
-			this::_populateResourceContext,
-			formStructureResource -> formStructureResource.getFormStructure(
-				formStructureId));
 	}
 
 	private <T, R, E1 extends Throwable, E2 extends Throwable> R

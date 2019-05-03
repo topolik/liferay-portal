@@ -15,8 +15,11 @@
 package com.liferay.portal.util;
 
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.util.PropsTestUtil;
 import com.liferay.portal.kernel.util.HttpUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
 
+import java.util.HashMap;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -33,6 +36,18 @@ public class PortalImplEscapeRedirectTest {
 		HttpUtil httpUtil = new HttpUtil();
 
 		httpUtil.setHttp(new HttpImpl());
+
+		PropsTestUtil.setProps(
+			new HashMap<String, Object>() {
+				{
+					put(
+						PropsKeys.DNS_SECURITY_ADDRESS_TIMEOUT_SECONDS,
+						String.valueOf(2));
+					put(
+						PropsKeys.DNS_SECURITY_THREAD_LIMIT,
+						String.valueOf(10));
+				}
+			});
 	}
 
 	@Test
@@ -108,6 +123,9 @@ public class PortalImplEscapeRedirectTest {
 		String[] redirectURLIPsAllowed = PropsValues.REDIRECT_URL_IPS_ALLOWED;
 		String redirectURLSecurityMode = PropsValues.REDIRECT_URL_SECURITY_MODE;
 
+		setPropsValuesValue("DNS_SECURITY_THREAD_LIMIT", 10);
+		setPropsValuesValue("DNS_SECURITY_ADDRESS_TIMEOUT_SECONDS", 2);
+
 		setPropsValuesValue("REDIRECT_URL_SECURITY_MODE", "ip");
 		setPropsValuesValue(
 			"REDIRECT_URL_IPS_ALLOWED",
@@ -151,6 +169,8 @@ public class PortalImplEscapeRedirectTest {
 			Assert.assertNull(_portalImpl.escapeRedirect("prefix.127.0.0.1"));
 		}
 		finally {
+			setPropsValuesValue("DNS_SECURITY_THREAD_LIMIT", 10);
+			setPropsValuesValue("DNS_SECURITY_ADDRESS_TIMEOUT_SECONDS", 2);
 			setPropsValuesValue(
 				"REDIRECT_URL_IPS_ALLOWED", redirectURLIPsAllowed);
 			setPropsValuesValue(

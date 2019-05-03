@@ -56,8 +56,6 @@ public class OAuth2ApplicationScopeAliasesWrapper
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("oAuth2ApplicationId", getOAuth2ApplicationId());
-		attributes.put("scopeAliases", getScopeAliases());
-		attributes.put("scopeAliasesHash", getScopeAliasesHash());
 
 		return attributes;
 	}
@@ -99,18 +97,6 @@ public class OAuth2ApplicationScopeAliasesWrapper
 
 		if (oAuth2ApplicationId != null) {
 			setOAuth2ApplicationId(oAuth2ApplicationId);
-		}
-
-		String scopeAliases = (String)attributes.get("scopeAliases");
-
-		if (scopeAliases != null) {
-			setScopeAliases(scopeAliases);
-		}
-
-		Long scopeAliasesHash = (Long)attributes.get("scopeAliasesHash");
-
-		if (scopeAliasesHash != null) {
-			setScopeAliasesHash(scopeAliasesHash);
 		}
 	}
 
@@ -162,31 +148,6 @@ public class OAuth2ApplicationScopeAliasesWrapper
 	@Override
 	public long getPrimaryKey() {
 		return model.getPrimaryKey();
-	}
-
-	/**
-	 * Returns the scope aliases of this o auth2 application scope aliases.
-	 *
-	 * @return the scope aliases of this o auth2 application scope aliases
-	 */
-	@Override
-	public String getScopeAliases() {
-		return model.getScopeAliases();
-	}
-
-	/**
-	 * Returns the scope aliases hash of this o auth2 application scope aliases.
-	 *
-	 * @return the scope aliases hash of this o auth2 application scope aliases
-	 */
-	@Override
-	public long getScopeAliasesHash() {
-		return model.getScopeAliasesHash();
-	}
-
-	@Override
-	public java.util.List<String> getScopeAliasesList() {
-		return model.getScopeAliasesList();
 	}
 
 	/**
@@ -275,31 +236,6 @@ public class OAuth2ApplicationScopeAliasesWrapper
 	@Override
 	public void setPrimaryKey(long primaryKey) {
 		model.setPrimaryKey(primaryKey);
-	}
-
-	/**
-	 * Sets the scope aliases of this o auth2 application scope aliases.
-	 *
-	 * @param scopeAliases the scope aliases of this o auth2 application scope aliases
-	 */
-	@Override
-	public void setScopeAliases(String scopeAliases) {
-		model.setScopeAliases(scopeAliases);
-	}
-
-	/**
-	 * Sets the scope aliases hash of this o auth2 application scope aliases.
-	 *
-	 * @param scopeAliasesHash the scope aliases hash of this o auth2 application scope aliases
-	 */
-	@Override
-	public void setScopeAliasesHash(long scopeAliasesHash) {
-		model.setScopeAliasesHash(scopeAliasesHash);
-	}
-
-	@Override
-	public void setScopeAliasesList(java.util.List<String> scopeAliasesList) {
-		model.setScopeAliasesList(scopeAliasesList);
 	}
 
 	/**

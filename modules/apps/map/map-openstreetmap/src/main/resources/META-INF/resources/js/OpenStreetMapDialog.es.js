@@ -5,6 +5,7 @@ import State, {Config} from 'metal-state';
  * @review
  */
 class OpenStreetMapDialog extends State {
+
 	/**
 	 * Creates a new map dialog using OpenStreetMap's API
 	 * @param  {Array} args List of arguments to be passed to State
@@ -16,7 +17,7 @@ class OpenStreetMapDialog extends State {
 		this._dialog = L.popup(
 			{
 				className: 'leaflet-popup',
-				minWidth: 400,
+				minWidth: 400
 			}
 		);
 	}
@@ -44,12 +45,13 @@ class OpenStreetMapDialog extends State {
  * @type {!Object}
  */
 OpenStreetMapDialog.STATE = {
+
 	/**
 	 * Map used for creating the dialog content
 	 * @review
 	 * @type {Object}
 	 */
-	map: Config.object(),
+	map: Config.object()
 };
 
 export default OpenStreetMapDialog;

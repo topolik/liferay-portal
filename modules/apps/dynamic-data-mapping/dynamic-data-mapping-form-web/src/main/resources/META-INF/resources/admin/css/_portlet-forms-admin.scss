@@ -1,3 +1,12 @@
+@media (min-width: 576px) {
+	.ddm-form-builder,
+	.ddm-translation-manager {
+		.modal-sm {
+			max-width: 300px;
+		}
+	}
+}
+
 .form-builder-publish-popover {
 	max-width: 500px;
 }
@@ -140,7 +149,7 @@
 		border-width: 0;
 		box-shadow: none;
 		margin: 0;
-		padding: 16px 10px 16px 10px;
+		padding: 16px 10px;
 
 		&:hover {
 			background-color: #F0F8FE;
@@ -463,6 +472,10 @@
 		position: absolute;
 		right: 15px;
 		top: 0;
+	}
+
+	.lfr-search-container-wrapper .list-group .list-group-item h2.h5 {
+		font-weight: 600;
 	}
 
 	.liferay-ddm-form-renderer-wizard-disabled {

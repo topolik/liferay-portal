@@ -14,7 +14,7 @@
 
 package com.liferay.fragment.service.impl;
 
-import com.liferay.fragment.constants.FragmentEntryTypeConstants;
+import com.liferay.fragment.constants.FragmentConstants;
 import com.liferay.fragment.exception.DuplicateFragmentEntryKeyException;
 import com.liferay.fragment.exception.FragmentEntryContentException;
 import com.liferay.fragment.exception.FragmentEntryNameException;
@@ -75,7 +75,7 @@ public class FragmentEntryLocalServiceImpl
 
 		return addFragmentEntry(
 			userId, groupId, fragmentCollectionId, StringPool.BLANK, name, 0,
-			FragmentEntryTypeConstants.TYPE_SECTION, status, serviceContext);
+			FragmentConstants.TYPE_SECTION, status, serviceContext);
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public class FragmentEntryLocalServiceImpl
 
 		return addFragmentEntry(
 			userId, groupId, fragmentCollectionId, StringPool.BLANK, name,
-			previewFileEntryId, FragmentEntryTypeConstants.TYPE_SECTION, status,
+			previewFileEntryId, FragmentConstants.TYPE_SECTION, status,
 			serviceContext);
 	}
 
@@ -123,7 +123,7 @@ public class FragmentEntryLocalServiceImpl
 
 		return addFragmentEntry(
 			userId, groupId, fragmentCollectionId, fragmentEntryKey, name, 0,
-			FragmentEntryTypeConstants.TYPE_SECTION, status, serviceContext);
+			FragmentConstants.TYPE_SECTION, status, serviceContext);
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public class FragmentEntryLocalServiceImpl
 		validate(name);
 
 		if (Validator.isNull(fragmentEntryKey)) {
-			fragmentEntryKey = _generateFragmentEntryKey(groupId, name);
+			fragmentEntryKey = generateFragmentEntryKey(groupId, name);
 		}
 
 		fragmentEntryKey = _getFragmentEntryKey(fragmentEntryKey);
@@ -188,7 +188,7 @@ public class FragmentEntryLocalServiceImpl
 
 		return addFragmentEntry(
 			userId, groupId, fragmentCollectionId, fragmentEntryKey, name,
-			previewFileEntryId, FragmentEntryTypeConstants.TYPE_SECTION, status,
+			previewFileEntryId, FragmentConstants.TYPE_SECTION, status,
 			serviceContext);
 	}
 
@@ -213,8 +213,7 @@ public class FragmentEntryLocalServiceImpl
 
 		return addFragmentEntry(
 			userId, groupId, fragmentCollectionId, StringPool.BLANK, name, css,
-			html, js, FragmentEntryTypeConstants.TYPE_SECTION, status,
-			serviceContext);
+			html, js, FragmentConstants.TYPE_SECTION, status, serviceContext);
 	}
 
 	@Override
@@ -238,8 +237,8 @@ public class FragmentEntryLocalServiceImpl
 
 		return addFragmentEntry(
 			userId, groupId, fragmentCollectionId, StringPool.BLANK, name, css,
-			html, js, previewFileEntryId,
-			FragmentEntryTypeConstants.TYPE_SECTION, status, serviceContext);
+			html, js, previewFileEntryId, FragmentConstants.TYPE_SECTION,
+			status, serviceContext);
 	}
 
 	@Override
@@ -263,7 +262,7 @@ public class FragmentEntryLocalServiceImpl
 
 		return addFragmentEntry(
 			userId, groupId, fragmentCollectionId, fragmentEntryKey, name, css,
-			html, js, 0, FragmentEntryTypeConstants.TYPE_SECTION, status,
+			html, js, 0, FragmentConstants.TYPE_SECTION, status,
 			serviceContext);
 	}
 
@@ -280,7 +279,7 @@ public class FragmentEntryLocalServiceImpl
 		User user = userLocalService.getUser(userId);
 
 		if (Validator.isNull(fragmentEntryKey)) {
-			fragmentEntryKey = _generateFragmentEntryKey(groupId, name);
+			fragmentEntryKey = generateFragmentEntryKey(groupId, name);
 		}
 
 		validate(name);
@@ -337,8 +336,8 @@ public class FragmentEntryLocalServiceImpl
 
 		return addFragmentEntry(
 			userId, groupId, fragmentCollectionId, fragmentEntryKey, name, css,
-			html, js, previewFileEntryId,
-			FragmentEntryTypeConstants.TYPE_SECTION, status, serviceContext);
+			html, js, previewFileEntryId, FragmentConstants.TYPE_SECTION,
+			status, serviceContext);
 	}
 
 	@Override
@@ -417,6 +416,29 @@ public class FragmentEntryLocalServiceImpl
 
 		return fragmentEntryPersistence.fetchByG_FEK(
 			groupId, _getFragmentEntryKey(fragmentEntryKey));
+	}
+
+	@Override
+	public String generateFragmentEntryKey(long groupId, String name) {
+		String fragmentEntryKey = _getFragmentEntryKey(name);
+
+		fragmentEntryKey = StringUtil.replace(
+			fragmentEntryKey, CharPool.SPACE, CharPool.DASH);
+
+		String curFragmentEntryKey = fragmentEntryKey;
+
+		int count = 0;
+
+		while (true) {
+			FragmentEntry fragmentEntry = fragmentEntryPersistence.fetchByG_FEK(
+				groupId, curFragmentEntryKey);
+
+			if (fragmentEntry == null) {
+				return curFragmentEntryKey;
+			}
+
+			curFragmentEntryKey = fragmentEntryKey + CharPool.DASH + count++;
+		}
 	}
 
 	@Override
@@ -603,28 +625,6 @@ public class FragmentEntryLocalServiceImpl
 
 		if (fragmentEntry != null) {
 			throw new DuplicateFragmentEntryKeyException();
-		}
-	}
-
-	private String _generateFragmentEntryKey(long groupId, String name) {
-		String fragmentEntryKey = _getFragmentEntryKey(name);
-
-		fragmentEntryKey = StringUtil.replace(
-			fragmentEntryKey, CharPool.SPACE, CharPool.DASH);
-
-		String curFragmentEntryKey = fragmentEntryKey;
-
-		int count = 0;
-
-		while (true) {
-			FragmentEntry fragmentEntry = fragmentEntryPersistence.fetchByG_FEK(
-				groupId, curFragmentEntryKey);
-
-			if (fragmentEntry == null) {
-				return curFragmentEntryKey;
-			}
-
-			curFragmentEntryKey = fragmentEntryKey + CharPool.DASH + count++;
 		}
 	}
 

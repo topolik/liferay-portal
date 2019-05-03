@@ -1,0 +1,80 @@
+definition {
+	macro addDisplayPage {
+		LexiconEntry.gotoAdd();
+
+		PortletEntry.inputName(name = "${displayPageName}");
+
+		Button.clickSave();
+
+		PageEditor.assertFragmentSidebarLoaded();
+	}
+
+	macro deleteDisplayPage {
+		LexiconCard.delete(card = "${displayPageName}");
+	}
+
+	macro gotoDisplayPage {
+		LexiconCard.clickCardTitle(card = "${displayPageName}");
+	}
+
+	macro gotoDisplayPageEllipsisItem {
+		LexiconCard.clickEllipsisItem(
+			card = "${displayPageName}",
+			item = "${item}");
+	}
+
+	macro markDisplayPageAsDefault {
+		LexiconCard.clickEllipsisItem(
+			card = "${displayPageName}",
+			item = "Mark As Default");
+
+		AssertVisible(
+			key_card = "${displayPageName}",
+			locator1 = "LexiconCard#CARD_STICKER");
+	}
+
+	macro openDisplayPagesAdmin {
+		Navigator.openWithAppendToBaseURL(urlAppend = "group/${siteURLKey}/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet&amp;_com_liferay_layout_admin_web_portlet_GroupPagesPortlet_tabs1=display-page-templates");
+	}
+
+	macro renameDisplayPage {
+		DisplayPageTemplatesAdmin.gotoDisplayPageEllipsisItem(
+			displayPageName = "${displayPageName}",
+			item = "Rename");
+
+		PortletEntry.inputName(name = "${newDisplayPageName}");
+
+		Modal.save();
+	}
+
+	macro viewDisplayPageNotPresent {
+		LexiconCard.viewCardNotPresent(card = "${displayPageName}");
+	}
+
+	macro viewDisplayPagePresent {
+		LexiconCard.viewCardPresent(card = "${displayPageName}");
+	}
+
+	macro viewPGViaAP {
+		var key_assetContent = "${webContentContent}";
+		var key_assetTitle = "${webContentTitle}";
+
+		AssertTextEquals(
+			locator1 = "AP#ASSET_ABSTRACT_TITLE",
+			value1 = "${webContentTitle}");
+
+		AssertTextEquals.assertPartialText(
+			locator1 = "AP#ASSET_ABSTRACT_DESCRIPTION",
+			value1 = "${webContentContent}");
+
+		AssertClick(
+			locator1 = "AP#ASSET_ABSTRACT_TITLE",
+			value1 = "${webContentTitle}");
+
+		for (var content : list "${contentList}") {
+			AssertElementPresent(
+				key_text = "${content}",
+				locator1 = "Fragment#EDITABLE_FIELD_CONTENT");
+		}
+	}
+}

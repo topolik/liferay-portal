@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 @ImplementationClassName("com.liferay.sync.model.impl.SyncDLObjectImpl")
 @ProviderType
 public interface SyncDLObject
-	extends SyncDLObjectModel, PersistedModel, TreeModel {
+	extends PersistedModel, SyncDLObjectModel, TreeModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

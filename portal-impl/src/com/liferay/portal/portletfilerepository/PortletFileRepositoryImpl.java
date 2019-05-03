@@ -271,16 +271,6 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 				serviceContext));
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #deletePortletFolder}
-	 */
-	@Deprecated
-	@Override
-	public void deleteFolder(long folderId) throws PortalException {
-		deletePortletFolder(folderId);
-	}
-
 	@Override
 	public void deletePortletFileEntries(long groupId, long folderId)
 		throws PortalException {
@@ -596,7 +586,13 @@ public class PortletFileRepositoryImpl implements PortletFileRepository {
 
 		if (Validator.isNotNull(queryString)) {
 			sb.append(StringPool.QUESTION);
-			sb.append(queryString);
+
+			if (queryString.startsWith(StringPool.AMPERSAND)) {
+				sb.append(queryString.substring(1));
+			}
+			else {
+				sb.append(queryString);
+			}
 		}
 
 		String portletFileEntryURL = sb.toString();

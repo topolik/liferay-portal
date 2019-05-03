@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 	"com.liferay.portlet.ratings.model.impl.RatingsEntryImpl"
 )
 @ProviderType
-public interface RatingsEntry extends RatingsEntryModel, PersistedModel {
+public interface RatingsEntry extends PersistedModel, RatingsEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

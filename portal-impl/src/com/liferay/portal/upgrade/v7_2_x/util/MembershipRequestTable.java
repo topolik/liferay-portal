@@ -28,20 +28,16 @@ public class MembershipRequestTable {
 	public static final String TABLE_NAME = "MembershipRequest";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"membershipRequestId", Types.BIGINT},
-		{"groupId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"createDate", Types.TIMESTAMP},
-		{"comments", Types.VARCHAR},
-		{"replyComments", Types.VARCHAR},
-		{"replyDate", Types.TIMESTAMP},
-		{"replierUserId", Types.BIGINT},
+		{"mvccVersion", Types.BIGINT}, {"membershipRequestId", Types.BIGINT},
+		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"createDate", Types.TIMESTAMP},
+		{"comments", Types.VARCHAR}, {"replyComments", Types.VARCHAR},
+		{"replyDate", Types.TIMESTAMP}, {"replierUserId", Types.BIGINT},
 		{"statusId", Types.BIGINT}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -67,7 +63,8 @@ TABLE_COLUMNS_MAP.put("replierUserId", Types.BIGINT);
 TABLE_COLUMNS_MAP.put("statusId", Types.BIGINT);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table MembershipRequest (mvccVersion LONG default 0 not null,membershipRequestId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,createDate DATE null,comments STRING null,replyComments STRING null,replyDate DATE null,replierUserId LONG,statusId LONG)";
+	public static final String TABLE_SQL_CREATE =
+"create table MembershipRequest (mvccVersion LONG default 0 not null,membershipRequestId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,createDate DATE null,comments STRING null,replyComments STRING null,replyDate DATE null,replierUserId LONG,statusId LONG)";
 
 	public static final String TABLE_SQL_DROP = "drop table MembershipRequest";
 

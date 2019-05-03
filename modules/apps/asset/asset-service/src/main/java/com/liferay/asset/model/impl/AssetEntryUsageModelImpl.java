@@ -20,20 +20,14 @@ import com.liferay.asset.model.AssetEntryUsage;
 import com.liferay.asset.model.AssetEntryUsageModel;
 import com.liferay.expando.kernel.model.ExpandoBridge;
 import com.liferay.expando.kernel.util.ExpandoBridgeFactoryUtil;
-import com.liferay.exportimport.kernel.lar.StagedModelType;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.bean.AutoEscapeBeanHandler;
-import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.CacheModel;
 import com.liferay.portal.kernel.model.ModelWrapper;
-import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.impl.BaseModelImpl;
 import com.liferay.portal.kernel.service.ServiceContext;
-import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
 
@@ -71,11 +65,10 @@ public class AssetEntryUsageModelImpl
 
 	public static final Object[][] TABLE_COLUMNS = {
 		{"uuid_", Types.VARCHAR}, {"assetEntryUsageId", Types.BIGINT},
-		{"groupId", Types.BIGINT}, {"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"assetEntryId", Types.BIGINT}, {"classNameId", Types.BIGINT},
-		{"classPK", Types.BIGINT}, {"portletId", Types.VARCHAR},
+		{"groupId", Types.BIGINT}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"assetEntryId", Types.BIGINT},
+		{"containerType", Types.BIGINT}, {"containerKey", Types.VARCHAR},
+		{"plid", Types.BIGINT}, {"type_", Types.INTEGER},
 		{"lastPublishDate", Types.TIMESTAMP}
 	};
 
@@ -86,20 +79,18 @@ public class AssetEntryUsageModelImpl
 		TABLE_COLUMNS_MAP.put("uuid_", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("assetEntryUsageId", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("groupId", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("companyId", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("userId", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("userName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("assetEntryId", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("classNameId", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("classPK", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("portletId", Types.VARCHAR);
+		TABLE_COLUMNS_MAP.put("containerType", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("containerKey", Types.VARCHAR);
+		TABLE_COLUMNS_MAP.put("plid", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("type_", Types.INTEGER);
 		TABLE_COLUMNS_MAP.put("lastPublishDate", Types.TIMESTAMP);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table AssetEntryUsage (uuid_ VARCHAR(75) null,assetEntryUsageId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,assetEntryId LONG,classNameId LONG,classPK LONG,portletId VARCHAR(200) null,lastPublishDate DATE null)";
+		"create table AssetEntryUsage (uuid_ VARCHAR(75) null,assetEntryUsageId LONG not null primary key,groupId LONG,createDate DATE null,modifiedDate DATE null,assetEntryId LONG,containerType LONG,containerKey VARCHAR(200) null,plid LONG,type_ INTEGER,lastPublishDate DATE null)";
 
 	public static final String TABLE_SQL_DROP = "drop table AssetEntryUsage";
 
@@ -115,40 +106,29 @@ public class AssetEntryUsageModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.service.util.ServiceProps.get(
-			"value.object.entity.cache.enabled.com.liferay.asset.model.AssetEntryUsage"),
-		true);
-
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.service.util.ServiceProps.get(
-			"value.object.finder.cache.enabled.com.liferay.asset.model.AssetEntryUsage"),
-		true);
-
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.asset.service.util.ServiceProps.get(
-			"value.object.column.bitmask.enabled.com.liferay.asset.model.AssetEntryUsage"),
-		true);
-
 	public static final long ASSETENTRYID_COLUMN_BITMASK = 1L;
 
-	public static final long CLASSNAMEID_COLUMN_BITMASK = 2L;
+	public static final long CONTAINERKEY_COLUMN_BITMASK = 2L;
 
-	public static final long CLASSPK_COLUMN_BITMASK = 4L;
+	public static final long CONTAINERTYPE_COLUMN_BITMASK = 4L;
 
-	public static final long COMPANYID_COLUMN_BITMASK = 8L;
+	public static final long GROUPID_COLUMN_BITMASK = 8L;
 
-	public static final long GROUPID_COLUMN_BITMASK = 16L;
+	public static final long PLID_COLUMN_BITMASK = 16L;
 
-	public static final long PORTLETID_COLUMN_BITMASK = 32L;
+	public static final long TYPE_COLUMN_BITMASK = 32L;
 
 	public static final long UUID_COLUMN_BITMASK = 64L;
 
 	public static final long ASSETENTRYUSAGEID_COLUMN_BITMASK = 128L;
 
-	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
-		com.liferay.asset.service.util.ServiceProps.get(
-			"lock.expiration.time.com.liferay.asset.model.AssetEntryUsage"));
+	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
+		_entityCacheEnabled = entityCacheEnabled;
+	}
+
+	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
+		_finderCacheEnabled = finderCacheEnabled;
+	}
 
 	public AssetEntryUsageModelImpl() {
 	}
@@ -265,19 +245,6 @@ public class AssetEntryUsageModelImpl
 			"groupId",
 			(BiConsumer<AssetEntryUsage, Long>)AssetEntryUsage::setGroupId);
 		attributeGetterFunctions.put(
-			"companyId", AssetEntryUsage::getCompanyId);
-		attributeSetterBiConsumers.put(
-			"companyId",
-			(BiConsumer<AssetEntryUsage, Long>)AssetEntryUsage::setCompanyId);
-		attributeGetterFunctions.put("userId", AssetEntryUsage::getUserId);
-		attributeSetterBiConsumers.put(
-			"userId",
-			(BiConsumer<AssetEntryUsage, Long>)AssetEntryUsage::setUserId);
-		attributeGetterFunctions.put("userName", AssetEntryUsage::getUserName);
-		attributeSetterBiConsumers.put(
-			"userName",
-			(BiConsumer<AssetEntryUsage, String>)AssetEntryUsage::setUserName);
-		attributeGetterFunctions.put(
 			"createDate", AssetEntryUsage::getCreateDate);
 		attributeSetterBiConsumers.put(
 			"createDate",
@@ -295,19 +262,25 @@ public class AssetEntryUsageModelImpl
 			(BiConsumer<AssetEntryUsage, Long>)
 				AssetEntryUsage::setAssetEntryId);
 		attributeGetterFunctions.put(
-			"classNameId", AssetEntryUsage::getClassNameId);
+			"containerType", AssetEntryUsage::getContainerType);
 		attributeSetterBiConsumers.put(
-			"classNameId",
-			(BiConsumer<AssetEntryUsage, Long>)AssetEntryUsage::setClassNameId);
-		attributeGetterFunctions.put("classPK", AssetEntryUsage::getClassPK);
-		attributeSetterBiConsumers.put(
-			"classPK",
-			(BiConsumer<AssetEntryUsage, Long>)AssetEntryUsage::setClassPK);
+			"containerType",
+			(BiConsumer<AssetEntryUsage, Long>)
+				AssetEntryUsage::setContainerType);
 		attributeGetterFunctions.put(
-			"portletId", AssetEntryUsage::getPortletId);
+			"containerKey", AssetEntryUsage::getContainerKey);
 		attributeSetterBiConsumers.put(
-			"portletId",
-			(BiConsumer<AssetEntryUsage, String>)AssetEntryUsage::setPortletId);
+			"containerKey",
+			(BiConsumer<AssetEntryUsage, String>)
+				AssetEntryUsage::setContainerKey);
+		attributeGetterFunctions.put("plid", AssetEntryUsage::getPlid);
+		attributeSetterBiConsumers.put(
+			"plid",
+			(BiConsumer<AssetEntryUsage, Long>)AssetEntryUsage::setPlid);
+		attributeGetterFunctions.put("type", AssetEntryUsage::getType);
+		attributeSetterBiConsumers.put(
+			"type",
+			(BiConsumer<AssetEntryUsage, Integer>)AssetEntryUsage::setType);
 		attributeGetterFunctions.put(
 			"lastPublishDate", AssetEntryUsage::getLastPublishDate);
 		attributeSetterBiConsumers.put(
@@ -379,69 +352,6 @@ public class AssetEntryUsageModelImpl
 	}
 
 	@Override
-	public long getCompanyId() {
-		return _companyId;
-	}
-
-	@Override
-	public void setCompanyId(long companyId) {
-		_columnBitmask |= COMPANYID_COLUMN_BITMASK;
-
-		if (!_setOriginalCompanyId) {
-			_setOriginalCompanyId = true;
-
-			_originalCompanyId = _companyId;
-		}
-
-		_companyId = companyId;
-	}
-
-	public long getOriginalCompanyId() {
-		return _originalCompanyId;
-	}
-
-	@Override
-	public long getUserId() {
-		return _userId;
-	}
-
-	@Override
-	public void setUserId(long userId) {
-		_userId = userId;
-	}
-
-	@Override
-	public String getUserUuid() {
-		try {
-			User user = UserLocalServiceUtil.getUserById(getUserId());
-
-			return user.getUuid();
-		}
-		catch (PortalException pe) {
-			return "";
-		}
-	}
-
-	@Override
-	public void setUserUuid(String userUuid) {
-	}
-
-	@Override
-	public String getUserName() {
-		if (_userName == null) {
-			return "";
-		}
-		else {
-			return _userName;
-		}
-	}
-
-	@Override
-	public void setUserName(String userName) {
-		_userName = userName;
-	}
-
-	@Override
 	public Date getCreateDate() {
 		return _createDate;
 	}
@@ -490,92 +400,94 @@ public class AssetEntryUsageModelImpl
 	}
 
 	@Override
-	public String getClassName() {
-		if (getClassNameId() <= 0) {
-			return "";
+	public long getContainerType() {
+		return _containerType;
+	}
+
+	@Override
+	public void setContainerType(long containerType) {
+		_columnBitmask |= CONTAINERTYPE_COLUMN_BITMASK;
+
+		if (!_setOriginalContainerType) {
+			_setOriginalContainerType = true;
+
+			_originalContainerType = _containerType;
 		}
 
-		return PortalUtil.getClassName(getClassNameId());
+		_containerType = containerType;
+	}
+
+	public long getOriginalContainerType() {
+		return _originalContainerType;
 	}
 
 	@Override
-	public void setClassName(String className) {
-		long classNameId = 0;
-
-		if (Validator.isNotNull(className)) {
-			classNameId = PortalUtil.getClassNameId(className);
-		}
-
-		setClassNameId(classNameId);
-	}
-
-	@Override
-	public long getClassNameId() {
-		return _classNameId;
-	}
-
-	@Override
-	public void setClassNameId(long classNameId) {
-		_columnBitmask |= CLASSNAMEID_COLUMN_BITMASK;
-
-		if (!_setOriginalClassNameId) {
-			_setOriginalClassNameId = true;
-
-			_originalClassNameId = _classNameId;
-		}
-
-		_classNameId = classNameId;
-	}
-
-	public long getOriginalClassNameId() {
-		return _originalClassNameId;
-	}
-
-	@Override
-	public long getClassPK() {
-		return _classPK;
-	}
-
-	@Override
-	public void setClassPK(long classPK) {
-		_columnBitmask |= CLASSPK_COLUMN_BITMASK;
-
-		if (!_setOriginalClassPK) {
-			_setOriginalClassPK = true;
-
-			_originalClassPK = _classPK;
-		}
-
-		_classPK = classPK;
-	}
-
-	public long getOriginalClassPK() {
-		return _originalClassPK;
-	}
-
-	@Override
-	public String getPortletId() {
-		if (_portletId == null) {
+	public String getContainerKey() {
+		if (_containerKey == null) {
 			return "";
 		}
 		else {
-			return _portletId;
+			return _containerKey;
 		}
 	}
 
 	@Override
-	public void setPortletId(String portletId) {
-		_columnBitmask |= PORTLETID_COLUMN_BITMASK;
+	public void setContainerKey(String containerKey) {
+		_columnBitmask |= CONTAINERKEY_COLUMN_BITMASK;
 
-		if (_originalPortletId == null) {
-			_originalPortletId = _portletId;
+		if (_originalContainerKey == null) {
+			_originalContainerKey = _containerKey;
 		}
 
-		_portletId = portletId;
+		_containerKey = containerKey;
 	}
 
-	public String getOriginalPortletId() {
-		return GetterUtil.getString(_originalPortletId);
+	public String getOriginalContainerKey() {
+		return GetterUtil.getString(_originalContainerKey);
+	}
+
+	@Override
+	public long getPlid() {
+		return _plid;
+	}
+
+	@Override
+	public void setPlid(long plid) {
+		_columnBitmask |= PLID_COLUMN_BITMASK;
+
+		if (!_setOriginalPlid) {
+			_setOriginalPlid = true;
+
+			_originalPlid = _plid;
+		}
+
+		_plid = plid;
+	}
+
+	public long getOriginalPlid() {
+		return _originalPlid;
+	}
+
+	@Override
+	public int getType() {
+		return _type;
+	}
+
+	@Override
+	public void setType(int type) {
+		_columnBitmask |= TYPE_COLUMN_BITMASK;
+
+		if (!_setOriginalType) {
+			_setOriginalType = true;
+
+			_originalType = _type;
+		}
+
+		_type = type;
+	}
+
+	public int getOriginalType() {
+		return _originalType;
 	}
 
 	@Override
@@ -588,13 +500,6 @@ public class AssetEntryUsageModelImpl
 		_lastPublishDate = lastPublishDate;
 	}
 
-	@Override
-	public StagedModelType getStagedModelType() {
-		return new StagedModelType(
-			PortalUtil.getClassNameId(AssetEntryUsage.class.getName()),
-			getClassNameId());
-	}
-
 	public long getColumnBitmask() {
 		return _columnBitmask;
 	}
@@ -602,7 +507,7 @@ public class AssetEntryUsageModelImpl
 	@Override
 	public ExpandoBridge getExpandoBridge() {
 		return ExpandoBridgeFactoryUtil.getExpandoBridge(
-			getCompanyId(), AssetEntryUsage.class.getName(), getPrimaryKey());
+			0, AssetEntryUsage.class.getName(), getPrimaryKey());
 	}
 
 	@Override
@@ -630,15 +535,13 @@ public class AssetEntryUsageModelImpl
 		assetEntryUsageImpl.setUuid(getUuid());
 		assetEntryUsageImpl.setAssetEntryUsageId(getAssetEntryUsageId());
 		assetEntryUsageImpl.setGroupId(getGroupId());
-		assetEntryUsageImpl.setCompanyId(getCompanyId());
-		assetEntryUsageImpl.setUserId(getUserId());
-		assetEntryUsageImpl.setUserName(getUserName());
 		assetEntryUsageImpl.setCreateDate(getCreateDate());
 		assetEntryUsageImpl.setModifiedDate(getModifiedDate());
 		assetEntryUsageImpl.setAssetEntryId(getAssetEntryId());
-		assetEntryUsageImpl.setClassNameId(getClassNameId());
-		assetEntryUsageImpl.setClassPK(getClassPK());
-		assetEntryUsageImpl.setPortletId(getPortletId());
+		assetEntryUsageImpl.setContainerType(getContainerType());
+		assetEntryUsageImpl.setContainerKey(getContainerKey());
+		assetEntryUsageImpl.setPlid(getPlid());
+		assetEntryUsageImpl.setType(getType());
 		assetEntryUsageImpl.setLastPublishDate(getLastPublishDate());
 
 		assetEntryUsageImpl.resetOriginalValues();
@@ -690,12 +593,12 @@ public class AssetEntryUsageModelImpl
 
 	@Override
 	public boolean isEntityCacheEnabled() {
-		return ENTITY_CACHE_ENABLED;
+		return _entityCacheEnabled;
 	}
 
 	@Override
 	public boolean isFinderCacheEnabled() {
-		return FINDER_CACHE_ENABLED;
+		return _finderCacheEnabled;
 	}
 
 	@Override
@@ -709,11 +612,6 @@ public class AssetEntryUsageModelImpl
 
 		assetEntryUsageModelImpl._setOriginalGroupId = false;
 
-		assetEntryUsageModelImpl._originalCompanyId =
-			assetEntryUsageModelImpl._companyId;
-
-		assetEntryUsageModelImpl._setOriginalCompanyId = false;
-
 		assetEntryUsageModelImpl._setModifiedDate = false;
 
 		assetEntryUsageModelImpl._originalAssetEntryId =
@@ -721,18 +619,21 @@ public class AssetEntryUsageModelImpl
 
 		assetEntryUsageModelImpl._setOriginalAssetEntryId = false;
 
-		assetEntryUsageModelImpl._originalClassNameId =
-			assetEntryUsageModelImpl._classNameId;
+		assetEntryUsageModelImpl._originalContainerType =
+			assetEntryUsageModelImpl._containerType;
 
-		assetEntryUsageModelImpl._setOriginalClassNameId = false;
+		assetEntryUsageModelImpl._setOriginalContainerType = false;
 
-		assetEntryUsageModelImpl._originalClassPK =
-			assetEntryUsageModelImpl._classPK;
+		assetEntryUsageModelImpl._originalContainerKey =
+			assetEntryUsageModelImpl._containerKey;
 
-		assetEntryUsageModelImpl._setOriginalClassPK = false;
+		assetEntryUsageModelImpl._originalPlid = assetEntryUsageModelImpl._plid;
 
-		assetEntryUsageModelImpl._originalPortletId =
-			assetEntryUsageModelImpl._portletId;
+		assetEntryUsageModelImpl._setOriginalPlid = false;
+
+		assetEntryUsageModelImpl._originalType = assetEntryUsageModelImpl._type;
+
+		assetEntryUsageModelImpl._setOriginalType = false;
 
 		assetEntryUsageModelImpl._columnBitmask = 0;
 	}
@@ -754,18 +655,6 @@ public class AssetEntryUsageModelImpl
 
 		assetEntryUsageCacheModel.groupId = getGroupId();
 
-		assetEntryUsageCacheModel.companyId = getCompanyId();
-
-		assetEntryUsageCacheModel.userId = getUserId();
-
-		assetEntryUsageCacheModel.userName = getUserName();
-
-		String userName = assetEntryUsageCacheModel.userName;
-
-		if ((userName != null) && (userName.length() == 0)) {
-			assetEntryUsageCacheModel.userName = null;
-		}
-
 		Date createDate = getCreateDate();
 
 		if (createDate != null) {
@@ -786,17 +675,19 @@ public class AssetEntryUsageModelImpl
 
 		assetEntryUsageCacheModel.assetEntryId = getAssetEntryId();
 
-		assetEntryUsageCacheModel.classNameId = getClassNameId();
+		assetEntryUsageCacheModel.containerType = getContainerType();
 
-		assetEntryUsageCacheModel.classPK = getClassPK();
+		assetEntryUsageCacheModel.containerKey = getContainerKey();
 
-		assetEntryUsageCacheModel.portletId = getPortletId();
+		String containerKey = assetEntryUsageCacheModel.containerKey;
 
-		String portletId = assetEntryUsageCacheModel.portletId;
-
-		if ((portletId != null) && (portletId.length() == 0)) {
-			assetEntryUsageCacheModel.portletId = null;
+		if ((containerKey != null) && (containerKey.length() == 0)) {
+			assetEntryUsageCacheModel.containerKey = null;
 		}
+
+		assetEntryUsageCacheModel.plid = getPlid();
+
+		assetEntryUsageCacheModel.type = getType();
 
 		Date lastPublishDate = getLastPublishDate();
 
@@ -879,6 +770,8 @@ public class AssetEntryUsageModelImpl
 	private static final Class<?>[] _escapedModelInterfaces = new Class[] {
 		AssetEntryUsage.class, ModelWrapper.class
 	};
+	private static boolean _entityCacheEnabled;
+	private static boolean _finderCacheEnabled;
 
 	private String _uuid;
 	private String _originalUuid;
@@ -886,25 +779,23 @@ public class AssetEntryUsageModelImpl
 	private long _groupId;
 	private long _originalGroupId;
 	private boolean _setOriginalGroupId;
-	private long _companyId;
-	private long _originalCompanyId;
-	private boolean _setOriginalCompanyId;
-	private long _userId;
-	private String _userName;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private boolean _setModifiedDate;
 	private long _assetEntryId;
 	private long _originalAssetEntryId;
 	private boolean _setOriginalAssetEntryId;
-	private long _classNameId;
-	private long _originalClassNameId;
-	private boolean _setOriginalClassNameId;
-	private long _classPK;
-	private long _originalClassPK;
-	private boolean _setOriginalClassPK;
-	private String _portletId;
-	private String _originalPortletId;
+	private long _containerType;
+	private long _originalContainerType;
+	private boolean _setOriginalContainerType;
+	private String _containerKey;
+	private String _originalContainerKey;
+	private long _plid;
+	private long _originalPlid;
+	private boolean _setOriginalPlid;
+	private int _type;
+	private int _originalType;
+	private boolean _setOriginalType;
 	private Date _lastPublishDate;
 	private long _columnBitmask;
 	private AssetEntryUsage _escapedModel;

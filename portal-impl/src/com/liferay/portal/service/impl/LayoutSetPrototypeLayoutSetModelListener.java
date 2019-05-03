@@ -51,7 +51,7 @@ public class LayoutSetPrototypeLayoutSetModelListener
 	protected void updateLayoutSetPrototype(
 		LayoutSet layoutSet, Date modifiedDate) {
 
-		if (layoutSet == null) {
+		if ((layoutSet == null) || !layoutSet.isHead()) {
 			return;
 		}
 

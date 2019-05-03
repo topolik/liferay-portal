@@ -100,7 +100,10 @@ public abstract class BaseNpmCommandTask
 		return GradleUtil.toString(_nodeVersion);
 	}
 
-	public abstract String getNpmCommand();
+	@Input
+	public String getNpmCommand() {
+		return GradleUtil.toString(_npmCommand);
+	}
 
 	@Input
 	@Optional
@@ -112,8 +115,7 @@ public abstract class BaseNpmCommandTask
 	public File getSourceDigestFile() {
 		Project project = getProject();
 
-		String pathname =
-			"npm/" + getNpmCommand() + "/" + getName() + "/.digest";
+		String pathname = "npm/" + getName() + "/.digest";
 
 		return new File(project.getBuildDir(), pathname);
 	}
@@ -194,6 +196,10 @@ public abstract class BaseNpmCommandTask
 		_nodeVersion = nodeVersion;
 	}
 
+	public void setNpmCommand(Object npmCommand) {
+		_npmCommand = npmCommand;
+	}
+
 	public void setNpmVersion(Object npmVersion) {
 		_npmVersion = npmVersion;
 	}
@@ -215,6 +221,7 @@ public abstract class BaseNpmCommandTask
 	}
 
 	private Object _nodeVersion;
+	private Object _npmCommand;
 	private Object _npmVersion;
 	private final PatternFilterable _patternFilterable = new PatternSet();
 	private Object _sourceDir;

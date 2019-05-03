@@ -27,38 +27,39 @@ definition {
 		}
 	}
 
-	@description = "This is a test for LPS-87134. Assert we can navigate to a child page in the Navigation Menu widget using pages hierarchy menu."
+	@description = "This is a test for LPS-87134. Assert we can navigate to a child page in the Navigation Menu widget."
 	@priority = "5"
 	test AddChildPage {
 		task ("Add a page and child page to the site") {
 			JSONLayout.addPublicLayout(
 				groupName = "Test Site Name",
-				layoutName = "Site Page"
-			);
+				layoutName = "Site Page");
 
 			JSONLayout.addPublicLayout(
 				groupName = "Test Site Name",
 				layoutName = "Site Child Page",
-				parentLayoutName = "Site Page"
-			);
+				parentLayoutName = "Site Page");
 		}
 
 		task ("Navigate to the child page using the Navigation Menu widget") {
-			Navigator.gotoSitePage(pageName = "Site Page", siteName = "Test Site Name");
+			Navigator.gotoSitePage(
+				pageName = "Site Page",
+				siteName = "Test Site Name");
 
-			Page.gotoChildPagePG(childPageName = "Site Child Page", pageName = "Site Page");
+			Page.gotoChildPagePG(
+				childPageName = "Site Child Page",
+				pageName = "Site Page");
 		}
 	}
 
-	@description = "This is a test for LPS-87134. Assert we can navigate to different pages in the Navigation Menu widget using pages hierarchy menu."
+	@description = "This is a test for LPS-87134. Assert we can navigate to different pages in the Navigation Menu widget."
 	@priority = "5"
 	test AddMultiplePages {
 		task ("Add three pages to the site") {
 			for (var index : list "1,2,3") {
 				JSONLayout.addPublicLayout(
 					groupName = "Test Site Name",
-					layoutName = "Site Page ${index}"
-				);
+					layoutName = "Site Page ${index}");
 			}
 		}
 
@@ -66,8 +67,7 @@ definition {
 			for (var index : list "1,2,3") {
 				Navigator.gotoSitePage(
 					pageName = "Site Page ${index}",
-					siteName = "Test Site Name"
-				);
+					siteName = "Test Site Name");
 			}
 		}
 	}
@@ -78,8 +78,7 @@ definition {
 		task ("Add a page to the site") {
 			JSONLayout.addPublicLayout(
 				groupName = "Test Site Name",
-				layoutName = "Site Page"
-			);
+				layoutName = "Site Page");
 		}
 
 		task ("Navigate to the Navigation Menu widget") {
@@ -91,8 +90,7 @@ definition {
 
 			AssertSelectedLabel(
 				locator1 = "NavigationMenusWidget#SELECT_NAVIGATION",
-				value1 = "Public Pages Hierarchy"
-			);
+				value1 = "Public Pages Hierarchy");
 		}
 	}
 
@@ -106,35 +104,39 @@ definition {
 		}
 
 		task ("Edit the name of the page") {
-			SitePages.gotoPageMenuItem(menuItem = "Configure", pageName = "Site Page");
+			SitePages.gotoPageMenuItem(
+				menuItem = "Configure",
+				pageName = "Site Page");
 
 			Page.editName(pageNameEdit = "Site Page Edit");
 		}
 
 		task ("Navigate to the Navigation Menu widget") {
-			Navigator.gotoSitePage(pageName = "Site Page Edit", siteName = "Test Site Name");
+			Navigator.gotoSitePage(
+				pageName = "Site Page Edit",
+				siteName = "Test Site Name");
 		}
 
 		task ("Assert the Navigation Menu widget shows the updated page name") {
-			Page.view(pageName = "Site Page Edit", privacy = "Public Pages");
+			Page.view(
+				pageName = "Site Page Edit",
+				privacy = "Public Pages");
 		}
 	}
 
-	@description = "This is a test for LPS-87134. Assert we can hide pages in the Navigation Menu widget using pages hierarchy menu."
+	@description = "This is a test for LPS-87134. Assert we can hide pages in the Navigation Menu widget."
 	@priority = "4"
 	test HidePages {
 		task ("Add a page to the site") {
 			JSONLayout.addPublicLayout(
 				groupName = "Test Site Name",
-				layoutName = "Site Page Visible"
-			);
+				layoutName = "Site Page Visible");
 		}
 
 		task ("Add a second page t othe site") {
 			JSONLayout.addPublicLayout(
 				groupName = "Test Site Name",
-				layoutName = "Site Page Hidden"
-			);
+				layoutName = "Site Page Hidden");
 		}
 
 		task ("Configure the first page to be visible") {
@@ -142,10 +144,9 @@ definition {
 
 			SitePages.gotoPageMenuItem(
 				menuItem = "Configure",
-				pageName = "Site Page Visible"
-			);
+				pageName = "Site Page Visible");
 
-			Page.toggleShowInPagesHierarchyMenu(toggleValue = "enable");
+			Page.toggleHiddenFromNavigationMenuWidget(toggleValue = "disable");
 
 			Button.clickSave();
 		}
@@ -155,10 +156,9 @@ definition {
 
 			SitePages.gotoPageMenuItem(
 				menuItem = "Configure",
-				pageName = "Site Page Hidden"
-			);
+				pageName = "Site Page Hidden");
 
-			Page.toggleShowInPagesHierarchyMenu(toggleValue = "disable");
+			Page.toggleHiddenFromNavigationMenuWidget(toggleValue = "enable");
 
 			Button.clickSave();
 		}
@@ -166,15 +166,13 @@ definition {
 		task ("Assert the first page is visible in the Navigation Menu widget") {
 			Navigator.gotoSitePage(
 				pageName = "Site Page Visible",
-				siteName = "Test Site Name"
-			);
+				siteName = "Test Site Name");
 		}
 
 		task ("Assert the second page is not visible in the Navigation Menu widget") {
 			AssertElementNotPresent(
-				locator1 = "Home#PAGE",
-				key_pageName = "Site Page Hidden"
-			);
+				key_pageName = "Site Page Hidden",
+				locator1 = "Home#PAGE");
 		}
 	}
 }

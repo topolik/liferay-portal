@@ -57,12 +57,64 @@ public class IconTag extends IncludeTag {
 		return EVAL_BODY_INCLUDE;
 	}
 
+	public String getAlt() {
+		return _alt;
+	}
+
+	public String getAriaRole() {
+		return _ariaRole;
+	}
+
 	public String getCssClass() {
 		return _cssClass;
 	}
 
 	public String getIcon() {
 		return _icon;
+	}
+
+	public String getIconCssClass() {
+		return _iconCssClass;
+	}
+
+	public String getImageHover() {
+		return _imageHover;
+	}
+
+	public String getLang() {
+		return _lang;
+	}
+
+	public String getLinkCssClass() {
+		return _linkCssClass;
+	}
+
+	/**
+	 * @deprecated As of Judson (7.1.x), with no direct replacement
+	 */
+	@Deprecated
+	public String getLinkTitle() {
+		return _linkTitle;
+	}
+
+	public String getMarkupView() {
+		return _markupView;
+	}
+
+	public String getTarget() {
+		return _target;
+	}
+
+	public boolean isLocalizeMessage() {
+		return _localizeMessage;
+	}
+
+	public boolean isToolTip() {
+		return _toolTip;
+	}
+
+	public boolean isUseDialog() {
+		return _useDialog;
 	}
 
 	public void setAlt(String alt) {
@@ -111,6 +163,14 @@ public class IconTag extends IncludeTag {
 
 	public void setLinkCssClass(String linkCssClass) {
 		_linkCssClass = linkCssClass;
+	}
+
+	/**
+	 * @deprecated As of Judson (7.1.x), with no direct replacement
+	 */
+	@Deprecated
+	public void setLinkTitle(String linkTitle) {
+		_linkTitle = linkTitle;
 	}
 
 	public void setLocalizeMessage(boolean localizeMessage) {
@@ -173,6 +233,7 @@ public class IconTag extends IncludeTag {
 		_label = null;
 		_lang = null;
 		_linkCssClass = null;
+		_linkTitle = null;
 		_localizeMessage = true;
 		_markupView = null;
 		_message = null;
@@ -451,6 +512,7 @@ public class IconTag extends IncludeTag {
 			"liferay-ui:icon:label", String.valueOf(isLabel()));
 		request.setAttribute("liferay-ui:icon:lang", _lang);
 		request.setAttribute("liferay-ui:icon:linkCssClass", _linkCssClass);
+		request.setAttribute("liferay-ui:icon:linkTitle", _linkTitle);
 		request.setAttribute(
 			"liferay-ui:icon:localizeMessage",
 			String.valueOf(_localizeMessage));
@@ -711,6 +773,7 @@ public class IconTag extends IncludeTag {
 	private Boolean _label;
 	private String _lang;
 	private String _linkCssClass;
+	private String _linkTitle;
 	private boolean _localizeMessage = true;
 	private String _markupView;
 	private String _message;

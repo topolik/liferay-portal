@@ -121,14 +121,14 @@
 		<tag-class>com.liferay.asset.taglib.servlet.taglib.AssetCategoriesNavigationTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
-			<description>Whether to display the portlet to end users when there isn't a category to display.</description>
+			<description>Whether to display the portlet when there isn't a category to display.</description>
 			<name>hidePortletWhenEmpty</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<type>boolean</type>
 		</attribute>
 		<attribute>
-			<description>A comma delimited set of vocabularies to display. By default, all the vocabularies that are visible to the current scope are displayed.</description>
+			<description>A comma delimited set of vocabularies to display. By default, all vocabularies visible to the current scope are displayed.</description>
 			<name>vocabularyIds</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -282,6 +282,21 @@
 		<attribute>
 			<name>viewURL</name>
 			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+	<tag>
+		<name>asset-entry-usages</name>
+		<tag-class>com.liferay.asset.taglib.servlet.taglib.AssetEntryUsagesTag</tag-class>
+		<body-content>JSP</body-content>
+		<attribute>
+			<name>className</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>classPK</name>
+			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 	</tag>
@@ -593,7 +608,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Event name which fires when user selects a display page using item selector.</description>
+			<description>The event name that fires when a user selects a display page using item selector.</description>
 			<name>eventName</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -605,7 +620,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description>Whether to allow page selection with the default Asset Publisher for the page.</description>
+			<description>Whether to allow page selection for the page's default Asset Publisher.</description>
 			<name>showPortletLayouts</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>

@@ -78,6 +78,7 @@ String dropdownMenuComponentId = randomNamespace + "socialBookmarksDropdownMenu"
 					icon="share"
 					style="secondary"
 					triggerCssClasses="btn-monospaced btn-outline-borderless btn-outline-secondary btn-sm"
+					triggerTitle='<%= LanguageUtil.get(request, "share") %>'
 				/>
 
 			<%
@@ -91,7 +92,7 @@ String dropdownMenuComponentId = randomNamespace + "socialBookmarksDropdownMenu"
 		outputKey="social_bookmarks"
 	>
 		<aui:script>
-			function socialBookmarks_handleItemClick(className, classPK, type, postURL, url) {
+			function socialBookmarks_handleItemClick(event, className, classPK, type, postURL, url) {
 				var SHARE_WINDOW_HEIGHT = 436;
 				var SHARE_WINDOW_WIDTH = 626;
 
@@ -103,6 +104,9 @@ String dropdownMenuComponentId = randomNamespace + "socialBookmarksDropdownMenu"
 					'status=0',
 					'width=' + SHARE_WINDOW_WIDTH
 				];
+
+				event.preventDefault();
+				event.stopPropagation();
 
 				window.open(postURL, null, shareWindowFeatures.join()).focus();
 
@@ -132,6 +136,7 @@ String dropdownMenuComponentId = randomNamespace + "socialBookmarksDropdownMenu"
 						var data = event.data.item.data;
 
 						socialBookmarks_handleItemClick(
+							event,
 							data.className,
 							parseInt(data.classPK),
 							data.type,

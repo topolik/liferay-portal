@@ -17,10 +17,8 @@ package com.liferay.change.tracking.model;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.model.AttachedModel;
 import com.liferay.portal.kernel.model.AuditedModel;
 import com.liferay.portal.kernel.model.BaseModel;
-import com.liferay.portal.kernel.model.ResourcedModel;
 import com.liferay.portal.kernel.model.ShardedModel;
 
 import java.util.Date;
@@ -38,8 +36,7 @@ import java.util.Date;
  */
 @ProviderType
 public interface CTEntryModel
-	extends AttachedModel, AuditedModel, BaseModel<CTEntry>, ResourcedModel,
-			ShardedModel {
+	extends AuditedModel, BaseModel<CTEntry>, ShardedModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -173,65 +170,60 @@ public interface CTEntryModel
 	public void setModifiedDate(Date modifiedDate);
 
 	/**
-	 * Returns the fully qualified class name of this ct entry.
+	 * Returns the original ct collection ID of this ct entry.
 	 *
-	 * @return the fully qualified class name of this ct entry
+	 * @return the original ct collection ID of this ct entry
 	 */
-	@Override
-	public String getClassName();
-
-	public void setClassName(String className);
+	public long getOriginalCTCollectionId();
 
 	/**
-	 * Returns the class name ID of this ct entry.
+	 * Sets the original ct collection ID of this ct entry.
 	 *
-	 * @return the class name ID of this ct entry
+	 * @param originalCTCollectionId the original ct collection ID of this ct entry
 	 */
-	@Override
-	public long getClassNameId();
+	public void setOriginalCTCollectionId(long originalCTCollectionId);
 
 	/**
-	 * Sets the class name ID of this ct entry.
+	 * Returns the model class name ID of this ct entry.
 	 *
-	 * @param classNameId the class name ID of this ct entry
+	 * @return the model class name ID of this ct entry
 	 */
-	@Override
-	public void setClassNameId(long classNameId);
+	public long getModelClassNameId();
 
 	/**
-	 * Returns the class pk of this ct entry.
+	 * Sets the model class name ID of this ct entry.
 	 *
-	 * @return the class pk of this ct entry
+	 * @param modelClassNameId the model class name ID of this ct entry
 	 */
-	@Override
-	public long getClassPK();
+	public void setModelClassNameId(long modelClassNameId);
 
 	/**
-	 * Sets the class pk of this ct entry.
+	 * Returns the model class pk of this ct entry.
 	 *
-	 * @param classPK the class pk of this ct entry
+	 * @return the model class pk of this ct entry
 	 */
-	@Override
-	public void setClassPK(long classPK);
+	public long getModelClassPK();
 
 	/**
-	 * Returns the resource prim key of this ct entry.
+	 * Sets the model class pk of this ct entry.
 	 *
-	 * @return the resource prim key of this ct entry
+	 * @param modelClassPK the model class pk of this ct entry
 	 */
-	@Override
-	public long getResourcePrimKey();
+	public void setModelClassPK(long modelClassPK);
 
 	/**
-	 * Sets the resource prim key of this ct entry.
+	 * Returns the model resource prim key of this ct entry.
 	 *
-	 * @param resourcePrimKey the resource prim key of this ct entry
+	 * @return the model resource prim key of this ct entry
 	 */
-	@Override
-	public void setResourcePrimKey(long resourcePrimKey);
+	public long getModelResourcePrimKey();
 
-	@Override
-	public boolean isResourceMain();
+	/**
+	 * Sets the model resource prim key of this ct entry.
+	 *
+	 * @param modelResourcePrimKey the model resource prim key of this ct entry
+	 */
+	public void setModelResourcePrimKey(long modelResourcePrimKey);
 
 	/**
 	 * Returns the change type of this ct entry.
@@ -246,6 +238,27 @@ public interface CTEntryModel
 	 * @param changeType the change type of this ct entry
 	 */
 	public void setChangeType(int changeType);
+
+	/**
+	 * Returns the collision of this ct entry.
+	 *
+	 * @return the collision of this ct entry
+	 */
+	public boolean getCollision();
+
+	/**
+	 * Returns <code>true</code> if this ct entry is collision.
+	 *
+	 * @return <code>true</code> if this ct entry is collision; <code>false</code> otherwise
+	 */
+	public boolean isCollision();
+
+	/**
+	 * Sets whether this ct entry is collision.
+	 *
+	 * @param collision the collision of this ct entry
+	 */
+	public void setCollision(boolean collision);
 
 	/**
 	 * Returns the status of this ct entry.

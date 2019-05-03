@@ -42,7 +42,6 @@ Export-Package:\
 	!com.liferay.portal.scripting.python,\
 	!com.liferay.portal.scripting.ruby,\
 	!com.liferay.portal.search,\
-	!com.liferay.portal.security.access.control,\
 	!com.liferay.portal.security.jaas.ext.*,\
 	!com.liferay.portal.service,\
 	!com.liferay.portal.sharepoint.*,\
@@ -273,7 +272,7 @@ Export-Package:\
 	\
 	org.jdom.*;version='1.0',\
 	\
-	org.json.*;version='2012.6.16.c7d2d9161321e9',\
+	org.json.*;version='20180813',\
 	\
 	org.objectweb.asm;version='7.0',\
 	org.objectweb.asm.commons;version='7.0',\
@@ -341,10 +340,6 @@ Provide-Capability:\
 	@../../../lib/portal/asm-util.jar,\
 	@../../../lib/portal/asm.jar,\
 	@../../../lib/portal/aspectj-rt.jar,\
-	@../../../lib/portal/bnd.jar!/aQute/bnd/annotation/metatype/*,\
-	@../../../lib/portal/bnd.jar!/aQute/bnd/header/*,\
-	@../../../lib/portal/bnd.jar!/aQute/bnd/osgi/*,\
-	@../../../lib/portal/bnd.jar!/aQute/bnd/version/*,\
 	@../../../lib/portal/ccpp.jar,\
 	@../../../lib/portal/commons-beanutils.jar,\
 	@../../../lib/portal/commons-chain.jar,\
@@ -397,6 +392,10 @@ Provide-Capability:\
 	@../../../lib/portal/xstream.jar,\
 	@../../../portal-impl/portal-impl.jar,\
 	@../../../portal-kernel/portal-kernel.jar,\
+	@lib/biz.aQute.bndlib.jar!/aQute/bnd/annotation/metatype/*,\
+	@lib/biz.aQute.bndlib.jar!/aQute/bnd/header/*,\
+	@lib/biz.aQute.bndlib.jar!/aQute/bnd/osgi/*,\
+	@lib/biz.aQute.bndlib.jar!/aQute/bnd/version/*,\
 	@lib/com.liferay.osgi.felix.util.jar,\
 	@lib/com.liferay.osgi.service.tracker.collections.jar,\
 	@lib/com.liferay.petra.concurrent.jar,\

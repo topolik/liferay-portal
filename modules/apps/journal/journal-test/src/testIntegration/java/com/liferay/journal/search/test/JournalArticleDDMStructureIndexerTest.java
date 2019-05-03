@@ -32,10 +32,11 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.rule.DeleteAfterTestRun;
 import com.liferay.portal.kernel.test.rule.SynchronousDestinationTestRule;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.search.test.util.IndexerFixture;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.PermissionCheckerTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import com.liferay.users.admin.test.util.search.UserSearchFixture;
 
 import java.util.List;
@@ -60,12 +61,12 @@ public class JournalArticleDDMStructureIndexerTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE,
+			PermissionCheckerMethodTestRule.INSTANCE,
 			SynchronousDestinationTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
-		LocaleThreadLocal.setSiteDefaultLocale(Locale.JAPAN);
+		LocaleThreadLocal.setSiteDefaultLocale(LocaleUtil.JAPAN);
 
 		setUpUserSearchFixture();
 		setUpJournalArticleDDMStructureFixture();
@@ -81,7 +82,7 @@ public class JournalArticleDDMStructureIndexerTest {
 	public void testDisableJournalArticleIndexer()
 		throws Exception, PortalException {
 
-		Locale locale = Locale.JAPAN;
+		Locale locale = LocaleUtil.JAPAN;
 		String searchTerm = "新規";
 		String title = "新規作成";
 
@@ -102,7 +103,7 @@ public class JournalArticleDDMStructureIndexerTest {
 
 	@Test
 	public void testReindexJournalArticle() throws Exception, PortalException {
-		Locale locale = Locale.JAPAN;
+		Locale locale = LocaleUtil.JAPAN;
 		String searchTerm = "新規";
 		String title = "新規作成";
 

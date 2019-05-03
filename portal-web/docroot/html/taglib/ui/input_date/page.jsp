@@ -136,39 +136,66 @@ else {
 
 	<aui:input label="<%= dateTogglerCheckboxLabel %>" name="<%= randomNamespace + dateTogglerCheckboxName %>" type="checkbox" value="<%= disabled %>" />
 
-	<aui:script sandbox="<%= true %>">
-		var checkbox = $('#<%= namespace + randomNamespace + dateTogglerCheckboxName %>');
+	<script>
+		(function() {
+			var form = document.<%= namespace + formName %>;
 
-		checkbox.on(
-			'click',
-			function(event) {
-				var checked = checkbox.prop('checked');
+			var checkbox = document.getElementById('<%= namespace + randomNamespace + dateTogglerCheckboxName %>');
 
-				var form = $(document.forms.<%= namespace + formName %>);
+			if (checkbox) {
+				checkbox.addEventListener(
+					'click',
+					function(event) {
+						var checked = checkbox.checked;
 
-				if (!form.length) {
-					form = $(checkbox.prop('form'));
-				}
+						if (!form) {
+							form = checkbox.form;
+						}
 
-				var dayField = form.fm('<%= HtmlUtil.escapeJS(dayParam) %>');
-				var inputDateField = form.fm('<%= HtmlUtil.getAUICompatibleId(name) %>');
-				var monthField = form.fm('<%= HtmlUtil.escapeJS(monthParam) %>');
-				var yearField = form.fm('<%= HtmlUtil.escapeJS(yearParam) %>');
+						var dayField = Liferay.Util.getFormElement(form, '<%= HtmlUtil.escapeJS(dayParam) %>');
 
-				inputDateField.prop('disabled', checked);
-				dayField.prop('disabled', checked);
-				monthField.prop('disabled', checked);
-				yearField.prop('disabled', checked);
+						if (dayField) {
+							dayField.disabled = checked;
 
-				if (checked) {
-					inputDateField.val('');
-					dayField.val('');
-					monthField.val('');
-					yearField.val('');
-				}
+							if (checked) {
+								dayField.value = '';
+							}
+						}
+
+						var inputDateField = Liferay.Util.getFormElement(form, '<%= HtmlUtil.getAUICompatibleId(name) %>');
+
+						if (inputDateField) {
+							inputDateField.disabled = checked;
+
+							if (checked) {
+								inputDateField.value = '';
+							}
+						}
+
+						var monthField = Liferay.Util.getFormElement(form, '<%= HtmlUtil.escapeJS(monthParam) %>');
+
+						if (monthField) {
+							monthField.disabled = checked;
+
+							if (checked) {
+								monthField.value = '';
+							}
+						}
+
+						var yearField = Liferay.Util.getFormElement(form, '<%= HtmlUtil.escapeJS(yearParam) %>');
+
+						if (yearField) {
+							yearField.disabled = checked;
+
+							if (checked) {
+								yearField.value = '';
+							}
+						}
+					}
+				);
 			}
-		);
-	</aui:script>
+		})();
+	</script>
 </c:if>
 
 <aui:script use='<%= "aui-datepicker" + (BrowserSnifferUtil.isMobile(request) ? "-native" : StringPool.BLANK) %>'>

@@ -16,6 +16,7 @@ package com.liferay.exportimport.internal.staging;
 
 import aQute.bnd.annotation.ProviderType;
 
+import com.liferay.change.tracking.CTEngineManager;
 import com.liferay.changeset.model.ChangesetCollection;
 import com.liferay.changeset.model.ChangesetEntry;
 import com.liferay.changeset.service.ChangesetCollectionLocalService;
@@ -79,6 +80,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.lock.DuplicateLockException;
 import com.liferay.portal.kernel.lock.Lock;
@@ -733,9 +735,6 @@ public class StagingImpl implements Staging {
 		Locale locale, Exception e,
 		ExportImportConfiguration exportImportConfiguration) {
 
-		JSONObject exceptionMessagesJSONObject =
-			JSONFactoryUtil.createJSONObject();
-
 		String errorMessage = StringPool.BLANK;
 		JSONArray errorMessagesJSONArray = null;
 		int errorType = 0;
@@ -962,9 +961,9 @@ public class StagingImpl implements Staging {
 
 			errorType = ServletResponseConstants.SC_FILE_CUSTOM_EXCEPTION;
 		}
-		else if (e instanceof ExportImportIOException ||
-				 (cause instanceof SystemException &&
-				  cause.getCause() instanceof ExportImportIOException)) {
+		else if ((e instanceof ExportImportIOException) ||
+				 ((cause instanceof SystemException) &&
+				  (cause.getCause() instanceof ExportImportIOException))) {
 
 			ExportImportIOException eiioe = null;
 
@@ -1237,8 +1236,8 @@ public class StagingImpl implements Staging {
 
 			errorType = ServletResponseConstants.SC_FILE_CUSTOM_EXCEPTION;
 		}
-		else if (e instanceof LayoutImportException ||
-				 cause instanceof LayoutImportException) {
+		else if ((e instanceof LayoutImportException) ||
+				 (cause instanceof LayoutImportException)) {
 
 			LayoutImportException lie = null;
 
@@ -1307,13 +1306,11 @@ public class StagingImpl implements Staging {
 				lpe.getMissingLayoutPrototypes();
 
 			for (Tuple missingLayoutPrototype : missingLayoutPrototypes) {
-				JSONObject errorMessageJSONObject =
-					JSONFactoryUtil.createJSONObject();
-
 				String layoutPrototypeUuid =
 					(String)missingLayoutPrototype.getObject(1);
 
-				errorMessageJSONObject.put("info", layoutPrototypeUuid);
+				JSONObject errorMessageJSONObject = JSONUtil.put(
+					"info", layoutPrototypeUuid);
 
 				String layoutPrototypeName =
 					(String)missingLayoutPrototype.getObject(2);
@@ -1684,7 +1681,8 @@ public class StagingImpl implements Staging {
 			errorType = ServletResponseConstants.SC_FILE_CUSTOM_EXCEPTION;
 		}
 
-		exceptionMessagesJSONObject.put("message", errorMessage);
+		JSONObject exceptionMessagesJSONObject = JSONUtil.put(
+			"message", errorMessage);
 
 		if ((errorMessagesJSONArray != null) &&
 			(errorMessagesJSONArray.length() > 0)) {
@@ -2043,10 +2041,12 @@ public class StagingImpl implements Staging {
 						false));
 			}
 
-			errorMessageJSONObject.put("size", referrers.size());
 			errorMessageJSONObject.put(
+				"size", referrers.size()
+			).put(
 				"type",
-				ResourceActionsUtil.getModelResource(locale, entry.getKey()));
+				ResourceActionsUtil.getModelResource(locale, entry.getKey())
+			);
 
 			warningMessagesJSONArray.put(errorMessageJSONObject);
 		}
@@ -2107,6 +2107,10 @@ public class StagingImpl implements Staging {
 		}
 
 		return false;
+	}
+
+	public boolean isChangeTrackingEnabled(long companyId) {
+		return _ctEngineManager.isChangeTrackingEnabled(companyId);
 	}
 
 	@Override
@@ -4316,6 +4320,9 @@ public class StagingImpl implements Staging {
 
 	@Reference
 	private ClassNameLocalService _classNameLocalService;
+
+	@Reference
+	private CTEngineManager _ctEngineManager;
 
 	@Reference
 	private DLValidator _dlValidator;

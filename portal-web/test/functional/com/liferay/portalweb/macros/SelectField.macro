@@ -1,0 +1,8 @@
+definition {
+	macro select {
+		Select(
+			key_selectFieldLabel = "${selectFieldLabel}",
+			locator1 = "Select#ANY",
+			value1 = "${selectFieldValue}");
+	}
+}

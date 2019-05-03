@@ -18,7 +18,8 @@ import com.liferay.portal.kernel.template.StringTemplateResource;
 import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateException;
 import com.liferay.portal.kernel.template.TemplateResource;
-import com.liferay.portal.template.AbstractSingleResourceTemplate;
+import com.liferay.portal.kernel.template.TemplateResourceCache;
+import com.liferay.portal.template.BaseTemplate;
 import com.liferay.portal.template.TemplateContextHelper;
 import com.liferay.portal.template.TemplateResourceThreadLocal;
 
@@ -42,8 +43,6 @@ import freemarker.template.utility.ObjectWrapperWithAPISupport;
 import java.io.Serializable;
 import java.io.Writer;
 
-import java.security.PrivilegedExceptionAction;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,27 +50,38 @@ import java.util.Map;
  * @author Mika Koivisto
  * @author Tina Tian
  */
-public class FreeMarkerTemplate extends AbstractSingleResourceTemplate {
+public class FreeMarkerTemplate extends BaseTemplate {
 
 	public FreeMarkerTemplate(
-		TemplateResource templateResource,
-		TemplateResource errorTemplateResource, Map<String, Object> context,
+		TemplateResource templateResource, Map<String, Object> context,
 		Configuration configuration,
-		TemplateContextHelper templateContextHelper, long interval) {
+		TemplateContextHelper templateContextHelper,
+		TemplateResourceCache templateResourceCache) {
 
-		super(
-			templateResource, errorTemplateResource, context,
-			templateContextHelper, TemplateConstants.LANG_TYPE_FTL, interval);
+		super(templateResource, context, templateContextHelper);
 
 		_configuration = configuration;
+		_templateResourceCache = templateResourceCache;
+
+		if (templateResourceCache.isEnabled()) {
+			cacheTemplateResource(templateResourceCache, templateResource);
+		}
 	}
 
 	@Override
-	protected void handleException(Exception exception, Writer writer)
+	protected void handleException(
+			TemplateResource templateResource,
+			TemplateResource errorTemplateResource, Exception exception,
+			Writer writer)
 		throws TemplateException {
 
-		if ((exception instanceof ParseException) ||
-			(exception instanceof freemarker.template.TemplateException)) {
+		if (_templateResourceCache.isEnabled()) {
+			cacheTemplateResource(
+				_templateResourceCache, errorTemplateResource);
+		}
+
+		if (exception instanceof freemarker.template.TemplateException ||
+			exception instanceof ParseException) {
 
 			put("exception", exception.getMessage());
 
@@ -136,6 +146,7 @@ public class FreeMarkerTemplate extends AbstractSingleResourceTemplate {
 		};
 
 	private final Configuration _configuration;
+	private final TemplateResourceCache _templateResourceCache;
 
 	private class CachableDefaultMapAdapter
 		extends WrappingTemplateModel
@@ -220,26 +231,6 @@ public class FreeMarkerTemplate extends AbstractSingleResourceTemplate {
 		private final Map<String, Object> _map;
 		private final ObjectWrapper _objectWrapper;
 		private final Map<String, TemplateModel> _wrappedValueMap;
-
-	}
-
-	private class TemplatePrivilegedExceptionAction
-		implements PrivilegedExceptionAction<Template> {
-
-		public TemplatePrivilegedExceptionAction(
-			TemplateResource templateResource) {
-
-			_templateResource = templateResource;
-		}
-
-		@Override
-		public Template run() throws Exception {
-			return _configuration.getTemplate(
-				getTemplateResourceUUID(_templateResource),
-				TemplateConstants.DEFAUT_ENCODING);
-		}
-
-		private final TemplateResource _templateResource;
 
 	}
 

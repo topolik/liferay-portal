@@ -37,6 +37,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.LayoutService;
@@ -93,8 +94,11 @@ public class DDLImpl implements DDL {
 			jsonObject.put(fieldName, StringPool.BLANK);
 		}
 
-		jsonObject.put("displayIndex", record.getDisplayIndex());
-		jsonObject.put("recordId", record.getRecordId());
+		jsonObject.put(
+			"displayIndex", record.getDisplayIndex()
+		).put(
+			"recordId", record.getRecordId()
+		);
 
 		DDLRecordVersion recordVersion = record.getRecordVersion();
 
@@ -124,9 +128,7 @@ public class DDLImpl implements DDL {
 				Stream<String> fieldValuesStringStream = fieldValuesStream.map(
 					fieldValue -> getDocumentLibraryFieldValue(fieldValue));
 
-				JSONObject fieldJSONObject = JSONFactoryUtil.createJSONObject();
-
-				fieldJSONObject.put(
+				JSONObject fieldJSONObject = JSONUtil.put(
 					"title",
 					fieldValuesStringStream.collect(
 						Collectors.joining(StringPool.COMMA_AND_SPACE)));
@@ -137,9 +139,7 @@ public class DDLImpl implements DDL {
 				Stream<String> fieldValuesStringStream = fieldValuesStream.map(
 					fieldValue -> getLinkToPageFieldValue(fieldValue, locale));
 
-				JSONObject fieldJSONObject = JSONFactoryUtil.createJSONObject();
-
-				fieldJSONObject.put(
+				JSONObject fieldJSONObject = JSONUtil.put(
 					"name",
 					fieldValuesStringStream.collect(
 						Collectors.joining(StringPool.COMMA_AND_SPACE)));
@@ -195,11 +195,9 @@ public class DDLImpl implements DDL {
 		for (DDMFormField ddmFormField : ddmFormFields) {
 			String name = ddmFormField.getName();
 
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
 			String dataType = ddmFormField.getDataType();
 
-			jsonObject.put("dataType", dataType);
+			JSONObject jsonObject = JSONUtil.put("dataType", dataType);
 
 			boolean readOnly = ddmFormField.isReadOnly();
 
@@ -207,15 +205,19 @@ public class DDLImpl implements DDL {
 
 			LocalizedValue label = ddmFormField.getLabel();
 
-			jsonObject.put("label", label.getString(locale));
-
-			jsonObject.put("name", name);
+			jsonObject.put(
+				"label", label.getString(locale)
+			).put(
+				"name", name
+			);
 
 			boolean required = ddmFormField.isRequired();
 
-			jsonObject.put("required", required);
-
-			jsonObject.put("sortable", true);
+			jsonObject.put(
+				"required", required
+			).put(
+				"sortable", true
+			);
 
 			String type = ddmFormField.getType();
 

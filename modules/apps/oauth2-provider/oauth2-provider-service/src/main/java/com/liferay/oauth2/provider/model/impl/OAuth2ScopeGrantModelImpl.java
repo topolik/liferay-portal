@@ -66,7 +66,8 @@ public class OAuth2ScopeGrantModelImpl
 		{"oAuth2ScopeGrantId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"oA2AScopeAliasesId", Types.BIGINT},
 		{"applicationName", Types.VARCHAR},
-		{"bundleSymbolicName", Types.VARCHAR}, {"scope", Types.VARCHAR}
+		{"bundleSymbolicName", Types.VARCHAR}, {"scope", Types.VARCHAR},
+		{"scopeAliases", Types.CLOB}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
@@ -79,10 +80,11 @@ public class OAuth2ScopeGrantModelImpl
 		TABLE_COLUMNS_MAP.put("applicationName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("bundleSymbolicName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("scope", Types.VARCHAR);
+		TABLE_COLUMNS_MAP.put("scopeAliases", Types.CLOB);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table OAuth2ScopeGrant (oAuth2ScopeGrantId LONG not null primary key,companyId LONG,oA2AScopeAliasesId LONG,applicationName VARCHAR(255) null,bundleSymbolicName VARCHAR(255) null,scope VARCHAR(240) null)";
+		"create table OAuth2ScopeGrant (oAuth2ScopeGrantId LONG not null primary key,companyId LONG,oA2AScopeAliasesId LONG,applicationName VARCHAR(255) null,bundleSymbolicName VARCHAR(255) null,scope VARCHAR(240) null,scopeAliases TEXT null)";
 
 	public static final String TABLE_SQL_DROP = "drop table OAuth2ScopeGrant";
 
@@ -268,6 +270,12 @@ public class OAuth2ScopeGrantModelImpl
 		attributeSetterBiConsumers.put(
 			"scope",
 			(BiConsumer<OAuth2ScopeGrant, String>)OAuth2ScopeGrant::setScope);
+		attributeGetterFunctions.put(
+			"scopeAliases", OAuth2ScopeGrant::getScopeAliases);
+		attributeSetterBiConsumers.put(
+			"scopeAliases",
+			(BiConsumer<OAuth2ScopeGrant, String>)
+				OAuth2ScopeGrant::setScopeAliases);
 
 		_attributeGetterFunctions = Collections.unmodifiableMap(
 			attributeGetterFunctions);
@@ -407,6 +415,21 @@ public class OAuth2ScopeGrantModelImpl
 		return GetterUtil.getString(_originalScope);
 	}
 
+	@Override
+	public String getScopeAliases() {
+		if (_scopeAliases == null) {
+			return "";
+		}
+		else {
+			return _scopeAliases;
+		}
+	}
+
+	@Override
+	public void setScopeAliases(String scopeAliases) {
+		_scopeAliases = scopeAliases;
+	}
+
 	public long getColumnBitmask() {
 		return _columnBitmask;
 	}
@@ -446,6 +469,7 @@ public class OAuth2ScopeGrantModelImpl
 		oAuth2ScopeGrantImpl.setApplicationName(getApplicationName());
 		oAuth2ScopeGrantImpl.setBundleSymbolicName(getBundleSymbolicName());
 		oAuth2ScopeGrantImpl.setScope(getScope());
+		oAuth2ScopeGrantImpl.setScopeAliases(getScopeAliases());
 
 		oAuth2ScopeGrantImpl.resetOriginalValues();
 
@@ -570,6 +594,14 @@ public class OAuth2ScopeGrantModelImpl
 			oAuth2ScopeGrantCacheModel.scope = null;
 		}
 
+		oAuth2ScopeGrantCacheModel.scopeAliases = getScopeAliases();
+
+		String scopeAliases = oAuth2ScopeGrantCacheModel.scopeAliases;
+
+		if ((scopeAliases != null) && (scopeAliases.length() == 0)) {
+			oAuth2ScopeGrantCacheModel.scopeAliases = null;
+		}
+
 		return oAuth2ScopeGrantCacheModel;
 	}
 
@@ -657,6 +689,7 @@ public class OAuth2ScopeGrantModelImpl
 	private String _originalBundleSymbolicName;
 	private String _scope;
 	private String _originalScope;
+	private String _scopeAliases;
 	private long _columnBitmask;
 	private OAuth2ScopeGrant _escapedModel;
 

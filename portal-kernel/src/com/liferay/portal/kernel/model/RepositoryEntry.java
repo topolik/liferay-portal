@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.RepositoryEntryImpl")
 @ProviderType
-public interface RepositoryEntry extends RepositoryEntryModel, PersistedModel {
+public interface RepositoryEntry extends PersistedModel, RepositoryEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

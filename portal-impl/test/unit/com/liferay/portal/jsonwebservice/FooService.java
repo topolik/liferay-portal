@@ -15,8 +15,12 @@
 package com.liferay.portal.jsonwebservice;
 
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
+
+import java.io.File;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -206,6 +210,20 @@ public class FooService {
 
 	public static ServiceContext srvcctx2(ServiceContext serviceContext) {
 		return serviceContext;
+	}
+
+	public static String uploadFiles(File firstFile, File[] otherFiles)
+		throws IOException {
+
+		StringBundler sb = new StringBundler(otherFiles.length + 1);
+
+		sb.append(FileUtil.read(firstFile));
+
+		for (File otherFile : otherFiles) {
+			sb.append(FileUtil.read(otherFile));
+		}
+
+		return sb.toString();
 	}
 
 	public static String use1(FooDataImpl fooData) {

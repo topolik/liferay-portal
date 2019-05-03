@@ -300,15 +300,20 @@ if (forcePost && (portletURL != null)) {
 	</div>
 </c:if>
 
-<aui:script>
+<script>
 	function <portlet:namespace />submitForm(curParam, cur) {
-		var form = AUI.$(document.<%= randomNamespace + namespace %>pageIteratorFm);
+		var data = {};
 
-		form.fm(curParam).val(cur);
+		data[curParam] = cur;
 
-		submitForm(form);
+		Liferay.Util.postForm(
+			document.<%= randomNamespace + namespace %>pageIteratorFm,
+			{
+				data: data
+			}
+		);
 	}
-</aui:script>
+</script>
 
 <%!
 private String _getHREF(String formName, String curParam, int cur, String jsCall, String url, String urlAnchor) throws Exception {

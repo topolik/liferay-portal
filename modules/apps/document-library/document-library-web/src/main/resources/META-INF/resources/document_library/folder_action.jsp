@@ -162,31 +162,9 @@ if ((row == null) && portletName.equals(DLPortletKeys.MEDIA_GALLERY_DISPLAY)) {
 				</c:if>
 
 				<c:if test="<%= hasUpdatePermission && !folder.isMountPoint() %>">
-					<portlet:renderURL var="moveURL">
-						<portlet:param name="mvcRenderCommandName" value="/document_library/move_entry" />
-						<portlet:param name="redirect" value="<%= redirect %>" />
-						<portlet:param name="repositoryId" value="<%= String.valueOf(repositoryId) %>" />
-						<portlet:param name="rowIdsFolder" value="<%= String.valueOf(folderId) %>" />
-					</portlet:renderURL>
-
 					<liferay-ui:icon
 						message="move"
-						url="<%= moveURL %>"
-					/>
-				</c:if>
-
-				<c:if test="<%= DLFolderPermission.contains(permissionChecker, scopeGroupId, folderId, ActionKeys.ADD_FOLDER) && !folder.isMountPoint() %>">
-					<portlet:renderURL var="addFolderURL">
-						<portlet:param name="mvcRenderCommandName" value="/document_library/edit_folder" />
-						<portlet:param name="redirect" value="<%= currentURL %>" />
-						<portlet:param name="repositoryId" value="<%= String.valueOf(repositoryId) %>" />
-						<portlet:param name="parentFolderId" value="<%= String.valueOf(folderId) %>" />
-						<portlet:param name="ignoreRootFolder" value="<%= Boolean.TRUE.toString() %>" />
-					</portlet:renderURL>
-
-					<liferay-ui:icon
-						message="add-subfolder"
-						url="<%= addFolderURL %>"
+						url='<%= "javascript:" + liferayPortletResponse.getNamespace() + "move(1, 'rowIdsFolder', " + folderId + ");" %>'
 					/>
 				</c:if>
 

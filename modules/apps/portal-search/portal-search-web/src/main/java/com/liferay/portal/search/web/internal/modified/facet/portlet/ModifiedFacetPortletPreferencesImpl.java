@@ -19,6 +19,7 @@ import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -78,10 +79,11 @@ public class ModifiedFacetPortletPreferencesImpl
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
 		for (int i = 0; i < _LABELS.length; i++) {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("label", _LABELS[i]);
-			jsonObject.put("range", _RANGES[i]);
+			JSONObject jsonObject = JSONUtil.put(
+				"label", _LABELS[i]
+			).put(
+				"range", _RANGES[i]
+			);
 
 			jsonArray.put(jsonObject);
 		}

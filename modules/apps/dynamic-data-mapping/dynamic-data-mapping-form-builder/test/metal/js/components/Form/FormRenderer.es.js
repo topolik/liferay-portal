@@ -1,6 +1,6 @@
+import * as FormSupport from 'source/components/Form/FormSupport.es';
 import dom from 'metal-dom';
 import FormRenderer from 'source/components/Form/FormRenderer.es';
-import FormSupport from 'source/components/Form/FormSupport.es';
 import mockPages from 'mock/mockPages.es';
 import mockSuccessPage from 'mock/mockSuccessPage.es';
 
@@ -225,10 +225,10 @@ describe(
 				);
 
 				const spy = jest.spyOn(component, 'emit');
-				const {pageRenderer} = component.refs;
+				const {pageRenderer0} = component.refs;
 				const mockEvent = jest.fn();
 
-				pageRenderer.emit('fieldEdited', mockEvent);
+				pageRenderer0.emit('fieldEdited', mockEvent);
 
 				expect(spy).toHaveBeenCalled();
 				expect(spy).toHaveBeenCalledWith('fieldEdited', expect.anything());
@@ -250,10 +250,10 @@ describe(
 				);
 
 				const spy = jest.spyOn(component, 'emit');
-				const {pageRenderer} = component.refs;
+				const {pageRenderer0} = component.refs;
 				const mockEvent = jest.fn();
 
-				pageRenderer.emit('fieldClicked', mockEvent);
+				pageRenderer0.emit('fieldClicked', mockEvent);
 
 				expect(spy).toHaveBeenCalled();
 				expect(spy).toHaveBeenCalledWith('fieldClicked', expect.anything());
@@ -611,7 +611,7 @@ describe(
 				expect(spy).toHaveBeenCalledWith(
 					'fieldMoved',
 					{
-						data: mockEvent,
+						addedToPlaceholder: true,
 						source: {
 							columnIndex: 1,
 							pageIndex: 0,

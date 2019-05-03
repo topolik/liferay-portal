@@ -16,12 +16,16 @@ package com.liferay.frontend.js.loader.modules.extender.internal.servlet;
 
 import com.liferay.frontend.js.loader.modules.extender.internal.configuration.Details;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
-import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.ObjectValuePair;
+import com.liferay.portal.minifier.MinifierUtil;
 import com.liferay.portal.url.builder.AbsolutePortalURLBuilder;
 import com.liferay.portal.url.builder.AbsolutePortalURLBuilderFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import java.util.Map;
 
@@ -50,11 +54,17 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class JSLoaderConfigServlet extends HttpServlet {
 
+	public long getLastModified() {
+		return _lastModified;
+	}
+
 	@Activate
 	@Modified
 	protected void activate(Map<String, Object> properties) {
 		_details = ConfigurableUtil.createConfigurable(
 			Details.class, properties);
+
+		_lastModified = System.currentTimeMillis();
 	}
 
 	@Override
@@ -62,16 +72,27 @@ public class JSLoaderConfigServlet extends HttpServlet {
 			HttpServletRequest request, HttpServletResponse response)
 		throws IOException {
 
-		response.setContentType(ContentTypes.TEXT_JAVASCRIPT_UTF8);
+		if (!_isStale()) {
+			if (_log.isDebugEnabled()) {
+				_log.debug("Serving cached content for /js_loader_config");
+			}
 
-		PrintWriter printWriter = new PrintWriter(
-			response.getOutputStream(), true);
+			_writeResponse(response, _objectValuePair.getValue());
 
-		printWriter.println("(function() {");
-		printWriter.println(
+			return;
+		}
+
+		if (_log.isDebugEnabled()) {
+			_log.debug("Generating content for /js_loader_config");
+		}
+
+		StringWriter stringWriter = new StringWriter();
+
+		stringWriter.write("(function() {");
+		stringWriter.write(
 			"Liferay.EXPLAIN_RESOLUTIONS = " + _details.explainResolutions() +
 				";\n");
-		printWriter.println(
+		stringWriter.write(
 			"Liferay.EXPOSE_GLOBAL = " + _details.exposeGlobal() + ";\n");
 
 		AbsolutePortalURLBuilder absolutePortalURLBuilder =
@@ -79,22 +100,57 @@ public class JSLoaderConfigServlet extends HttpServlet {
 				request);
 
 		String url = absolutePortalURLBuilder.forWhiteboard(
-			"/js_loader_config"
+			"/js_resolve_modules"
 		).build();
 
-		printWriter.println("Liferay.RESOLVE_PATH = \"" + url + "\";\n");
+		stringWriter.write("Liferay.RESOLVE_PATH = \"" + url + "\";\n");
 
-		printWriter.println(
+		stringWriter.write(
 			"Liferay.WAIT_TIMEOUT = " + (_details.waitTimeout() * 1000) +
 				";\n");
-		printWriter.println("}());");
+		stringWriter.write("}());");
+
+		String content = stringWriter.toString();
+
+		String minifiedContent = MinifierUtil.minifyJavaScript(
+			"/o/js_loader_config", content);
+
+		_objectValuePair = new ObjectValuePair<>(
+			getLastModified(), minifiedContent);
+
+		_writeResponse(response, minifiedContent);
+	}
+
+	private boolean _isStale() {
+		if (getLastModified() > _objectValuePair.getKey()) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private void _writeResponse(HttpServletResponse response, String content)
+		throws IOException {
+
+		response.setContentType(Details.CONTENT_TYPE);
+
+		PrintWriter printWriter = new PrintWriter(
+			response.getOutputStream(), true);
+
+		printWriter.write(content);
 
 		printWriter.close();
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		JSLoaderConfigServlet.class);
 
 	@Reference
 	private AbsolutePortalURLBuilderFactory _absolutePortalURLBuilderFactory;
 
 	private volatile Details _details;
+	private volatile long _lastModified;
+	private volatile ObjectValuePair<Long, String> _objectValuePair =
+		new ObjectValuePair<>(0L, null);
 
 }

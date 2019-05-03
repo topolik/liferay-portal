@@ -40,7 +40,7 @@ import com.liferay.portal.kernel.test.util.UserTestUtil;
 import com.liferay.portal.service.test.ServiceTestUtil;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.PermissionCheckerTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 import com.liferay.segments.constants.SegmentsActionKeys;
 import com.liferay.segments.constants.SegmentsConstants;
 import com.liferay.segments.model.SegmentsEntry;
@@ -67,7 +67,7 @@ public class SegmentsEntryServiceTest {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE);
+			PermissionCheckerMethodTestRule.INSTANCE);
 
 	@Before
 	public void setUp() throws Exception {
@@ -105,10 +105,11 @@ public class SegmentsEntryServiceTest {
 				_groupUser, permissionChecker)) {
 
 			_segmentsEntryService.addSegmentsEntry(
+				RandomTestUtil.randomString(),
 				RandomTestUtil.randomLocaleStringMap(),
 				RandomTestUtil.randomLocaleStringMap(), true,
-				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-				SegmentsConstants.SOURCE_DEFAULT, RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(), SegmentsConstants.SOURCE_DEFAULT,
+				RandomTestUtil.randomString(),
 				ServiceContextTestUtil.getServiceContext(
 					_group, _groupUser.getUserId()));
 		}
@@ -122,10 +123,11 @@ public class SegmentsEntryServiceTest {
 				_groupUser, PermissionCheckerFactoryUtil.create(_groupUser))) {
 
 			_segmentsEntryService.addSegmentsEntry(
+				RandomTestUtil.randomString(),
 				RandomTestUtil.randomLocaleStringMap(),
 				RandomTestUtil.randomLocaleStringMap(), true,
-				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
-				SegmentsConstants.SOURCE_DEFAULT, RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(), SegmentsConstants.SOURCE_DEFAULT,
+				RandomTestUtil.randomString(),
 				ServiceContextTestUtil.getServiceContext(
 					_group, _groupUser.getUserId()));
 		}
@@ -360,9 +362,10 @@ public class SegmentsEntryServiceTest {
 
 			_segmentsEntryService.updateSegmentsEntry(
 				segmentsEntry.getSegmentsEntryId(),
+				RandomTestUtil.randomString(),
 				RandomTestUtil.randomLocaleStringMap(),
 				RandomTestUtil.randomLocaleStringMap(), true,
-				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(),
 				ServiceContextTestUtil.getServiceContext(
 					_group, _groupUser.getUserId()));
 		}
@@ -387,9 +390,10 @@ public class SegmentsEntryServiceTest {
 
 			_segmentsEntryService.updateSegmentsEntry(
 				segmentsEntry.getSegmentsEntryId(),
+				RandomTestUtil.randomString(),
 				RandomTestUtil.randomLocaleStringMap(),
 				RandomTestUtil.randomLocaleStringMap(), true,
-				RandomTestUtil.randomString(), RandomTestUtil.randomString(),
+				RandomTestUtil.randomString(),
 				ServiceContextTestUtil.getServiceContext(
 					_group, _groupUser.getUserId()));
 		}

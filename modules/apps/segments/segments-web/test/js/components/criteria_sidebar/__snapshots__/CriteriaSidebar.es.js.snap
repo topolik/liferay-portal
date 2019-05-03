@@ -48,15 +48,13 @@ exports[`CriteriaSidebar should render 1`] = `
         </div>
       </div>
     </div>
-    <ul
-      class="properties-list"
+    <div
+      class="sidebar-collapse"
     >
-      <li
-        class="empty-message"
-      >
-        no-results-were-found
-      </li>
-    </ul>
+      <ul
+        class="sidebar-collapse-groups list-unstyled"
+      />
+    </div>
   </div>
 </DocumentFragment>
 `;

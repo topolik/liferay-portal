@@ -235,161 +235,6 @@ public interface AssetEntryUsagePersistence
 	public int countByUUID_G(String uuid, long groupId);
 
 	/**
-	 * Returns all the asset entry usages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @return the matching asset entry usages
-	 */
-	public java.util.List<AssetEntryUsage> findByUuid_C(
-		String uuid, long companyId);
-
-	/**
-	 * Returns a range of all the asset entry usages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param start the lower bound of the range of asset entry usages
-	 * @param end the upper bound of the range of asset entry usages (not inclusive)
-	 * @return the range of matching asset entry usages
-	 */
-	public java.util.List<AssetEntryUsage> findByUuid_C(
-		String uuid, long companyId, int start, int end);
-
-	/**
-	 * Returns an ordered range of all the asset entry usages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param start the lower bound of the range of asset entry usages
-	 * @param end the upper bound of the range of asset entry usages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the ordered range of matching asset entry usages
-	 */
-	public java.util.List<AssetEntryUsage> findByUuid_C(
-		String uuid, long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
-			orderByComparator);
-
-	/**
-	 * Returns an ordered range of all the asset entry usages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * <p>
-	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
-	 * </p>
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param start the lower bound of the range of asset entry usages
-	 * @param end the upper bound of the range of asset entry usages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @param retrieveFromCache whether to retrieve from the finder cache
-	 * @return the ordered range of matching asset entry usages
-	 */
-	public java.util.List<AssetEntryUsage> findByUuid_C(
-		String uuid, long companyId, int start, int end,
-		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
-			orderByComparator,
-		boolean retrieveFromCache);
-
-	/**
-	 * Returns the first asset entry usage in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching asset entry usage
-	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
-	 */
-	public AssetEntryUsage findByUuid_C_First(
-			String uuid, long companyId,
-			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
-				orderByComparator)
-		throws NoSuchEntryUsageException;
-
-	/**
-	 * Returns the first asset entry usage in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the first matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
-	 */
-	public AssetEntryUsage fetchByUuid_C_First(
-		String uuid, long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
-			orderByComparator);
-
-	/**
-	 * Returns the last asset entry usage in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching asset entry usage
-	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
-	 */
-	public AssetEntryUsage findByUuid_C_Last(
-			String uuid, long companyId,
-			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
-				orderByComparator)
-		throws NoSuchEntryUsageException;
-
-	/**
-	 * Returns the last asset entry usage in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the last matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
-	 */
-	public AssetEntryUsage fetchByUuid_C_Last(
-		String uuid, long companyId,
-		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
-			orderByComparator);
-
-	/**
-	 * Returns the asset entry usages before and after the current asset entry usage in the ordered set where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param assetEntryUsageId the primary key of the current asset entry usage
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
-	 * @return the previous, current, and next asset entry usage
-	 * @throws NoSuchEntryUsageException if a asset entry usage with the primary key could not be found
-	 */
-	public AssetEntryUsage[] findByUuid_C_PrevAndNext(
-			long assetEntryUsageId, String uuid, long companyId,
-			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
-				orderByComparator)
-		throws NoSuchEntryUsageException;
-
-	/**
-	 * Removes all the asset entry usages where uuid = &#63; and companyId = &#63; from the database.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 */
-	public void removeByUuid_C(String uuid, long companyId);
-
-	/**
-	 * Returns the number of asset entry usages where uuid = &#63; and companyId = &#63;.
-	 *
-	 * @param uuid the uuid
-	 * @param companyId the company ID
-	 * @return the number of matching asset entry usages
-	 */
-	public int countByUuid_C(String uuid, long companyId);
-
-	/**
 	 * Returns all the asset entry usages where assetEntryId = &#63;.
 	 *
 	 * @param assetEntryId the asset entry ID
@@ -534,373 +379,361 @@ public interface AssetEntryUsagePersistence
 	public int countByAssetEntryId(long assetEntryId);
 
 	/**
-	 * Returns all the asset entry usages where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns all the asset entry usages where plid = &#63;.
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @return the matching asset entry usages
 	 */
-	public java.util.List<AssetEntryUsage> findByA_C(
-		long assetEntryId, long classNameId);
+	public java.util.List<AssetEntryUsage> findByPlid(long plid);
 
 	/**
-	 * Returns a range of all the asset entry usages where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns a range of all the asset entry usages where plid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @return the range of matching asset entry usages
 	 */
-	public java.util.List<AssetEntryUsage> findByA_C(
-		long assetEntryId, long classNameId, int start, int end);
+	public java.util.List<AssetEntryUsage> findByPlid(
+		long plid, int start, int end);
 
 	/**
-	 * Returns an ordered range of all the asset entry usages where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns an ordered range of all the asset entry usages where plid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching asset entry usages
 	 */
-	public java.util.List<AssetEntryUsage> findByA_C(
-		long assetEntryId, long classNameId, int start, int end,
+	public java.util.List<AssetEntryUsage> findByPlid(
+		long plid, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns an ordered range of all the asset entry usages where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns an ordered range of all the asset entry usages where plid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching asset entry usages
 	 */
-	public java.util.List<AssetEntryUsage> findByA_C(
-		long assetEntryId, long classNameId, int start, int end,
+	public java.util.List<AssetEntryUsage> findByPlid(
+		long plid, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator,
 		boolean retrieveFromCache);
 
 	/**
-	 * Returns the first asset entry usage in the ordered set where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns the first asset entry usage in the ordered set where plid = &#63;.
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching asset entry usage
 	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
 	 */
-	public AssetEntryUsage findByA_C_First(
-			long assetEntryId, long classNameId,
+	public AssetEntryUsage findByPlid_First(
+			long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Returns the first asset entry usage in the ordered set where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns the first asset entry usage in the ordered set where plid = &#63;.
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
 	 */
-	public AssetEntryUsage fetchByA_C_First(
-		long assetEntryId, long classNameId,
+	public AssetEntryUsage fetchByPlid_First(
+		long plid,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns the last asset entry usage in the ordered set where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns the last asset entry usage in the ordered set where plid = &#63;.
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching asset entry usage
 	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
 	 */
-	public AssetEntryUsage findByA_C_Last(
-			long assetEntryId, long classNameId,
+	public AssetEntryUsage findByPlid_Last(
+			long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Returns the last asset entry usage in the ordered set where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns the last asset entry usage in the ordered set where plid = &#63;.
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
 	 */
-	public AssetEntryUsage fetchByA_C_Last(
-		long assetEntryId, long classNameId,
+	public AssetEntryUsage fetchByPlid_Last(
+		long plid,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns the asset entry usages before and after the current asset entry usage in the ordered set where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns the asset entry usages before and after the current asset entry usage in the ordered set where plid = &#63;.
 	 *
 	 * @param assetEntryUsageId the primary key of the current asset entry usage
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next asset entry usage
 	 * @throws NoSuchEntryUsageException if a asset entry usage with the primary key could not be found
 	 */
-	public AssetEntryUsage[] findByA_C_PrevAndNext(
-			long assetEntryUsageId, long assetEntryId, long classNameId,
+	public AssetEntryUsage[] findByPlid_PrevAndNext(
+			long assetEntryUsageId, long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Removes all the asset entry usages where assetEntryId = &#63; and classNameId = &#63; from the database.
+	 * Removes all the asset entry usages where plid = &#63; from the database.
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 */
-	public void removeByA_C(long assetEntryId, long classNameId);
+	public void removeByPlid(long plid);
 
 	/**
-	 * Returns the number of asset entry usages where assetEntryId = &#63; and classNameId = &#63;.
+	 * Returns the number of asset entry usages where plid = &#63;.
 	 *
-	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
+	 * @param plid the plid
 	 * @return the number of matching asset entry usages
 	 */
-	public int countByA_C(long assetEntryId, long classNameId);
+	public int countByPlid(long plid);
 
 	/**
-	 * Returns all the asset entry usages where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns all the asset entry usages where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @return the matching asset entry usages
 	 */
-	public java.util.List<AssetEntryUsage> findByA_P(
-		long assetEntryId, String portletId);
+	public java.util.List<AssetEntryUsage> findByA_T(
+		long assetEntryId, int type);
 
 	/**
-	 * Returns a range of all the asset entry usages where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns a range of all the asset entry usages where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @return the range of matching asset entry usages
 	 */
-	public java.util.List<AssetEntryUsage> findByA_P(
-		long assetEntryId, String portletId, int start, int end);
+	public java.util.List<AssetEntryUsage> findByA_T(
+		long assetEntryId, int type, int start, int end);
 
 	/**
-	 * Returns an ordered range of all the asset entry usages where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns an ordered range of all the asset entry usages where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching asset entry usages
 	 */
-	public java.util.List<AssetEntryUsage> findByA_P(
-		long assetEntryId, String portletId, int start, int end,
+	public java.util.List<AssetEntryUsage> findByA_T(
+		long assetEntryId, int type, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns an ordered range of all the asset entry usages where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns an ordered range of all the asset entry usages where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the ordered range of matching asset entry usages
 	 */
-	public java.util.List<AssetEntryUsage> findByA_P(
-		long assetEntryId, String portletId, int start, int end,
+	public java.util.List<AssetEntryUsage> findByA_T(
+		long assetEntryId, int type, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator,
 		boolean retrieveFromCache);
 
 	/**
-	 * Returns the first asset entry usage in the ordered set where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns the first asset entry usage in the ordered set where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching asset entry usage
 	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
 	 */
-	public AssetEntryUsage findByA_P_First(
-			long assetEntryId, String portletId,
+	public AssetEntryUsage findByA_T_First(
+			long assetEntryId, int type,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Returns the first asset entry usage in the ordered set where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns the first asset entry usage in the ordered set where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
 	 */
-	public AssetEntryUsage fetchByA_P_First(
-		long assetEntryId, String portletId,
+	public AssetEntryUsage fetchByA_T_First(
+		long assetEntryId, int type,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns the last asset entry usage in the ordered set where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns the last asset entry usage in the ordered set where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching asset entry usage
 	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
 	 */
-	public AssetEntryUsage findByA_P_Last(
-			long assetEntryId, String portletId,
+	public AssetEntryUsage findByA_T_Last(
+			long assetEntryId, int type,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Returns the last asset entry usage in the ordered set where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns the last asset entry usage in the ordered set where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
 	 */
-	public AssetEntryUsage fetchByA_P_Last(
-		long assetEntryId, String portletId,
+	public AssetEntryUsage fetchByA_T_Last(
+		long assetEntryId, int type,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns the asset entry usages before and after the current asset entry usage in the ordered set where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns the asset entry usages before and after the current asset entry usage in the ordered set where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * @param assetEntryUsageId the primary key of the current asset entry usage
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next asset entry usage
 	 * @throws NoSuchEntryUsageException if a asset entry usage with the primary key could not be found
 	 */
-	public AssetEntryUsage[] findByA_P_PrevAndNext(
-			long assetEntryUsageId, long assetEntryId, String portletId,
+	public AssetEntryUsage[] findByA_T_PrevAndNext(
+			long assetEntryUsageId, long assetEntryId, int type,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Removes all the asset entry usages where assetEntryId = &#63; and portletId = &#63; from the database.
+	 * Removes all the asset entry usages where assetEntryId = &#63; and type = &#63; from the database.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 */
-	public void removeByA_P(long assetEntryId, String portletId);
+	public void removeByA_T(long assetEntryId, int type);
 
 	/**
-	 * Returns the number of asset entry usages where assetEntryId = &#63; and portletId = &#63;.
+	 * Returns the number of asset entry usages where assetEntryId = &#63; and type = &#63;.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param portletId the portlet ID
+	 * @param type the type
 	 * @return the number of matching asset entry usages
 	 */
-	public int countByA_P(long assetEntryId, String portletId);
+	public int countByA_T(long assetEntryId, int type);
 
 	/**
-	 * Returns all the asset entry usages where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns all the asset entry usages where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @return the matching asset entry usages
 	 */
 	public java.util.List<AssetEntryUsage> findByC_C_P(
-		long classNameId, long classPK, String portletId);
+		long containerType, String containerKey, long plid);
 
 	/**
-	 * Returns a range of all the asset entry usages where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns a range of all the asset entry usages where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @return the range of matching asset entry usages
 	 */
 	public java.util.List<AssetEntryUsage> findByC_C_P(
-		long classNameId, long classPK, String portletId, int start, int end);
+		long containerType, String containerKey, long plid, int start, int end);
 
 	/**
-	 * Returns an ordered range of all the asset entry usages where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns an ordered range of all the asset entry usages where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
 	 * @return the ordered range of matching asset entry usages
 	 */
 	public java.util.List<AssetEntryUsage> findByC_C_P(
-		long classNameId, long classPK, String portletId, int start, int end,
+		long containerType, String containerKey, long plid, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns an ordered range of all the asset entry usages where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns an ordered range of all the asset entry usages where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
 	 * <p>
 	 * Useful when paginating results. Returns a maximum of <code>end - start</code> instances. <code>start</code> and <code>end</code> are not primary keys, they are indexes in the result set. Thus, <code>0</code> refers to the first result in the set. Setting both <code>start</code> and <code>end</code> to <code>QueryUtil#ALL_POS</code> will return the full result set. If <code>orderByComparator</code> is specified, then the query will include the given ORDER BY logic. If <code>orderByComparator</code> is absent and pagination is required (<code>start</code> and <code>end</code> are not <code>QueryUtil#ALL_POS</code>), then the query will include the default ORDER BY logic from <code>AssetEntryUsageModelImpl</code>. If both <code>orderByComparator</code> and pagination are absent, for performance reasons, the query will not have an ORDER BY clause and the returned result set will be sorted on by the primary key in an ascending order.
 	 * </p>
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param start the lower bound of the range of asset entry usages
 	 * @param end the upper bound of the range of asset entry usages (not inclusive)
 	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
@@ -908,172 +741,175 @@ public interface AssetEntryUsagePersistence
 	 * @return the ordered range of matching asset entry usages
 	 */
 	public java.util.List<AssetEntryUsage> findByC_C_P(
-		long classNameId, long classPK, String portletId, int start, int end,
+		long containerType, String containerKey, long plid, int start, int end,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator,
 		boolean retrieveFromCache);
 
 	/**
-	 * Returns the first asset entry usage in the ordered set where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns the first asset entry usage in the ordered set where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching asset entry usage
 	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
 	 */
 	public AssetEntryUsage findByC_C_P_First(
-			long classNameId, long classPK, String portletId,
+			long containerType, String containerKey, long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Returns the first asset entry usage in the ordered set where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns the first asset entry usage in the ordered set where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the first matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
 	 */
 	public AssetEntryUsage fetchByC_C_P_First(
-		long classNameId, long classPK, String portletId,
+		long containerType, String containerKey, long plid,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns the last asset entry usage in the ordered set where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns the last asset entry usage in the ordered set where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching asset entry usage
 	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
 	 */
 	public AssetEntryUsage findByC_C_P_Last(
-			long classNameId, long classPK, String portletId,
+			long containerType, String containerKey, long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Returns the last asset entry usage in the ordered set where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns the last asset entry usage in the ordered set where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the last matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
 	 */
 	public AssetEntryUsage fetchByC_C_P_Last(
-		long classNameId, long classPK, String portletId,
+		long containerType, String containerKey, long plid,
 		com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 			orderByComparator);
 
 	/**
-	 * Returns the asset entry usages before and after the current asset entry usage in the ordered set where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns the asset entry usages before and after the current asset entry usage in the ordered set where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
 	 * @param assetEntryUsageId the primary key of the current asset entry usage
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param orderByComparator the comparator to order the set by (optionally <code>null</code>)
 	 * @return the previous, current, and next asset entry usage
 	 * @throws NoSuchEntryUsageException if a asset entry usage with the primary key could not be found
 	 */
 	public AssetEntryUsage[] findByC_C_P_PrevAndNext(
-			long assetEntryUsageId, long classNameId, long classPK,
-			String portletId,
+			long assetEntryUsageId, long containerType, String containerKey,
+			long plid,
 			com.liferay.portal.kernel.util.OrderByComparator<AssetEntryUsage>
 				orderByComparator)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Removes all the asset entry usages where classNameId = &#63; and classPK = &#63; and portletId = &#63; from the database.
+	 * Removes all the asset entry usages where containerType = &#63; and containerKey = &#63; and plid = &#63; from the database.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 */
-	public void removeByC_C_P(long classNameId, long classPK, String portletId);
+	public void removeByC_C_P(
+		long containerType, String containerKey, long plid);
 
 	/**
-	 * Returns the number of asset entry usages where classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns the number of asset entry usages where containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @return the number of matching asset entry usages
 	 */
-	public int countByC_C_P(long classNameId, long classPK, String portletId);
+	public int countByC_C_P(long containerType, String containerKey, long plid);
 
 	/**
-	 * Returns the asset entry usage where assetEntryId = &#63; and classNameId = &#63; and classPK = &#63; and portletId = &#63; or throws a <code>NoSuchEntryUsageException</code> if it could not be found.
+	 * Returns the asset entry usage where assetEntryId = &#63; and containerType = &#63; and containerKey = &#63; and plid = &#63; or throws a <code>NoSuchEntryUsageException</code> if it could not be found.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @return the matching asset entry usage
 	 * @throws NoSuchEntryUsageException if a matching asset entry usage could not be found
 	 */
 	public AssetEntryUsage findByA_C_C_P(
-			long assetEntryId, long classNameId, long classPK, String portletId)
+			long assetEntryId, long containerType, String containerKey,
+			long plid)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Returns the asset entry usage where assetEntryId = &#63; and classNameId = &#63; and classPK = &#63; and portletId = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 * Returns the asset entry usage where assetEntryId = &#63; and containerType = &#63; and containerKey = &#63; and plid = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @return the matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
 	 */
 	public AssetEntryUsage fetchByA_C_C_P(
-		long assetEntryId, long classNameId, long classPK, String portletId);
+		long assetEntryId, long containerType, String containerKey, long plid);
 
 	/**
-	 * Returns the asset entry usage where assetEntryId = &#63; and classNameId = &#63; and classPK = &#63; and portletId = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 * Returns the asset entry usage where assetEntryId = &#63; and containerType = &#63; and containerKey = &#63; and plid = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @param retrieveFromCache whether to retrieve from the finder cache
 	 * @return the matching asset entry usage, or <code>null</code> if a matching asset entry usage could not be found
 	 */
 	public AssetEntryUsage fetchByA_C_C_P(
-		long assetEntryId, long classNameId, long classPK, String portletId,
+		long assetEntryId, long containerType, String containerKey, long plid,
 		boolean retrieveFromCache);
 
 	/**
-	 * Removes the asset entry usage where assetEntryId = &#63; and classNameId = &#63; and classPK = &#63; and portletId = &#63; from the database.
+	 * Removes the asset entry usage where assetEntryId = &#63; and containerType = &#63; and containerKey = &#63; and plid = &#63; from the database.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @return the asset entry usage that was removed
 	 */
 	public AssetEntryUsage removeByA_C_C_P(
-			long assetEntryId, long classNameId, long classPK, String portletId)
+			long assetEntryId, long containerType, String containerKey,
+			long plid)
 		throws NoSuchEntryUsageException;
 
 	/**
-	 * Returns the number of asset entry usages where assetEntryId = &#63; and classNameId = &#63; and classPK = &#63; and portletId = &#63;.
+	 * Returns the number of asset entry usages where assetEntryId = &#63; and containerType = &#63; and containerKey = &#63; and plid = &#63;.
 	 *
 	 * @param assetEntryId the asset entry ID
-	 * @param classNameId the class name ID
-	 * @param classPK the class pk
-	 * @param portletId the portlet ID
+	 * @param containerType the container type
+	 * @param containerKey the container key
+	 * @param plid the plid
 	 * @return the number of matching asset entry usages
 	 */
 	public int countByA_C_C_P(
-		long assetEntryId, long classNameId, long classPK, String portletId);
+		long assetEntryId, long containerType, String containerKey, long plid);
 
 	/**
 	 * Caches the asset entry usage in the entity cache if it is enabled.

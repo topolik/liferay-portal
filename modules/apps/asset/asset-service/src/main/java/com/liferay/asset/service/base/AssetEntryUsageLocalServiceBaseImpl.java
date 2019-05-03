@@ -19,12 +19,7 @@ import aQute.bnd.annotation.ProviderType;
 import com.liferay.asset.model.AssetEntryUsage;
 import com.liferay.asset.service.AssetEntryUsageLocalService;
 import com.liferay.asset.service.persistence.AssetEntryUsagePersistence;
-import com.liferay.exportimport.kernel.lar.ExportImportHelperUtil;
-import com.liferay.exportimport.kernel.lar.ManifestSummary;
-import com.liferay.exportimport.kernel.lar.PortletDataContext;
-import com.liferay.exportimport.kernel.lar.StagedModelDataHandlerUtil;
-import com.liferay.exportimport.kernel.lar.StagedModelType;
-import com.liferay.portal.kernel.bean.BeanReference;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.db.DB;
 import com.liferay.portal.kernel.dao.db.DBManagerUtil;
 import com.liferay.portal.kernel.dao.jdbc.SqlUpdate;
@@ -33,11 +28,8 @@ import com.liferay.portal.kernel.dao.orm.ActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DefaultActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
-import com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.IndexableActionableDynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Projection;
-import com.liferay.portal.kernel.dao.orm.Property;
-import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.model.PersistedModel;
@@ -45,18 +37,18 @@ import com.liferay.portal.kernel.module.framework.service.IdentifiableOSGiServic
 import com.liferay.portal.kernel.search.Indexable;
 import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.service.BaseLocalServiceImpl;
-import com.liferay.portal.kernel.service.PersistedModelLocalServiceRegistry;
-import com.liferay.portal.kernel.service.persistence.UserPersistence;
+import com.liferay.portal.kernel.service.PersistedModelLocalService;
 import com.liferay.portal.kernel.transaction.Transactional;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.PortalUtil;
-import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.io.Serializable;
 
 import java.util.List;
 
 import javax.sql.DataSource;
+
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * Provides the base implementation for the asset entry usage local service.
@@ -72,7 +64,8 @@ import javax.sql.DataSource;
 @ProviderType
 public abstract class AssetEntryUsageLocalServiceBaseImpl
 	extends BaseLocalServiceImpl
-	implements AssetEntryUsageLocalService, IdentifiableOSGiService {
+	implements AssetEntryUsageLocalService, AopService,
+			   IdentifiableOSGiService {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -297,100 +290,6 @@ public abstract class AssetEntryUsageLocalServiceBaseImpl
 		actionableDynamicQuery.setPrimaryKeyPropertyName("assetEntryUsageId");
 	}
 
-	@Override
-	public ExportActionableDynamicQuery getExportActionableDynamicQuery(
-		final PortletDataContext portletDataContext) {
-
-		final ExportActionableDynamicQuery exportActionableDynamicQuery =
-			new ExportActionableDynamicQuery() {
-
-				@Override
-				public long performCount() throws PortalException {
-					ManifestSummary manifestSummary =
-						portletDataContext.getManifestSummary();
-
-					StagedModelType stagedModelType = getStagedModelType();
-
-					long modelAdditionCount = super.performCount();
-
-					manifestSummary.addModelAdditionCount(
-						stagedModelType, modelAdditionCount);
-
-					long modelDeletionCount =
-						ExportImportHelperUtil.getModelDeletionCount(
-							portletDataContext, stagedModelType);
-
-					manifestSummary.addModelDeletionCount(
-						stagedModelType, modelDeletionCount);
-
-					return modelAdditionCount;
-				}
-
-			};
-
-		initActionableDynamicQuery(exportActionableDynamicQuery);
-
-		exportActionableDynamicQuery.setAddCriteriaMethod(
-			new ActionableDynamicQuery.AddCriteriaMethod() {
-
-				@Override
-				public void addCriteria(DynamicQuery dynamicQuery) {
-					portletDataContext.addDateRangeCriteria(
-						dynamicQuery, "modifiedDate");
-
-					StagedModelType stagedModelType =
-						exportActionableDynamicQuery.getStagedModelType();
-
-					long referrerClassNameId =
-						stagedModelType.getReferrerClassNameId();
-
-					Property classNameIdProperty = PropertyFactoryUtil.forName(
-						"classNameId");
-
-					if ((referrerClassNameId !=
-							StagedModelType.REFERRER_CLASS_NAME_ID_ALL) &&
-						(referrerClassNameId !=
-							StagedModelType.REFERRER_CLASS_NAME_ID_ANY)) {
-
-						dynamicQuery.add(
-							classNameIdProperty.eq(
-								stagedModelType.getReferrerClassNameId()));
-					}
-					else if (referrerClassNameId ==
-								StagedModelType.REFERRER_CLASS_NAME_ID_ANY) {
-
-						dynamicQuery.add(classNameIdProperty.isNotNull());
-					}
-				}
-
-			});
-
-		exportActionableDynamicQuery.setCompanyId(
-			portletDataContext.getCompanyId());
-
-		exportActionableDynamicQuery.setGroupId(
-			portletDataContext.getScopeGroupId());
-
-		exportActionableDynamicQuery.setPerformActionMethod(
-			new ActionableDynamicQuery.PerformActionMethod<AssetEntryUsage>() {
-
-				@Override
-				public void performAction(AssetEntryUsage assetEntryUsage)
-					throws PortalException {
-
-					StagedModelDataHandlerUtil.exportStagedModel(
-						portletDataContext, assetEntryUsage);
-				}
-
-			});
-		exportActionableDynamicQuery.setStagedModelType(
-			new StagedModelType(
-				PortalUtil.getClassNameId(AssetEntryUsage.class.getName()),
-				StagedModelType.REFERRER_CLASS_NAME_ID_ALL));
-
-		return exportActionableDynamicQuery;
-	}
-
 	/**
 	 * @throws PortalException
 	 */
@@ -407,39 +306,6 @@ public abstract class AssetEntryUsageLocalServiceBaseImpl
 		throws PortalException {
 
 		return assetEntryUsagePersistence.findByPrimaryKey(primaryKeyObj);
-	}
-
-	/**
-	 * Returns all the asset entry usages matching the UUID and company.
-	 *
-	 * @param uuid the UUID of the asset entry usages
-	 * @param companyId the primary key of the company
-	 * @return the matching asset entry usages, or an empty list if no matches were found
-	 */
-	@Override
-	public List<AssetEntryUsage> getAssetEntryUsagesByUuidAndCompanyId(
-		String uuid, long companyId) {
-
-		return assetEntryUsagePersistence.findByUuid_C(uuid, companyId);
-	}
-
-	/**
-	 * Returns a range of asset entry usages matching the UUID and company.
-	 *
-	 * @param uuid the UUID of the asset entry usages
-	 * @param companyId the primary key of the company
-	 * @param start the lower bound of the range of asset entry usages
-	 * @param end the upper bound of the range of asset entry usages (not inclusive)
-	 * @param orderByComparator the comparator to order the results by (optionally <code>null</code>)
-	 * @return the range of matching asset entry usages, or an empty list if no matches were found
-	 */
-	@Override
-	public List<AssetEntryUsage> getAssetEntryUsagesByUuidAndCompanyId(
-		String uuid, long companyId, int start, int end,
-		OrderByComparator<AssetEntryUsage> orderByComparator) {
-
-		return assetEntryUsagePersistence.findByUuid_C(
-			uuid, companyId, start, end, orderByComparator);
 	}
 
 	/**
@@ -498,118 +364,17 @@ public abstract class AssetEntryUsageLocalServiceBaseImpl
 		return assetEntryUsagePersistence.update(assetEntryUsage);
 	}
 
-	/**
-	 * Returns the asset entry usage local service.
-	 *
-	 * @return the asset entry usage local service
-	 */
-	public AssetEntryUsageLocalService getAssetEntryUsageLocalService() {
-		return assetEntryUsageLocalService;
+	@Override
+	public Class<?>[] getAopInterfaces() {
+		return new Class<?>[] {
+			AssetEntryUsageLocalService.class, IdentifiableOSGiService.class,
+			PersistedModelLocalService.class
+		};
 	}
 
-	/**
-	 * Sets the asset entry usage local service.
-	 *
-	 * @param assetEntryUsageLocalService the asset entry usage local service
-	 */
-	public void setAssetEntryUsageLocalService(
-		AssetEntryUsageLocalService assetEntryUsageLocalService) {
-
-		this.assetEntryUsageLocalService = assetEntryUsageLocalService;
-	}
-
-	/**
-	 * Returns the asset entry usage persistence.
-	 *
-	 * @return the asset entry usage persistence
-	 */
-	public AssetEntryUsagePersistence getAssetEntryUsagePersistence() {
-		return assetEntryUsagePersistence;
-	}
-
-	/**
-	 * Sets the asset entry usage persistence.
-	 *
-	 * @param assetEntryUsagePersistence the asset entry usage persistence
-	 */
-	public void setAssetEntryUsagePersistence(
-		AssetEntryUsagePersistence assetEntryUsagePersistence) {
-
-		this.assetEntryUsagePersistence = assetEntryUsagePersistence;
-	}
-
-	/**
-	 * Returns the counter local service.
-	 *
-	 * @return the counter local service
-	 */
-	public com.liferay.counter.kernel.service.CounterLocalService
-		getCounterLocalService() {
-
-		return counterLocalService;
-	}
-
-	/**
-	 * Sets the counter local service.
-	 *
-	 * @param counterLocalService the counter local service
-	 */
-	public void setCounterLocalService(
-		com.liferay.counter.kernel.service.CounterLocalService
-			counterLocalService) {
-
-		this.counterLocalService = counterLocalService;
-	}
-
-	/**
-	 * Returns the user local service.
-	 *
-	 * @return the user local service
-	 */
-	public com.liferay.portal.kernel.service.UserLocalService
-		getUserLocalService() {
-
-		return userLocalService;
-	}
-
-	/**
-	 * Sets the user local service.
-	 *
-	 * @param userLocalService the user local service
-	 */
-	public void setUserLocalService(
-		com.liferay.portal.kernel.service.UserLocalService userLocalService) {
-
-		this.userLocalService = userLocalService;
-	}
-
-	/**
-	 * Returns the user persistence.
-	 *
-	 * @return the user persistence
-	 */
-	public UserPersistence getUserPersistence() {
-		return userPersistence;
-	}
-
-	/**
-	 * Sets the user persistence.
-	 *
-	 * @param userPersistence the user persistence
-	 */
-	public void setUserPersistence(UserPersistence userPersistence) {
-		this.userPersistence = userPersistence;
-	}
-
-	public void afterPropertiesSet() {
-		persistedModelLocalServiceRegistry.register(
-			"com.liferay.asset.model.AssetEntryUsage",
-			assetEntryUsageLocalService);
-	}
-
-	public void destroy() {
-		persistedModelLocalServiceRegistry.unregister(
-			"com.liferay.asset.model.AssetEntryUsage");
+	@Override
+	public void setAopProxy(Object aopProxy) {
+		assetEntryUsageLocalService = (AssetEntryUsageLocalService)aopProxy;
 	}
 
 	/**
@@ -654,29 +419,17 @@ public abstract class AssetEntryUsageLocalServiceBaseImpl
 		}
 	}
 
-	@BeanReference(type = AssetEntryUsageLocalService.class)
 	protected AssetEntryUsageLocalService assetEntryUsageLocalService;
 
-	@BeanReference(type = AssetEntryUsagePersistence.class)
+	@Reference
 	protected AssetEntryUsagePersistence assetEntryUsagePersistence;
 
-	@ServiceReference(
-		type = com.liferay.counter.kernel.service.CounterLocalService.class
-	)
+	@Reference
 	protected com.liferay.counter.kernel.service.CounterLocalService
 		counterLocalService;
 
-	@ServiceReference(
-		type = com.liferay.portal.kernel.service.UserLocalService.class
-	)
-	protected com.liferay.portal.kernel.service.UserLocalService
-		userLocalService;
-
-	@ServiceReference(type = UserPersistence.class)
-	protected UserPersistence userPersistence;
-
-	@ServiceReference(type = PersistedModelLocalServiceRegistry.class)
-	protected PersistedModelLocalServiceRegistry
-		persistedModelLocalServiceRegistry;
+	@Reference
+	protected com.liferay.portal.kernel.service.LayoutLocalService
+		layoutLocalService;
 
 }

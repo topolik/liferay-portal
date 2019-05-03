@@ -580,6 +580,12 @@
 		</attribute>
 		<attribute>
 			<description></description>
+			<name>triggerTitle</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description></description>
 			<name>type</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -2244,6 +2250,12 @@
 		</attribute>
 		<attribute>
 			<description></description>
+			<name>tableSchemaContributorKey</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<description></description>
 			<name>useDefaultClasses</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -2339,7 +2351,7 @@
 			<rtexprvalue>true</rtexprvalue>
 		</attribute>
 		<attribute>
-			<description></description>
+			<description>Deprecated as of 7.1.0, with no direct replacement.</description>
 			<name>initials</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>

@@ -35,6 +35,7 @@ import com.liferay.portal.kernel.servlet.taglib.ui.URLMenuItem;
 import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.HtmlUtil;
+import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -82,13 +83,11 @@ public class JournalContentPortletToolbarContributor
 			portletRequest, JournalPortletKeys.JOURNAL,
 			PortletRequest.RENDER_PHASE);
 
-		portletURL.setParameter(
-			"hideDefaultSuccessMessage", Boolean.TRUE.toString());
-		portletURL.setParameter("groupId", String.valueOf(scopeGroupId));
 		portletURL.setParameter("mvcPath", "/edit_article.jsp");
-		portletURL.setParameter("portletResource", portletDisplay.getId());
 		portletURL.setParameter("redirect", themeDisplay.getURLCurrent());
-		portletURL.setParameter("referringPlid", String.valueOf(plid));
+		portletURL.setParameter("portletResource", portletDisplay.getId());
+		portletURL.setParameter("refererPlid", String.valueOf(plid));
+		portletURL.setParameter("groupId", String.valueOf(scopeGroupId));
 
 		List<DDMStructure> ddmStructures =
 			_journalFolderService.getDDMStructures(
@@ -144,7 +143,10 @@ public class JournalContentPortletToolbarContributor
 
 			urlMenuItem.setLabel(label);
 
-			urlMenuItem.setURL(portletURL.toString());
+			String url = _http.addParameter(
+				portletURL.toString(), "refererPlid", plid);
+
+			urlMenuItem.setURL(url);
 
 			menuItems.add(urlMenuItem);
 		}
@@ -213,6 +215,9 @@ public class JournalContentPortletToolbarContributor
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		JournalContentPortletToolbarContributor.class);
+
+	@Reference
+	private Http _http;
 
 	@Reference
 	private JournalFolderService _journalFolderService;

@@ -28,14 +28,13 @@ public class ExpandoRowTable {
 	public static final String TABLE_NAME = "ExpandoRow";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"rowId_", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"tableId", Types.BIGINT},
+		{"rowId_", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"modifiedDate", Types.TIMESTAMP}, {"tableId", Types.BIGINT},
 		{"classPK", Types.BIGINT}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("rowId_", Types.BIGINT);
@@ -49,7 +48,8 @@ TABLE_COLUMNS_MAP.put("tableId", Types.BIGINT);
 TABLE_COLUMNS_MAP.put("classPK", Types.BIGINT);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table ExpandoRow (rowId_ LONG not null primary key,companyId LONG,modifiedDate DATE null,tableId LONG,classPK LONG)";
+	public static final String TABLE_SQL_CREATE =
+"create table ExpandoRow (rowId_ LONG not null primary key,companyId LONG,modifiedDate DATE null,tableId LONG,classPK LONG)";
 
 	public static final String TABLE_SQL_DROP = "drop table ExpandoRow";
 

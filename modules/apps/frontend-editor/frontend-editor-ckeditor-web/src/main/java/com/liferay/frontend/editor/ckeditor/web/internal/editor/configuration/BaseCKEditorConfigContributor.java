@@ -16,9 +16,8 @@ package com.liferay.frontend.editor.ckeditor.web.internal.editor.configuration;
 
 import com.liferay.frontend.editor.ckeditor.web.internal.constants.CKEditorConstants;
 import com.liferay.portal.kernel.editor.configuration.BaseEditorConfigContributor;
-import com.liferay.portal.kernel.json.JSONArray;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -45,22 +44,19 @@ public class BaseCKEditorConfigContributor extends BaseEditorConfigContributor {
 				CKEditorConstants.ATTRIBUTE_NAMESPACE + ":cssClasses"));
 
 		jsonObject.put(
-			"bodyClass", "html-editor " + HtmlUtil.escape(cssClasses));
-
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(
-			HtmlUtil.escape(
-				PortalUtil.getStaticResourceURL(
-					themeDisplay.getRequest(),
-					themeDisplay.getPathThemeCss() + "/clay.css")));
-		jsonArray.put(
-			HtmlUtil.escape(
-				PortalUtil.getStaticResourceURL(
-					themeDisplay.getRequest(),
-					themeDisplay.getPathThemeCss() + "/main.css")));
-
-		jsonObject.put("contentsCss", jsonArray);
+			"bodyClass", "html-editor " + HtmlUtil.escape(cssClasses)
+		).put(
+			"contentsCss",
+			JSONUtil.putAll(
+				HtmlUtil.escape(
+					PortalUtil.getStaticResourceURL(
+						themeDisplay.getRequest(),
+						themeDisplay.getPathThemeCss() + "/clay.css")),
+				HtmlUtil.escape(
+					PortalUtil.getStaticResourceURL(
+						themeDisplay.getRequest(),
+						themeDisplay.getPathThemeCss() + "/main.css")))
+		);
 
 		String contentsLanguageDir = getContentsLanguageDir(
 			inputEditorTaglibAttributes);
@@ -74,9 +70,11 @@ public class BaseCKEditorConfigContributor extends BaseEditorConfigContributor {
 		contentsLanguageId = contentsLanguageId.replace("iw", "he");
 		contentsLanguageId = contentsLanguageId.replace("_", "-");
 
-		jsonObject.put("contentsLanguage", contentsLanguageId);
-
-		jsonObject.put("height", 265);
+		jsonObject.put(
+			"contentsLanguage", contentsLanguageId
+		).put(
+			"height", 265
+		);
 
 		String languageId = getLanguageId(themeDisplay);
 

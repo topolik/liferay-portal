@@ -22,6 +22,7 @@ import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.model.JournalFolderConstants;
 import com.liferay.journal.web.internal.security.permission.resource.JournalFolderPermission;
 import com.liferay.journal.web.internal.security.permission.resource.JournalPermission;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -46,7 +47,6 @@ import com.liferay.taglib.security.PermissionsURLTag;
 import com.liferay.trash.TrashHelper;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletURL;
@@ -80,34 +80,34 @@ public class JournalFolderActionDropdownItems {
 						_themeDisplay.getPermissionChecker(), _folder,
 						ActionKeys.UPDATE)) {
 
-					add(_getEditFolderActionConsumer());
+					add(_getEditFolderActionUnsafeConsumer());
 				}
 
 				if (JournalFolderPermission.contains(
 						_themeDisplay.getPermissionChecker(), _folder,
 						ActionKeys.UPDATE)) {
 
-					add(_getMoveFolderActionConsumer());
+					add(_getMoveFolderActionUnsafeConsumer());
 				}
 
 				if (JournalFolderPermission.contains(
 						_themeDisplay.getPermissionChecker(), _folder,
 						ActionKeys.PERMISSIONS)) {
 
-					add(_getPermissionsFolderActionConsumer());
+					add(_getPermissionsFolderActionUnsafeConsumer());
 				}
 
 				if (JournalFolderPermission.contains(
 						_themeDisplay.getPermissionChecker(), _folder,
 						ActionKeys.DELETE)) {
 
-					add(_getDeleteFolderActionConsumer());
+					add(_getDeleteFolderActionUnsafeConsumer());
 				}
 
 				Group group = _themeDisplay.getScopeGroup();
 
 				if (_isShowPublishFolderAction() && !group.isLayout()) {
-					add(_getPublishToLiveFolderActionConsumer());
+					add(_getPublishToLiveFolderActionUnsafeConsumer());
 				}
 			}
 		};
@@ -146,7 +146,7 @@ public class JournalFolderActionDropdownItems {
 						_themeDisplay.getScopeGroupId(),
 						ActionKeys.ADD_FOLDER)) {
 
-					add(_getAddHomeFolderActionConsumer());
+					add(_getAddHomeFolderActionUnsafeConsumer());
 				}
 
 				boolean workflowEnabled = false;
@@ -165,7 +165,7 @@ public class JournalFolderActionDropdownItems {
 						JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID,
 						ActionKeys.UPDATE)) {
 
-					add(_getEditHomeFolderActionConsumer());
+					add(_getEditHomeFolderActionUnsafeConsumer());
 				}
 
 				if (JournalPermission.contains(
@@ -173,19 +173,21 @@ public class JournalFolderActionDropdownItems {
 						_themeDisplay.getScopeGroupId(),
 						ActionKeys.PERMISSIONS)) {
 
-					add(_getPermissionsHomeFolderActionConsumer());
+					add(_getPermissionsHomeFolderActionUnsafeConsumer());
 				}
 
 				Group group = _themeDisplay.getScopeGroup();
 
 				if (_isShowPublishFolderAction() && !group.isLayout()) {
-					add(_getPublishToLiveFolderActionConsumer());
+					add(_getPublishToLiveFolderActionUnsafeConsumer());
 				}
 			}
 		};
 	}
 
-	private Consumer<DropdownItem> _getAddHomeFolderActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getAddHomeFolderActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(
 				_liferayPortletResponse.createRenderURL(), "mvcPath",
@@ -196,7 +198,8 @@ public class JournalFolderActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getDeleteFolderActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getDeleteFolderActionUnsafeConsumer()
 		throws PortalException {
 
 		String redirect = _getRedirect();
@@ -240,7 +243,9 @@ public class JournalFolderActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getEditFolderActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getEditFolderActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(
 				_liferayPortletResponse.createRenderURL(), "mvcPath",
@@ -250,7 +255,9 @@ public class JournalFolderActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getEditHomeFolderActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getEditHomeFolderActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(
 				_liferayPortletResponse.createRenderURL(), "mvcPath",
@@ -262,7 +269,9 @@ public class JournalFolderActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getMoveFolderActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getMoveFolderActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(
 				_liferayPortletResponse.createRenderURL(), "mvcPath",
@@ -272,7 +281,8 @@ public class JournalFolderActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getPermissionsFolderActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getPermissionsFolderActionUnsafeConsumer()
 		throws Exception {
 
 		String permissionsURL = PermissionsURLTag.doTag(
@@ -287,7 +297,8 @@ public class JournalFolderActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getPermissionsHomeFolderActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getPermissionsHomeFolderActionUnsafeConsumer()
 		throws Exception {
 
 		String permissionsURL = PermissionsURLTag.doTag(
@@ -303,7 +314,9 @@ public class JournalFolderActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getPublishToLiveFolderActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getPublishToLiveFolderActionUnsafeConsumer() {
+
 		PortletURL publishFolderURL = _liferayPortletResponse.createActionURL();
 
 		publishFolderURL.setParameter(

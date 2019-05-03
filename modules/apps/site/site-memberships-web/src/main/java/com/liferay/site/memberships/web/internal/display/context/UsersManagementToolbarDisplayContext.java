@@ -20,7 +20,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -84,32 +83,30 @@ public class UsersManagementToolbarDisplayContext
 							ActionKeys.ASSIGN_USER_ROLES)) {
 
 						add(
-							SafeConsumer.ignore(
-								dropdownItem -> {
-									dropdownItem.putData(
-										"action", "selectSiteRole");
+							dropdownItem -> {
+								dropdownItem.putData(
+									"action", "selectSiteRole");
 
-									PortletURL editUsersSiteRolesURL =
-										liferayPortletResponse.
-											createActionURL();
+								PortletURL editUsersSiteRolesURL =
+									liferayPortletResponse.createActionURL();
 
-									editUsersSiteRolesURL.setParameter(
-										ActionRequest.ACTION_NAME,
-										"editUsersSiteRoles");
+								editUsersSiteRolesURL.setParameter(
+									ActionRequest.ACTION_NAME,
+									"editUsersSiteRoles");
 
-									dropdownItem.putData(
-										"editUsersSiteRolesURL",
-										editUsersSiteRolesURL.toString());
+								dropdownItem.putData(
+									"editUsersSiteRolesURL",
+									editUsersSiteRolesURL.toString());
 
-									dropdownItem.putData(
-										"selectSiteRoleURL",
-										_getSelectorURL("/site_roles.jsp"));
-									dropdownItem.setIcon("add-role");
-									dropdownItem.setLabel(
-										LanguageUtil.get(
-											request, "assign-site-roles"));
-									dropdownItem.setQuickAction(true);
-								}));
+								dropdownItem.putData(
+									"selectSiteRoleURL",
+									_getSelectorURL("/site_roles.jsp"));
+								dropdownItem.setIcon("add-role");
+								dropdownItem.setLabel(
+									LanguageUtil.get(
+										request, "assign-site-roles"));
+								dropdownItem.setQuickAction(true);
+							});
 
 						Role role = _usersDisplayContext.getRole();
 
@@ -313,34 +310,32 @@ public class UsersManagementToolbarDisplayContext
 					});
 
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData("action", "selectRoles");
-							dropdownItem.putData(
-								"selectRolesURL",
-								_getSelectorURL("/select_site_role.jsp"));
+					dropdownItem -> {
+						dropdownItem.putData("action", "selectRoles");
+						dropdownItem.putData(
+							"selectRolesURL",
+							_getSelectorURL("/select_site_role.jsp"));
 
-							PortletURL viewRoleURL =
-								liferayPortletResponse.createRenderURL();
+						PortletURL viewRoleURL =
+							liferayPortletResponse.createRenderURL();
 
-							viewRoleURL.setParameter("mvcPath", "/view.jsp");
-							viewRoleURL.setParameter("tabs1", "users");
-							viewRoleURL.setParameter("navigation", "roles");
-							viewRoleURL.setParameter(
-								"redirect", themeDisplay.getURLCurrent());
-							viewRoleURL.setParameter(
-								"groupId",
-								String.valueOf(
-									_usersDisplayContext.getGroupId()));
+						viewRoleURL.setParameter("mvcPath", "/view.jsp");
+						viewRoleURL.setParameter("tabs1", "users");
+						viewRoleURL.setParameter("navigation", "roles");
+						viewRoleURL.setParameter(
+							"redirect", themeDisplay.getURLCurrent());
+						viewRoleURL.setParameter(
+							"groupId",
+							String.valueOf(_usersDisplayContext.getGroupId()));
 
-							dropdownItem.putData(
-								"viewRoleURL", viewRoleURL.toString());
+						dropdownItem.putData(
+							"viewRoleURL", viewRoleURL.toString());
 
-							dropdownItem.setActive(
-								Objects.equals(getNavigation(), "roles"));
-							dropdownItem.setLabel(
-								LanguageUtil.get(request, "roles"));
-						}));
+						dropdownItem.setActive(
+							Objects.equals(getNavigation(), "roles"));
+						dropdownItem.setLabel(
+							LanguageUtil.get(request, "roles"));
+					});
 			}
 		};
 	}

@@ -76,7 +76,7 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 					<c:if test="<%= oAuth2Application != null %>">
 						<aui:fieldset style="margin-bottom: 1em; border-bottom: 2px solid #F0F0F0;">
 							<div class="pencil-wrapper">
-								<aui:button href="" icon="icon-pencil" onClick='<%= renderResponse.getNamespace() + "showEditClientIdModal();" %>' value="" />
+								<aui:button href="" onClick='<%= renderResponse.getNamespace() + "showEditClientIdModal();" %>' value="edit" />
 
 								<aui:input name="clientId" readonly="true" required="<%= true %>" type="text" />
 							</div>
@@ -84,7 +84,7 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 							<aui:input name="originalClientId" type="hidden" value="<%= clientId %>" />
 
 							<div class="pencil-wrapper">
-								<aui:button href="" icon="icon-pencil" onClick='<%= renderResponse.getNamespace() + "showEditClientSecretModal();" %>' value="" />
+								<aui:button href="" onClick='<%= renderResponse.getNamespace() + "showEditClientSecretModal();" %>' value="edit" />
 
 								<aui:input name="clientSecret" readonly="true" type="password" value="<%= clientSecret %>" />
 							</div>
@@ -210,7 +210,7 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 	</div>
 </div>
 
-<aui:script use="aui-io-request,aui-modal,liferay-form,node">
+<aui:script use="aui-io-request,aui-modal,liferay-form,node,node-event-simulate">
 	<portlet:namespace />generateRandomSecret = function() {
 		var io = A.io.request(
 			'<liferay-portlet:resourceURL copyCurrentRenderParameters="<%= false %>" id="/admin/generate_random_secret" />',
@@ -284,18 +284,18 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 		var bodyContentDiv = A.one('#<portlet:namespace />edit-client-id-modal');
 		var clientIdPadlock = A.one('#<portlet:namespace />clientIdPadlock');
 		var applyField = A.one('#<portlet:namespace />newClientId');
-		var populateField = A.one('#<portlet:namespace />clientId');
+		var populateFieldClientId = A.one('#<portlet:namespace />clientId');
 
-		<portlet:namespace />showModal('<%= UnicodeLanguageUtil.get(request, "edit-client-id") %>', bodyContentDiv, clientIdPadlock, applyField, populateField);
+		<portlet:namespace />showModal('<%= UnicodeLanguageUtil.get(request, "edit-client-id") %>', bodyContentDiv, clientIdPadlock, applyField, populateFieldClientId);
 	}
 
 	<portlet:namespace />showEditClientSecretModal = function() {
 		var bodyContentDiv = A.one('#<portlet:namespace />edit-client-secret-modal');
 		var clientSecretPadlock = A.one('#<portlet:namespace />clientSecretPadlock');
 		var applyField = A.one('#<portlet:namespace />newClientSecret');
-		var populateField = A.one('#<portlet:namespace />clientSecret')
+		var populateFieldClientSecret = A.one('#<portlet:namespace />clientSecret')
 
-		<portlet:namespace />showModal('<%= UnicodeLanguageUtil.get(request, "edit-client-secret") %>', bodyContentDiv, clientSecretPadlock, applyField, populateField);
+		<portlet:namespace />showModal('<%= UnicodeLanguageUtil.get(request, "edit-client-secret") %>', bodyContentDiv, clientSecretPadlock, applyField, populateFieldClientSecret);
 	}
 
 	<portlet:namespace />showModal = function(title, bodyContent, footerContent, applyField, populateField) {
@@ -305,14 +305,20 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 				bodyContent: bodyContent,
 				centered: true,
 				cssClass: 'edit-client-credentials-modal',
-				destroyOnHide: true,
+				destroyOnHide: false,
 				footerContent: footerContent,
 				headerContent: title,
 				modal: true,
-				visible: false,
-				zIndex: Liferay.zIndex.OVERLAY
+				plugins: [Liferay.WidgetZIndex]
 			}
 		).render();
+
+		modal.on(
+			'render',
+				function(event) {
+					<portlet:namespace />updateComponent(applyField, populateField.val());
+				}
+		);
 
 		modal.addToolbar(
 			[
@@ -320,6 +326,8 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 					label: '<liferay-ui:message key="cancel" />',
 					on: {
 						click: function() {
+							<portlet:namespace />updateComponent(applyField, populateField.val());
+
 							modal.hide();
 						}
 					}
@@ -330,6 +338,7 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 					on: {
 						click: function() {
 							<portlet:namespace />updateComponent(populateField, applyField.val());
+
 							modal.hide();
 						}
 					}
@@ -365,14 +374,19 @@ String clientSecret = (oAuth2Application == null) ? "" : oAuth2Application.getCl
 	}
 
 	<portlet:namespace />updateRedirectURIs = function(required) {
-		var redirectURIsLabel = $('#<portlet:namespace />redirectURIs').parent().children()[0];
-		var lexiconIconParent = redirectURIsLabel.children[0];
+		var redirectURIsNode = document.getElementById('<portlet:namespace />redirectURIs');
 
-		if (required) {
-			lexiconIconParent.style="visibility:visible;";
-		}
-		else {
-			lexiconIconParent.style="visibility:hidden;";
+		if (redirectURIsNode) {
+			var lexiconIconParent = redirectURIsNode.parentNode.firstElementChild.firstElementChild;
+
+			if (lexiconIconParent) {
+				if (required) {
+					lexiconIconParent.style="visibility:visible;";
+				}
+				else {
+					lexiconIconParent.style="visibility:hidden;";
+				}
+			}
 		}
 	}
 

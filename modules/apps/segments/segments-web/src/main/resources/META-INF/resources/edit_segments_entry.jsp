@@ -27,8 +27,6 @@ SegmentsEntry segmentsEntry = editSegmentsEntryDisplayContext.getSegmentsEntry()
 
 long segmentsEntryId = editSegmentsEntryDisplayContext.getSegmentsEntryId();
 
-String type = editSegmentsEntryDisplayContext.getType();
-
 if (Validator.isNotNull(backURL)) {
 	portletDisplay.setShowBackIcon(true);
 	portletDisplay.setURLBack(backURL);
@@ -37,7 +35,6 @@ if (Validator.isNotNull(backURL)) {
 renderResponse.setTitle(editSegmentsEntryDisplayContext.getTitle(locale));
 %>
 
-<liferay-ui:error embed="<%= false %>" exception="<%= DefaultSegmentsEntryException.MustNotUpdateDefaultSegmentsEntry.class %>" message="the-segment-cannot-be-updated-because-it-is-the-default-segment" />
 <liferay-ui:error embed="<%= false %>" exception="<%= SegmentsEntryCriteriaException.class %>" message="invalid-criteria" />
 <liferay-ui:error embed="<%= false %>" exception="<%= SegmentsEntryKeyException.class %>" message="key-is-already-used" />
 
@@ -46,7 +43,8 @@ renderResponse.setTitle(editSegmentsEntryDisplayContext.getTitle(locale));
 <aui:form action="<%= updateSegmentsEntryActionURL %>" method="post" name="editSegmentFm" onSubmit='<%= "event.preventDefault(); " + renderResponse.getNamespace() + "saveSegmentsEntry();" %>'>
 	<aui:input name="redirect" type="hidden" value="<%= redirect %>" />
 	<aui:input name="segmentsEntryId" type="hidden" value="<%= segmentsEntryId %>" />
-	<aui:input name="type" type="hidden" value="<%= type %>" />
+	<aui:input name="segmentsEntryKey" type="hidden" value="<%= editSegmentsEntryDisplayContext.getSegmentsEntryKey() %>" />
+	<aui:input name="type" type="hidden" value="<%= editSegmentsEntryDisplayContext.getType() %>" />
 	<aui:input name="dynamic" type="hidden" value="<%= true %>" />
 
 	<%
@@ -75,13 +73,14 @@ renderResponse.setTitle(editSegmentsEntryDisplayContext.getTitle(locale));
 				formId: '<portlet:namespace />editSegmentFm',
 				initialMembersCount: <%= editSegmentsEntryDisplayContext.getSegmentsEntryClassPKsCount() %>,
 				initialSegmentActive: <%= (segmentsEntry == null) ? false : segmentsEntry.isActive() %>,
-				initialSegmentName: '<%= (segmentsEntry != null) ? segmentsEntry.getName(locale) : StringPool.BLANK %>',
+				initialSegmentName: '<%= (segmentsEntry != null) ? HtmlUtil.escapeJS(segmentsEntry.getName(locale)) : StringPool.BLANK %>',
 				locale: '<%= locale %>',
 				portletNamespace: '<portlet:namespace />',
 				previewMembersURL: '<%= previewMembersURL %>',
 				propertyGroups: <%= editSegmentsEntryDisplayContext.getPropertyGroupsJSONArray(locale) %>,
 				redirect: '<%= HtmlUtil.escape(redirect) %>',
 				requestMembersCountURL: '<%= getSegmentsEntryClassPKsCountURL %>',
+				showInEditMode: <%= editSegmentsEntryDisplayContext.isShowInEditMode() %>,
 				source: '<%= editSegmentsEntryDisplayContext.getSource() %>'
 			},
 			{

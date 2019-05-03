@@ -44,6 +44,12 @@ public class ExpandoColumnConstants {
 
 	public static final String BOOLEAN_LABEL = "custom.field.boolean";
 
+	public static final String DATA_TYPE_DECIMAL = "Decimal";
+
+	public static final String DATA_TYPE_INTEGER = "Integer";
+
+	public static final String DATA_TYPE_TEXT = "Text";
+
 	public static final int DATE = 3;
 
 	public static final int DATE_ARRAY = 4;
@@ -105,7 +111,15 @@ public class ExpandoColumnConstants {
 
 	public static final String NUMBER_LABEL = "custom.field.number";
 
+	public static final String PRECISION_16_BIT = "16-bit";
+
+	public static final String PRECISION_32_BIT = "32-bit";
+
+	public static final String PRECISION_64_BIT = "64-bit";
+
 	public static final String PROPERTY_DISPLAY_TYPE = "display-type";
+
+	public static final String PROPERTY_DISPLAY_TYPE_BOOLEAN = "boolean";
 
 	public static final String PROPERTY_DISPLAY_TYPE_CHECKBOX = "checkbox";
 
@@ -114,7 +128,8 @@ public class ExpandoColumnConstants {
 	public static final String PROPERTY_DISPLAY_TYPE_GEOLOCATION =
 		"geolocation";
 
-	public static final String PROPERTY_DISPLAY_TYPE_NUMBER = "number";
+	public static final String PROPERTY_DISPLAY_TYPE_INPUT_FIELD =
+		"input-field";
 
 	public static final String PROPERTY_DISPLAY_TYPE_RADIO = "radio";
 
@@ -122,8 +137,6 @@ public class ExpandoColumnConstants {
 		"selection-list";
 
 	public static final String PROPERTY_DISPLAY_TYPE_TEXT_BOX = "text-box";
-
-	public static final String PROPERTY_DISPLAY_TYPE_TEXT_FIELD = "text-field";
 
 	public static final String PROPERTY_HEIGHT = "height";
 
@@ -174,25 +187,43 @@ public class ExpandoColumnConstants {
 
 	public static final String UNKNOWN_LABEL = "Unknown";
 
+	public static final String getDataType(int type) {
+		if ((type == DOUBLE) || (type == DOUBLE_ARRAY) || (type == FLOAT) ||
+			(type == FLOAT_ARRAY)) {
+
+			return DATA_TYPE_DECIMAL;
+		}
+		else if ((type == INTEGER) || (type == INTEGER_ARRAY) ||
+				 (type == LONG) || (type == LONG_ARRAY) || (type == SHORT) ||
+				 (type == SHORT_ARRAY)) {
+
+			return DATA_TYPE_INTEGER;
+		}
+		else if ((type == STRING) || (type == STRING_ARRAY) ||
+				 (type == STRING_LOCALIZED)) {
+
+			return DATA_TYPE_TEXT;
+		}
+
+		return StringPool.BLANK;
+	}
+
 	public static final String getDefaultDisplayTypeProperty(
 		int type, UnicodeProperties properties) {
 
-		if ((type == BOOLEAN) || (type == BOOLEAN_ARRAY) ||
-			(type == DATE_ARRAY) || (type == DOUBLE_ARRAY) ||
-			(type == FLOAT_ARRAY) || (type == INTEGER_ARRAY) ||
-			(type == LONG_ARRAY) || (type == NUMBER_ARRAY) ||
-			(type == SHORT_ARRAY) || (type == STRING_ARRAY) ||
-			(type == STRING_ARRAY_LOCALIZED)) {
+		if (type == BOOLEAN) {
+			return PROPERTY_DISPLAY_TYPE_BOOLEAN;
+		}
+		else if ((type == BOOLEAN_ARRAY) || (type == DATE_ARRAY) ||
+				 (type == DOUBLE_ARRAY) || (type == FLOAT_ARRAY) ||
+				 (type == INTEGER_ARRAY) || (type == LONG_ARRAY) ||
+				 (type == NUMBER_ARRAY) || (type == SHORT_ARRAY) ||
+				 (type == STRING_ARRAY) || (type == STRING_ARRAY_LOCALIZED)) {
 
 			return PROPERTY_DISPLAY_TYPE_SELECTION_LIST;
 		}
 		else if (type == DATE) {
 			return PROPERTY_DISPLAY_TYPE_DATE;
-		}
-		else if ((type == DOUBLE) || (type == FLOAT) || (type == INTEGER) ||
-				 (type == LONG) || (type == NUMBER) || (type == SHORT)) {
-
-			return PROPERTY_DISPLAY_TYPE_NUMBER;
 		}
 		else if (type == GEOLOCATION) {
 			return PROPERTY_DISPLAY_TYPE_GEOLOCATION;
@@ -205,7 +236,25 @@ public class ExpandoColumnConstants {
 				return PROPERTY_DISPLAY_TYPE_TEXT_BOX;
 			}
 
-			return PROPERTY_DISPLAY_TYPE_TEXT_FIELD;
+			return PROPERTY_DISPLAY_TYPE_INPUT_FIELD;
+		}
+
+		return StringPool.BLANK;
+	}
+
+	public static final String getPrecisionType(int type) {
+		if ((type == DOUBLE) || (type == DOUBLE_ARRAY) || (type == LONG) ||
+			(type == LONG_ARRAY)) {
+
+			return PRECISION_64_BIT;
+		}
+		else if ((type == FLOAT) || (type == FLOAT_ARRAY) ||
+				 (type == INTEGER) || (type == INTEGER_ARRAY)) {
+
+			return PRECISION_32_BIT;
+		}
+		else if ((type == SHORT) || (type == SHORT_ARRAY)) {
+			return PRECISION_16_BIT;
 		}
 
 		return StringPool.BLANK;

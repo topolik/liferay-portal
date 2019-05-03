@@ -21,8 +21,8 @@ import com.liferay.journal.constants.JournalConstants;
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Repository;
@@ -56,12 +56,15 @@ public class JournalArticleImageUpgradeUtil {
 				return StringPool.BLANK;
 			}
 
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("groupId", fileEntry.getGroupId());
-			jsonObject.put("title", fileEntry.getTitle());
-			jsonObject.put("type", "document");
-			jsonObject.put("uuid", fileEntry.getUuid());
+			JSONObject jsonObject = JSONUtil.put(
+				"groupId", fileEntry.getGroupId()
+			).put(
+				"title", fileEntry.getTitle()
+			).put(
+				"type", "document"
+			).put(
+				"uuid", fileEntry.getUuid()
+			);
 
 			return jsonObject.toString();
 		}

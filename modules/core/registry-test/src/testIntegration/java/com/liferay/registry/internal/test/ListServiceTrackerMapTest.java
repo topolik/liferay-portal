@@ -14,6 +14,9 @@
 
 package com.liferay.registry.internal.test;
 
+import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.portal.kernel.test.rule.AggregateTestRule;
+import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
 import com.liferay.registry.Registry;
 import com.liferay.registry.RegistryUtil;
 import com.liferay.registry.ServiceReference;
@@ -23,6 +26,7 @@ import com.liferay.registry.collections.ServiceTrackerMap;
 import com.liferay.registry.internal.RegistryWrapper;
 import com.liferay.registry.internal.TrackedOne;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -31,18 +35,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.test.api.ArquillianResource;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 
 /**
@@ -51,21 +54,31 @@ import org.osgi.framework.ServiceRegistration;
 @RunWith(Arquillian.class)
 public class ListServiceTrackerMapTest {
 
-	@Before
-	public void setUp() throws BundleException {
-		_bundle.start();
+	@ClassRule
+	@Rule
+	public static final AggregateTestRule aggregateTestRule =
+		new LiferayIntegrationTestRule();
 
-		_bundleContext = _bundle.getBundleContext();
+	@Before
+	public void setUp() {
+		Bundle bundle = FrameworkUtil.getBundle(
+			ListServiceTrackerMapTest.class);
+
+		_bundleContext = bundle.getBundleContext();
 	}
 
 	@After
-	public void tearDown() throws BundleException {
-		_bundle.stop();
-
+	public void tearDown() {
 		if (_serviceTrackerMap != null) {
 			_serviceTrackerMap.close();
 
 			_serviceTrackerMap = null;
+		}
+
+		for (ServiceRegistration<?> serviceRegistration :
+				_serviceRegistrations) {
+
+			serviceRegistration.unregister();
 		}
 	}
 
@@ -76,15 +89,15 @@ public class ListServiceTrackerMapTest {
 
 			TrackedOne trackedOne1 = new TrackedOne();
 
-			registerService(trackedOne1, 1);
+			_serviceRegistrations.add(registerService(trackedOne1, 1));
 
 			TrackedOne trackedOne3 = new TrackedOne();
 
-			registerService(trackedOne3, 3);
+			_serviceRegistrations.add(registerService(trackedOne3, 3));
 
 			TrackedOne trackedOne2 = new TrackedOne();
 
-			registerService(trackedOne2, 2);
+			_serviceRegistrations.add(registerService(trackedOne2, 2));
 
 			List<TrackedOne> services = serviceTrackerMap.getService("aTarget");
 
@@ -105,11 +118,11 @@ public class ListServiceTrackerMapTest {
 
 			TrackedOne trackedOne1 = new TrackedOne();
 
-			registerService(trackedOne1, 1);
+			_serviceRegistrations.add(registerService(trackedOne1, 1));
 
 			TrackedOne trackedOne3 = new TrackedOne();
 
-			registerService(trackedOne3, 3);
+			_serviceRegistrations.add(registerService(trackedOne3, 3));
 
 			TrackedOne trackedOne2 = new TrackedOne();
 
@@ -169,11 +182,16 @@ public class ListServiceTrackerMapTest {
 		try (ServiceTrackerMap<String, List<TrackedOne>> serviceTrackerMap =
 				createServiceTrackerMap()) {
 
-			registerService(new TrackedOne(), "aTarget");
-			registerService(new TrackedOne(), "anotherTarget");
-			registerService(new TrackedOne(), "aTarget");
-			registerService(new TrackedOne(), "anotherTarget");
-			registerService(new TrackedOne(), "anotherTarget");
+			_serviceRegistrations.add(
+				registerService(new TrackedOne(), "aTarget"));
+			_serviceRegistrations.add(
+				registerService(new TrackedOne(), "anotherTarget"));
+			_serviceRegistrations.add(
+				registerService(new TrackedOne(), "aTarget"));
+			_serviceRegistrations.add(
+				registerService(new TrackedOne(), "anotherTarget"));
+			_serviceRegistrations.add(
+				registerService(new TrackedOne(), "anotherTarget"));
 
 			List<TrackedOne> aTargetList = serviceTrackerMap.getService(
 				"aTarget");
@@ -195,7 +213,7 @@ public class ListServiceTrackerMapTest {
 		try (ServiceTrackerMap<String, List<TrackedOne>> serviceTrackerMap =
 				createServiceTrackerMap()) {
 
-			registerService(new TrackedOne());
+			_serviceRegistrations.add(registerService(new TrackedOne()));
 
 			List<TrackedOne> services = serviceTrackerMap.getService("aTarget");
 
@@ -208,8 +226,8 @@ public class ListServiceTrackerMapTest {
 		try (ServiceTrackerMap<String, List<TrackedOne>> serviceTrackerMap =
 				createServiceTrackerMap()) {
 
-			registerService(new TrackedOne());
-			registerService(new TrackedOne());
+			_serviceRegistrations.add(registerService(new TrackedOne()));
+			_serviceRegistrations.add(registerService(new TrackedOne()));
 
 			List<TrackedOne> services = serviceTrackerMap.getService("aTarget");
 
@@ -309,10 +327,9 @@ public class ListServiceTrackerMapTest {
 			TrackedOne.class, trackedOne, properties);
 	}
 
-	@ArquillianResource
-	private Bundle _bundle;
-
 	private BundleContext _bundleContext;
+	private final List<ServiceRegistration<?>> _serviceRegistrations =
+		new ArrayList<>();
 	private ServiceTrackerMap<String, List<TrackedOne>> _serviceTrackerMap;
 
 }

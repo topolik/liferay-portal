@@ -66,7 +66,12 @@ public interface AssetListEntryLocalService
 	 * Never modify or reference this interface directly. Always use {@link AssetListEntryLocalServiceUtil} to access the asset list entry local service. Add custom service methods to <code>com.liferay.asset.list.service.impl.AssetListEntryLocalServiceImpl</code> and rerun ServiceBuilder to automatically copy the method declarations to this interface.
 	 */
 	public void addAssetEntrySelection(
-			long assetListEntryId, long assetEntryId,
+			long assetListEntryId, long assetEntryId, long segmentsEntryId,
+			ServiceContext serviceContext)
+		throws PortalException;
+
+	public void addAssetEntrySelections(
+			long assetListEntryId, long[] assetEntryIds, long segmentsEntryId,
 			ServiceContext serviceContext)
 		throws PortalException;
 
@@ -108,7 +113,8 @@ public interface AssetListEntryLocalService
 	@Transactional(enabled = false)
 	public AssetListEntry createAssetListEntry(long assetListEntryId);
 
-	public void deleteAssetEntrySelection(long assetListEntryId, int position)
+	public void deleteAssetEntrySelection(
+			long assetListEntryId, long segmentsEntryId, int position)
 		throws PortalException;
 
 	/**
@@ -130,6 +136,10 @@ public interface AssetListEntryLocalService
 	 */
 	@Indexable(type = IndexableType.DELETE)
 	public AssetListEntry deleteAssetListEntry(long assetListEntryId)
+		throws PortalException;
+
+	public AssetListEntry deleteAssetListEntry(
+			long assetListEntryId, long segmentsEntryId)
 		throws PortalException;
 
 	/**
@@ -284,6 +294,11 @@ public interface AssetListEntryLocalService
 	public AssetListEntry getAssetListEntry(long assetListEntryId)
 		throws PortalException;
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public AssetListEntry getAssetListEntry(
+			long groupId, String assetListEntryKey)
+		throws PortalException;
+
 	/**
 	 * Returns the asset list entry matching the UUID and group.
 	 *
@@ -317,7 +332,8 @@ public interface AssetListEntryLocalService
 		throws PortalException;
 
 	public void moveAssetEntrySelection(
-			long assetListEntryId, int position, int newPosition)
+			long assetListEntryId, long segmentsEntryId, int position,
+			int newPosition)
 		throws PortalException;
 
 	/**
@@ -330,15 +346,16 @@ public interface AssetListEntryLocalService
 	public AssetListEntry updateAssetListEntry(AssetListEntry assetListEntry);
 
 	public AssetListEntry updateAssetListEntry(
+			long assetListEntryId, long segmentsEntryId, String typeSettings,
+			ServiceContext serviceContext)
+		throws PortalException;
+
+	public AssetListEntry updateAssetListEntry(
 			long assetListEntryId, String title)
 		throws PortalException;
 
-	public AssetListEntry updateAssetListEntryTypeSettings(
-			long assetListEntryId, String typeSettings)
-		throws PortalException;
-
-	public AssetListEntry updateAssetListEntryTypeSettingsProperties(
-			long assetListEntryId, String typeSettingsProperties)
+	public void updateAssetListEntryTypeSettings(
+			long assetListEntryId, long segmentsEntryId, String typeSettings)
 		throws PortalException;
 
 }

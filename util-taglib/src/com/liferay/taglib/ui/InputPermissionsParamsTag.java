@@ -23,6 +23,7 @@ import com.liferay.portal.kernel.model.RoleConstants;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
+import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
 import com.liferay.portal.kernel.service.RoleLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.JavaConstants;
@@ -143,12 +144,26 @@ public class InputPermissionsParamsTag extends TagSupport {
 			ResourceActionsUtil.getModelResourceGuestDefaultActions(modelName);
 
 		if (layout.isTypeControlPanel()) {
-			Group group = themeDisplay.getScopeGroup();
+			long refererPlid = themeDisplay.getRefererPlid();
 
-			if (!group.hasPrivateLayouts() &&
-				guestDefaultActions.contains(ActionKeys.VIEW)) {
+			if (refererPlid > 0) {
+				Layout refererLayout = LayoutLocalServiceUtil.getLayout(
+					refererPlid);
 
-				return RoleConstants.GUEST;
+				if (refererLayout.isPublicLayout() &&
+					guestDefaultActions.contains(ActionKeys.VIEW)) {
+
+					return RoleConstants.GUEST;
+				}
+			}
+			else {
+				Group group = themeDisplay.getScopeGroup();
+
+				if (!group.hasPrivateLayouts() &&
+					guestDefaultActions.contains(ActionKeys.VIEW)) {
+
+					return RoleConstants.GUEST;
+				}
 			}
 		}
 		else if (layout.isPublicLayout() &&

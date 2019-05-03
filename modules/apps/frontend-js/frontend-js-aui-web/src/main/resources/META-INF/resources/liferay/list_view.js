@@ -1,3 +1,10 @@
+/**
+ * The List View Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-list-view
+ */
+
 AUI.add(
 	'liferay-list-view',
 	function(A) {

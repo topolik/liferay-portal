@@ -21,13 +21,12 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.user.associated.data.util.UADDynamicQueryUtil;
 
 /**
- * The base implementation of {@link UADAnonymizer} for entities created using
- * ServiceBuilder. The count and batch actions are based on
+ * Provides the base implementation of {@link UADAnonymizer} for entities
+ * created using Service Builder. The count and batch actions are based on
  * {@link ActionableDynamicQuery}, which is available in the service for the
- * entity of type {@code T}.
+ * type {@code T} entity.
  *
  * @author William Newbury
- * @review
  */
 public abstract class DynamicQueryUADAnonymizer<T extends BaseModel>
 	implements UADAnonymizer<T> {
@@ -65,31 +64,28 @@ public abstract class DynamicQueryUADAnonymizer<T extends BaseModel>
 	}
 
 	/**
-	 * Returns an {@link ActionableDynamicQuery} for type {@code T}. This can be
+	 * Returns an {@code ActionableDynamicQuery} for type {@code T}. This can be
 	 * retrieved from the service.
 	 *
 	 * @return an {@link ActionableDynamicQuery} for type {@code T}
-	 * @review
 	 */
 	protected abstract ActionableDynamicQuery doGetActionableDynamicQuery();
 
 	/**
-	 * Returns the names identifying fields on the entity of type {@code T} that
+	 * Returns the names identifying fields on the type {@code T} entity that
 	 * contain the primary key of a user.
 	 *
-	 * @return fields that may contain the primary key of a user
-	 * @review
+	 * @return the fields that may contain the primary key of a user
 	 */
 	protected abstract String[] doGetUserIdFieldNames();
 
 	/**
-	 * Returns an {@link ActionableDynamicQuery} for type {@code T}. It should
-	 * be populated with criterion and ready for use by the service.
+	 * Returns an {@code ActionableDynamicQuery} for type {@code T}. It should
+	 * be populated with criteria and ready for use by the service.
 	 *
-	 * @param userId the primary key of the user to pre-filter the
-	 * 				 {@link ActionableDynamicQuery}
-	 * @return a pre-filtered {@link ActionableDynamicQuery}
-	 * @review
+	 * @param  userId the primary key of the user to pre-filter the {@code
+	 *         ActionableDynamicQuery}
+	 * @return a pre-filtered {@code ActionableDynamicQuery}
 	 */
 	protected ActionableDynamicQuery getActionableDynamicQuery(long userId) {
 		return UADDynamicQueryUtil.addActionableDynamicQueryCriteria(

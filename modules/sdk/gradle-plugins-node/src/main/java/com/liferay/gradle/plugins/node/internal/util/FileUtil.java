@@ -16,6 +16,8 @@ package com.liferay.gradle.plugins.node.internal.util;
 
 import com.liferay.gradle.util.OSDetector;
 
+import groovy.json.JsonSlurper;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -29,6 +31,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -37,6 +40,7 @@ import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.file.CopySpec;
+import org.gradle.api.logging.Logger;
 import org.gradle.internal.hash.HashUtil;
 import org.gradle.internal.hash.HashValue;
 import org.gradle.process.ExecResult;
@@ -46,6 +50,65 @@ import org.gradle.process.ExecSpec;
  * @author Andrea Di Giorgi
  */
 public class FileUtil extends com.liferay.gradle.util.FileUtil {
+
+	public static void createBinDirLinks(Logger logger, File nodeModulesDir)
+		throws IOException {
+
+		JsonSlurper jsonSlurper = new JsonSlurper();
+
+		Path nodeModulesDirPath = nodeModulesDir.toPath();
+
+		Path nodeModulesBinDirPath = nodeModulesDirPath.resolve(
+			_NODE_MODULES_BIN_DIR_NAME);
+
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
+				nodeModulesDirPath, _directoryStreamFilter)) {
+
+			for (Path dirPath : directoryStream) {
+				Path packageJsonPath = dirPath.resolve("package.json");
+
+				if (Files.notExists(packageJsonPath)) {
+					continue;
+				}
+
+				Map<String, Object> packageJsonMap =
+					(Map<String, Object>)jsonSlurper.parse(
+						packageJsonPath.toFile());
+
+				Object binObject = packageJsonMap.get("bin");
+
+				if (!(binObject instanceof Map<?, ?>)) {
+					continue;
+				}
+
+				Map<String, String> binJsonMap = (Map<String, String>)binObject;
+
+				if (binJsonMap.isEmpty()) {
+					continue;
+				}
+
+				Files.createDirectories(nodeModulesBinDirPath);
+
+				for (Map.Entry<String, String> entry : binJsonMap.entrySet()) {
+					String linkFileName = entry.getKey();
+					String linkTargetFileName = entry.getValue();
+
+					Path linkPath = nodeModulesBinDirPath.resolve(linkFileName);
+					Path linkTargetPath = dirPath.resolve(linkTargetFileName);
+
+					Files.deleteIfExists(linkPath);
+
+					Files.createSymbolicLink(linkPath, linkTargetPath);
+
+					if (logger.isInfoEnabled()) {
+						logger.info(
+							"Created binary symbolic link {} which targets {}",
+							linkPath, linkTargetPath);
+					}
+				}
+			}
+		}
+	}
 
 	public static void deleteSymbolicLinks(Path dirPath) throws IOException {
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(
@@ -96,6 +159,39 @@ public class FileUtil extends com.liferay.gradle.util.FileUtil {
 		}
 
 		return sb.toString();
+	}
+
+	public static void removeBinDirLinks(
+			final Logger logger, File nodeModulesDir)
+		throws IOException {
+
+		Files.walkFileTree(
+			nodeModulesDir.toPath(),
+			new SimpleFileVisitor<Path>() {
+
+				@Override
+				public FileVisitResult preVisitDirectory(
+						Path dirPath, BasicFileAttributes basicFileAttributes)
+					throws IOException {
+
+					String dirName = String.valueOf(dirPath.getFileName());
+
+					if (dirName.equals(_NODE_MODULES_BIN_DIR_NAME)) {
+						if (logger.isInfoEnabled()) {
+							logger.info(
+								"Removing binary symbolic links from {}",
+								dirPath);
+						}
+
+						FileUtil.deleteSymbolicLinks(dirPath);
+
+						return FileVisitResult.SKIP_SUBTREE;
+					}
+
+					return FileVisitResult.CONTINUE;
+				}
+
+			});
 	}
 
 	public static void syncDir(
@@ -193,6 +289,18 @@ public class FileUtil extends com.liferay.gradle.util.FileUtil {
 
 		return sortedFiles;
 	}
+
+	private static final String _NODE_MODULES_BIN_DIR_NAME = ".bin";
+
+	private static final DirectoryStream.Filter<Path> _directoryStreamFilter =
+		new DirectoryStream.Filter<Path>() {
+
+			@Override
+			public boolean accept(Path path) throws IOException {
+				return Files.isDirectory(path);
+			}
+
+		};
 
 	private static class FileComparator implements Comparator<File> {
 

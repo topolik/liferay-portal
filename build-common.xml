@@ -53,7 +53,7 @@
 	<path id="lib.classpath">
 		<fileset
 			dir="${project.dir}/lib/development"
-			excludes="biz.aQute.bnd.jar,com.liferay.ant.bnd.jar"
+			excludes="com.liferay.ant.bnd.jar"
 			includes="*.jar"
 		/>
 		<fileset
@@ -84,15 +84,11 @@
 		<pathelement path="${classpath.full}" />
 		<fileset
 			dir="${project.dir}/lib/development"
-			includes="jsp-api.jar,mail.jar,servlet-api.jar"
+			includes="biz.aQute.bnd.jar,jsp-api.jar,mail.jar,servlet-api.jar"
 		/>
 		<fileset
 			dir="${project.dir}/lib/global"
 			includes="*.jar"
-		/>
-		<fileset
-			dir="${project.dir}/lib/portal"
-			includes="bnd.jar"
 		/>
 		<path refid="lib.pre.classpath" />
 		<path refid="web-lib.classpath" />
@@ -449,8 +445,13 @@ information.
 						/>
 					</copy>
 
+					<path id="test.compile.classpath">
+						<pathelement path="${project.dir}/lib/development/biz.aQute.bnd.jar" />
+						<path refid="test.classpath" />
+					</path>
+
 					<javac
-						classpathref="test.classpath"
+						classpathref="test.compile.classpath"
 						compiler="${javac.compiler}"
 						debug="${javac.debug}"
 						deprecation="${javac.deprecation}"
@@ -870,8 +871,8 @@ information.
 						<arg value="-Dforced.cache.enabled=@{forcedcacheenabled}" />
 						<arg value="-Dliferay.home=${liferay.home}" />
 						<arg if:set="env.JENKINS_HOME" value="-Dliferay.ssl.context.enabled=true" />
-						<arg if:set="env.JENKINS_HOME" value="-Dorg.gradle.internal.http.connectionTimeout=60000" />
-						<arg if:set="env.JENKINS_HOME" value="-Dorg.gradle.internal.http.socketTimeout=60000" />
+						<arg if:set="env.JENKINS_HOME" value="-Dorg.gradle.internal.http.connectionTimeout=120000" />
+						<arg if:set="env.JENKINS_HOME" value="-Dorg.gradle.internal.http.socketTimeout=120000" />
 						<arg value="tasks" />
 						<arg value="--all" />
 						<env key="GRADLE_OPTS" value="@{gradleopts}" />
@@ -912,8 +913,8 @@ information.
 								<arg value="-Dforced.cache.enabled=@{forcedcacheenabled}" />
 								<arg value="-Dliferay.home=${liferay.home}" />
 								<arg if:set="env.JENKINS_HOME" value="-Dliferay.ssl.context.enabled=true" />
-								<arg if:set="env.JENKINS_HOME" value="-Dorg.gradle.internal.http.connectionTimeout=60000" />
-								<arg if:set="env.JENKINS_HOME" value="-Dorg.gradle.internal.http.socketTimeout=60000" />
+								<arg if:set="env.JENKINS_HOME" value="-Dorg.gradle.internal.http.connectionTimeout=120000" />
+								<arg if:set="env.JENKINS_HOME" value="-Dorg.gradle.internal.http.socketTimeout=120000" />
 								<arg line="@{task}" />
 								<env key="GRADLE_OPTS" value="@{gradleopts}" />
 								<redirector errorproperty="@{outputproperty}.error" outputproperty="@{outputproperty}" unless:blank="@{outputproperty}" />
@@ -1004,6 +1005,8 @@ information.
 
 	<macrodef name="junit-cmd">
 		<attribute name="forkmode" />
+		<attribute default="" name="junit.jvm.override" />
+		<attribute default="" name="junit.jvm.override.version" />
 		<attribute name="test.type" />
 		<element name="misc" optional="yes" />
 		<element name="test.classes" />
@@ -1011,14 +1014,19 @@ information.
 		<sequential>
 			<local name="aspectj.weaver.enabled" />
 			<local name="junit.java.gc" />
+			<local name="junit.jvm.override.version" />
+
+			<condition else="@{junit.jvm.override.version}" property="junit.jvm.override.version" value="${java.specification.version}">
+				<equals arg1="@{junit.jvm.override.version}" arg2="" />
+			</condition>
 
 			<if>
 				<equals arg1="@{test.type}" arg2="unit" />
 				<then>
 					<if>
-						<isset property="junit.java.unit.gc[${java.specification.version}]" />
+						<isset property="junit.java.unit.gc[@{junit.jvm.override.version}]" />
 						<then>
-							<propertycopy from="junit.java.unit.gc[${java.specification.version}]" name="junit.java.unit.gc" override="true" />
+							<propertycopy from="junit.java.unit.gc[@{junit.jvm.override.version}]" name="junit.java.unit.gc" override="true" />
 						</then>
 					</if>
 
@@ -1034,9 +1042,9 @@ information.
 				</then>
 				<else>
 					<if>
-						<isset property="junit.java.integration.gc[${java.specification.version}]" />
+						<isset property="junit.java.integration.gc[@{junit.jvm.override.version}]" />
 						<then>
-							<propertycopy from="junit.java.integration.gc[${java.specification.version}]" name="junit.java.integration.gc" override="true" />
+							<propertycopy from="junit.java.integration.gc[@{junit.jvm.override.version}]" name="junit.java.integration.gc" override="true" />
 						</then>
 					</if>
 
@@ -1046,18 +1054,26 @@ information.
 
 					<basename file="${project.dir}" property="project.dir.name" />
 
-					<property name="junit.java.gc" value="${junit.java.integration.gc} -verbose:gc -Xloggc:/tmp/${project.dir.name}-@{test.type}-gc.log -XX:+PrintGCCause -XX:+PrintGCDetails" />
+					<condition else="${junit.java.integration.gc} -verbose:gc -Xloggc:/tmp/${project.dir.name}-@{test.type}-gc.log -XX:+PrintGCCause -XX:+PrintGCDetails" property="junit.java.gc" value="${junit.java.integration.gc} -Xlog:gc:/tmp/${project.dir.name}-@{test.type}-gc.log">
+						<isset property="junit.java.integration.gc[@{junit.jvm.override.version}]" />
+					</condition>
 				</else>
 			</if>
 
 			<if>
-				<isset property="junit.java.add.opens[${java.specification.version}]" />
+				<isset property="junit.java.add.opens[@{junit.jvm.override.version}]" />
 				<then>
-					<propertycopy from="junit.java.add.opens[${java.specification.version}]" name="junit.java.add.opens" override="true" />
+					<propertycopy from="junit.java.add.opens[@{junit.jvm.override.version}]" name="junit.java.add.opens" override="true" />
 				</then>
 			</if>
 
-			<junit dir="${project.dir}" fork="on" forkmode="@{forkmode}" haltonfailure="${junit.halt.on.failure}" jvm="${junit.jvm}" outputtoformatters="false" printsummary="on" showoutput="true">
+			<local name="junit.jvm.bin" />
+
+			<condition else="${junit.jvm.override}" property="junit.jvm.bin" value="${junit.jvm}">
+				<equals arg1="${junit.jvm.override}" arg2="" />
+			</condition>
+
+			<junit dir="${project.dir}" fork="on" forkmode="@{forkmode}" haltonfailure="${junit.halt.on.failure}" jvm="${junit.jvm.bin}" outputtoformatters="false" printsummary="on" showoutput="true">
 				<sysproperty if:true="${aspectj.weaver.enabled}" key="aspectj.agent" value="${aspectj.agent}" />
 				<sysproperty key="catalina.base" value="." />
 				<sysproperty file="woven-classes" key="junit.aspectj.dump" />
@@ -1131,9 +1147,29 @@ information.
 		</sequential>
 	</macrodef>
 
+	<macrodef name="lstopwatch">
+		<attribute name="action" />
+		<attribute name="name" />
+		<sequential>
+			<if>
+				<equals arg1="@{action}" arg2="start" />
+				<then>
+					<local name="timestamp" />
+
+					<tstamp>
+						<format pattern="MM-dd-yyyy HH:mm:ss:SSS z" property="timestamp" timezone="America/Los_Angeles" />
+					</tstamp>
+
+					<echo>@{name}.start.timestamp: ${timestamp}</echo>
+				</then>
+			</if>
+
+			<stopwatch action="@{action}" name="@{name}" />
+		</sequential>
+	</macrodef>
+
 	<macrodef name="manifest-helper">
 		<attribute default="false" name="analyze" />
-
 		<sequential>
 			<trycatch>
 				<try>
@@ -1665,7 +1701,7 @@ artifact.url=${remote.repository.url}/com/liferay/portal/com.liferay.${processed
 				<path refid="lib.pre.classpath" />
 				<fileset
 					dir="${project.dir}/lib/development"
-					excludes="jalopy.jar,jetty*.jar,tomcat*.jar"
+					excludes="biz.aQute.bnd.jar,jalopy.jar,jetty*.jar,tomcat*.jar"
 					includes="*.jar"
 				/>
 				<fileset
@@ -1683,6 +1719,24 @@ artifact.url=${remote.repository.url}/com/liferay/portal/com.liferay.${processed
 					includes="com.liferay.portal.dao.db-*.jar"
 				/>
 			</path>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="setup-yarn">
+		<sequential>
+			<if>
+				<not>
+					<and>
+						<equals arg1="${os.name}" arg2="SunOS" />
+						<isset property="env.JENKINS_HOME" />
+					</and>
+				</not>
+				<then>
+					<gradle-execute dir="${project.dir}/modules" task="setUpYarn">
+						<arg value="--build-file=${project.dir}/modules/util.gradle" />
+					</gradle-execute>
+				</then>
+			</if>
 		</sequential>
 	</macrodef>
 
@@ -1764,6 +1818,8 @@ rerun your task.
 		<attribute name="test.includes" />
 		<attribute name="test.type" />
 		<attribute default="" name="test.excludes" />
+		<attribute default="" name="junit.jvm.override" />
+		<attribute default="" name="junit.jvm.override.version" />
 
 		<sequential>
 			<if>
@@ -1793,6 +1849,8 @@ rerun your task.
 
 					<junit-cmd
 						forkmode="@{junit.forkmode}"
+						junit.jvm.override="@{junit.jvm.override}"
+						junit.jvm.override.version="@{junit.jvm.override.version}"
 						test.type="@{test.type}"
 					>
 						<misc>
@@ -1849,6 +1907,7 @@ rerun your task.
 					<propertyref name="aspectj.configuration" />
 					<propertyref name="baseline.jar.report.level" />
 					<propertyref name="baseline.jar.report.only.dirty.packages" />
+					<propertyref name="build.binaries.cache.dir" />
 					<propertyref name="git.working.branch.name" />
 					<propertyref name="jacoco.agent.configuration" />
 					<propertyref name="jacoco.agent.jar" />
@@ -2310,6 +2369,24 @@ rerun your task.
 
 		<if>
 			<not>
+				<isset property="junit.jvm.override" />
+			</not>
+			<then>
+				<property name="junit.jvm.override" value="" />
+			</then>
+		</if>
+
+		<if>
+			<not>
+				<isset property="junit.jvm.override.version}" />
+			</not>
+			<then>
+				<property name="junit.jvm.override.version" value="" />
+			</then>
+		</if>
+
+		<if>
+			<not>
 				<isset property="test.class" />
 			</not>
 			<then>
@@ -2323,6 +2400,8 @@ rerun your task.
 
 		<test-cmd
 			junit.forkmode="perTest"
+			junit.jvm.override="${junit.jvm.override}"
+			junit.jvm.override.version="${junit.jvm.override.version}"
 			test.includes="**/${test.class}.class"
 			test.type="${test.type}"
 		/>
@@ -2343,6 +2422,24 @@ rerun your task.
 		<propertycopy from="TEST_CLASS_GROUP_${test.class.group.index}" name="test.classes" />
 
 		<if>
+			<not>
+				<isset property="junit.jvm.override" />
+			</not>
+			<then>
+				<property name="junit.jvm.override" value="" />
+			</then>
+		</if>
+
+		<if>
+			<not>
+				<isset property="junit.jvm.override.version}" />
+			</not>
+			<then>
+				<property name="junit.jvm.override.version" value="" />
+			</then>
+		</if>
+
+		<if>
 			<or>
 				<not>
 					<isset property="test.type" />
@@ -2352,6 +2449,8 @@ rerun your task.
 			<then>
 				<test-cmd
 					junit.forkmode="perTest"
+					junit.jvm.override="${junit.jvm.override}"
+					junit.jvm.override.version="${junit.jvm.override.version}"
 					test.includes="${test.classes}"
 					test.type="unit"
 				/>
@@ -2368,6 +2467,8 @@ rerun your task.
 			<then>
 				<test-cmd
 					junit.forkmode="once"
+					junit.jvm.override="${junit.jvm.override}"
+					junit.jvm.override.version="${junit.jvm.override.version}"
 					test.includes="${test.classes}"
 					test.type="integration"
 				/>

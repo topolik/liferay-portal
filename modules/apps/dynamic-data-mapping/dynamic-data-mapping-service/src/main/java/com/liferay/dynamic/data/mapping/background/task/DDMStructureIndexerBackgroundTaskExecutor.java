@@ -46,7 +46,7 @@ public class DDMStructureIndexerBackgroundTaskExecutor
 	extends BaseBackgroundTaskExecutor {
 
 	public static String getBackgroundTaskName(long structureId) {
-		return _BACKGROUND_TASK_NAME_PREFIX.concat(String.valueOf(structureId));
+		return _BACKGROUND_TASK_NAME_PREFIX + structureId;
 	}
 
 	@Override

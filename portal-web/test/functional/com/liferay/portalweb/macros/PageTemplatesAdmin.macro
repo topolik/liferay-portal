@@ -1,4 +1,24 @@
 definition {
+	macro _addPageTemplate {
+		if (isSet(pageTemplateType)) {
+			var menuItem = "${pageTemplateType}";
+		}
+		else {
+			var menuItem = "Content Page Template";
+		}
+
+		if ("${siteTemplate}" == "true") {
+			LexiconEntry.gotoAdd();
+		}
+		else {
+			LexiconEntry.gotoAddMenuItem(menuItem = "${menuItem}");
+		}
+
+		PortletEntry.inputName(name = "${pageTemplateName}");
+
+		Button.clickSave();
+	}
+
 	macro _gotoAddCollection {
 		if (IsElementPresent(locator1 = "NavNested#NAV_NESTED_PLUS")) {
 			Click(locator1 = "NavNested#NAV_NESTED_PLUS");
@@ -13,62 +33,61 @@ definition {
 
 		Collection.editCollection(
 			collectionDescription = "${collectionDescription}",
-			collectionName = "${collectionName}"
-		);
+			collectionName = "${collectionName}");
 
 		Button.clickSave();
 	}
 
+	macro addDuplicatePageTemplate {
+		PageTemplatesAdmin._addPageTemplate(
+			menuItem = "${menuItem}",
+			pageTemplateName = "${pageTemplateName}",
+			pageTemplateType = "${pageTemplateType}",
+			siteTemplate = "${siteTemplate}");
+
+		AssertTextEquals(
+			locator1 = "Message#ERROR_MODAL_CONTENT",
+			value1 = "A page template entry with that name already exists.");
+	}
+
 	macro addPageTemplate {
-		if (isSet(pageTemplateType)) {
-			var menuItem = "${pageTemplateType}";
-		}
-		else {
-			var menuItem = "Standard Page Template";
-		}
+		PageTemplatesAdmin._addPageTemplate(
+			menuItem = "${menuItem}",
+			pageTemplateName = "${pageTemplateName}",
+			pageTemplateType = "${pageTemplateType}",
+			siteTemplate = "${siteTemplate}");
 
-		LexiconEntry.gotoAddMenuItem(menuItem = "${menuItem}");
-
-		PortletEntry.inputName(name = "${pageTemplateName}");
-
-		Button.clickSave();
+		PageEditor.assertFragmentSidebarLoaded();
 	}
 
 	macro configureWidgetPageTemplateLayout {
 		Click.pauseClickAt(locator1 = "ControlMenu#EDIT_COG");
 
 		Click(
-			locator1 = "SitePagesEditPage#LAYOUT_CARD",
-			key_columnName = "${columnName}"
-		);
+			key_columnName = "${columnName}",
+			locator1 = "SitePagesEditPage#LAYOUT_CARD");
 
 		PortletEntry.save();
 	}
 
 	macro deletePageTemplate {
-		LexiconCard.delete(
-			card = "${pageTemplateName}"
-		);
+		LexiconCard.delete(card = "${pageTemplateName}");
 	}
 
 	macro gotoPageTemplateEllipsisItem {
 		LexiconCard.clickEllipsisItem(
 			card = "${pageTemplateName}",
-			item = "${item}"
-		);
+			item = "${item}");
 	}
 
 	macro openPageTemplatesAdmin {
-		Navigator.openWithAppendToBaseURL(
-			urlAppend = "group/${siteURLKey}/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet&amp;_com_liferay_layout_admin_web_portlet_GroupPagesPortlet_tabs1=page-templates"
-		);
+		Navigator.openWithAppendToBaseURL(urlAppend = "group/${siteURLKey}/~/control_panel/manage?p_p_id=com_liferay_layout_admin_web_portlet_GroupPagesPortlet&amp;_com_liferay_layout_admin_web_portlet_GroupPagesPortlet_tabs1=page-templates");
 	}
 
 	macro renamePageTemplate {
 		PageTemplatesAdmin.gotoPageTemplateEllipsisItem(
 			item = "Rename",
-			pageTemplateName = "${pageTemplateName}"
-		);
+			pageTemplateName = "${pageTemplateName}");
 
 		PortletEntry.inputName(name = "${newPageTemplateName}");
 
@@ -76,14 +95,10 @@ definition {
 	}
 
 	macro viewPageTemplateNotPresent {
-		LexiconCard.viewCardNotPresent(
-			card = "${pageTemplateName}"
-		);
+		LexiconCard.viewCardNotPresent(card = "${pageTemplateName}");
 	}
 
 	macro viewPageTemplatePresent {
-		LexiconCard.viewCardPresent(
-			card = "${pageTemplateName}"
-		);
+		LexiconCard.viewCardPresent(card = "${pageTemplateName}");
 	}
 }

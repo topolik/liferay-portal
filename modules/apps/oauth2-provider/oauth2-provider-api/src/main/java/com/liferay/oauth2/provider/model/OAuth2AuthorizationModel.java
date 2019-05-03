@@ -231,6 +231,21 @@ public interface OAuth2AuthorizationModel
 	public void setAccessTokenExpirationDate(Date accessTokenExpirationDate);
 
 	/**
+	 * Returns the remote host info of this o auth2 authorization.
+	 *
+	 * @return the remote host info of this o auth2 authorization
+	 */
+	@AutoEscape
+	public String getRemoteHostInfo();
+
+	/**
+	 * Sets the remote host info of this o auth2 authorization.
+	 *
+	 * @param remoteHostInfo the remote host info of this o auth2 authorization
+	 */
+	public void setRemoteHostInfo(String remoteHostInfo);
+
+	/**
 	 * Returns the remote ip info of this o auth2 authorization.
 	 *
 	 * @return the remote ip info of this o auth2 authorization

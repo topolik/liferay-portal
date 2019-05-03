@@ -13,14 +13,10 @@ class AssetEntryListDropdownDefaultEventHandler extends DefaultEventHandler {
 		this._openWindow(Liferay.Language.get('permissions'), itemData.permissionsAssetEntryListURL);
 	}
 
-	viewAssetListContent(itemData) {
-		this._openWindow(Liferay.Language.get('view-content'), itemData.viewAssetListContentURL);
-	}
-
 	renameAssetListEntry(itemData) {
 		OpenSimpleInputModal(
 			{
-				dialogTitle: Liferay.Language.get('rename-asset-list'),
+				dialogTitle: Liferay.Language.get('rename-content-set'),
 				formSubmitURL: itemData.renameAssetListEntryURL,
 				idFieldName: 'id',
 				idFieldValue: itemData.assetListEntryId,

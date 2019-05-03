@@ -21,7 +21,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -197,20 +196,17 @@ public class AssetCategoriesManagementToolbarDisplayContext
 						isFlattenedNavigationAllowed()) {
 
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setActive(_isNavigationCategory());
-								dropdownItem.putData(
-									"action", "selectCategory");
-								dropdownItem.putData(
-									"categoriesSelectorURL",
-									_getCategoriesSelectorURL());
-								dropdownItem.putData(
-									"viewCategoriesURL",
-									_getViewCategoriesURL());
-								dropdownItem.setLabel(
-									LanguageUtil.get(request, "category"));
-							}));
+						dropdownItem -> {
+							dropdownItem.setActive(_isNavigationCategory());
+							dropdownItem.putData("action", "selectCategory");
+							dropdownItem.putData(
+								"categoriesSelectorURL",
+								_getCategoriesSelectorURL());
+							dropdownItem.putData(
+								"viewCategoriesURL", _getViewCategoriesURL());
+							dropdownItem.setLabel(
+								LanguageUtil.get(request, "category"));
+						});
 				}
 			}
 		};

@@ -1,3 +1,10 @@
+/**
+ * The Pagination Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-pagination
+ */
+
 AUI.add(
 	'liferay-pagination',
 	function(A) {

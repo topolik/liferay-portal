@@ -34,6 +34,8 @@ import com.liferay.layout.page.template.model.LayoutPageTemplateCollection;
 import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
 import com.liferay.layout.page.template.service.LayoutPageTemplateCollectionLocalService;
 import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
+import com.liferay.layout.page.template.service.LayoutPageTemplateStructureLocalService;
+import com.liferay.layout.util.LayoutCopyHelper;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -61,6 +63,7 @@ import com.liferay.portal.kernel.service.PortletPreferencesLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ThemeLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.transaction.TransactionCommitCallbackUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
@@ -170,11 +173,19 @@ public class WesterosBankSiteInitializer implements SiteInitializer {
 			JournalArticle carouselJournalArticle = _addCarouselJournalArticle(
 				serviceContext);
 
-			_configureFragmentEntryLink(
-				serviceContext.getCompanyId(), serviceContext.getScopeGroupId(),
-				personalLayout.getPlid(),
-				carouselFragmentEntry.getFragmentEntryId(),
-				carouselJournalArticle.getArticleId());
+			TransactionCommitCallbackUtil.registerCallback(
+				() -> {
+					_copyLayout(personalLayout);
+
+					_configureFragmentEntryLink(
+						serviceContext.getCompanyId(),
+						serviceContext.getScopeGroupId(),
+						personalLayout.getPlid(),
+						carouselFragmentEntry.getFragmentEntryId(),
+						carouselJournalArticle.getArticleId());
+
+					return null;
+				});
 
 			List<Layout> personalLayoutChildren = _addLayouts(
 				personalLayout, _LAYOUT_NAMES_CHILDREN_PERSONAL,
@@ -211,6 +222,13 @@ public class WesterosBankSiteInitializer implements SiteInitializer {
 				"For Your Business",
 				businessLayoutPageTemplate.getLayoutPageTemplateEntryId(),
 				serviceContext);
+
+			TransactionCommitCallbackUtil.registerCallback(
+				() -> {
+					_copyLayout(businessLayout);
+
+					return null;
+				});
 
 			_addLayouts(
 				businessLayout, _LAYOUT_NAMES_CHILDREN_BUSINESS,
@@ -510,22 +528,43 @@ public class WesterosBankSiteInitializer implements SiteInitializer {
 				continue;
 			}
 
-			PortletPreferences portletPreferences =
+			PortletPreferences jxPortletPreferences =
 				new PortletPreferencesImpl();
 
-			portletPreferences.setValue("articleId", articleId);
-
-			portletPreferences.setValue(
+			jxPortletPreferences.setValue("articleId", articleId);
+			jxPortletPreferences.setValue(
 				"portletSetupPortletDecoratorId", "barebone");
 
 			String portletId = PortletIdCodec.encode(
 				JournalContentPortletKeys.JOURNAL_CONTENT,
 				fragmentEntryLink.getNamespace());
 
-			_portletPreferencesLocalService.addPortletPreferences(
-				companyId, 0, PortletKeys.PREFS_OWNER_TYPE_LAYOUT,
-				_portal.getControlPanelPlid(companyId), portletId, null,
-				PortletPreferencesFactoryUtil.toXML(portletPreferences));
+			com.liferay.portal.kernel.model.PortletPreferences
+				portletPreferences =
+					_portletPreferencesLocalService.fetchPortletPreferences(
+						0, PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid,
+						portletId);
+
+			if (portletPreferences == null) {
+				_portletPreferencesLocalService.addPortletPreferences(
+					companyId, 0, PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid,
+					portletId, null,
+					PortletPreferencesFactoryUtil.toXML(jxPortletPreferences));
+			}
+			else {
+				_portletPreferencesLocalService.updatePreferences(
+					0, PortletKeys.PREFS_OWNER_TYPE_LAYOUT, plid, portletId,
+					jxPortletPreferences);
+			}
+		}
+	}
+
+	private void _copyLayout(Layout layout) throws Exception {
+		Layout draftLayout = _layoutLocalService.fetchLayout(
+			_portal.getClassNameId(Layout.class), layout.getPlid());
+
+		if (draftLayout != null) {
+			_layoutCopyHelper.copyLayout(draftLayout, layout);
 		}
 	}
 
@@ -709,6 +748,9 @@ public class WesterosBankSiteInitializer implements SiteInitializer {
 	private JournalArticleLocalService _journalArticleLocalService;
 
 	@Reference
+	private LayoutCopyHelper _layoutCopyHelper;
+
+	@Reference
 	private LayoutLocalService _layoutLocalService;
 
 	@Reference
@@ -718,6 +760,10 @@ public class WesterosBankSiteInitializer implements SiteInitializer {
 	@Reference
 	private LayoutPageTemplateEntryLocalService
 		_layoutPageTemplateEntryLocalService;
+
+	@Reference
+	private LayoutPageTemplateStructureLocalService
+		_layoutPageTemplateStructureLocalService;
 
 	@Reference
 	private LayoutSetLocalService _layoutSetLocalService;

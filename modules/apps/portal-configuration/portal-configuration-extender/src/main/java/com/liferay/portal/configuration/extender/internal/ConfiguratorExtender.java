@@ -15,20 +15,22 @@
 package com.liferay.portal.configuration.extender.internal;
 
 import com.liferay.osgi.felix.util.AbstractExtender;
+import com.liferay.petra.function.UnsafeFunction;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.util.PropertiesUtil;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.net.URL;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.felix.cm.file.ConfigurationHandler;
 import org.apache.felix.utils.extender.Extension;
 import org.apache.felix.utils.log.Logger;
 
@@ -39,9 +41,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
  * @author Carlos Sierra Andrés
@@ -57,29 +56,6 @@ public class ConfiguratorExtender extends AbstractExtender {
 		start(bundleContext);
 	}
 
-	@Reference(
-		cardinality = ReferenceCardinality.AT_LEAST_ONE,
-		policy = ReferencePolicy.DYNAMIC,
-		policyOption = ReferencePolicyOption.GREEDY
-	)
-	protected void addConfigurationDescriptionFactory(
-		ConfigurationDescriptionFactory configurationDescriptionFactory) {
-
-		_configurationDescriptionFactories.add(configurationDescriptionFactory);
-	}
-
-	@Reference(
-		cardinality = ReferenceCardinality.AT_LEAST_ONE,
-		policy = ReferencePolicy.DYNAMIC,
-		policyOption = ReferencePolicyOption.GREEDY
-	)
-	protected void addNamedConfigurationContentFactory(
-		NamedConfigurationContentFactory namedConfigurationContentFactory) {
-
-		_namedConfigurationContentFactories.add(
-			namedConfigurationContentFactory);
-	}
-
 	@Deactivate
 	protected void deactivate(BundleContext bundleContext) throws Exception {
 		stop(bundleContext);
@@ -92,26 +68,27 @@ public class ConfiguratorExtender extends AbstractExtender {
 	}
 
 	@Override
-	protected Extension doCreateExtension(Bundle bundle) throws Exception {
-		Collection<NamedConfigurationContent> namedConfigurationContents =
+	protected Extension doCreateExtension(Bundle bundle) {
+		Dictionary<String, String> headers = bundle.getHeaders(
+			StringPool.BLANK);
+
+		String configurationPath = headers.get("Liferay-Configuration-Path");
+
+		if (configurationPath == null) {
+			return null;
+		}
+
+		List<NamedConfigurationContent> namedConfigurationContents =
 			new ArrayList<>();
 
-		for (NamedConfigurationContentFactory namedConfigurationContentFactory :
-				_namedConfigurationContentFactories) {
+		_addNamedConfigurations(
+			bundle, configurationPath, namedConfigurationContents,
+			inputStream -> ConfigurationHandler.read(inputStream), "*.config");
 
-			try {
-				List<NamedConfigurationContent> contents =
-					namedConfigurationContentFactory.create(
-						new BundleStorageImpl(bundle));
-
-				if (contents != null) {
-					namedConfigurationContents.addAll(contents);
-				}
-			}
-			catch (Throwable t) {
-				_logger.log(Logger.LOG_INFO, t.getMessage(), t);
-			}
-		}
+		_addNamedConfigurations(
+			bundle, configurationPath, namedConfigurationContents,
+			inputStream -> PropertiesUtil.load(inputStream, "UTF-8"),
+			"*.properties");
 
 		if (namedConfigurationContents.isEmpty()) {
 			return null;
@@ -119,27 +96,12 @@ public class ConfiguratorExtender extends AbstractExtender {
 
 		return new ConfiguratorExtension(
 			_configurationAdmin, new Logger(bundle.getBundleContext()),
-			bundle.getSymbolicName(), namedConfigurationContents,
-			_configurationDescriptionFactories);
+			bundle.getSymbolicName(), namedConfigurationContents);
 	}
 
 	@Override
 	protected void error(String s, Throwable throwable) {
 		_logger.log(Logger.LOG_ERROR, s, throwable);
-	}
-
-	protected void removeConfigurationDescriptionFactory(
-		ConfigurationDescriptionFactory configurationDescriptionFactory) {
-
-		_configurationDescriptionFactories.remove(
-			configurationDescriptionFactory);
-	}
-
-	protected void removeNamedConfigurationContentFactory(
-		NamedConfigurationContentFactory namedConfigurationContentFactory) {
-
-		_namedConfigurationContentFactories.remove(
-			namedConfigurationContentFactory);
 	}
 
 	@Reference(unbind = "-")
@@ -155,68 +117,58 @@ public class ConfiguratorExtender extends AbstractExtender {
 			Logger.LOG_WARNING, StringBundler.concat("[", bundle, "] ", s));
 	}
 
-	private ConfigurationAdmin _configurationAdmin;
-	private final Collection<ConfigurationDescriptionFactory>
-		_configurationDescriptionFactories = new CopyOnWriteArrayList<>();
-	private Logger _logger;
-	private final Collection<NamedConfigurationContentFactory>
-		_namedConfigurationContentFactories = new CopyOnWriteArrayList<>();
+	private void _addNamedConfigurations(
+		Bundle bundle, String configurationPath,
+		List<NamedConfigurationContent> namedConfigurationContents,
+		UnsafeFunction<InputStream, Dictionary<?, ?>, IOException>
+			propertyFunction,
+		String filePattern) {
 
-	private static class BundleStorageImpl implements BundleStorage {
+		Enumeration<URL> entries = bundle.findEntries(
+			configurationPath, filePattern, true);
 
-		public BundleStorageImpl(Bundle bundle) {
-			_bundle = bundle;
+		if (entries == null) {
+			return;
 		}
 
-		@Override
-		public Enumeration<URL> findEntries(
-			String root, String pattern, boolean recurse) {
+		while (entries.hasMoreElements()) {
+			URL url = entries.nextElement();
 
-			return _bundle.findEntries(root, pattern, recurse);
+			String name = url.getFile();
+
+			int lastIndexOfSlash = name.lastIndexOf('/');
+
+			if (lastIndexOfSlash < 0) {
+				lastIndexOfSlash = 0;
+			}
+
+			String factoryPid = null;
+			String pid = null;
+
+			int index = name.lastIndexOf('-');
+
+			if (index > lastIndexOfSlash) {
+				factoryPid = name.substring(lastIndexOfSlash, index);
+				pid = name.substring(
+					index + 1, name.length() + 1 - filePattern.length());
+			}
+			else {
+				pid = name.substring(
+					lastIndexOfSlash, name.length() + 1 - filePattern.length());
+			}
+
+			namedConfigurationContents.add(
+				new NamedConfigurationContent(
+					factoryPid, pid,
+					() -> {
+						try (InputStream inputStream = url.openStream()) {
+							return propertyFunction.apply(inputStream);
+						}
+					}));
 		}
-
-		@Override
-		public long getBundleId() {
-			return _bundle.getBundleId();
-		}
-
-		@Override
-		public URL getEntry(String name) {
-			return _bundle.getEntry(name);
-		}
-
-		@Override
-		public Enumeration<String> getEntryPaths(String name) {
-			return _bundle.getEntryPaths(name);
-		}
-
-		@Override
-		public Dictionary<String, String> getHeaders() {
-			return _bundle.getHeaders(StringPool.BLANK);
-		}
-
-		@Override
-		public String getLocation() {
-			return _bundle.getLocation();
-		}
-
-		@Override
-		public URL getResource(String name) {
-			return _bundle.getResource(name);
-		}
-
-		@Override
-		public Enumeration<URL> getResources(String name) throws IOException {
-			return _bundle.getResources(name);
-		}
-
-		@Override
-		public String getSymbolicName() {
-			return _bundle.getSymbolicName();
-		}
-
-		private final Bundle _bundle;
-
 	}
+
+	private ConfigurationAdmin _configurationAdmin;
+	private Logger _logger;
 
 }

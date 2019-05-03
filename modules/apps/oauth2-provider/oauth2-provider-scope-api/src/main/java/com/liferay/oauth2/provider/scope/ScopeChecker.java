@@ -21,18 +21,17 @@ import aQute.bnd.annotation.ProviderType;
  * authorization in a JAX-RS request.
  *
  * @author Carlos Sierra Andrés
- * @review
  */
 @ProviderType
 public interface ScopeChecker {
 
 	/**
-	 * Checks if the current request has been authorized for all given scopes.
+	 * Returns <code>true</code> if the current request has been authorized for
+	 * all given scopes.
 	 *
 	 * @param  scopes the scopes to check the request for authorization
-	 * @return <code>true</code> if the request has been authorized all given
-	 *         scopes, <code>false</code> otherwise.
-	 * @review
+	 * @return <code>true</code> if the request has been authorized for all
+	 *         given scopes; <code>false</code> otherwise
 	 */
 	public default boolean checkAllScopes(String... scopes) {
 		for (String scope : scopes) {
@@ -45,13 +44,12 @@ public interface ScopeChecker {
 	}
 
 	/**
-	 * Checks if the current request has been authorized for any of the given
-	 * scopes.
+	 * Returns <code>true</code> if the current request has been authorized for
+	 * any of the given scopes.
 	 *
 	 * @param  scopes the scopes to check the request for authorization
-	 * @return <code>true</code> if the request has been authorized any of the
-	 *         given scopes, <code>false</code> otherwise.
-	 * @review
+	 * @return <code>true</code> if the request has been authorized for any of
+	 *         the given scopes; <code>false</code> otherwise
 	 */
 	public default boolean checkAnyScope(String... scopes) {
 		for (String scope : scopes) {
@@ -64,12 +62,12 @@ public interface ScopeChecker {
 	}
 
 	/**
-	 * Checks if the current request has been authorized for the given scope.
+	 * Returns <code>true</code> if the current request has been authorized for
+	 * the given scope.
 	 *
-	 * @param  scope the scope to check the request for authorization.
-	 * @return <code>true</code> if the request has been authorized the given
-	 *         scope, <code>false</code> otherwise.
-	 * @review
+	 * @param  scope the scope to check the request for authorization
+	 * @return <code>true</code> if the request has been authorized for the
+	 *         given scope; <code>false</code> otherwise
 	 */
 	public boolean checkScope(String scope);
 

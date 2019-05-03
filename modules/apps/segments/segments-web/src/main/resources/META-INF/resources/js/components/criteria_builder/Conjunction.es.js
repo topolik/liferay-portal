@@ -1,7 +1,7 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import ClayButton from '../shared/ClayButton.es';
 import getCN from 'classnames';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 class Conjunction extends React.Component {
 	static propTypes = {

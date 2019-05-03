@@ -26,8 +26,8 @@ import com.liferay.petra.io.delta.DeltaUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.lock.Lock;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -179,10 +179,11 @@ public class SyncHelperImpl implements SyncHelper {
 		sb.append(StringPool.COMMA_AND_SPACE);
 		sb.append("\"error\": ");
 
-		JSONObject errorJSONObject = JSONFactoryUtil.createJSONObject();
-
-		errorJSONObject.put("message", throwableMessage);
-		errorJSONObject.put("type", ClassUtil.getClassName(throwable));
+		JSONObject errorJSONObject = JSONUtil.put(
+			"message", throwableMessage
+		).put(
+			"type", ClassUtil.getClassName(throwable)
+		);
 
 		sb.append(errorJSONObject.toString());
 
@@ -204,18 +205,17 @@ public class SyncHelperImpl implements SyncHelper {
 			rootCauseThrowable = rootCauseThrowable.getCause();
 		}
 
-		JSONObject rootCauseJSONObject = JSONFactoryUtil.createJSONObject();
-
 		throwableMessage = rootCauseThrowable.getMessage();
 
 		if (Validator.isNull(throwableMessage)) {
 			throwableMessage = rootCauseThrowable.toString();
 		}
 
-		rootCauseJSONObject.put("message", throwableMessage);
-
-		rootCauseJSONObject.put(
-			"type", ClassUtil.getClassName(rootCauseThrowable));
+		JSONObject rootCauseJSONObject = JSONUtil.put(
+			"message", throwableMessage
+		).put(
+			"type", ClassUtil.getClassName(rootCauseThrowable)
+		);
 
 		sb.append(rootCauseJSONObject);
 

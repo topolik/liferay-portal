@@ -12,225 +12,16 @@ import {Config} from 'metal-state';
 import {EventHandler} from 'metal-events';
 
 class Select extends Component {
-	static STATE = {
+	addValue(value) {
+		const currentValue = this._getArrayValue(this.value);
+		const newValue = [...currentValue];
 
-		/**
-		 * @default 'string'
-		 * @instance
-		 * @memberof Select
-		 * @type {?(string|undefined)}
-		 */
+		if (value) {
+			newValue.push(value);
+		}
 
-		dataType: Config.string().value('string'),
-
-		/**
-		 * @default 'boolean'
-		 * @instance
-		 * @memberof Select
-		 * @type {?(boolean|undefined)}
-		 */
-
-		evaluable: Config.bool().value(false),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?bool}
-		 */
-
-		expanded: Config.bool().internal().value(false),
-
-		/**
-		 * @default 'string'
-		 * @instance
-		 * @memberof Select
-		 * @type {?(string|undefined)}
-		 */
-
-		dataSourceType: Config.string(),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof Select
-		 * @type {?bool}
-		 */
-
-		readOnly: Config.bool().value(false),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof FieldBase
-		 * @type {?(string|undefined)}
-		 */
-
-		tip: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?(string|undefined)}
-		 */
-
-		id: Config.string(),
-
-		key: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Text
-		 * @type {?(string|undefined)}
-		 */
-
-		fieldName: Config.string(),
-
-		fixedOptions: Config.arrayOf(
-			Config.shapeOf(
-				{
-					active: Config.bool().value(false),
-					disabled: Config.bool().value(false),
-					id: Config.string(),
-					inline: Config.bool().value(false),
-					label: Config.string(),
-					name: Config.string(),
-					showLabel: Config.bool().value(true),
-					value: Config.string()
-				}
-			)
-		).value([]),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?array<object>}
-		 */
-
-		options: Config.arrayOf(
-			Config.shapeOf(
-				{
-					active: Config.bool().value(false),
-					disabled: Config.bool().value(false),
-					id: Config.string(),
-					inline: Config.bool().value(false),
-					label: Config.string(),
-					name: Config.string(),
-					showLabel: Config.bool().value(true),
-					value: Config.string()
-				}
-			)
-		).value([]),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?(string|undefined)}
-		 */
-
-		label: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?(string|undefined)}
-		 */
-
-		multiple: Config.bool(),
-
-		/**
-		 * @default Choose an Option
-		 * @instance
-		 * @memberof Select
-		 * @type {?string}
-		 */
-
-		placeholder: Config.string(),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?string}
-		 */
-
-		predefinedValue: Config.oneOfType([Config.array(), Config.string()]).value([]),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof Select
-		 * @type {?bool}
-		 */
-
-		required: Config.bool().value(false),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof FieldBase
-		 * @type {?(bool|undefined)}
-		 */
-
-		repeatable: Config.bool(),
-
-		/**
-		 * @default false
-		 * @instance
-		 * @memberof Select
-		 * @type {?bool}
-		 */
-
-		showLabel: Config.bool().value(true),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?(string|undefined)}
-		 */
-
-		spritemap: Config.string(),
-
-		/**
-		 * @default {}
-		 * @instance
-		 * @memberof Select
-		 * @type {object}
-		 */
-
-		strings: Config.object().value(
-			{
-				chooseAnOption: Liferay.Language.get('choose-an-option'),
-				chooseOptions: Liferay.Language.get('choose-options')
-			}
-		),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Text
-		 * @type {?(string|undefined)}
-		 */
-
-		type: Config.string().value('select'),
-
-		/**
-		 * @default undefined
-		 * @instance
-		 * @memberof Select
-		 * @type {?(string|undefined)}
-		 */
-
-		value: Config.oneOfType([Config.array(), Config.string()]),
-
-		visible: Config.bool().value(true)
-	};
+		return newValue;
+	}
 
 	attached() {
 		this._eventHandler = new EventHandler();
@@ -238,12 +29,12 @@ class Select extends Component {
 		this._eventHandler.add(
 			dom.on(document, 'click', this._handleDocumentClicked.bind(this))
 		);
+	}
 
-		this.setState(
-			{
-				visible: true
-			}
-		);
+	deleteValue(value) {
+		const currentValue = this._getArrayValue(this.value);
+
+		return currentValue.filter(v => v !== value);
 	}
 
 	disposeInternal() {
@@ -267,7 +58,7 @@ class Select extends Component {
 		);
 
 		const emptyOption = {
-			label: this.strings.chooseAnOption,
+			label: Liferay.Language.get('choose-an-option'),
 			value: ''
 		};
 
@@ -295,37 +86,22 @@ class Select extends Component {
 		return {
 			...state,
 			options: newOptions,
-			value: valueArray
-		};
-	}
-
-	syncMultiple(multiple) {
-		if (multiple === false) {
-			this.setState(
-				{
-					value: []
-				},
-				() => this.emit(
-					'fieldEdited',
-					{
-						fieldInstance: this,
-						value: []
-					}
+			value: valueArray.filter(
+				value => newOptions.some(
+					option => value === option.value
 				)
-			);
-		}
+			)
+		};
 	}
 
-	_prepareOption(option, valueArray) {
-		const {multiple} = this;
-		const included = valueArray.includes(option.value);
+	setValue(value) {
+		const newValue = [];
 
-		return {
-			...option,
-			active: !multiple && included,
-			checked: multiple && included,
-			type: multiple ? 'checkbox' : 'item'
-		};
+		if (value) {
+			newValue.push(value);
+		}
+
+		return newValue;
 	}
 
 	_getArrayValue(value) {
@@ -347,37 +123,6 @@ class Select extends Component {
 		if (expanded && !this.element.contains(target) && !dropdown.element.contains(target) && !menu.contains(target)) {
 			this.setState({expanded: false});
 		}
-	}
-
-	_isEmptyArray(array) {
-		return array.some(value => value !== '') === false;
-	}
-
-	addValue(value) {
-		const currentValue = this._getArrayValue(this.value);
-		const newValue = [...currentValue];
-
-		if (value) {
-			newValue.push(value);
-		}
-
-		return newValue;
-	}
-
-	deleteValue(value) {
-		const currentValue = this._getArrayValue(this.value);
-
-		return currentValue.filter(v => v !== value);
-	}
-
-	setValue(value) {
-		const newValue = [];
-
-		if (value) {
-			newValue.push(value);
-		}
-
-		return newValue;
 	}
 
 	_handleItemClicked({data, preventDefault}) {
@@ -441,7 +186,216 @@ class Select extends Component {
 			)
 		);
 	}
+
+	_isEmptyArray(array) {
+		return array.some(value => value !== '') === false;
+	}
+
+	_prepareOption(option, valueArray) {
+		const {multiple} = this;
+		const included = valueArray.includes(option.value);
+
+		return {
+			...option,
+			active: !multiple && included,
+			checked: multiple && included,
+			type: multiple ? 'checkbox' : 'item'
+		};
+	}
 }
+
+Select.STATE = {
+
+	/**
+	 * @default 'string'
+	 * @instance
+	 * @memberof Select
+	 * @type {?(string|undefined)}
+	 */
+
+	dataSourceType: Config.string(),
+
+	/**
+	 * @default 'string'
+	 * @instance
+	 * @memberof Select
+	 * @type {?(string|undefined)}
+	 */
+
+	dataType: Config.string().value('string'),
+
+	/**
+	 * @default 'boolean'
+	 * @instance
+	 * @memberof Select
+	 * @type {?(boolean|undefined)}
+	 */
+
+	evaluable: Config.bool().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Select
+	 * @type {?bool}
+	 */
+
+	expanded: Config.bool().internal().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Text
+	 * @type {?(string|undefined)}
+	 */
+
+	fieldName: Config.string(),
+
+	fixedOptions: Config.arrayOf(
+		Config.shapeOf(
+			{
+				active: Config.bool().value(false),
+				disabled: Config.bool().value(false),
+				id: Config.string(),
+				inline: Config.bool().value(false),
+				label: Config.string(),
+				name: Config.string(),
+				showLabel: Config.bool().value(true),
+				value: Config.string()
+			}
+		)
+	).value([]),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Select
+	 * @type {?(string|undefined)}
+	 */
+
+	label: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Select
+	 * @type {?(string|undefined)}
+	 */
+
+	multiple: Config.bool(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Select
+	 * @type {?array<object>}
+	 */
+
+	options: Config.arrayOf(
+		Config.shapeOf(
+			{
+				active: Config.bool().value(false),
+				disabled: Config.bool().value(false),
+				id: Config.string(),
+				inline: Config.bool().value(false),
+				label: Config.string(),
+				name: Config.string(),
+				showLabel: Config.bool().value(true),
+				value: Config.string()
+			}
+		)
+	).value([]),
+
+	/**
+	 * @default Choose an Option
+	 * @instance
+	 * @memberof Select
+	 * @type {?string}
+	 */
+
+	placeholder: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Select
+	 * @type {?string}
+	 */
+
+	predefinedValue: Config.oneOfType([Config.array(), Config.string()]).value([]),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof Select
+	 * @type {?bool}
+	 */
+
+	readOnly: Config.bool().value(false),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof FieldBase
+	 * @type {?(bool|undefined)}
+	 */
+
+	repeatable: Config.bool(),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof Select
+	 * @type {?bool}
+	 */
+
+	required: Config.bool().value(false),
+
+	/**
+	 * @default false
+	 * @instance
+	 * @memberof Select
+	 * @type {?bool}
+	 */
+
+	showLabel: Config.bool().value(true),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Select
+	 * @type {?(string|undefined)}
+	 */
+
+	spritemap: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof FieldBase
+	 * @type {?(string|undefined)}
+	 */
+
+	tip: Config.string(),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Text
+	 * @type {?(string|undefined)}
+	 */
+
+	type: Config.string().value('select'),
+
+	/**
+	 * @default undefined
+	 * @instance
+	 * @memberof Select
+	 * @type {?(string|undefined)}
+	 */
+
+	value: Config.oneOfType([Config.array(), Config.string()])
+};
 
 Soy.register(Select, templates);
 

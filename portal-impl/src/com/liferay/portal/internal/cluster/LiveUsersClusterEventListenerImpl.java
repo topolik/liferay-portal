@@ -19,8 +19,8 @@ import com.liferay.portal.kernel.cluster.ClusterEventListener;
 import com.liferay.portal.kernel.cluster.ClusterEventType;
 import com.liferay.portal.kernel.cluster.ClusterInvokeThreadLocal;
 import com.liferay.portal.kernel.cluster.ClusterNode;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.messaging.DestinationNames;
 import com.liferay.portal.kernel.messaging.Message;
 import com.liferay.portal.kernel.messaging.MessageBusUtil;
@@ -58,10 +58,11 @@ public class LiveUsersClusterEventListenerImpl implements ClusterEventListener {
 		for (ClusterNode clusterNode : clusterNodes) {
 			Message message = new Message();
 
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put("clusterNodeId", clusterNode.getClusterNodeId());
-			jsonObject.put("command", command);
+			JSONObject jsonObject = JSONUtil.put(
+				"clusterNodeId", clusterNode.getClusterNodeId()
+			).put(
+				"command", command
+			);
 
 			message.setPayload(jsonObject.toString());
 

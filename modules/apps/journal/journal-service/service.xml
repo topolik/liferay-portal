@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.2.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_2_0.dtd">
 
-<service-builder auto-import-default-references="false" auto-namespace-tables="false" package-path="com.liferay.journal">
+<service-builder auto-import-default-references="false" auto-namespace-tables="false" dependency-injector="ds" package-path="com.liferay.journal">
 	<namespace>Journal</namespace>
 	<entity local-service="true" name="JournalArticle" remote-service="true" trash-enabled="true" uuid="true">
 
@@ -213,7 +213,6 @@
 
 		<reference entity="JournalArticleLocalization" package-path="com.liferay.journal" />
 		<reference entity="JournalArticleResource" package-path="com.liferay.journal" />
-		<reference entity="JournalContentSearch" package-path="com.liferay.journal" />
 		<reference entity="JournalFolder" package-path="com.liferay.journal" />
 		<reference entity="ClassName" package-path="com.liferay.portal" />
 		<reference entity="Company" package-path="com.liferay.portal" />
@@ -311,6 +310,9 @@
 
 		<!-- Finder methods -->
 
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
 		<finder name="PortletId" return-type="Collection">
 			<finder-column name="portletId" />
 		</finder>

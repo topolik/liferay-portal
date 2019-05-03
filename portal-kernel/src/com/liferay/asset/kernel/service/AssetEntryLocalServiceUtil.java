@@ -17,7 +17,6 @@ package com.liferay.asset.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for AssetEntry. This utility wraps
@@ -531,6 +530,16 @@ public class AssetEntryLocalServiceUtil {
 	}
 
 	public static int getEntriesCount(
+		long[] groupIds, long[] classNameIds, long[] classTypeIds,
+		String keywords, String userName, String title, String description,
+		Boolean listable, boolean advancedSearch, boolean andOperator) {
+
+		return getService().getEntriesCount(
+			groupIds, classNameIds, classTypeIds, keywords, userName, title,
+			description, listable, advancedSearch, andOperator);
+	}
+
+	public static int getEntriesCount(
 		long[] groupIds, long[] classNameIds, String keywords, String userName,
 		String title, String description, Boolean listable,
 		boolean advancedSearch, boolean andOperator) {
@@ -1029,9 +1038,6 @@ public class AssetEntryLocalServiceUtil {
 		if (_service == null) {
 			_service = (AssetEntryLocalService)PortalBeanLocatorUtil.locate(
 				AssetEntryLocalService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				AssetEntryLocalServiceUtil.class, "_service");
 		}
 
 		return _service;

@@ -17,7 +17,6 @@ package com.liferay.portal.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for Repository. This utility wraps
@@ -80,34 +79,6 @@ public class RepositoryServiceUtil {
 		return getService().getRepository(repositoryId);
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public static String[] getSupportedConfigurations(long classNameId) {
-		return getService().getSupportedConfigurations(classNameId);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public static String[] getSupportedParameters(
-		long classNameId, String configuration) {
-
-		return getService().getSupportedParameters(classNameId, configuration);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public static String[] getSupportedParameters(
-		String className, String configuration) {
-
-		return getService().getSupportedParameters(className, configuration);
-	}
-
 	public static com.liferay.portal.kernel.util.UnicodeProperties
 			getTypeSettingsProperties(long repositoryId)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -126,9 +97,6 @@ public class RepositoryServiceUtil {
 		if (_service == null) {
 			_service = (RepositoryService)PortalBeanLocatorUtil.locate(
 				RepositoryService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				RepositoryServiceUtil.class, "_service");
 		}
 
 		return _service;

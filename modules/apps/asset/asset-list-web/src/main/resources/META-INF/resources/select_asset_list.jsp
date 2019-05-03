@@ -26,7 +26,7 @@ SelectAssetListDisplayContext selectAssetListDisplayContext = new SelectAssetLis
 
 <div class="container-fluid-1280" id="<portlet:namespace />assetLists">
 	<liferay-ui:search-container
-		emptyResultsMessage="there-are-no-asset-lists"
+		emptyResultsMessage="there-are-no-content-sets"
 		id="assetListEntries"
 		searchContainer="<%= selectAssetListDisplayContext.getSearchContainer() %>"
 	>
@@ -79,5 +79,5 @@ SelectAssetListDisplayContext selectAssetListDisplayContext = new SelectAssetLis
 </div>
 
 <aui:script>
-	Liferay.Util.selectEntityHandler('#<portlet:namespace />assetLists', '<%= selectAssetListDisplayContext.getEventName() %>');
+	Liferay.Util.selectEntityHandler('#<portlet:namespace />assetLists', '<%= HtmlUtil.escapeJS(selectAssetListDisplayContext.getEventName()) %>');
 </aui:script>

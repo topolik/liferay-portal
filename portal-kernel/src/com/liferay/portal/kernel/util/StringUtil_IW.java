@@ -148,25 +148,6 @@ public class StringUtil_IW {
 		return StringUtil.extractLeadingDigits(s);
 	}
 
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public java.lang.String highlight(java.lang.String s,
-		java.lang.String[] queryTerms) {
-		return StringUtil.highlight(s, queryTerms);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public java.lang.String highlight(java.lang.String s,
-		java.lang.String[] queryTerms, java.lang.String highlight1,
-		java.lang.String highlight2) {
-		return StringUtil.highlight(s, queryTerms, highlight1, highlight2);
-	}
-
 	public int indexOfAny(java.lang.String s, char[] chars) {
 		return StringUtil.indexOfAny(s, chars);
 	}
@@ -384,23 +365,6 @@ public class StringUtil_IW {
 		java.util.Collection<java.lang.String> lines)
 		throws java.io.IOException {
 		StringUtil.readLines(is, lines);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public java.lang.String remove(java.lang.String s, java.lang.String element) {
-		return StringUtil.remove(s, element);
-	}
-
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
-	public java.lang.String remove(java.lang.String s,
-		java.lang.String element, java.lang.String delimiter) {
-		return StringUtil.remove(s, element, delimiter);
 	}
 
 	public java.lang.String removeChar(java.lang.String s, char oldSub) {

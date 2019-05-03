@@ -39,6 +39,7 @@ import com.liferay.dynamic.data.mapping.io.DDMFormFieldTypesSerializerSerializeR
 import com.liferay.dynamic.data.mapping.io.DDMFormFieldTypesSerializerSerializeResponse;
 import com.liferay.dynamic.data.mapping.io.DDMFormFieldTypesSerializerTracker;
 import com.liferay.dynamic.data.mapping.io.exporter.DDMFormInstanceRecordWriterTracker;
+import com.liferay.dynamic.data.mapping.model.DDMDataProviderInstance;
 import com.liferay.dynamic.data.mapping.model.DDMForm;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstance;
 import com.liferay.dynamic.data.mapping.model.DDMFormInstanceRecord;
@@ -65,6 +66,7 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.NavigationItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.ViewTypeItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -79,6 +81,9 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortalPreferences;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
+import com.liferay.portal.kernel.portlet.PortletProvider;
+import com.liferay.portal.kernel.portlet.PortletProviderUtil;
+import com.liferay.portal.kernel.portlet.PortletURLFactoryUtil;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -88,6 +93,7 @@ import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
@@ -95,8 +101,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
@@ -434,6 +440,20 @@ public class DDMFormAdminDisplayContext {
 		};
 	}
 
+	public String getFieldSetDefinitionURL() throws PortalException {
+		DDMFormBuilderSettingsResponse ddmFormBuilderSettingsResponse =
+			getDDMFormBuilderSettingsResponse();
+
+		return ddmFormBuilderSettingsResponse.getFieldSetDefinitionURL();
+	}
+
+	public JSONArray getFieldSetsJSONArray() throws PortalException {
+		DDMFormBuilderSettingsResponse ddmFormBuilderSettingsResponse =
+			getDDMFormBuilderSettingsResponse();
+
+		return ddmFormBuilderSettingsResponse.getFieldSets();
+	}
+
 	public List<DropdownItem> getFilterItemsDropdownItems() {
 		HttpServletRequest request = formAdminRequestHelper.getRequest();
 
@@ -643,8 +663,7 @@ public class DDMFormAdminDisplayContext {
 	}
 
 	public String getMainRequire() {
-		return _npmResolver.resolveModuleName("dynamic-data-mapping-form-web") +
-			" as main";
+		return _npmResolver.resolveModuleName("dynamic-data-mapping-form-web");
 	}
 
 	public List<NavigationItem> getNavigationItems() {
@@ -673,6 +692,11 @@ public class DDMFormAdminDisplayContext {
 							"element-set");
 						navigationItem.setLabel(
 							LanguageUtil.get(request, "element-sets"));
+					});
+
+				add(
+					navigationItem -> {
+						_populateDDMDataProviderNavigationItem(navigationItem);
 					});
 			}
 		};
@@ -816,8 +840,8 @@ public class DDMFormAdminDisplayContext {
 		PortletURL portletURL = _renderResponse.createRenderURL();
 
 		portletURL.setParameter("mvcPath", "/admin/view.jsp");
-		portletURL.setParameter("groupId", String.valueOf(getScopeGroupId()));
 		portletURL.setParameter("currentTab", "forms");
+		portletURL.setParameter("groupId", String.valueOf(getScopeGroupId()));
 
 		return portletURL.toString();
 	}
@@ -962,10 +986,13 @@ public class DDMFormAdminDisplayContext {
 
 		ThemeDisplay themeDisplay = formAdminRequestHelper.getThemeDisplay();
 
+		long fieldSetClassNameId = PortalUtil.getClassNameId(
+			DDMFormInstance.class);
+
 		DDMFormBuilderSettingsRequest ddmFormBuilderSettingsRequest =
 			DDMFormBuilderSettingsRequest.with(
-				themeDisplay.getCompanyId(), themeDisplay.getScopeGroupId(), 0,
-				getDDMForm(), themeDisplay.getLocale());
+				themeDisplay.getCompanyId(), themeDisplay.getScopeGroupId(),
+				fieldSetClassNameId, getDDMForm(), themeDisplay.getLocale());
 
 		_ddmFormBuilderSettingsResponse =
 			_ddmFormBuilderSettingsRetriever.getSettings(
@@ -1009,11 +1036,8 @@ public class DDMFormAdminDisplayContext {
 		HttpServletRequest httpServletRequest =
 			formAdminRequestHelper.getRequest();
 
-		DDMFormInstanceRecord formInstanceRecord =
-			(DDMFormInstanceRecord)httpServletRequest.getAttribute(
-				DDMFormWebKeys.DYNAMIC_DATA_MAPPING_FORM_INSTANCE_RECORD);
-
-		return formInstanceRecord;
+		return (DDMFormInstanceRecord)httpServletRequest.getAttribute(
+			DDMFormWebKeys.DYNAMIC_DATA_MAPPING_FORM_INSTANCE_RECORD);
 	}
 
 	protected String getDisplayStyle(
@@ -1192,7 +1216,9 @@ public class DDMFormAdminDisplayContext {
 		return ParamUtil.getString(_renderRequest, "keywords");
 	}
 
-	protected Consumer<DropdownItem> getOrderByDropdownItem(String orderByCol) {
+	protected UnsafeConsumer<DropdownItem, Exception> getOrderByDropdownItem(
+		String orderByCol) {
+
 		return dropdownItem -> {
 			dropdownItem.setActive(orderByCol.equals(getOrderByCol()));
 			dropdownItem.setHref(getPortletURL(), "orderByCol", orderByCol);
@@ -1272,6 +1298,38 @@ public class DDMFormAdminDisplayContext {
 	}
 
 	protected final DDMFormAdminRequestHelper formAdminRequestHelper;
+
+	private void _populateDDMDataProviderNavigationItem(
+		NavigationItem navigationItem) {
+
+		navigationItem.setActive(false);
+
+		PortletURL portletURL = PortletURLFactoryUtil.create(
+			formAdminRequestHelper.getLiferayPortletRequest(),
+			PortletProviderUtil.getPortletId(
+				DDMDataProviderInstance.class.getName(),
+				PortletProvider.Action.EDIT),
+			PortletRequest.RENDER_PHASE);
+
+		portletURL.setParameter("mvcPath", "/view.jsp");
+		portletURL.setParameter(
+			"backURL", formAdminRequestHelper.getCurrentURL());
+		portletURL.setParameter(
+			"refererPortletName",
+			DDMPortletKeys.DYNAMIC_DATA_MAPPING_FORM_ADMIN);
+		portletURL.setParameter(
+			"groupId",
+			String.valueOf(formAdminRequestHelper.getScopeGroupId()));
+		portletURL.setParameter("showBackIcon", Boolean.FALSE.toString());
+
+		navigationItem.setHref(portletURL.toString());
+
+		ResourceBundle moduleResourceBundle = ResourceBundleUtil.getBundle(
+			"content.Language", formAdminRequestHelper.getLocale(), getClass());
+
+		navigationItem.setLabel(
+			LanguageUtil.get(moduleResourceBundle, "data-providers"));
+	}
 
 	private static final String[] _DISPLAY_VIEWS = {"descriptive", "list"};
 

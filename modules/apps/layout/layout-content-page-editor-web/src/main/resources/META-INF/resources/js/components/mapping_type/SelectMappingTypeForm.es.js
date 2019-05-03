@@ -3,7 +3,11 @@ import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
 import Soy from 'metal-soy';
 
 import getConnectedComponent from '../../store/ConnectedComponent.es';
-import {HIDE_MAPPING_TYPE_DIALOG, SELECT_MAPPEABLE_TYPE} from '../../actions/actions.es';
+import {
+	HIDE_MAPPING_TYPE_DIALOG,
+	SELECT_MAPPEABLE_TYPE,
+	UPDATE_LAST_SAVE_DATE
+} from '../../actions/actions.es';
 import {setIn} from '../../utils/FragmentsEditorUpdateUtils.es';
 import templates from './SelectMappingTypeForm.soy';
 
@@ -89,10 +93,11 @@ class SelectMappingTypeForm extends PortletBase {
 		this._selectedMappingTypeId = '';
 		this._selectedMappingSubtypeId = '';
 
-		this.store
-			.dispatchAction(
-				HIDE_MAPPING_TYPE_DIALOG
-			);
+		this.store.dispatch(
+			{
+				type: HIDE_MAPPING_TYPE_DIALOG
+			}
+		);
 	}
 
 	/**
@@ -159,15 +164,22 @@ class SelectMappingTypeForm extends PortletBase {
 		}
 
 		this.store
-			.dispatchAction(
-				HIDE_MAPPING_TYPE_DIALOG
+			.dispatch(
+				{
+					type: HIDE_MAPPING_TYPE_DIALOG
+				}
 			)
-			.dispatchAction(
-				SELECT_MAPPEABLE_TYPE,
+			.dispatch(
 				{
 					mappingTypes,
 					selectedMappingSubtypeId: this._selectedMappingSubtypeId,
-					selectedMappingTypeId: this._selectedMappingTypeId
+					selectedMappingTypeId: this._selectedMappingTypeId,
+					type: SELECT_MAPPEABLE_TYPE
+				}
+			).dispatch(
+				{
+					lastSaveDate: new Date(),
+					type: UPDATE_LAST_SAVE_DATE
 				}
 			);
 	}
@@ -182,7 +194,7 @@ class SelectMappingTypeForm extends PortletBase {
 		this._mappingSubtypes = null;
 
 		return this.fetch(
-			this.getAssetClassTypesURL,
+			this.getInfoClassTypesURL,
 			{
 				classNameId: this._selectedMappingTypeId
 			}
@@ -204,7 +216,7 @@ class SelectMappingTypeForm extends PortletBase {
 	 * @review
 	 */
 	_loadMappingTypes() {
-		return this.fetch(this.getAssetDisplayContributorsURL, {})
+		return this.fetch(this.getInfoDisplayContributorsURL, {})
 			.then(
 				response => response.json()
 			)
@@ -305,8 +317,8 @@ const ConnectedSelectMappingTypeForm = getConnectedComponent(
 	SelectMappingTypeForm,
 	[
 		'classPK',
-		'getAssetClassTypesURL',
-		'getAssetDisplayContributorsURL',
+		'getInfoClassTypesURL',
+		'getInfoDisplayContributorsURL',
 		'portletNamespace',
 		'savingChanges',
 		'selectedMappingTypes'

@@ -28,18 +28,15 @@ public class AssetLinkTable {
 	public static final String TABLE_NAME = "AssetLink";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"linkId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"entryId1", Types.BIGINT},
-		{"entryId2", Types.BIGINT},
-		{"type_", Types.INTEGER},
+		{"linkId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
+		{"createDate", Types.TIMESTAMP}, {"entryId1", Types.BIGINT},
+		{"entryId2", Types.BIGINT}, {"type_", Types.INTEGER},
 		{"weight", Types.INTEGER}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("linkId", Types.BIGINT);
@@ -61,7 +58,8 @@ TABLE_COLUMNS_MAP.put("type_", Types.INTEGER);
 TABLE_COLUMNS_MAP.put("weight", Types.INTEGER);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table AssetLink (linkId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,entryId1 LONG,entryId2 LONG,type_ INTEGER,weight INTEGER)";
+	public static final String TABLE_SQL_CREATE =
+"create table AssetLink (linkId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,entryId1 LONG,entryId2 LONG,type_ INTEGER,weight INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table AssetLink";
 

@@ -34,12 +34,14 @@ import com.liferay.portal.kernel.service.ServiceContextFunction;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.test.ReflectionTestUtil;
+import com.liferay.portal.kernel.test.util.PropsTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.util.Http;
 import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.InetAddressUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.xmlrpc.Fault;
 import com.liferay.portal.kernel.xmlrpc.XmlRpc;
 import com.liferay.portal.kernel.xmlrpc.XmlRpcConstants;
@@ -53,6 +55,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
 
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -100,6 +103,7 @@ public class PingbackMethodImplTest extends PowerMockito {
 		setUpPortalUtil();
 		setUpPortletLocalServiceUtil();
 		setUpPortletProviderUtil();
+		setUpPropsUtil();
 		setUpUserLocalServiceUtil();
 		setUpXmlRpcUtil();
 	}
@@ -401,17 +405,18 @@ public class PingbackMethodImplTest extends PowerMockito {
 		PingbackMethodImpl pingbackMethodImpl = new PingbackMethodImpl();
 
 		ReflectionTestUtil.setFieldValue(
+			pingbackMethodImpl, "_blogsEntryLocalService",
+			_blogsEntryLocalService);
+		ReflectionTestUtil.setFieldValue(
 			pingbackMethodImpl, "_commentManager", _commentManager);
-
 		ReflectionTestUtil.setFieldValue(
 			pingbackMethodImpl, "_http", HttpUtil.getHttp());
-
 		ReflectionTestUtil.setFieldValue(
 			pingbackMethodImpl, "_portal", PortalUtil.getPortal());
-
-		pingbackMethodImpl.setBlogsEntryLocalService(_blogsEntryLocalService);
-		pingbackMethodImpl.setPortletLocalService(_portletLocalService);
-		pingbackMethodImpl.setUserLocalService(_userLocalService);
+		ReflectionTestUtil.setFieldValue(
+			pingbackMethodImpl, "_portletLocalService", _portletLocalService);
+		ReflectionTestUtil.setFieldValue(
+			pingbackMethodImpl, "_userLocalService", _userLocalService);
 
 		return pingbackMethodImpl;
 	}
@@ -576,6 +581,19 @@ public class PingbackMethodImplTest extends PowerMockito {
 		).toReturn(
 			BlogsPortletKeys.BLOGS
 		);
+	}
+
+	protected void setUpPropsUtil() {
+		Map<String, Object> propertiesMap = new HashMap<String, Object>() {
+			{
+				put(
+					PropsKeys.DNS_SECURITY_ADDRESS_TIMEOUT_SECONDS,
+					String.valueOf(2));
+				put(PropsKeys.DNS_SECURITY_THREAD_LIMIT, String.valueOf(10));
+			}
+		};
+
+		PropsTestUtil.setProps(propertiesMap);
 	}
 
 	protected void setUpUserLocalServiceUtil() throws Exception {

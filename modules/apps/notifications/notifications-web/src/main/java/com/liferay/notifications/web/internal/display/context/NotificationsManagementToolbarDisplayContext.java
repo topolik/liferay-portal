@@ -18,7 +18,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.LabelItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
@@ -55,39 +54,33 @@ public class NotificationsManagementToolbarDisplayContext {
 			{
 				if (!_isActionRequired()) {
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.putData(
-									"action", "markNotificationsAsRead");
-								dropdownItem.setIcon("envelope-open");
-								dropdownItem.setLabel(
-									LanguageUtil.get(_request, "mark-as-read"));
-								dropdownItem.setQuickAction(true);
-							}));
-
+						dropdownItem -> {
+							dropdownItem.putData(
+								"action", "markNotificationsAsRead");
+							dropdownItem.setIcon("envelope-open");
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, "mark-as-read"));
+							dropdownItem.setQuickAction(true);
+						});
 					add(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.putData(
-									"action", "markNotificationsAsUnread");
-								dropdownItem.setIcon("envelope-closed");
-								dropdownItem.setLabel(
-									LanguageUtil.get(
-										_request, "mark-as-unread"));
-								dropdownItem.setQuickAction(true);
-							}));
+						dropdownItem -> {
+							dropdownItem.putData(
+								"action", "markNotificationsAsUnread");
+							dropdownItem.setIcon("envelope-closed");
+							dropdownItem.setLabel(
+								LanguageUtil.get(_request, "mark-as-unread"));
+							dropdownItem.setQuickAction(true);
+						});
 				}
 
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.putData(
-								"action", "deleteNotifications");
-							dropdownItem.setIcon("times-circle");
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "delete"));
-							dropdownItem.setQuickAction(true);
-						}));
+					dropdownItem -> {
+						dropdownItem.putData("action", "deleteNotifications");
+						dropdownItem.setIcon("times-circle");
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "delete"));
+						dropdownItem.setQuickAction(true);
+					});
 			}
 		};
 	}
@@ -106,14 +99,13 @@ public class NotificationsManagementToolbarDisplayContext {
 			{
 				if (!_isActionRequired()) {
 					addGroup(
-						SafeConsumer.ignore(
-							dropdownGroupItem -> {
-								dropdownGroupItem.setDropdownItems(
-									_getFilterNavigationDropdownItems());
-								dropdownGroupItem.setLabel(
-									LanguageUtil.get(
-										_request, "filter-by-navigation"));
-							}));
+						dropdownGroupItem -> {
+							dropdownGroupItem.setDropdownItems(
+								_getFilterNavigationDropdownItems());
+							dropdownGroupItem.setLabel(
+								LanguageUtil.get(
+									_request, "filter-by-navigation"));
+						});
 				}
 
 				addGroup(
@@ -134,24 +126,20 @@ public class NotificationsManagementToolbarDisplayContext {
 
 				if (navigation.equals("read") || navigation.equals("unread")) {
 					add(
-						SafeConsumer.ignore(
-							labelItem -> {
-								PortletURL removeLabelURL =
-									PortletURLUtil.clone(
-										_currentURLObj,
-										_liferayPortletResponse);
+						labelItem -> {
+							PortletURL removeLabelURL = PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse);
 
-								removeLabelURL.setParameter(
-									"navigation", (String)null);
+							removeLabelURL.setParameter(
+								"navigation", (String)null);
 
-								labelItem.putData(
-									"removeLabelURL",
-									removeLabelURL.toString());
+							labelItem.putData(
+								"removeLabelURL", removeLabelURL.toString());
 
-								labelItem.setCloseable(true);
-								labelItem.setLabel(
-									LanguageUtil.get(_request, navigation));
-							}));
+							labelItem.setCloseable(true);
+							labelItem.setLabel(
+								LanguageUtil.get(_request, navigation));
+						});
 				}
 			}
 		};
@@ -180,41 +168,38 @@ public class NotificationsManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setHref(
-								PortletURLUtil.clone(
-									_currentURLObj, _liferayPortletResponse),
-								SearchContainer.DEFAULT_CUR_PARAM, "0",
-								"navigation", "all");
-							dropdownItem.setActive(navigation.equals("all"));
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "all"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setHref(
+							PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse),
+							SearchContainer.DEFAULT_CUR_PARAM, "0",
+							"navigation", "all");
+						dropdownItem.setActive(navigation.equals("all"));
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "all"));
+					});
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setHref(
-								PortletURLUtil.clone(
-									_currentURLObj, _liferayPortletResponse),
-								SearchContainer.DEFAULT_CUR_PARAM, "0",
-								"navigation", "unread");
-							dropdownItem.setActive(navigation.equals("unread"));
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "unread"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setHref(
+							PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse),
+							SearchContainer.DEFAULT_CUR_PARAM, "0",
+							"navigation", "unread");
+						dropdownItem.setActive(navigation.equals("unread"));
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "unread"));
+					});
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setHref(
-								PortletURLUtil.clone(
-									_currentURLObj, _liferayPortletResponse),
-								SearchContainer.DEFAULT_CUR_PARAM, "0",
-								"navigation", "read");
-							dropdownItem.setActive(navigation.equals("read"));
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "read"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setHref(
+							PortletURLUtil.clone(
+								_currentURLObj, _liferayPortletResponse),
+							SearchContainer.DEFAULT_CUR_PARAM, "0",
+							"navigation", "read");
+						dropdownItem.setActive(navigation.equals("read"));
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "read"));
+					});
 			}
 		};
 	}
@@ -227,13 +212,12 @@ public class NotificationsManagementToolbarDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(true);
-							dropdownItem.setHref(getSortingURL());
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "date"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setActive(true);
+						dropdownItem.setHref(getSortingURL());
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "date"));
+					});
 			}
 		};
 	}

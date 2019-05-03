@@ -17,7 +17,6 @@ package com.liferay.portal.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for Portlet. This utility wraps
@@ -71,15 +70,6 @@ public class PortletLocalServiceUtil {
 
 	public static void clearCache() {
 		getService().clearCache();
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 #clearPortletsMap)}
-	 */
-	@Deprecated
-	public static void clearCompanyPortletsPool() {
-		getService().clearCompanyPortletsPool();
 	}
 
 	public static void clearPortletsMap() {
@@ -474,17 +464,6 @@ public class PortletLocalServiceUtil {
 		return getService().loadGetPortletsMap(companyId);
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 #loadGetPortletsMap(long))}
-	 */
-	@Deprecated
-	public static java.util.Map<String, com.liferay.portal.kernel.model.Portlet>
-		loadGetPortletsPool(long companyId) {
-
-		return getService().loadGetPortletsPool(companyId);
-	}
-
 	public static void removeCompanyPortletsPool(long companyId) {
 		getService().removeCompanyPortletsPool(companyId);
 	}
@@ -519,9 +498,6 @@ public class PortletLocalServiceUtil {
 		if (_service == null) {
 			_service = (PortletLocalService)PortalBeanLocatorUtil.locate(
 				PortletLocalService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				PortletLocalServiceUtil.class, "_service");
 		}
 
 		return _service;

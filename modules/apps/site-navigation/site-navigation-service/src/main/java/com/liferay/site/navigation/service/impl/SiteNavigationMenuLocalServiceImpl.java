@@ -36,6 +36,7 @@ import com.liferay.site.navigation.type.SiteNavigationMenuItemTypeRegistry;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Pavel Savinov
@@ -263,10 +264,14 @@ public class SiteNavigationMenuLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException {
 
-		User user = userLocalService.getUser(userId);
-
 		SiteNavigationMenu siteNavigationMenu = getSiteNavigationMenu(
 			siteNavigationMenuId);
+
+		if (Objects.equals(siteNavigationMenu.getName(), name)) {
+			return siteNavigationMenu;
+		}
+
+		User user = userLocalService.getUser(userId);
 
 		validate(siteNavigationMenu.getGroupId(), name);
 

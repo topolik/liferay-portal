@@ -1,10 +1,13 @@
 import Component from 'metal-component';
 import Soy, {Config} from 'metal-soy';
 import getConnectedComponent from '../../store/ConnectedComponent.es';
+import './segmentsExperiences/modal.es';
 import templates from './SegmentsExperienceSelector.soy';
-import {CREATE_SEGMENTS_EXPERIENCE, DELETE_SEGMENTS_EXPERIENCE, EDIT_SEGMENTS_EXPERIENCE, END_CREATE_SEGMENTS_EXPERIENCE, END_EDIT_SEGMENTS_EXPERIENCE, SELECT_SEGMENTS_EXPERIENCE, START_CREATE_SEGMENTS_EXPERIENCE, START_EDIT_SEGMENTS_EXPERIENCE} from '../../actions/actions.es';
+import {CREATE_SEGMENTS_EXPERIENCE, DELETE_SEGMENTS_EXPERIENCE, EDIT_SEGMENTS_EXPERIENCE, SELECT_SEGMENTS_EXPERIENCE, UPDATE_SEGMENTS_EXPERIENCE_PRIORITY} from '../../actions/actions.es';
 import 'frontend-js-web/liferay/compat/modal/Modal.es';
 import {setIn} from '../../utils/FragmentsEditorUpdateUtils.es';
+
+const DISMISS_ALERT_ANIMATION_WAIT = 500;
 
 /**
  * Tells if a priority an `obj2`
@@ -107,6 +110,11 @@ class SegmentsExperienceSelector extends Component {
 	 * @review
 	 */
 	_closeDropdown() {
+		this._experiencesErrorHandler(
+			{
+				creation: false
+			}
+		);
 		this.openDropdown = false;
 	}
 
@@ -115,9 +123,11 @@ class SegmentsExperienceSelector extends Component {
 	 * @private
 	 * @review
 	 */
-	_closeModal() {
-		this.store.dispatchAction(
-			END_CREATE_SEGMENTS_EXPERIENCE
+	_closeCreateModal() {
+		this._experiencesModalStateHandler(
+			{
+				creation: false
+			}
 		);
 	}
 
@@ -130,14 +140,31 @@ class SegmentsExperienceSelector extends Component {
 	 * @review
 	 */
 	_createSegmentsExperience(name, segmentsEntryId) {
-		this.store.dispatchAction(
-			CREATE_SEGMENTS_EXPERIENCE,
+		this.store.dispatch(
 			{
 				name,
-				segmentsEntryId
+				segmentsEntryId,
+				type: CREATE_SEGMENTS_EXPERIENCE
 			}
-		).dispatchAction(
-			END_CREATE_SEGMENTS_EXPERIENCE
+		).done(
+			() => {
+				this._closeCreateModal();
+
+				Liferay.Util.openToast(
+					{
+						title: Liferay.Language.get('the-experience-was-created-successfully'),
+						type: 'success'
+					}
+				);
+			}
+		).failed(
+			() => {
+				this._experiencesErrorHandler(
+					{
+						creation: true
+					}
+				);
+			}
 		);
 	}
 
@@ -149,10 +176,111 @@ class SegmentsExperienceSelector extends Component {
 	 * @review
 	 */
 	_deleteSegmentsExperience(segmentsExperienceId) {
-		this.store.dispatchAction(
-			DELETE_SEGMENTS_EXPERIENCE,
+		this.store.dispatch(
 			{
-				segmentsExperienceId
+				segmentsExperienceId,
+				type: DELETE_SEGMENTS_EXPERIENCE
+			}
+		).done(
+			() => {
+				Liferay.Util.openToast(
+					{
+						title: Liferay.Language.get('the-experience-was-deleted-successfully'),
+						type: 'success'
+					}
+				);
+			}
+		).failed(
+			() => {
+				this._openDropdown();
+
+				this._experiencesErrorHandler(
+					{
+						deletion: true
+					}
+				);
+			}
+		);
+	}
+
+	/**
+	 * Clears the creation error with a `DISMISS_ALERT_ANIMATION_WAIT` miliseconds wait,
+	 * so the dismissable alert can complete its animation
+	 * @memberof SegmentsExperienceSelector
+	 * @private
+	 * @review
+	 */
+	_dismissCreationError() {
+		setTimeout(
+			() => {
+				this._experiencesErrorHandler(
+					{
+						creation: false
+					}
+				);
+			},
+			DISMISS_ALERT_ANIMATION_WAIT
+		);
+	}
+
+	/**
+	 * Clears the edition with a `DISMISS_ALERT_ANIMATION_WAIT` miliseconds wait,
+	 * so the dismissable alert can complete its animation
+	 * @memberof SegmentsExperienceSelector
+	 * @private
+	 * @review
+	 */
+	_dismissEditionError() {
+		setTimeout(
+			() => {
+				this._experiencesErrorHandler(
+					{
+						edition: false
+					}
+				);
+			},
+			DISMISS_ALERT_ANIMATION_WAIT
+		);
+	}
+
+	/**
+	 * Moves the focus to the create experience button
+	 * Clears the error with a 500 miliseconds wait,
+	 * so the dismissable alert can complete its animation
+	 * @memberof SegmentsExperienceSelector
+	 * @private
+	 * @review
+	 */
+	_dismissDeletionError() {
+		this.refs.newExperienceBtn.focus();
+		setTimeout(
+			() => {
+				this._experiencesErrorHandler(
+					{
+						deletion: false
+					}
+				);
+			},
+			500
+		);
+	}
+
+	/**
+	 * Updates the error status for the experiences
+	 *
+	 * @param {object} objError
+	 * @param {boolean} [objError.deletion] - True if experience deletion error has ocurred
+	 * @param {boolean} [objError.creation] - True if experience creation error has ocurred
+	 * @param {boolean} [objError.edition] - True if experience edition error has ocurred
+	 * @memberof SegmentsExperienceSelector
+	 */
+	_experiencesErrorHandler(objError = {}) {
+		requestAnimationFrame(
+			() => {
+				this._segmentsExperienceErrors = Object.assign(
+					this._segmentsExperienceErrors || {},
+					objError
+				);
 			}
 		);
 	}
@@ -163,15 +291,36 @@ class SegmentsExperienceSelector extends Component {
 	 * @memberof SegmentsExperienceSelector
 	 */
 	_editSegmentsExperience({segmentsExperienceId, name, segmentsEntryId}) {
-		this.store.dispatchAction(
-			EDIT_SEGMENTS_EXPERIENCE,
+		this.store.dispatch(
 			{
 				name,
 				segmentsEntryId,
-				segmentsExperienceId
+				segmentsExperienceId,
+				type: EDIT_SEGMENTS_EXPERIENCE
 			}
-		).dispatchAction(
-			END_EDIT_SEGMENTS_EXPERIENCE
+		).done(
+			() => {
+				this._experiencesModalStateHandler(
+					{
+						edition: false
+					}
+				);
+
+				Liferay.Util.openToast(
+					{
+						title: Liferay.Language.get('the-experience-was-updated-successfully'),
+						type: 'success'
+					}
+				);
+			}
+		).failed(
+			() => {
+				this._experiencesErrorHandler(
+					{
+						edition: true
+					}
+				);
+			}
 		);
 	}
 
@@ -183,15 +332,18 @@ class SegmentsExperienceSelector extends Component {
 	 * @private
 	 */
 	_handleDeleteButtonClick(event) {
+		this._experiencesErrorHandler(
+			{
+				deletion: false
+			}
+		);
 		const confirmed = confirm(
 			Liferay.Language.get('do-you-want-to-delete-this-experience')
 		);
 
 		if (confirmed) {
 			const segmentsExperienceId = event.currentTarget.getAttribute('data-segmentsExperienceId');
-			this._deleteSegmentsExperience(
-				segmentsExperienceId
-			);
+			this._deleteSegmentsExperience(segmentsExperienceId);
 		}
 	}
 
@@ -267,31 +419,119 @@ class SegmentsExperienceSelector extends Component {
 	/**
 	 * @memberof SegmentsExperienceSelector
 	 * @review
-	 * @param {Event} event
+	 * @param {!string} name
+	 * @param {!string} segmentsEntryId
 	 */
-	_handleEditFormSubmit(event) {
-		event.preventDefault();
-
+	_handleEditFormSubmit(
+		name,
+		segmentsEntryId
+	) {
 		this._editSegmentsExperience(
 			{
-				name: this.refs.editModal.refs.experienceName.value,
-				segmentsEntryId: this.refs.editModal.refs.experienceSegmentId.value,
-				segmentsExperienceId: this.segmentsExperienceEdition.segmentsExperienceId
+				name,
+				segmentsEntryId,
+				segmentsExperienceId: this.modalStates.edition.segmentsExperienceId
 			}
 		);
 	}
 
 	/**
+	 * Triggers update priority store action
+	 * @param {Event} event
 	 * @memberof SegmentsExperienceSelector
 	 * @review
-	 * @param {Event} event
 	 */
-	_handleFormSubmit(event) {
-		event.preventDefault();
+	_handleMoveExperienceUpButtonClick(event) {
+		const priority = event.currentTarget.getAttribute('data-priority');
+		const segmentsExperienceId = event.currentTarget.getAttribute('data-segmentsExperienceId');
 
-		this._createSegmentsExperience(
-			this.refs.modal.refs.experienceName.value,
-			this.refs.modal.refs.experienceSegmentId.value
+		const buttonPriorityUp = this.refs[`buttonPriorityUp${segmentsExperienceId}`];
+		const selectExperienceBtnRef = this.refs[`selectExperienceButton${segmentsExperienceId}`];
+
+		this._updatePriority(
+			{
+				focusFallbackElement: selectExperienceBtnRef,
+				payload: {
+					direction: 'up',
+					priority,
+					segmentsExperienceId
+				},
+				priorityButton: buttonPriorityUp.element
+			}
+		);
+	}
+
+	/**
+	 * Triggers update priority store action
+	 * @param {Event} event
+	 * @memberof SegmentsExperienceSelector
+	 * @review
+	 */
+	_handleMoveExperienceDownButtonClick(event) {
+		const priority = event.currentTarget.getAttribute('data-priority');
+		const segmentsExperienceId = event.currentTarget.getAttribute('data-segmentsExperienceId');
+
+		const buttonPriorityDown = this.refs[`buttonPriorityDown${segmentsExperienceId}`];
+		const selectExperienceBtnRef = this.refs[`selectExperienceButton${segmentsExperienceId}`];
+
+		this._updatePriority(
+			{
+				focusFallbackElement: selectExperienceBtnRef,
+				payload: {
+					direction: 'down',
+					priority,
+					segmentsExperienceId
+				},
+				priorityButton: buttonPriorityDown.element
+			}
+		);
+	}
+
+	/**
+	 * Dispatchs priority update actions
+	 * and handles focus change when necessary
+	 *
+	 * @param {HTMLButtonElement} priorityButton
+	 * @param {HTMLElement} focusFallbackElement
+	 * @param {object} payload
+	 * @param {!('down'|'up')} payload.direction
+	 * @param {!number} payload.priority
+	 * @param {!string} payload.segmentsExperienceId
+	 * @memberof SegmentsExperienceSelector
+	 */
+	_updatePriority(
+		{
+			focusFallbackElement,
+			priorityButton,
+			payload
+		}
+	) {
+		const onBlur = () => {
+			focusFallbackElement.focus();
+			priorityButton.removeEventListener('blur', onBlur);
+		};
+
+		priorityButton.addEventListener('blur', onBlur);
+
+		const removeBlurListener = () => {
+			priorityButton.removeEventListener(
+				'blur',
+				onBlur
+			);
+		};
+
+		this.store.dispatch(
+			Object.assign(
+				{},
+				payload,
+				{
+					type: UPDATE_SEGMENTS_EXPERIENCE_PRIORITY
+				}
+			)
+		).done(
+			removeBlurListener
+		).failed(
+			removeBlurListener
 		);
 	}
 
@@ -306,14 +546,16 @@ class SegmentsExperienceSelector extends Component {
 	}
 
 	/**
-	 * Opens modal
+	 * Opens experience creation modal
 	 * @memberof SegmentsExperienceSelector
 	 * @private
 	 * @review
 	 */
-	_openModal() {
-		this.store.dispatchAction(
-			START_CREATE_SEGMENTS_EXPERIENCE
+	_openCreateModal() {
+		this._experiencesModalStateHandler(
+			{
+				creation: true
+			}
 		);
 	}
 
@@ -325,19 +567,30 @@ class SegmentsExperienceSelector extends Component {
 	 */
 	_openEditModal(
 		{
-			name,
-			segmentsEntryId,
-			segmentsExperienceId
+			name = '',
+			segmentsEntryId = null,
+			segmentsExperienceId = null
 		}
 	) {
-		this.store.dispatchAction(
-			START_EDIT_SEGMENTS_EXPERIENCE,
+		this._experiencesModalStateHandler(
 			{
-				name,
-				segmentsEntryId,
-				segmentsExperienceId
+				edition: {
+					name,
+					segmentsEntryId,
+					segmentsExperienceId
+				}
 			}
 		);
+	}
+
+	/**
+	 * @param {object} [newState]
+	 * @param {boolean} [newState.creation] - The status of the experience creation modal
+	 * @param {boolean} [newState.editon] - The status of the experience edition modal
+	 * @memberof SegmentsExperienceSelector
+	 */
+	_experiencesModalStateHandler(newState = {}) {
+		this.modalStates = newState;
 	}
 
 	/**
@@ -348,10 +601,10 @@ class SegmentsExperienceSelector extends Component {
 	 * @review
 	 */
 	_selectSegmentsExperience(segmentsExperienceId) {
-		this.store.dispatchAction(
-			SELECT_SEGMENTS_EXPERIENCE,
+		this.store.dispatch(
 			{
-				segmentsExperienceId
+				segmentsExperienceId,
+				type: SELECT_SEGMENTS_EXPERIENCE
 			}
 		);
 	}
@@ -362,8 +615,15 @@ class SegmentsExperienceSelector extends Component {
 	 * @review
 	 */
 	_closeEditModal() {
-		this.store.dispatchAction(
-			END_EDIT_SEGMENTS_EXPERIENCE
+		this._experiencesErrorHandler(
+			{
+				edition: false
+			}
+		);
+		this._experiencesModalStateHandler(
+			{
+				edition: false
+			}
 		);
 	}
 
@@ -374,7 +634,7 @@ class SegmentsExperienceSelector extends Component {
 	 * @review
 	 */
 	_toggleEditModal() {
-		const modalEditAction = this.segmentsExperienceEdition.segmentsExperienceId ?
+		const modalEditAction = this.modalStates.edition ?
 			this._closeEditModal :
 			this._openEditModal;
 
@@ -387,10 +647,10 @@ class SegmentsExperienceSelector extends Component {
 	 * @private
 	 * @review
 	 */
-	_toggleModal() {
-		const modalAction = this.experienceSegmentsCreation.creatingSegmentsExperience ?
-			this._closeModal :
-			this._openModal;
+	_toggleCreateModal() {
+		const modalAction = this.modalStates.creation ?
+			this._closeCreateModal :
+			this._openCreateModal;
 
 		modalAction.call(this);
 	}
@@ -412,6 +672,7 @@ class SegmentsExperienceSelector extends Component {
 }
 
 SegmentsExperienceSelector.STATE = {
+	modalStates: Config.object().value(null),
 	openDropdown: Config.bool().internal().value(false),
 	segmentsEntryId: Config.string().internal()
 };

@@ -4,10 +4,11 @@ import Soy from 'metal-soy';
 
 import '../common/FloatingToolbarColorPicker.es';
 import './FloatingToolbarBackgroundColorPanelDelegateTemplate.soy';
-import {ITEM_CONFIG_KEYS} from '../../../utils/constants';
+import {CONFIG_KEYS} from '../../../utils/rowConstants';
+import {disableSavingChangesStatusAction, enableSavingChangesStatusAction, updateLastSaveDateAction} from '../../../actions/saveChanges.es';
 import getConnectedComponent from '../../../store/ConnectedComponent.es';
 import templates from './FloatingToolbarBackgroundColorPanel.soy';
-import {UPDATE_LAST_SAVE_DATE, UPDATE_SAVING_CHANGES_STATUS, UPDATE_SECTION_CONFIG, UPDATE_TRANSLATION_STATUS} from '../../../actions/actions.es';
+import {UPDATE_ROW_CONFIG, UPDATE_TRANSLATION_STATUS} from '../../../actions/actions.es';
 
 /**
  * FloatingToolbarBackgroundColorPanel
@@ -20,9 +21,9 @@ class FloatingToolbarBackgroundColorPanel extends Component {
 	 * @review
 	 */
 	_handleClearButtonClick() {
-		this._updateSectionConfig(
+		this._updateRowConfig(
 			{
-				[ITEM_CONFIG_KEYS.backgroundColorCssClass]: ''
+				[CONFIG_KEYS.backgroundColorCssClass]: ''
 			}
 		);
 	}
@@ -34,49 +35,36 @@ class FloatingToolbarBackgroundColorPanel extends Component {
 	 * @review
 	 */
 	_handleBackgroundColorButtonClick(event) {
-		this._updateSectionConfig(
+		this._updateRowConfig(
 			{
-				[ITEM_CONFIG_KEYS.backgroundColorCssClass]: event.color
+				[CONFIG_KEYS.backgroundColorCssClass]: event.color
 			}
 		);
 	}
 
 	/**
-	 * Updates section configuration
-	 * @param {object} config Section configuration
+	 * Updates row configuration
+	 * @param {object} config Row configuration
 	 * @private
 	 * @review
 	 */
-	_updateSectionConfig(config) {
+	_updateRowConfig(config) {
 		this.store
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: true
-				}
-			)
-			.dispatchAction(
-				UPDATE_SECTION_CONFIG,
+			.dispatch(enableSavingChangesStatusAction())
+			.dispatch(
 				{
 					config,
-					sectionId: this.itemId
+					rowId: this.itemId,
+					type: UPDATE_ROW_CONFIG
 				}
 			)
-			.dispatchAction(
-				UPDATE_TRANSLATION_STATUS
-			)
-			.dispatchAction(
-				UPDATE_LAST_SAVE_DATE,
+			.dispatch(
 				{
-					lastSaveDate: new Date()
+					type: UPDATE_TRANSLATION_STATUS
 				}
 			)
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: false
-				}
-			);
+			.dispatch(updateLastSaveDateAction())
+			.dispatch(disableSavingChangesStatusAction());
 	}
 }
 

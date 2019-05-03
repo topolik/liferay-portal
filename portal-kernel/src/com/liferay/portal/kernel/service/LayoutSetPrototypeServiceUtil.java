@@ -17,7 +17,6 @@ package com.liferay.portal.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for LayoutSetPrototype. This utility wraps
@@ -49,23 +48,6 @@ public class LayoutSetPrototypeServiceUtil {
 
 		return getService().addLayoutSetPrototype(
 			nameMap, descriptionMap, active, layoutsUpdateable, serviceContext);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 #addLayoutSetPrototype(Map, Map, boolean, boolean,
-	 ServiceContext)}
-	 */
-	@Deprecated
-	public static com.liferay.portal.kernel.model.LayoutSetPrototype
-			addLayoutSetPrototype(
-				java.util.Map<java.util.Locale, String> nameMap,
-				String description, boolean active, boolean layoutsUpdateable,
-				ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().addLayoutSetPrototype(
-			nameMap, description, active, layoutsUpdateable, serviceContext);
 	}
 
 	public static void deleteLayoutSetPrototype(long layoutSetPrototypeId)
@@ -121,25 +103,6 @@ public class LayoutSetPrototypeServiceUtil {
 			layoutsUpdateable, serviceContext);
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 #updateLayoutSetPrototype(long, Map, Map, boolean, boolean,
-	 ServiceContext)}
-	 */
-	@Deprecated
-	public static com.liferay.portal.kernel.model.LayoutSetPrototype
-			updateLayoutSetPrototype(
-				long layoutSetPrototypeId,
-				java.util.Map<java.util.Locale, String> nameMap,
-				String description, boolean active, boolean layoutsUpdateable,
-				ServiceContext serviceContext)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().updateLayoutSetPrototype(
-			layoutSetPrototypeId, nameMap, description, active,
-			layoutsUpdateable, serviceContext);
-	}
-
 	public static com.liferay.portal.kernel.model.LayoutSetPrototype
 			updateLayoutSetPrototype(long layoutSetPrototypeId, String settings)
 		throws com.liferay.portal.kernel.exception.PortalException {
@@ -152,9 +115,6 @@ public class LayoutSetPrototypeServiceUtil {
 		if (_service == null) {
 			_service = (LayoutSetPrototypeService)PortalBeanLocatorUtil.locate(
 				LayoutSetPrototypeService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				LayoutSetPrototypeServiceUtil.class, "_service");
 		}
 
 		return _service;

@@ -64,7 +64,15 @@ public class StagedExpandoColumnImpl implements StagedExpandoColumn {
 
 	@Override
 	public Object clone() {
-		return new StagedExpandoColumnImpl(_expandoColumn);
+		StagedExpandoColumnImpl stagedExpandoColumn =
+			new StagedExpandoColumnImpl();
+
+		stagedExpandoColumn._expandoColumn =
+			(ExpandoColumn)_expandoColumn.clone();
+		stagedExpandoColumn._expandoTableClassName = _expandoTableClassName;
+		stagedExpandoColumn._expandoTableName = _expandoTableName;
+
+		return stagedExpandoColumn;
 	}
 
 	@Override

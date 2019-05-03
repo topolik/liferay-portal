@@ -119,21 +119,22 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 								</aui:a>
 							</h2>
 
-							<span class="text-default">
+							<div>
 								<%= curCategory.getDescription() %>
-							</span>
+							</div>
 
 							<%
 							int subcategoriesCount = categoryDisplay.getSubcategoriesCount(curCategory);
 							int threadsCount = categoryDisplay.getSubcategoriesThreadsCount(curCategory);
 							%>
 
-							<span class="h6 text-default">
-								<liferay-ui:message arguments="<%= subcategoriesCount %>" key='<%= (subcategoriesCount == 1) ? "x-subcategory" : "x-subcategories" %>' />
-							</span>
-							<span class="h6 text-default">
+							<div>
+								<liferay-ui:message arguments="<%= subcategoriesCount %>" key='<%= (subcategoriesCount == 1) ? "x-category" : "x-categories" %>' />
+							</div>
+
+							<div>
 								<liferay-ui:message arguments="<%= threadsCount %>" key='<%= (threadsCount == 1) ? "x-thread" : "x-threads" %>' />
-							</span>
+							</div>
 						</liferay-ui:search-container-column-text>
 
 						<liferay-ui:search-container-column-jsp
@@ -179,45 +180,6 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 						<liferay-ui:search-container-column-text
 							colspan="<%= 2 %>"
 						>
-							<c:choose>
-								<c:when test="<%= (message != null) && (thread.getMessageCount() == 1) %>">
-
-									<%
-									String messageUserName = "anonymous";
-
-									if (!message.isAnonymous()) {
-										messageUserName = message.getUserName();
-									}
-
-									Date modifiedDate = message.getModifiedDate();
-
-									String modifiedDateDescription = LanguageUtil.getTimeDescription(request, System.currentTimeMillis() - modifiedDate.getTime(), true);
-									%>
-
-									<span class="text-default">
-										<liferay-ui:message arguments="<%= new String[] {messageUserName, modifiedDateDescription} %>" key="x-modified-x-ago" />
-									</span>
-								</c:when>
-								<c:otherwise>
-
-									<%
-									String messageUserName = "anonymous";
-
-									if (thread.getLastPostByUserId() != 0) {
-										messageUserName = HtmlUtil.escape(PortalUtil.getUserName(thread.getLastPostByUserId(), StringPool.BLANK));
-									}
-
-									Date lastPostDate = thread.getLastPostDate();
-
-									String lastPostDateDescription = LanguageUtil.getTimeDescription(request, System.currentTimeMillis() - lastPostDate.getTime(), true);
-									%>
-
-									<span class="text-default">
-										<liferay-ui:message arguments="<%= new String[] {messageUserName, lastPostDateDescription} %>" key="x-replied-x-ago" />
-									</span>
-								</c:otherwise>
-							</c:choose>
-
 							<h2 class="h5">
 								<aui:a href="<%= rowURL.toString() %>">
 									<c:if test="<%= message != null %>">
@@ -237,7 +199,7 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 								%>
 
 								<c:if test="<%= (threadPriority != null) && (thread.getPriority() > 0) %>">
-									<span class="text-default <%= threadPriority[1] %>" title="<%= HtmlUtil.escapeAttribute(threadPriority[0]) %>"></span>
+									<div class="<%= threadPriority[1] %>" title="<%= HtmlUtil.escapeAttribute(threadPriority[0]) %>"></div>
 								</c:if>
 
 								<c:if test="<%= thread.isQuestion() %>">
@@ -245,21 +207,61 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 								</c:if>
 							</h2>
 
-							<span class="h6">
+							<c:choose>
+								<c:when test="<%= (message != null) && (thread.getMessageCount() == 1) %>">
+
+									<%
+									String messageUserName = "anonymous";
+
+									if (!message.isAnonymous()) {
+										messageUserName = message.getUserName();
+									}
+
+									Date modifiedDate = message.getModifiedDate();
+
+									String modifiedDateDescription = LanguageUtil.getTimeDescription(request, System.currentTimeMillis() - modifiedDate.getTime(), true);
+									%>
+
+									<div>
+										<liferay-ui:message arguments="<%= new String[] {messageUserName, modifiedDateDescription} %>" key="x-modified-x-ago" />
+									</div>
+								</c:when>
+								<c:otherwise>
+
+									<%
+									String messageUserName = "anonymous";
+
+									if (thread.getLastPostByUserId() != 0) {
+										messageUserName = HtmlUtil.escape(PortalUtil.getUserName(thread.getLastPostByUserId(), StringPool.BLANK));
+									}
+
+									Date lastPostDate = thread.getLastPostDate();
+
+									String lastPostDateDescription = LanguageUtil.getTimeDescription(request, System.currentTimeMillis() - lastPostDate.getTime(), true);
+									%>
+
+									<div>
+										<liferay-ui:message arguments="<%= new String[] {messageUserName, lastPostDateDescription} %>" key="x-replied-x-ago" />
+									</div>
+								</c:otherwise>
+							</c:choose>
+
+							<div>
 								<aui:workflow-status bean="<%= message %>" markupView="lexicon" model="<%= MBMessage.class %>" showIcon="<%= false %>" showLabel="<%= false %>" status="<%= message.getStatus() %>" />
-							</span>
+							</div>
 
 							<%
 							int repliesCount = Math.max(thread.getMessageCount() - 1, 0);
 							int viewCount = thread.getViewCount();
 							%>
 
-							<span class="h6 text-default">
+							<div>
 								<liferay-ui:message arguments="<%= repliesCount %>" key='<%= (repliesCount == 1) ? "x-reply" : "x-replies" %>' />
-							</span>
-							<span class="h6 text-default">
+							</div>
+
+							<div>
 								<liferay-ui:message arguments="<%= viewCount %>" key='<%= (viewCount == 1) ? "x-view" : "x-views" %>' />
-							</span>
+							</div>
 
 							<c:if test="<%= thread.isQuestion() %>">
 
@@ -267,17 +269,17 @@ SearchContainer entriesSearchContainer = (SearchContainer)request.getAttribute("
 								int threadAnswersCount = MBMessageServiceUtil.getThreadAnswersCount(thread.getGroupId(), thread.getCategoryId(), thread.getThreadId());
 								%>
 
-								<span class="h6">
+								<div>
 									<%= threadAnswersCount %>
 
 									<liferay-ui:message key='<%= (threadAnswersCount == 1) ? "answer" : "answers" %>' />
-								</span>
+								</div>
 							</c:if>
 
 							<c:if test="<%= thread.isLocked() %>">
-								<span class="h6">
+								<div>
 									<liferay-ui:message key="locked" />
-								</span>
+								</div>
 							</c:if>
 						</liferay-ui:search-container-column-text>
 

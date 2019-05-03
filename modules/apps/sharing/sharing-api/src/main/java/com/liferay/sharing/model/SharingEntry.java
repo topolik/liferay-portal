@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.sharing.model.impl.SharingEntryImpl")
 @ProviderType
-public interface SharingEntry extends SharingEntryModel, PersistedModel {
+public interface SharingEntry extends PersistedModel, SharingEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

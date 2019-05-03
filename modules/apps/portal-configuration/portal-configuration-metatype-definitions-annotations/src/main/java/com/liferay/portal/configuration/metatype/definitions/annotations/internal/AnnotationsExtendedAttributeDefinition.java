@@ -128,6 +128,10 @@ public class AnnotationsExtendedAttributeDefinition
 					"name-arguments",
 					StringUtil.merge(
 						extendedAttributeDefinition.nameArguments()));
+				map.put(
+					"required-input",
+					String.valueOf(
+						extendedAttributeDefinition.requiredInput()));
 
 				_extensionAttributes.put(
 					ExtendedAttributeDefinition.XML_NAMESPACE, map);

@@ -36,6 +36,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.service.LayoutServiceUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
@@ -203,10 +204,11 @@ public class DDMFormFieldValueRendererTest extends BaseDDMTestCase {
 
 	@Test
 	public void testDocumentLibraryFieldValueRenderer() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("groupId", RandomTestUtil.randomLong());
-		jsonObject.put("uuid", RandomTestUtil.randomString());
+		JSONObject jsonObject = JSONUtil.put(
+			"groupId", RandomTestUtil.randomLong()
+		).put(
+			"uuid", RandomTestUtil.randomString()
+		);
 
 		DDMFormFieldValue ddmFormFieldValue = createDDMFormFieldValue(
 			"DocumentLibrary", new UnlocalizedValue(jsonObject.toString()));
@@ -222,10 +224,11 @@ public class DDMFormFieldValueRendererTest extends BaseDDMTestCase {
 
 	@Test
 	public void testGeolocationFieldValueRenderer() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("latitude", 9.8765);
-		jsonObject.put("longitude", 1.2345);
+		JSONObject jsonObject = JSONUtil.put(
+			"latitude", 9.8765
+		).put(
+			"longitude", 1.2345
+		);
 
 		DDMFormFieldValue ddmFormFieldValue = createDDMFormFieldValue(
 			"Geolocation", new UnlocalizedValue(jsonObject.toString()));
@@ -279,11 +282,13 @@ public class DDMFormFieldValueRendererTest extends BaseDDMTestCase {
 
 	@Test
 	public void testLinkToPageFieldValueRenderer() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("groupId", RandomTestUtil.randomLong());
-		jsonObject.put("layoutId", RandomTestUtil.randomLong());
-		jsonObject.put("privateLayout", RandomTestUtil.randomBoolean());
+		JSONObject jsonObject = JSONUtil.put(
+			"groupId", RandomTestUtil.randomLong()
+		).put(
+			"layoutId", RandomTestUtil.randomLong()
+		).put(
+			"privateLayout", RandomTestUtil.randomBoolean()
+		);
 
 		DDMFormFieldValue ddmFormFieldValue = createDDMFormFieldValue(
 			"LinkToPage", new UnlocalizedValue(jsonObject.toString()));

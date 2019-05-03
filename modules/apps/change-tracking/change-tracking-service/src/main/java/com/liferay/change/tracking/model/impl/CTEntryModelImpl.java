@@ -29,10 +29,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.model.impl.BaseModelImpl;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.UserLocalServiceUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.io.Serializable;
 
@@ -72,9 +69,10 @@ public class CTEntryModelImpl
 		{"ctEntryId", Types.BIGINT}, {"companyId", Types.BIGINT},
 		{"userId", Types.BIGINT}, {"userName", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP},
-		{"classNameId", Types.BIGINT}, {"classPK", Types.BIGINT},
-		{"resourcePrimKey", Types.BIGINT}, {"changeType", Types.INTEGER},
-		{"status", Types.INTEGER}
+		{"originalCTCollectionId", Types.BIGINT},
+		{"modelClassNameId", Types.BIGINT}, {"modelClassPK", Types.BIGINT},
+		{"modelResourcePrimKey", Types.BIGINT}, {"changeType", Types.INTEGER},
+		{"collision", Types.BOOLEAN}, {"status", Types.INTEGER}
 	};
 
 	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
@@ -87,15 +85,17 @@ public class CTEntryModelImpl
 		TABLE_COLUMNS_MAP.put("userName", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
-		TABLE_COLUMNS_MAP.put("classNameId", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("classPK", Types.BIGINT);
-		TABLE_COLUMNS_MAP.put("resourcePrimKey", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("originalCTCollectionId", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("modelClassNameId", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("modelClassPK", Types.BIGINT);
+		TABLE_COLUMNS_MAP.put("modelResourcePrimKey", Types.BIGINT);
 		TABLE_COLUMNS_MAP.put("changeType", Types.INTEGER);
+		TABLE_COLUMNS_MAP.put("collision", Types.BOOLEAN);
 		TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table CTEntry (ctEntryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,classNameId LONG,classPK LONG,resourcePrimKey LONG,changeType INTEGER,status INTEGER)";
+		"create table CTEntry (ctEntryId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,originalCTCollectionId LONG,modelClassNameId LONG,modelClassPK LONG,modelResourcePrimKey LONG,changeType INTEGER,collision BOOLEAN,status INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table CTEntry";
 
@@ -110,28 +110,19 @@ public class CTEntryModelImpl
 
 	public static final String TX_MANAGER = "liferayTransactionManager";
 
-	public static final boolean ENTITY_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.change.tracking.service.util.ServiceProps.get(
-			"value.object.entity.cache.enabled.com.liferay.change.tracking.model.CTEntry"),
-		true);
+	public static final long MODELCLASSNAMEID_COLUMN_BITMASK = 1L;
 
-	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(
-		com.liferay.change.tracking.service.util.ServiceProps.get(
-			"value.object.finder.cache.enabled.com.liferay.change.tracking.model.CTEntry"),
-		true);
+	public static final long MODELCLASSPK_COLUMN_BITMASK = 2L;
 
-	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(
-		com.liferay.change.tracking.service.util.ServiceProps.get(
-			"value.object.column.bitmask.enabled.com.liferay.change.tracking.model.CTEntry"),
-		true);
+	public static final long CTENTRYID_COLUMN_BITMASK = 4L;
 
-	public static final long CLASSNAMEID_COLUMN_BITMASK = 1L;
+	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
+		_entityCacheEnabled = entityCacheEnabled;
+	}
 
-	public static final long CLASSPK_COLUMN_BITMASK = 2L;
-
-	public static final long RESOURCEPRIMKEY_COLUMN_BITMASK = 4L;
-
-	public static final long CTENTRYID_COLUMN_BITMASK = 8L;
+	public static void setFinderCacheEnabled(boolean finderCacheEnabled) {
+		_finderCacheEnabled = finderCacheEnabled;
+	}
 
 	public static final String MAPPING_TABLE_CTENTRYAGGREGATES_CTENTRIES_NAME =
 		"CTEntryAggregates_CTEntries";
@@ -146,13 +137,6 @@ public class CTEntryModelImpl
 		MAPPING_TABLE_CTENTRYAGGREGATES_CTENTRIES_SQL_CREATE =
 			"create table CTEntryAggregates_CTEntries (companyId LONG not null,ctEntryId LONG not null,ctEntryAggregateId LONG not null,primary key (ctEntryId, ctEntryAggregateId))";
 
-	public static final boolean
-		FINDER_CACHE_ENABLED_CTENTRYAGGREGATES_CTENTRIES =
-			GetterUtil.getBoolean(
-				com.liferay.change.tracking.service.util.ServiceProps.get(
-					"value.object.finder.cache.enabled.CTEntryAggregates_CTEntries"),
-				true);
-
 	public static final String MAPPING_TABLE_CTCOLLECTIONS_CTENTRIES_NAME =
 		"CTCollections_CTEntries";
 
@@ -165,16 +149,6 @@ public class CTEntryModelImpl
 	public static final String
 		MAPPING_TABLE_CTCOLLECTIONS_CTENTRIES_SQL_CREATE =
 			"create table CTCollections_CTEntries (companyId LONG not null,ctCollectionId LONG not null,ctEntryId LONG not null,primary key (ctCollectionId, ctEntryId))";
-
-	public static final boolean FINDER_CACHE_ENABLED_CTCOLLECTIONS_CTENTRIES =
-		GetterUtil.getBoolean(
-			com.liferay.change.tracking.service.util.ServiceProps.get(
-				"value.object.finder.cache.enabled.CTCollections_CTEntries"),
-			true);
-
-	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(
-		com.liferay.change.tracking.service.util.ServiceProps.get(
-			"lock.expiration.time.com.liferay.change.tracking.model.CTEntry"));
 
 	public CTEntryModelImpl() {
 	}
@@ -293,20 +267,31 @@ public class CTEntryModelImpl
 		attributeSetterBiConsumers.put(
 			"modifiedDate",
 			(BiConsumer<CTEntry, Date>)CTEntry::setModifiedDate);
-		attributeGetterFunctions.put("classNameId", CTEntry::getClassNameId);
-		attributeSetterBiConsumers.put(
-			"classNameId", (BiConsumer<CTEntry, Long>)CTEntry::setClassNameId);
-		attributeGetterFunctions.put("classPK", CTEntry::getClassPK);
-		attributeSetterBiConsumers.put(
-			"classPK", (BiConsumer<CTEntry, Long>)CTEntry::setClassPK);
 		attributeGetterFunctions.put(
-			"resourcePrimKey", CTEntry::getResourcePrimKey);
+			"originalCTCollectionId", CTEntry::getOriginalCTCollectionId);
 		attributeSetterBiConsumers.put(
-			"resourcePrimKey",
-			(BiConsumer<CTEntry, Long>)CTEntry::setResourcePrimKey);
+			"originalCTCollectionId",
+			(BiConsumer<CTEntry, Long>)CTEntry::setOriginalCTCollectionId);
+		attributeGetterFunctions.put(
+			"modelClassNameId", CTEntry::getModelClassNameId);
+		attributeSetterBiConsumers.put(
+			"modelClassNameId",
+			(BiConsumer<CTEntry, Long>)CTEntry::setModelClassNameId);
+		attributeGetterFunctions.put("modelClassPK", CTEntry::getModelClassPK);
+		attributeSetterBiConsumers.put(
+			"modelClassPK",
+			(BiConsumer<CTEntry, Long>)CTEntry::setModelClassPK);
+		attributeGetterFunctions.put(
+			"modelResourcePrimKey", CTEntry::getModelResourcePrimKey);
+		attributeSetterBiConsumers.put(
+			"modelResourcePrimKey",
+			(BiConsumer<CTEntry, Long>)CTEntry::setModelResourcePrimKey);
 		attributeGetterFunctions.put("changeType", CTEntry::getChangeType);
 		attributeSetterBiConsumers.put(
 			"changeType", (BiConsumer<CTEntry, Integer>)CTEntry::setChangeType);
+		attributeGetterFunctions.put("collision", CTEntry::getCollision);
+		attributeSetterBiConsumers.put(
+			"collision", (BiConsumer<CTEntry, Boolean>)CTEntry::setCollision);
 		attributeGetterFunctions.put("status", CTEntry::getStatus);
 		attributeSetterBiConsumers.put(
 			"status", (BiConsumer<CTEntry, Integer>)CTEntry::setStatus);
@@ -405,94 +390,67 @@ public class CTEntryModelImpl
 	}
 
 	@Override
-	public String getClassName() {
-		if (getClassNameId() <= 0) {
-			return "";
+	public long getOriginalCTCollectionId() {
+		return _originalCTCollectionId;
+	}
+
+	@Override
+	public void setOriginalCTCollectionId(long originalCTCollectionId) {
+		_originalCTCollectionId = originalCTCollectionId;
+	}
+
+	@Override
+	public long getModelClassNameId() {
+		return _modelClassNameId;
+	}
+
+	@Override
+	public void setModelClassNameId(long modelClassNameId) {
+		_columnBitmask |= MODELCLASSNAMEID_COLUMN_BITMASK;
+
+		if (!_setOriginalModelClassNameId) {
+			_setOriginalModelClassNameId = true;
+
+			_originalModelClassNameId = _modelClassNameId;
 		}
 
-		return PortalUtil.getClassName(getClassNameId());
+		_modelClassNameId = modelClassNameId;
+	}
+
+	public long getOriginalModelClassNameId() {
+		return _originalModelClassNameId;
 	}
 
 	@Override
-	public void setClassName(String className) {
-		long classNameId = 0;
+	public long getModelClassPK() {
+		return _modelClassPK;
+	}
 
-		if (Validator.isNotNull(className)) {
-			classNameId = PortalUtil.getClassNameId(className);
+	@Override
+	public void setModelClassPK(long modelClassPK) {
+		_columnBitmask |= MODELCLASSPK_COLUMN_BITMASK;
+
+		if (!_setOriginalModelClassPK) {
+			_setOriginalModelClassPK = true;
+
+			_originalModelClassPK = _modelClassPK;
 		}
 
-		setClassNameId(classNameId);
+		_modelClassPK = modelClassPK;
+	}
+
+	public long getOriginalModelClassPK() {
+		return _originalModelClassPK;
 	}
 
 	@Override
-	public long getClassNameId() {
-		return _classNameId;
+	public long getModelResourcePrimKey() {
+		return _modelResourcePrimKey;
 	}
 
 	@Override
-	public void setClassNameId(long classNameId) {
-		_columnBitmask |= CLASSNAMEID_COLUMN_BITMASK;
-
-		if (!_setOriginalClassNameId) {
-			_setOriginalClassNameId = true;
-
-			_originalClassNameId = _classNameId;
-		}
-
-		_classNameId = classNameId;
-	}
-
-	public long getOriginalClassNameId() {
-		return _originalClassNameId;
-	}
-
-	@Override
-	public long getClassPK() {
-		return _classPK;
-	}
-
-	@Override
-	public void setClassPK(long classPK) {
-		_columnBitmask |= CLASSPK_COLUMN_BITMASK;
-
-		if (!_setOriginalClassPK) {
-			_setOriginalClassPK = true;
-
-			_originalClassPK = _classPK;
-		}
-
-		_classPK = classPK;
-	}
-
-	public long getOriginalClassPK() {
-		return _originalClassPK;
-	}
-
-	@Override
-	public long getResourcePrimKey() {
-		return _resourcePrimKey;
-	}
-
-	@Override
-	public void setResourcePrimKey(long resourcePrimKey) {
-		_columnBitmask |= RESOURCEPRIMKEY_COLUMN_BITMASK;
-
-		if (!_setOriginalResourcePrimKey) {
-			_setOriginalResourcePrimKey = true;
-
-			_originalResourcePrimKey = _resourcePrimKey;
-		}
-
-		_resourcePrimKey = resourcePrimKey;
-	}
-
-	@Override
-	public boolean isResourceMain() {
-		return true;
-	}
-
-	public long getOriginalResourcePrimKey() {
-		return _originalResourcePrimKey;
+	public void setModelResourcePrimKey(long modelResourcePrimKey) {
+		_modelResourcePrimKey = modelResourcePrimKey;
 	}
 
 	@Override
@@ -503,6 +461,21 @@ public class CTEntryModelImpl
 	@Override
 	public void setChangeType(int changeType) {
 		_changeType = changeType;
+	}
+
+	@Override
+	public boolean getCollision() {
+		return _collision;
+	}
+
+	@Override
+	public boolean isCollision() {
+		return _collision;
+	}
+
+	@Override
+	public void setCollision(boolean collision) {
+		_collision = collision;
 	}
 
 	@Override
@@ -553,10 +526,12 @@ public class CTEntryModelImpl
 		ctEntryImpl.setUserName(getUserName());
 		ctEntryImpl.setCreateDate(getCreateDate());
 		ctEntryImpl.setModifiedDate(getModifiedDate());
-		ctEntryImpl.setClassNameId(getClassNameId());
-		ctEntryImpl.setClassPK(getClassPK());
-		ctEntryImpl.setResourcePrimKey(getResourcePrimKey());
+		ctEntryImpl.setOriginalCTCollectionId(getOriginalCTCollectionId());
+		ctEntryImpl.setModelClassNameId(getModelClassNameId());
+		ctEntryImpl.setModelClassPK(getModelClassPK());
+		ctEntryImpl.setModelResourcePrimKey(getModelResourcePrimKey());
 		ctEntryImpl.setChangeType(getChangeType());
+		ctEntryImpl.setCollision(isCollision());
 		ctEntryImpl.setStatus(getStatus());
 
 		ctEntryImpl.resetOriginalValues();
@@ -608,12 +583,12 @@ public class CTEntryModelImpl
 
 	@Override
 	public boolean isEntityCacheEnabled() {
-		return ENTITY_CACHE_ENABLED;
+		return _entityCacheEnabled;
 	}
 
 	@Override
 	public boolean isFinderCacheEnabled() {
-		return FINDER_CACHE_ENABLED;
+		return _finderCacheEnabled;
 	}
 
 	@Override
@@ -622,18 +597,14 @@ public class CTEntryModelImpl
 
 		ctEntryModelImpl._setModifiedDate = false;
 
-		ctEntryModelImpl._originalClassNameId = ctEntryModelImpl._classNameId;
+		ctEntryModelImpl._originalModelClassNameId =
+			ctEntryModelImpl._modelClassNameId;
 
-		ctEntryModelImpl._setOriginalClassNameId = false;
+		ctEntryModelImpl._setOriginalModelClassNameId = false;
 
-		ctEntryModelImpl._originalClassPK = ctEntryModelImpl._classPK;
+		ctEntryModelImpl._originalModelClassPK = ctEntryModelImpl._modelClassPK;
 
-		ctEntryModelImpl._setOriginalClassPK = false;
-
-		ctEntryModelImpl._originalResourcePrimKey =
-			ctEntryModelImpl._resourcePrimKey;
-
-		ctEntryModelImpl._setOriginalResourcePrimKey = false;
+		ctEntryModelImpl._setOriginalModelClassPK = false;
 
 		ctEntryModelImpl._columnBitmask = 0;
 	}
@@ -674,13 +645,17 @@ public class CTEntryModelImpl
 			ctEntryCacheModel.modifiedDate = Long.MIN_VALUE;
 		}
 
-		ctEntryCacheModel.classNameId = getClassNameId();
+		ctEntryCacheModel.originalCTCollectionId = getOriginalCTCollectionId();
 
-		ctEntryCacheModel.classPK = getClassPK();
+		ctEntryCacheModel.modelClassNameId = getModelClassNameId();
 
-		ctEntryCacheModel.resourcePrimKey = getResourcePrimKey();
+		ctEntryCacheModel.modelClassPK = getModelClassPK();
+
+		ctEntryCacheModel.modelResourcePrimKey = getModelResourcePrimKey();
 
 		ctEntryCacheModel.changeType = getChangeType();
+
+		ctEntryCacheModel.collision = isCollision();
 
 		ctEntryCacheModel.status = getStatus();
 
@@ -755,6 +730,8 @@ public class CTEntryModelImpl
 	private static final Class<?>[] _escapedModelInterfaces = new Class[] {
 		CTEntry.class, ModelWrapper.class
 	};
+	private static boolean _entityCacheEnabled;
+	private static boolean _finderCacheEnabled;
 
 	private long _ctEntryId;
 	private long _companyId;
@@ -763,16 +740,16 @@ public class CTEntryModelImpl
 	private Date _createDate;
 	private Date _modifiedDate;
 	private boolean _setModifiedDate;
-	private long _classNameId;
-	private long _originalClassNameId;
-	private boolean _setOriginalClassNameId;
-	private long _classPK;
-	private long _originalClassPK;
-	private boolean _setOriginalClassPK;
-	private long _resourcePrimKey;
-	private long _originalResourcePrimKey;
-	private boolean _setOriginalResourcePrimKey;
+	private long _originalCTCollectionId;
+	private long _modelClassNameId;
+	private long _originalModelClassNameId;
+	private boolean _setOriginalModelClassNameId;
+	private long _modelClassPK;
+	private long _originalModelClassPK;
+	private boolean _setOriginalModelClassPK;
+	private long _modelResourcePrimKey;
 	private int _changeType;
+	private boolean _collision;
 	private int _status;
 	private long _columnBitmask;
 	private CTEntry _escapedModel;

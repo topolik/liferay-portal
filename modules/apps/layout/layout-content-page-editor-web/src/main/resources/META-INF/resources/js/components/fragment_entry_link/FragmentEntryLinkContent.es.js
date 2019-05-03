@@ -1,29 +1,27 @@
-import {contains} from 'metal-dom';
+import {closest, contains} from 'metal-dom';
 import Component from 'metal-component';
 import {Config} from 'metal-state';
 import {isFunction, isObject} from 'metal';
 import Soy from 'metal-soy';
 
-import FragmentEditableField from './FragmentEditableField.es';
-import FragmentStyleEditor from './FragmentStyleEditor.es';
-import MetalStore from '../../store/store.es';
+import {EDITABLE_FRAGMENT_ENTRY_PROCESSOR} from '../../utils/constants';
+import {getConnectedComponent} from '../../store/ConnectedComponent.es';
+import {prefixSegmentsExperienceId} from '../../utils/prefixSegmentsExperienceId.es';
 import {setIn} from '../../utils/FragmentsEditorUpdateUtils.es';
 import {shouldUpdateOnChangeProperties} from '../../utils/FragmentsEditorComponentUtils.es';
-import {prefixSegmentsExperienceId} from '../../utils/prefixSegmentsExperienceId.es';
+import {updateEditableValueAction} from '../../actions/updateEditableValue.es';
+import FragmentEditableField from './FragmentEditableField.es';
+import FragmentStyleEditor from './FragmentStyleEditor.es';
 import templates from './FragmentEntryLinkContent.soy';
-import {UPDATE_EDITABLE_VALUE} from '../../actions/actions.es';
-
-const EDITABLE_FRAGMENT_ENTRY_PROCESSOR = 'com.liferay.fragment.entry.processor.editable.EditableFragmentEntryProcessor';
 
 /**
- * FragmentEntryLinkContent
+ * Creates a Fragment Entry Link Content component.
  * @review
  */
 class FragmentEntryLinkContent extends Component {
 
 	/**
 	 * @inheritDoc
-	 * @review
 	 */
 	created() {
 		this._handleOpenStyleTooltip = this._handleOpenStyleTooltip.bind(this);
@@ -32,7 +30,6 @@ class FragmentEntryLinkContent extends Component {
 
 	/**
 	 * @inheritDoc
-	 * @review
 	 */
 	disposed() {
 		this._destroyEditables();
@@ -40,19 +37,29 @@ class FragmentEntryLinkContent extends Component {
 
 	/**
 	 * @inheritDoc
-	 * @review
 	 */
 	prepareStateForRender(state) {
-		return setIn(
-			state,
+		let nextState = state;
+
+		if (state.languageId && Liferay.Language.direction) {
+			nextState = setIn(
+				nextState,
+				['_languageDirection'],
+				Liferay.Language.direction[state.languageId] || 'ltr'
+			);
+		}
+
+		nextState = setIn(
+			nextState,
 			['content'],
 			this.content ? Soy.toIncDom(this.content) : null
 		);
+
+		return nextState;
 	}
 
 	/**
 	 * @inheritDoc
-	 * @review
 	 */
 	rendered() {
 		if (this.content) {
@@ -79,10 +86,9 @@ class FragmentEntryLinkContent extends Component {
 	}
 
 	/**
-	 * Handle content changed
+	 * Renders the content if it is changed.
 	 * @inheritDoc
-	 * @param {string} newContent
-	 * @review
+	 * @param {string} newContent The new content to render.
 	 */
 	syncContent(newContent) {
 		if (newContent && (newContent !== this.content)) {
@@ -91,43 +97,44 @@ class FragmentEntryLinkContent extends Component {
 	}
 
 	/**
-	 * Handle editableValues changed
+	 * Handles changes to editable values.
 	 * @inheritDoc
-	 * @param {object} newEditableValues
-	 * @review
+	 * @param {object} newEditableValues The updated values.
+	 * @param {object} oldEditableValues The original values.
 	 */
-	syncEditableValues(newEditableValues) {
-		if (this._editables) {
-			this._editables.forEach(
-				editable => {
-					const editableValues = (
-						newEditableValues[EDITABLE_FRAGMENT_ENTRY_PROCESSOR] &&
-						newEditableValues[EDITABLE_FRAGMENT_ENTRY_PROCESSOR][editable.editableId]
-					) ?
-						newEditableValues[EDITABLE_FRAGMENT_ENTRY_PROCESSOR][editable.editableId] :
-						{
-							defaultValue: editable.content
-						};
+	syncEditableValues(newEditableValues, oldEditableValues) {
+		if (newEditableValues !== oldEditableValues) {
+			if (this._editables) {
+				this._editables.forEach(
+					editable => {
+						const editableValues = (
+							newEditableValues[EDITABLE_FRAGMENT_ENTRY_PROCESSOR] &&
+							newEditableValues[EDITABLE_FRAGMENT_ENTRY_PROCESSOR][editable.editableId]
+						) ?
+							newEditableValues[EDITABLE_FRAGMENT_ENTRY_PROCESSOR][editable.editableId] :
+							{
+								defaultValue: editable.content
+							};
 
-					editable.editableValues = editableValues;
+						editable.editableValues = editableValues;
+					}
+				);
+			}
+
+			this._update(
+				{
+					defaultLanguageId: this.defaultLanguageId,
+					defaultSegmentsExperienceId: this.defaultSegmentsExperienceId,
+					languageId: this.languageId,
+					segmentsExperienceId: this.segmentsExperienceId,
+					updateFunctions: []
 				}
 			);
 		}
-
-		this._update(
-			{
-				defaultLanguageId: this.defaultLanguageId,
-				defaultSegmentsExperienceId: this.defaultSegmentsExperienceId,
-				languageId: this.languageId,
-				segmentsExperienceId: this.segmentsExperienceId,
-				updateFunctions: []
-			}
-		);
 	}
 
 	/**
-	 * Propagate store to editables when it's loaded
-	 * @review
+	 * Propagates the store to editable fields when it's loaded.
 	 */
 	syncStore() {
 		if (this._editables) {
@@ -140,8 +147,8 @@ class FragmentEntryLinkContent extends Component {
 	}
 
 	/**
-	 * Create instantes of FragmentStyleEditor for each element styled with
-	 * background image.
+	 * Create instances of a Fragment Style Editor for each element styled with
+	 * a background image.
 	 */
 	_createBackgroundImageStyleEditors() {
 		if (this._backgroundImageStyleEditors) {
@@ -190,7 +197,7 @@ class FragmentEntryLinkContent extends Component {
 	}
 
 	/**
-	 * Create instances of FragmentEditableField for each editable.
+	 * Creates instances of a fragment editable field for each editable.
 	 */
 	_createEditables() {
 		this._destroyEditables();
@@ -232,8 +239,6 @@ class FragmentEntryLinkContent extends Component {
 		);
 	}
 
-	/**
-	 */
 	_createStyles() {
 		const elements = [];
 
@@ -264,7 +269,7 @@ class FragmentEntryLinkContent extends Component {
 	}
 
 	/**
-	 * Destroy existing FragmentEditableField instances.
+	 * Destroys existing fragment editable field instances.
 	 */
 	_destroyEditables() {
 		if (this._editables) {
@@ -273,6 +278,21 @@ class FragmentEntryLinkContent extends Component {
 			);
 
 			this._editables = [];
+		}
+	}
+
+	/**
+	 * @param {MouseEvent} event
+	 * @private
+	 * @review
+	 */
+	_handleFragmentEntryLinkContentClick(event) {
+		const element = event.srcElement;
+
+		if (closest(element, '[href]') &&
+			!('lfrPageEditorHrefEnabled' in element.dataset)) {
+
+			event.preventDefault();
 		}
 	}
 
@@ -293,25 +313,24 @@ class FragmentEntryLinkContent extends Component {
 	 * @param {Object} event
 	 */
 	_handleStyleChanged(event) {
-		const editableValueSegmentsExperienceId = prefixSegmentsExperienceId(this.segmentsExperienceId) || prefixSegmentsExperienceId(this.defaultSegmentsExperienceId);
+		const editableValueSegmentsExperienceId = prefixSegmentsExperienceId(this.segmentsExperienceId) ||
+			prefixSegmentsExperienceId(this.defaultSegmentsExperienceId);
 
-		this.store.dispatchAction(
-			UPDATE_EDITABLE_VALUE,
-			{
-				editableId: event.name,
-				editableValue: event.value,
-				editableValueId: this.languageId,
-				editableValueSegmentsExperienceId,
-				fragmentEntryLinkId: this.fragmentEntryLinkId
-			}
+		this.store.dispatch(
+			updateEditableValueAction(
+				this.fragmentEntryLinkId,
+				event.name,
+				this.languageId,
+				event.value,
+				editableValueSegmentsExperienceId
+			)
 		);
 	}
 
 	/**
-	 * Renders the FragmentEntryLink content parsing with AUI
+	 * Parses and renders the fragment entry link content with AUI.
 	 * @param {string} content
 	 * @private
-	 * @review
 	 */
 	_renderContent(content) {
 		if (content && this.refs.content) {
@@ -343,14 +362,13 @@ class FragmentEntryLinkContent extends Component {
 	}
 
 	/**
-	 * Runs a set of update functions through the collection of editable values
-	 * inside this fragment entry link.
-	 * @param {string} languageId The current language id
-	 * @param {string} defaultLanguageId The default language id
-	 * @param {Array<Function>} updateFunctions The set of update functions to execute for each
-	 * 	editable value
+	 * Runs a set of update functions through the editable values inside this
+	 * fragment entry link.
+	 * @param {string} languageId The current language ID.
+	 * @param {string} defaultLanguageId The default language ID.
+	 * @param {Array<Function>} updateFunctions The set of update functions to
+	 * execute for each editable value.
 	 * @private
-	 * @review
 	 */
 	_update(
 		{
@@ -392,18 +410,16 @@ class FragmentEntryLinkContent extends Component {
 
 /**
  * State definition.
- * @review
  * @static
  * @type {!Object}
  */
 FragmentEntryLinkContent.STATE = {
 
 	/**
-	 * Fragment content to be rendered
+	 * Fragment content to be rendered.
 	 * @default ''
 	 * @instance
 	 * @memberOf FragmentEntryLink
-	 * @review
 	 * @type {string}
 	 */
 	content: Config.any()
@@ -415,154 +431,50 @@ FragmentEntryLinkContent.STATE = {
 		.value(''),
 
 	/**
-	 * Default configurations for AlloyEditor instances.
-	 * @default {}
-	 * @instance
-	 * @memberOf FragmentEntryLink
-	 * @review
-	 * @type {object}
-	 */
-	defaultEditorConfigurations: Config.object().value({}),
-
-	/**
-	 * Default language id.
-	 * @default undefined
-	 * @instance
-	 * @memberOf FragmentsEditor
-	 * @review
-	 * @type {!string}
-	 */
-	defaultLanguageId: Config.string().required(),
-
-	/**
-	 * Default segment id.
-	 * @default undefined
-	 * @instance
-	 * @memberOf FragmentsEditor
-	 * @review
-	 * @type {!string}
-	 */
-	defaultSegmentsExperienceId: Config.string().required(),
-
-	/**
-	 * Editable values that should be used instead of the default ones
-	 * inside editable fields.
+	 * Editable values that should be used instead of the default ones inside
+	 * editable fields.
 	 * @default undefined
 	 * @instance
 	 * @memberOf FragmentEntryLink
-	 * @review
 	 * @type {!Object}
 	 */
 	editableValues: Config.object().required(),
 
 	/**
-	 * FragmentEntryLink id
+	 * Fragment entry link ID.
 	 * @default undefined
 	 * @instance
 	 * @memberOf FragmentEntryLinkContent
-	 * @review
 	 * @type {!string}
 	 */
 	fragmentEntryLinkId: Config.string().required(),
 
 	/**
-	 * Image selector url
-	 * @default undefined
-	 * @instance
-	 * @memberOf FragmentEntryLink
-	 * @review
-	 * @type {!string}
-	 */
-	imageSelectorURL: Config.string().required(),
-
-	/**
-	 * Currently selected language id.
-	 * @default undefined
-	 * @instance
-	 * @memberOf FragmentsEditor
-	 * @review
-	 * @type {!string}
-	 */
-	languageId: Config.string().required(),
-
-	/**
-	 * Currently selected segment id.
-	 * @default undefined
-	 * @instance
-	 * @memberOf FragmentsEditor
-	 * @review
-	 * @type {!string}
-	 */
-	segmentsExperienceId: Config.string(),
-
-	/**
-	 * Selected mapping type label
-	 * @default {}
-	 * @instance
-	 * @memberOf FragmentEntryLink
-	 * @review
-	 * @type {{
-	 *   subtype: {
-	 *   	id: !string,
-	 *   	label: !string
-	 *   },
-	 *   type: {
-	 *   	id: !string,
-	 *   	label: !string
-	 *   }
-	 * }}
-	 */
-	selectedMappingTypes: Config
-		.shapeOf(
-			{
-				subtype: Config.shapeOf(
-					{
-						id: Config.string().required(),
-						label: Config.string().required()
-					}
-				),
-				type: Config.shapeOf(
-					{
-						id: Config.string().required(),
-						label: Config.string().required()
-					}
-				)
-			}
-		)
-		.value({}),
-
-	/**
-	 * If true, asset mapping is enabled
+	 * If <code>true</code>, the asset mapping is enabled.
 	 * @default false
 	 * @instance
 	 * @memberOf FragmentEntryLink
-	 * @review
-	 * @type {bool}
+	 * @type {boolean}
 	 */
-	showMapping: Config.bool().value(false),
-
-	/**
-	 * Store instance
-	 * @default undefined
-	 * @instance
-	 * @memberOf FragmentEntryLink
-	 * @review
-	 * @type {MetalStore}
-	 */
-	store: Config.instanceOf(MetalStore),
-
-	/**
-	 * Portlet namespace needed for prefixing Alloy Editor instances
-	 * @default undefined
-	 * @instance
-	 * @memberOf FragmentEntryLink
-	 * @review
-	 * @type {!string}
-	 */
-	portletNamespace: Config.string().required()
+	showMapping: Config.bool().value(false)
 };
 
-Soy.register(FragmentEntryLinkContent, templates);
+const ConnectedFragmentEntryLinkContent = getConnectedComponent(
+	FragmentEntryLinkContent,
+	[
+		'defaultEditorConfigurations',
+		'defaultLanguageId',
+		'defaultSegmentsExperienceId',
+		'imageSelectorURL',
+		'languageId',
+		'portletNamespace',
+		'selectedMappingTypes',
+		'segmentsExperienceId',
+		'spritemap'
+	]
+);
 
-export {EDITABLE_FRAGMENT_ENTRY_PROCESSOR};
-export default FragmentEntryLinkContent;
+Soy.register(ConnectedFragmentEntryLinkContent, templates);
+
+export {ConnectedFragmentEntryLinkContent, FragmentEntryLinkContent};
+export default ConnectedFragmentEntryLinkContent;

@@ -26,6 +26,7 @@ int userOAuth2AuthorizationsCount = OAuth2AuthorizationServiceUtil.getUserOAuth2
 	actionDropdownItems="<%= oAuth2ConnectedApplicationsManagementToolbarDisplayContext.getActionDropdownItems() %>"
 	disabled="<%= userOAuth2AuthorizationsCount == 0 %>"
 	filterDropdownItems="<%= oAuth2ConnectedApplicationsManagementToolbarDisplayContext.getFilterDropdownItems() %>"
+	itemsTotal="<%= userOAuth2AuthorizationsCount %>"
 	namespace="<%= renderResponse.getNamespace() %>"
 	searchContainerId="oAuth2ConnectedApplicationsSearchContainer"
 	selectable="<%= true %>"
@@ -100,15 +101,20 @@ int userOAuth2AuthorizationsCount = OAuth2AuthorizationServiceUtil.getUserOAuth2
 	</aui:form>
 </div>
 
-<aui:script>
+<script>
 	function <portlet:namespace />removeAccess() {
 		if (confirm('<%= UnicodeLanguageUtil.get(request, "are-you-sure-you-want-to-remove-access-for-the-selected-entries") %>')) {
-			var form = AUI.$(document.<portlet:namespace />fm);
+			var form = document.<portlet:namespace />fm;
 
-			form.attr('method', 'post');
-			form.fm('oAuth2AuthorizationIds').val(Liferay.Util.listCheckedExcept(form, '<portlet:namespace />allRowIds'));
-
-			submitForm(form, '<portlet:actionURL name="/connected_applications/revoke_oauth2_authorizations" />');
+			Liferay.Util.postForm(
+				form,
+				{
+					data: {
+						oAuth2AuthorizationIds: Liferay.Util.listCheckedExcept(form, '<portlet:namespace />allRowIds')
+					},
+					url: '<portlet:actionURL name="/connected_applications/revoke_oauth2_authorizations" />'
+				}
+			);
 		}
 	}
-</aui:script>
+</script>

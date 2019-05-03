@@ -55,6 +55,7 @@ import com.liferay.portal.kernel.model.Release;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
+import com.liferay.portal.kernel.servlet.taglib.DynamicIncludeUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.Validator;
@@ -208,6 +209,11 @@ public class DDMPortlet extends MVCPortlet {
 				throw new PortletException(e);
 			}
 		}
+
+		DynamicIncludeUtil.include(
+			portal.getHttpServletRequest(renderRequest),
+			portal.getHttpServletResponse(renderResponse),
+			DDMPortlet.class.getName() + "#formRendered", true);
 
 		super.render(renderRequest, renderResponse);
 	}

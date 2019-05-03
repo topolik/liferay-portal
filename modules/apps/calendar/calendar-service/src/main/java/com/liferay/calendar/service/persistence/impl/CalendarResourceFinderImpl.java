@@ -32,16 +32,19 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.spring.extender.service.ServiceReference;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Eduardo Lundgren
  * @author Fabio Pezzutto
  */
+@Component(service = CalendarResourceFinder.class)
 public class CalendarResourceFinderImpl
 	extends CalendarResourceFinderBaseImpl implements CalendarResourceFinder {
 
@@ -410,7 +413,7 @@ public class CalendarResourceFinderImpl
 
 		sb.append(StringPool.OPEN_PARENTHESIS);
 
-		for (int i = 0; i < classNameIds.length - 1; i++) {
+		for (int i = 0; i < (classNameIds.length - 1); i++) {
 			sb.append("classNameId = ? OR ");
 		}
 
@@ -428,7 +431,7 @@ public class CalendarResourceFinderImpl
 
 		sb.append(StringPool.OPEN_PARENTHESIS);
 
-		for (int i = 0; i < groupIds.length - 1; i++) {
+		for (int i = 0; i < (groupIds.length - 1); i++) {
 			sb.append("groupId = ? OR ");
 		}
 
@@ -442,7 +445,7 @@ public class CalendarResourceFinderImpl
 		return CalendarResourceModelImpl.TABLE_COLUMNS_MAP;
 	}
 
-	@ServiceReference(type = CustomSQL.class)
+	@Reference
 	private CustomSQL _customSQL;
 
 }

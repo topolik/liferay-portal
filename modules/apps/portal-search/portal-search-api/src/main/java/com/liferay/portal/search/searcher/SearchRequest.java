@@ -18,6 +18,7 @@ import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.search.aggregation.Aggregation;
 import com.liferay.portal.search.aggregation.pipeline.PipelineAggregation;
+import com.liferay.portal.search.filter.ComplexQueryPart;
 import com.liferay.portal.search.query.Query;
 import com.liferay.portal.search.sort.Sort;
 import com.liferay.portal.search.stats.StatsRequest;
@@ -26,60 +27,75 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Holds parameters to be used when performing a search.
+ * Holds the parameters used when performing a search. Build the search request
+ * with the {@link SearchRequestBuilder}.
  *
  * @author André de Oliveira
- *
- * @review
  */
 @ProviderType
 public interface SearchRequest {
 
 	public Map<String, Aggregation> getAggregationsMap();
 
+	public List<ComplexQueryPart> getComplexQueryParts();
+
 	public List<String> getEntryClassNames();
+
+	public String getFederatedSearchKey();
+
+	public List<SearchRequest> getFederatedSearchRequests();
+
+	public Integer getFrom();
+
+	public List<String> getIndexes();
 
 	public List<Class<?>> getModelIndexerClasses();
 
 	public Map<String, PipelineAggregation> getPipelineAggregationsMap();
 
+	public Query getPostFilterQuery();
+
 	public Query getQuery();
+
+	public String getQueryString();
 
 	/**
 	 * Provides a secondary query to reorder the top documents returned.
 	 *
 	 * @return the rescore query
-	 *
-	 * @review
 	 */
 	public Query getRescoreQuery();
+
+	public Integer getSize();
 
 	public List<Sort> getSorts();
 
 	/**
-	 * Provides the metric aggregations that are to be computed for each field.
+	 * Provides the metric aggregations to be computed for each field.
 	 *
-	 * @return the stats that are enabled for each field.
-	 *
-	 * @review
+	 * @return the stats that are enabled for each field
 	 */
 	public List<StatsRequest> getStatsRequests();
 
+	public boolean isBasicFacetSelection();
+
+	public boolean isEmptySearchEnabled();
+
 	/**
-	 * Enables explanation for each hit on how its score was computed.
+	 * Returns <code>true</code> if the explanation for how each hit's score is
+	 * computed.
 	 *
-	 * @return whether to explain scores
-	 *
-	 * @review
+	 * @return <code>true</code> if the scores are explained; <code>false</code>
+	 *         otherwise
 	 */
 	public boolean isExplain();
 
 	/**
-	 * Enables inclusion of the search engine's response string with results.
+	 * Returns <code>true</code> if the search engine's response string is
+	 * included with the returned results.
 	 *
-	 * @return whether to include the response string
-	 *
-	 * @review
+	 * @return <code>true</code> if the response string is included;
+	 *         <code>false</code> otherwise
 	 */
 	public boolean isIncludeResponseString();
 

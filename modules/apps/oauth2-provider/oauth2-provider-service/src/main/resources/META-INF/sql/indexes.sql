@@ -1,11 +1,10 @@
 create index IX_87DAF9C3 on OA2Auths_OA2ScopeGrants (companyId);
-create index IX_F4C82F24 on OA2Auths_OA2ScopeGrants (oAuth2AuthorizationId);
 create index IX_2F541817 on OA2Auths_OA2ScopeGrants (oAuth2ScopeGrantId);
 
 create index IX_523E5C67 on OAuth2Application (companyId, clientId[$COLUMN_LENGTH:75$]);
 
 create index IX_282ECE83 on OAuth2ApplicationScopeAliases (companyId);
-create index IX_29847127 on OAuth2ApplicationScopeAliases (oAuth2ApplicationId, scopeAliasesHash);
+create index IX_2F9EBCBB on OAuth2ApplicationScopeAliases (oAuth2ApplicationId);
 
 create index IX_77D3B9EA on OAuth2Authorization (accessTokenContentHash);
 create index IX_70DD169C on OAuth2Authorization (oAuth2ApplicationId);

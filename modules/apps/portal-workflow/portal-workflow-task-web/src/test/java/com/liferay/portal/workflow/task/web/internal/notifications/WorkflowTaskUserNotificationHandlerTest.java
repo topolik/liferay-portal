@@ -19,6 +19,7 @@ import com.liferay.portal.json.JSONFactoryImpl;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.UserNotificationEvent;
 import com.liferay.portal.kernel.model.UserNotificationEventWrapper;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
@@ -128,11 +129,13 @@ public class WorkflowTaskUserNotificationHandlerTest {
 	protected UserNotificationEvent mockUserNotificationEvent(
 		String entryClassName, long workflowTaskId) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("entryClassName", entryClassName);
-		jsonObject.put("notificationMessage", _NOTIFICATION_MESSAGE);
-		jsonObject.put("workflowTaskId", workflowTaskId);
+		JSONObject jsonObject = JSONUtil.put(
+			"entryClassName", entryClassName
+		).put(
+			"notificationMessage", _NOTIFICATION_MESSAGE
+		).put(
+			"workflowTaskId", workflowTaskId
+		);
 
 		return new UserNotificationEventWrapper(null) {
 

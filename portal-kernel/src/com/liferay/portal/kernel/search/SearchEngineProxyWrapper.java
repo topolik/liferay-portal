@@ -40,15 +40,6 @@ public class SearchEngineProxyWrapper implements SearchEngine {
 	 */
 	@Deprecated
 	@Override
-	public BooleanClauseFactory getBooleanClauseFactory() {
-		return _searchEngine.getBooleanClauseFactory();
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x)
-	 */
-	@Deprecated
-	@Override
 	public BooleanQueryFactory getBooleanQueryFactory() {
 		return _searchEngine.getBooleanQueryFactory();
 	}
@@ -74,15 +65,6 @@ public class SearchEngineProxyWrapper implements SearchEngine {
 	@Override
 	public TermQueryFactory getTermQueryFactory() {
 		return _searchEngine.getTermQueryFactory();
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x)
-	 */
-	@Deprecated
-	@Override
-	public TermRangeQueryFactory getTermRangeQueryFactory() {
-		return _searchEngine.getTermRangeQueryFactory();
 	}
 
 	@Override

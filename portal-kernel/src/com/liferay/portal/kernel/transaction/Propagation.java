@@ -19,17 +19,45 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Defines a transaction boundary in relation to a current transaction.
+ *
  * @author Michael Young
  * @author Shuyang Zhou
+ * @see    Transactional
  */
 public enum Propagation {
 
+	/**
+	 * Support a current transaction, throw an exception if none exists.
+	 */
 	MANDATORY(TransactionDefinition.PROPAGATION_MANDATORY),
+	/**
+	 * Execute within a nested transaction if a current transaction exists,
+	 * behaves like PROPAGATION_REQUIRED otherwise.
+	 */
 	NESTED(TransactionDefinition.PROPAGATION_NESTED),
+	/**
+	 * Execute non-transactionally, throw an exception if a transaction exists.
+	 */
 	NEVER(TransactionDefinition.PROPAGATION_NEVER),
+	/**
+	 * Execute non-transactionally, suspend the current transaction if one
+	 * exists.
+	 */
 	NOT_SUPPORTED(TransactionDefinition.PROPAGATION_NOT_SUPPORTED),
+	/**
+	 * Support a current transaction, create a new one if none exists.
+	 */
 	REQUIRED(TransactionDefinition.PROPAGATION_REQUIRED),
+	/**
+	 * Create a new transaction, and suspend the current transaction if one
+	 * exists.
+	 */
 	REQUIRES_NEW(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
+	/**
+	 * Support a current transaction, execute non-transactionally if none
+	 * exists.
+	 */
 	SUPPORTS(TransactionDefinition.PROPAGATION_SUPPORTS);
 
 	public static Propagation getPropagation(int value) {

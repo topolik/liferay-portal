@@ -1,5 +1,5 @@
 import * as fieldDeletedHandler from 'source/components/LayoutProvider/handlers/fieldDeletedHandler.es';
-import FormSupport from 'source/components/Form/FormSupport.es';
+import * as FormSupport from 'source/components/Form/FormSupport.es';
 import mockPages from 'mock/mockPages.es';
 import RulesSupport from 'source/components/RuleBuilder/RulesSupport.es';
 
@@ -24,7 +24,7 @@ describe(
 
 						const removeRowSpy = jest.spyOn(FormSupport, 'removeRow');
 
-						removeRowSpy.mockImplementation(() => ({}));
+						removeRowSpy.mockImplementation(() => []);
 
 						fieldDeletedHandler.handleFieldDeleted(state, event);
 
@@ -62,7 +62,7 @@ describe(
 
 						const clearAllConditionFieldValuesSpy = jest.spyOn(RulesSupport, 'clearAllConditionFieldValues');
 
-						clearAllConditionFieldValuesSpy.mockImplementation(() => ({}));
+						clearAllConditionFieldValuesSpy.mockImplementation(() => []);
 
 						fieldDeletedHandler.handleFieldDeleted(state, event);
 

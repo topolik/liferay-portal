@@ -19,13 +19,14 @@ import com.liferay.dynamic.data.mapping.model.DDMTemplate;
 import com.liferay.dynamic.data.mapping.service.DDMStructureLocalServiceUtil;
 import com.liferay.dynamic.data.mapping.service.DDMTemplateServiceUtil;
 import com.liferay.dynamic.data.mapping.util.DDMUtil;
+import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.web.configuration.JournalWebConfiguration;
+import com.liferay.journal.web.internal.servlet.taglib.util.JournalDDMTemplateActionDropdownItemsProvider;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.EmptyOnClickRowChecker;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
-import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
@@ -84,6 +85,18 @@ public class JournalDDMTemplateDisplayContext {
 		return _ddmStructure;
 	}
 
+	public List<DropdownItem> getDDMTemplateActionDropdownItems(
+			DDMTemplate ddmTemplate)
+		throws Exception {
+
+		JournalDDMTemplateActionDropdownItemsProvider
+			ddmTemplateActionDropdownItems =
+				new JournalDDMTemplateActionDropdownItemsProvider(
+					ddmTemplate, _renderRequest, _renderResponse);
+
+		return ddmTemplateActionDropdownItems.getActionDropdownItems();
+	}
+
 	public SearchContainer getDDMTemplateSearch() throws Exception {
 		if (_ddmTemplateSearch != null) {
 			return _ddmTemplateSearch;
@@ -130,16 +143,28 @@ public class JournalDDMTemplateDisplayContext {
 
 		ddmTemplateSearch.setResults(results);
 
-		if (ListUtil.isNotEmpty(results)) {
-			ddmTemplateSearch.setTotal(results.size());
-		}
-		else {
-			ddmTemplateSearch.setTotal(0);
-		}
+		int total = DDMTemplateServiceUtil.searchCount(
+			themeDisplay.getCompanyId(), groupIds,
+			new long[] {PortalUtil.getClassNameId(DDMStructure.class)},
+			_getDDMTemplateClassPKs(),
+			PortalUtil.getClassNameId(JournalArticle.class), _getKeywords(),
+			StringPool.BLANK, StringPool.BLANK, WorkflowConstants.STATUS_ANY);
+
+		ddmTemplateSearch.setTotal(total);
 
 		_ddmTemplateSearch = ddmTemplateSearch;
 
 		return ddmTemplateSearch;
+	}
+
+	public String getDisplayStyle() {
+		if (_displayStyle != null) {
+			return _displayStyle;
+		}
+
+		_displayStyle = ParamUtil.getString(_request, "displayStyle", "icon");
+
+		return _displayStyle;
 	}
 
 	public String getOrderByCol() {
@@ -219,6 +244,7 @@ public class JournalDDMTemplateDisplayContext {
 	private Long _classPK;
 	private DDMStructure _ddmStructure;
 	private SearchContainer _ddmTemplateSearch;
+	private String _displayStyle;
 	private final JournalWebConfiguration _journalWebConfiguration;
 	private String _keywords;
 	private String _orderByCol;

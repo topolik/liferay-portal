@@ -106,8 +106,11 @@ public class DDMTemplateHelperImpl implements DDMTemplateHelper {
 			}
 		}
 
-		jsonObject.put("types", typesJSONObject);
-		jsonObject.put("variables", variablesJSONObject);
+		jsonObject.put(
+			"types", typesJSONObject
+		).put(
+			"variables", variablesJSONObject
+		);
 
 		return jsonObject.toString();
 	}
@@ -148,9 +151,11 @@ public class DDMTemplateHelperImpl implements DDMTemplateHelper {
 
 			Class<?> returnTypeClass = method.getReturnType();
 
-			methodJSONObject.put("returnType", returnTypeClass.getName());
-
-			methodJSONObject.put("type", "Method");
+			methodJSONObject.put(
+				"returnType", returnTypeClass.getName()
+			).put(
+				"type", "Method"
+			);
 
 			typeJSONObject.put(method.getName(), methodJSONObject);
 		}
@@ -215,7 +220,7 @@ public class DDMTemplateHelperImpl implements DDMTemplateHelper {
 		Template template = TemplateManagerUtil.getTemplate(
 			language, templateResource, false);
 
-		for (String key : template.getKeys()) {
+		for (String key : template.keySet()) {
 			Object value = template.get(key);
 
 			if (value == null) {

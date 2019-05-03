@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -94,7 +95,7 @@ public class GitHubRemoteGitRepository extends BaseRemoteGitRepository {
 
 		int page = 1;
 
-		while (page <= _MAX_LABEL_PAGES) {
+		while (page <= _PAGES_LABEL_PAGES_SIZE_MAX) {
 			try {
 				labelsJSONArray = JenkinsResultsParserUtil.toJSONArray(
 					JenkinsResultsParserUtil.combine(
@@ -198,22 +199,19 @@ public class GitHubRemoteGitRepository extends BaseRemoteGitRepository {
 		}
 
 		@Override
-		public boolean equals(Object o) {
-			if (o == null) {
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+
+			if (!(obj instanceof Label)) {
 				return false;
 			}
 
-			if (!(o instanceof Label)) {
-				return false;
-			}
+			Label label = (Label)obj;
 
-			Label label = (Label)o;
-
-			String color = getColor();
-			String name = getName();
-
-			if (color.equals(label.getColor()) &&
-				name.equals(label.getName())) {
+			if (Objects.equals(getColor(), label.getColor()) &&
+				Objects.equals(getName(), label.getName())) {
 
 				return true;
 			}
@@ -286,7 +284,7 @@ public class GitHubRemoteGitRepository extends BaseRemoteGitRepository {
 		_labelRequestURL = labelRequestURL;
 	}
 
-	private static final int _MAX_LABEL_PAGES = 10;
+	private static final int _PAGES_LABEL_PAGES_SIZE_MAX = 10;
 
 	private static final Map<String, List<Label>> _labelsLists =
 		new ConcurrentHashMap<>();

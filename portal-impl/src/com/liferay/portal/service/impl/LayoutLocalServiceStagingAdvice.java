@@ -176,8 +176,8 @@ public class LayoutLocalServiceStagingAdvice implements BeanFactoryAware {
 		layoutLocalServiceHelper.validateParentLayoutId(
 			groupId, privateLayout, layoutId, parentLayoutId);
 
-		Layout layout = LayoutUtil.findByG_P_L(
-			groupId, privateLayout, layoutId);
+		Layout layout = LayoutUtil.findByG_P_L_Head(
+			groupId, privateLayout, layoutId, false);
 
 		if (LayoutStagingUtil.isBranchingLayout(layout)) {
 			layout = getProxiedLayout(layout);
@@ -273,8 +273,8 @@ public class LayoutLocalServiceStagingAdvice implements BeanFactoryAware {
 			boolean privateLayout, long layoutId, String typeSettings)
 		throws PortalException {
 
-		Layout layout = LayoutUtil.findByG_P_L(
-			groupId, privateLayout, layoutId);
+		Layout layout = LayoutUtil.findByG_P_L_Head(
+			groupId, privateLayout, layoutId, false);
 
 		if (LayoutStagingUtil.isBranchingLayout(layout)) {
 			layout = getProxiedLayout(layout);
@@ -322,8 +322,8 @@ public class LayoutLocalServiceStagingAdvice implements BeanFactoryAware {
 			String colorSchemeId, String css)
 		throws PortalException {
 
-		Layout layout = LayoutUtil.findByG_P_L(
-			groupId, privateLayout, layoutId);
+		Layout layout = LayoutUtil.findByG_P_L_Head(
+			groupId, privateLayout, layoutId, false);
 
 		if (LayoutStagingUtil.isBranchingLayout(layout)) {
 			layout = getProxiedLayout(layout);
@@ -456,7 +456,15 @@ public class LayoutLocalServiceStagingAdvice implements BeanFactoryAware {
 				Object proxiedLayout = proxiedLayouts.get(layout);
 
 				if (proxiedLayout != null) {
-					return (Layout)proxiedLayout;
+					Layout cachedProxiedLayout = (Layout)proxiedLayout;
+
+					if (layout.getMvccVersion() ==
+							cachedProxiedLayout.getMvccVersion()) {
+
+						return cachedProxiedLayout;
+					}
+
+					proxiedLayouts.remove(layout);
 				}
 
 				proxiedLayout = ProxyUtil.newProxyInstance(
@@ -615,8 +623,8 @@ public class LayoutLocalServiceStagingAdvice implements BeanFactoryAware {
 	private static final Set<String>
 		_layoutLocalServiceStagingAdviceMethodNames = new HashSet<>(
 			Arrays.asList(
-				"createLayout", "deleteLayout", "getLayouts", "updateLayout",
-				"updateLookAndFeel", "updateName"));
+				"create", "createLayout", "deleteLayout", "getLayouts",
+				"updateLayout", "updateLookAndFeel", "updateName"));
 
 	private BeanFactory _beanFactory;
 
@@ -643,7 +651,9 @@ public class LayoutLocalServiceStagingAdvice implements BeanFactoryAware {
 
 			Class<?>[] parameterTypes = method.getParameterTypes();
 
-			if (methodName.equals("createLayout")) {
+			if (methodName.equals("create") ||
+				methodName.equals("createLayout")) {
+
 				return _invoke(method, arguments);
 			}
 			else if (methodName.equals("deleteLayout")) {

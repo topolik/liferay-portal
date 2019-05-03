@@ -20,6 +20,7 @@ import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
 import com.liferay.oauth2.provider.constants.ClientProfile;
 import com.liferay.oauth2.provider.constants.GrantType;
 import com.liferay.oauth2.provider.model.OAuth2Application;
+import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalService;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.util.OAuth2SecureRandomGenerator;
 import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
@@ -84,8 +85,9 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 
 		OAuth2AdminPortletDisplayContext oAuth2AdminPortletDisplayContext =
 			new OAuth2AdminPortletDisplayContext(
-				_oAuth2ApplicationService, _oAuth2ProviderConfiguration,
-				request, null, _dlurlHelper);
+				_oAuth2ApplicationService,
+				_oAuth2ApplicationScopeAliasesLocalService,
+				_oAuth2ProviderConfiguration, request, null, _dlurlHelper);
 
 		String[] oAuth2Features =
 			oAuth2AdminPortletDisplayContext.getOAuth2Features(
@@ -232,6 +234,10 @@ public class UpdateOAuth2ApplicationMVCActionCommand
 
 	@Reference
 	private DLURLHelper _dlurlHelper;
+
+	@Reference
+	private OAuth2ApplicationScopeAliasesLocalService
+		_oAuth2ApplicationScopeAliasesLocalService;
 
 	@Reference
 	private OAuth2ApplicationService _oAuth2ApplicationService;

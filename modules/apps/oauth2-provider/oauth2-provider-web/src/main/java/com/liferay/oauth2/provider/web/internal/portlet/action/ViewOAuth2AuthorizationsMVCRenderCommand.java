@@ -16,6 +16,7 @@ package com.liferay.oauth2.provider.web.internal.portlet.action;
 
 import com.liferay.document.library.util.DLURLHelper;
 import com.liferay.oauth2.provider.configuration.OAuth2ProviderConfiguration;
+import com.liferay.oauth2.provider.service.OAuth2ApplicationScopeAliasesLocalService;
 import com.liferay.oauth2.provider.service.OAuth2ApplicationService;
 import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderPortletKeys;
 import com.liferay.oauth2.provider.web.internal.constants.OAuth2ProviderWebKeys;
@@ -58,8 +59,10 @@ public class ViewOAuth2AuthorizationsMVCRenderCommand
 
 		OAuth2AdminPortletDisplayContext oAuth2AdminPortletDisplayContext =
 			new OAuth2AdminPortletDisplayContext(
-				_oAuth2ApplicationService, _oAuth2ProviderConfiguration,
-				renderRequest, getThemeDisplay(renderRequest), _dlurlHelper);
+				_oAuth2ApplicationService,
+				_oAuth2ApplicationScopeAliasesLocalService,
+				_oAuth2ProviderConfiguration, renderRequest,
+				getThemeDisplay(renderRequest), _dlurlHelper);
 
 		renderRequest.setAttribute(
 			OAuth2ProviderWebKeys.OAUTH2_ADMIN_PORTLET_DISPLAY_CONTEXT,
@@ -80,6 +83,10 @@ public class ViewOAuth2AuthorizationsMVCRenderCommand
 
 	@Reference
 	private DLURLHelper _dlurlHelper;
+
+	@Reference
+	private OAuth2ApplicationScopeAliasesLocalService
+		_oAuth2ApplicationScopeAliasesLocalService;
 
 	@Reference
 	private OAuth2ApplicationService _oAuth2ApplicationService;

@@ -16,6 +16,7 @@ package com.liferay.site.memberships.web.internal.servlet.taglib.util;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.MembershipRequest;
 import com.liferay.portal.kernel.model.MembershipRequestConstants;
@@ -26,7 +27,6 @@ import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
@@ -61,13 +61,15 @@ public class ViewMembershipRequetsPendingActionDropdownItemsProvider {
 						_themeDisplay.getScopeGroup(),
 						ActionKeys.ASSIGN_MEMBERS)) {
 
-					add(_getReplyRequestActionConsumer());
+					add(_getReplyRequestActionUnsafeConsumer());
 				}
 			}
 		};
 	}
 
-	private Consumer<DropdownItem> _getReplyRequestActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getReplyRequestActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(
 				_renderResponse.createRenderURL(), "mvcPath",

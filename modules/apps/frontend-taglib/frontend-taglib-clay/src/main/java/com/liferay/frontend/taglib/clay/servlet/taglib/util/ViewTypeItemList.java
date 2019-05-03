@@ -14,13 +14,13 @@
 
 package com.liferay.frontend.taglib.clay.servlet.taglib.util;
 
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import javax.portlet.PortletURL;
 
@@ -39,10 +39,15 @@ public class ViewTypeItemList extends ArrayList<ViewTypeItem> {
 		_selectedType = selectedType;
 	}
 
-	public void add(Consumer<ViewTypeItem> consumer) {
+	public void add(UnsafeConsumer<ViewTypeItem, Exception> unsafeConsumer) {
 		ViewTypeItem viewTypeItem = new ViewTypeItem();
 
-		consumer.accept(viewTypeItem);
+		try {
+			unsafeConsumer.accept(viewTypeItem);
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 
 		add(viewTypeItem);
 	}
@@ -67,8 +72,15 @@ public class ViewTypeItemList extends ArrayList<ViewTypeItem> {
 		return viewTypeItem;
 	}
 
-	public void addCardViewTypeItem(Consumer<ViewTypeItem> consumer) {
-		consumer.accept(addCardViewTypeItem());
+	public void addCardViewTypeItem(
+		UnsafeConsumer<ViewTypeItem, Exception> unsafeConsumer) {
+
+		try {
+			unsafeConsumer.accept(addCardViewTypeItem());
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public ViewTypeItem addListViewTypeItem() {
@@ -92,8 +104,15 @@ public class ViewTypeItemList extends ArrayList<ViewTypeItem> {
 		return viewTypeItem;
 	}
 
-	public void addListViewTypeItem(Consumer<ViewTypeItem> consumer) {
-		consumer.accept(addListViewTypeItem());
+	public void addListViewTypeItem(
+		UnsafeConsumer<ViewTypeItem, Exception> unsafeConsumer) {
+
+		try {
+			unsafeConsumer.accept(addListViewTypeItem());
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public ViewTypeItem addTableViewTypeItem() {
@@ -116,8 +135,15 @@ public class ViewTypeItemList extends ArrayList<ViewTypeItem> {
 		return viewTypeItem;
 	}
 
-	public void addTableViewTypeItem(Consumer<ViewTypeItem> consumer) {
-		consumer.accept(addTableViewTypeItem());
+	public void addTableViewTypeItem(
+		UnsafeConsumer<ViewTypeItem, Exception> unsafeConsumer) {
+
+		try {
+			unsafeConsumer.accept(addTableViewTypeItem());
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private final PortletURL _portletURL;

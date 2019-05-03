@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.sharing.constants.SharingPortletKeys;
+import com.liferay.sharing.web.internal.constants.SharingWebKeys;
 import com.liferay.sharing.web.internal.display.SharingEntryPermissionDisplay;
 import com.liferay.sharing.web.internal.display.SharingEntryPermissionDisplayAction;
 import com.liferay.sharing.web.internal.util.SharingUtil;
@@ -57,27 +58,30 @@ public class ViewMVCRenderCommand implements MVCRenderCommand {
 
 		Template template = getTemplate(renderRequest);
 
+		long classNameId = ParamUtil.getLong(renderRequest, "classNameId");
+
+		template.put("classNameId", classNameId);
+
+		long classPK = ParamUtil.getLong(renderRequest, "classPK");
+
+		template.put("classPK", classPK);
+
+		String refererPortletNamespace = ParamUtil.getString(
+			renderRequest, "refererPortletNamespace");
+
+		template.put(
+			"dialogId",
+			refererPortletNamespace + SharingWebKeys.SHARING_DIALOG_ID);
+
+		template.put("portletNamespace", renderResponse.getNamespace());
+		template.put("refererPortletNamespace", refererPortletNamespace);
+
 		PortletURL shareActionURL = renderResponse.createActionURL();
 
 		shareActionURL.setParameter(
 			ActionRequest.ACTION_NAME, "/sharing/share");
 
-		long classNameId = ParamUtil.getLong(renderRequest, "classNameId");
-		long classPK = ParamUtil.getLong(renderRequest, "classPK");
-
-		template.put("classNameId", classNameId);
-		template.put("classPK", classPK);
-
-		template.put("portletNamespace", renderResponse.getNamespace());
-
-		String refererPortletNamespace = ParamUtil.getString(
-			renderRequest, "refererPortletNamespace");
-
-		template.put("refererPortletNamespace", refererPortletNamespace);
-
 		template.put("shareActionURL", shareActionURL.toString());
-		template.put(
-			"sharingDialogId", refererPortletNamespace + "sharingDialogId");
 
 		List<SharingEntryPermissionDisplay> sharingEntryPermissionDisplays =
 			_sharingUtil.getSharingEntryPermissionDisplays(
@@ -99,6 +103,16 @@ public class ViewMVCRenderCommand implements MVCRenderCommand {
 		template.put(
 			"sharingUserAutocompleteURL",
 			sharingUserAutocompleteURL.toString());
+
+		ResourceURL sharingVerifyEmailAddressURL =
+			renderResponse.createResourceURL();
+
+		sharingVerifyEmailAddressURL.setResourceID(
+			"/sharing/verify_email_address");
+
+		template.put(
+			"sharingVerifyEmailAddressURL",
+			sharingVerifyEmailAddressURL.toString());
 
 		template.put(
 			"spritemap",

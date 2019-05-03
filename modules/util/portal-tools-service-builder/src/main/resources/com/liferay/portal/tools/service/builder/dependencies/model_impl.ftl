@@ -45,7 +45,6 @@ import ${apiPackagePath}.model.${entity.name}Soap;
 	<#assign versionedEntity = entity.versionedEntity />
 
 	import ${apiPackagePath}.model.${versionedEntity.name};
-	import ${apiPackagePath}.model.impl.${versionedEntity.name}Impl;
 </#if>
 
 import ${apiPackagePath}.service.${entity.name}LocalServiceUtil;
@@ -655,7 +654,7 @@ public class ${entity.name}ModelImpl extends BaseModelImpl<${entity.name}> imple
 		@Override
 		public void populateVersionModel(${versionEntity.name} ${versionEntity.varName}) {
 			<#list entity.entityColumns as entityColumn>
-				<#if !entityColumn.isPrimary() && !stringUtil.equals(entityColumn.methodName, "HeadId") && !stringUtil.equals(entityColumn.methodName, "MvccVersion")>
+				<#if !entityColumn.isPrimary() && !stringUtil.equals(entityColumn.methodName, "HeadId") && !stringUtil.equals(entityColumn.methodName, "MvccVersion") && !entityColumn.isMappingManyToMany()>
 					${versionEntity.varName}.set${entityColumn.methodName}(get${entityColumn.methodName}());
 				</#if>
 			</#list>
@@ -674,7 +673,7 @@ public class ${entity.name}ModelImpl extends BaseModelImpl<${entity.name}> imple
 		@Override
 		public void populateVersionedModel(${versionedEntity.name} ${versionedEntity.varName}) {
 			<#list versionedEntity.entityColumns as entityColumn>
-				<#if !entityColumn.isPrimary() && !stringUtil.equals(entityColumn.methodName, "HeadId") && !stringUtil.equals(entityColumn.methodName, "MvccVersion")>
+				<#if !entityColumn.isPrimary() && !stringUtil.equals(entityColumn.methodName, "HeadId") && !stringUtil.equals(entityColumn.methodName, "MvccVersion") && !entityColumn.isMappingManyToMany()>
 					${versionedEntity.varName}.set${entityColumn.methodName}(get${entityColumn.methodName}());
 				</#if>
 			</#list>

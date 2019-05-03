@@ -65,13 +65,31 @@ import java.rmi.RemoteException;
 public class AssetListEntryServiceSoap {
 
 	public static void addAssetEntrySelection(
-			long assetListEntryId, long assetEntryId,
+			long assetListEntryId, long assetEntryId, long segmentsEntryId,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws RemoteException {
 
 		try {
 			AssetListEntryServiceUtil.addAssetEntrySelection(
-				assetListEntryId, assetEntryId, serviceContext);
+				assetListEntryId, assetEntryId, segmentsEntryId,
+				serviceContext);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void addAssetEntrySelections(
+			long assetListEntryId, long[] assetEntryIds, long segmentsEntryId,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws RemoteException {
+
+		try {
+			AssetListEntryServiceUtil.addAssetEntrySelections(
+				assetListEntryId, assetEntryIds, segmentsEntryId,
+				serviceContext);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -144,12 +162,12 @@ public class AssetListEntryServiceSoap {
 	}
 
 	public static void deleteAssetEntrySelection(
-			long assetListEntryId, int position)
+			long assetListEntryId, long segmentsEntryId, int position)
 		throws RemoteException {
 
 		try {
 			AssetListEntryServiceUtil.deleteAssetEntrySelection(
-				assetListEntryId, position);
+				assetListEntryId, segmentsEntryId, position);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -183,6 +201,21 @@ public class AssetListEntryServiceSoap {
 
 			return com.liferay.asset.list.model.AssetListEntrySoap.toSoapModel(
 				returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void deleteAssetListEntry(
+			long assetListEntryId, long segmentsEntryId)
+		throws RemoteException {
+
+		try {
+			AssetListEntryServiceUtil.deleteAssetListEntry(
+				assetListEntryId, segmentsEntryId);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -288,13 +321,87 @@ public class AssetListEntryServiceSoap {
 		}
 	}
 
+	public static com.liferay.asset.list.model.AssetListEntrySoap
+			getAssetListEntry(long assetListEntryId)
+		throws RemoteException {
+
+		try {
+			com.liferay.asset.list.model.AssetListEntry returnValue =
+				AssetListEntryServiceUtil.getAssetListEntry(assetListEntryId);
+
+			return com.liferay.asset.list.model.AssetListEntrySoap.toSoapModel(
+				returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.asset.list.model.AssetListEntrySoap
+			getAssetListEntry(long groupId, String assetListEntryKey)
+		throws RemoteException {
+
+		try {
+			com.liferay.asset.list.model.AssetListEntry returnValue =
+				AssetListEntryServiceUtil.getAssetListEntry(
+					groupId, assetListEntryKey);
+
+			return com.liferay.asset.list.model.AssetListEntrySoap.toSoapModel(
+				returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static com.liferay.asset.list.model.AssetListEntrySoap
+			getAssetListEntryByUuidAndGroupId(String uuid, long groupId)
+		throws RemoteException {
+
+		try {
+			com.liferay.asset.list.model.AssetListEntry returnValue =
+				AssetListEntryServiceUtil.getAssetListEntryByUuidAndGroupId(
+					uuid, groupId);
+
+			return com.liferay.asset.list.model.AssetListEntrySoap.toSoapModel(
+				returnValue);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
 	public static void moveAssetEntrySelection(
-			long assetListEntryId, int position, int newPosition)
+			long assetListEntryId, long segmentsEntryId, int position,
+			int newPosition)
 		throws RemoteException {
 
 		try {
 			AssetListEntryServiceUtil.moveAssetEntrySelection(
-				assetListEntryId, position, newPosition);
+				assetListEntryId, segmentsEntryId, position, newPosition);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+
+			throw new RemoteException(e.getMessage());
+		}
+	}
+
+	public static void updateAssetListEntry(
+			long assetListEntryId, long segmentsEntryId, String typeSettings,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws RemoteException {
+
+		try {
+			AssetListEntryServiceUtil.updateAssetListEntry(
+				assetListEntryId, segmentsEntryId, typeSettings,
+				serviceContext);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -322,39 +429,13 @@ public class AssetListEntryServiceSoap {
 		}
 	}
 
-	public static com.liferay.asset.list.model.AssetListEntrySoap
-			updateAssetListEntryTypeSettings(
-				long assetListEntryId, String typeSettings)
+	public static void updateAssetListEntryTypeSettings(
+			long assetListEntryId, long segmentsEntryId, String typeSettings)
 		throws RemoteException {
 
 		try {
-			com.liferay.asset.list.model.AssetListEntry returnValue =
-				AssetListEntryServiceUtil.updateAssetListEntryTypeSettings(
-					assetListEntryId, typeSettings);
-
-			return com.liferay.asset.list.model.AssetListEntrySoap.toSoapModel(
-				returnValue);
-		}
-		catch (Exception e) {
-			_log.error(e, e);
-
-			throw new RemoteException(e.getMessage());
-		}
-	}
-
-	public static com.liferay.asset.list.model.AssetListEntrySoap
-			updateAssetListEntryTypeSettingsProperties(
-				long assetListEntryId, String typeSettingsProperties)
-		throws RemoteException {
-
-		try {
-			com.liferay.asset.list.model.AssetListEntry returnValue =
-				AssetListEntryServiceUtil.
-					updateAssetListEntryTypeSettingsProperties(
-						assetListEntryId, typeSettingsProperties);
-
-			return com.liferay.asset.list.model.AssetListEntrySoap.toSoapModel(
-				returnValue);
+			AssetListEntryServiceUtil.updateAssetListEntryTypeSettings(
+				assetListEntryId, segmentsEntryId, typeSettings);
 		}
 		catch (Exception e) {
 			_log.error(e, e);

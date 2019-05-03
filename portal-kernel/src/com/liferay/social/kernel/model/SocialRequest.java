@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 	"com.liferay.portlet.social.model.impl.SocialRequestImpl"
 )
 @ProviderType
-public interface SocialRequest extends SocialRequestModel, PersistedModel {
+public interface SocialRequest extends PersistedModel, SocialRequestModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

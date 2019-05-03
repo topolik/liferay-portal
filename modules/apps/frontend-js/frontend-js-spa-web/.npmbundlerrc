@@ -19,10 +19,8 @@
 		}
 	},
 	"exclude": {
-		"bootstrap": [
-			"Gruntfile.js",
-			"grunt/**/*"
-		],
+		"bootstrap": true,
+		"core-js": true,
 		"path-browserify": true,
 		"punycode": true,
 		"querystring": true,
@@ -33,5 +31,6 @@
 		],
 		"url": true
 	},
-	"output": "classes/META-INF/resources"
+    "output": "classes/META-INF/resources/",
+    "preset": "liferay-npm-bundler-preset-standard"
 }

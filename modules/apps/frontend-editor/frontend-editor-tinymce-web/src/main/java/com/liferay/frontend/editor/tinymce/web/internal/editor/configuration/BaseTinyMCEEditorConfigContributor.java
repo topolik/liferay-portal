@@ -17,7 +17,6 @@ package com.liferay.frontend.editor.tinymce.web.internal.editor.configuration;
 import com.liferay.frontend.editor.tinymce.web.internal.constants.TinyMCEEditorConstants;
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.ItemSelectorCriterion;
-import com.liferay.item.selector.ItemSelectorReturnType;
 import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.image.criterion.ImageItemSelectorCriterion;
 import com.liferay.petra.string.StringBundler;
@@ -32,7 +31,6 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.Validator;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -66,10 +64,13 @@ public abstract class BaseTinyMCEEditorConfigContributor
 					themeDisplay.getRequest(),
 					themeDisplay.getPathThemeCss() + "/main.css")));
 
-		jsonObject.put("content_css", sb.toString());
-
-		jsonObject.put("convert_urls", Boolean.FALSE);
-		jsonObject.put("extended_valid_elements", _EXTENDED_VALID_ELEMENTS);
+		jsonObject.put(
+			"content_css", sb.toString()
+		).put(
+			"convert_urls", Boolean.FALSE
+		).put(
+			"extended_valid_elements", _EXTENDED_VALID_ELEMENTS
+		);
 
 		ItemSelector itemSelector = getItemSelector();
 
@@ -82,33 +83,39 @@ public abstract class BaseTinyMCEEditorConfigContributor
 		List<ItemSelectorCriterion> itemSelectorCriteria =
 			itemSelector.getItemSelectorCriteria(filebrowserImageBrowseUrl);
 
-		ImageItemSelectorCriterion imageItemSelectorCriterion =
+		ItemSelectorCriterion itemSelectorCriterion =
 			new ImageItemSelectorCriterion();
 
-		imageItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			Arrays.<ItemSelectorReturnType>asList(
-				new URLItemSelectorReturnType()));
+		itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
+			new URLItemSelectorReturnType());
 
-		itemSelectorCriteria.add(imageItemSelectorCriterion);
+		itemSelectorCriteria.add(itemSelectorCriterion);
 
 		PortletURL itemSelectorURL = itemSelector.getItemSelectorURL(
 			requestBackedPortletURLFactory, itemSelectedEventName,
 			itemSelectorCriteria.toArray(
 				new ItemSelectorCriterion[itemSelectorCriteria.size()]));
 
-		jsonObject.put("filebrowserImageBrowseUrl", itemSelectorURL.toString());
-
-		jsonObject.put("invalid_elements", "script");
+		jsonObject.put(
+			"filebrowserImageBrowseUrl", itemSelectorURL.toString()
+		).put(
+			"invalid_elements", "script"
+		);
 
 		String contentsLanguageId = (String)inputEditorTaglibAttributes.get(
 			TinyMCEEditorConstants.ATTRIBUTE_NAMESPACE + ":contentsLanguageId");
 
-		jsonObject.put("language", getTinyMCELanguage(contentsLanguageId));
-
-		jsonObject.put("menubar", Boolean.FALSE);
-		jsonObject.put("mode", "textareas");
-		jsonObject.put("relative_urls", Boolean.FALSE);
-		jsonObject.put("remove_script_host", Boolean.FALSE);
+		jsonObject.put(
+			"language", getTinyMCELanguage(contentsLanguageId)
+		).put(
+			"menubar", Boolean.FALSE
+		).put(
+			"mode", "textareas"
+		).put(
+			"relative_urls", Boolean.FALSE
+		).put(
+			"remove_script_host", Boolean.FALSE
+		);
 
 		String namespace = GetterUtil.getString(
 			inputEditorTaglibAttributes.get(
@@ -118,13 +125,15 @@ public abstract class BaseTinyMCEEditorConfigContributor
 			inputEditorTaglibAttributes.get(
 				TinyMCEEditorConstants.ATTRIBUTE_NAMESPACE + ":name"));
 
-		jsonObject.put("selector", "#" + namespace + name);
-
 		jsonObject.put(
+			"selector", "#" + namespace + name
+		).put(
 			"toolbar",
 			"bold italic underline | alignleft aligncenter alignright | " +
-				"preview print");
-		jsonObject.put("toolbar_items_size", "small");
+				"preview print"
+		).put(
+			"toolbar_items_size", "small"
+		);
 	}
 
 	protected abstract ItemSelector getItemSelector();

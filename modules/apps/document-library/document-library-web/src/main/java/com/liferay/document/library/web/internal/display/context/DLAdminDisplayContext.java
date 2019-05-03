@@ -28,7 +28,6 @@ import com.liferay.document.library.kernel.service.DLAppLocalServiceUtil;
 import com.liferay.document.library.kernel.service.DLAppServiceUtil;
 import com.liferay.document.library.kernel.service.DLFileEntryTypeLocalServiceUtil;
 import com.liferay.document.library.kernel.util.DLUtil;
-import com.liferay.document.library.kernel.util.comparator.RepositoryModelModifiedDateComparator;
 import com.liferay.document.library.kernel.versioning.VersioningStrategy;
 import com.liferay.document.library.web.internal.display.context.logic.DLPortletInstanceSettingsHelper;
 import com.liferay.document.library.web.internal.display.context.util.DLRequestHelper;
@@ -62,6 +61,7 @@ import com.liferay.portal.kernel.search.SearchResult;
 import com.liferay.portal.kernel.search.SearchResultUtil;
 import com.liferay.portal.kernel.search.Sort;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
+import com.liferay.portal.kernel.theme.PortletDisplay;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -193,6 +193,26 @@ public class DLAdminDisplayContext {
 		}
 
 		return orderByType;
+	}
+
+	public String getRememberCheckBoxStateURLRegex() {
+		PortletDisplay portletDisplay = _themeDisplay.getPortletDisplay();
+
+		if (!DLPortletKeys.DOCUMENT_LIBRARY.equals(
+				portletDisplay.getRootPortletId())) {
+
+			return StringBundler.concat(
+				"^(?!.*", portletDisplay.getNamespace(),
+				"redirect).*(folderId=", _folderId, ")");
+		}
+
+		if (_folderId == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
+			return "^[^?]+/" + portletDisplay.getInstanceId() + "\\?";
+		}
+
+		return StringBundler.concat(
+			"^[^?]+/", portletDisplay.getInstanceId(), "/view/" + _folderId,
+			"\\?");
 	}
 
 	public long getRepositoryId() {
@@ -411,10 +431,6 @@ public class DLAdminDisplayContext {
 			DLUtil.getRepositoryModelOrderByComparator(
 				orderByCol, orderByType, orderByModel);
 
-		if (navigation.equals("recent")) {
-			orderByComparator = new RepositoryModelModifiedDateComparator();
-		}
-
 		dlSearchContainer.setOrderByCol(orderByCol);
 		dlSearchContainer.setOrderByComparator(orderByComparator);
 		dlSearchContainer.setOrderByType(orderByType);
@@ -535,10 +551,10 @@ public class DLAdminDisplayContext {
 								dlSearchContainer.getOrderByComparator());
 				}
 			}
-			else if (navigation.equals("mine") || navigation.equals("recent")) {
+			else if (navigation.equals("mine")) {
 				long groupFileEntriesUserId = 0;
 
-				if (navigation.equals("mine") && _themeDisplay.isSignedIn()) {
+				if (_themeDisplay.isSignedIn()) {
 					groupFileEntriesUserId = _themeDisplay.getUserId();
 
 					status = WorkflowConstants.STATUS_ANY;
@@ -576,7 +592,7 @@ public class DLAdminDisplayContext {
 		return dlSearchContainer;
 	}
 
-	private List _getSearchResults(SearchContainer searchContainer)
+	private Hits _getHits(SearchContainer searchContainer)
 		throws PortalException {
 
 		SearchContext searchContext = SearchContextFactory.getInstance(
@@ -610,16 +626,17 @@ public class DLAdminDisplayContext {
 
 		searchContext.setStart(searchContainer.getStart());
 
-		Hits hits = DLAppServiceUtil.search(searchRepositoryId, searchContext);
+		return DLAppServiceUtil.search(searchRepositoryId, searchContext);
+	}
 
-		List<SearchResult> searchResults = SearchResultUtil.getSearchResults(
-			hits, _request.getLocale());
+	private List<Object> _getSearchResults(Hits hits) throws PortalException {
+		List<Object> searchResults = new ArrayList<>();
 
-		List dlSearchResults = new ArrayList<>();
+		for (SearchResult searchResult :
+				SearchResultUtil.getSearchResults(hits, _request.getLocale())) {
 
-		for (SearchResult searchResult : searchResults) {
 			FileEntry fileEntry = null;
-			Folder curFolder = null;
+			Folder folder = null;
 
 			String className = searchResult.getClassName();
 
@@ -630,7 +647,7 @@ public class DLAdminDisplayContext {
 
 				if (!fileEntryRelatedSearchResults.isEmpty()) {
 					fileEntryRelatedSearchResults.forEach(
-						fileEntryRelatedSearchResult -> dlSearchResults.add(
+						fileEntryRelatedSearchResult -> searchResults.add(
 							fileEntryRelatedSearchResult.getModel()));
 				}
 				else if (className.equals(DLFileEntry.class.getName()) ||
@@ -640,15 +657,15 @@ public class DLAdminDisplayContext {
 					fileEntry = DLAppLocalServiceUtil.getFileEntry(
 						searchResult.getClassPK());
 
-					dlSearchResults.add(fileEntry);
+					searchResults.add(fileEntry);
 				}
 				else if (className.equals(DLFolder.class.getName()) ||
 						 className.equals(Folder.class.getName())) {
 
-					curFolder = DLAppLocalServiceUtil.getFolder(
+					folder = DLAppLocalServiceUtil.getFolder(
 						searchResult.getClassPK());
 
-					dlSearchResults.add(curFolder);
+					searchResults.add(folder);
 				}
 			}
 			catch (ClassNotFoundException cnfe) {
@@ -656,17 +673,17 @@ public class DLAdminDisplayContext {
 			}
 		}
 
-		return dlSearchResults;
+		return searchResults;
 	}
 
 	private SearchContainer _getSearchSearchContainer() throws PortalException {
 		SearchContainer searchContainer = new SearchContainer(
 			_liferayPortletRequest, getSearchSearchContainerURL(), null, null);
 
-		List results = _getSearchResults(searchContainer);
+		Hits hits = _getHits(searchContainer);
 
-		searchContainer.setResults(results);
-		searchContainer.setTotal(results.size());
+		searchContainer.setResults(_getSearchResults(hits));
+		searchContainer.setTotal(hits.getLength());
 
 		return searchContainer;
 	}

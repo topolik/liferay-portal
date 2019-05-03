@@ -23,7 +23,7 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.module.framework.service.IdentifiableOSGiService;
 import com.liferay.portal.kernel.service.BaseServiceImpl;
 import com.liferay.portal.kernel.service.persistence.ClassNamePersistence;
-import com.liferay.portal.kernel.service.persistence.GroupPersistence;
+import com.liferay.portal.kernel.service.persistence.LayoutPersistence;
 import com.liferay.portal.kernel.service.persistence.UserPersistence;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.spring.extender.service.ServiceReference;
@@ -340,63 +340,64 @@ public abstract class SegmentsExperienceServiceBaseImpl
 	}
 
 	/**
-	 * Returns the group local service.
+	 * Returns the layout local service.
 	 *
-	 * @return the group local service
+	 * @return the layout local service
 	 */
-	public com.liferay.portal.kernel.service.GroupLocalService
-		getGroupLocalService() {
+	public com.liferay.portal.kernel.service.LayoutLocalService
+		getLayoutLocalService() {
 
-		return groupLocalService;
+		return layoutLocalService;
 	}
 
 	/**
-	 * Sets the group local service.
+	 * Sets the layout local service.
 	 *
-	 * @param groupLocalService the group local service
+	 * @param layoutLocalService the layout local service
 	 */
-	public void setGroupLocalService(
-		com.liferay.portal.kernel.service.GroupLocalService groupLocalService) {
+	public void setLayoutLocalService(
+		com.liferay.portal.kernel.service.LayoutLocalService
+			layoutLocalService) {
 
-		this.groupLocalService = groupLocalService;
+		this.layoutLocalService = layoutLocalService;
 	}
 
 	/**
-	 * Returns the group remote service.
+	 * Returns the layout remote service.
 	 *
-	 * @return the group remote service
+	 * @return the layout remote service
 	 */
-	public com.liferay.portal.kernel.service.GroupService getGroupService() {
-		return groupService;
+	public com.liferay.portal.kernel.service.LayoutService getLayoutService() {
+		return layoutService;
 	}
 
 	/**
-	 * Sets the group remote service.
+	 * Sets the layout remote service.
 	 *
-	 * @param groupService the group remote service
+	 * @param layoutService the layout remote service
 	 */
-	public void setGroupService(
-		com.liferay.portal.kernel.service.GroupService groupService) {
+	public void setLayoutService(
+		com.liferay.portal.kernel.service.LayoutService layoutService) {
 
-		this.groupService = groupService;
+		this.layoutService = layoutService;
 	}
 
 	/**
-	 * Returns the group persistence.
+	 * Returns the layout persistence.
 	 *
-	 * @return the group persistence
+	 * @return the layout persistence
 	 */
-	public GroupPersistence getGroupPersistence() {
-		return groupPersistence;
+	public LayoutPersistence getLayoutPersistence() {
+		return layoutPersistence;
 	}
 
 	/**
-	 * Sets the group persistence.
+	 * Sets the layout persistence.
 	 *
-	 * @param groupPersistence the group persistence
+	 * @param layoutPersistence the layout persistence
 	 */
-	public void setGroupPersistence(GroupPersistence groupPersistence) {
-		this.groupPersistence = groupPersistence;
+	public void setLayoutPersistence(LayoutPersistence layoutPersistence) {
+		this.layoutPersistence = layoutPersistence;
 	}
 
 	/**
@@ -595,18 +596,18 @@ public abstract class SegmentsExperienceServiceBaseImpl
 	protected ClassNamePersistence classNamePersistence;
 
 	@ServiceReference(
-		type = com.liferay.portal.kernel.service.GroupLocalService.class
+		type = com.liferay.portal.kernel.service.LayoutLocalService.class
 	)
-	protected com.liferay.portal.kernel.service.GroupLocalService
-		groupLocalService;
+	protected com.liferay.portal.kernel.service.LayoutLocalService
+		layoutLocalService;
 
 	@ServiceReference(
-		type = com.liferay.portal.kernel.service.GroupService.class
+		type = com.liferay.portal.kernel.service.LayoutService.class
 	)
-	protected com.liferay.portal.kernel.service.GroupService groupService;
+	protected com.liferay.portal.kernel.service.LayoutService layoutService;
 
-	@ServiceReference(type = GroupPersistence.class)
-	protected GroupPersistence groupPersistence;
+	@ServiceReference(type = LayoutPersistence.class)
+	protected LayoutPersistence layoutPersistence;
 
 	@ServiceReference(
 		type = com.liferay.portal.kernel.service.ResourceLocalService.class

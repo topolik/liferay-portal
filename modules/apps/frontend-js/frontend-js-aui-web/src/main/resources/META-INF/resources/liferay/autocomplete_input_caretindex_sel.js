@@ -1,3 +1,10 @@
+/**
+ * The Autocomplete Input Caretindex Sel Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-autocomplete-input-caretindex-sel
+ */
+
 AUI.add(
 	'liferay-autocomplete-input-caretindex-sel',
 	function(A) {

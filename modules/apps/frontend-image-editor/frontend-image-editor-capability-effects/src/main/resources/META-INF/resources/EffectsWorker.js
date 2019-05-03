@@ -14,7 +14,7 @@ onmessage = function(event) {
 	var effect = event.data.effect;
 	var controlPoints = getControlPoints(effect);
 
-	if (controlPoints) {
+	if (controlPoints) {
 		var dataLength = imageData.data.length;
 
 		if (dataLength) {
@@ -28,19 +28,19 @@ onmessage = function(event) {
 
 			for (var i = 0; i < dataLength; i += 4) {
 				var red = data[i];
-				var green = data[i+1];
-				var blue = data[i+2];
-				var alpha = data[i+3];
+				var green = data[i + 1];
+				var blue = data[i + 2];
+				var alpha = data[i + 3];
 
 				data[i] = redCurve.valueOf(red);
-				data[i+1] = greenCurve.valueOf(green);
-				data[i+2] = blueCurve.valueOf(blue);
+				data[i + 1] = greenCurve.valueOf(green);
+				data[i + 2] = blueCurve.valueOf(blue);
 
 				if (controlPoints.desaturate) {
-					data[i] = data[i] * DESATURATION_MATRIX[0] + data[i+1] * DESATURATION_MATRIX[1] + data[i+2] * DESATURATION_MATRIX[2] + alpha * DESATURATION_MATRIX[3] + DESATURATION_MATRIX[4];
-					data[i+1] = data[i] * DESATURATION_MATRIX[5] + data[i+1] * DESATURATION_MATRIX[6] + data[i+2] * DESATURATION_MATRIX[7] + alpha * DESATURATION_MATRIX[8] + DESATURATION_MATRIX[9];
-					data[i+2] = data[i] * DESATURATION_MATRIX[10] + data[i+1] * DESATURATION_MATRIX[11] + data[i+2] * DESATURATION_MATRIX[12] + alpha * DESATURATION_MATRIX[13] + DESATURATION_MATRIX[14];
-					data[i+3] = data[i] * DESATURATION_MATRIX[15] + data[i+1] * DESATURATION_MATRIX[16] + data[i+2] * DESATURATION_MATRIX[17] + alpha * DESATURATION_MATRIX[18] + DESATURATION_MATRIX[19];
+					data[i] = data[i] * DESATURATION_MATRIX[0] + data[i + 1] * DESATURATION_MATRIX[1] + data[i + 2] * DESATURATION_MATRIX[2] + alpha * DESATURATION_MATRIX[3] + DESATURATION_MATRIX[4];
+					data[i + 1] = data[i] * DESATURATION_MATRIX[5] + data[i + 1] * DESATURATION_MATRIX[6] + data[i + 2] * DESATURATION_MATRIX[7] + alpha * DESATURATION_MATRIX[8] + DESATURATION_MATRIX[9];
+					data[i + 2] = data[i] * DESATURATION_MATRIX[10] + data[i + 1] * DESATURATION_MATRIX[11] + data[i + 2] * DESATURATION_MATRIX[12] + alpha * DESATURATION_MATRIX[13] + DESATURATION_MATRIX[14];
+					data[i + 3] = data[i] * DESATURATION_MATRIX[15] + data[i + 1] * DESATURATION_MATRIX[16] + data[i + 2] * DESATURATION_MATRIX[17] + alpha * DESATURATION_MATRIX[18] + DESATURATION_MATRIX[19];
 				}
 			}
 		}
@@ -63,64 +63,64 @@ onmessage = function(event) {
 var getControlPoints = function(effect) {
 	var controlPoints;
 
-	switch(effect.toLowerCase()) {
-		case 'ruby':
-			controlPoints = CONTROL_POINTS_RUBY;
-			break;
-		case 'absinthe':
-			controlPoints = CONTROL_POINTS_ABSINTHE;
-			break;
-		case 'chroma':
-			controlPoints = CONTROL_POINTS_CHROMA;
-			break;
-		case 'atari':
-			controlPoints = CONTROL_POINTS_ATARI;
-			break;
-		case 'tripel':
-			controlPoints = CONTROL_POINTS_TRIPEL;
-			break;
-		case 'ailis':
-			controlPoints = CONTROL_POINTS_AILIS;
-			break;
-		case 'flatfoot':
-			controlPoints = CONTROL_POINTS_FLATFOOT;
-			break;
-		case 'pyrexia':
-			controlPoints = CONTROL_POINTS_PYREXIA;
-			break;
-		case 'umbra':
-			controlPoints = CONTROL_POINTS_UMBRA;
-			break;
-		case 'rouge':
-			controlPoints = CONTROL_POINTS_ROUGE;
-			break;
-		case 'idyll':
-			controlPoints = CONTROL_POINTS_IDYLL;
-			break;
-		case 'glimmer':
-			controlPoints = CONTROL_POINTS_GLIMMER;
-			break;
-		case 'elysium':
-			controlPoints = CONTROL_POINTS_ELYSIUM;
-			break;
-		case 'nucleus':
-			controlPoints = CONTROL_POINTS_NUCLEUS;
-			break;
-		case 'amber':
-			controlPoints = CONTROL_POINTS_AMBER;
-			break;
-		case 'paella':
-			controlPoints = CONTROL_POINTS_PAELLA;
-			break;
-		case 'aureus':
-			controlPoints = CONTROL_POINTS_AUREUS;
-			break;
-		case 'expanse':
-			controlPoints = CONTROL_POINTS_EXPANSE;
-			break;
-		case 'orchid':
-			controlPoints = CONTROL_POINTS_ORCHID;
-			break;
+	switch (effect.toLowerCase()) {
+	case 'ruby':
+		controlPoints = CONTROL_POINTS_RUBY;
+		break;
+	case 'absinthe':
+		controlPoints = CONTROL_POINTS_ABSINTHE;
+		break;
+	case 'chroma':
+		controlPoints = CONTROL_POINTS_CHROMA;
+		break;
+	case 'atari':
+		controlPoints = CONTROL_POINTS_ATARI;
+		break;
+	case 'tripel':
+		controlPoints = CONTROL_POINTS_TRIPEL;
+		break;
+	case 'ailis':
+		controlPoints = CONTROL_POINTS_AILIS;
+		break;
+	case 'flatfoot':
+		controlPoints = CONTROL_POINTS_FLATFOOT;
+		break;
+	case 'pyrexia':
+		controlPoints = CONTROL_POINTS_PYREXIA;
+		break;
+	case 'umbra':
+		controlPoints = CONTROL_POINTS_UMBRA;
+		break;
+	case 'rouge':
+		controlPoints = CONTROL_POINTS_ROUGE;
+		break;
+	case 'idyll':
+		controlPoints = CONTROL_POINTS_IDYLL;
+		break;
+	case 'glimmer':
+		controlPoints = CONTROL_POINTS_GLIMMER;
+		break;
+	case 'elysium':
+		controlPoints = CONTROL_POINTS_ELYSIUM;
+		break;
+	case 'nucleus':
+		controlPoints = CONTROL_POINTS_NUCLEUS;
+		break;
+	case 'amber':
+		controlPoints = CONTROL_POINTS_AMBER;
+		break;
+	case 'paella':
+		controlPoints = CONTROL_POINTS_PAELLA;
+		break;
+	case 'aureus':
+		controlPoints = CONTROL_POINTS_AUREUS;
+		break;
+	case 'expanse':
+		controlPoints = CONTROL_POINTS_EXPANSE;
+		break;
+	case 'orchid':
+		controlPoints = CONTROL_POINTS_ORCHID;
+		break;
 	}
 
 	return controlPoints;
@@ -196,7 +196,7 @@ var CONTROL_POINTS_CHROMA = {
 var CONTROL_POINTS_ATARI = {
 	red: [[0, 25], [45, 80], [85, 135], [120, 180], [230, 240], [255, 255]],
 	green: [[0, 18], [42, 58], [90, 102], [120, 130], [165, 140], [217, 195], [255, 210]],
-	blue: [[0, 0], [40, 55], [88, 112], [132, 172], [168, 198], [215, 218], [255, 240]],
+	blue: [[0, 0], [40, 55], [88, 112], [132, 172], [168, 198], [215, 218], [255, 240]]
 };
 
 /**

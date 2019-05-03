@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.2.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_2_0.dtd">
 
-<service-builder auto-import-default-references="false" auto-namespace-tables="false" package-path="com.liferay.asset.list">
+<service-builder auto-import-default-references="false" auto-namespace-tables="false" dependency-injector="ds" package-path="com.liferay.asset.list">
 	<namespace>AssetList</namespace>
 	<entity local-service="true" name="AssetListEntry" remote-service="true" uuid="true">
 
@@ -23,15 +23,19 @@
 
 		<!-- Other fields -->
 
+		<column name="assetListEntryKey" type="String" />
 		<column name="title" type="String" />
 		<column name="type" type="int" />
-		<column name="typeSettings" type="String" />
 		<column name="lastPublishDate" type="Date" />
 
 		<!-- Finder methods -->
 
 		<finder name="GroupId" return-type="Collection">
 			<finder-column name="groupId" />
+		</finder>
+		<finder name="G_ALEK" return-type="AssetListEntry" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="assetListEntryKey" />
 		</finder>
 		<finder name="G_T" return-type="AssetListEntry" unique="true">
 			<finder-column name="groupId" />
@@ -49,6 +53,7 @@
 		<!-- References -->
 
 		<reference entity="AssetListEntryAssetEntryRel" package-path="com.liferay.asset.list" />
+		<reference entity="AssetListEntrySegmentsEntryRel" package-path="com.liferay.asset.list" />
 		<reference entity="Resource" package-path="com.liferay.portal" />
 		<reference entity="User" package-path="com.liferay.portal" />
 	</entity>
@@ -73,8 +78,8 @@
 		<!-- Other fields -->
 
 		<column name="assetListEntryId" type="long" />
-		<column name="segmentsEntryId" type="long" />
 		<column name="assetEntryId" type="long" />
+		<column name="segmentsEntryId" type="long" />
 		<column name="position" type="int" />
 		<column name="lastPublishDate" type="Date" />
 
@@ -89,12 +94,18 @@
 		<finder name="AssetListEntryId" return-type="Collection">
 			<finder-column name="assetListEntryId" />
 		</finder>
-		<finder name="A_P" return-type="AssetListEntryAssetEntryRel" unique="true">
+		<finder name="A_S" return-type="Collection">
 			<finder-column name="assetListEntryId" />
+			<finder-column name="segmentsEntryId" />
+		</finder>
+		<finder name="A_S_P" return-type="AssetListEntryAssetEntryRel" unique="true">
+			<finder-column name="assetListEntryId" />
+			<finder-column name="segmentsEntryId" />
 			<finder-column name="position" />
 		</finder>
-		<finder name="A_GtP" return-type="Collection">
+		<finder name="A_S_GtP" return-type="Collection">
 			<finder-column name="assetListEntryId" />
+			<finder-column name="segmentsEntryId" />
 			<finder-column comparator="&gt;" name="position" />
 		</finder>
 
@@ -102,7 +113,7 @@
 
 		<reference entity="User" package-path="com.liferay.portal" />
 	</entity>
-	<entity local-service="true" name="AssetListEntrySegmentsEntryRel" remote-service="true" uuid="true">
+	<entity local-service="true" name="AssetListEntrySegmentsEntryRel" remote-service="false" uuid="true">
 
 		<!-- PK fields -->
 
@@ -139,6 +150,10 @@
 			<finder-column name="assetListEntryId" />
 			<finder-column name="segmentsEntryId" />
 		</finder>
+
+		<!-- References -->
+
+		<reference entity="User" package-path="com.liferay.portal" />
 	</entity>
 	<entity local-service="true" name="AssetListEntryUsage" remote-service="false" uuid="true">
 

@@ -15,8 +15,9 @@
 package com.liferay.layout.internal.search.util;
 
 import com.liferay.fragment.model.FragmentEntryLink;
+import com.liferay.fragment.renderer.DefaultFragmentRendererContext;
+import com.liferay.fragment.renderer.FragmentRendererController;
 import com.liferay.fragment.service.FragmentEntryLinkLocalServiceUtil;
-import com.liferay.fragment.util.FragmentEntryRenderUtil;
 import com.liferay.layout.page.template.model.LayoutPageTemplateStructure;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -26,7 +27,6 @@ import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
 
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
@@ -39,20 +39,26 @@ import javax.servlet.http.HttpServletResponse;
 public class LayoutPageTemplateStructureRenderUtil {
 
 	public static String renderLayoutContent(
-			HttpServletRequest request, HttpServletResponse response,
+			FragmentRendererController fragmentRendererController,
+			HttpServletRequest httpServletRequest,
+			HttpServletResponse httpServletResponse,
 			LayoutPageTemplateStructure layoutPageTemplateStructure,
 			String mode, Map<String, Object> parameterMap, Locale locale,
 			long[] segmentsExperienceIds)
 		throws PortalException {
 
-		String data = layoutPageTemplateStructure.getData();
+		if (fragmentRendererController == null) {
+			return StringPool.BLANK;
+		}
+
+		String data = layoutPageTemplateStructure.getData(
+			segmentsExperienceIds);
 
 		if (Validator.isNull(data)) {
 			return StringPool.BLANK;
 		}
 
-		JSONObject dataJSONObject = JSONFactoryUtil.createJSONObject(
-			layoutPageTemplateStructure.getData());
+		JSONObject dataJSONObject = JSONFactoryUtil.createJSONObject(data);
 
 		JSONArray structureJSONArray = dataJSONObject.getJSONArray("structure");
 
@@ -91,23 +97,19 @@ public class LayoutPageTemplateStructureRenderUtil {
 						continue;
 					}
 
-					String renderFragmentEntryLink = StringPool.BLANK;
+					DefaultFragmentRendererContext fragmentRendererContext =
+						new DefaultFragmentRendererContext(fragmentEntryLink);
 
-					if (parameterMap != null) {
-						renderFragmentEntryLink =
-							FragmentEntryRenderUtil.renderFragmentEntryLink(
-								fragmentEntryLink, mode, parameterMap, locale,
-								segmentsExperienceIds, request, response);
-					}
-					else {
-						renderFragmentEntryLink =
-							FragmentEntryRenderUtil.renderFragmentEntryLink(
-								fragmentEntryLink, mode, Collections.emptyMap(),
-								locale, segmentsExperienceIds, request,
-								response);
-					}
+					fragmentRendererContext.setFieldValues(parameterMap);
+					fragmentRendererContext.setLocale(locale);
+					fragmentRendererContext.setMode(mode);
+					fragmentRendererContext.setSegmentsExperienceIds(
+						segmentsExperienceIds);
 
-					sb.append(renderFragmentEntryLink);
+					sb.append(
+						fragmentRendererController.render(
+							fragmentRendererContext, httpServletRequest,
+							httpServletResponse));
 				}
 			}
 		}

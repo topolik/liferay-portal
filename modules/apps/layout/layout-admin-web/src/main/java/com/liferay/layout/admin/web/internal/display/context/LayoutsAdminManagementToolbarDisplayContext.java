@@ -18,7 +18,6 @@ import com.liferay.frontend.taglib.clay.servlet.taglib.display.context.SearchCon
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.CreationMenu;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
@@ -105,15 +104,14 @@ public class LayoutsAdminManagementToolbarDisplayContext
 					 !_layoutsAdminDisplayContext.hasLayouts())) {
 
 					addPrimaryDropdownItem(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setHref(
-									_layoutsAdminDisplayContext.
-										getSelectLayoutPageTemplateEntryURL(
-											firstLayoutPageTemplateCollectionId,
-											selPlid, false));
-								dropdownItem.setLabel(_getLabel(false));
-							}));
+						dropdownItem -> {
+							dropdownItem.setHref(
+								_layoutsAdminDisplayContext.
+									getSelectLayoutPageTemplateEntryURL(
+										firstLayoutPageTemplateCollectionId,
+										selPlid, false));
+							dropdownItem.setLabel(_getLabel(false));
+						});
 				}
 
 				if (_layoutsAdminDisplayContext.isPrivateLayout() ||
@@ -121,15 +119,14 @@ public class LayoutsAdminManagementToolbarDisplayContext
 					!_layoutsAdminDisplayContext.hasLayouts()) {
 
 					addPrimaryDropdownItem(
-						SafeConsumer.ignore(
-							dropdownItem -> {
-								dropdownItem.setHref(
-									_layoutsAdminDisplayContext.
-										getSelectLayoutPageTemplateEntryURL(
-											firstLayoutPageTemplateCollectionId,
-											selPlid, true));
-								dropdownItem.setLabel(_getLabel(true));
-							}));
+						dropdownItem -> {
+							dropdownItem.setHref(
+								_layoutsAdminDisplayContext.
+									getSelectLayoutPageTemplateEntryURL(
+										firstLayoutPageTemplateCollectionId,
+										selPlid, true));
+							dropdownItem.setLabel(_getLabel(true));
+						});
 				}
 			}
 		};
@@ -138,6 +135,10 @@ public class LayoutsAdminManagementToolbarDisplayContext
 	@Override
 	public String getSearchActionURL() {
 		PortletURL portletURL = liferayPortletResponse.createRenderURL();
+
+		portletURL.setParameter(
+			"privateLayout",
+			String.valueOf(_layoutsAdminDisplayContext.isPrivateLayout()));
 
 		return portletURL.toString();
 	}

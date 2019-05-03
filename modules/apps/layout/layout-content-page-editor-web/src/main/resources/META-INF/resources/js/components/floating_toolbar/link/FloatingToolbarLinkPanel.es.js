@@ -1,11 +1,12 @@
 import Component from 'metal-component';
+import debounce from 'metal-debounce';
 import Soy, {Config} from 'metal-soy';
 
 import './FloatingToolbarLinkPanelDelegateTemplate.soy';
 import {BUTTON_TYPES, TARGET_TYPES} from '../../../utils/constants';
+import {disableSavingChangesStatusAction, enableSavingChangesStatusAction, updateLastSaveDateAction} from '../../../actions/saveChanges.es';
 import templates from './FloatingToolbarLinkPanel.soy';
-import {UPDATE_CONFIG_ATTRIBUTES, UPDATE_LAST_SAVE_DATE, UPDATE_SAVING_CHANGES_STATUS} from '../../../actions/actions.es';
-import debounce from 'metal-debounce';
+import {UPDATE_CONFIG_ATTRIBUTES} from '../../../actions/actions.es';
 
 /**
  * FloatingToolbarLinkPanel
@@ -36,7 +37,7 @@ class FloatingToolbarLinkPanel extends Component {
 			href: hrefElement.value
 		};
 
-		this._updateSectionConfig(config);
+		this._updateRowConfig(config);
 	}
 
 	/**
@@ -51,39 +52,24 @@ class FloatingToolbarLinkPanel extends Component {
 	}
 
 	/**
-	 * Updates section configuration
-	 * @param {object} config Section configuration
+	 * Updates row configuration
+	 * @param {object} config Row configuration
 	 * @private
 	 * @review
 	 */
-	_updateSectionConfig(config) {
+	_updateRowConfig(config) {
 		this.store
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: true
-				}
-			)
-			.dispatchAction(
-				UPDATE_CONFIG_ATTRIBUTES,
+			.dispatch(enableSavingChangesStatusAction())
+			.dispatch(
 				{
 					config,
-					editableId: this.itemId,
-					fragmentEntryLinkId: this.item.fragmentEntryLinkId
+					editableId: this.item.editableId,
+					fragmentEntryLinkId: this.item.fragmentEntryLinkId,
+					type: UPDATE_CONFIG_ATTRIBUTES
 				}
 			)
-			.dispatchAction(
-				UPDATE_LAST_SAVE_DATE,
-				{
-					lastSaveDate: new Date()
-				}
-			)
-			.dispatchAction(
-				UPDATE_SAVING_CHANGES_STATUS,
-				{
-					savingChanges: false
-				}
-			);
+			.dispatch(updateLastSaveDateAction())
+			.dispatch(disableSavingChangesStatusAction());
 	}
 
 	/**
@@ -102,7 +88,7 @@ class FloatingToolbarLinkPanel extends Component {
 			buttonType: buttonType.buttonTypeId
 		};
 
-		this._updateSectionConfig(config);
+		this._updateRowConfig(config);
 	}
 
 	/**
@@ -116,7 +102,7 @@ class FloatingToolbarLinkPanel extends Component {
 			target: targetElement.options[targetElement.selectedIndex].value
 		};
 
-		this._updateSectionConfig(config);
+		this._updateRowConfig(config);
 	}
 }
 
@@ -129,14 +115,28 @@ class FloatingToolbarLinkPanel extends Component {
 FloatingToolbarLinkPanel.STATE = {
 
 	/**
-	 * @default undefined
-	 * @memberof FloatingToolbarLinkPanel
+	 * @default BUTTON_TYPES
+	 * @memberOf FloatingToolbarLinkPanel
+	 * @private
 	 * @review
-	 * @type {object}
+	 * @type {object[]}
 	 */
-	store: Config
-		.object()
-		.value(null),
+	_buttonTypes: Config
+		.array()
+		.internal()
+		.value(BUTTON_TYPES),
+
+	/**
+	 * @default TARGET_TYPES
+	 * @memberOf FloatingToolbarLinkPanel
+	 * @private
+	 * @review
+	 * @type {object[]}
+	 */
+	_targetTypes: Config
+		.array()
+		.internal()
+		.value(TARGET_TYPES),
 
 	/**
 	 * @default undefined
@@ -159,28 +159,14 @@ FloatingToolbarLinkPanel.STATE = {
 		.required(),
 
 	/**
-	 * @default CONTAINER_TYPES
-	 * @memberOf FloatingToolbarLinkPanel
-	 * @private
+	 * @default undefined
+	 * @memberof FloatingToolbarLinkPanel
 	 * @review
-	 * @type {object[]}
+	 * @type {object}
 	 */
-	_buttonTypes: Config
-		.array()
-		.internal()
-		.value(BUTTON_TYPES),
-
-	/**
-	 * @default CONTAINER_TYPES
-	 * @memberOf FloatingToolbarLinkPanel
-	 * @private
-	 * @review
-	 * @type {object[]}
-	 */
-	_targetTypes: Config
-		.array()
-		.internal()
-		.value(TARGET_TYPES)
+	store: Config
+		.object()
+		.value(null)
 };
 
 Soy.register(FloatingToolbarLinkPanel, templates);

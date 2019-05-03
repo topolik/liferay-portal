@@ -1,5 +1,4 @@
 {
-	"output": "classes/META-INF/resources",
 	"config": {
 		"imports": {
 			"frontend-js-node-shims": {
@@ -12,11 +11,15 @@
 		}
 	},
 	"exclude": {
-		"bootstrap": [
-			"Gruntfile.js", "grunt/**/*"
-		],
+		"bootstrap": true,
 		"querystring": [
 			"test/**/*"
+		],
+		"xss-filters": [
+			"dist/**/*",
+			"tests/**/*"
 		]
-	}
+	},
+	"output": "classes/META-INF/resources",
+	"preset": "liferay-npm-bundler-preset-standard"
 }

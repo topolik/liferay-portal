@@ -28,52 +28,33 @@ public class UserTable {
 	public static final String TABLE_NAME = "User_";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"uuid_", Types.VARCHAR},
-		{"externalReferenceCode", Types.VARCHAR},
-		{"userId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"defaultUser", Types.BOOLEAN},
-		{"contactId", Types.BIGINT},
-		{"password_", Types.VARCHAR},
-		{"passwordEncrypted", Types.BOOLEAN},
-		{"passwordReset", Types.BOOLEAN},
-		{"passwordModifiedDate", Types.TIMESTAMP},
-		{"digest", Types.VARCHAR},
+		{"mvccVersion", Types.BIGINT}, {"uuid_", Types.VARCHAR},
+		{"externalReferenceCode", Types.VARCHAR}, {"userId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"defaultUser", Types.BOOLEAN},
+		{"contactId", Types.BIGINT}, {"password_", Types.VARCHAR},
+		{"passwordEncrypted", Types.BOOLEAN}, {"passwordReset", Types.BOOLEAN},
+		{"passwordModifiedDate", Types.TIMESTAMP}, {"digest", Types.VARCHAR},
 		{"reminderQueryQuestion", Types.VARCHAR},
 		{"reminderQueryAnswer", Types.VARCHAR},
-		{"graceLoginCount", Types.INTEGER},
-		{"screenName", Types.VARCHAR},
-		{"emailAddress", Types.VARCHAR},
-		{"facebookId", Types.BIGINT},
-		{"googleUserId", Types.VARCHAR},
-		{"ldapServerId", Types.BIGINT},
-		{"openId", Types.VARCHAR},
-		{"portraitId", Types.BIGINT},
-		{"languageId", Types.VARCHAR},
-		{"timeZoneId", Types.VARCHAR},
-		{"greeting", Types.VARCHAR},
-		{"comments", Types.VARCHAR},
-		{"firstName", Types.VARCHAR},
-		{"middleName", Types.VARCHAR},
-		{"lastName", Types.VARCHAR},
-		{"jobTitle", Types.VARCHAR},
-		{"loginDate", Types.TIMESTAMP},
-		{"loginIP", Types.VARCHAR},
-		{"lastLoginDate", Types.TIMESTAMP},
-		{"lastLoginIP", Types.VARCHAR},
+		{"graceLoginCount", Types.INTEGER}, {"screenName", Types.VARCHAR},
+		{"emailAddress", Types.VARCHAR}, {"facebookId", Types.BIGINT},
+		{"googleUserId", Types.VARCHAR}, {"ldapServerId", Types.BIGINT},
+		{"openId", Types.VARCHAR}, {"portraitId", Types.BIGINT},
+		{"languageId", Types.VARCHAR}, {"timeZoneId", Types.VARCHAR},
+		{"greeting", Types.VARCHAR}, {"comments", Types.VARCHAR},
+		{"firstName", Types.VARCHAR}, {"middleName", Types.VARCHAR},
+		{"lastName", Types.VARCHAR}, {"jobTitle", Types.VARCHAR},
+		{"loginDate", Types.TIMESTAMP}, {"loginIP", Types.VARCHAR},
+		{"lastLoginDate", Types.TIMESTAMP}, {"lastLoginIP", Types.VARCHAR},
 		{"lastFailedLoginDate", Types.TIMESTAMP},
-		{"failedLoginAttempts", Types.INTEGER},
-		{"lockout", Types.BOOLEAN},
-		{"lockoutDate", Types.TIMESTAMP},
-		{"agreedToTermsOfUse", Types.BOOLEAN},
-		{"emailAddressVerified", Types.BOOLEAN},
-		{"status", Types.INTEGER}
+		{"failedLoginAttempts", Types.INTEGER}, {"lockout", Types.BOOLEAN},
+		{"lockoutDate", Types.TIMESTAMP}, {"agreedToTermsOfUse", Types.BOOLEAN},
+		{"emailAddressVerified", Types.BOOLEAN}, {"status", Types.INTEGER}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -163,7 +144,8 @@ TABLE_COLUMNS_MAP.put("emailAddressVerified", Types.BOOLEAN);
 TABLE_COLUMNS_MAP.put("status", Types.INTEGER);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table User_ (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,externalReferenceCode VARCHAR(75) null,userId LONG not null primary key,companyId LONG,createDate DATE null,modifiedDate DATE null,defaultUser BOOLEAN,contactId LONG,password_ VARCHAR(75) null,passwordEncrypted BOOLEAN,passwordReset BOOLEAN,passwordModifiedDate DATE null,digest VARCHAR(255) null,reminderQueryQuestion VARCHAR(75) null,reminderQueryAnswer VARCHAR(75) null,graceLoginCount INTEGER,screenName VARCHAR(75) null,emailAddress VARCHAR(254) null,facebookId LONG,googleUserId VARCHAR(75) null,ldapServerId LONG,openId VARCHAR(1024) null,portraitId LONG,languageId VARCHAR(75) null,timeZoneId VARCHAR(75) null,greeting VARCHAR(255) null,comments STRING null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,jobTitle VARCHAR(100) null,loginDate DATE null,loginIP VARCHAR(75) null,lastLoginDate DATE null,lastLoginIP VARCHAR(75) null,lastFailedLoginDate DATE null,failedLoginAttempts INTEGER,lockout BOOLEAN,lockoutDate DATE null,agreedToTermsOfUse BOOLEAN,emailAddressVerified BOOLEAN,status INTEGER)";
+	public static final String TABLE_SQL_CREATE =
+"create table User_ (mvccVersion LONG default 0 not null,uuid_ VARCHAR(75) null,externalReferenceCode VARCHAR(75) null,userId LONG not null primary key,companyId LONG,createDate DATE null,modifiedDate DATE null,defaultUser BOOLEAN,contactId LONG,password_ VARCHAR(75) null,passwordEncrypted BOOLEAN,passwordReset BOOLEAN,passwordModifiedDate DATE null,digest VARCHAR(255) null,reminderQueryQuestion VARCHAR(75) null,reminderQueryAnswer VARCHAR(75) null,graceLoginCount INTEGER,screenName VARCHAR(75) null,emailAddress VARCHAR(254) null,facebookId LONG,googleUserId VARCHAR(75) null,ldapServerId LONG,openId VARCHAR(1024) null,portraitId LONG,languageId VARCHAR(75) null,timeZoneId VARCHAR(75) null,greeting VARCHAR(255) null,comments STRING null,firstName VARCHAR(75) null,middleName VARCHAR(75) null,lastName VARCHAR(75) null,jobTitle VARCHAR(100) null,loginDate DATE null,loginIP VARCHAR(75) null,lastLoginDate DATE null,lastLoginIP VARCHAR(75) null,lastFailedLoginDate DATE null,failedLoginAttempts INTEGER,lockout BOOLEAN,lockoutDate DATE null,agreedToTermsOfUse BOOLEAN,emailAddressVerified BOOLEAN,status INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table User_";
 

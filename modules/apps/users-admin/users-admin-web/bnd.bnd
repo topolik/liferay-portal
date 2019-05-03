@@ -1,9 +1,10 @@
 Bundle-Name: Liferay Users Admin Web
 Bundle-SymbolicName: com.liferay.users.admin.web
-Bundle-Version: 4.0.0
+Bundle-Version: 5.0.0
 Import-Package:\
 	javax.net.ssl,\
 	\
 	*
+Liferay-JS-Submodules-Bridge: users-admin-web
 Web-ContextPath: /users-admin-web
 -dsannotations-options: inherit

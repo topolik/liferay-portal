@@ -130,12 +130,6 @@ public interface PropsKeys {
 	public static final String ASSET_CATEGORIES_SELECTOR_MAX_ENTRIES =
 		"asset.categories.selector.max.entries";
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	public static final String ASSET_ENTRY_VALIDATOR = "asset.entry.validator";
-
 	public static final String ASSET_FILTER_SEARCH_LIMIT =
 		"asset.filter.search.limit";
 
@@ -876,11 +870,23 @@ public interface PropsKeys {
 	public static final String DISCUSSION_COMMENTS_FORMAT =
 		"discussion.comments.format";
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), with no direct replacement
+	 */
+	@Deprecated
 	public static final String DISCUSSION_EMAIL_BODY = "discussion.email.body";
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), with no direct replacement
+	 */
+	@Deprecated
 	public static final String DISCUSSION_EMAIL_COMMENTS_ADDED_ENABLED =
 		"discussion.email.comments.added.enabled";
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), with no direct replacement
+	 */
+	@Deprecated
 	public static final String DISCUSSION_EMAIL_SUBJECT =
 		"discussion.email.subject";
 
@@ -1180,10 +1186,20 @@ public interface PropsKeys {
 
 	public static final String DL_SUBFOLDERS_VISIBLE = "dl.subfolders.visible";
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), with no direct replacement
+	 */
+	@Deprecated
 	public static final String DL_TABS_VISIBLE = "dl.tabs.visible";
 
 	public static final String DL_WEBDAV_SUBSTITUTION_CHAR =
 		"dl.webdav.substitution.char";
+
+	public static final String DNS_SECURITY_ADDRESS_TIMEOUT_SECONDS =
+		"dns.security.address.timeout.seconds";
+
+	public static final String DNS_SECURITY_THREAD_LIMIT =
+		"dns.security.thread.limit";
 
 	public static final String DYNAMIC_RESOURCE_SERVLET_ALLOWED_PATHS =
 		"dynamic.resource.servlet.allowed.paths";

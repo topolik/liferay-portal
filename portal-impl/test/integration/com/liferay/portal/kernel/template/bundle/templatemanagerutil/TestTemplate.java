@@ -15,12 +15,14 @@
 package com.liferay.portal.kernel.template.bundle.templatemanagerutil;
 
 import com.liferay.portal.kernel.template.Template;
+import com.liferay.portal.kernel.template.TemplateResource;
 
 import java.io.Writer;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,26 +46,12 @@ public class TestTemplate implements Template {
 	}
 
 	@Override
-	public void doProcessTemplate(Writer writer) throws Exception {
-	}
-
-	@Override
 	public Set<Map.Entry<String, Object>> entrySet() {
 		return null;
 	}
 
 	@Override
 	public Object get(Object key) {
-		return null;
-	}
-
-	@Override
-	public Object get(String key) {
-		return null;
-	}
-
-	@Override
-	public String[] getKeys() {
 		return null;
 	}
 
@@ -78,11 +66,17 @@ public class TestTemplate implements Template {
 	}
 
 	@Override
-	public void prepare(HttpServletRequest request) {
+	public void prepare(HttpServletRequest httpServletRequest) {
 	}
 
 	@Override
 	public void processTemplate(Writer writer) {
+	}
+
+	@Override
+	public void processTemplate(
+		Writer writer,
+		Supplier<TemplateResource> errorTemplateResourceSupplier) {
 	}
 
 	@Override

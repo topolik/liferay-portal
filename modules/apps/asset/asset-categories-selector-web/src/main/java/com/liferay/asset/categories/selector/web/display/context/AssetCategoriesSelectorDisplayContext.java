@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
@@ -68,22 +69,25 @@ public class AssetCategoriesSelectorDisplayContext {
 			jsonObject = vocabulariesJSONArray.getJSONObject(0);
 		}
 		else {
-			jsonObject.put("children", vocabulariesJSONArray);
-			jsonObject.put("icon", "folder");
-			jsonObject.put("id", "0");
 			jsonObject.put(
+				"children", vocabulariesJSONArray
+			).put(
+				"icon", "folder"
+			).put(
+				"id", "0"
+			).put(
 				"name",
-				LanguageUtil.get(themeDisplay.getLocale(), "vocabularies"));
+				LanguageUtil.get(themeDisplay.getLocale(), "vocabularies")
+			);
 		}
 
-		jsonObject.put("disabled", true);
-		jsonObject.put("expanded", true);
+		jsonObject.put(
+			"disabled", true
+		).put(
+			"expanded", true
+		);
 
-		JSONArray rootJSONArray = JSONFactoryUtil.createJSONArray();
-
-		rootJSONArray.put(jsonObject);
-
-		return rootJSONArray;
+		return JSONUtil.put(jsonObject);
 	}
 
 	public long getCategoryId() {
@@ -226,9 +230,13 @@ public class AssetCategoriesSelectorDisplayContext {
 				jsonObject.put("children", children);
 			}
 
-			jsonObject.put("icon", "categories");
-			jsonObject.put("id", category.getCategoryId());
-			jsonObject.put("name", category.getTitle(themeDisplay.getLocale()));
+			jsonObject.put(
+				"icon", "categories"
+			).put(
+				"id", category.getCategoryId()
+			).put(
+				"name", category.getTitle(themeDisplay.getLocale())
+			);
 
 			if (getSelectedCategories().contains(
 					String.valueOf(category.getCategoryId()))) {
@@ -249,15 +257,19 @@ public class AssetCategoriesSelectorDisplayContext {
 			_request, "allowedSelectVocabularies");
 
 		for (long vocabularyId : getVocabularyIds()) {
-			JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-			jsonObject.put(
-				"children", _getCategoriesJSONArray(vocabularyId, 0));
-			jsonObject.put("disabled", !allowedSelectVocabularies);
-			jsonObject.put("icon", "vocabulary");
-			jsonObject.put("id", vocabularyId);
-			jsonObject.put("name", getVocabularyTitle(vocabularyId));
-			jsonObject.put("vocabulary", true);
+			JSONObject jsonObject = JSONUtil.put(
+				"children", _getCategoriesJSONArray(vocabularyId, 0)
+			).put(
+				"disabled", !allowedSelectVocabularies
+			).put(
+				"icon", "vocabulary"
+			).put(
+				"id", vocabularyId
+			).put(
+				"name", getVocabularyTitle(vocabularyId)
+			).put(
+				"vocabulary", true
+			);
 
 			jsonArray.put(jsonObject);
 		}

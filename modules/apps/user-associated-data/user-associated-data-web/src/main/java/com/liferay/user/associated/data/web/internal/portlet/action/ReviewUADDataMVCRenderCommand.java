@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.PortletURLUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCRenderCommand;
 import com.liferay.portal.kernel.service.GroupLocalService;
+import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.LocaleThreadLocal;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
@@ -32,6 +33,7 @@ import com.liferay.user.associated.data.constants.UserAssociatedDataPortletKeys;
 import com.liferay.user.associated.data.display.UADDisplay;
 import com.liferay.user.associated.data.web.internal.constants.UADConstants;
 import com.liferay.user.associated.data.web.internal.constants.UADWebKeys;
+import com.liferay.user.associated.data.web.internal.display.ScopeDisplay;
 import com.liferay.user.associated.data.web.internal.display.UADApplicationSummaryDisplay;
 import com.liferay.user.associated.data.web.internal.display.UADHierarchyDisplay;
 import com.liferay.user.associated.data.web.internal.display.UADInfoPanelDisplay;
@@ -42,6 +44,7 @@ import com.liferay.user.associated.data.web.internal.util.SelectedUserHelper;
 import com.liferay.user.associated.data.web.internal.util.UADApplicationSummaryHelper;
 import com.liferay.user.associated.data.web.internal.util.UADSearchContainerBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.portlet.PortletException;
@@ -77,33 +80,53 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 			String scope = ParamUtil.getString(
 				renderRequest, "scope", UADConstants.SCOPE_PERSONAL_SITE);
 
-			long[] groupIds = _getGroupIds(selectedUser, scope);
+			List<ScopeDisplay> scopeDisplays = new ArrayList<>();
 
-			List<UADApplicationSummaryDisplay> uadApplicationSummaryDisplays =
-				_uadApplicationSummaryHelper.getUADApplicationSummaryDisplays(
-					selectedUser.getUserId(), groupIds);
+			ScopeDisplay scopeDisplay = null;
 
-			UADApplicationSummaryDisplay uadApplicationSummaryDisplay =
-				uadApplicationSummaryDisplays.get(0);
+			for (String curScope : UADConstants.SCOPES) {
+				long[] curGroupIds = _getGroupIds(selectedUser, curScope);
 
-			for (UADApplicationSummaryDisplay
-					currentUADApplicationSummaryDisplay :
-						uadApplicationSummaryDisplays) {
+				ScopeDisplay curScopeDisplay = new ScopeDisplay(
+					curScope, curGroupIds,
+					_uadApplicationSummaryHelper.
+						getUADApplicationSummaryDisplays(
+							selectedUser.getUserId(), curGroupIds));
 
-				if (currentUADApplicationSummaryDisplay.getCount() > 0) {
-					uadApplicationSummaryDisplay =
-						currentUADApplicationSummaryDisplay;
+				scopeDisplays.add(curScopeDisplay);
 
-					break;
+				if (scope.equals(curScope)) {
+					scopeDisplay = curScopeDisplay;
 				}
 			}
+
+			if (!scopeDisplay.hasItems()) {
+				for (ScopeDisplay curScopeDisplay : scopeDisplays) {
+					if (curScopeDisplay.hasItems()) {
+						scopeDisplay = curScopeDisplay;
+					}
+				}
+			}
+
+			scopeDisplay.setActive(true);
 
 			String applicationKey = ParamUtil.getString(
 				renderRequest, "applicationKey");
 
 			if (Validator.isNull(applicationKey)) {
-				applicationKey =
-					uadApplicationSummaryDisplay.getApplicationKey();
+				applicationKey = scopeDisplay.getApplicationKey();
+			}
+			else {
+				for (UADApplicationSummaryDisplay uadApplicationSummaryDisplay :
+						scopeDisplay.getUADApplicationSummaryDisplays()) {
+
+					if (applicationKey.equals(
+							uadApplicationSummaryDisplay.getApplicationKey()) &&
+						!uadApplicationSummaryDisplay.hasItems()) {
+
+						applicationKey = scopeDisplay.getApplicationKey();
+					}
+				}
 			}
 
 			ViewUADEntitiesDisplay viewUADEntitiesDisplay =
@@ -122,7 +145,13 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 			UADHierarchyDisplay uadHierarchyDisplay =
 				_uadRegistry.getUADHierarchyDisplay(applicationKey);
 
-			if (uadHierarchyDisplay != null) {
+			if (applicationKey.equals(UADConstants.ALL_APPLICATIONS)) {
+				viewUADEntitiesDisplay.setSearchContainer(
+					_uadSearchContainerBuilder.getSearchContainer(
+						renderRequest, liferayPortletResponse, currentURL,
+						scopeDisplay.getUADApplicationSummaryDisplays()));
+			}
+			else if (uadHierarchyDisplay != null) {
 				UADDisplay<?>[] uadDisplays =
 					uadHierarchyDisplay.getUADDisplays();
 
@@ -144,8 +173,12 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 				viewUADEntitiesDisplay.setSearchContainer(
 					_uadSearchContainerBuilder.getSearchContainer(
 						renderRequest, liferayPortletResponse, applicationKey,
-						currentURL, groupIds, parentContainerClass, 0L,
-						selectedUser, uadHierarchyDisplay));
+						currentURL, scopeDisplay.getGroupIds(),
+						parentContainerClass, 0L, selectedUser,
+						uadHierarchyDisplay));
+
+				renderRequest.setAttribute(
+					UADWebKeys.UAD_HIERARCHY_DISPLAY, uadHierarchyDisplay);
 			}
 			else {
 				String uadRegistryKey = ParamUtil.getString(
@@ -165,7 +198,7 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 				viewUADEntitiesDisplay.setSearchContainer(
 					_uadSearchContainerBuilder.getSearchContainer(
 						renderRequest, liferayPortletResponse, currentURL,
-						groupIds, selectedUser, uadDisplay));
+						scopeDisplay.getGroupIds(), selectedUser, uadDisplay));
 				viewUADEntitiesDisplay.setTypeName(
 					uadDisplay.getTypeName(
 						LocaleThreadLocal.getThemeDisplayLocale()));
@@ -173,19 +206,23 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 					new Class<?>[] {uadDisplay.getTypeClass()});
 
 				viewUADEntitiesDisplay.setUADRegistryKey(uadRegistryKey);
+
+				renderRequest.setAttribute(
+					UADWebKeys.APPLICATION_UAD_DISPLAYS,
+					_uadRegistry.getApplicationUADDisplays(applicationKey));
 			}
 
 			renderRequest.setAttribute(
-				UADWebKeys.APPLICATION_UAD_DISPLAYS,
-				_uadRegistry.getApplicationUADDisplays(applicationKey));
-			renderRequest.setAttribute(UADWebKeys.GROUP_IDS, groupIds);
+				UADWebKeys.GROUP_IDS, scopeDisplay.getGroupIds());
+			renderRequest.setAttribute(
+				UADWebKeys.SCOPE_DISPLAYS, scopeDisplays);
 			renderRequest.setAttribute(
 				UADWebKeys.TOTAL_UAD_ENTITIES_COUNT,
 				_uadApplicationSummaryHelper.getTotalReviewableUADEntitiesCount(
 					selectedUser.getUserId()));
 			renderRequest.setAttribute(
 				UADWebKeys.UAD_APPLICATION_SUMMARY_DISPLAY_LIST,
-				uadApplicationSummaryDisplays);
+				scopeDisplay.getUADApplicationSummaryDisplays());
 			renderRequest.setAttribute(
 				UADWebKeys.UAD_INFO_PANEL_DISPLAY, uadInfoPanelDisplay);
 			renderRequest.setAttribute(
@@ -208,21 +245,23 @@ public class ReviewUADDataMVCRenderCommand implements MVCRenderCommand {
 			}
 
 			if (scope.equals(UADConstants.SCOPE_REGULAR_SITES)) {
-				List<Group> groups = _groupLocalService.getGroups(
+				List<Group> allGroups = new ArrayList<>();
+
+				List<Group> liveGroups = _groupLocalService.getGroups(
 					user.getCompanyId(), GroupConstants.ANY_PARENT_GROUP_ID,
 					true);
 
-				int size = groups.size();
+				allGroups.addAll(liveGroups);
 
-				long[] groupIds = new long[size];
+				for (Group group : liveGroups) {
+					Group stagingGroup = group.getStagingGroup();
 
-				for (int i = 0; i < size; i++) {
-					Group group = groups.get(i);
-
-					groupIds[i] = group.getGroupId();
+					if (stagingGroup != null) {
+						allGroups.add(stagingGroup);
+					}
 				}
 
-				return groupIds;
+				return ListUtil.toLongArray(allGroups, Group.GROUP_ID_ACCESSOR);
 			}
 		}
 		catch (PortalException pe) {

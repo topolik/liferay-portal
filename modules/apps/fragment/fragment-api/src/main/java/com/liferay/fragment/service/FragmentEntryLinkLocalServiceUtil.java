@@ -58,6 +58,19 @@ public class FragmentEntryLinkLocalServiceUtil {
 			addFragmentEntryLink(
 				long userId, long groupId, long originalFragmentEntryLinkId,
 				long fragmentEntryId, long classNameId, long classPK,
+				String rendererKey,
+				com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().addFragmentEntryLink(
+			userId, groupId, originalFragmentEntryLinkId, fragmentEntryId,
+			classNameId, classPK, rendererKey, serviceContext);
+	}
+
+	public static com.liferay.fragment.model.FragmentEntryLink
+			addFragmentEntryLink(
+				long userId, long groupId, long originalFragmentEntryLinkId,
+				long fragmentEntryId, long classNameId, long classPK,
 				String css, String html, String js, String editableValues,
 				int position,
 				com.liferay.portal.kernel.service.ServiceContext serviceContext)
@@ -67,6 +80,36 @@ public class FragmentEntryLinkLocalServiceUtil {
 			userId, groupId, originalFragmentEntryLinkId, fragmentEntryId,
 			classNameId, classPK, css, html, js, editableValues, position,
 			serviceContext);
+	}
+
+	public static com.liferay.fragment.model.FragmentEntryLink
+			addFragmentEntryLink(
+				long userId, long groupId, long originalFragmentEntryLinkId,
+				long fragmentEntryId, long classNameId, long classPK,
+				String css, String html, String js, String editableValues,
+				int position, String rendererKey,
+				com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().addFragmentEntryLink(
+			userId, groupId, originalFragmentEntryLinkId, fragmentEntryId,
+			classNameId, classPK, css, html, js, editableValues, position,
+			rendererKey, serviceContext);
+	}
+
+	public static com.liferay.fragment.model.FragmentEntryLink
+			addFragmentEntryLink(
+				long userId, long groupId, long originalFragmentEntryLinkId,
+				long fragmentEntryId, long classNameId, long classPK,
+				String css, String html, String js, String editableValues,
+				String namespace, int position, String rendererKey,
+				com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().addFragmentEntryLink(
+			userId, groupId, originalFragmentEntryLinkId, fragmentEntryId,
+			classNameId, classPK, css, html, js, editableValues, namespace,
+			position, rendererKey, serviceContext);
 	}
 
 	public static com.liferay.fragment.model.FragmentEntryLink
@@ -261,6 +304,13 @@ public class FragmentEntryLinkLocalServiceUtil {
 		return getService().getActionableDynamicQuery();
 	}
 
+	public static int getClassedModelFragmentEntryLinksCount(
+		long groupId, long classNameId, long classPK) {
+
+		return getService().getClassedModelFragmentEntryLinksCount(
+			groupId, classNameId, classPK);
+	}
+
 	public static com.liferay.portal.kernel.dao.orm.ExportActionableDynamicQuery
 		getExportActionableDynamicQuery(
 			com.liferay.exportimport.kernel.lar.PortletDataContext
@@ -448,10 +498,10 @@ public class FragmentEntryLinkLocalServiceUtil {
 		return getService().getPersistedModel(primaryKeyObj);
 	}
 
-	public static void updateClassModel(long classNameId, long classPK)
+	public static void updateClassedModel(long classNameId, long classPK)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
-		getService().updateClassModel(classNameId, classPK);
+		getService().updateClassedModel(classNameId, classPK);
 	}
 
 	/**
@@ -488,6 +538,22 @@ public class FragmentEntryLinkLocalServiceUtil {
 			userId, fragmentEntryLinkId, originalFragmentEntryLinkId,
 			fragmentEntryId, classNameId, classPK, css, html, js,
 			editableValues, position, serviceContext);
+	}
+
+	public static com.liferay.fragment.model.FragmentEntryLink
+			updateFragmentEntryLink(
+				long userId, long fragmentEntryLinkId,
+				long originalFragmentEntryLinkId, long fragmentEntryId,
+				long classNameId, long classPK, String css, String html,
+				String js, String editableValues, String namespace,
+				int position,
+				com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().updateFragmentEntryLink(
+			userId, fragmentEntryLinkId, originalFragmentEntryLinkId,
+			fragmentEntryId, classNameId, classPK, css, html, js,
+			editableValues, namespace, position, serviceContext);
 	}
 
 	public static com.liferay.fragment.model.FragmentEntryLink

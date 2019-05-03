@@ -27,6 +27,7 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.ContactConstants;
 import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.UserLocalService;
+import com.liferay.portal.kernel.util.InetAddressUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -414,7 +415,8 @@ public class JabberImpl implements Jabber {
 		String jabberHost = _chatGroupServiceConfiguration.jabberHost();
 
 		if (!Validator.isIPAddress(jabberHost)) {
-			InetAddress inetAddress = InetAddress.getByName(jabberHost);
+			InetAddress inetAddress = InetAddressUtil.getInetAddressByName(
+				jabberHost);
 
 			jabberHost = inetAddress.getHostAddress();
 		}
@@ -475,11 +477,6 @@ public class JabberImpl implements Jabber {
 			user.getScreenName(), password, attributes);
 	}
 
-	@Reference(unbind = "-")
-	protected void setUserLocalService(UserLocalService userLocalService) {
-		_userLocalService = userLocalService;
-	}
-
 	protected void updateStatus(
 		long userId, int online, Connection connection) {
 
@@ -523,6 +520,8 @@ public class JabberImpl implements Jabber {
 	private ConnectionConfiguration _connectionConfiguration;
 	private final Map<Long, Connection> _connections = new HashMap<>();
 	private final Set<Long> _onlineUserIds = new HashSet<>();
+
+	@Reference(unbind = "-")
 	private UserLocalService _userLocalService;
 
 }

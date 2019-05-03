@@ -67,7 +67,7 @@ public class OAuth2AuthorizationCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(33);
+		StringBundler sb = new StringBundler(35);
 
 		sb.append("{oAuth2AuthorizationId=");
 		sb.append(oAuth2AuthorizationId);
@@ -91,6 +91,8 @@ public class OAuth2AuthorizationCacheModel
 		sb.append(accessTokenCreateDate);
 		sb.append(", accessTokenExpirationDate=");
 		sb.append(accessTokenExpirationDate);
+		sb.append(", remoteHostInfo=");
+		sb.append(remoteHostInfo);
 		sb.append(", remoteIPInfo=");
 		sb.append(remoteIPInfo);
 		sb.append(", refreshTokenContent=");
@@ -159,6 +161,13 @@ public class OAuth2AuthorizationCacheModel
 				new Date(accessTokenExpirationDate));
 		}
 
+		if (remoteHostInfo == null) {
+			oAuth2AuthorizationImpl.setRemoteHostInfo("");
+		}
+		else {
+			oAuth2AuthorizationImpl.setRemoteHostInfo(remoteHostInfo);
+		}
+
 		if (remoteIPInfo == null) {
 			oAuth2AuthorizationImpl.setRemoteIPInfo("");
 		}
@@ -215,6 +224,7 @@ public class OAuth2AuthorizationCacheModel
 		accessTokenContentHash = objectInput.readLong();
 		accessTokenCreateDate = objectInput.readLong();
 		accessTokenExpirationDate = objectInput.readLong();
+		remoteHostInfo = objectInput.readUTF();
 		remoteIPInfo = objectInput.readUTF();
 		refreshTokenContent = objectInput.readUTF();
 
@@ -255,6 +265,13 @@ public class OAuth2AuthorizationCacheModel
 		objectOutput.writeLong(accessTokenCreateDate);
 		objectOutput.writeLong(accessTokenExpirationDate);
 
+		if (remoteHostInfo == null) {
+			objectOutput.writeUTF("");
+		}
+		else {
+			objectOutput.writeUTF(remoteHostInfo);
+		}
+
 		if (remoteIPInfo == null) {
 			objectOutput.writeUTF("");
 		}
@@ -285,6 +302,7 @@ public class OAuth2AuthorizationCacheModel
 	public long accessTokenContentHash;
 	public long accessTokenCreateDate;
 	public long accessTokenExpirationDate;
+	public String remoteHostInfo;
 	public String remoteIPInfo;
 	public String refreshTokenContent;
 	public long refreshTokenContentHash;

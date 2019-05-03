@@ -4,7 +4,7 @@
 <service-builder auto-namespace-tables="false" package-path="com.liferay.segments">
 	<author>Eduardo Garcia</author>
 	<namespace>Segments</namespace>
-	<entity local-service="true" name="SegmentsEntry" remote-service="true">
+	<entity local-service="true" name="SegmentsEntry" remote-service="true" uuid="true">
 
 		<!-- PK fields -->
 
@@ -24,13 +24,14 @@
 
 		<!-- Other fields -->
 
+		<column name="segmentsEntryKey" type="String" />
 		<column localized="true" name="name" type="String" />
 		<column localized="true" name="description" type="String" />
 		<column name="active" type="boolean" />
 		<column name="criteria" type="String" />
-		<column name="key" type="String" />
 		<column name="source" type="String" />
 		<column name="type" type="String" />
+		<column name="lastPublishDate" type="Date" />
 
 		<!-- Order -->
 
@@ -49,13 +50,13 @@
 		<finder name="Type" return-type="Collection">
 			<finder-column name="type" />
 		</finder>
+		<finder name="G_S" return-type="SegmentsEntry" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="segmentsEntryKey" />
+		</finder>
 		<finder name="G_A" return-type="Collection">
 			<finder-column arrayable-operator="OR" name="groupId" />
 			<finder-column name="active" />
-		</finder>
-		<finder name="G_K" return-type="SegmentsEntry" unique="true">
-			<finder-column name="groupId" />
-			<finder-column name="key" />
 		</finder>
 		<finder name="A_T" return-type="Collection">
 			<finder-column name="active" />
@@ -111,7 +112,7 @@
 			<finder-column name="classPK" />
 		</finder>
 	</entity>
-	<entity local-service="true" name="SegmentsExperience" remote-service="true">
+	<entity local-service="true" name="SegmentsExperience" remote-service="true" uuid="true">
 
 		<!-- PK fields -->
 
@@ -137,6 +138,7 @@
 		<column localized="true" name="name" type="String" />
 		<column name="priority" type="int" />
 		<column name="active" type="boolean" />
+		<column name="lastPublishDate" type="Date" />
 
 		<!-- Order -->
 
@@ -163,6 +165,18 @@
 			<finder-column name="classNameId" />
 			<finder-column name="classPK" />
 		</finder>
+		<finder name="G_C_C_P" return-type="SegmentsExperience" unique="true">
+			<finder-column name="groupId" />
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+			<finder-column name="priority" />
+		</finder>
+		<finder name="G_C_C_GtP" return-type="Collection">
+			<finder-column name="groupId" />
+			<finder-column name="classNameId" />
+			<finder-column name="classPK" />
+			<finder-column comparator="&gt;" name="priority" />
+		</finder>
 		<finder name="G_C_C_A" return-type="Collection">
 			<finder-column name="groupId" />
 			<finder-column name="classNameId" />
@@ -179,14 +193,12 @@
 
 		<!-- References -->
 
-		<reference entity="Group" package-path="com.liferay.portal" />
+		<reference entity="Layout" package-path="com.liferay.portal" />
 	</entity>
 	<exceptions>
-		<exception>DefaultSegmentsEntry</exception>
-		<exception>DefaultSegmentsExperience</exception>
 		<exception>RequiredSegmentsEntry</exception>
 		<exception>SegmentsEntryCriteria</exception>
 		<exception>SegmentsEntryKey</exception>
-		<exception>SegmentsExperienceSegmentsEntry</exception>
+		<exception>SegmentsExperiencePriority</exception>
 	</exceptions>
 </service-builder>

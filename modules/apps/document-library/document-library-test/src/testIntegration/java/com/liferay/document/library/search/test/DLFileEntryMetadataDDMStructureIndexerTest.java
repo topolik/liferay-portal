@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.search.test.util.IndexerFixture;
 import com.liferay.portal.test.rule.Inject;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.PermissionCheckerTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.util.Locale;
 
@@ -55,7 +55,7 @@ public class DLFileEntryMetadataDDMStructureIndexerTest
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE,
+			PermissionCheckerMethodTestRule.INSTANCE,
 			SynchronousDestinationTestRule.INSTANCE);
 
 	@Before
@@ -83,7 +83,7 @@ public class DLFileEntryMetadataDDMStructureIndexerTest
 
 	@Test
 	public void testReindexDLFileEntry() throws Exception, PortalException {
-		Locale locale = Locale.JAPAN;
+		Locale locale = LocaleUtil.JAPAN;
 		String fileName_jp = "content_search.txt";
 		String searchTerm = "新規";
 

@@ -26,6 +26,7 @@ import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.GroupConstants;
@@ -115,8 +116,10 @@ public class MeetingsPortlet extends MVCPortlet {
 		catch (Exception e) {
 			jsonObject.put(
 				"message",
-				translate(actionRequest, "the-meeting-could-not-be-deleted"));
-			jsonObject.put("success", false);
+				translate(actionRequest, "the-meeting-could-not-be-deleted")
+			).put(
+				"success", false
+			);
 		}
 
 		writeJSON(actionRequest, actionResponse, jsonObject);
@@ -240,9 +243,11 @@ public class MeetingsPortlet extends MVCPortlet {
 				PowwowServiceProviderUtil.getJoinPowwowMeetingURL(
 					powwowMeetingId, name, type);
 
-			jsonObject.put("joinPowwowMeetingURL", joinPowwowMeetingURL);
-
-			jsonObject.put("success", Boolean.TRUE);
+			jsonObject.put(
+				"joinPowwowMeetingURL", joinPowwowMeetingURL
+			).put(
+				"success", Boolean.TRUE
+			);
 		}
 		catch (Exception e) {
 			jsonObject.putException(e);
@@ -538,20 +543,23 @@ public class MeetingsPortlet extends MVCPortlet {
 			jsonObject.put(
 				"emailBody",
 				powwowSubscriptionSender.getEmailNotificationBody(
-					serviceContext.getLocale()));
-			jsonObject.put(
+					serviceContext.getLocale())
+			).put(
 				"emailSubject",
 				powwowSubscriptionSender.getEmailNotificationSubject(
-					serviceContext.getLocale()));
-
-			jsonObject.put("success", Boolean.TRUE);
+					serviceContext.getLocale())
+			).put(
+				"success", Boolean.TRUE
+			);
 		}
 		catch (Exception e) {
 			jsonObject.put(
 				"message",
 				translate(
-					resourceRequest, "unable-to-render-meeting-invitation"));
-			jsonObject.put("success", Boolean.FALSE);
+					resourceRequest, "unable-to-render-meeting-invitation")
+			).put(
+				"success", Boolean.FALSE
+			);
 		}
 
 		writeJSON(resourceRequest, resourceResponse, jsonObject);
@@ -644,13 +652,15 @@ public class MeetingsPortlet extends MVCPortlet {
 				(OrderByComparator)null);
 
 			for (User user : users) {
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-				jsonObject.put("emailAddress", user.getEmailAddress());
-				jsonObject.put("fullName", user.getFullName());
-				jsonObject.put(
-					"portraitURL", user.getPortraitURL(themeDisplay));
-				jsonObject.put("userId", user.getUserId());
+				JSONObject jsonObject = JSONUtil.put(
+					"emailAddress", user.getEmailAddress()
+				).put(
+					"fullName", user.getFullName()
+				).put(
+					"portraitURL", user.getPortraitURL(themeDisplay)
+				).put(
+					"userId", user.getUserId()
+				);
 
 				jsonArray.put(jsonObject);
 			}

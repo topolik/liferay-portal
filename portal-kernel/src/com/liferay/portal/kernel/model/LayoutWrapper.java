@@ -46,6 +46,7 @@ public class LayoutWrapper
 
 		attributes.put("mvccVersion", getMvccVersion());
 		attributes.put("uuid", getUuid());
+		attributes.put("headId", getHeadId());
 		attributes.put("plid", getPlid());
 		attributes.put("groupId", getGroupId());
 		attributes.put("companyId", getCompanyId());
@@ -54,8 +55,6 @@ public class LayoutWrapper
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("parentPlid", getParentPlid());
-		attributes.put("leftPlid", getLeftPlid());
-		attributes.put("rightPlid", getRightPlid());
 		attributes.put("privateLayout", isPrivateLayout());
 		attributes.put("layoutId", getLayoutId());
 		attributes.put("parentLayoutId", getParentLayoutId());
@@ -99,6 +98,12 @@ public class LayoutWrapper
 
 		if (uuid != null) {
 			setUuid(uuid);
+		}
+
+		Long headId = (Long)attributes.get("headId");
+
+		if (headId != null) {
+			setHeadId(headId);
 		}
 
 		Long plid = (Long)attributes.get("plid");
@@ -147,18 +152,6 @@ public class LayoutWrapper
 
 		if (parentPlid != null) {
 			setParentPlid(parentPlid);
-		}
-
-		Long leftPlid = (Long)attributes.get("leftPlid");
-
-		if (leftPlid != null) {
-			setLeftPlid(leftPlid);
-		}
-
-		Long rightPlid = (Long)attributes.get("rightPlid");
-
-		if (rightPlid != null) {
-			setRightPlid(rightPlid);
 		}
 
 		Boolean privateLayout = (Boolean)attributes.get("privateLayout");
@@ -664,6 +657,16 @@ public class LayoutWrapper
 	}
 
 	/**
+	 * Returns the head ID of this layout.
+	 *
+	 * @return the head ID of this layout
+	 */
+	@Override
+	public long getHeadId() {
+		return model.getHeadId();
+	}
+
+	/**
 	 * Returns the hidden of this layout.
 	 *
 	 * @return the hidden of this layout
@@ -857,16 +860,6 @@ public class LayoutWrapper
 	@Override
 	public LayoutType getLayoutType() {
 		return model.getLayoutType();
-	}
-
-	/**
-	 * Returns the left plid of this layout.
-	 *
-	 * @return the left plid of this layout
-	 */
-	@Override
-	public long getLeftPlid() {
-		return model.getLeftPlid();
 	}
 
 	/**
@@ -1067,16 +1060,6 @@ public class LayoutWrapper
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return model.getResetMaxStateURL(request);
-	}
-
-	/**
-	 * Returns the right plid of this layout.
-	 *
-	 * @return the right plid of this layout
-	 */
-	@Override
-	public long getRightPlid() {
-		return model.getRightPlid();
 	}
 
 	/**
@@ -1601,15 +1584,6 @@ public class LayoutWrapper
 		return model.isSystem();
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), with no direct replacement
-	 */
-	@Deprecated
-	@Override
-	public boolean isTypeArticle() {
-		return model.isTypeArticle();
-	}
-
 	@Override
 	public boolean isTypeControlPanel() {
 		return model.isTypeControlPanel();
@@ -1829,6 +1803,16 @@ public class LayoutWrapper
 	}
 
 	/**
+	 * Sets the head ID of this layout.
+	 *
+	 * @param headId the head ID of this layout
+	 */
+	@Override
+	public void setHeadId(long headId) {
+		model.setHeadId(headId);
+	}
+
+	/**
 	 * Sets whether this layout is hidden.
 	 *
 	 * @param hidden the hidden of this layout
@@ -1958,16 +1942,6 @@ public class LayoutWrapper
 	@Override
 	public void setLayoutSet(LayoutSet layoutSet) {
 		model.setLayoutSet(layoutSet);
-	}
-
-	/**
-	 * Sets the left plid of this layout.
-	 *
-	 * @param leftPlid the left plid of this layout
-	 */
-	@Override
-	public void setLeftPlid(long leftPlid) {
-		model.setLeftPlid(leftPlid);
 	}
 
 	/**
@@ -2121,16 +2095,6 @@ public class LayoutWrapper
 	@Override
 	public void setPublishDate(Date publishDate) {
 		model.setPublishDate(publishDate);
-	}
-
-	/**
-	 * Sets the right plid of this layout.
-	 *
-	 * @param rightPlid the right plid of this layout
-	 */
-	@Override
-	public void setRightPlid(long rightPlid) {
-		model.setRightPlid(rightPlid);
 	}
 
 	/**
@@ -2361,33 +2325,18 @@ public class LayoutWrapper
 	}
 
 	@Override
-	public long getNestedSetsTreeNodeLeft() {
-		return model.getNestedSetsTreeNodeLeft();
-	}
-
-	@Override
-	public long getNestedSetsTreeNodeRight() {
-		return model.getNestedSetsTreeNodeRight();
-	}
-
-	@Override
-	public long getNestedSetsTreeNodeScopeId() {
-		return model.getNestedSetsTreeNodeScopeId();
-	}
-
-	@Override
-	public void setNestedSetsTreeNodeLeft(long nestedSetsTreeNodeLeft) {
-		model.setNestedSetsTreeNodeLeft(nestedSetsTreeNodeLeft);
-	}
-
-	@Override
-	public void setNestedSetsTreeNodeRight(long nestedSetsTreeNodeRight) {
-		model.setNestedSetsTreeNodeRight(nestedSetsTreeNodeRight);
-	}
-
-	@Override
 	public StagedModelType getStagedModelType() {
 		return model.getStagedModelType();
+	}
+
+	@Override
+	public boolean isHead() {
+		return model.isHead();
+	}
+
+	@Override
+	public void populateVersionModel(LayoutVersion layoutVersion) {
+		model.populateVersionModel(layoutVersion);
 	}
 
 	@Override

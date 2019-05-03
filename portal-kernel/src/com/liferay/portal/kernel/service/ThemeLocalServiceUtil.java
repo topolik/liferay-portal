@@ -17,7 +17,6 @@ package com.liferay.portal.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the local service utility for Theme. This utility wraps
@@ -106,16 +105,6 @@ public class ThemeLocalServiceUtil {
 		return getService().getThemes(companyId);
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link #getPageThemes}
-	 */
-	@Deprecated
-	public static java.util.List<com.liferay.portal.kernel.model.Theme>
-		getThemes(long companyId, long groupId, long userId, boolean wapTheme) {
-
-		return getService().getThemes(companyId, groupId, userId, wapTheme);
-	}
-
 	public static java.util.List<com.liferay.portal.kernel.model.Theme>
 		getWARThemes() {
 
@@ -152,9 +141,6 @@ public class ThemeLocalServiceUtil {
 		if (_service == null) {
 			_service = (ThemeLocalService)PortalBeanLocatorUtil.locate(
 				ThemeLocalService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				ThemeLocalServiceUtil.class, "_service");
 		}
 
 		return _service;

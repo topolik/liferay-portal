@@ -78,9 +78,29 @@ public interface FragmentEntryLinkLocalService
 
 	public FragmentEntryLink addFragmentEntryLink(
 			long userId, long groupId, long originalFragmentEntryLinkId,
+			long fragmentEntryId, long classNameId, long classPK,
+			String rendererKey, ServiceContext serviceContext)
+		throws PortalException;
+
+	public FragmentEntryLink addFragmentEntryLink(
+			long userId, long groupId, long originalFragmentEntryLinkId,
 			long fragmentEntryId, long classNameId, long classPK, String css,
 			String html, String js, String editableValues, int position,
 			ServiceContext serviceContext)
+		throws PortalException;
+
+	public FragmentEntryLink addFragmentEntryLink(
+			long userId, long groupId, long originalFragmentEntryLinkId,
+			long fragmentEntryId, long classNameId, long classPK, String css,
+			String html, String js, String editableValues, int position,
+			String rendererKey, ServiceContext serviceContext)
+		throws PortalException;
+
+	public FragmentEntryLink addFragmentEntryLink(
+			long userId, long groupId, long originalFragmentEntryLinkId,
+			long fragmentEntryId, long classNameId, long classPK, String css,
+			String html, String js, String editableValues, String namespace,
+			int position, String rendererKey, ServiceContext serviceContext)
 		throws PortalException;
 
 	public FragmentEntryLink addFragmentEntryLink(
@@ -220,6 +240,10 @@ public interface FragmentEntryLinkLocalService
 	public ActionableDynamicQuery getActionableDynamicQuery();
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getClassedModelFragmentEntryLinksCount(
+		long groupId, long classNameId, long classPK);
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public ExportActionableDynamicQuery getExportActionableDynamicQuery(
 		PortletDataContext portletDataContext);
 
@@ -342,7 +366,7 @@ public interface FragmentEntryLinkLocalService
 	public PersistedModel getPersistedModel(Serializable primaryKeyObj)
 		throws PortalException;
 
-	public void updateClassModel(long classNameId, long classPK)
+	public void updateClassedModel(long classNameId, long classPK)
 		throws PortalException;
 
 	/**
@@ -364,6 +388,14 @@ public interface FragmentEntryLinkLocalService
 			long originalFragmentEntryLinkId, long fragmentEntryId,
 			long classNameId, long classPK, String css, String html, String js,
 			String editableValues, int position, ServiceContext serviceContext)
+		throws PortalException;
+
+	public FragmentEntryLink updateFragmentEntryLink(
+			long userId, long fragmentEntryLinkId,
+			long originalFragmentEntryLinkId, long fragmentEntryId,
+			long classNameId, long classPK, String css, String html, String js,
+			String editableValues, String namespace, int position,
+			ServiceContext serviceContext)
 		throws PortalException;
 
 	public FragmentEntryLink updateFragmentEntryLink(

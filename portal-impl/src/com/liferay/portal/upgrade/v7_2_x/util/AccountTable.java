@@ -28,26 +28,19 @@ public class AccountTable {
 	public static final String TABLE_NAME = "Account_";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"accountId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"userName", Types.VARCHAR},
-		{"createDate", Types.TIMESTAMP},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"parentAccountId", Types.BIGINT},
-		{"name", Types.VARCHAR},
-		{"legalName", Types.VARCHAR},
-		{"legalId", Types.VARCHAR},
-		{"legalType", Types.VARCHAR},
-		{"sicCode", Types.VARCHAR},
-		{"tickerSymbol", Types.VARCHAR},
-		{"industry", Types.VARCHAR},
-		{"type_", Types.VARCHAR},
+		{"mvccVersion", Types.BIGINT}, {"accountId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
+		{"userName", Types.VARCHAR}, {"createDate", Types.TIMESTAMP},
+		{"modifiedDate", Types.TIMESTAMP}, {"parentAccountId", Types.BIGINT},
+		{"name", Types.VARCHAR}, {"legalName", Types.VARCHAR},
+		{"legalId", Types.VARCHAR}, {"legalType", Types.VARCHAR},
+		{"sicCode", Types.VARCHAR}, {"tickerSymbol", Types.VARCHAR},
+		{"industry", Types.VARCHAR}, {"type_", Types.VARCHAR},
 		{"size_", Types.VARCHAR}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -85,7 +78,8 @@ TABLE_COLUMNS_MAP.put("type_", Types.VARCHAR);
 TABLE_COLUMNS_MAP.put("size_", Types.VARCHAR);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table Account_ (mvccVersion LONG default 0 not null,accountId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,parentAccountId LONG,name VARCHAR(75) null,legalName VARCHAR(75) null,legalId VARCHAR(75) null,legalType VARCHAR(75) null,sicCode VARCHAR(75) null,tickerSymbol VARCHAR(75) null,industry VARCHAR(75) null,type_ VARCHAR(75) null,size_ VARCHAR(75) null)";
+	public static final String TABLE_SQL_CREATE =
+"create table Account_ (mvccVersion LONG default 0 not null,accountId LONG not null primary key,companyId LONG,userId LONG,userName VARCHAR(75) null,createDate DATE null,modifiedDate DATE null,parentAccountId LONG,name VARCHAR(75) null,legalName VARCHAR(75) null,legalId VARCHAR(75) null,legalType VARCHAR(75) null,sicCode VARCHAR(75) null,tickerSymbol VARCHAR(75) null,industry VARCHAR(75) null,type_ VARCHAR(75) null,size_ VARCHAR(75) null)";
 
 	public static final String TABLE_SQL_DROP = "drop table Account_";
 

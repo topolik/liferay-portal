@@ -17,7 +17,6 @@ package com.liferay.frontend.editor.alloyeditor.web.internal.editor.configuratio
 import com.liferay.frontend.editor.alloyeditor.web.internal.constants.AlloyEditorConstants;
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.ItemSelectorCriterion;
-import com.liferay.item.selector.ItemSelectorReturnType;
 import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.file.criterion.FileItemSelectorCriterion;
 import com.liferay.layout.item.selector.criterion.LayoutItemSelectorCriterion;
@@ -28,8 +27,6 @@ import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.portlet.PortletURL;
@@ -61,26 +58,27 @@ public abstract class BaseAlloyEditorConfigContributor
 			inputEditorTaglibAttributes);
 
 		jsonObject.put(
-			"contentsLanguage", contentsLanguageId.replace("iw_", "he_"));
-
-		jsonObject.put("disableNativeSpellChecker", Boolean.FALSE);
-
-		jsonObject.put(
+			"contentsLanguage", contentsLanguageId.replace("iw_", "he_")
+		).put(
+			"disableNativeSpellChecker", Boolean.FALSE
+		).put(
 			"extraPlugins",
 			"ae_autolink,ae_dragresize,ae_addimages,ae_imagealignment," +
 				"ae_placeholder,ae_selectionregion,ae_tableresize," +
-					"ae_tabletools,ae_uicore");
-
-		jsonObject.put("imageScaleResize", "scale");
+					"ae_tabletools,ae_uicore"
+		).put(
+			"imageScaleResize", "scale"
+		);
 
 		String languageId = getLanguageId(themeDisplay);
 
-		jsonObject.put("language", languageId.replace("iw_", "he_"));
-
 		jsonObject.put(
+			"language", languageId.replace("iw_", "he_")
+		).put(
 			"removePlugins",
-			"contextmenu,elementspath,image,link,liststyle,resize,tabletools," +
-				"toolbar");
+			"contextmenu,elementspath,floatingspace,image,link,liststyle," +
+				"resize,table,tabletools,toolbar"
+		);
 
 		String namespace = GetterUtil.getString(
 			inputEditorTaglibAttributes.get(
@@ -107,19 +105,15 @@ public abstract class BaseAlloyEditorConfigContributor
 		ItemSelectorCriterion fileItemSelectorCriterion =
 			new FileItemSelectorCriterion();
 
-		List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
-			new ArrayList<>();
-
-		desiredItemSelectorReturnTypes.add(new URLItemSelectorReturnType());
-
 		fileItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
+			new URLItemSelectorReturnType());
 
 		LayoutItemSelectorCriterion layoutItemSelectorCriterion =
 			new LayoutItemSelectorCriterion();
 
 		layoutItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
+			new URLItemSelectorReturnType());
+		layoutItemSelectorCriterion.setShowHiddenPages(true);
 
 		PortletURL itemSelectorURL = _itemSelector.getItemSelectorURL(
 			requestBackedPortletURLFactory, eventName,

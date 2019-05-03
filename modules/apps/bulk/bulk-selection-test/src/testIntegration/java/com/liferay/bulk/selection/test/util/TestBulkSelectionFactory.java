@@ -17,15 +17,14 @@ package com.liferay.bulk.selection.test.util;
 import com.liferay.asset.kernel.model.AssetEntry;
 import com.liferay.bulk.selection.BulkSelection;
 import com.liferay.bulk.selection.BulkSelectionFactory;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.petra.string.StringUtil;
+import com.liferay.portal.kernel.exception.PortalException;
 
 import java.io.Serializable;
 
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -44,8 +43,13 @@ public class TestBulkSelectionFactory implements BulkSelectionFactory<Integer> {
 		return new BulkSelection<Integer>() {
 
 			@Override
-			public String describe(Locale locale) {
-				return "Test Integer Bulk Selection";
+			public <E extends PortalException> void forEach(
+					UnsafeConsumer<Integer, E> unsafeConsumer)
+				throws PortalException {
+
+				for (String s : integers) {
+					unsafeConsumer.accept(Integer.valueOf(s));
+				}
 			}
 
 			@Override
@@ -61,22 +65,13 @@ public class TestBulkSelectionFactory implements BulkSelectionFactory<Integer> {
 			}
 
 			@Override
-			public boolean isMultiple() {
-				return true;
+			public long getSize() {
+				return integers.length;
 			}
 
 			@Override
 			public Serializable serialize() {
 				return StringUtil.merge(integers, StringPool.COMMA);
-			}
-
-			@Override
-			public Stream<Integer> stream() {
-				return Arrays.stream(
-					integers
-				).map(
-					Integer::new
-				);
 			}
 
 			@Override

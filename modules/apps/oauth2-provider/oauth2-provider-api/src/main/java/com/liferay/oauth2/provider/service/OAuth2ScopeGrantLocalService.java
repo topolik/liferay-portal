@@ -102,6 +102,12 @@ public interface OAuth2ScopeGrantLocalService
 			String applicationName, String bundleSymbolicName, String scope)
 		throws DuplicateOAuth2ScopeGrantException;
 
+	public OAuth2ScopeGrant createOAuth2ScopeGrant(
+			long companyId, long oAuth2ApplicationScopeAliasesId,
+			String applicationName, String bundleSymbolicName, String scope,
+			List<String> scopeAliases)
+		throws DuplicateOAuth2ScopeGrantException;
+
 	public void deleteOAuth2AuthorizationOAuth2ScopeGrant(
 		long oAuth2AuthorizationId, long oAuth2ScopeGrantId);
 

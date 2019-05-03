@@ -28,18 +28,15 @@ public class UserTrackerTable {
 	public static final String TABLE_NAME = "UserTracker";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"mvccVersion", Types.BIGINT},
-		{"userTrackerId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"modifiedDate", Types.TIMESTAMP},
-		{"sessionId", Types.VARCHAR},
-		{"remoteAddr", Types.VARCHAR},
-		{"remoteHost", Types.VARCHAR},
+		{"mvccVersion", Types.BIGINT}, {"userTrackerId", Types.BIGINT},
+		{"companyId", Types.BIGINT}, {"userId", Types.BIGINT},
+		{"modifiedDate", Types.TIMESTAMP}, {"sessionId", Types.VARCHAR},
+		{"remoteAddr", Types.VARCHAR}, {"remoteHost", Types.VARCHAR},
 		{"userAgent", Types.VARCHAR}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("mvccVersion", Types.BIGINT);
@@ -61,7 +58,8 @@ TABLE_COLUMNS_MAP.put("remoteHost", Types.VARCHAR);
 TABLE_COLUMNS_MAP.put("userAgent", Types.VARCHAR);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table UserTracker (mvccVersion LONG default 0 not null,userTrackerId LONG not null primary key,companyId LONG,userId LONG,modifiedDate DATE null,sessionId VARCHAR(200) null,remoteAddr VARCHAR(75) null,remoteHost VARCHAR(75) null,userAgent VARCHAR(200) null)";
+	public static final String TABLE_SQL_CREATE =
+"create table UserTracker (mvccVersion LONG default 0 not null,userTrackerId LONG not null primary key,companyId LONG,userId LONG,modifiedDate DATE null,sessionId VARCHAR(200) null,remoteAddr VARCHAR(75) null,remoteHost VARCHAR(75) null,userAgent VARCHAR(200) null)";
 
 	public static final String TABLE_SQL_DROP = "drop table UserTracker";
 

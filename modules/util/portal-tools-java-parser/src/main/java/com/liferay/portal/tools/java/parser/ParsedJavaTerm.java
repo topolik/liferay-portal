@@ -203,7 +203,10 @@ public class ParsedJavaTerm implements Comparable<ParsedJavaTerm> {
 
 		if (StringUtil.endsWith(
 				previousParsedJavaTerm.getContent(),
-				CharPool.OPEN_CURLY_BRACE)) {
+				CharPool.OPEN_CURLY_BRACE) ||
+			Objects.equals(
+				previousParsedJavaTerm.getClassName(),
+				JavaSwitchCaseStatement.class.getName())) {
 
 			return NO_ACTION_REQUIRED;
 		}
@@ -489,7 +492,7 @@ public class ParsedJavaTerm implements Comparable<ParsedJavaTerm> {
 	private static final Pattern _accessModifierPattern = Pattern.compile(
 		"\t(private|protected|public)\\s");
 	private static final Pattern _variableNamePattern = Pattern.compile(
-		"\\s(\\w+)( =|;)");
+		"\\s([\\w$]+)( =|;)");
 
 	private final String _className;
 	private boolean _containsCommentToken;

@@ -68,7 +68,7 @@ class Layout extends Component {
 				plugins.push(
 					{
 						cfg: {
-							rowSelector: '.layout-column'
+							rowSelector: '.layout-item'
 						},
 						fn: A.Plugin.SearchContainerSelect
 					}
@@ -237,6 +237,7 @@ class Layout extends Component {
 	 */
 	_handleDropLayoutColumnItem(eventData) {
 		this._removeLayoutColumnsScrollListener();
+		this._resetDragDropClasses();
 
 		let layoutColumns = this.layoutColumns.map(
 			(layoutColumn) => [...layoutColumn]
@@ -244,6 +245,7 @@ class Layout extends Component {
 		const {sourceItemPlid, targetId, targetType} = eventData;
 
 		const itemDropIsValid = dropIsValid(
+			layoutColumns,
 			this._draggingItem,
 			this._draggingItemColumnIndex,
 			targetId,
@@ -436,6 +438,7 @@ class Layout extends Component {
 	 * @review
 	 */
 	_handleLeaveLayoutColumnItem() {
+		this._resetDragDropClasses();
 		this._resetHoveredData();
 	}
 
@@ -589,6 +592,29 @@ class Layout extends Component {
 	}
 
 	/**
+	 * Removes all drag-drop related classes from all items.
+	 * @private
+	 * @review
+	 */
+	_resetDragDropClasses() {
+		this.element.querySelectorAll(
+			`
+				.layout-column-item-drag-bottom,
+				.layout-column-item-drag-inside,
+				.layout-column-item-drag-top
+			`
+		).forEach(
+			item => {
+				item.classList.remove(
+					'layout-column-item-drag-bottom',
+					'layout-column-item-drag-inside',
+					'layout-column-item-drag-top'
+				);
+			}
+		);
+	}
+
+	/**
 	 * Resets dragging information to null
 	 * @private
 	 */
@@ -625,6 +651,31 @@ class Layout extends Component {
 		) {
 			this._draggingItemPosition = DROP_TARGET_BORDERS.bottom;
 			this._hoveredLayoutColumnItemPlid = targetColumnLastItem.plid;
+
+			this._resetDragDropClasses();
+
+			this._setElementDragDropCssClass(
+				targetColumnLastItem.plid,
+				DROP_TARGET_BORDERS.bottom
+			);
+		}
+	}
+
+	/**
+	 * Adds the given CSS class to the given itemPlid if it is found inside
+	 * the document.
+	 * @param {string} itemPlid
+	 * @param {string} cssClass
+	 * @private
+	 * @review
+	 */
+	_setElementDragDropCssClass(itemPlid, cssClass) {
+		const itemElement = this.element.querySelector(
+			`li[data-layout-column-item-plid="${itemPlid}"]`
+		);
+
+		if (itemElement) {
+			itemElement.classList.add(cssClass);
 		}
 	}
 
@@ -659,6 +710,9 @@ class Layout extends Component {
 		if (!targetEqualsSource && !targetIsChild && !draggingInsideParent) {
 			this._draggingItemPosition = position;
 			this._hoveredLayoutColumnItemPlid = targetItemPlid;
+
+			this._resetDragDropClasses();
+			this._setElementDragDropCssClass(targetItemPlid, position);
 		}
 	}
 
@@ -785,6 +839,7 @@ Layout.STATE = {
 		Config.arrayOf(
 			Config.shapeOf(
 				{
+					actions: Config.string().required(),
 					actionURLs: Config.object().required(),
 					active: Config.bool().required(),
 					checked: Config.bool().required(),

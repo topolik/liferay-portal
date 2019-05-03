@@ -94,22 +94,22 @@ public class UIItemsBuilder {
 	public UIItemsBuilder(
 			HttpServletRequest request, FileShortcut fileShortcut,
 			ResourceBundle resourceBundle, DLTrashUtil dlTrashUtil,
-			VersioningStrategy versioningStrategy, DLURLHelper dlurlHelper)
+			VersioningStrategy versioningStrategy, DLURLHelper dlURLHelper)
 		throws PortalException {
 
 		this(
 			request, fileShortcut.getFileVersion(), fileShortcut,
-			resourceBundle, dlTrashUtil, versioningStrategy, dlurlHelper);
+			resourceBundle, dlTrashUtil, versioningStrategy, dlURLHelper);
 	}
 
 	public UIItemsBuilder(
 		HttpServletRequest request, FileVersion fileVersion,
 		ResourceBundle resourceBundle, DLTrashUtil dlTrashUtil,
-		VersioningStrategy versioningStrategy, DLURLHelper dlurlHelper) {
+		VersioningStrategy versioningStrategy, DLURLHelper dlURLHelper) {
 
 		this(
 			request, fileVersion, null, resourceBundle, dlTrashUtil,
-			versioningStrategy, dlurlHelper);
+			versioningStrategy, dlURLHelper);
 	}
 
 	public void addCancelCheckoutMenuItem(List<MenuItem> menuItems)
@@ -280,8 +280,7 @@ public class UIItemsBuilder {
 
 		compareVersionURL.setParameter("backURL", _getCurrentURL());
 
-		String jsNamespace =
-			getNamespace() + String.valueOf(_fileVersion.getFileVersionId());
+		String jsNamespace = getNamespace() + _fileVersion.getFileVersionId();
 
 		StringBundler sb = new StringBundler(4);
 
@@ -351,7 +350,7 @@ public class UIItemsBuilder {
 			mvcActionCommandName = "/document_library/edit_file_shortcut";
 		}
 
-		PortletURL portletURL = _getActionURL(mvcActionCommandName, cmd);
+		PortletURL portletURL = _getDeleteActionURL(mvcActionCommandName, cmd);
 
 		if (_fileShortcut == null) {
 			portletURL.setParameter(
@@ -469,7 +468,7 @@ public class UIItemsBuilder {
 			appendVersion = true;
 		}
 
-		String url = _dlurlHelper.getDownloadURL(
+		String url = _dlURLHelper.getDownloadURL(
 			_fileEntry, _fileVersion, _themeDisplay, StringPool.BLANK,
 			appendVersion, true);
 
@@ -493,10 +492,15 @@ public class UIItemsBuilder {
 			return;
 		}
 
+		String label = TextFormatter.formatStorageSize(
+			_fileEntry.getSize(), _themeDisplay.getLocale());
+
 		_addURLUIItem(
 			new URLToolbarItem(), toolbarItems, DLUIItemKeys.DOWNLOAD,
-			LanguageUtil.get(_resourceBundle, "download"),
-			_dlurlHelper.getDownloadURL(
+			StringBundler.concat(
+				LanguageUtil.get(_resourceBundle, "download"), " (", label,
+				")"),
+			_dlURLHelper.getDownloadURL(
 				_fileEntry, _fileVersion, _themeDisplay, StringPool.BLANK));
 	}
 
@@ -553,51 +557,10 @@ public class UIItemsBuilder {
 			return;
 		}
 
-		LiferayPortletResponse liferayPortletResponse =
-			_getLiferayPortletResponse();
-
-		PortletURL portletURL = liferayPortletResponse.createRenderURL();
-
-		portletURL.setParameter(
-			"mvcRenderCommandName", "/document_library/move_entry");
-
-		PortletURL redirectURL = liferayPortletResponse.createRenderURL();
-
-		long folderId = 0;
-
-		if (_fileShortcut != null) {
-			folderId = _fileShortcut.getFolderId();
-		}
-		else {
-			folderId = _fileEntry.getFolderId();
-		}
-
-		if (folderId == DLFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			redirectURL.setParameter(
-				"mvcRenderCommandName", "/document_library/view");
-		}
-		else {
-			redirectURL.setParameter(
-				"mvcRenderCommandName", "/document_library/view_folder");
-		}
-
-		redirectURL.setParameter("folderId", String.valueOf(folderId));
-
-		portletURL.setParameter("redirect", redirectURL.toString());
-
-		if (_fileShortcut != null) {
-			portletURL.setParameter(
-				"rowIdsDLFileShortcut",
-				String.valueOf(_fileShortcut.getFileShortcutId()));
-		}
-		else {
-			portletURL.setParameter(
-				"rowIdsFileEntry", String.valueOf(_fileEntry.getFileEntryId()));
-		}
-
-		_addURLUIItem(
-			new URLMenuItem(), menuItems, DLUIItemKeys.MOVE, "move",
-			portletURL.toString());
+		_addJavaScriptUIItem(
+			new JavaScriptMenuItem(), menuItems, DLUIItemKeys.MOVE,
+			LanguageUtil.get(_resourceBundle, "move"),
+			_getMoveEntryOnClickJavaScript());
 	}
 
 	public void addMoveToolbarItem(List<ToolbarItem> toolbarItems)
@@ -607,11 +570,10 @@ public class UIItemsBuilder {
 			return;
 		}
 
-		PortletURL portletURL = _getRenderURL("/document_library/move_entry");
-
-		_addURLUIItem(
-			new URLToolbarItem(), toolbarItems, DLUIItemKeys.MOVE,
-			LanguageUtil.get(_resourceBundle, "move"), portletURL.toString());
+		_addJavaScriptUIItem(
+			new JavaScriptToolbarItem(), toolbarItems, DLUIItemKeys.MOVE,
+			LanguageUtil.get(_resourceBundle, "move"),
+			_getMoveEntryOnClickJavaScript());
 	}
 
 	public void addMoveToTheRecycleBinToolbarItem(
@@ -657,7 +619,7 @@ public class UIItemsBuilder {
 			return;
 		}
 
-		String webDavURL = _dlurlHelper.getWebDavURL(
+		String webDavURL = _dlURLHelper.getWebDavURL(
 			_themeDisplay, _fileEntry.getFolder(), _fileEntry,
 			PropsValues.
 				DL_FILE_ENTRY_OPEN_IN_MS_OFFICE_MANUAL_CHECK_IN_REQUIRED,
@@ -704,7 +666,7 @@ public class UIItemsBuilder {
 			return;
 		}
 
-		String webDavURL = _dlurlHelper.getWebDavURL(
+		String webDavURL = _dlURLHelper.getWebDavURL(
 			_themeDisplay, _fileEntry.getFolder(), _fileEntry,
 			PropsValues.
 				DL_FILE_ENTRY_OPEN_IN_MS_OFFICE_MANUAL_CHECK_IN_REQUIRED);
@@ -784,9 +746,10 @@ public class UIItemsBuilder {
 			throw new SystemException("Unable to create permissions URL", e);
 		}
 
-		StringBundler sb = new StringBundler(5);
+		StringBundler sb = new StringBundler(6);
 
-		sb.append("Liferay.Util.openWindow({title: '");
+		sb.append("Liferay.Util.openWindow({dialogIframe: {bodyCssClass: ");
+		sb.append("'dialog-with-footer'}, title: '");
 		sb.append(UnicodeLanguageUtil.get(_resourceBundle, "permissions"));
 		sb.append("', uri: '");
 		sb.append(permissionsURL);
@@ -1074,7 +1037,7 @@ public class UIItemsBuilder {
 		HttpServletRequest request, FileVersion fileVersion,
 		FileShortcut fileShortcut, ResourceBundle resourceBundle,
 		DLTrashUtil dlTrashUtil, VersioningStrategy versioningStrategy,
-		DLURLHelper dlurlHelper) {
+		DLURLHelper dlURLHelper) {
 
 		try {
 			_request = request;
@@ -1083,7 +1046,7 @@ public class UIItemsBuilder {
 			_resourceBundle = resourceBundle;
 			_dlTrashUtil = dlTrashUtil;
 			_versioningStrategy = versioningStrategy;
-			_dlurlHelper = dlurlHelper;
+			_dlURLHelper = dlURLHelper;
 
 			FileEntry fileEntry = null;
 
@@ -1185,6 +1148,33 @@ public class UIItemsBuilder {
 		return _currentURL;
 	}
 
+	private PortletURL _getDeleteActionURL(
+		String mvcActionCommandName, String cmd) {
+
+		String currentMVCRenderCommandName = ParamUtil.getString(
+			_request, "mvcRenderCommandName");
+
+		if (currentMVCRenderCommandName.equals(
+				"/document_library/view_file_entry")) {
+
+			String redirect = ParamUtil.getString(_request, "redirect");
+
+			if (Validator.isNull(redirect)) {
+				LiferayPortletResponse liferayPortletResponse =
+					_getLiferayPortletResponse();
+
+				PortletURL portletURL =
+					liferayPortletResponse.createRenderURL();
+
+				redirect = portletURL.toString();
+			}
+
+			return _getActionURL(mvcActionCommandName, cmd, redirect);
+		}
+
+		return _getActionURL(mvcActionCommandName, cmd);
+	}
+
 	private LiferayPortletRequest _getLiferayPortletRequest() {
 		PortletRequest portletRequest = (PortletRequest)_request.getAttribute(
 			JavaConstants.JAVAX_PORTLET_REQUEST);
@@ -1198,6 +1188,26 @@ public class UIItemsBuilder {
 				JavaConstants.JAVAX_PORTLET_RESPONSE);
 
 		return PortalUtil.getLiferayPortletResponse(portletResponse);
+	}
+
+	private String _getMoveEntryOnClickJavaScript() {
+		StringBundler sb = new StringBundler(5);
+
+		sb.append(getNamespace());
+		sb.append("move(1, ");
+
+		if (_fileShortcut != null) {
+			sb.append("'rowIdsDLFileShortcut', ");
+			sb.append(_fileShortcut.getFileShortcutId());
+		}
+		else {
+			sb.append("'rowIdsFileEntry', ");
+			sb.append(_fileEntry.getFileEntryId());
+		}
+
+		sb.append(");");
+
+		return sb.toString();
 	}
 
 	private String _getRedirect() {
@@ -1326,7 +1336,7 @@ public class UIItemsBuilder {
 
 	private String _currentURL;
 	private final DLTrashUtil _dlTrashUtil;
-	private final DLURLHelper _dlurlHelper;
+	private final DLURLHelper _dlURLHelper;
 	private final FileEntry _fileEntry;
 	private final FileEntryDisplayContextHelper _fileEntryDisplayContextHelper;
 	private FileShortcut _fileShortcut;

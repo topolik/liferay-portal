@@ -53,7 +53,7 @@ public class DDMTemplateCTConfigurationRegistrar {
 			_builder.setContentType(
 				"Dynamic Data Mapping Template"
 			).setContentTypeLanguageKey(
-				"dynamic-data-mapping"
+				"dynamic-data-mapping-template"
 			).setEntityClasses(
 				DDMTemplate.class, DDMTemplateVersion.class
 			).setResourceEntitiesByCompanyIdFunction(
@@ -69,7 +69,7 @@ public class DDMTemplateCTConfigurationRegistrar {
 			).setVersionEntityByVersionEntityIdFunction(
 				_ddmTemplateVersionLocalService::fetchDDMTemplateVersion
 			).setVersionEntityDetails(
-				CTFunctions.getFetchSiteNameFunction(),
+				null, CTFunctions.getFetchSiteNameFunction(),
 				ddmStructureVersion -> ddmStructureVersion.getName(
 					LocaleUtil.getMostRelevantLocale()),
 				DDMTemplateVersion::getVersion

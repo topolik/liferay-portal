@@ -17,6 +17,7 @@ package com.liferay.portal.kernel.theme;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.model.Layout;
+import com.liferay.portal.kernel.model.LayoutConstants;
 import com.liferay.portal.kernel.model.LayoutType;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.service.LayoutLocalServiceUtil;
@@ -36,6 +37,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -48,45 +50,6 @@ import javax.servlet.http.HttpServletRequest;
  * @author Shuyang Zhou
  */
 public class NavItem implements Serializable {
-
-	/**
-	 * Creates a single level of navigation items from the layouts. Navigation
-	 * items for nested layouts are only created when they are accessed.
-	 *
-	 * <p>
-	 * No permission checks are performed in this method. Permissions of child
-	 * layouts are honored when accessing them via {@link #getChildren()}.
-	 * </p>
-	 *
-	 * @param      request the currently served {@link HttpServletRequest}
-	 * @param      layouts the layouts from which to create the navigation items
-	 * @return     a single level of navigation items from the layouts, or
-	 *             <code>null</code> if the collection of layouts was
-	 *             <code>null</code>.
-	 * @deprecated As of Judson (7.1.x), replaced by {@link
-	 *             #fromLayouts(HttpServletRequest, ThemeDisplay, Map)}
-	 */
-	@Deprecated
-	public static List<NavItem> fromLayouts(
-		HttpServletRequest request, List<Layout> layouts,
-		Map<String, Object> contextObjects) {
-
-		if ((layouts == null) || layouts.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)request.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		List<NavItem> navItems = new ArrayList<>(layouts.size());
-
-		for (Layout layout : layouts) {
-			navItems.add(
-				new NavItem(request, themeDisplay, layout, contextObjects));
-		}
-
-		return navItems;
-	}
 
 	public static List<NavItem> fromLayouts(
 			HttpServletRequest request, ThemeDisplay themeDisplay,
@@ -109,7 +72,8 @@ public class NavItem implements Serializable {
 			while (iterator.hasNext()) {
 				Layout childLayout = iterator.next();
 
-				if (childLayout.isHidden() ||
+				if (_isContentLayoutDraft(childLayout) ||
+					childLayout.isHidden() ||
 					!LayoutPermissionUtil.contains(
 						themeDisplay.getPermissionChecker(), childLayout,
 						ActionKeys.VIEW)) {
@@ -124,6 +88,10 @@ public class NavItem implements Serializable {
 		for (Layout parentLayout : parentLayouts) {
 			List<Layout> childLayouts = layoutChildLayouts.get(
 				parentLayout.getPlid());
+
+			if (_isContentLayoutDraft(parentLayout)) {
+				continue;
+			}
 
 			navItems.add(
 				new NavItem(
@@ -420,6 +388,18 @@ public class NavItem implements Serializable {
 		}
 
 		return navItems;
+	}
+
+	private static boolean _isContentLayoutDraft(Layout layout) {
+		if (!Objects.equals(layout.getType(), LayoutConstants.TYPE_CONTENT)) {
+			return false;
+		}
+
+		if (Objects.equals(layout.getCreateDate(), layout.getPublishDate())) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private NavItem(

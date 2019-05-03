@@ -16,18 +16,19 @@ package com.liferay.segments.web.internal.display.context;
 
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
-import com.liferay.frontend.taglib.clay.servlet.taglib.util.SafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.language.LanguageUtil;
+import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.search.BaseModelSearchResult;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Sort;
-import com.liferay.portal.kernel.search.SortFactoryUtil;
+import com.liferay.portal.kernel.service.GroupLocalServiceUtil;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.kernel.util.ParamUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.segments.model.SegmentsEntry;
@@ -115,6 +116,15 @@ public class SelectSegmentsEntryDisplayContext {
 		};
 	}
 
+	public String getGroupDescriptiveName(SegmentsEntry segmentsEntry)
+		throws PortalException {
+
+		Group group = GroupLocalServiceUtil.getGroup(
+			segmentsEntry.getGroupId());
+
+		return group.getDescriptiveName(_themeDisplay.getLocale());
+	}
+
 	public String getOrderByType() {
 		if (Validator.isNotNull(_orderByType)) {
 			return _orderByType;
@@ -156,6 +166,11 @@ public class SelectSegmentsEntryDisplayContext {
 		_searchContainer = searchContainer;
 
 		return _searchContainer;
+	}
+
+	public long[] getSelectedSegmentsEntryIds() {
+		return StringUtil.split(
+			ParamUtil.getString(_request, "selectedSegmentsEntryIds"), 0L);
 	}
 
 	public String getSortingURL() {
@@ -224,13 +239,13 @@ public class SelectSegmentsEntryDisplayContext {
 	private OrderByComparator<SegmentsEntry> _getOrderByComparator() {
 		boolean orderByAsc = false;
 
-		String orderByCol = _getOrderByCol();
-
 		String orderByType = getOrderByType();
 
 		if (orderByType.equals("asc")) {
 			orderByAsc = true;
 		}
+
+		String orderByCol = _getOrderByCol();
 
 		OrderByComparator<SegmentsEntry> orderByComparator = null;
 
@@ -249,27 +264,23 @@ public class SelectSegmentsEntryDisplayContext {
 		return new DropdownItemList() {
 			{
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								Objects.equals(
-									_getOrderByCol(), "modified-date"));
-							dropdownItem.setHref(
-								_getPortletURL(), "orderByCol",
-								"modified-date");
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "modified-date"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setActive(
+							Objects.equals(_getOrderByCol(), "modified-date"));
+						dropdownItem.setHref(
+							_getPortletURL(), "orderByCol", "modified-date");
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "modified-date"));
+					});
 				add(
-					SafeConsumer.ignore(
-						dropdownItem -> {
-							dropdownItem.setActive(
-								Objects.equals(_getOrderByCol(), "name"));
-							dropdownItem.setHref(
-								_getPortletURL(), "orderByCol", "name");
-							dropdownItem.setLabel(
-								LanguageUtil.get(_request, "name"));
-						}));
+					dropdownItem -> {
+						dropdownItem.setActive(
+							Objects.equals(_getOrderByCol(), "name"));
+						dropdownItem.setHref(
+							_getPortletURL(), "orderByCol", "name");
+						dropdownItem.setLabel(
+							LanguageUtil.get(_request, "name"));
+					});
 			}
 		};
 	}
@@ -293,17 +304,29 @@ public class SelectSegmentsEntryDisplayContext {
 	}
 
 	private Sort _getSort() {
-		String orderByCol = _getOrderByCol();
+		boolean orderByAsc = false;
 
-		if (orderByCol.equals("name")) {
-			return SortFactoryUtil.getSort(
-				SegmentsEntry.class, Sort.STRING_TYPE, Field.NAME,
-				getOrderByType());
+		String orderByType = getOrderByType();
+
+		if (orderByType.equals("asc")) {
+			orderByAsc = true;
 		}
 
-		return SortFactoryUtil.getSort(
-			SegmentsEntry.class, Sort.LONG_TYPE, Field.MODIFIED_DATE,
-			getOrderByType());
+		String orderByCol = _getOrderByCol();
+
+		Sort sort = null;
+
+		if (orderByCol.equals("name")) {
+			String sortFieldName = Field.getSortableFieldName(
+				"localized_name_".concat(_themeDisplay.getLanguageId()));
+
+			sort = new Sort(sortFieldName, Sort.STRING_TYPE, orderByAsc);
+		}
+		else {
+			sort = new Sort(Field.MODIFIED_DATE, Sort.LONG_TYPE, orderByAsc);
+		}
+
+		return sort;
 	}
 
 	private boolean _hasResults() throws PortalException {

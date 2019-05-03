@@ -14,9 +14,9 @@
 
 package com.liferay.portal.spring.transaction;
 
+import com.liferay.portal.kernel.aop.AopMethodInvocation;
+import com.liferay.portal.kernel.aop.ChainableMethodAdvice;
 import com.liferay.portal.kernel.transaction.Transactional;
-import com.liferay.portal.spring.aop.AopMethodInvocation;
-import com.liferay.portal.spring.aop.ChainableMethodAdvice;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,7 +31,7 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
 public class TransactionInterceptor extends ChainableMethodAdvice {
 
 	@Override
-	public Object createMethodContext(
+	public TransactionAttributeAdapter createMethodContext(
 		Class<?> targetClass, Method method,
 		Map<Class<? extends Annotation>, Annotation> annotations) {
 
@@ -56,17 +56,12 @@ public class TransactionInterceptor extends ChainableMethodAdvice {
 		TransactionAttributeAdapter transactionAttributeAdapter =
 			aopMethodInvocation.getAdviceMethodContext();
 
+		TransactionExecutor transactionExecutor =
+			transactionAttributeAdapter.getTransactionExecutor();
+
 		return transactionExecutor.execute(
 			transactionAttributeAdapter,
 			() -> aopMethodInvocation.proceed(arguments));
 	}
-
-	public void setTransactionExecutor(
-		TransactionExecutor transactionExecutor) {
-
-		this.transactionExecutor = transactionExecutor;
-	}
-
-	protected TransactionExecutor transactionExecutor;
 
 }

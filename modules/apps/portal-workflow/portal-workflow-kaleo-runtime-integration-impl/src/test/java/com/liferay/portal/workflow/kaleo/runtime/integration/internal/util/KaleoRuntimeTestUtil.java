@@ -16,13 +16,14 @@ package com.liferay.portal.workflow.kaleo.runtime.integration.internal.util;
 
 import com.liferay.portal.kernel.workflow.WorkflowTaskAssignee;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignmentInstance;
+import com.liferay.portal.workflow.kaleo.model.KaleoTaskAssignmentInstanceWrapper;
 import com.liferay.portal.workflow.kaleo.model.KaleoTaskInstanceToken;
+import com.liferay.portal.workflow.kaleo.model.KaleoTaskInstanceTokenWrapper;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Assert;
-
-import org.mockito.Mockito;
 
 /**
  * @author Marcellus Tavares
@@ -43,51 +44,49 @@ public class KaleoRuntimeTestUtil {
 	}
 
 	public static KaleoTaskAssignmentInstance mockKaleoTaskAssignmentInstance(
-		String returnAssigneeClassName, long returnAssigneeClassPK) {
+		String assigneeClassName, long assigneeClassPK) {
 
-		KaleoTaskAssignmentInstance kaleoTaskAssignmentInstance = Mockito.mock(
-			KaleoTaskAssignmentInstance.class);
+		return new KaleoTaskAssignmentInstanceWrapper(null) {
 
-		Mockito.when(
-			kaleoTaskAssignmentInstance.getAssigneeClassName()
-		).thenReturn(
-			returnAssigneeClassName
-		);
+			@Override
+			public String getAssigneeClassName() {
+				return assigneeClassName;
+			}
 
-		Mockito.when(
-			kaleoTaskAssignmentInstance.getAssigneeClassPK()
-		).thenReturn(
-			returnAssigneeClassPK
-		);
+			@Override
+			public long getAssigneeClassPK() {
+				return assigneeClassPK;
+			}
 
-		return kaleoTaskAssignmentInstance;
+		};
 	}
 
 	public static KaleoTaskInstanceToken mockKaleoTaskInstanceToken(
-		KaleoTaskAssignmentInstance... returnKaleoTaskAssignmentInstances) {
+		KaleoTaskAssignmentInstance... kaleoTaskAssignmentInstances) {
 
-		KaleoTaskInstanceToken kaleoTaskInstanceToken = Mockito.mock(
-			KaleoTaskInstanceToken.class);
+		return new KaleoTaskInstanceTokenWrapper(null) {
 
-		Mockito.when(
-			kaleoTaskInstanceToken.getKaleoTaskAssignmentInstances()
-		).thenReturn(
-			Arrays.asList(returnKaleoTaskAssignmentInstances)
-		);
+			@Override
+			public KaleoTaskAssignmentInstance
+				getFirstKaleoTaskAssignmentInstance() {
 
-		if ((returnKaleoTaskAssignmentInstances.length == 0) ||
-			(returnKaleoTaskAssignmentInstances.length > 1)) {
+				if ((kaleoTaskAssignmentInstances.length == 0) ||
+					(kaleoTaskAssignmentInstances.length > 1)) {
 
-			return kaleoTaskInstanceToken;
-		}
+					return null;
+				}
 
-		Mockito.when(
-			kaleoTaskInstanceToken.getFirstKaleoTaskAssignmentInstance()
-		).thenReturn(
-			returnKaleoTaskAssignmentInstances[0]
-		);
+				return kaleoTaskAssignmentInstances[0];
+			}
 
-		return kaleoTaskInstanceToken;
+			@Override
+			public List<KaleoTaskAssignmentInstance>
+				getKaleoTaskAssignmentInstances() {
+
+				return Arrays.asList(kaleoTaskAssignmentInstances);
+			}
+
+		};
 	}
 
 }

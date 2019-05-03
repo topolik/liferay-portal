@@ -1,3 +1,10 @@
+/**
+ * The Preview Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-preview
+ */
+
 AUI.add(
 	'liferay-preview',
 	function(A) {

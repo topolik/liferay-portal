@@ -128,23 +128,19 @@ public class AssetEntryUsagePersistenceTest {
 
 		newAssetEntryUsage.setGroupId(RandomTestUtil.nextLong());
 
-		newAssetEntryUsage.setCompanyId(RandomTestUtil.nextLong());
-
-		newAssetEntryUsage.setUserId(RandomTestUtil.nextLong());
-
-		newAssetEntryUsage.setUserName(RandomTestUtil.randomString());
-
 		newAssetEntryUsage.setCreateDate(RandomTestUtil.nextDate());
 
 		newAssetEntryUsage.setModifiedDate(RandomTestUtil.nextDate());
 
 		newAssetEntryUsage.setAssetEntryId(RandomTestUtil.nextLong());
 
-		newAssetEntryUsage.setClassNameId(RandomTestUtil.nextLong());
+		newAssetEntryUsage.setContainerType(RandomTestUtil.nextLong());
 
-		newAssetEntryUsage.setClassPK(RandomTestUtil.nextLong());
+		newAssetEntryUsage.setContainerKey(RandomTestUtil.randomString());
 
-		newAssetEntryUsage.setPortletId(RandomTestUtil.randomString());
+		newAssetEntryUsage.setPlid(RandomTestUtil.nextLong());
+
+		newAssetEntryUsage.setType(RandomTestUtil.nextInt());
 
 		newAssetEntryUsage.setLastPublishDate(RandomTestUtil.nextDate());
 
@@ -162,15 +158,6 @@ public class AssetEntryUsagePersistenceTest {
 			existingAssetEntryUsage.getGroupId(),
 			newAssetEntryUsage.getGroupId());
 		Assert.assertEquals(
-			existingAssetEntryUsage.getCompanyId(),
-			newAssetEntryUsage.getCompanyId());
-		Assert.assertEquals(
-			existingAssetEntryUsage.getUserId(),
-			newAssetEntryUsage.getUserId());
-		Assert.assertEquals(
-			existingAssetEntryUsage.getUserName(),
-			newAssetEntryUsage.getUserName());
-		Assert.assertEquals(
 			Time.getShortTimestamp(existingAssetEntryUsage.getCreateDate()),
 			Time.getShortTimestamp(newAssetEntryUsage.getCreateDate()));
 		Assert.assertEquals(
@@ -180,14 +167,15 @@ public class AssetEntryUsagePersistenceTest {
 			existingAssetEntryUsage.getAssetEntryId(),
 			newAssetEntryUsage.getAssetEntryId());
 		Assert.assertEquals(
-			existingAssetEntryUsage.getClassNameId(),
-			newAssetEntryUsage.getClassNameId());
+			existingAssetEntryUsage.getContainerType(),
+			newAssetEntryUsage.getContainerType());
 		Assert.assertEquals(
-			existingAssetEntryUsage.getClassPK(),
-			newAssetEntryUsage.getClassPK());
+			existingAssetEntryUsage.getContainerKey(),
+			newAssetEntryUsage.getContainerKey());
 		Assert.assertEquals(
-			existingAssetEntryUsage.getPortletId(),
-			newAssetEntryUsage.getPortletId());
+			existingAssetEntryUsage.getPlid(), newAssetEntryUsage.getPlid());
+		Assert.assertEquals(
+			existingAssetEntryUsage.getType(), newAssetEntryUsage.getType());
 		Assert.assertEquals(
 			Time.getShortTimestamp(
 				existingAssetEntryUsage.getLastPublishDate()),
@@ -213,15 +201,6 @@ public class AssetEntryUsagePersistenceTest {
 	}
 
 	@Test
-	public void testCountByUuid_C() throws Exception {
-		_persistence.countByUuid_C("", RandomTestUtil.nextLong());
-
-		_persistence.countByUuid_C("null", 0L);
-
-		_persistence.countByUuid_C((String)null, 0L);
-	}
-
-	@Test
 	public void testCountByAssetEntryId() throws Exception {
 		_persistence.countByAssetEntryId(RandomTestUtil.nextLong());
 
@@ -229,41 +208,39 @@ public class AssetEntryUsagePersistenceTest {
 	}
 
 	@Test
-	public void testCountByA_C() throws Exception {
-		_persistence.countByA_C(
-			RandomTestUtil.nextLong(), RandomTestUtil.nextLong());
+	public void testCountByPlid() throws Exception {
+		_persistence.countByPlid(RandomTestUtil.nextLong());
 
-		_persistence.countByA_C(0L, 0L);
+		_persistence.countByPlid(0L);
 	}
 
 	@Test
-	public void testCountByA_P() throws Exception {
-		_persistence.countByA_P(RandomTestUtil.nextLong(), "");
+	public void testCountByA_T() throws Exception {
+		_persistence.countByA_T(
+			RandomTestUtil.nextLong(), RandomTestUtil.nextInt());
 
-		_persistence.countByA_P(0L, "null");
-
-		_persistence.countByA_P(0L, (String)null);
+		_persistence.countByA_T(0L, 0);
 	}
 
 	@Test
 	public void testCountByC_C_P() throws Exception {
 		_persistence.countByC_C_P(
-			RandomTestUtil.nextLong(), RandomTestUtil.nextLong(), "");
+			RandomTestUtil.nextLong(), "", RandomTestUtil.nextLong());
 
-		_persistence.countByC_C_P(0L, 0L, "null");
+		_persistence.countByC_C_P(0L, "null", 0L);
 
-		_persistence.countByC_C_P(0L, 0L, (String)null);
+		_persistence.countByC_C_P(0L, (String)null, 0L);
 	}
 
 	@Test
 	public void testCountByA_C_C_P() throws Exception {
 		_persistence.countByA_C_C_P(
-			RandomTestUtil.nextLong(), RandomTestUtil.nextLong(),
-			RandomTestUtil.nextLong(), "");
+			RandomTestUtil.nextLong(), RandomTestUtil.nextLong(), "",
+			RandomTestUtil.nextLong());
 
-		_persistence.countByA_C_C_P(0L, 0L, 0L, "null");
+		_persistence.countByA_C_C_P(0L, 0L, "null", 0L);
 
-		_persistence.countByA_C_C_P(0L, 0L, 0L, (String)null);
+		_persistence.countByA_C_C_P(0L, 0L, (String)null, 0L);
 	}
 
 	@Test
@@ -292,10 +269,9 @@ public class AssetEntryUsagePersistenceTest {
 	protected OrderByComparator<AssetEntryUsage> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
 			"AssetEntryUsage", "uuid", true, "assetEntryUsageId", true,
-			"groupId", true, "companyId", true, "userId", true, "userName",
-			true, "createDate", true, "modifiedDate", true, "assetEntryId",
-			true, "classNameId", true, "classPK", true, "portletId", true,
-			"lastPublishDate", true);
+			"groupId", true, "createDate", true, "modifiedDate", true,
+			"assetEntryId", true, "containerType", true, "containerKey", true,
+			"plid", true, "type", true, "lastPublishDate", true);
 	}
 
 	@Test
@@ -540,21 +516,20 @@ public class AssetEntryUsagePersistenceTest {
 				existingAssetEntryUsage, "getOriginalAssetEntryId",
 				new Class<?>[0]));
 		Assert.assertEquals(
-			Long.valueOf(existingAssetEntryUsage.getClassNameId()),
+			Long.valueOf(existingAssetEntryUsage.getContainerType()),
 			ReflectionTestUtil.<Long>invoke(
-				existingAssetEntryUsage, "getOriginalClassNameId",
-				new Class<?>[0]));
-		Assert.assertEquals(
-			Long.valueOf(existingAssetEntryUsage.getClassPK()),
-			ReflectionTestUtil.<Long>invoke(
-				existingAssetEntryUsage, "getOriginalClassPK",
+				existingAssetEntryUsage, "getOriginalContainerType",
 				new Class<?>[0]));
 		Assert.assertTrue(
 			Objects.equals(
-				existingAssetEntryUsage.getPortletId(),
+				existingAssetEntryUsage.getContainerKey(),
 				ReflectionTestUtil.invoke(
-					existingAssetEntryUsage, "getOriginalPortletId",
+					existingAssetEntryUsage, "getOriginalContainerKey",
 					new Class<?>[0])));
+		Assert.assertEquals(
+			Long.valueOf(existingAssetEntryUsage.getPlid()),
+			ReflectionTestUtil.<Long>invoke(
+				existingAssetEntryUsage, "getOriginalPlid", new Class<?>[0]));
 	}
 
 	protected AssetEntryUsage addAssetEntryUsage() throws Exception {
@@ -566,23 +541,19 @@ public class AssetEntryUsagePersistenceTest {
 
 		assetEntryUsage.setGroupId(RandomTestUtil.nextLong());
 
-		assetEntryUsage.setCompanyId(RandomTestUtil.nextLong());
-
-		assetEntryUsage.setUserId(RandomTestUtil.nextLong());
-
-		assetEntryUsage.setUserName(RandomTestUtil.randomString());
-
 		assetEntryUsage.setCreateDate(RandomTestUtil.nextDate());
 
 		assetEntryUsage.setModifiedDate(RandomTestUtil.nextDate());
 
 		assetEntryUsage.setAssetEntryId(RandomTestUtil.nextLong());
 
-		assetEntryUsage.setClassNameId(RandomTestUtil.nextLong());
+		assetEntryUsage.setContainerType(RandomTestUtil.nextLong());
 
-		assetEntryUsage.setClassPK(RandomTestUtil.nextLong());
+		assetEntryUsage.setContainerKey(RandomTestUtil.randomString());
 
-		assetEntryUsage.setPortletId(RandomTestUtil.randomString());
+		assetEntryUsage.setPlid(RandomTestUtil.nextLong());
+
+		assetEntryUsage.setType(RandomTestUtil.nextInt());
 
 		assetEntryUsage.setLastPublishDate(RandomTestUtil.nextDate());
 

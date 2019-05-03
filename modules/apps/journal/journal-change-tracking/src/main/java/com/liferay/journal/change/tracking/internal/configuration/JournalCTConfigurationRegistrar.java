@@ -24,9 +24,13 @@ import com.liferay.journal.service.JournalArticleResourceLocalService;
 import com.liferay.portal.kernel.dao.orm.DynamicQuery;
 import com.liferay.portal.kernel.dao.orm.Property;
 import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
+import com.liferay.portal.kernel.model.BaseModel;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -45,7 +49,7 @@ public class JournalCTConfigurationRegistrar {
 			_builder.setContentType(
 				"Web Content"
 			).setContentTypeLanguageKey(
-				"journal"
+				"journal-article"
 			).setEntityClasses(
 				JournalArticleResource.class, JournalArticle.class
 			).setResourceEntitiesByCompanyIdFunction(
@@ -62,6 +66,8 @@ public class JournalCTConfigurationRegistrar {
 			).setVersionEntityByVersionEntityIdFunction(
 				_journalArticleLocalService::fetchJournalArticle
 			).setVersionEntityDetails(
+				Arrays.asList(
+					_getDDMStructuresFunction(), _getDDMTemplatesFunction()),
 				CTFunctions.getFetchSiteNameFunction(),
 				JournalArticle::getTitle, JournalArticle::getVersion
 			).setEntityIdsFromVersionEntityFunctions(
@@ -86,6 +92,20 @@ public class JournalCTConfigurationRegistrar {
 		dynamicQuery.add(companyIdProperty.eq(companyId));
 
 		return _journalArticleResourceLocalService.dynamicQuery(dynamicQuery);
+	}
+
+	private Function<JournalArticle, List<? extends BaseModel>>
+		_getDDMStructuresFunction() {
+
+		return journalArticle -> Collections.singletonList(
+			journalArticle.getDDMStructure());
+	}
+
+	private Function<JournalArticle, List<? extends BaseModel>>
+		_getDDMTemplatesFunction() {
+
+		return journalArticle -> Collections.singletonList(
+			journalArticle.getDDMTemplate());
 	}
 
 	@Reference(scope = ReferenceScope.PROTOTYPE_REQUIRED)

@@ -54,13 +54,7 @@ public class LayoutModelListener extends BaseModelListener<Layout> {
 			return;
 		}
 
-		UnicodeProperties typeSettingsProperties =
-			layout.getTypeSettingsProperties();
-
-		boolean visible = GetterUtil.getBoolean(
-			typeSettingsProperties.getProperty("visible"), true);
-
-		if (layout.isHidden() || !visible) {
+		if (!_isVisible(layout)) {
 			return;
 		}
 
@@ -69,19 +63,58 @@ public class LayoutModelListener extends BaseModelListener<Layout> {
 				layout.getTypeSettingsProperty("siteNavigationMenuId"),
 				CharPool.COMMA));
 
-		for (long siteNavigationMenuId : siteNavigationMenuIds) {
-			_addSiteNavigationMenuItem(siteNavigationMenuId, layout);
-		}
+		_addLayoutSiteNavigationMenuItems(siteNavigationMenuIds, layout);
 	}
 
 	@Override
 	public void onAfterRemove(Layout layout) throws ModelListenerException {
+		if (layout == null) {
+			return;
+		}
+
 		List<SiteNavigationMenu> siteNavigationMenus =
 			_siteNavigationMenuLocalService.getSiteNavigationMenus(
 				layout.getGroupId());
 
-		for (SiteNavigationMenu siteNavigationMenu : siteNavigationMenus) {
-			_deleteSiteNavigationMenuItem(siteNavigationMenu, layout);
+		try {
+			for (SiteNavigationMenu siteNavigationMenu : siteNavigationMenus) {
+				_deleteSiteNavigationMenuItem(siteNavigationMenu, layout);
+			}
+		}
+		catch (PortalException pe) {
+			throw new ModelListenerException(pe);
+		}
+	}
+
+	@Override
+	public void onAfterUpdate(Layout layout) throws ModelListenerException {
+		if (!_isVisible(layout)) {
+			return;
+		}
+
+		UnicodeProperties typeSettingsProperties =
+			layout.getTypeSettingsProperties();
+
+		boolean published = GetterUtil.getBoolean(
+			typeSettingsProperties.getProperty("published"));
+
+		if (!published) {
+			long[] siteNavigationMenuIds = GetterUtil.getLongValues(
+				StringUtil.split(
+					layout.getTypeSettingsProperty("siteNavigationMenuId"),
+					CharPool.COMMA));
+
+			_addLayoutSiteNavigationMenuItems(siteNavigationMenuIds, layout);
+		}
+	}
+
+	private void _addLayoutSiteNavigationMenuItems(
+		long[] siteNavigationMenuIds, Layout layout) {
+
+		for (long siteNavigationMenuId : siteNavigationMenuIds) {
+			if (siteNavigationMenuId > 0) {
+				_addSiteNavigationMenuItem(siteNavigationMenuId, layout);
+			}
 		}
 	}
 
@@ -120,7 +153,8 @@ public class LayoutModelListener extends BaseModelListener<Layout> {
 	}
 
 	private void _deleteSiteNavigationMenuItem(
-		SiteNavigationMenu siteNavigationMenu, Layout layout) {
+			SiteNavigationMenu siteNavigationMenu, Layout layout)
+		throws PortalException {
 
 		List<SiteNavigationMenuItem> siteNavigationMenuItems =
 			_siteNavigationMenuItemLocalService.getSiteNavigationMenuItems(
@@ -138,7 +172,8 @@ public class LayoutModelListener extends BaseModelListener<Layout> {
 
 			if (Objects.equals(layout.getUuid(), layoutUuid)) {
 				_siteNavigationMenuItemLocalService.
-					deleteSiteNavigationMenuItem(siteNavigationMenuItem);
+					deleteSiteNavigationMenuItem(
+						siteNavigationMenuItem.getSiteNavigationMenuItemId());
 			}
 		}
 	}
@@ -172,6 +207,23 @@ public class LayoutModelListener extends BaseModelListener<Layout> {
 		}
 
 		return 0;
+	}
+
+	private boolean _isVisible(Layout layout) {
+		UnicodeProperties typeSettingsProperties =
+			layout.getTypeSettingsProperties();
+
+		boolean visible = GetterUtil.getBoolean(
+			typeSettingsProperties.getProperty("visible"), true);
+
+		if (layout.isHidden() || !visible ||
+			(Objects.equals(layout.getType(), LayoutConstants.TYPE_CONTENT) &&
+			 Objects.equals(layout.getCreateDate(), layout.getPublishDate()))) {
+
+			return false;
+		}
+
+		return true;
 	}
 
 	private boolean _menuItemExists(long siteNavigationMenuId, Layout layout) {

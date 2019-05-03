@@ -26,7 +26,6 @@ import com.liferay.portal.kernel.language.Language;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
-import com.liferay.portal.kernel.search.Document;
 import com.liferay.portal.kernel.search.Field;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistry;
@@ -40,6 +39,8 @@ import com.liferay.portal.kernel.util.FastDateFormatFactory;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.search.document.Document;
+import com.liferay.portal.search.legacy.document.DocumentBuilderFactory;
 import com.liferay.portal.search.summary.Summary;
 import com.liferay.portal.search.summary.SummaryBuilder;
 import com.liferay.portal.search.summary.SummaryBuilderFactory;
@@ -58,15 +59,16 @@ import java.text.SimpleDateFormat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.portlet.PortletException;
@@ -82,8 +84,21 @@ public class SearchResultSummaryDisplayBuilder {
 
 	public SearchResultSummaryDisplayContext build() throws Exception {
 		try {
-			return build(
-				_document.get(Field.ENTRY_CLASS_NAME), getEntryClassPK());
+			if (_documentBuilderFactory != null) {
+				_document = _documentBuilderFactory.builder(
+					_legacyDocument
+				).build();
+			}
+
+			String className = getFieldValueString(Field.ENTRY_CLASS_NAME);
+
+			long classPK = getEntryClassPK();
+
+			if (Validator.isBlank(className) && (classPK == 0)) {
+				return buildFromPlainDocument();
+			}
+
+			return build(className, classPK);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -92,104 +107,175 @@ public class SearchResultSummaryDisplayBuilder {
 		}
 	}
 
-	public void setAbridged(boolean abridged) {
+	public SearchResultSummaryDisplayBuilder setAbridged(boolean abridged) {
 		_abridged = abridged;
+
+		return this;
 	}
 
-	public void setAssetEntryLocalService(
+	public SearchResultSummaryDisplayBuilder setAssetEntryLocalService(
 		AssetEntryLocalService assetEntryLocalService) {
 
 		_assetEntryLocalService = assetEntryLocalService;
+
+		return this;
 	}
 
-	public void setAssetRendererFactoryLookup(
+	public SearchResultSummaryDisplayBuilder setAssetRendererFactoryLookup(
 		AssetRendererFactoryLookup assetRendererFactoryLookup) {
 
 		_assetRendererFactoryLookup = assetRendererFactoryLookup;
+
+		return this;
 	}
 
-	public void setCurrentURL(String currentURL) {
+	public SearchResultSummaryDisplayBuilder setCurrentURL(String currentURL) {
 		_currentURL = currentURL;
+
+		return this;
 	}
 
-	public void setDocument(Document document) {
-		_document = document;
+	public SearchResultSummaryDisplayBuilder setDocument(
+		com.liferay.portal.kernel.search.Document document) {
+
+		_legacyDocument = document;
+
+		return this;
 	}
 
-	public void setFastDateFormatFactory(
+	public SearchResultSummaryDisplayBuilder setDocumentBuilderFactory(
+		DocumentBuilderFactory documentBuilderFactory) {
+
+		_documentBuilderFactory = documentBuilderFactory;
+
+		return this;
+	}
+
+	public SearchResultSummaryDisplayBuilder setFastDateFormatFactory(
 		FastDateFormatFactory fastDateFormatFactory) {
 
 		_fastDateFormatFactory = fastDateFormatFactory;
+
+		return this;
 	}
 
-	public void setHighlightEnabled(boolean highlightEnabled) {
+	public SearchResultSummaryDisplayBuilder setHighlightEnabled(
+		boolean highlightEnabled) {
+
 		_highlightEnabled = highlightEnabled;
+
+		return this;
 	}
 
-	public void setImageRequested(boolean imageRequested) {
+	public SearchResultSummaryDisplayBuilder setImageRequested(
+		boolean imageRequested) {
+
 		_imageRequested = imageRequested;
+
+		return this;
 	}
 
-	public void setIndexerRegistry(IndexerRegistry indexerRegistry) {
+	public SearchResultSummaryDisplayBuilder setIndexerRegistry(
+		IndexerRegistry indexerRegistry) {
+
 		_indexerRegistry = indexerRegistry;
+
+		return this;
 	}
 
-	public void setLanguage(Language language) {
+	public SearchResultSummaryDisplayBuilder setLanguage(Language language) {
 		_language = language;
+
+		return this;
 	}
 
-	public void setLocale(Locale locale) {
+	public SearchResultSummaryDisplayBuilder setLocale(Locale locale) {
 		_locale = locale;
+
+		return this;
 	}
 
-	public void setPortletURLFactory(PortletURLFactory portletURLFactory) {
+	public SearchResultSummaryDisplayBuilder setPortletURLFactory(
+		PortletURLFactory portletURLFactory) {
+
 		_portletURLFactory = portletURLFactory;
+
+		return this;
 	}
 
-	public void setRenderRequest(RenderRequest renderRequest) {
+	public SearchResultSummaryDisplayBuilder setRenderRequest(
+		RenderRequest renderRequest) {
+
 		_renderRequest = renderRequest;
+
+		return this;
 	}
 
-	public void setRenderResponse(RenderResponse renderResponse) {
+	public SearchResultSummaryDisplayBuilder setRenderResponse(
+		RenderResponse renderResponse) {
+
 		_renderResponse = renderResponse;
+
+		return this;
 	}
 
-	public void setRequest(HttpServletRequest request) {
+	public SearchResultSummaryDisplayBuilder setRequest(
+		HttpServletRequest request) {
+
 		_request = request;
+
+		return this;
 	}
 
-	public void setResourceActions(ResourceActions resourceActions) {
+	public SearchResultSummaryDisplayBuilder setResourceActions(
+		ResourceActions resourceActions) {
+
 		_resourceActions = resourceActions;
+
+		return this;
 	}
 
-	public void setSearchResultImageContributorsStream(
-		Stream<SearchResultImageContributor>
-			searchResultImageContributorsStream) {
+	public SearchResultSummaryDisplayBuilder
+		setSearchResultImageContributorsStream(
+			Stream<SearchResultImageContributor>
+				searchResultImageContributorsStream) {
 
 		_searchResultImageContributorsStream =
 			searchResultImageContributorsStream;
+
+		return this;
 	}
 
-	public void setSearchResultPreferences(
+	public SearchResultSummaryDisplayBuilder setSearchResultPreferences(
 		SearchResultPreferences searchResultPreferences) {
 
 		_searchResultPreferences = searchResultPreferences;
+
+		return this;
 	}
 
-	public void setSearchResultViewURLSupplier(
+	public SearchResultSummaryDisplayBuilder setSearchResultViewURLSupplier(
 		SearchResultViewURLSupplier searchResultViewURLSupplier) {
 
 		_searchResultViewURLSupplier = searchResultViewURLSupplier;
+
+		return this;
 	}
 
-	public void setSummaryBuilderFactory(
+	public SearchResultSummaryDisplayBuilder setSummaryBuilderFactory(
 		SummaryBuilderFactory summaryBuilderFactory) {
 
 		_summaryBuilderFactory = summaryBuilderFactory;
+
+		return this;
 	}
 
-	public void setThemeDisplay(ThemeDisplay themeDisplay) {
+	public SearchResultSummaryDisplayBuilder setThemeDisplay(
+		ThemeDisplay themeDisplay) {
+
 		_themeDisplay = themeDisplay;
+
+		return this;
 	}
 
 	protected SearchResultSummaryDisplayContext build(
@@ -203,7 +289,7 @@ public class SearchResultSummaryDisplayBuilder {
 
 		if (assetRendererFactory != null) {
 			long resourcePrimKey = GetterUtil.getLong(
-				_document.get(Field.ROOT_ENTRY_CLASS_PK));
+				getFieldValueString(Field.ROOT_ENTRY_CLASS_PK));
 
 			if (resourcePrimKey > 0) {
 				classPK = resourcePrimKey;
@@ -251,7 +337,7 @@ public class SearchResultSummaryDisplayBuilder {
 			className, classPK);
 
 		buildAssetCategoriesOrTags(
-			searchResultSummaryDisplayContext, assetEntry, className, classPK);
+			searchResultSummaryDisplayContext, assetEntry);
 
 		buildAssetRendererURLDownload(
 			searchResultSummaryDisplayContext, assetRenderer, summary);
@@ -269,9 +355,8 @@ public class SearchResultSummaryDisplayBuilder {
 	}
 
 	protected void buildAssetCategoriesOrTags(
-			SearchResultSummaryDisplayContext searchResultSummaryDisplayContext,
-			AssetEntry assetEntry, String className, long classPK)
-		throws PortletException {
+		SearchResultSummaryDisplayContext searchResultSummaryDisplayContext,
+		AssetEntry assetEntry) {
 
 		if (hasAssetCategoriesOrTags(assetEntry)) {
 			searchResultSummaryDisplayContext.setAssetCategoriesOrTagsVisible(
@@ -301,7 +386,7 @@ public class SearchResultSummaryDisplayBuilder {
 		SearchResultSummaryDisplayContext searchResultSummaryDisplayContext) {
 
 		Optional<String> dateStringOptional = SearchStringUtil.maybe(
-			_document.get(Field.CREATE_DATE));
+			getFieldValueString(Field.CREATE_DATE));
 
 		Optional<Date> dateOptional = dateStringOptional.map(
 			this::parseDateStringFieldValue);
@@ -317,9 +402,9 @@ public class SearchResultSummaryDisplayBuilder {
 	protected void buildCreatorUserName(
 		SearchResultSummaryDisplayContext searchResultSummaryDisplayContext) {
 
-		String creatorUserName = _document.get(Field.USER_NAME);
+		String creatorUserName = getFieldValueString(Field.USER_NAME);
 
-		if (creatorUserName != null) {
+		if (!Validator.isBlank(creatorUserName)) {
 			searchResultSummaryDisplayContext.setCreatorUserName(
 				creatorUserName);
 			searchResultSummaryDisplayContext.setCreatorVisible(true);
@@ -330,64 +415,132 @@ public class SearchResultSummaryDisplayBuilder {
 		SearchResultSummaryDisplayContext searchResultSummaryDisplayContext) {
 
 		if (_searchResultPreferences.isDisplayResultsInDocumentForm()) {
+			Collection<String> allFieldNames = getAllFieldNames();
+
 			searchResultSummaryDisplayContext.
-				setDocumentFormFieldDisplayContexts(buildFields());
+				setDocumentFormFieldDisplayContexts(
+					buildFieldDisplayContexts(allFieldNames.stream()));
+
 			searchResultSummaryDisplayContext.setDocumentFormVisible(true);
 		}
 	}
 
-	protected SearchResultFieldDisplayContext buildField(Field field) {
+	protected List<SearchResultFieldDisplayContext> buildFieldDisplayContexts(
+		Stream<String> fieldNames) {
+
+		return fieldNames.sorted(
+		).map(
+			this::buildFieldWithHighlight
+		).collect(
+			Collectors.toList()
+		);
+	}
+
+	protected SearchResultFieldDisplayContext buildFieldWithHighlight(
+		String fieldName) {
+
 		SearchResultFieldDisplayContext searchResultFieldDisplayContext =
 			new SearchResultFieldDisplayContext();
 
-		searchResultFieldDisplayContext.setArray(isArray(field));
-		searchResultFieldDisplayContext.setName(field.getName());
-		searchResultFieldDisplayContext.setNumeric(field.isNumeric());
-		searchResultFieldDisplayContext.setTokenized(field.isTokenized());
+		searchResultFieldDisplayContext.setName(fieldName);
 		searchResultFieldDisplayContext.setValuesToString(
-			getValuesToString(field));
+			getHighlightedFieldValue(fieldName));
 
 		return searchResultFieldDisplayContext;
 	}
 
-	protected List<SearchResultFieldDisplayContext> buildFields() {
-		Map<String, Field> map = _document.getFields();
+	protected SearchResultSummaryDisplayContext buildFromPlainDocument()
+		throws PortletException {
 
-		List<Map.Entry<String, Field>> entries = new LinkedList<>(
-			map.entrySet());
+		Set<String> set = new LinkedHashSet<>(
+			Arrays.asList(
+				SearchStringUtil.splitAndUnquote(
+					_searchResultPreferences.getFieldsToDisplayOptional())));
 
-		Collections.sort(
-			entries,
-			new Comparator<Map.Entry<String, Field>>() {
+		boolean star = set.remove(StringPool.STAR);
 
-				@Override
-				public int compare(
-					Map.Entry<String, Field> entry1,
-					Map.Entry<String, Field> entry2) {
+		boolean all;
 
-					String key = entry1.getKey();
-
-					return key.compareTo(entry2.getKey());
-				}
-
-			});
-
-		List<SearchResultFieldDisplayContext> searchResultFieldDisplayContexts =
-			new ArrayList<>(entries.size());
-
-		for (Map.Entry<String, Field> entry : entries) {
-			Field field = entry.getValue();
-
-			String fieldName = field.getName();
-
-			if (fieldName.equals(Field.UID)) {
-				continue;
-			}
-
-			searchResultFieldDisplayContexts.add(buildField(field));
+		if (star || set.isEmpty()) {
+			all = true;
+		}
+		else {
+			all = false;
 		}
 
-		return searchResultFieldDisplayContexts;
+		List<String> fieldNames = new ArrayList<>(set);
+
+		List<String> allFieldNames = getAllFieldNames();
+
+		String contentFieldName;
+		boolean contentVisible;
+		boolean fieldsVisible;
+		String titleFieldName;
+
+		if (fieldNames.isEmpty()) {
+			contentFieldName = null;
+			contentVisible = false;
+			fieldsVisible = true;
+			titleFieldName = allFieldNames.get(0);
+		}
+		else if (fieldNames.size() == 1) {
+			contentFieldName = null;
+			contentVisible = false;
+			fieldsVisible = false;
+			titleFieldName = fieldNames.get(0);
+		}
+		else {
+			contentFieldName = fieldNames.get(1);
+			contentVisible = true;
+			fieldsVisible = fieldNames.size() > 2;
+			titleFieldName = fieldNames.get(0);
+		}
+
+		SearchResultSummaryDisplayContext searchResultSummaryDisplayContext =
+			new SearchResultSummaryDisplayContext();
+
+		searchResultSummaryDisplayContext.setContentVisible(contentVisible);
+		searchResultSummaryDisplayContext.setFieldsVisible(fieldsVisible);
+
+		SummaryBuilder summaryBuilder = _summaryBuilderFactory.newInstance();
+
+		if (contentFieldName != null) {
+			summaryBuilder.setContent(
+				getHighlightedValuesToString(contentFieldName));
+		}
+
+		summaryBuilder.setHighlight(_highlightEnabled);
+		summaryBuilder.setTitle(getHighlightedValuesToString(titleFieldName));
+
+		Summary summary = summaryBuilder.build();
+
+		if (contentVisible) {
+			searchResultSummaryDisplayContext.setContent(summary.getContent());
+		}
+
+		if (fieldsVisible) {
+			List<String> visibleFieldNames;
+
+			if (all) {
+				visibleFieldNames = allFieldNames;
+			}
+			else {
+				visibleFieldNames = fieldNames;
+			}
+
+			searchResultSummaryDisplayContext.setFieldDisplayContexts(
+				buildFieldDisplayContexts(visibleFieldNames.stream()));
+		}
+
+		searchResultSummaryDisplayContext.setHighlightedTitle(
+			summary.getTitle());
+		searchResultSummaryDisplayContext.setPortletURL(
+			_portletURLFactory.getPortletURL());
+		searchResultSummaryDisplayContext.setViewURL(StringPool.BLANK);
+
+		buildDocumentForm(searchResultSummaryDisplayContext);
+
+		return searchResultSummaryDisplayContext;
 	}
 
 	protected void buildImage(
@@ -456,9 +609,13 @@ public class SearchResultSummaryDisplayBuilder {
 		SearchResultSummaryDisplayContext searchResultSummaryDisplayContext,
 		String className) {
 
-		searchResultSummaryDisplayContext.setModelResource(
-			_resourceActions.getModelResource(
-				_themeDisplay.getLocale(), className));
+		String modelResource = _resourceActions.getModelResource(
+			_themeDisplay.getLocale(), className);
+
+		if (!Validator.isBlank(modelResource)) {
+			searchResultSummaryDisplayContext.setModelResource(modelResource);
+			searchResultSummaryDisplayContext.setModelResourceVisible(true);
+		}
 	}
 
 	protected SearchResultSummaryDisplayContext buildTemporarilyUnavailable() {
@@ -507,6 +664,19 @@ public class SearchResultSummaryDisplayBuilder {
 		return format.format(date);
 	}
 
+	protected List<String> getAllFieldNames() {
+		if (_document != null) {
+			Map<String, com.liferay.portal.search.document.Field> map =
+				_document.getFields();
+
+			return new ArrayList<>(map.keySet());
+		}
+
+		Map<String, Field> map = _legacyDocument.getFields();
+
+		return new ArrayList<>(map.keySet());
+	}
+
 	protected long getAssetEntryUserId(AssetEntry assetEntry) {
 		if (Objects.equals(assetEntry.getClassName(), User.class.getName())) {
 			return assetEntry.getClassPK();
@@ -544,7 +714,66 @@ public class SearchResultSummaryDisplayBuilder {
 	}
 
 	protected long getEntryClassPK() {
-		return GetterUtil.getLong(_document.get(Field.ENTRY_CLASS_PK));
+		return getFieldValueLong(Field.ENTRY_CLASS_PK);
+	}
+
+	protected long getFieldValueLong(String fieldName) {
+		if (_document != null) {
+			return GetterUtil.getLong(_document.getLong(fieldName));
+		}
+
+		return GetterUtil.getLong(_legacyDocument.get(fieldName));
+	}
+
+	protected String getFieldValueString(String fieldName) {
+		if (_document != null) {
+			return _document.getString(fieldName);
+		}
+
+		return _legacyDocument.get(fieldName);
+	}
+
+	protected List<String> getFieldValueStrings(String fieldName) {
+		if (_document != null) {
+			return _document.getStrings(fieldName);
+		}
+
+		Field field = _legacyDocument.getField(fieldName);
+
+		return Arrays.asList(field.getValues());
+	}
+
+	protected String getHighlightedFieldName(String fieldName) {
+		if (!_highlightEnabled) {
+			return fieldName;
+		}
+
+		String snippetFieldName = Field.SNIPPET.concat(
+			StringPool.UNDERLINE
+		).concat(
+			fieldName
+		);
+
+		if (isFieldPresent(snippetFieldName)) {
+			return snippetFieldName;
+		}
+
+		return fieldName;
+	}
+
+	protected String getHighlightedFieldValue(String fieldName) {
+		SummaryBuilder summaryBuilder = _summaryBuilderFactory.newInstance();
+
+		summaryBuilder.setContent(getHighlightedValuesToString(fieldName));
+		summaryBuilder.setHighlight(_highlightEnabled);
+
+		Summary summary = summaryBuilder.build();
+
+		return summary.getContent();
+	}
+
+	protected String getHighlightedValuesToString(String fieldName) {
+		return getValuesToString(getHighlightedFieldName(fieldName));
 	}
 
 	protected Indexer<Object> getIndexer(String className) {
@@ -576,11 +805,11 @@ public class SearchResultSummaryDisplayBuilder {
 		Indexer<?> indexer = getIndexer(className);
 
 		if (indexer != null) {
-			String snippet = _document.get(Field.SNIPPET);
+			String snippet = getFieldValueString(Field.SNIPPET);
 
 			com.liferay.portal.kernel.search.Summary summary =
 				indexer.getSummary(
-					_document, snippet, _renderRequest, _renderResponse);
+					_legacyDocument, snippet, _renderRequest, _renderResponse);
 
 			if (summary != null) {
 				summaryBuilder.setContent(summary.getContent());
@@ -603,18 +832,18 @@ public class SearchResultSummaryDisplayBuilder {
 		return null;
 	}
 
-	protected String getValuesToString(Field field) {
-		String[] values = field.getValues();
+	protected String getValuesToString(String fieldName) {
+		List<String> values = getFieldValueStrings(fieldName);
 
-		if (ArrayUtil.isEmpty(values)) {
+		if (values.isEmpty()) {
 			return StringPool.BLANK;
 		}
 
-		if (values.length == 1) {
-			return values[0];
+		if (values.size() == 1) {
+			return values.get(0);
 		}
 
-		return String.valueOf(Arrays.asList(values));
+		return String.valueOf(values);
 	}
 
 	protected boolean hasAssetCategoriesOrTags(AssetEntry assetEntry) {
@@ -647,14 +876,15 @@ public class SearchResultSummaryDisplayBuilder {
 		return true;
 	}
 
-	protected boolean isArray(Field field) {
-		String[] values = field.getValues();
+	protected boolean isFieldPresent(String fieldName) {
+		if (_document != null) {
+			Map<String, com.liferay.portal.search.document.Field> map =
+				_document.getFields();
 
-		if (values.length > 1) {
-			return true;
+			return map.containsKey(fieldName);
 		}
 
-		return false;
+		return _legacyDocument.hasField(fieldName);
 	}
 
 	protected Date parseDateStringFieldValue(String dateStringFieldValue) {
@@ -677,11 +907,13 @@ public class SearchResultSummaryDisplayBuilder {
 	private AssetRendererFactoryLookup _assetRendererFactoryLookup;
 	private String _currentURL;
 	private Document _document;
+	private DocumentBuilderFactory _documentBuilderFactory;
 	private FastDateFormatFactory _fastDateFormatFactory;
 	private boolean _highlightEnabled;
 	private boolean _imageRequested;
 	private IndexerRegistry _indexerRegistry;
 	private Language _language;
+	private com.liferay.portal.kernel.search.Document _legacyDocument;
 	private Locale _locale;
 	private PortletURLFactory _portletURLFactory;
 	private RenderRequest _renderRequest;

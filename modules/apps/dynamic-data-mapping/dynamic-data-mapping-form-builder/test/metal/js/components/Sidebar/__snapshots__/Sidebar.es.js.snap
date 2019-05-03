@@ -15,24 +15,28 @@ Object {
                   "localizedValue": Object {
                     "en_US": "Multiple Selection",
                   },
+                  "multiple": undefined,
                   "type": "text",
                   "value": "Mock Field",
                   "visible": true,
                 },
                 Object {
                   "fieldName": "name",
+                  "multiple": undefined,
                   "type": "text",
                   "value": undefined,
                   "visible": true,
                 },
                 Object {
                   "fieldName": "showLabel",
+                  "multiple": undefined,
                   "type": "checkbox",
                   "value": true,
                   "visible": true,
                 },
                 Object {
                   "fieldName": "required",
+                  "multiple": undefined,
                   "type": "checkbox",
                   "visible": true,
                 },
@@ -105,7 +109,7 @@ exports[`Sidebar should close the sidebar in edition mode 1`] = `
         <div class="tab-content">
           <div class="ddm-page-list-container">
             <div aria-labelledby="sidebarLightFormsFieldTab" class="fade tab-pane active show" id="sidebarLightDetails" role="tabpanel">
-              <div class="row">
+              <div class="position-relative row">
                 <div class="col-md-undefined">
                   <div id="fields-rule">
                     <p>Text Field</p>
@@ -136,6 +140,9 @@ exports[`Sidebar should close the sidebar in edition mode 1`] = `
 </div>
 <div class="dropdown-menu dropdown-menu-indicator-start" ref="menu">
   <ul class="list-unstyled">
+    <li tabindex="-1"><button class="btn dropdown-item btn-sm btn-link" aria-label="Date" type="button"><span class="dropdown-item-indicator"><svg class="lexicon-icon lexicon-icon-calendar" focusable="false" role="presentation">
+            <use xlink:href="icons.svg#calendar"></use>
+          </svg></span>Date</button></li>
     <li tabindex="-1"><button class="btn dropdown-item btn-sm btn-link" aria-label="Text Field" type="button"><span class="dropdown-item-indicator"><svg class="lexicon-icon lexicon-icon-text" focusable="false" role="presentation">
             <use xlink:href="icons.svg#text"></use>
           </svg></span>Text Field</button></li>
@@ -206,7 +213,7 @@ exports[`Sidebar should close the sidebar in edition mode 2`] = `
         <div class="tab-content">
           <div class="ddm-page-list-container">
             <div aria-labelledby="sidebarLightFormsFieldTab" class="fade tab-pane active show" id="sidebarLightDetails" role="tabpanel">
-              <div class="row">
+              <div class="position-relative row">
                 <div class="col-md-undefined">
                   <div id="fields-rule">
                     <p>Text Field</p>
@@ -237,6 +244,9 @@ exports[`Sidebar should close the sidebar in edition mode 2`] = `
 </div>
 <div class="dropdown-menu dropdown-menu-indicator-start" ref="menu">
   <ul class="list-unstyled">
+    <li tabindex="-1"><button class="btn dropdown-item btn-sm btn-link" aria-label="Date" type="button"><span class="dropdown-item-indicator"><svg class="lexicon-icon lexicon-icon-calendar" focusable="false" role="presentation">
+            <use xlink:href="icons.svg#calendar"></use>
+          </svg></span>Date</button></li>
     <li tabindex="-1"><button class="btn dropdown-item btn-sm btn-link" aria-label="Text Field" type="button"><span class="dropdown-item-indicator"><svg class="lexicon-icon lexicon-icon-text" focusable="false" role="presentation">
             <use xlink:href="icons.svg#text"></use>
           </svg></span>Text Field</button></li>
@@ -284,6 +294,7 @@ exports[`Sidebar should close the sidebar when the mouse down event is not on it
       <div class="collapse navbar-collapse" id="sidebarLightCollapse00">
         <ul class="nav navbar-nav" role="tablist">
           <li class="nav-item" data-index="0" ref="tab0"><a class="nav-link active" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">elements</span></a></li>
+          <li class="nav-item" data-index="1" ref="tab1"><a class="nav-link" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">element-sets</span></a></li>
         </ul>
       </div>
     </nav>
@@ -296,6 +307,15 @@ exports[`Sidebar should close the sidebar when the mouse down event is not on it
               </svg></span></a>
           <div aria-labelledby="#ddm-field-types-basic-header" id="ddm-field-types-basic-body" class="panel-collapse show" role="tabpanel">
             <div class="panel-body p-0 m-0 list-group">
+              <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="date" ref="fieldType_date">
+                <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-calendar" aria-hidden="true">
+                        <use xlink:href="icons.svg#calendar"></use>
+                      </svg></span></span></div>
+                <div class="autofit-col autofit-col-expand">
+                  <h4 class="list-group-title text-truncate"><span>Date</span></h4>
+                  <p class="list-group-subtitle text-truncate">Select date from a Datepicker.</p>
+                </div>
+              </div>
               <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="text" ref="fieldType_text">
                 <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-text" aria-hidden="true">
                         <use xlink:href="icons.svg#text"></use>
@@ -380,6 +400,7 @@ exports[`Sidebar should emit fieldMoved when the dragEnd method is called 1`] = 
       <div class="collapse navbar-collapse" id="sidebarLightCollapse00">
         <ul class="nav navbar-nav" role="tablist">
           <li class="nav-item" data-index="0" ref="tab0"><a class="nav-link active" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">elements</span></a></li>
+          <li class="nav-item" data-index="1" ref="tab1"><a class="nav-link" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">element-sets</span></a></li>
         </ul>
       </div>
     </nav>
@@ -392,6 +413,15 @@ exports[`Sidebar should emit fieldMoved when the dragEnd method is called 1`] = 
               </svg></span></a>
           <div aria-labelledby="#ddm-field-types-basic-header" id="ddm-field-types-basic-body" class="panel-collapse show" role="tabpanel">
             <div class="panel-body p-0 m-0 list-group">
+              <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="date" ref="fieldType_date">
+                <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-calendar" aria-hidden="true">
+                        <use xlink:href="icons.svg#calendar"></use>
+                      </svg></span></span></div>
+                <div class="autofit-col autofit-col-expand">
+                  <h4 class="list-group-title text-truncate"><span>Date</span></h4>
+                  <p class="list-group-subtitle text-truncate">Select date from a Datepicker.</p>
+                </div>
+              </div>
               <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="text" ref="fieldType_text">
                 <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-text" aria-hidden="true">
                         <use xlink:href="icons.svg#text"></use>
@@ -476,6 +506,7 @@ exports[`Sidebar should render a Sidebar closed 1`] = `
       <div class="collapse navbar-collapse" id="sidebarLightCollapse00">
         <ul class="nav navbar-nav" role="tablist">
           <li class="nav-item" data-index="0" ref="tab0"><a class="nav-link active" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">elements</span></a></li>
+          <li class="nav-item" data-index="1" ref="tab1"><a class="nav-link" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">element-sets</span></a></li>
         </ul>
       </div>
     </nav>
@@ -488,6 +519,15 @@ exports[`Sidebar should render a Sidebar closed 1`] = `
               </svg></span></a>
           <div aria-labelledby="#ddm-field-types-basic-header" id="ddm-field-types-basic-body" class="panel-collapse show" role="tabpanel">
             <div class="panel-body p-0 m-0 list-group">
+              <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="date" ref="fieldType_date">
+                <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-calendar" aria-hidden="true">
+                        <use xlink:href="icons.svg#calendar"></use>
+                      </svg></span></span></div>
+                <div class="autofit-col autofit-col-expand">
+                  <h4 class="list-group-title text-truncate"><span>Date</span></h4>
+                  <p class="list-group-subtitle text-truncate">Select date from a Datepicker.</p>
+                </div>
+              </div>
               <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="text" ref="fieldType_text">
                 <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-text" aria-hidden="true">
                         <use xlink:href="icons.svg#text"></use>
@@ -572,6 +612,7 @@ exports[`Sidebar should render a Sidebar open 1`] = `
       <div class="collapse navbar-collapse" id="sidebarLightCollapse00">
         <ul class="nav navbar-nav" role="tablist">
           <li class="nav-item" data-index="0" ref="tab0"><a class="nav-link active" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">elements</span></a></li>
+          <li class="nav-item" data-index="1" ref="tab1"><a class="nav-link" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">element-sets</span></a></li>
         </ul>
       </div>
     </nav>
@@ -584,6 +625,15 @@ exports[`Sidebar should render a Sidebar open 1`] = `
               </svg></span></a>
           <div aria-labelledby="#ddm-field-types-basic-header" id="ddm-field-types-basic-body" class="panel-collapse show" role="tabpanel">
             <div class="panel-body p-0 m-0 list-group">
+              <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="date" ref="fieldType_date">
+                <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-calendar" aria-hidden="true">
+                        <use xlink:href="icons.svg#calendar"></use>
+                      </svg></span></span></div>
+                <div class="autofit-col autofit-col-expand">
+                  <h4 class="list-group-title text-truncate"><span>Date</span></h4>
+                  <p class="list-group-subtitle text-truncate">Select date from a Datepicker.</p>
+                </div>
+              </div>
               <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="text" ref="fieldType_text">
                 <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-text" aria-hidden="true">
                         <use xlink:href="icons.svg#text"></use>
@@ -668,6 +718,7 @@ exports[`Sidebar should render a Sidebar with fieldTypes 1`] = `
       <div class="collapse navbar-collapse" id="sidebarLightCollapse00">
         <ul class="nav navbar-nav" role="tablist">
           <li class="nav-item" data-index="0" ref="tab0"><a class="nav-link active" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">elements</span></a></li>
+          <li class="nav-item" data-index="1" ref="tab1"><a class="nav-link" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">element-sets</span></a></li>
         </ul>
       </div>
     </nav>
@@ -680,6 +731,15 @@ exports[`Sidebar should render a Sidebar with fieldTypes 1`] = `
               </svg></span></a>
           <div aria-labelledby="#ddm-field-types-basic-header" id="ddm-field-types-basic-body" class="panel-collapse show" role="tabpanel">
             <div class="panel-body p-0 m-0 list-group">
+              <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="date" ref="fieldType_date">
+                <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-calendar" aria-hidden="true">
+                        <use xlink:href="icons.svg#calendar"></use>
+                      </svg></span></span></div>
+                <div class="autofit-col autofit-col-expand">
+                  <h4 class="list-group-title text-truncate"><span>Date</span></h4>
+                  <p class="list-group-subtitle text-truncate">Select date from a Datepicker.</p>
+                </div>
+              </div>
               <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="text" ref="fieldType_text">
                 <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-text" aria-hidden="true">
                         <use xlink:href="icons.svg#text"></use>
@@ -764,6 +824,7 @@ exports[`Sidebar should render a Sidebar with spritemap 1`] = `
       <div class="collapse navbar-collapse" id="sidebarLightCollapse00">
         <ul class="nav navbar-nav" role="tablist">
           <li class="nav-item" data-index="0" ref="tab0"><a class="nav-link active" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">elements</span></a></li>
+          <li class="nav-item" data-index="1" ref="tab1"><a class="nav-link" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">element-sets</span></a></li>
         </ul>
       </div>
     </nav>
@@ -776,6 +837,15 @@ exports[`Sidebar should render a Sidebar with spritemap 1`] = `
               </svg></span></a>
           <div aria-labelledby="#ddm-field-types-basic-header" id="ddm-field-types-basic-body" class="panel-collapse show" role="tabpanel">
             <div class="panel-body p-0 m-0 list-group">
+              <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="date" ref="fieldType_date">
+                <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-calendar" aria-hidden="true">
+                        <use xlink:href="icons.svg#calendar"></use>
+                      </svg></span></span></div>
+                <div class="autofit-col autofit-col-expand">
+                  <h4 class="list-group-title text-truncate"><span>Date</span></h4>
+                  <p class="list-group-subtitle text-truncate">Select date from a Datepicker.</p>
+                </div>
+              </div>
               <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="text" ref="fieldType_text">
                 <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-text" aria-hidden="true">
                         <use xlink:href="icons.svg#text"></use>
@@ -860,6 +930,7 @@ exports[`Sidebar should render the default markup 1`] = `
       <div class="collapse navbar-collapse" id="sidebarLightCollapse00">
         <ul class="nav navbar-nav" role="tablist">
           <li class="nav-item" data-index="0" ref="tab0"><a class="nav-link active" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">elements</span></a></li>
+          <li class="nav-item" data-index="1" ref="tab1"><a class="nav-link" aria-controls="sidebarLightDetails" data-toggle="tab" href="javascript:;" role="tab"><span class="navbar-text-truncate">element-sets</span></a></li>
         </ul>
       </div>
     </nav>
@@ -872,6 +943,15 @@ exports[`Sidebar should render the default markup 1`] = `
               </svg></span></a>
           <div aria-labelledby="#ddm-field-types-basic-header" id="ddm-field-types-basic-body" class="panel-collapse show" role="tabpanel">
             <div class="panel-body p-0 m-0 list-group">
+              <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="date" ref="fieldType_date">
+                <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-calendar" aria-hidden="true">
+                        <use xlink:href="icons.svg#calendar"></use>
+                      </svg></span></span></div>
+                <div class="autofit-col autofit-col-expand">
+                  <h4 class="list-group-title text-truncate"><span>Date</span></h4>
+                  <p class="list-group-subtitle text-truncate">Select date from a Datepicker.</p>
+                </div>
+              </div>
               <div class="ddm-drag-item list-group-item list-group-item-flex" data-field-type-name="text" ref="fieldType_text">
                 <div class="autofit-col"><span class="sticker sticker-secondary"><span class="inline-item"><svg class="lexicon-icon lexicon-icon-text" aria-hidden="true">
                         <use xlink:href="icons.svg#text"></use>

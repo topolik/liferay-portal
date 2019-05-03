@@ -19,6 +19,7 @@ import com.liferay.oauth2.provider.scope.liferay.LiferayOAuth2Scope;
 import com.liferay.oauth2.provider.scope.liferay.ScopeDescriptorLocator;
 import com.liferay.oauth2.provider.scope.spi.application.descriptor.ApplicationDescriptor;
 import com.liferay.oauth2.provider.scope.spi.scope.descriptor.ScopeDescriptor;
+import com.liferay.petra.string.StringUtil;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,10 +66,20 @@ public class AssignableScopes {
 			_scopeDescriptorLocator);
 	}
 
+	public void addLiferayOAuth2Scope(LiferayOAuth2Scope liferayOAuth2Scope) {
+		if (liferayOAuth2Scope != null) {
+			_liferayOAuth2Scopes.add(liferayOAuth2Scope);
+		}
+	}
+
 	public void addLiferayOAuth2Scopes(
 		Collection<LiferayOAuth2Scope> liferayOAuth2Scopes) {
 
-		_liferayOAuth2Scopes.addAll(liferayOAuth2Scopes);
+		if (liferayOAuth2Scopes == null) {
+			return;
+		}
+
+		liferayOAuth2Scopes.forEach(this::addLiferayOAuth2Scope);
 	}
 
 	public boolean contains(AssignableScopes assignableScopes) {
@@ -200,6 +211,11 @@ public class AssignableScopes {
 		return new AssignableScopes(
 			_applicationDescriptorLocator, liferayOAuth2Scopes, _locale,
 			_scopeDescriptorLocator);
+	}
+
+	@Override
+	public String toString() {
+		return StringUtil.merge(_liferayOAuth2Scopes, " + ");
 	}
 
 	private final ApplicationDescriptorLocator _applicationDescriptorLocator;

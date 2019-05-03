@@ -10,6 +10,7 @@
 		<name>body-bottom</name>
 		<tag-class>com.liferay.taglib.util.BodyBottomTag</tag-class>
 		<body-content>JSP</body-content>
+		<description>Deprecated since 7.2, unused.</description>
 		<attribute>
 			<name>outputKey</name>
 			<required>false</required>
@@ -20,6 +21,7 @@
 		<name>body-top</name>
 		<tag-class>com.liferay.taglib.util.BodyTopTag</tag-class>
 		<body-content>JSP</body-content>
+		<description>Deprecated since 7.2, unused.</description>
 		<attribute>
 			<name>outputKey</name>
 			<required>false</required>
@@ -57,6 +59,7 @@
 		<tag-class>com.liferay.taglib.util.GetUrlTag</tag-class>
 		<tei-class>com.liferay.taglib.util.GetUrlTei</tei-class>
 		<body-content>JSP</body-content>
+		<description>Deprecated since 7.2, unused.</description>
 		<attribute>
 			<name>expires</name>
 			<required>false</required>

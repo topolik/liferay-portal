@@ -332,18 +332,6 @@ public class InvokerFilterHelper {
 		}
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by {@link
-	 *             #initFilter(ServletContext, String, FilterConfig)}
-	 */
-	@Deprecated
-	protected Filter initFilter(
-		ServletContext servletContext, String filterClassName,
-		String filterName, FilterConfig filterConfig) {
-
-		return initFilter(servletContext, filterClassName, filterConfig);
-	}
-
 	protected void readLiferayFilterWebXML(
 			ServletContext servletContext, String path)
 		throws Exception {
@@ -511,13 +499,11 @@ public class InvokerFilterHelper {
 
 			Set<Dispatcher> dispatchers = new HashSet<>();
 
-			String[] dispatcherStrings = (String[])serviceReference.getProperty(
-				"dispatcher");
+			for (String dispatcherString :
+					StringPlus.asList(
+						serviceReference.getProperty("dispatcher"))) {
 
-			if (dispatcherStrings != null) {
-				for (String dispatcher : dispatcherStrings) {
-					dispatchers.add(Dispatcher.valueOf(dispatcher));
-				}
+				dispatchers.add(Dispatcher.valueOf(dispatcherString));
 			}
 
 			FilterMapping filterMapping = new FilterMapping(

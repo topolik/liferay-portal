@@ -20,8 +20,12 @@ import com.liferay.calendar.exception.RequiredCalendarException;
 import com.liferay.calendar.exporter.CalendarDataFormat;
 import com.liferay.calendar.exporter.CalendarDataHandler;
 import com.liferay.calendar.exporter.CalendarDataHandlerFactory;
+import com.liferay.calendar.internal.util.CalendarUtil;
 import com.liferay.calendar.model.Calendar;
+import com.liferay.calendar.service.CalendarBookingLocalService;
+import com.liferay.calendar.service.CalendarNotificationTemplateLocalService;
 import com.liferay.calendar.service.base.CalendarLocalServiceBaseImpl;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.exception.NoSuchGroupException;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -44,11 +48,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * @author Eduardo Lundgren
  * @author Fabio Pezzutto
  * @author Andrea Di Giorgi
  */
+@Component(
+	property = "model.class.name=com.liferay.calendar.model.Calendar",
+	service = AopService.class
+)
 public class CalendarLocalServiceImpl extends CalendarLocalServiceBaseImpl {
 
 	@Indexable(type = IndexableType.REINDEX)
@@ -127,12 +138,12 @@ public class CalendarLocalServiceImpl extends CalendarLocalServiceBaseImpl {
 
 		// Calendar bookings
 
-		calendarBookingLocalService.deleteCalendarBookings(
+		_calendarBookingLocalService.deleteCalendarBookings(
 			calendar.getCalendarId());
 
 		// Calendar notification templates
 
-		calendarNotificationTemplateLocalService.
+		_calendarNotificationTemplateLocalService.
 			deleteCalendarNotificationTemplates(calendar.getCalendarId());
 
 		return calendar;
@@ -244,23 +255,7 @@ public class CalendarLocalServiceImpl extends CalendarLocalServiceBaseImpl {
 
 	@Override
 	public boolean isStagingCalendar(Calendar calendar) {
-		long groupId = calendar.getGroupId();
-
-		try {
-			Group group = groupLocalService.getGroup(groupId);
-
-			return group.isStagingGroup();
-		}
-		catch (PortalException pe) {
-
-			// LPS-52675
-
-			if (_log.isDebugEnabled()) {
-				_log.debug(pe, pe);
-			}
-
-			return false;
-		}
+		return CalendarUtil.isStagingCalendar(calendar, groupLocalService);
 	}
 
 	@Override
@@ -421,5 +416,12 @@ public class CalendarLocalServiceImpl extends CalendarLocalServiceBaseImpl {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		CalendarLocalServiceImpl.class);
+
+	@Reference
+	private CalendarBookingLocalService _calendarBookingLocalService;
+
+	@Reference
+	private CalendarNotificationTemplateLocalService
+		_calendarNotificationTemplateLocalService;
 
 }

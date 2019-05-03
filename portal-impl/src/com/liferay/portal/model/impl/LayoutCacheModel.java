@@ -79,12 +79,14 @@ public class LayoutCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(75);
+		StringBundler sb = new StringBundler(73);
 
 		sb.append("{mvccVersion=");
 		sb.append(mvccVersion);
 		sb.append(", uuid=");
 		sb.append(uuid);
+		sb.append(", headId=");
+		sb.append(headId);
 		sb.append(", plid=");
 		sb.append(plid);
 		sb.append(", groupId=");
@@ -101,10 +103,6 @@ public class LayoutCacheModel
 		sb.append(modifiedDate);
 		sb.append(", parentPlid=");
 		sb.append(parentPlid);
-		sb.append(", leftPlid=");
-		sb.append(leftPlid);
-		sb.append(", rightPlid=");
-		sb.append(rightPlid);
 		sb.append(", privateLayout=");
 		sb.append(privateLayout);
 		sb.append(", layoutId=");
@@ -173,6 +171,8 @@ public class LayoutCacheModel
 			layoutImpl.setUuid(uuid);
 		}
 
+		layoutImpl.setHeadId(headId);
+		layoutImpl.setHead(head);
 		layoutImpl.setPlid(plid);
 		layoutImpl.setGroupId(groupId);
 		layoutImpl.setCompanyId(companyId);
@@ -200,8 +200,6 @@ public class LayoutCacheModel
 		}
 
 		layoutImpl.setParentPlid(parentPlid);
-		layoutImpl.setLeftPlid(leftPlid);
-		layoutImpl.setRightPlid(rightPlid);
 		layoutImpl.setPrivateLayout(privateLayout);
 		layoutImpl.setLayoutId(layoutId);
 		layoutImpl.setParentLayoutId(parentLayoutId);
@@ -332,6 +330,10 @@ public class LayoutCacheModel
 		mvccVersion = objectInput.readLong();
 		uuid = objectInput.readUTF();
 
+		headId = objectInput.readLong();
+
+		head = objectInput.readBoolean();
+
 		plid = objectInput.readLong();
 
 		groupId = objectInput.readLong();
@@ -344,10 +346,6 @@ public class LayoutCacheModel
 		modifiedDate = objectInput.readLong();
 
 		parentPlid = objectInput.readLong();
-
-		leftPlid = objectInput.readLong();
-
-		rightPlid = objectInput.readLong();
 
 		privateLayout = objectInput.readBoolean();
 
@@ -396,6 +394,10 @@ public class LayoutCacheModel
 			objectOutput.writeUTF(uuid);
 		}
 
+		objectOutput.writeLong(headId);
+
+		objectOutput.writeBoolean(head);
+
 		objectOutput.writeLong(plid);
 
 		objectOutput.writeLong(groupId);
@@ -415,10 +417,6 @@ public class LayoutCacheModel
 		objectOutput.writeLong(modifiedDate);
 
 		objectOutput.writeLong(parentPlid);
-
-		objectOutput.writeLong(leftPlid);
-
-		objectOutput.writeLong(rightPlid);
 
 		objectOutput.writeBoolean(privateLayout);
 
@@ -537,6 +535,8 @@ public class LayoutCacheModel
 
 	public long mvccVersion;
 	public String uuid;
+	public long headId;
+	public boolean head;
 	public long plid;
 	public long groupId;
 	public long companyId;
@@ -545,8 +545,6 @@ public class LayoutCacheModel
 	public long createDate;
 	public long modifiedDate;
 	public long parentPlid;
-	public long leftPlid;
-	public long rightPlid;
 	public boolean privateLayout;
 	public long layoutId;
 	public long parentLayoutId;

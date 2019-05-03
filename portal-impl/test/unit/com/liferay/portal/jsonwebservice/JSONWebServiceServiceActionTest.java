@@ -17,11 +17,21 @@ package com.liferay.portal.jsonwebservice;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebServiceAction;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManagerUtil;
 import com.liferay.portal.kernel.servlet.HttpMethods;
+import com.liferay.portal.kernel.test.FinalizeManagerUtil;
+import com.liferay.portal.kernel.test.GCUtil;
 import com.liferay.portal.kernel.upload.FileItem;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.upload.LiferayFileItem;
+import com.liferay.portal.upload.LiferayFileItemFactory;
 import com.liferay.portal.upload.UploadServletRequestImpl;
+import com.liferay.portal.util.FileImpl;
 import com.liferay.portal.util.PortalImpl;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -29,6 +39,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,6 +59,10 @@ public class JSONWebServiceServiceActionTest
 	@BeforeClass
 	public static void setUpClass() throws Exception {
 		initPortalServices();
+
+		FileUtil fileUtil = new FileUtil();
+
+		fileUtil.setFile(new FileImpl());
 
 		Class<?> clazz = JSONWebServiceServiceAction.class;
 
@@ -72,6 +87,13 @@ public class JSONWebServiceServiceActionTest
 
 		jsonWebServiceActionsManagerUtil.setJSONWebServiceActionsManager(
 			new JSONWebServiceActionsManagerImpl());
+	}
+
+	@After
+	public void tearDown() throws InterruptedException {
+		GCUtil.gc(true);
+
+		FinalizeManagerUtil.drainPendingFinalizeActions();
 	}
 
 	@Test
@@ -131,7 +153,8 @@ public class JSONWebServiceServiceActionTest
 
 		Map<String, FileItem[]> fileParams = new HashMap<>();
 
-		fileParams.put("fileName", null);
+		fileParams.put(
+			"fileName", new FileItem[] {createLiferayFileItem("aaa")});
 
 		HttpServletRequest httpServletRequest = new UploadServletRequestImpl(
 			createHttpRequest("/foo/add-file"), fileParams, null) {
@@ -141,12 +164,47 @@ public class JSONWebServiceServiceActionTest
 				return "test";
 			}
 
+			@Override
+			public Map<String, FileItem[]> getMultipartParameterMap() {
+				return fileParams;
+			}
+
 		};
 
 		JSONWebServiceAction jsonWebServiceAction = lookupJSONWebServiceAction(
 			httpServletRequest);
 
 		Assert.assertNotNull(jsonWebServiceAction);
+	}
+
+	@Test
+	public void testMultipartRequestFilesUpload() throws Exception {
+		registerActionClass(FooService.class);
+
+		Map<String, FileItem[]> fileParams = new HashMap<>();
+
+		fileParams.put(
+			"firstFile", new FileItem[] {createLiferayFileItem("aaa")});
+
+		fileParams.put(
+			"otherFiles",
+			new FileItem[] {
+				createLiferayFileItem("bbb"), createLiferayFileItem("ccc")
+			});
+
+		HttpServletRequest httpServletRequest = new UploadServletRequestImpl(
+			createHttpRequest("/foo/upload-files"), fileParams, null);
+
+		JSONWebServiceAction jsonWebServiceAction = lookupJSONWebServiceAction(
+			httpServletRequest);
+
+		Assert.assertNotNull(jsonWebServiceAction);
+
+		Object result = jsonWebServiceAction.invoke();
+
+		Assert.assertNotNull(result);
+
+		Assert.assertEquals("aaabbbccc", result.toString());
 	}
 
 	@Test
@@ -194,6 +252,23 @@ public class JSONWebServiceServiceActionTest
 		mockHttpServletRequest.setRemoteUser("root");
 
 		return mockHttpServletRequest;
+	}
+
+	protected FileItem createLiferayFileItem(String content)
+		throws IOException {
+
+		LiferayFileItemFactory liferayFileItemFactory =
+			new LiferayFileItemFactory(null);
+
+		LiferayFileItem liferayFileItem = liferayFileItemFactory.createItem(
+			StringUtil.randomString(), StringUtil.randomString(), true,
+			StringUtil.randomString());
+
+		try (OutputStream outputStream = liferayFileItem.getOutputStream()) {
+			outputStream.write(content.getBytes());
+		}
+
+		return liferayFileItem;
 	}
 
 	protected void testServletContextInvoker(

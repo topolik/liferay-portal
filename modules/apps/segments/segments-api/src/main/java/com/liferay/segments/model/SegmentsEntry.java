@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.segments.model.impl.SegmentsEntryImpl")
 @ProviderType
-public interface SegmentsEntry extends SegmentsEntryModel, PersistedModel {
+public interface SegmentsEntry extends PersistedModel, SegmentsEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -57,7 +57,5 @@ public interface SegmentsEntry extends SegmentsEntryModel, PersistedModel {
 		};
 
 	public com.liferay.segments.criteria.Criteria getCriteriaObj();
-
-	public boolean isDefaultSegment();
 
 }

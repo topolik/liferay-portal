@@ -2,11 +2,13 @@ import {Config} from 'metal-state';
 import PortletBase from 'frontend-js-web/liferay/PortletBase.es';
 import Soy from 'metal-soy';
 
+import 'frontend-js-web/liferay/compat/modal/Modal.es';
 import {COMPATIBLE_TYPES} from '../../utils/constants';
-import {HIDE_MAPPING_DIALOG, UPDATE_EDITABLE_VALUE} from '../../actions/actions.es';
-import {Store} from '../../store/store.es';
-import templates from './SelectMappingDialog.soy';
+import {HIDE_MAPPING_DIALOG} from '../../actions/actions.es';
 import {setIn} from '../../utils/FragmentsEditorUpdateUtils.es';
+import {Store} from '../../store/store.es';
+import {updateEditableValueAction} from '../../actions/updateEditableValue.es';
+import templates from './SelectMappingDialog.soy';
 
 /**
  * SelectMappingDialog
@@ -61,16 +63,17 @@ class SelectMappingDialog extends PortletBase {
 	 */
 	_handleMappeableFieldSelected(key = '') {
 		this.store
-			.dispatchAction(
-				UPDATE_EDITABLE_VALUE,
+			.dispatch(
+				updateEditableValueAction(
+					this.fragmentEntryLinkId,
+					this.editableId,
+					'mappedField',
+					key
+				)
+			).dispatch(
 				{
-					editableId: this.editableId,
-					editableValue: key,
-					editableValueId: 'mappedField',
-					fragmentEntryLinkId: this.fragmentEntryLinkId
+					type: HIDE_MAPPING_DIALOG
 				}
-			).dispatchAction(
-				HIDE_MAPPING_DIALOG
 			);
 	}
 
@@ -81,8 +84,10 @@ class SelectMappingDialog extends PortletBase {
 	 */
 	_handleCancelButtonClick() {
 		this.store
-			.dispatchAction(
-				HIDE_MAPPING_DIALOG
+			.dispatch(
+				{
+					type: HIDE_MAPPING_DIALOG
+				}
 			);
 	}
 

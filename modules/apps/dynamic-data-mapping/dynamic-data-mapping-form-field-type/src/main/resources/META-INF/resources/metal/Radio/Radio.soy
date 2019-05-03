@@ -55,16 +55,16 @@
 
 	{if $options}
 		<div class="ddm-radio">
-			{let $radioValue: $predefinedValue ? $predefinedValue : $value /}
+			{let $radioValue: $value ?: $predefinedValue ?: '' /}
 
-			{for $radio in $options}
+			{foreach $radio in $options}
 				{call ClayRadio.render data="$radio"}
 					{param checked: $radioValue == $radio.value ? true : false  /}
 					{param disabled: $disabled /}
 					{param inline: $inline /}
 					{param name: $name /}
 				{/call}
-			{/for}
+			{/foreach}
 		</div>
 	{/if}
 {/template}

@@ -28,15 +28,13 @@ public class AnnouncementsFlagTable {
 	public static final String TABLE_NAME = "AnnouncementsFlag";
 
 	public static final Object[][] TABLE_COLUMNS = {
-		{"flagId", Types.BIGINT},
-		{"companyId", Types.BIGINT},
-		{"userId", Types.BIGINT},
-		{"createDate", Types.TIMESTAMP},
-		{"entryId", Types.BIGINT},
-		{"value", Types.INTEGER}
+		{"flagId", Types.BIGINT}, {"companyId", Types.BIGINT},
+		{"userId", Types.BIGINT}, {"createDate", Types.TIMESTAMP},
+		{"entryId", Types.BIGINT}, {"value", Types.INTEGER}
 	};
 
-	public static final Map<String, Integer> TABLE_COLUMNS_MAP = new HashMap<String, Integer>();
+	public static final Map<String, Integer> TABLE_COLUMNS_MAP =
+new HashMap<String, Integer>();
 
 static {
 TABLE_COLUMNS_MAP.put("flagId", Types.BIGINT);
@@ -52,7 +50,8 @@ TABLE_COLUMNS_MAP.put("entryId", Types.BIGINT);
 TABLE_COLUMNS_MAP.put("value", Types.INTEGER);
 
 }
-	public static final String TABLE_SQL_CREATE = "create table AnnouncementsFlag (flagId LONG not null primary key,companyId LONG,userId LONG,createDate DATE null,entryId LONG,value INTEGER)";
+	public static final String TABLE_SQL_CREATE =
+"create table AnnouncementsFlag (flagId LONG not null primary key,companyId LONG,userId LONG,createDate DATE null,entryId LONG,value INTEGER)";
 
 	public static final String TABLE_SQL_DROP = "drop table AnnouncementsFlag";
 

@@ -18,9 +18,7 @@
 			<site-member-defaults>
 				<action-key>VIEW</action-key>
 			</site-member-defaults>
-			<guest-defaults>
-				<action-key>VIEW</action-key>
-			</guest-defaults>
+			<guest-defaults />
 			<guest-unsupported>
 				<action-key>UPDATE</action-key>
 			</guest-unsupported>

@@ -34,6 +34,11 @@
 	<td>//div[contains(@id,'ddmTemplatesSearchContainer')]//tr/td[3]//a</td>
 	<td></td>
 </tr>
+<tr>
+	<td>ADT_TABLE_NAME_2</td>
+	<td>//div[contains(@id,'ddmTemplatesSearchContainer')]//tr[2]/td[3]//a</td>
+	<td></td>
+</tr>
 </tbody>
 </table>
 </body>

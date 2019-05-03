@@ -29,6 +29,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>FIELD_MAPPINGS_EDITOR</td>
+	<td>//div[contains(@class,'ace_editor')]//span[contains(.,'${indexName}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SEARCH_BAR_WIDGET</td>
 	<td>//input[not(ancestor::header[@id='banner'])][contains(@data-qa-id,'searchInput')]</td>
 	<td></td>
@@ -44,6 +49,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>SEARCH__ENGINE_INFORMATION</td>
+	<td>//div[contains(@class,'alert alert-info') and not(contains(@class,'hide'))]//strong[${position}][contains(.,'${searchInformation}')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>SEARCH_INFO</td>
 	<td>//span[contains(@class,'text-truncate')]/span</td>
 	<td></td>
@@ -51,6 +61,16 @@
 <tr>
 	<td>SEARCH_PORTLET_OPTIONS_WRENCH</td>
 	<td>//div[contains(@class,'portlet-options')]/a[contains(@id,'_SearchPortlet') and @title='Options']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SORT_PORTLET_DROPDOWN</td>
+	<td>//div/select[contains(@id, "SortPortlet")]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>SORT_PORTLET_SORT_OPTION</td>
+	<td>//div/select[contains(@id, "SortPortlet")]/option[contains(., "${sortOption}")]</td>
 	<td></td>
 </tr>
 </tbody>

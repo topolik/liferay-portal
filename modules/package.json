@@ -1,0 +1,59 @@
+{
+	"devDependencies": {
+		"alloy-ui": "^3.1.0-deprecated.40",
+		"compass-mixins": "0.12.10",
+		"fs-extra": "7.0.1",
+		"gulp": "3.9.1",
+		"jsdoc": "3.5.5",
+		"karma": "4.0.0",
+		"liferay-font-awesome": "3.3.2",
+		"liferay-frontend-common-css": "1.0.4",
+		"liferay-jest-junit-reporter": "1.0.1",
+		"liferay-karma-alloy-config": "0.0.15",
+		"liferay-karma-config": "0.0.3",
+		"liferay-npm-bridge-generator": "2.7.1",
+		"liferay-npm-bundler": "2.7.1",
+		"liferay-npm-bundler-preset-standard": "2.7.1",
+		"liferay-npm-scripts": "1.5.1",
+		"liferay-theme-es2015-hook": "8.0.0-rc.2"
+	},
+	"private": true,
+	"scripts": {
+		"checkFormat": "liferay-npm-scripts lint",
+		"format": "liferay-npm-scripts format"
+	},
+	"workspaces": {
+		"packages": [
+			"apps/**/*-taglib",
+			"apps/**/*-web",
+			"apps/analytics/analytics-client-js",
+			"apps/document-library/document-library-preview-audio",
+			"apps/document-library/document-library-preview-document",
+			"apps/document-library/document-library-preview-image",
+			"apps/document-library/document-library-preview-pdf",
+			"apps/document-library/document-library-preview-video",
+			"apps/dynamic-data-mapping/dynamic-data-mapping-form-builder",
+			"apps/dynamic-data-mapping/dynamic-data-mapping-form-field-type",
+			"apps/dynamic-data-mapping/dynamic-data-mapping-form-renderer",
+			"apps/frontend-image-editor/frontend-image-editor-capability-brightness",
+			"apps/frontend-image-editor/frontend-image-editor-capability-contrast",
+			"apps/frontend-image-editor/frontend-image-editor-capability-crop",
+			"apps/frontend-image-editor/frontend-image-editor-capability-effects",
+			"apps/frontend-image-editor/frontend-image-editor-capability-resize",
+			"apps/frontend-image-editor/frontend-image-editor-capability-rotate",
+			"apps/frontend-image-editor/frontend-image-editor-capability-saturation",
+			"apps/frontend-js/frontend-js-node-shims",
+			"apps/frontend-taglib/frontend-taglib-chart",
+			"apps/frontend-taglib/frontend-taglib-clay",
+			"apps/frontend-theme/frontend-theme-admin",
+			"apps/frontend-theme/frontend-theme-classic",
+			"apps/frontend-theme-fjord/frontend-theme-fjord",
+			"apps/frontend-theme-porygon/frontend-theme-porygon",
+			"apps/frontend-theme-westeros-bank/frontend-theme-westeros-bank",
+			"apps/map/map-common",
+			"apps/map/map-google-maps",
+			"apps/map/map-openstreetmap",
+			"apps/portal-portlet-bridge/portal-portlet-bridge-soy-impl"
+		]
+	}
+}

@@ -2,9 +2,13 @@ definition {
 	macro addNewChangeList {
 		Click(locator1 = "Button#PLUS");
 
-		Type(locator1 = "ChangeList#CHANGE_LIST_NAME", value1 = "${changeListName}");
+		Type(
+			locator1 = "ChangeList#CHANGE_LIST_NAME",
+			value1 = "${changeListName}");
 
-		Type(locator1 = "ChangeList#CHANGE_LIST_DESCRIPTION", value1 = "${changeListDescription}");
+		Type(
+			locator1 = "ChangeList#CHANGE_LIST_DESCRIPTION",
+			value1 = "${changeListDescription}");
 
 		Button.clickSave();
 	}
@@ -16,29 +20,21 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "ChangeList#OVERVIEW_PAGE_TITLE",
-			value1 = "Select Change List"
-		);
+			value1 = "Select Change List");
 	}
 
 	macro disableChangeList {
-		Uncheck.uncheckToggleSwitch(
-			locator1 = "ChangeListSettings#CHANGE_LISTS_TOGGLE_SWITCH"
-		);
+		Uncheck.uncheckToggleSwitch(locator1 = "ChangeListSettings#CHANGE_LISTS_TOGGLE_SWITCH");
 
-		if (isSet(gotoOverview)) {
-			Click(locator1 = "ChangeListSettings#SAVE_AND_GO_TO_OVERVIEW_BUTTON");
-		}
-		else {
-			Click(locator1 = "Button#SAVE");
-		}
+		Click(locator1 = "Button#SAVE");
 
 		Alert.viewSuccessMessage();
 	}
 
 	macro enableChangeList {
-		Check.checkToggleSwitch(
-			locator1 = "ChangeListSettings#CHANGE_LISTS_TOGGLE_SWITCH"
-		);
+		Pause(locator1 = "1000");
+
+		Check.checkToggleSwitch(locator1 = "ChangeListSettings#CHANGE_LISTS_TOGGLE_SWITCH");
 
 		if (isSet(gotoOverview)) {
 			Click(locator1 = "ChangeListSettings#SAVE_AND_GO_TO_OVERVIEW_BUTTON");
@@ -48,6 +44,14 @@ definition {
 		}
 
 		Alert.viewSuccessMessage();
+	}
+
+	macro gotoDelete {
+		Click.waitForMenuToggleJSClick(
+			key_rowEntry = "${rowEntry}",
+			locator1 = "Icon#TABLE_VERTICAL_ELLIPSIS");
+
+		MenuItem.click(menuItem = "Delete");
 	}
 
 	macro publishChangeList {
@@ -61,15 +65,17 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "ChangeList#OVERVIEW_PAGE_TITLE",
-			value1 = "History"
-		);
+			value1 = "History");
+
+		Pause(locator1 = "5000");
+
+		Refresh();
 
 		var key_changeListName = "${changeListName}";
 
 		AssertTextEquals(
 			locator1 = "ChangeList#HISTORY_CHANGE_LIST_STATUS",
-			value1 = "Published"
-		);
+			value1 = "Published");
 	}
 
 	macro searchForChangeList {
@@ -79,8 +85,7 @@ definition {
 
 		AssertTextPresent(
 			locator1 = "ChangeList#CHANGE_LIST_TABLE_ENTRY_NAME",
-			value1 = "${changeListName}"
-		);
+			value1 = "${changeListName}");
 	}
 
 	macro selectChangeList {
@@ -93,27 +98,29 @@ definition {
 
 			AssertTextEquals(
 				locator1 = "ChangeList#OVERVIEW_PAGE_TITLE",
-				value1 = "Select Change List"
-			);
+				value1 = "Select Change List");
 		}
 		else {
 			Click(
-				locator1 = "ChangeList#SELECT_CHANGE_LIST_VALUE",
-				key_changeListName = "${changeListName}"
-			);
+				key_changeListName = "${changeListName}",
+				locator1 = "ChangeList#SELECT_CHANGE_LIST_VALUE");
 
 			AssertTextEquals(
 				locator1 = "ChangeList#OVERVIEW_PAGE_TITLE",
-				value1 = "Overview"
-			);
+				value1 = "Change Lists");
 		}
 	}
 
 	macro selectChangeListMenuItem {
 		LexiconEntry.gotoEntryMenuItem(
 			menuItem = "${menuItem}",
-			rowEntry = "${rowEntry}"
-		);
+			rowEntry = "${rowEntry}");
+	}
+
+	macro viewAddedItemCounter {
+		AssertTextEquals(
+			locator1 = "ChangeList#CHANGE_LIST_ADDED",
+			value1 = "${nbrOfAddedItems}");
 	}
 
 	macro viewChangeOnOverview {
@@ -121,52 +128,92 @@ definition {
 
 		AssertTextEquals(
 			locator1 = "ChangeList#LATEST_CHANGES_TITLE",
-			value1 = "${contentTitle}"
-		);
+			value1 = "${contentTitle}");
 
 		var key_contentType = "${contentType}";
 
 		AssertTextEquals(
 			locator1 = "ChangeList#LATEST_CHANGES_CONTENT_TYPE",
-			value1 = "${contentType}"
-		);
+			value1 = "${contentType}");
 
 		var key_contentChangeType = "${contentChangeType}";
 
 		AssertTextEquals(
 			locator1 = "ChangeList#LATEST_CHANGES_CHANGE_TYPE",
-			value1 = "${contentChangeType}"
-		);
+			value1 = "${contentChangeType}");
+	}
+
+	macro viewContentTypeOnOverview {
+		var key_contentTitle = "${contentTitle}";
+
+		AssertTextEquals(
+			locator1 = "ChangeList#LATEST_CHANGES_CONTENT_TYPE",
+			value1 = "${contentType}");
+	}
+
+	macro viewDeletedItemCounter {
+		AssertTextEquals(
+			locator1 = "ChangeList#CHANGE_LIST_DELETED",
+			value1 = "${nbrOfDeletedItems}");
+	}
+
+	macro viewModifiedItemCounter {
+		AssertTextEquals(
+			locator1 = "ChangeList#CHANGE_LIST_MODIFIED",
+			value1 = "${nbrOfModifiedItems}");
 	}
 
 	macro viewNoStagingMenuitemsNotAvailable {
 		AssertElementNotPresent(locator1 = "Icon#HEADER_VERTICAL_ELLIPSIS");
 
-		ProductMenuHelper.expandPanel(panel = "Site Administration");
+		ProductMenu.gotoPortlet(
+			category = "Publishing",
+			panel = "Site Administration",
+			portlet = "Staging");
 
-		ProductMenuHelper.expandCategory(category = "Publishing");
-
-		AssertElementNotPresent(
-			locator1 = "ProductMenu#PORTLET",
-			value1 = "Staging",
-			key_portlet = "Staging"
-		);
+		Alert.viewWarningSpecific(warningMessage = "Change lists are enabled for the current virtual instance. Staging and change lists cannot be used together.");
 	}
 
 	macro viewPublishedChangeListDetails {
 		AssertTextEquals(
 			locator1 = "ChangeList#OVERVIEW_CHANGE_LIST_NAME",
-			value1 = "${changeListName}"
-		);
+			value1 = "${changeListName}");
 
 		AssertTextEquals(
 			locator1 = "ChangeList#OVERVIEW_DESCRIPTION",
-			value1 = "${changeListDescription}"
-		);
+			value1 = "${changeListDescription}");
 
 		AssertTextPresent(
 			locator1 = "ChangeList#OVERVIEW_PUBLISHED_BY",
-			value1 = "${changeListPublishedBy}"
-		);
+			value1 = "${changeListPublishedBy}");
+	}
+
+	macro viewSpecificChangeListHistory {
+		var key_contentTitle = "${contentTitle}";
+
+		AssertTextEquals(
+			locator1 = "ChangeList#VIEW_CHANGE_LIST_NAME_HISTORY",
+			value1 = "${changeListName}");
+	}
+
+	macro workOnProduction {
+		if (IsTextEqual(locator1 = "ChangeList#OVERVIEW_PAGE_TITLE", value1 = "Change Lists")) {
+			Click(locator1 = "ChangeList#SELECT_CHANGE_LIST_DROPDOWN");
+
+			Click(
+				key_changeListName = "Work on Production",
+				locator1 = "ChangeList#SELECT_CHANGE_LIST_VALUE");
+
+			AssertTextEquals(
+				locator1 = "ChangeList#OVERVIEW_PAGE_TITLE",
+				value1 = "Select Change List");
+		}
+		else {
+			Click(
+				key_changeListName = "Work on Production",
+				locator1 = "ChangeList#CHANGE_LIST_NAME_CARD_VIEW");
+		}
+		Alert.viewSuccessMessageText(successMessage = "Production has been checked out. All your modifications will be added to the live site immediately.");
+
 	}
 }

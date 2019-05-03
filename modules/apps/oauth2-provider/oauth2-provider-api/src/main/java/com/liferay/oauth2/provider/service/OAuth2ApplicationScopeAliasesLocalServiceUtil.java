@@ -316,6 +316,13 @@ public class OAuth2ApplicationScopeAliasesLocalServiceUtil {
 		return getService().getPersistedModel(primaryKeyObj);
 	}
 
+	public static java.util.List<String> getScopeAliasesList(
+		long oAuth2ApplicationScopeAliasesId) {
+
+		return getService().getScopeAliasesList(
+			oAuth2ApplicationScopeAliasesId);
+	}
+
 	/**
 	 * Updates the o auth2 application scope aliases in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	 *

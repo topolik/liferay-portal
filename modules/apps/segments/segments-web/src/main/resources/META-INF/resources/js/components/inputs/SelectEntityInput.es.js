@@ -1,6 +1,6 @@
-import React from 'react';
-import propTypes from 'prop-types';
 import ClayButton from '../shared/ClayButton.es';
+import propTypes from 'prop-types';
+import React from 'react';
 
 class SelectEntityInput extends React.Component {
 	static propTypes = {

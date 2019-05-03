@@ -14,13 +14,14 @@
 
 package com.liferay.layout.content.page.editor.web.internal.portlet.action;
 
-import com.liferay.asset.display.contributor.AssetDisplayContributor;
-import com.liferay.asset.display.contributor.AssetDisplayContributorTracker;
-import com.liferay.asset.display.contributor.AssetDisplayField;
+import com.liferay.info.display.contributor.InfoDisplayContributor;
+import com.liferay.info.display.contributor.InfoDisplayContributorTracker;
+import com.liferay.info.display.contributor.InfoDisplayField;
 import com.liferay.layout.content.page.editor.constants.ContentPageEditorPortletKeys;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.JSONPortletResponseUtil;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
@@ -59,25 +60,27 @@ public class GetMappingFieldsMVCActionCommand extends BaseMVCActionCommand {
 
 		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
 
-		AssetDisplayContributor assetDisplayContributor =
-			_assetDisplayContributorTracker.getAssetDisplayContributor(
+		InfoDisplayContributor infoDisplayContributor =
+			_infoDisplayContributorTracker.getInfoDisplayContributor(
 				_portal.getClassName(classNameId));
 
-		if (assetDisplayContributor != null) {
+		if (infoDisplayContributor != null) {
 			long classTypeId = ParamUtil.getLong(actionRequest, "classTypeId");
 			ThemeDisplay themeDisplay =
 				(ThemeDisplay)actionRequest.getAttribute(WebKeys.THEME_DISPLAY);
 
-			Set<AssetDisplayField> assetEntryFields =
-				assetDisplayContributor.getAssetDisplayFields(
+			Set<InfoDisplayField> infoDisplayFields =
+				infoDisplayContributor.getInfoDisplayFields(
 					classTypeId, themeDisplay.getLocale());
 
-			for (AssetDisplayField assetEntryField : assetEntryFields) {
-				JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-				jsonObject.put("key", assetEntryField.getKey());
-				jsonObject.put("label", assetEntryField.getLabel());
-				jsonObject.put("type", assetEntryField.getType());
+			for (InfoDisplayField infoDisplayField : infoDisplayFields) {
+				JSONObject jsonObject = JSONUtil.put(
+					"key", infoDisplayField.getKey()
+				).put(
+					"label", infoDisplayField.getLabel()
+				).put(
+					"type", infoDisplayField.getType()
+				);
 
 				jsonArray.put(jsonObject);
 			}
@@ -88,7 +91,7 @@ public class GetMappingFieldsMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	@Reference
-	private AssetDisplayContributorTracker _assetDisplayContributorTracker;
+	private InfoDisplayContributorTracker _infoDisplayContributorTracker;
 
 	@Reference
 	private Portal _portal;

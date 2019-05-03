@@ -142,7 +142,6 @@ public class LayoutIndexer extends BaseIndexer<Layout> {
 		document.addText(
 			Field.DEFAULT_LANGUAGE_ID, layout.getDefaultLanguageId());
 		document.addLocalizedText(Field.NAME, layout.getNameMap());
-		document.addNumberSortable("leftPlid", layout.getLeftPlid());
 		document.addText(
 			"privateLayout", String.valueOf(layout.isPrivateLayout()));
 		document.addText(Field.TYPE, layout.getType());
@@ -163,14 +162,14 @@ public class LayoutIndexer extends BaseIndexer<Layout> {
 			return document;
 		}
 
-		HttpServletRequest request = null;
+		HttpServletRequest httpServletRequest = null;
 		HttpServletResponse response = null;
 
 		ServiceContext serviceContext =
 			ServiceContextThreadLocal.getServiceContext();
 
 		if (serviceContext != null) {
-			request = serviceContext.getRequest();
+			httpServletRequest = serviceContext.getRequest();
 			response = serviceContext.getResponse();
 		}
 
@@ -179,7 +178,8 @@ public class LayoutIndexer extends BaseIndexer<Layout> {
 
 			String content =
 				LayoutPageTemplateStructureRenderUtil.renderLayoutContent(
-					request, response, layoutPageTemplateStructure,
+					null, httpServletRequest, response,
+					layoutPageTemplateStructure,
 					FragmentEntryLinkConstants.VIEW, new HashMap<>(), locale,
 					new long[0]);
 

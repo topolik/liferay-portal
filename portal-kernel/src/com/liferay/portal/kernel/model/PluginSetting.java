@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.PluginSettingImpl")
 @ProviderType
-public interface PluginSetting extends PluginSettingModel, PersistedModel {
+public interface PluginSetting extends PersistedModel, PluginSettingModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

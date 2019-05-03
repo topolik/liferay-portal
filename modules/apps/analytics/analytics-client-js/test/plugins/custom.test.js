@@ -1,6 +1,7 @@
 import AnalyticsClient from '../../src/analytics';
 import dom from 'metal-dom';
 import {expect} from 'chai';
+import fetchMock from 'fetch-mock';
 
 const applicationId = 'Custom';
 
@@ -15,6 +16,21 @@ const createCustomAssetElement = () => {
 	customAssetElement.dataset.analyticsAssetTitle = 'Custom Asset Title 1';
 	customAssetElement.dataset.analyticsAssetType = 'custom';
 	customAssetElement.innerText = 'Lorem ipsum dolor, sit amet consectetur adipisicing elit.';
+
+	document.body.appendChild(customAssetElement);
+
+	return customAssetElement;
+};
+
+const createCustomAssetElementWithForm = () => {
+	const customAssetElement = document.createElement('div');
+	customAssetElement.dataset.analyticsAssetCategory = 'custom-asset-category';
+	customAssetElement.dataset.analyticsAssetId = 'assetId';
+	customAssetElement.dataset.analyticsAssetTitle = 'Custom Asset Title 1';
+	customAssetElement.dataset.analyticsAssetType = 'custom';
+	customAssetElement.innerHTML = `
+		<form><input type="text" /><button type="submit" /></form>
+	`;
 
 	document.body.appendChild(customAssetElement);
 
@@ -56,6 +72,29 @@ describe('Custom Asset Plugin', () => {
 				eventId: 'assetViewed',
 			});
 			expect(events[0].properties.assetId).to.equal('assetId');
+
+			document.body.removeChild(customAssetElement);
+		});
+
+		it('should be fired with formEnabled if there is form element every custom asset on the page', () => {
+			const customAssetElement = createCustomAssetElementWithForm();
+
+			const domContentLoaded = new Event('DOMContentLoaded');
+			document.dispatchEvent(domContentLoaded);
+
+			const events = Analytics.events.filter(
+				({eventId}) => eventId === 'assetViewed'
+			);
+
+			expect(events.length).to.be.at.least(1, 'At least one event should have been fired');
+
+			events[0].should.deep.include({
+				applicationId,
+				eventId: 'assetViewed',
+			});
+
+			expect(events[0].properties.assetId).to.equal('assetId');
+			expect(events[0].properties.formEnabled).to.equal(true);
 
 			document.body.removeChild(customAssetElement);
 		});

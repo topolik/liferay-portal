@@ -7,7 +7,6 @@
 	{@param layouts: list<[name: string, url: string]>}
 	{@param spritemap: string}
 	{@param totalCount: number}
-	{@param? _handleCloseDialogClick: any}
 	{@param? _handleFormSubmit: any}
 	{@param? _handleSearchInputKeyUp: any}
 	{@param? _keywords: string}
@@ -20,7 +19,7 @@
 
 	<div class="layout-finder">
 		<button
-			class="btn btn-sm btn-unstyled lfr-portal-tooltip text-secondary"
+			class="btn btn-monospaced btn-sm btn-unstyled lfr-portal-tooltip text-secondary"
 			data-onclick="{$_toggleDialog}"
 			data-title="{msg desc=""}find-a-page{/msg}"
 			type="button"
@@ -43,23 +42,9 @@
 				>
 					<div class="modal-content">
 						<header class="modal-header">
-							<h1 class="modal-title">
+							<h1 class="modal-title text-dark">
 								{msg desc=""}pages-finder{/msg}
 							</h1>
-
-							<button
-								class="close"
-								data-onclick="{$_handleCloseDialogClick}"
-								type="button"
-							>
-								<span class="sr-only">
-									{msg desc=""}close-dialog{/msg}
-								</span>
-
-								<svg class="lexicon-icon">
-									<use xlink:href="{$spritemap}#times"></use>
-								</svg>
-							</button>
 						</header>
 
 						<section class="modal-body">

@@ -179,13 +179,33 @@ public abstract class BaseBuildData implements BuildData {
 	}
 
 	@Override
+	public String getJenkinsGitHubBranchName() {
+		return getGitHubBranchName(getJenkinsGitHubURL());
+	}
+
+	@Override
+	public String getJenkinsGitHubRepositoryName() {
+		return getGitHubRepositoryName(getJenkinsGitHubURL());
+	}
+
+	@Override
 	public String getJenkinsGitHubURL() {
 		return getString("jenkins_github_url");
 	}
 
 	@Override
+	public String getJenkinsGitHubUsername() {
+		return getGitHubUsername(getJenkinsGitHubURL());
+	}
+
+	@Override
 	public String getJobName() {
 		return optString("job_name");
+	}
+
+	@Override
+	public String getJobURL() {
+		return optString("job_url");
 	}
 
 	@Override
@@ -265,6 +285,7 @@ public abstract class BaseBuildData implements BuildData {
 		put("build_url", buildURL);
 		put("cohort_name", matcher.group("cohortName"));
 		put("hostname", _getHostname());
+		put("job_url", matcher.group("jobURL"));
 		put("master_hostname", matcher.group("masterHostname"));
 		put("start_time", _getStartTime());
 		put("type", getType());
@@ -346,10 +367,10 @@ public abstract class BaseBuildData implements BuildData {
 			setBuildDescription(_getDefaultBuildDescription());
 		}
 
-		setJenkinsGitHubURL(DEFAULT_JENKINS_GITHUB_URL);
-		setWorkspaceDir(DEFAULT_WORKSPACE_DIR);
+		setJenkinsGitHubURL(URL_JENKINS_GITHUB_DEFAULT);
+		setWorkspaceDir(DIR_WORKSPACE_DEFAULT);
 
-		validateKeys(_REQUIRED_KEYS);
+		validateKeys(_KEYS_REQUIRED);
 	}
 
 	protected File getFile(String key) {
@@ -359,6 +380,39 @@ public abstract class BaseBuildData implements BuildData {
 	protected String getFormattedDate(Long timestamp) {
 		return JenkinsResultsParserUtil.toDateString(
 			new Date(timestamp), "MMM dd, yyyy h:mm:ss a z", "US/Pacific");
+	}
+
+	protected String getGitHubBranchName(String gitHubBranchURL) {
+		Matcher matcher = _gitHubBranchURLPattern.matcher(gitHubBranchURL);
+
+		if (!matcher.find()) {
+			throw new RuntimeException(
+				"Invalid GitHub Branch URL " + gitHubBranchURL);
+		}
+
+		return matcher.group("branchName");
+	}
+
+	protected String getGitHubRepositoryName(String gitHubBranchURL) {
+		Matcher matcher = _gitHubBranchURLPattern.matcher(gitHubBranchURL);
+
+		if (!matcher.find()) {
+			throw new RuntimeException(
+				"Invalid GitHub Branch URL " + gitHubBranchURL);
+		}
+
+		return matcher.group("repositoryName");
+	}
+
+	protected String getGitHubUsername(String gitHubBranchURL) {
+		Matcher matcher = _gitHubBranchURLPattern.matcher(gitHubBranchURL);
+
+		if (!matcher.find()) {
+			throw new RuntimeException(
+				"Invalid GitHub Branch URL " + gitHubBranchURL);
+		}
+
+		return matcher.group("username");
 	}
 
 	protected JSONArray getJSONArray(String key) {
@@ -473,7 +527,7 @@ public abstract class BaseBuildData implements BuildData {
 		return buildURLJSONObject.getLong("timestamp");
 	}
 
-	private static final String[] _REQUIRED_KEYS = {
+	private static final String[] _KEYS_REQUIRED = {
 		"build_description", "build_number", "build_url", "cohort_name",
 		"hostname", "jenkins_github_url", "job_name", "master_hostname",
 		"run_id", "workspace_dir"
@@ -481,9 +535,12 @@ public abstract class BaseBuildData implements BuildData {
 
 	private static final Pattern _buildURLPattern = Pattern.compile(
 		JenkinsResultsParserUtil.combine(
-			"https?://(?<masterHostname>(?<cohortName>test-\\d+)-\\d+)",
-			"(\\.liferay\\.com)?/job/(?<jobName>[^/]+)/(.*/)?",
-			"(?<buildNumber>\\d+)/?"));
+			"(?<jobURL>https?://(?<masterHostname>",
+			"(?<cohortName>test-\\d+)-\\d+)(\\.liferay\\.com)?/job/",
+			"(?<jobName>[^/]+)/(.*/)?)(?<buildNumber>\\d+)/?"));
+	private static final Pattern _gitHubBranchURLPattern = Pattern.compile(
+		"https://github.com/(?<username>[^/]+)/(?<repositoryName>[^/]+)/tree/" +
+			"(?<branchName>.+)");
 
 	private Map<String, String> _buildParameters;
 	private Host _host;

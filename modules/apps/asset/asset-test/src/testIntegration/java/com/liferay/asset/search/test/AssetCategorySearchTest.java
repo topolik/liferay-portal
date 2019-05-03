@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.test.rule.AggregateTestRule;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.search.test.util.BaseSearchTestCase;
 import com.liferay.portal.test.rule.LiferayIntegrationTestRule;
-import com.liferay.portal.test.rule.PermissionCheckerTestRule;
+import com.liferay.portal.test.rule.PermissionCheckerMethodTestRule;
 
 import java.util.Locale;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class AssetCategorySearchTest extends BaseSearchTestCase {
 	public static final AggregateTestRule aggregateTestRule =
 		new AggregateTestRule(
 			new LiferayIntegrationTestRule(),
-			PermissionCheckerTestRule.INSTANCE);
+			PermissionCheckerMethodTestRule.INSTANCE);
 
 	@Ignore
 	@Override
@@ -81,6 +81,12 @@ public class AssetCategorySearchTest extends BaseSearchTestCase {
 	@Override
 	@Test
 	public void testSearchComments() throws Exception {
+	}
+
+	@Ignore
+	@Override
+	@Test
+	public void testSearchCommentsByKeywords() throws Exception {
 	}
 
 	@Ignore

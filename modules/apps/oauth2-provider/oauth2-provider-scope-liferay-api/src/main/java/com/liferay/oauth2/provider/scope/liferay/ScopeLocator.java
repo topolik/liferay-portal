@@ -14,68 +14,65 @@
 
 package com.liferay.oauth2.provider.scope.liferay;
 
+import aQute.bnd.annotation.ProviderType;
+
 import java.util.Collection;
 
 /**
- * This interface allows to list scope aliases and matching {@link
- * LiferayOAuth2Scope}s based on a portal instance configuration of OAuth2
- * Framework.<br /> Scope alias can match multiple {@link LiferayOAuth2Scope}s
- * based on particular portal instance configuration of OAuth2 Framework.
+ * Lists scope aliases and matching {@link LiferayOAuth2Scope}s based on a
+ * portal instance configuration of the OAuth2 framework. Scope aliases can
+ * match multiple {@link LiferayOAuth2Scope}s from OAuth2 frameworks in
+ * different portal instances.
  *
  * @author Carlos Sierra Andrés
- * @review
  */
+@ProviderType
 public interface ScopeLocator {
 
+	public LiferayOAuth2Scope getLiferayOAuth2Scope(
+		long companyId, String applicationName, String scope);
+
 	/**
-	 * Returns a collection of application exported scopes matching a {@code
-	 * scopesAlias} in the given portal instance.
+	 * Returns the application exported scopes matching the given portal
+	 * instance's scopes alias.
 	 *
-	 * @param  companyId the company for which the scopes are to be located
-	 * @param  scopesAlias the scope alias the scopes are mapped to
-	 * @return a collection of one or more matching scopes for the given company
-	 *         and scope alias
-	 * @review
+	 * @param  companyId the ID of the portal instance containing the scopes
+	 * @param  scopesAlias the alias mapped to scopes
+	 * @return the matching scopes
 	 */
 	public Collection<LiferayOAuth2Scope> getLiferayOAuth2Scopes(
 		long companyId, String scopesAlias);
 
 	/**
-	 * Returns a collection of application exported scopes matching a {@code
-	 * scopesAlias} in the given portal instance, filtered by {@code
-	 * applicationName}.
+	 * Returns the application exported scopes matching the given portal
+	 * instance's scopes alias, filtered by application name.
 	 *
-	 * @param  companyId the company for which the scopes are to be located
-	 * @param  scopesAlias the scope alias the scopes are mapped to
-	 * @param  applicationName the application for which the scopes are to be
-	 *         located
-	 * @return a collection of one or more matching scopes for the given company
-	 *         and scope alias, filtered by {@code applicationName}
-	 * @review
+	 * @param  companyId the ID of the portal instance containing the scopes
+	 * @param  scopesAlias the alias mapped to scopes
+	 * @param  applicationName the application containing the scopes
+	 * @return the matching scopes, filtered by application name
 	 */
 	public Collection<LiferayOAuth2Scope> getLiferayOAuth2Scopes(
 		long companyId, String scopesAlias, String applicationName);
 
 	/**
-	 * Returns a list of scope aliases available for the given portal instance.
-	 * <br />
+	 * Returns the scope aliases available for the given portal instance.
 	 *
-	 * @param  companyId the portal instance context
-	 * @return a non-<code>null</code> collection of scope aliases from the
-	 *         portal instance
-	 * @review
+	 * @param  companyId the ID of the portal instance containing the scope
+	 *         aliases
+	 * @return the non-<code>null</code> scope aliases
 	 */
 	public Collection<String> getScopeAliases(long companyId);
 
 	/**
-	 * Returns a list of scope aliases available for the given portal instance,
+	 * Returns the scope aliases available for the given portal instance,
 	 * filtered by application name.
 	 *
-	 * @param  companyId the portal instance context
-	 * @param  applicationName name of application exporting the scopes
-	 * @return a non-<code>null</code> collection of scope aliases from the
-	 *         portal instance filtered by {@code applicationName}
-	 * @review
+	 * @param  companyId the ID of the portal instance containing the scope
+	 *         aliases
+	 * @param  applicationName the application exporting the scopes
+	 * @return the non-<code>null</code> scope aliases, filtered by application
+	 *         name
 	 */
 	public Collection<String> getScopeAliases(
 		long companyId, String applicationName);

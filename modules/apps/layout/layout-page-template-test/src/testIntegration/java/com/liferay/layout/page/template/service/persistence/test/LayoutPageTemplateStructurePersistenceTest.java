@@ -151,8 +151,6 @@ public class LayoutPageTemplateStructurePersistenceTest {
 
 		newLayoutPageTemplateStructure.setClassPK(RandomTestUtil.nextLong());
 
-		newLayoutPageTemplateStructure.setData(RandomTestUtil.randomString());
-
 		_layoutPageTemplateStructures.add(
 			_persistence.update(newLayoutPageTemplateStructure));
 
@@ -195,9 +193,6 @@ public class LayoutPageTemplateStructurePersistenceTest {
 		Assert.assertEquals(
 			existingLayoutPageTemplateStructure.getClassPK(),
 			newLayoutPageTemplateStructure.getClassPK());
-		Assert.assertEquals(
-			existingLayoutPageTemplateStructure.getData(),
-			newLayoutPageTemplateStructure.getData());
 	}
 
 	@Test
@@ -277,8 +272,7 @@ public class LayoutPageTemplateStructurePersistenceTest {
 			"LayoutPageTemplateStructure", "uuid", true,
 			"layoutPageTemplateStructureId", true, "groupId", true, "companyId",
 			true, "userId", true, "userName", true, "createDate", true,
-			"modifiedDate", true, "classNameId", true, "classPK", true, "data",
-			true);
+			"modifiedDate", true, "classNameId", true, "classPK", true);
 	}
 
 	@Test
@@ -593,8 +587,6 @@ public class LayoutPageTemplateStructurePersistenceTest {
 		layoutPageTemplateStructure.setClassNameId(RandomTestUtil.nextLong());
 
 		layoutPageTemplateStructure.setClassPK(RandomTestUtil.nextLong());
-
-		layoutPageTemplateStructure.setData(RandomTestUtil.randomString());
 
 		_layoutPageTemplateStructures.add(
 			_persistence.update(layoutPageTemplateStructure));

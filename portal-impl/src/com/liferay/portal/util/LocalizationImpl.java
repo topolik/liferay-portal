@@ -666,22 +666,6 @@ public class LocalizationImpl implements Localization {
 		return map;
 	}
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x)
-	 */
-	@Deprecated
-	@Override
-	public String getPreferencesKey(String key, String languageId) {
-		String defaultLanguageId = LocaleUtil.toLanguageId(
-			LocaleUtil.getSiteDefault());
-
-		if (!languageId.equals(defaultLanguageId)) {
-			key = getLocalizedName(key, languageId);
-		}
-
-		return key;
-	}
-
 	@Override
 	public String getPreferencesValue(
 		PortletPreferences preferences, String key, String languageId) {
@@ -927,6 +911,27 @@ public class LocalizationImpl implements Localization {
 		}
 
 		return StringPool.BLANK;
+	}
+
+	@Override
+	public Map<Locale, String> populateLocalizationMap(
+		Map<Locale, String> localizationMap, String defaultLanguageId,
+		long groupId) {
+
+		String defaultValue = localizationMap.get(
+			LocaleUtil.fromLanguageId(defaultLanguageId));
+
+		for (Locale availableLocale :
+				LanguageUtil.getAvailableLocales(groupId)) {
+
+			if (!localizationMap.containsKey(availableLocale) ||
+				Validator.isNull(localizationMap.get(availableLocale))) {
+
+				localizationMap.put(availableLocale, defaultValue);
+			}
+		}
+
+		return localizationMap;
 	}
 
 	@Override

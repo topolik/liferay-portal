@@ -32,18 +32,22 @@ fragmentEntryLink.setHtml(html);
 fragmentEntryLink.setJs(js);
 fragmentEntryLink.setFragmentEntryId(fragmentEntryId);
 
+DefaultFragmentRendererContext defaultFragmentRendererContext = new DefaultFragmentRendererContext(fragmentEntryLink);
+
+defaultFragmentRendererContext.setMode(FragmentEntryLinkConstants.VIEW);
+
 try {
 %>
 
-	<%= FragmentEntryRenderUtil.renderFragmentEntryLink(fragmentEntryLink, FragmentEntryLinkConstants.VIEW, request, response) %>
+	<%= fragmentRendererController.render(defaultFragmentRendererContext, request, response) %>
 
 <%
 }
-catch (FragmentEntryContentException fece) {
+catch (IOException ioe) {
 %>
 
 	<div class="alert alert-danger">
-		<liferay-ui:message key="<%= fece.getMessage() %>" />
+		<liferay-ui:message key="<%= ioe.getMessage() %>" />
 	</div>
 
 <%

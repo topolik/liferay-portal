@@ -28,7 +28,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.portal.model.impl.PortletItemImpl")
 @ProviderType
-public interface PortletItem extends PortletItemModel, PersistedModel {
+public interface PortletItem extends PersistedModel, PortletItemModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

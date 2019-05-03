@@ -15,9 +15,8 @@
 package com.liferay.journal.web.internal.portlet;
 
 import com.liferay.asset.display.page.constants.AssetDisplayPageConstants;
-import com.liferay.asset.display.page.model.AssetDisplayPageEntry;
+import com.liferay.asset.display.page.portlet.AssetDisplayPageEntryFormProcessor;
 import com.liferay.asset.display.page.portlet.AssetDisplayPageFriendlyURLProvider;
-import com.liferay.asset.display.page.service.AssetDisplayPageEntryLocalService;
 import com.liferay.asset.kernel.exception.AssetCategoryException;
 import com.liferay.asset.kernel.exception.AssetTagException;
 import com.liferay.asset.kernel.model.AssetEntry;
@@ -61,6 +60,7 @@ import com.liferay.journal.exception.NoSuchArticleException;
 import com.liferay.journal.exception.NoSuchFeedException;
 import com.liferay.journal.exception.NoSuchFolderException;
 import com.liferay.journal.model.JournalArticle;
+import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalFeed;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.model.JournalFolderConstants;
@@ -71,13 +71,11 @@ import com.liferay.journal.service.JournalFolderService;
 import com.liferay.journal.util.JournalContent;
 import com.liferay.journal.util.JournalConverter;
 import com.liferay.journal.util.JournalHelper;
-import com.liferay.journal.web.asset.JournalArticleAssetRenderer;
+import com.liferay.journal.web.asset.model.JournalArticleAssetRenderer;
 import com.liferay.journal.web.configuration.JournalWebConfiguration;
 import com.liferay.journal.web.internal.portlet.action.ActionUtil;
 import com.liferay.journal.web.util.JournalPortletUtil;
 import com.liferay.journal.web.util.JournalUtil;
-import com.liferay.layout.page.template.model.LayoutPageTemplateEntry;
-import com.liferay.layout.page.template.service.LayoutPageTemplateEntryLocalService;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
@@ -85,6 +83,7 @@ import com.liferay.portal.kernel.diff.CompareVersionsException;
 import com.liferay.portal.kernel.exception.LocaleException;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Layout;
@@ -100,6 +99,7 @@ import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.service.LayoutLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.servlet.MultiSessionMessages;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -110,6 +110,7 @@ import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -129,7 +130,6 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -228,12 +228,6 @@ public class JournalPortlet extends MVCPortlet {
 		portalPreferences.setValues(
 			JournalPortletKeys.JOURNAL, key,
 			ArrayUtil.append(addMenuFavItems, ddmStructureKey));
-
-		SessionMessages.add(
-			actionRequest,
-			_portal.getPortletId(actionRequest) +
-				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
-			JournalPortletKeys.JOURNAL);
 	}
 
 	public void addArticle(
@@ -462,12 +456,6 @@ public class JournalPortlet extends MVCPortlet {
 		portalPreferences.setValues(
 			JournalPortletKeys.JOURNAL, key,
 			ArrayUtil.remove(addMenuFavItems, ddmStructureKey));
-
-		SessionMessages.add(
-			actionRequest,
-			_portal.getPortletId(actionRequest) +
-				SessionMessages.KEY_SUFFIX_REFRESH_PORTLET,
-			JournalPortletKeys.JOURNAL);
 	}
 
 	@Override
@@ -691,6 +679,9 @@ public class JournalPortlet extends MVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
+		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
+
 		UploadException uploadException =
 			(UploadException)actionRequest.getAttribute(
 				WebKeys.UPLOAD_EXCEPTION);
@@ -728,24 +719,13 @@ public class JournalPortlet extends MVCPortlet {
 		long classNameId = ParamUtil.getLong(
 			uploadPortletRequest, "classNameId");
 		long classPK = ParamUtil.getLong(uploadPortletRequest, "classPK");
-
 		String articleId = ParamUtil.getString(
 			uploadPortletRequest, "articleId");
-
 		boolean autoArticleId = ParamUtil.getBoolean(
 			uploadPortletRequest, "autoArticleId");
 		double version = ParamUtil.getDouble(uploadPortletRequest, "version");
-
 		Map<Locale, String> titleMap = LocalizationUtil.getLocalizationMap(
 			actionRequest, "titleMapAsXML");
-		Map<Locale, String> descriptionMap =
-			LocalizationUtil.getLocalizationMap(
-				actionRequest, "descriptionMapAsXML");
-		Map<Locale, String> friendlyURLMap =
-			LocalizationUtil.getLocalizationMap(actionRequest, "friendlyURL");
-
-		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			JournalArticle.class.getName(), uploadPortletRequest);
 
 		String ddmStructureKey = ParamUtil.getString(
 			uploadPortletRequest, "ddmStructureKey");
@@ -755,15 +735,36 @@ public class JournalPortlet extends MVCPortlet {
 			_portal.getClassNameId(JournalArticle.class), ddmStructureKey,
 			true);
 
+		ServiceContext serviceContext = ServiceContextFactory.getInstance(
+			JournalArticle.class.getName(), uploadPortletRequest);
+
 		Fields fields = DDMUtil.getFields(
 			ddmStructure.getStructureId(), serviceContext);
 
 		String content = _journalConverter.getContent(ddmStructure, fields);
 
+		if ((classNameId == JournalArticleConstants.CLASSNAME_ID_DEFAULT) &&
+			_isEmpty(titleMap)) {
+
+			Locale articleDefaultLocale = LocaleUtil.fromLanguageId(
+				LocalizationUtil.getDefaultLanguageId(content));
+
+			titleMap.put(
+				articleDefaultLocale,
+				LanguageUtil.format(
+					_portal.getHttpServletRequest(actionRequest), "untitled-x",
+					HtmlUtil.escape(
+						ddmStructure.getName(themeDisplay.getLocale()))));
+		}
+
+		Map<Locale, String> descriptionMap =
+			LocalizationUtil.getLocalizationMap(
+				actionRequest, "descriptionMapAsXML");
+		Map<Locale, String> friendlyURLMap =
+			LocalizationUtil.getLocalizationMap(actionRequest, "friendlyURL");
+
 		String ddmTemplateKey = ParamUtil.getString(
 			uploadPortletRequest, "ddmTemplateKey");
-		long assetDisplayPageId = ParamUtil.getLong(
-			uploadPortletRequest, "assetDisplayPageId");
 		int displayPageType = ParamUtil.getInteger(
 			uploadPortletRequest, "displayPageType");
 
@@ -776,12 +777,25 @@ public class JournalPortlet extends MVCPortlet {
 			Layout targetLayout = _journalHelper.getArticleLayout(
 				layoutUuid, groupId);
 
-			if ((assetDisplayPageId != 0) || (targetLayout == null)) {
+			JournalArticle latestArticle = _journalArticleService.fetchArticle(
+				groupId, articleId);
+
+			if ((displayPageType == AssetDisplayPageConstants.TYPE_SPECIFIC) &&
+				(targetLayout == null) && (latestArticle != null) &&
+				Validator.isNotNull(latestArticle.getLayoutUuid())) {
+
+				Layout latestTargetLayout = _journalHelper.getArticleLayout(
+					latestArticle.getLayoutUuid(), groupId);
+
+				if (latestTargetLayout == null) {
+					layoutUuid = latestArticle.getLayoutUuid();
+				}
+			}
+			else if (targetLayout == null) {
 				layoutUuid = null;
 			}
 		}
 		else {
-			assetDisplayPageId = 0;
 			layoutUuid = null;
 		}
 
@@ -930,10 +944,10 @@ public class JournalPortlet extends MVCPortlet {
 		String portletResource = ParamUtil.getString(
 			actionRequest, "portletResource");
 
-		long referringPlid = ParamUtil.getLong(actionRequest, "referringPlid");
+		long refererPlid = ParamUtil.getLong(actionRequest, "refererPlid");
 
-		if (Validator.isNotNull(portletResource) && (referringPlid > 0)) {
-			Layout layout = _layoutLocalService.getLayout(referringPlid);
+		if (Validator.isNotNull(portletResource) && (refererPlid > 0)) {
+			Layout layout = _layoutLocalService.getLayout(refererPlid);
 
 			PortletPreferences portletPreferences =
 				PortletPreferencesFactoryUtil.getStrictPortletSetup(
@@ -964,12 +978,19 @@ public class JournalPortlet extends MVCPortlet {
 
 		// Asset display page
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
+		_assetDisplayPageEntryFormProcessor.process(
+			JournalArticle.class.getName(), article.getResourcePrimKey(),
+			actionRequest);
 
-		_updateAssetDisplayPage(
-			themeDisplay.getUserId(), groupId, article, assetDisplayPageId,
-			displayPageType, serviceContext);
+		int workflowAction = ParamUtil.getInteger(
+			actionRequest, "workflowAction", WorkflowConstants.ACTION_PUBLISH);
+
+		if (Validator.isNotNull(portletResource) &&
+			(workflowAction != WorkflowConstants.ACTION_SAVE_DRAFT)) {
+
+			MultiSessionMessages.add(
+				actionRequest, portletResource + "requestProcessed");
+		}
 
 		sendEditArticleRedirect(
 			actionRequest, actionResponse, article, oldUrlTitle);
@@ -1272,14 +1293,15 @@ public class JournalPortlet extends MVCPortlet {
 		throws IOException, PortletException {
 
 		try {
-			ActionUtil.getFolder(renderRequest);
-
 			String path = getPath(renderRequest, renderResponse);
 
 			if (Objects.equals(path, "/edit_article.jsp") ||
 				Objects.equals(path, "/view_article_history.jsp")) {
 
 				ActionUtil.getArticle(renderRequest);
+			}
+			else {
+				ActionUtil.getFolder(renderRequest);
 			}
 		}
 		catch (Exception e) {
@@ -1313,6 +1335,9 @@ public class JournalPortlet extends MVCPortlet {
 			String redirect)
 		throws Exception {
 
+		String portletResource = ParamUtil.getString(
+			actionRequest, "portletResource");
+
 		String referringPortletResource = ParamUtil.getString(
 			actionRequest, "referringPortletResource");
 
@@ -1322,6 +1347,7 @@ public class JournalPortlet extends MVCPortlet {
 
 		portletURL.setParameter("mvcPath", "/edit_article.jsp");
 		portletURL.setParameter("redirect", redirect);
+		portletURL.setParameter("portletResource", portletResource);
 		portletURL.setParameter(
 			"referringPortletResource", referringPortletResource);
 		portletURL.setParameter(
@@ -1403,11 +1429,14 @@ public class JournalPortlet extends MVCPortlet {
 		int workflowAction = ParamUtil.getInteger(
 			actionRequest, "workflowAction", WorkflowConstants.ACTION_PUBLISH);
 
-		String portletId = _http.getParameter(redirect, "p_p_id", false);
+		String portletId = _http.getParameter(
+			redirect, "portletResource", false);
 
 		String namespace = _portal.getPortletNamespace(portletId);
 
-		if (Validator.isNotNull(oldUrlTitle)) {
+		if (Validator.isNotNull(oldUrlTitle) &&
+			Validator.isNotNull(portletId)) {
+
 			String oldRedirectParam = namespace + "redirect";
 
 			String oldRedirect = _http.getParameter(
@@ -1453,20 +1482,20 @@ public class JournalPortlet extends MVCPortlet {
 			}
 		}
 		else {
-			WindowState windowState = actionRequest.getWindowState();
+			redirect = _portal.escapeRedirect(redirect);
 
-			if (windowState.equals(LiferayWindowState.POP_UP)) {
-				redirect = _portal.escapeRedirect(redirect);
+			if (Validator.isNotNull(redirect) &&
+				Validator.isNotNull(portletId)) {
 
-				if (Validator.isNotNull(redirect)) {
-					if (actionName.equals("addArticle") && (article != null)) {
-						redirect = _http.addParameter(
-							redirect, namespace + "className",
-							JournalArticle.class.getName());
-						redirect = _http.addParameter(
-							redirect, namespace + "classPK",
-							JournalArticleAssetRenderer.getClassPK(article));
-					}
+				if (actionName.equals("addArticle") && (article != null) &&
+					Validator.isNotNull(namespace)) {
+
+					redirect = _http.addParameter(
+						redirect, namespace + "className",
+						JournalArticle.class.getName());
+					redirect = _http.addParameter(
+						redirect, namespace + "classPK",
+						JournalArticleAssetRenderer.getClassPK(article));
 				}
 			}
 		}
@@ -1508,10 +1537,10 @@ public class JournalPortlet extends MVCPortlet {
 
 		Layout layout = themeDisplay.getLayout();
 
-		long referringPlid = ParamUtil.getLong(actionRequest, "referringPlid");
+		long refererPlid = ParamUtil.getLong(actionRequest, "refererPlid");
 
-		if (referringPlid > 0) {
-			layout = _layoutLocalService.fetchLayout(referringPlid);
+		if (refererPlid > 0) {
+			layout = _layoutLocalService.fetchLayout(refererPlid);
 		}
 
 		_journalContentSearchLocalService.updateContentSearch(
@@ -1519,53 +1548,25 @@ public class JournalPortlet extends MVCPortlet {
 			portletResource, articleId, true);
 	}
 
-	private void _updateAssetDisplayPage(
-			long userId, long groupId, JournalArticle article,
-			long layoutPageTemplateEntryId, int displayPageType,
-			ServiceContext serviceContext)
-		throws PortalException {
+	private boolean _isEmpty(Map<Locale, String> map) {
+		if (MapUtil.isEmpty(map)) {
+			return true;
+		}
 
-		long classNameId = _portal.getClassNameId(JournalArticle.class);
-		long classPK = article.getResourcePrimKey();
-
-		AssetDisplayPageEntry assetDisplayPageEntry =
-			_assetDisplayPageEntryLocalService.fetchAssetDisplayPageEntry(
-				groupId, classNameId, classPK);
-
-		if (displayPageType == AssetDisplayPageConstants.TYPE_NONE) {
-			if (assetDisplayPageEntry != null) {
-				_assetDisplayPageEntryLocalService.deleteAssetDisplayPageEntry(
-					groupId, classNameId, classPK);
+		for (String value : map.values()) {
+			if (Validator.isNotNull(value)) {
+				return false;
 			}
 		}
-		else if (assetDisplayPageEntry == null) {
-			_assetDisplayPageEntryLocalService.addAssetDisplayPageEntry(
-				userId, groupId, classNameId, classPK,
-				layoutPageTemplateEntryId, displayPageType, serviceContext);
-		}
-		else {
-			_assetDisplayPageEntryLocalService.updateAssetDisplayPageEntry(
-				assetDisplayPageEntry.getAssetDisplayPageEntryId(),
-				layoutPageTemplateEntryId, displayPageType);
-		}
 
-		LayoutPageTemplateEntry layoutPageTemplateEntry =
-			_layoutPageTemplateEntryLocalService.fetchLayoutPageTemplateEntry(
-				layoutPageTemplateEntryId);
-
-		if (layoutPageTemplateEntry != null) {
-			layoutPageTemplateEntry.setModifiedDate(new Date());
-
-			_layoutPageTemplateEntryLocalService.updateLayoutPageTemplateEntry(
-				layoutPageTemplateEntry);
-		}
+		return true;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(JournalPortlet.class);
 
 	@Reference
-	private AssetDisplayPageEntryLocalService
-		_assetDisplayPageEntryLocalService;
+	private AssetDisplayPageEntryFormProcessor
+		_assetDisplayPageEntryFormProcessor;
 
 	@Reference
 	private AssetDisplayPageFriendlyURLProvider
@@ -1614,10 +1615,6 @@ public class JournalPortlet extends MVCPortlet {
 
 	@Reference
 	private LayoutLocalService _layoutLocalService;
-
-	@Reference
-	private LayoutPageTemplateEntryLocalService
-		_layoutPageTemplateEntryLocalService;
 
 	@Reference
 	private Portal _portal;

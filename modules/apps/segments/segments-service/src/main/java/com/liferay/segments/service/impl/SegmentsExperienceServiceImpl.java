@@ -15,6 +15,7 @@
 package com.liferay.segments.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
@@ -40,7 +41,7 @@ public class SegmentsExperienceServiceImpl
 	@Override
 	public SegmentsExperience addSegmentsExperience(
 			long segmentsEntryId, long classNameId, long classPK,
-			Map<Locale, String> nameMap, int priority, boolean active,
+			Map<Locale, String> nameMap, boolean active,
 			ServiceContext serviceContext)
 		throws PortalException {
 
@@ -49,7 +50,7 @@ public class SegmentsExperienceServiceImpl
 			SegmentsActionKeys.MANAGE_SEGMENTS_ENTRIES);
 
 		return segmentsExperienceLocalService.addSegmentsExperience(
-			segmentsEntryId, classNameId, classPK, nameMap, priority, active,
+			segmentsEntryId, classNameId, classPK, nameMap, active,
 			serviceContext);
 	}
 
@@ -58,8 +59,12 @@ public class SegmentsExperienceServiceImpl
 			long segmentsExperienceId)
 		throws PortalException {
 
+		SegmentsExperience segmentsExperience =
+			segmentsExperienceLocalService.getSegmentsExperience(
+				segmentsExperienceId);
+
 		_segmentsExperienceResourcePermission.check(
-			getPermissionChecker(), segmentsExperienceId, ActionKeys.DELETE);
+			getPermissionChecker(), segmentsExperience, ActionKeys.DELETE);
 
 		return segmentsExperienceLocalService.deleteSegmentsExperience(
 			segmentsExperienceId);
@@ -84,7 +89,7 @@ public class SegmentsExperienceServiceImpl
 		long groupId, long classNameId, long classPK, boolean active) {
 
 		return segmentsExperiencePersistence.filterFindByG_C_C_A(
-			groupId, classNameId, classPK, active);
+			groupId, classNameId, _getPublishedLayoutClassPK(classPK), active);
 	}
 
 	@Override
@@ -93,8 +98,8 @@ public class SegmentsExperienceServiceImpl
 		int end, OrderByComparator<SegmentsExperience> orderByComparator) {
 
 		return segmentsExperiencePersistence.filterFindByG_C_C_A(
-			groupId, classNameId, classPK, active, start, end,
-			orderByComparator);
+			groupId, classNameId, _getPublishedLayoutClassPK(classPK), active,
+			start, end, orderByComparator);
 	}
 
 	@Override
@@ -102,20 +107,66 @@ public class SegmentsExperienceServiceImpl
 		long groupId, long classNameId, long classPK, boolean active) {
 
 		return segmentsExperiencePersistence.filterCountByG_C_C_A(
-			groupId, classNameId, classPK, active);
+			groupId, classNameId, _getPublishedLayoutClassPK(classPK), active);
 	}
 
 	@Override
 	public SegmentsExperience updateSegmentsExperience(
 			long segmentsExperienceId, long segmentsEntryId,
-			Map<Locale, String> nameMap, int priority, boolean active)
+			Map<Locale, String> nameMap, boolean active)
 		throws PortalException {
 
+		SegmentsExperience segmentsExperience =
+			segmentsExperienceLocalService.getSegmentsExperience(
+				segmentsExperienceId);
+
 		_segmentsExperienceResourcePermission.check(
-			getPermissionChecker(), segmentsExperienceId, ActionKeys.UPDATE);
+			getPermissionChecker(), segmentsExperience, ActionKeys.UPDATE);
 
 		return segmentsExperienceLocalService.updateSegmentsExperience(
-			segmentsExperienceId, segmentsEntryId, nameMap, priority, active);
+			segmentsExperienceId, segmentsEntryId, nameMap, active);
+	}
+
+	@Override
+	public void updateSegmentsExperiencePriority(
+			long segmentsExperienceId, int newPriority)
+		throws PortalException {
+
+		SegmentsExperience segmentsExperience =
+			segmentsExperiencePersistence.findByPrimaryKey(
+				segmentsExperienceId);
+
+		_segmentsExperienceResourcePermission.check(
+			getPermissionChecker(), segmentsExperience, ActionKeys.UPDATE);
+
+		SegmentsExperience swapSegmentsExperience =
+			segmentsExperiencePersistence.fetchByG_C_C_P(
+				segmentsExperience.getGroupId(),
+				segmentsExperience.getClassNameId(),
+				segmentsExperience.getClassPK(), newPriority);
+
+		if (swapSegmentsExperience != null) {
+			_segmentsExperienceResourcePermission.check(
+				getPermissionChecker(), swapSegmentsExperience,
+				ActionKeys.UPDATE);
+		}
+
+		segmentsExperienceLocalService.updateSegmentsExperiencePriority(
+			segmentsExperienceId, newPriority);
+	}
+
+	private long _getPublishedLayoutClassPK(long classPK) {
+		Layout layout = layoutLocalService.fetchLayout(classPK);
+
+		if ((layout != null) &&
+			(layout.getClassNameId() == classNameLocalService.getClassNameId(
+				Layout.class)) &&
+			(layout.getClassPK() != 0)) {
+
+			return layout.getClassPK();
+		}
+
+		return classPK;
 	}
 
 	private static volatile PortletResourcePermission

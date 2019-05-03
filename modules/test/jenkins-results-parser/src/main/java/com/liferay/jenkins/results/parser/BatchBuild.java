@@ -323,17 +323,14 @@ public class BatchBuild extends BaseBuild {
 	public int getTotalSlavesUsedCount(
 		String status, boolean modifiedBuildsOnly) {
 
-		int totalSlavesUsedCount = getTotalSlavesUsedCount(
-			status, modifiedBuildsOnly, true);
-
-		return totalSlavesUsedCount;
+		return getTotalSlavesUsedCount(status, modifiedBuildsOnly, true);
 	}
 
 	@Override
 	public void update() {
 		super.update();
 
-		if (badBuildNumbers.size() >= MAX_REINVOCATIONS) {
+		if (badBuildNumbers.size() >= REINVOCATIONS_SIZE_MAX) {
 			return;
 		}
 
@@ -575,8 +572,10 @@ public class BatchBuild extends BaseBuild {
 
 			AxisBuild downstreamAxisBuild = (AxisBuild)downstreamBuild;
 
-			tableRowElements.add(
-				downstreamAxisBuild.getJenkinsReportTableRowElement());
+			tableRowElements.addAll(
+				downstreamAxisBuild.getJenkinsReportTableRowElements(
+					downstreamAxisBuild.getResult(),
+					downstreamAxisBuild.getStatus()));
 		}
 
 		return tableRowElements;

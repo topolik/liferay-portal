@@ -26,6 +26,7 @@ import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.repository.model.FileEntry;
 import com.liferay.portal.kernel.servlet.ServletResponseConstants;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
@@ -115,8 +116,11 @@ public class MultipleUploadResponseHandler implements UploadResponseHandler {
 					ServletResponseConstants.SC_UPLOAD_REQUEST_SIZE_EXCEPTION;
 			}
 
-			jsonObject.put("message", errorMessage);
-			jsonObject.put("status", errorType);
+			jsonObject.put(
+				"message", errorMessage
+			).put(
+				"status", errorType
+			);
 		}
 
 		return jsonObject;
@@ -129,14 +133,15 @@ public class MultipleUploadResponseHandler implements UploadResponseHandler {
 
 		String sourceFileName = uploadPortletRequest.getFileName("file");
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("groupId", fileEntry.getGroupId());
-		jsonObject.put("name", fileEntry.getTitle());
-		jsonObject.put("title", sourceFileName);
-		jsonObject.put("uuid", fileEntry.getUuid());
-
-		return jsonObject;
+		return JSONUtil.put(
+			"groupId", fileEntry.getGroupId()
+		).put(
+			"name", fileEntry.getTitle()
+		).put(
+			"title", sourceFileName
+		).put(
+			"uuid", fileEntry.getUuid()
+		);
 	}
 
 	@Activate

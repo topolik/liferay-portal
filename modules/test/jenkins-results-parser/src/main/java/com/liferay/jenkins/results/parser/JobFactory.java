@@ -56,10 +56,8 @@ public class JobFactory {
 		String jobName, String testSuiteName, String portalBranchName,
 		String repositoryName) {
 
-		Job job = _newJob(
+		return _newJob(
 			jobName, testSuiteName, portalBranchName, repositoryName);
-
-		return job;
 	}
 
 	private static boolean _isCentralMergePullRequest(
@@ -177,6 +175,20 @@ public class JobFactory {
 
 		if (jobName.equals("test-portal-release")) {
 			_jobs.put(jobName, new PortalReleaseJob(jobName, portalBranchName));
+
+			return _jobs.get(jobName);
+		}
+
+		if (jobName.startsWith("test-portal-testsuite-upstream(")) {
+			_jobs.put(
+				jobName,
+				new PortalTestSuiteUpstreamJob(jobName, testSuiteName));
+
+			return _jobs.get(jobName);
+		}
+
+		if (jobName.startsWith("test-portal-testsuite-upstream-controller(")) {
+			_jobs.put(jobName, new SimpleJob(jobName));
 
 			return _jobs.get(jobName);
 		}

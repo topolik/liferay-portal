@@ -17,6 +17,7 @@ package com.liferay.portal.search.web.internal.portlet.action;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.portlet.ConfigurationAction;
 import com.liferay.portal.kernel.portlet.DefaultConfigurationAction;
 import com.liferay.portal.kernel.util.ParamUtil;
@@ -55,19 +56,22 @@ public class SearchConfigurationAction extends DefaultConfigurationAction {
 			ActionResponse actionResponse)
 		throws Exception {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
 		JSONArray facetsJSONArray = JSONFactoryUtil.createJSONArray();
 
 		for (SearchFacet searchFacet : searchFacetTracker.getSearchFacets()) {
-			JSONObject facetJSONObject = JSONFactoryUtil.createJSONObject();
-
-			facetJSONObject.put("className", searchFacet.getFacetClassName());
-			facetJSONObject.put("data", searchFacet.getJSONData(actionRequest));
-			facetJSONObject.put("fieldName", searchFacet.getFieldName());
-			facetJSONObject.put("id", searchFacet.getId());
-			facetJSONObject.put("label", searchFacet.getLabel());
-			facetJSONObject.put("order", searchFacet.getOrder());
+			JSONObject facetJSONObject = JSONUtil.put(
+				"className", searchFacet.getFacetClassName()
+			).put(
+				"data", searchFacet.getJSONData(actionRequest)
+			).put(
+				"fieldName", searchFacet.getFieldName()
+			).put(
+				"id", searchFacet.getId()
+			).put(
+				"label", searchFacet.getLabel()
+			).put(
+				"order", searchFacet.getOrder()
+			);
 
 			boolean displayFacet = ParamUtil.getBoolean(
 				actionRequest, searchFacet.getClassName() + "displayFacet");
@@ -82,7 +86,7 @@ public class SearchConfigurationAction extends DefaultConfigurationAction {
 			facetsJSONArray.put(facetJSONObject);
 		}
 
-		jsonObject.put("facets", facetsJSONArray);
+		JSONObject jsonObject = JSONUtil.put("facets", facetsJSONArray);
 
 		setPreference(
 			actionRequest, "searchConfiguration", jsonObject.toString());

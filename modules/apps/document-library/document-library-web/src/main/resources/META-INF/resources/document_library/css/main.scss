@@ -1,7 +1,19 @@
 @import "bourbon";
 @import "mixins";
 
-@import "upper_tbar";
+@mixin file-icon($colorIndex, $color) {
+	[data-file-icon-color="#{$colorIndex}"] .lexicon-icon {
+		color: $color;
+		height: 1.25em;
+		width: auto;
+	}
+}
+
+@include file-icon(2, #50D2A0);
+@include file-icon(4, #FFB46E);
+@include file-icon(6, #4B9BFF);
+
+@import "radio-secondary-text";
 
 .portlet-document-library, .portlet-document-library-display {
 	@import "document_library_preview";
@@ -38,14 +50,6 @@
 		}
 	}
 
-	.file-entry-preview-error-container {
-		margin: auto;
-		max-width: 340px;
-		padding-bottom: 5em;
-		padding-top: 10em;
-		text-align: center;
-	}
-
 	.file-entry-list-description {
 		font-style: italic;
 		margin-left: 10px;
@@ -80,6 +84,12 @@
 			content: '';
 			display: block;
 			height: 0;
+		}
+
+		.list-group .list-group-item {
+			h2.h5 {
+				font-weight: 600;
+			}
 		}
 
 		.search-info {
@@ -130,6 +140,14 @@
 	.modal .edit-categories, .modal .edit-tags {
 		.modal-content {
 			height: 445px;
+		}
+
+		&.modal-dialog-expanded .modal-content {
+			height: 575px;
+
+			.modal-body.inline-scroller {
+				max-height: 445px;
+			}
 		}
 
 		small {
@@ -273,17 +291,6 @@
 
 	.document-library-breadcrumb ul {
 		margin-bottom: 0;
-	}
-
-	.lfr-document-library-comments.lfr-panel.lfr-extended {
-		background: #FFF;
-		border: 0 solid #CCC;
-		border-right-width: 1px;
-		margin-bottom: 0;
-
-		.lfr-panel-titlebar {
-			margin-top: 0;
-		}
 	}
 
 	.common-file-metadata-container {
@@ -599,6 +606,10 @@
 	background-color: #FFFFE0;
 	font-size: 1.2em;
 	padding: 0.3em;
+}
+
+.autocomplete-dropdown-menu {
+	z-index: 2000;
 }
 
 .firefox {

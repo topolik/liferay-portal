@@ -811,9 +811,17 @@ public class ProjectTemplateFilesTest {
 		sb.append(projectTemplateDirName.replace('-', '.'));
 		sb.append(".internal.");
 
-		Matcher matcher = _projectTemplateDirNameSeparatorPattern.matcher(
-			projectTemplateDirName.substring(
-				FileTestUtil.PROJECT_TEMPLATE_DIR_PREFIX.length()));
+		Path bndBndPath = projectTemplateDirPath.resolve("bnd.bnd");
+
+		Properties properties = FileUtil.readProperties(bndBndPath);
+
+		String bundleName = properties.getProperty(Constants.BUNDLE_NAME);
+
+		bundleName = bundleName.replaceAll("[^\\w\\s]", "");
+
+		Matcher matcher = _bundleNameSeparatorPattern.matcher(
+			bundleName.substring(
+				FileTestUtil.PROJECT_TEMPLATE_BUNDLE_NAME_PREFIX.length()));
 
 		while (matcher.find()) {
 			String initial = matcher.group(1);
@@ -1050,6 +1058,8 @@ public class ProjectTemplateFilesTest {
 			Pattern.DOTALL | Pattern.MULTILINE);
 	private static final Pattern _bundleDescriptionPattern = Pattern.compile(
 		"Creates a .+\\.");
+	private static final Pattern _bundleNameSeparatorPattern = Pattern.compile(
+		"(?:^|\\s)(\\w)");
 	private static final List<String> _gitIgnoreLines = Arrays.asList(
 		".gradle/", "build/", "target/");
 
@@ -1078,8 +1088,6 @@ public class ProjectTemplateFilesTest {
 
 	private static final Pattern _pomXmlExecutionIdPattern = Pattern.compile(
 		"[a-z]+(?:-[a-z]+)*");
-	private static final Pattern _projectTemplateDirNameSeparatorPattern =
-		Pattern.compile("(?:^|-)(\\w)");
 	private static final Set<String> _textFileExtensions = new HashSet<>(
 		Arrays.asList(
 			"bnd", "gradle", "java", "js", "json", "jsp", "jspf", "properties",

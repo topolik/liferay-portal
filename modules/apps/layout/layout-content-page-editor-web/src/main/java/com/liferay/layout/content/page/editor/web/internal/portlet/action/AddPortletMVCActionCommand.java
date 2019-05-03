@@ -14,10 +14,12 @@
 
 package com.liferay.layout.content.page.editor.web.internal.portlet.action;
 
+import com.liferay.fragment.constants.FragmentEntryLinkConstants;
 import com.liferay.fragment.model.FragmentEntryLink;
 import com.liferay.fragment.processor.FragmentEntryProcessorRegistry;
+import com.liferay.fragment.renderer.DefaultFragmentRendererContext;
+import com.liferay.fragment.renderer.FragmentRendererController;
 import com.liferay.fragment.service.FragmentEntryLinkLocalService;
-import com.liferay.fragment.util.FragmentEntryRenderUtil;
 import com.liferay.layout.content.page.editor.constants.ContentPageEditorPortletKeys;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -35,10 +37,12 @@ import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.service.PortletLocalService;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
+import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 
 import javax.portlet.ActionRequest;
@@ -84,14 +88,26 @@ public class AddPortletMVCActionCommand extends BaseMVCActionCommand {
 			actionRequest);
 
 		try {
+			String instanceId = StringPool.BLANK;
+
+			Portlet portlet = _portletLocalService.getPortletById(portletId);
+
+			if (portlet.isInstanceable()) {
+				instanceId = PortletIdCodec.generateInstanceId();
+			}
+
 			String html = _getPortletFragmentEntryLinkHTML(
-				serviceContext.getRequest(), portletId);
+				serviceContext.getRequest(), portletId, instanceId);
 
 			JSONObject editableValueJSONObject =
 				_fragmentEntryProcessorRegistry.
 					getDefaultEditableValuesJSONObject(html);
 
-			editableValueJSONObject.put("portletId", portletId);
+			editableValueJSONObject.put(
+				"instanceId", instanceId
+			).put(
+				"portletId", portletId
+			);
 
 			FragmentEntryLink fragmentEntryLink =
 				_fragmentEntryLinkLocalService.addFragmentEntryLink(
@@ -100,21 +116,35 @@ public class AddPortletMVCActionCommand extends BaseMVCActionCommand {
 					StringPool.BLANK, html, StringPool.BLANK,
 					editableValueJSONObject.toString(), 0, serviceContext);
 
-			jsonObject.put(
-				"content",
-				FragmentEntryRenderUtil.renderFragmentEntryLink(
-					fragmentEntryLink,
-					_portal.getHttpServletRequest(actionRequest),
-					_portal.getHttpServletResponse(actionResponse)));
-			jsonObject.put(
-				"editableValues", fragmentEntryLink.getEditableValues());
-			jsonObject.put(
-				"fragmentEntryLinkId",
-				fragmentEntryLink.getFragmentEntryLinkId());
+			DefaultFragmentRendererContext defaultFragmentRendererContext =
+				new DefaultFragmentRendererContext(fragmentEntryLink);
+
+			defaultFragmentRendererContext.setMode(
+				FragmentEntryLinkConstants.EDIT);
 
 			jsonObject.put(
+				"content",
+				_fragmentRendererController.render(
+					defaultFragmentRendererContext,
+					_portal.getHttpServletRequest(actionRequest),
+					_portal.getHttpServletResponse(actionResponse))
+			).put(
+				"editableValues", fragmentEntryLink.getEditableValues()
+			);
+
+			if (SessionErrors.contains(
+					actionRequest, "fragmentEntryInvalidContent")) {
+
+				jsonObject.put("error", true);
+			}
+
+			jsonObject.put(
+				"fragmentEntryLinkId",
+				fragmentEntryLink.getFragmentEntryLinkId()
+			).put(
 				"name",
-				_portal.getPortletTitle(portletId, themeDisplay.getLocale()));
+				_portal.getPortletTitle(portletId, themeDisplay.getLocale())
+			);
 
 			SessionMessages.add(actionRequest, "fragmentEntryLinkAdded");
 		}
@@ -135,7 +165,7 @@ public class AddPortletMVCActionCommand extends BaseMVCActionCommand {
 	}
 
 	private String _getPortletFragmentEntryLinkHTML(
-			HttpServletRequest request, String portletId)
+			HttpServletRequest request, String portletId, String instanceId)
 		throws PortalException {
 
 		Element runtimeTagElement = new Element(
@@ -149,11 +179,8 @@ public class AddPortletMVCActionCommand extends BaseMVCActionCommand {
 			"defaultPreferences",
 			PortletPreferencesFactoryUtil.toXML(portletPreferences));
 
-		Portlet portlet = _portletLocalService.getPortletById(portletId);
-
-		if (portlet.isInstanceable()) {
-			runtimeTagElement.attr(
-				"instanceId", PortletIdCodec.generateInstanceId());
+		if (Validator.isNotNull(instanceId)) {
+			runtimeTagElement.attr("instanceId", instanceId);
 		}
 
 		runtimeTagElement.attr("persistSettings=false", true);
@@ -170,6 +197,9 @@ public class AddPortletMVCActionCommand extends BaseMVCActionCommand {
 
 	@Reference
 	private FragmentEntryProcessorRegistry _fragmentEntryProcessorRegistry;
+
+	@Reference
+	private FragmentRendererController _fragmentRendererController;
 
 	@Reference
 	private Portal _portal;

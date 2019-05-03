@@ -482,8 +482,8 @@ public class BeanPortletExtension implements Extension {
 	}
 
 	public void step4ApplicationScopedInitializedSync(
-		@Initialized(ApplicationScoped.class) @Observes ServletContext
-			servletContext,
+		@Initialized(ApplicationScoped.class) @Observes
+			ServletContext servletContext,
 		BeanManager beanManager,
 		javax.enterprise.event.Event<ServletContext> servletContextEvent) {
 
@@ -1317,10 +1317,8 @@ public class BeanPortletExtension implements Extension {
 
 		String defaultPreferencesValidator = wildcardPreferencesValidator;
 
-		return portletName -> {
-			return preferencesValidators.getOrDefault(
-				portletName, defaultPreferencesValidator);
-		};
+		return portletName -> preferencesValidators.getOrDefault(
+			portletName, defaultPreferencesValidator);
 	}
 
 	private LiferayPortletConfiguration _getAnnotatedLiferayConfiguration(

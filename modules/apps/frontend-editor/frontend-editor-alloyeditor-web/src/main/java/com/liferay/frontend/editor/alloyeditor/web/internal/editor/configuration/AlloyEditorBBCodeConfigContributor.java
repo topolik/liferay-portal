@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.editor.configuration.EditorConfigContributor;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.parsers.bbcode.BBCodeTranslatorUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
@@ -59,19 +60,27 @@ public class AlloyEditorBBCodeConfigContributor
 			jsonObject, inputEditorTaglibAttributes, themeDisplay,
 			requestBackedPortletURLFactory);
 
-		jsonObject.put("allowedContent", Boolean.TRUE);
-		jsonObject.put("enterMode", 1);
+		jsonObject.put(
+			"allowedContent", Boolean.TRUE
+		).put(
+			"enterMode", 1
+		);
 
 		String extraPlugins = jsonObject.getString("extraPlugins");
 
 		extraPlugins = extraPlugins.concat(",bbcode,itemselector");
 
-		jsonObject.put("extraPlugins", extraPlugins);
-
-		jsonObject.put("forceEnterMode", Boolean.TRUE);
-		jsonObject.put("format_tags", "p;pre");
-		jsonObject.put("lang", getLangJSONObject(inputEditorTaglibAttributes));
-		jsonObject.put("newThreadURL", MBThreadConstants.NEW_THREAD_URL);
+		jsonObject.put(
+			"extraPlugins", extraPlugins
+		).put(
+			"forceEnterMode", Boolean.TRUE
+		).put(
+			"format_tags", "p;pre"
+		).put(
+			"lang", getLangJSONObject(inputEditorTaglibAttributes)
+		).put(
+			"newThreadURL", MBThreadConstants.NEW_THREAD_URL
+		);
 
 		String removePlugins = jsonObject.getString("removePlugins");
 
@@ -87,49 +96,41 @@ public class AlloyEditorBBCodeConfigContributor
 				","
 			).concat(
 				sb.toString()
-			));
-
-		jsonObject.put(
+			)
+		).put(
 			"smiley_images",
-			toJSONArray(BBCodeTranslatorUtil.getEmoticonFiles()));
-		jsonObject.put(
+			toJSONArray(BBCodeTranslatorUtil.getEmoticonFiles())
+		).put(
 			"smiley_path",
-			HtmlUtil.escape(themeDisplay.getPathThemeImages()) + "/emoticons/");
-		jsonObject.put(
+			HtmlUtil.escape(themeDisplay.getPathThemeImages()) + "/emoticons/"
+		).put(
 			"smiley_symbols",
-			toJSONArray(BBCodeTranslatorUtil.getEmoticonSymbols()));
-
-		jsonObject.put(
-			"toolbars", getToolbarsJSONObject(themeDisplay.getLocale()));
+			toJSONArray(BBCodeTranslatorUtil.getEmoticonSymbols())
+		).put(
+			"toolbars", getToolbarsJSONObject(themeDisplay.getLocale())
+		);
 	}
 
 	protected JSONObject getLangJSONObject(
 		Map<String, Object> inputEditorTaglibAttributes) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put(
+		return JSONUtil.put(
 			"code",
 			LanguageUtil.get(
 				getContentsLocale(inputEditorTaglibAttributes), "code"));
-
-		return jsonObject;
 	}
 
 	protected JSONObject getStyleFormatJSONObject(
 		String styleFormatName, String element, String cssClass, int type) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("name", styleFormatName);
-		jsonObject.put("style", getStyleJSONObject(element, cssClass, type));
-
-		return jsonObject;
+		return JSONUtil.put(
+			"name", styleFormatName
+		).put(
+			"style", getStyleJSONObject(element, cssClass, type)
+		);
 	}
 
 	protected JSONArray getStyleFormatsJSONArray(Locale locale) {
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
 		ResourceBundle resourceBundle = null;
 
 		try {
@@ -139,34 +140,27 @@ public class AlloyEditorBBCodeConfigContributor
 			resourceBundle = ResourceBundleUtil.EMPTY_RESOURCE_BUNDLE;
 		}
 
-		jsonArray.put(
+		return JSONUtil.putAll(
 			getStyleFormatJSONObject(
 				LanguageUtil.get(resourceBundle, "normal"), "p", null,
-				_CKEDITOR_STYLE_BLOCK));
-		jsonArray.put(
+				_CKEDITOR_STYLE_BLOCK),
 			getStyleFormatJSONObject(
 				LanguageUtil.get(resourceBundle, "cited-work"), "cite", null,
-				_CKEDITOR_STYLE_INLINE));
-		jsonArray.put(
+				_CKEDITOR_STYLE_INLINE),
 			getStyleFormatJSONObject(
 				LanguageUtil.get(resourceBundle, "computer-code"), "code", null,
 				_CKEDITOR_STYLE_INLINE));
-
-		return jsonArray;
 	}
 
 	protected JSONObject getStyleFormatsJSONObject(Locale locale) {
-		JSONObject styleFormatsJSONObject = JSONFactoryUtil.createJSONObject();
+		JSONObject stylesJSONObject = JSONUtil.put(
+			"styles", getStyleFormatsJSONArray(locale));
 
-		JSONObject stylesJSONObject = JSONFactoryUtil.createJSONObject();
-
-		stylesJSONObject.put("styles", getStyleFormatsJSONArray(locale));
-
-		styleFormatsJSONObject.put("cfg", stylesJSONObject);
-
-		styleFormatsJSONObject.put("name", "styles");
-
-		return styleFormatsJSONObject;
+		return JSONUtil.put(
+			"cfg", stylesJSONObject
+		).put(
+			"name", "styles"
+		);
 	}
 
 	protected JSONObject getStyleJSONObject(
@@ -175,94 +169,73 @@ public class AlloyEditorBBCodeConfigContributor
 		JSONObject styleJSONObject = JSONFactoryUtil.createJSONObject();
 
 		if (Validator.isNotNull(cssClass)) {
-			JSONObject attributesJSONObject =
-				JSONFactoryUtil.createJSONObject();
-
-			attributesJSONObject.put("class", cssClass);
+			JSONObject attributesJSONObject = JSONUtil.put("class", cssClass);
 
 			styleJSONObject.put("attributes", attributesJSONObject);
 		}
 
-		styleJSONObject.put("element", element);
-		styleJSONObject.put("type", type);
+		styleJSONObject.put(
+			"element", element
+		).put(
+			"type", type
+		);
 
 		return styleJSONObject;
 	}
 
 	protected JSONObject getToolbarsAddJSONObject() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		JSONArray buttonsJSONArray = JSONFactoryUtil.createJSONArray();
-
-		buttonsJSONArray.put("image");
-
-		jsonObject.put("buttons", buttonsJSONArray);
-
-		jsonObject.put("tabIndex", 2);
-
-		return jsonObject;
+		return JSONUtil.put(
+			"buttons", JSONUtil.put("image")
+		).put(
+			"tabIndex", 2
+		);
 	}
 
 	protected JSONObject getToolbarsJSONObject(Locale locale) {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("add", getToolbarsAddJSONObject());
-		jsonObject.put("styles", getToolbarsStylesJSONObject(locale));
-
-		return jsonObject;
+		return JSONUtil.put(
+			"add", getToolbarsAddJSONObject()
+		).put(
+			"styles", getToolbarsStylesJSONObject(locale)
+		);
 	}
 
 	protected JSONObject getToolbarsStylesJSONObject(Locale locale) {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put(
-			"selections", getToolbarsStylesSelectionsJSONArray(locale));
-		jsonObject.put("tabIndex", 1);
-
-		return jsonObject;
+		return JSONUtil.put(
+			"selections", getToolbarsStylesSelectionsJSONArray(locale)
+		).put(
+			"tabIndex", 1
+		);
 	}
 
 	protected JSONArray getToolbarsStylesSelectionsJSONArray(Locale locale) {
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(getToolbarsStylesSelectionsLinkJSONObject());
-		jsonArray.put(getToolbarsStylesSelectionsTextJSONObject(locale));
-
-		return jsonArray;
+		return JSONUtil.putAll(
+			getToolbarsStylesSelectionsLinkJSONObject(),
+			getToolbarsStylesSelectionsTextJSONObject(locale));
 	}
 
 	protected JSONObject getToolbarsStylesSelectionsLinkJSONObject() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("buttons", toJSONArray("['linkEditBrowse']"));
-		jsonObject.put("name", "link");
-		jsonObject.put("test", "AlloyEditor.SelectionTest.link");
-
-		return jsonObject;
+		return JSONUtil.put(
+			"buttons", toJSONArray("['linkEditBrowse']")
+		).put(
+			"name", "link"
+		).put(
+			"test", "AlloyEditor.SelectionTest.link"
+		);
 	}
 
 	protected JSONObject getToolbarsStylesSelectionsTextJSONObject(
 		Locale locale) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(getStyleFormatsJSONObject(locale));
-		jsonArray.put("bold");
-		jsonArray.put("italic");
-		jsonArray.put("underline");
-		jsonArray.put("ol");
-		jsonArray.put("ul");
-		jsonArray.put("linkBrowse");
-		jsonArray.put("quote");
-
-		jsonObject.put("buttons", jsonArray);
-
-		jsonObject.put("name", "text");
-		jsonObject.put("test", "AlloyEditor.SelectionTest.text");
-
-		return jsonObject;
+		return JSONUtil.put(
+			"buttons",
+			JSONUtil.putAll(
+				getStyleFormatsJSONObject(locale), "bold", "italic",
+				"underline", "ol", "ul", "linkBrowse", "quote")
+		).put(
+			"name", "text"
+		).put(
+			"test", "AlloyEditor.SelectionTest.text"
+		);
 	}
 
 	private static final int _CKEDITOR_STYLE_BLOCK = 1;

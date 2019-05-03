@@ -6,17 +6,11 @@ definition {
 			MetalComponent.waitForManagementBar();
 		}
 
-		Click(
-			locator1 = "Icon#CURRENT_DISPLAY_STYLE"
-		);
+		Click.clickNoMouseOver(locator1 = "Icon#CURRENT_DISPLAY_STYLE");
 
-		MenuItem.click(
-			menuItem = "${displayStyle}"
-		);
+		MenuItem.click(menuItem = "${displayStyle}");
 
-		ManagementBar.viewDisplayStyle(
-			displayStyle = "${displayStyle}"
-		);
+		ManagementBar.viewDisplayStyle(displayStyle = "${displayStyle}");
 	}
 
 	macro clickAdd {
@@ -26,33 +20,23 @@ definition {
 			MetalComponent.waitForManagementBar();
 		}
 
-		Click(
-			locator1 = "Button#PLUS"
-		);
+		Click.clickNoMouseOver(locator1 = "Button#PLUS");
 	}
 
 	macro clickAddMenuItem {
 		ManagementBar.clickAdd();
 
-		MenuItem.click(
-			menuItem = "${menuItem}"
-		);
+		MenuItem.click(menuItem = "${menuItem}");
 	}
 
 	macro clickInfo {
-		Click(
-			locator1 = "Icon#INFO"
-		);
+		Click.clickNoMouseOver(locator1 = "Icon#INFO");
 	}
 
 	macro clickSelectAllCheckbox {
-		Click(
-			locator1 = "Checkbox#LEXICON_SELECT_ALL_CONTAINER"
-		);
+		Click(locator1 = "Checkbox#LEXICON_SELECT_ALL_CONTAINER");
 
-		AssertChecked.assertCheckedNotVisible(
-			locator1 = "Checkbox#LEXICON_SELECT_ALL_INPUT"
-		);
+		AssertChecked.assertCheckedNotVisible(locator1 = "Checkbox#LEXICON_SELECT_ALL_INPUT");
 	}
 
 	macro setFilterAndOrder {
@@ -65,9 +49,7 @@ definition {
 
 		Click(locator1 = "ManagementBar#FILTER_AND_ORDER");
 
-		MenuItem.click(
-			menuItem = "${menuItem}"
-		);
+		MenuItem.click(menuItem = "${menuItem}");
 	}
 
 	macro toggleViewOrder {
@@ -76,17 +58,15 @@ definition {
 		}
 
 		AssertElementPresent(
-			locator1 = "ManagementBar#ORDER_ICON_SPECIFIC",
-			key_order = "${order}"
-		);
+			key_order = "${order}",
+			locator1 = "ManagementBar#ORDER_ICON_SPECIFIC");
 	}
 
 	macro viewDisplayStyle {
 		var displayStyleKey = StringUtil.lowerCaseFirstLetter("${displayStyle}");
 
 		AssertVisible(
-			locator1 = "Icon#CURRENT_DISPLAY_STYLE_ACTIVE",
-			key_displayStyle = "${displayStyleKey}"
-		);
+			key_displayStyle = "${displayStyleKey}",
+			locator1 = "Icon#CURRENT_DISPLAY_STYLE_ACTIVE");
 	}
 }

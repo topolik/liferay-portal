@@ -18,6 +18,7 @@ import com.liferay.asset.kernel.model.AssetVocabulary;
 import com.liferay.asset.kernel.service.AssetVocabularyServiceUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.service.ServiceContext;
+import com.liferay.portal.kernel.settings.LocalizedValuesMap;
 import com.liferay.portal.kernel.test.util.GroupTestUtil;
 import com.liferay.portal.kernel.test.util.RandomTestUtil;
 import com.liferay.portal.kernel.test.util.ServiceContextTestUtil;
@@ -40,6 +41,24 @@ public class AssetVocabularyFixture {
 
 	public AssetVocabulary createAssetVocabulary() throws Exception {
 		return createAssetVocabulary(RandomTestUtil.randomString());
+	}
+
+	public AssetVocabulary createAssetVocabulary(
+			LocalizedValuesMap titleMap, LocalizedValuesMap descriptionMap)
+		throws Exception {
+
+		ServiceContext serviceContext =
+			ServiceContextTestUtil.getServiceContext(
+				_group.getGroupId(), getUserId());
+
+		AssetVocabulary assetVocabulary =
+			AssetVocabularyServiceUtil.addVocabulary(
+				serviceContext.getScopeGroupId(), null, titleMap.getValues(),
+				descriptionMap.getValues(), "", serviceContext);
+
+		_assetVocabularies.add(assetVocabulary);
+
+		return assetVocabulary;
 	}
 
 	public AssetVocabulary createAssetVocabulary(String title)

@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface UserNotificationEvent
-	extends UserNotificationEventModel, PersistedModel {
+	extends PersistedModel, UserNotificationEventModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

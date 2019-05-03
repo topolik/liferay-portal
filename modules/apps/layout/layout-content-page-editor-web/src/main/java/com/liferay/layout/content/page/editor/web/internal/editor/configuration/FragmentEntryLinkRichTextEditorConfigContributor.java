@@ -16,8 +16,7 @@ package com.liferay.layout.content.page.editor.web.internal.editor.configuration
 
 import com.liferay.item.selector.ItemSelector;
 import com.liferay.item.selector.ItemSelectorCriterion;
-import com.liferay.item.selector.ItemSelectorReturnType;
-import com.liferay.item.selector.criteria.FileEntryItemSelectorReturnType;
+import com.liferay.item.selector.criteria.DownloadURLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.URLItemSelectorReturnType;
 import com.liferay.item.selector.criteria.image.criterion.ImageItemSelectorCriterion;
 import com.liferay.item.selector.criteria.url.criterion.URLItemSelectorCriterion;
@@ -28,15 +27,15 @@ import com.liferay.portal.kernel.editor.configuration.EditorConfigContributor;
 import com.liferay.portal.kernel.json.JSONArray;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.RequestBackedPortletURLFactory;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
+import com.liferay.portal.kernel.util.AggregateResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleLoader;
 import com.liferay.portal.kernel.util.ResourceBundleUtil;
 import com.liferay.portal.kernel.util.Validator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -71,34 +70,39 @@ public class FragmentEntryLinkRichTextEditorConfigContributor
 		StringBundler sb = new StringBundler(5);
 
 		sb.append(getAllowedContentText());
-		sb.append(" a[*](*); div[*](*){text-align}; img[*](*){*}; ");
+		sb.append(" a[*](*); div[*](*){text-align}; img[*](*){*}; p[*](*); ");
 		sb.append(getAllowedContentLists());
 		sb.append(getAllowedContentTable());
 		sb.append(" span[*](*){*}; ");
 
-		jsonObject.put("allowedContent", sb.toString());
-
-		jsonObject.put("enterMode", 2);
-		jsonObject.put("extraPlugins", getExtraPluginsLists());
+		jsonObject.put(
+			"allowedContent", sb.toString()
+		).put(
+			"enterMode", 2
+		).put(
+			"extraPlugins", getExtraPluginsLists()
+		);
 
 		PortletURL itemSelectorURL = _itemSelector.getItemSelectorURL(
 			requestBackedPortletURLFactory, "_EDITOR_NAME_selectItem",
 			getImageItemSelectorCriterion(), getURLItemSelectorCriterion());
 
 		jsonObject.put(
-			"filebrowserImageBrowseLinkUrl", itemSelectorURL.toString());
-		jsonObject.put("filebrowserImageBrowseUrl", itemSelectorURL.toString());
-
-		jsonObject.put("removePlugins", getRemovePluginsLists());
-		jsonObject.put(
+			"filebrowserImageBrowseLinkUrl", itemSelectorURL.toString()
+		).put(
+			"filebrowserImageBrowseUrl", itemSelectorURL.toString()
+		).put(
+			"removePlugins", getRemovePluginsLists()
+		).put(
 			"spritemap",
-			themeDisplay.getPathThemeImages() + "/lexicon/icons.svg");
-		jsonObject.put(
-			"toolbars", getToolbarsJSONObject(themeDisplay.getLocale()));
+			themeDisplay.getPathThemeImages() + "/lexicon/icons.svg"
+		).put(
+			"toolbars", getToolbarsJSONObject(themeDisplay.getLocale())
+		);
 	}
 
 	protected String getAllowedContentLists() {
-		return "li ol ul;";
+		return "li ol ul [*](*){*};";
 	}
 
 	protected String getAllowedContentTable() {
@@ -117,107 +121,74 @@ public class FragmentEntryLinkRichTextEditorConfigContributor
 	}
 
 	protected ItemSelectorCriterion getImageItemSelectorCriterion() {
-		List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
-			new ArrayList<>();
-
-		desiredItemSelectorReturnTypes.add(
-			new FileEntryItemSelectorReturnType());
-
-		ItemSelectorCriterion imageItemSelectorCriterion =
+		ItemSelectorCriterion itemSelectorCriterion =
 			new ImageItemSelectorCriterion();
 
-		imageItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
+		itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
+			new DownloadURLItemSelectorReturnType());
 
-		return imageItemSelectorCriterion;
+		return itemSelectorCriterion;
 	}
 
 	protected String getRemovePluginsLists() {
-		return "contextmenu,elementspath,image,link,liststyle,magicline," +
-			"resize,tabletools,toolbar,ae_embed";
+		return "contextmenu,elementspath,floatingspace,image,link,liststyle," +
+			"magicline,resize,tabletools,toolbar,ae_embed";
 	}
 
 	protected JSONObject getStyleFormatJSONObject(
 		String styleFormatName, String element, String cssClass, int type) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("name", styleFormatName);
-		jsonObject.put("style", getStyleJSONObject(element, cssClass, type));
-
-		return jsonObject;
+		return JSONUtil.put(
+			"name", styleFormatName
+		).put(
+			"style", getStyleJSONObject(element, cssClass, type)
+		);
 	}
 
 	protected JSONArray getStyleFormatsJSONArray(Locale locale) {
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
+		Class<?> clazz = getClass();
 
 		ResourceBundle resourceBundle = null;
 
+		ResourceBundleLoader resourceBundleLoader =
+			new AggregateResourceBundleLoader(
+				ResourceBundleUtil.getResourceBundleLoader(
+					"content.Language", clazz.getClassLoader()),
+				_resourceBundleLoader,
+				LanguageUtil.getPortalResourceBundleLoader());
+
 		try {
-			resourceBundle = _resourceBundleLoader.loadResourceBundle(locale);
+			resourceBundle = resourceBundleLoader.loadResourceBundle(locale);
 		}
 		catch (MissingResourceException mre) {
 			resourceBundle = ResourceBundleUtil.EMPTY_RESOURCE_BUNDLE;
 		}
 
-		jsonArray.put(
+		return JSONUtil.putAll(
 			getStyleFormatJSONObject(
-				LanguageUtil.get(resourceBundle, "normal"), "p", null, 1));
-		jsonArray.put(
+				LanguageUtil.get(resourceBundle, "small"), "p", "small", 1),
+			getStyleFormatJSONObject(
+				LanguageUtil.get(resourceBundle, "lead"), "p", "lead", 1),
 			getStyleFormatJSONObject(
 				LanguageUtil.format(resourceBundle, "heading-x", "1"), "h1",
-				null, 1));
-		jsonArray.put(
+				null, 1),
 			getStyleFormatJSONObject(
 				LanguageUtil.format(resourceBundle, "heading-x", "2"), "h2",
-				null, 1));
-		jsonArray.put(
+				null, 1),
 			getStyleFormatJSONObject(
 				LanguageUtil.format(resourceBundle, "heading-x", "3"), "h3",
-				null, 1));
-		jsonArray.put(
+				null, 1),
 			getStyleFormatJSONObject(
 				LanguageUtil.format(resourceBundle, "heading-x", "4"), "h4",
 				null, 1));
-		jsonArray.put(
-			getStyleFormatJSONObject(
-				LanguageUtil.get(resourceBundle, "preformatted-text"), "pre",
-				null, 1));
-		jsonArray.put(
-			getStyleFormatJSONObject(
-				LanguageUtil.get(resourceBundle, "cited-work"), "cite", null,
-				2));
-		jsonArray.put(
-			getStyleFormatJSONObject(
-				LanguageUtil.get(resourceBundle, "computer-code"), "code", null,
-				2));
-		jsonArray.put(
-			getStyleFormatJSONObject(
-				LanguageUtil.get(resourceBundle, "info-message"), "div",
-				"portlet-msg-info", 1));
-		jsonArray.put(
-			getStyleFormatJSONObject(
-				LanguageUtil.get(resourceBundle, "alert-message"), "div",
-				"portlet-msg-alert", 1));
-		jsonArray.put(
-			getStyleFormatJSONObject(
-				LanguageUtil.get(resourceBundle, "error-message"), "div",
-				"portlet-msg-error", 1));
-
-		return jsonArray;
 	}
 
 	protected JSONObject getStyleFormatsJSONObject(Locale locale) {
-		JSONObject stylesJSONObject = JSONFactoryUtil.createJSONObject();
-
-		stylesJSONObject.put("styles", getStyleFormatsJSONArray(locale));
-
-		JSONObject styleFormatsJSONObject = JSONFactoryUtil.createJSONObject();
-
-		styleFormatsJSONObject.put("cfg", stylesJSONObject);
-		styleFormatsJSONObject.put("name", "styles");
-
-		return styleFormatsJSONObject;
+		return JSONUtil.put(
+			"cfg", JSONUtil.put("styles", getStyleFormatsJSONArray(locale))
+		).put(
+			"name", "styles"
+		);
 	}
 
 	protected JSONObject getStyleJSONObject(
@@ -226,111 +197,96 @@ public class FragmentEntryLinkRichTextEditorConfigContributor
 		JSONObject styleJSONObject = JSONFactoryUtil.createJSONObject();
 
 		if (Validator.isNotNull(cssClass)) {
-			JSONObject attributesJSONObject =
-				JSONFactoryUtil.createJSONObject();
-
-			attributesJSONObject.put("class", cssClass);
-
-			styleJSONObject.put("attributes", attributesJSONObject);
+			styleJSONObject.put("attributes", JSONUtil.put("class", cssClass));
 		}
 
-		styleJSONObject.put("element", element);
-		styleJSONObject.put("type", type);
+		styleJSONObject.put(
+			"element", element
+		).put(
+			"type", type
+		);
 
 		return styleJSONObject;
 	}
 
 	protected JSONObject getToolbarsJSONObject(Locale locale) {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+		JSONObject toolbarJSONObject = JSONUtil.put(
+			"buttons", toJSONArray("['image', 'hline']")
+		).put(
+			"tabIndex", 1
+		);
 
-		JSONObject toolbarJSONObject = JSONFactoryUtil.createJSONObject();
-
-		toolbarJSONObject.put("buttons", toJSONArray("['image', 'hline']"));
-		toolbarJSONObject.put("tabIndex", 1);
-
-		jsonObject.put("add", toolbarJSONObject);
-
-		jsonObject.put("styles", getToolbarsStylesJSONObject(locale));
-
-		return jsonObject;
+		return JSONUtil.put(
+			"add", toolbarJSONObject
+		).put(
+			"styles", getToolbarsStylesJSONObject(locale)
+		);
 	}
 
 	protected JSONObject getToolbarsStylesJSONObject(Locale locale) {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put(
-			"selections", getToolbarsStylesSelectionsJSONArray(locale));
-		jsonObject.put("tabIndex", 1);
-
-		return jsonObject;
+		return JSONUtil.put(
+			"selections", getToolbarsStylesSelectionsJSONArray(locale)
+		).put(
+			"tabIndex", 1
+		);
 	}
 
 	protected JSONArray getToolbarsStylesSelectionsJSONArray(Locale locale) {
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
-
-		jsonArray.put(getToolbarsStylesSelectionsLinkJSONObject());
-		jsonArray.put(getToolbarsStylesSelectionsTextJSONObject(locale));
-
-		return jsonArray;
+		return JSONUtil.putAll(
+			getToolbarsStylesSelectionsLinkJSONObject(),
+			getToolbarsStylesSelectionsTextJSONObject(locale));
 	}
 
 	protected JSONObject getToolbarsStylesSelectionsLinkJSONObject() {
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("buttons", toJSONArray("['linkEditBrowse']"));
-		jsonObject.put("name", "link");
-		jsonObject.put("test", "AlloyEditor.SelectionTest.link");
-
-		return jsonObject;
+		return JSONUtil.put(
+			"buttons", toJSONArray("['linkEditBrowse']")
+		).put(
+			"name", "link"
+		).put(
+			"test", "AlloyEditor.SelectionTest.link"
+		);
 	}
 
 	protected JSONObject getToolbarsStylesSelectionsTextJSONObject(
 		Locale locale) {
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
+		return JSONUtil.put(
+			"buttons",
+			JSONUtil.putAll(
+				getStyleFormatsJSONObject(locale),
+				"bold", "italic", "underline", "ol",
+				"ul", "linkBrowse",
 
-		JSONArray jsonArray = JSONFactoryUtil.createJSONArray();
+				// Separate
 
-		jsonArray.put(getStyleFormatsJSONObject(locale));
-		jsonArray.put("bold");
-		jsonArray.put("italic");
-		jsonArray.put("underline");
-		jsonArray.put("ol");
-		jsonArray.put("ul");
-		jsonArray.put("linkBrowse");
+				"paragraphLeft", "paragraphCenter",
+				"paragraphRight", "paragraphJustify",
 
-		jsonArray.put("paragraphLeft");
-		jsonArray.put("paragraphCenter");
-		jsonArray.put("paragraphRight");
-		jsonArray.put("paragraphJustify");
+				// Separate
 
-		jsonArray.put("spacing");
+				"spacing",
 
-		jsonArray.put("color");
+				// Separate
 
-		jsonArray.put("removeFormat");
+				"color",
 
-		jsonObject.put("buttons", jsonArray);
+				// Separate
 
-		jsonObject.put("name", "text");
-		jsonObject.put("test", "AlloyEditor.SelectionTest.text");
-
-		return jsonObject;
+				"removeFormat"
+			)
+		).put(
+			"name", "text"
+		).put("test", "AlloyEditor.SelectionTest.text");
 	}
 
 	protected ItemSelectorCriterion getURLItemSelectorCriterion() {
-		ItemSelectorCriterion urlItemSelectorCriterion =
+		ItemSelectorCriterion itemSelectorCriterion =
 			new URLItemSelectorCriterion();
 
-		List<ItemSelectorReturnType> desiredItemSelectorReturnTypes =
-			new ArrayList<>();
+		itemSelectorCriterion.setDesiredItemSelectorReturnTypes(
+			new URLItemSelectorReturnType());
 
-		desiredItemSelectorReturnTypes.add(new URLItemSelectorReturnType());
-
-		urlItemSelectorCriterion.setDesiredItemSelectorReturnTypes(
-			desiredItemSelectorReturnTypes);
-
-		return urlItemSelectorCriterion;
+		return itemSelectorCriterion;
 	}
 
 	@Reference

@@ -118,8 +118,7 @@ public class LayoutPageTemplateManagementToolbarDisplayContext
 							"addPageTemplateURL",
 							_getAddLayoutPageTemplateEntryURL());
 						dropdownItem.setLabel(
-							LanguageUtil.get(
-								request, "standard-page-template"));
+							LanguageUtil.get(request, "content-page-template"));
 					});
 
 				Group scopeGroup = _themeDisplay.getScopeGroup();
@@ -184,6 +183,7 @@ public class LayoutPageTemplateManagementToolbarDisplayContext
 		actionURL.setParameter(
 			"mvcRenderCommandName", "/layout/edit_layout_page_template_entry");
 		actionURL.setParameter("redirect", _themeDisplay.getURLCurrent());
+		actionURL.setParameter("backURL", _themeDisplay.getURLCurrent());
 		actionURL.setParameter(
 			"layoutPageTemplateCollectionId",
 			String.valueOf(
@@ -199,6 +199,7 @@ public class LayoutPageTemplateManagementToolbarDisplayContext
 		actionURL.setParameter(
 			ActionRequest.ACTION_NAME,
 			"/layout_prototype/add_layout_prototype");
+		actionURL.setParameter("backURL", _themeDisplay.getURLCurrent());
 		actionURL.setParameter(
 			"layoutPageTemplateCollectionId",
 			String.valueOf(

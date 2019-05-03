@@ -237,19 +237,18 @@ public class PorygonSiteInitializer implements SiteInitializer {
 			"com_liferay_asset_publisher_web_portlet_AssetPublisherPortlet",
 			column, -1);
 
-		PortletPreferences portletPreferences =
+		PortletPreferences jxPortletPreferences =
 			_getAssetPublisherPortletPreferences(ddmStructure, serviceContext);
 
-		portletPreferences.setValue("delta", delta);
-		portletPreferences.setValue("displayStyle", ddmTemplateKey);
-
-		portletPreferences.setValue(
+		jxPortletPreferences.setValue("delta", delta);
+		jxPortletPreferences.setValue("displayStyle", ddmTemplateKey);
+		jxPortletPreferences.setValue(
 			"portletSetupPortletDecoratorId", portletDecoratorId);
 
 		_portletPreferencesLocalService.addPortletPreferences(
 			serviceContext.getCompanyId(), 0,
 			PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(), portletId,
-			null, PortletPreferencesFactoryUtil.toXML(portletPreferences));
+			null, PortletPreferencesFactoryUtil.toXML(jxPortletPreferences));
 	}
 
 	private LayoutPageTemplateEntry _addDisplayPageEntry(
@@ -624,17 +623,16 @@ public class PorygonSiteInitializer implements SiteInitializer {
 			"com_liferay_nested_portlets_web_portlet_NestedPortletsPortlet",
 			_COLUMN_1, -1);
 
-		PortletPreferences portletPreferences = new PortletPreferencesImpl();
+		PortletPreferences jxPortletPreferences = new PortletPreferencesImpl();
 
-		portletPreferences.setValue("layoutTemplateId", layoutTemplateId);
-
-		portletPreferences.setValue(
+		jxPortletPreferences.setValue("layoutTemplateId", layoutTemplateId);
+		jxPortletPreferences.setValue(
 			"portletSetupPortletDecoratorId", _PORTLET_DECORATOR_BAREBONE);
 
 		_portletPreferencesLocalService.addPortletPreferences(
 			serviceContext.getCompanyId(), 0,
 			PortletKeys.PREFS_OWNER_TYPE_LAYOUT, layout.getPlid(), portletId,
-			null, PortletPreferencesFactoryUtil.toXML(portletPreferences));
+			null, PortletPreferencesFactoryUtil.toXML(jxPortletPreferences));
 
 		return portletId;
 	}
@@ -746,31 +744,30 @@ public class PorygonSiteInitializer implements SiteInitializer {
 			DDMStructure ddmStructure, ServiceContext serviceContext)
 		throws Exception {
 
-		PortletPreferences portletPreferences = new PortletPreferencesImpl();
+		PortletPreferences jxPortletPreferences = new PortletPreferencesImpl();
 
 		String journalArticleClassNameId = String.valueOf(
 			_portal.getClassNameId(JournalArticle.class));
 
+		jxPortletPreferences.setValue(
+			"anyAssetType", journalArticleClassNameId);
+
 		String structureId = String.valueOf(ddmStructure.getStructureId());
 
-		portletPreferences.setValue("anyAssetType", journalArticleClassNameId);
-
-		portletPreferences.setValue(
+		jxPortletPreferences.setValue(
 			"anyClassTypeJournalArticleAssetRendererFactory", structureId);
 
-		portletPreferences.setValue("assetLinkBehavior", "viewInPortlet");
-		portletPreferences.setValue("classNameIds", journalArticleClassNameId);
-		portletPreferences.setValue("classTypeIds", structureId);
-
-		portletPreferences.setValue(
+		jxPortletPreferences.setValue("assetLinkBehavior", "viewInPortlet");
+		jxPortletPreferences.setValue(
+			"classNameIds", journalArticleClassNameId);
+		jxPortletPreferences.setValue("classTypeIds", structureId);
+		jxPortletPreferences.setValue(
 			"classTypeIdsJournalArticleAssetRendererFactory", structureId);
-
-		portletPreferences.setValue(
+		jxPortletPreferences.setValue(
 			"groupId", String.valueOf(serviceContext.getScopeGroupId()));
+		jxPortletPreferences.setValue("emailAssetEntryAddedEnabled", "false");
 
-		portletPreferences.setValue("emailAssetEntryAddedEnabled", "false");
-
-		return portletPreferences;
+		return jxPortletPreferences;
 	}
 
 	private String _getDDMTemplateKey(
@@ -794,7 +791,7 @@ public class PorygonSiteInitializer implements SiteInitializer {
 		Map<String, String> fileEntriesMap = new HashMap<>();
 
 		for (FileEntry fileEntry : fileEntries) {
-			String fileEntryURL = _dlurlHelper.getPreviewURL(
+			String fileEntryURL = _dlURLHelper.getPreviewURL(
 				fileEntry, fileEntry.getFileVersion(), null, StringPool.BLANK,
 				false, false);
 
@@ -822,7 +819,7 @@ public class PorygonSiteInitializer implements SiteInitializer {
 
 		sb.append(StringPool.UNDERLINE);
 		sb.append(portletId);
-		sb.append(StringPool.DOUBLE_UNDERLINE);
+		sb.append(StringPool.UNDERLINE);
 		sb.append(column);
 
 		return sb.toString();
@@ -958,7 +955,7 @@ public class PorygonSiteInitializer implements SiteInitializer {
 	private DLAppLocalService _dlAppLocalService;
 
 	@Reference
-	private DLURLHelper _dlurlHelper;
+	private DLURLHelper _dlURLHelper;
 
 	@Reference
 	private FragmentCollectionLocalService _fragmentCollectionLocalService;

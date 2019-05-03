@@ -1,43 +1,43 @@
 import {ADD_FRAGMENT_ENTRY_LINK, CHANGE_LANGUAGE_ID, CREATE_SEGMENTS_EXPERIENCE, REMOVE_FRAGMENT_ENTRY_LINK, SELECT_SEGMENTS_EXPERIENCE, UPDATE_TRANSLATION_STATUS} from '../actions/actions.es';
-import {setIn} from '../utils/FragmentsEditorUpdateUtils.es';
+import {EDITABLE_FRAGMENT_ENTRY_PROCESSOR} from '../utils/constants';
 import {prefixSegmentsExperienceId} from '../utils/prefixSegmentsExperienceId.es';
-
-const EDITABLE_VALUES_KEY = 'com.liferay.fragment.entry.processor.editable.EditableFragmentEntryProcessor';
+import {setIn} from '../utils/FragmentsEditorUpdateUtils.es';
 
 /**
  * Reducer for changing languageId
- * @param {!object} state
- * @param {!string} actionType
- * @param {object} payload
- * @param {string} payload.languageId
+ * @param {object} state
+ * @param {object} action
+ * @param {string} action.languageId
+ * @param {string} action.type
  * @return {object}
  * @review
  */
-function languageIdReducer(state, actionType, payload) {
+function languageIdReducer(state, action) {
 	let nextState = state;
 
-	if (actionType === CHANGE_LANGUAGE_ID) {
-		nextState = setIn(nextState, ['languageId'], payload.languageId);
+	if (action.type === CHANGE_LANGUAGE_ID) {
+		nextState = setIn(nextState, ['languageId'], action.languageId);
 	}
 
 	return nextState;
 }
 
 /**
- * @param {!object} state
- * @param {!string} actionType
+ * @param {object} state
+ * @param {object} action
+ * @param {string} action.type
  * @return {object}
  * @review
  */
-function translationStatusReducer(state, actionType) {
+function translationStatusReducer(state, action) {
 	let nextState = state;
 
 	if (
-		actionType === ADD_FRAGMENT_ENTRY_LINK ||
-		actionType === UPDATE_TRANSLATION_STATUS ||
-		actionType === REMOVE_FRAGMENT_ENTRY_LINK ||
-		actionType === SELECT_SEGMENTS_EXPERIENCE ||
-		actionType === CREATE_SEGMENTS_EXPERIENCE
+		action.type === ADD_FRAGMENT_ENTRY_LINK ||
+		action.type === UPDATE_TRANSLATION_STATUS ||
+		action.type === REMOVE_FRAGMENT_ENTRY_LINK ||
+		action.type === SELECT_SEGMENTS_EXPERIENCE ||
+		action.type === CREATE_SEGMENTS_EXPERIENCE
 	) {
 		const segmentsExperienceId = nextState.segmentsExperienceId || nextState.defaultSegmentsExperienceId;
 
@@ -47,7 +47,11 @@ function translationStatusReducer(state, actionType) {
 			prefixSegmentsExperienceId(segmentsExperienceId)
 		);
 
-		nextState = setIn(nextState, ['translationStatus'], nextTranslationStatus);
+		nextState = setIn(
+			nextState,
+			['translationStatus'],
+			nextTranslationStatus
+		);
 	}
 
 	return nextState;
@@ -67,7 +71,7 @@ function _getEditableValues(fragmentEntryLinks) {
 		)
 		.map(
 			fragmentEntryLink => (
-				fragmentEntryLink.editableValues[EDITABLE_VALUES_KEY]
+				fragmentEntryLink.editableValues[EDITABLE_FRAGMENT_ENTRY_PROCESSOR]
 			)
 		)
 		.filter(
@@ -117,10 +121,21 @@ function _getTranslationStatus(languageIds, editableValues, segmentsExperienceId
 			const values = editableValues.map(
 				editableValue => Object.keys(editableValue).map(
 					editableValueId => {
-						return editableValue &&
-							editableValue[editableValueId] &&
-							editableValue[editableValueId][segmentsExperienceId] &&
-							editableValue[editableValueId][segmentsExperienceId][languageId];
+						let result;
+
+						if (!segmentsExperienceId) {
+							result = editableValue &&
+								editableValue[editableValueId] &&
+								editableValue[editableValueId][languageId];
+						}
+						else {
+							result = editableValue &&
+								editableValue[editableValueId] &&
+								editableValue[editableValueId][segmentsExperienceId] &&
+								editableValue[editableValueId][segmentsExperienceId][languageId];
+						}
+
+						return result;
 					}
 				)
 			)

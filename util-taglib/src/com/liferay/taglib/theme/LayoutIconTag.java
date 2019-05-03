@@ -33,7 +33,9 @@ import javax.servlet.jsp.tagext.BodyTag;
 
 /**
  * @author Brian Wing Shun Chan
+ * @deprecated As of Mueller (7.2.x), since 7.2, unused
  */
+@Deprecated
 public class LayoutIconTag extends IncludeTag implements BodyTag {
 
 	public static void doTag(Layout layout, PageContext pageContext)
@@ -122,6 +124,10 @@ public class LayoutIconTag extends IncludeTag implements BodyTag {
 		doTag(_layout, pageContext);
 
 		return SKIP_BODY;
+	}
+
+	public Layout getLayout() {
+		return _layout;
 	}
 
 	public void setLayout(Layout layout) {

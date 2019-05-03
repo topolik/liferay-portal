@@ -69,6 +69,11 @@
 	<td></td>
 </tr>
 <tr>
+	<td>DELETE_NOT_FOCUSABLE</td>
+	<td>//button[@data-title='Delete' or @title='Delete']//*[contains(@focusable,'false')]</td>
+	<td></td>
+</tr>
+<tr>
 	<td>DETAILS</td>
 	<td>//div[contains(.,'Details')]/span/a/i[@class='icon-file-alt']</td>
 	<td></td>
@@ -100,7 +105,7 @@
 </tr>
 <tr>
 	<td>EXPIRE</td>
-	<td>//a[@data-title='Expire'] | //a[@title='Expire']</td>
+	<td>//button[@data-title='Expire' or @title='Expire']</td>
 	<td></td>
 </tr>
 <tr>
@@ -115,7 +120,7 @@
 </tr>
 <tr>
 	<td>GOOGLE_PLUS</td>
-	<td>//i[contains(@class,'icon-google-plus')]</td>
+	<td>//a[contains(@href,'google_login')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -130,22 +135,27 @@
 </tr>
 <tr>
 	<td>MARK_AS_READ</td>
-	<td>//nav[contains(@class,'management-bar')]//div[contains(@class,'container-fluid')]//a/*[name()='svg'][contains(@class,'lexicon-icon-envelope-open')]</td>
+	<td>//nav[contains(@class,'management-bar')]//div[contains(@class,'container-fluid')]//button[contains(@aria-label,'envelope-open')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MARK_AS_UNREAD</td>
-	<td>//nav[contains(@class,'management-bar')]//div[contains(@class,'container-fluid')]//a/*[name()='svg'][contains(@class,'lexicon-icon-envelope-closed')]</td>
+	<td>//nav[contains(@class,'management-bar')]//div[contains(@class,'container-fluid')]//button[contains(@aria-label,'envelope-closed')]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MOVE</td>
-	<td>//*[*[name()='svg'][contains(@class,'icon-change')]]</td>
+	<td>//*[*[name()='svg'][contains(@class,'icon-move')]]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>MOVE_TO_RECYCLE_BIN</td>
 	<td>//a[contains(@data-qa-id,'recycle-binButton')]/span[contains(@class,'icon-monospaced')] | //*[*[name()='svg'][contains(@class,'icon-trash')] | //a[@data-title='Deactivate']]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>OK</td>
+	<td>//span[contains(@class,'icon-ok')]</td>
 	<td></td>
 </tr>
 <tr>
@@ -221,7 +231,7 @@
 </tr>
 <tr>
 	<td>REMOVE_TAG</td>
-	<td>//span[contains(.,'${key_removeTag}')]//..//i[contains(@class,'icon-remove')]</td>
+	<td>//span[contains(.,'${key_removeTag}')]//..//button[contains(@class,'btn close')]</td>
 	<td></td>
 </tr>
 <tr>

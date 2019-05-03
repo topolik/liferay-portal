@@ -54,9 +54,9 @@ public class AssetListEntryWrapper
 		attributes.put("userName", getUserName());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
+		attributes.put("assetListEntryKey", getAssetListEntryKey());
 		attributes.put("title", getTitle());
 		attributes.put("type", getType());
-		attributes.put("typeSettings", getTypeSettings());
 		attributes.put("lastPublishDate", getLastPublishDate());
 
 		return attributes;
@@ -112,6 +112,12 @@ public class AssetListEntryWrapper
 			setModifiedDate(modifiedDate);
 		}
 
+		String assetListEntryKey = (String)attributes.get("assetListEntryKey");
+
+		if (assetListEntryKey != null) {
+			setAssetListEntryKey(assetListEntryKey);
+		}
+
 		String title = (String)attributes.get("title");
 
 		if (title != null) {
@@ -124,12 +130,6 @@ public class AssetListEntryWrapper
 			setType(type);
 		}
 
-		String typeSettings = (String)attributes.get("typeSettings");
-
-		if (typeSettings != null) {
-			setTypeSettings(typeSettings);
-		}
-
 		Date lastPublishDate = (Date)attributes.get("lastPublishDate");
 
 		if (lastPublishDate != null) {
@@ -139,28 +139,54 @@ public class AssetListEntryWrapper
 
 	@Override
 	public java.util.List<com.liferay.asset.kernel.model.AssetEntry>
-		getAssetEntries() {
+		getAssetEntries(long segmentsEntryId) {
 
-		return model.getAssetEntries();
+		return model.getAssetEntries(segmentsEntryId);
 	}
 
 	@Override
 	public java.util.List<com.liferay.asset.kernel.model.AssetEntry>
-		getAssetEntries(int start, int end) {
+		getAssetEntries(long segmentsEntryId, int start, int end) {
 
-		return model.getAssetEntries(start, end);
+		return model.getAssetEntries(segmentsEntryId, start, end);
 	}
 
 	@Override
-	public int getAssetEntriesCount() {
-		return model.getAssetEntriesCount();
+	public java.util.List<com.liferay.asset.kernel.model.AssetEntry>
+		getAssetEntries(long[] segmentsEntryIds) {
+
+		return model.getAssetEntries(segmentsEntryIds);
+	}
+
+	@Override
+	public java.util.List<com.liferay.asset.kernel.model.AssetEntry>
+		getAssetEntries(long[] segmentsEntryIds, int start, int end) {
+
+		return model.getAssetEntries(segmentsEntryIds, start, end);
+	}
+
+	@Override
+	public int getAssetEntriesCount(long segmentsEntryId) {
+		return model.getAssetEntriesCount(segmentsEntryId);
+	}
+
+	@Override
+	public int getAssetEntriesCount(long[] segmentsEntryIds) {
+		return model.getAssetEntriesCount(segmentsEntryIds);
 	}
 
 	@Override
 	public com.liferay.asset.kernel.service.persistence.AssetEntryQuery
-		getAssetEntryQuery() {
+		getAssetEntryQuery(long segmentsEntryId) {
 
-		return model.getAssetEntryQuery();
+		return model.getAssetEntryQuery(segmentsEntryId);
+	}
+
+	@Override
+	public com.liferay.asset.kernel.service.persistence.AssetEntryQuery
+		getAssetEntryQuery(long[] segmentsEntryIds) {
+
+		return model.getAssetEntryQuery(segmentsEntryIds);
 	}
 
 	/**
@@ -171,6 +197,16 @@ public class AssetListEntryWrapper
 	@Override
 	public long getAssetListEntryId() {
 		return model.getAssetListEntryId();
+	}
+
+	/**
+	 * Returns the asset list entry key of this asset list entry.
+	 *
+	 * @return the asset list entry key of this asset list entry
+	 */
+	@Override
+	public String getAssetListEntryKey() {
+		return model.getAssetListEntryKey();
 	}
 
 	/**
@@ -258,14 +294,9 @@ public class AssetListEntryWrapper
 		return model.getTypeLabel();
 	}
 
-	/**
-	 * Returns the type settings of this asset list entry.
-	 *
-	 * @return the type settings of this asset list entry
-	 */
 	@Override
-	public String getTypeSettings() {
-		return model.getTypeSettings();
+	public String getTypeSettings(long segmentsEntryId) {
+		return model.getTypeSettings(segmentsEntryId);
 	}
 
 	/**
@@ -321,6 +352,16 @@ public class AssetListEntryWrapper
 	@Override
 	public void setAssetListEntryId(long assetListEntryId) {
 		model.setAssetListEntryId(assetListEntryId);
+	}
+
+	/**
+	 * Sets the asset list entry key of this asset list entry.
+	 *
+	 * @param assetListEntryKey the asset list entry key of this asset list entry
+	 */
+	@Override
+	public void setAssetListEntryKey(String assetListEntryKey) {
+		model.setAssetListEntryKey(assetListEntryKey);
 	}
 
 	/**
@@ -401,16 +442,6 @@ public class AssetListEntryWrapper
 	@Override
 	public void setType(int type) {
 		model.setType(type);
-	}
-
-	/**
-	 * Sets the type settings of this asset list entry.
-	 *
-	 * @param typeSettings the type settings of this asset list entry
-	 */
-	@Override
-	public void setTypeSettings(String typeSettings) {
-		model.setTypeSettings(typeSettings);
 	}
 
 	/**

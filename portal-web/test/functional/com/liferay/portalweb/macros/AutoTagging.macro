@@ -16,27 +16,22 @@ definition {
 			ProductMenu.gotoPortlet(
 				category = "Configuration",
 				panel = "Control Panel",
-				portlet = "System Settings"
-			);
+				portlet = "System Settings");
 
 			SystemSettings.gotoConfiguration(
 				configurationCategory = "Assets",
 				configurationName = "Asset Auto Tagging",
-				configurationScope = "System Scope"
-			);
+				configurationScope = "System Scope");
 
 			FormFields.disableCheckbox(fieldName = "enabled");
 
 		}
 
 		else if ("${disableAutoTaggingFor}" == "Instance Settings") {
-			ProductMenu.gotoPortlet(
-				category = "Configuration",
-				panel = "Control Panel",
-				portlet = "Instance Settings"
-			);
-
-			Navigator.gotoNavTab(navTab = "Asset Auto Tagging");
+			PortalSettings.gotoConfiguration(
+				configurationCategory = "Assets",
+				configurationName = "Asset Auto Tagging",
+				configurationScope = "Virtual Instance Scope");
 
 			Uncheck(locator1 = "Checkbox#ENABLE_AUTO_TAGGING");
 		}
@@ -45,8 +40,7 @@ definition {
 			ProductMenu.gotoPortlet(
 				category = "Configuration",
 				panel = "Site Administration",
-				portlet = "Settings"
-			);
+				portlet = "Settings");
 
 			Panel.expandPanel(panel = "Asset Auto Tagging");
 
@@ -67,27 +61,21 @@ definition {
 			ProductMenu.gotoPortlet(
 				category = "Configuration",
 				panel = "Control Panel",
-				portlet = "System Settings"
-			);
+				portlet = "System Settings");
 
 			SystemSettings.gotoConfiguration(
 				configurationCategory = "Assets",
 				configurationName = "Asset Auto Tagging",
-				configurationScope = "System Scope"
-			);
+				configurationScope = "System Scope");
 
 			FormFields.enableCheckbox(fieldName = "enabled");
 		}
 
 		else if ("${enableAutoTaggingFor}" == "Instance Settings") {
-			ProductMenu.gotoPortlet(
-				category = "Configuration",
-				panel = "Control Panel",
-				portlet = "Instance Settings"
-			);
-
-			Navigator.gotoNavTab(navTab = "Asset Auto Tagging");
-
+			PortalSettings.gotoConfiguration(
+				configurationCategory = "Assets",
+				configurationName = "Asset Auto Tagging",
+				configurationScope = "Virtual Instance Scope");
 			Check(locator1 = "Checkbox#ENABLE_AUTO_TAGGING");
 		}
 
@@ -95,8 +83,7 @@ definition {
 			ProductMenu.gotoPortlet(
 				category = "Configuration",
 				panel = "Site Administration",
-				portlet = "Settings"
-			);
+				portlet = "Settings");
 
 			Panel.expandPanel(panel = "Asset Auto Tagging");
 
@@ -116,14 +103,12 @@ definition {
 		ProductMenu.gotoPortlet(
 			category = "Configuration",
 			panel = "Control Panel",
-			portlet = "System Settings"
-		);
+			portlet = "System Settings");
 
 		SystemSettings.gotoConfiguration(
 			configurationCategory = "Documents and Media",
 			configurationName = "TensorFlow Image Auto Tagging",
-			configurationScope = "Virtual Instance Scope"
-		);
+			configurationScope = "Virtual Instance Scope");
 
 		FormFields.enableCheckbox(fieldName = "enabled");
 

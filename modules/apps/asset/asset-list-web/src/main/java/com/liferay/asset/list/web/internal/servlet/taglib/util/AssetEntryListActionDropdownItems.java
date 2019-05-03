@@ -18,6 +18,7 @@ import com.liferay.asset.list.model.AssetListEntry;
 import com.liferay.asset.list.web.internal.security.permission.resource.AssetListEntryPermission;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.language.LanguageUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletRequest;
@@ -30,7 +31,6 @@ import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.taglib.security.PermissionsURLTag;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.PortletURL;
@@ -62,31 +62,32 @@ public class AssetEntryListActionDropdownItems {
 						_themeDisplay.getPermissionChecker(), _assetListEntry,
 						ActionKeys.UPDATE)) {
 
-					add(_getEditAssetListEntryActionConsumer());
-					add(_getRenameAssetListEntryActionConsumer());
+					add(_getEditAssetListEntryActionUnsafeConsumer());
+					add(_getRenameAssetListEntryActionUnsafeConsumer());
 				}
 
 				if (AssetListEntryPermission.contains(
 						_themeDisplay.getPermissionChecker(), _assetListEntry,
 						ActionKeys.PERMISSIONS)) {
 
-					add(_getPermissionsAssetListEntryActionConsumer());
+					add(_getPermissionsAssetListEntryActionUnsafeConsumer());
 				}
 
-				add(_getViewAssetListContentActionConsumer());
-				add(_getViewAssetListEntryUsagesActionConsumer());
+				add(_getViewAssetListEntryUsagesActionUnsafeConsumer());
 
 				if (AssetListEntryPermission.contains(
 						_themeDisplay.getPermissionChecker(), _assetListEntry,
 						ActionKeys.DELETE)) {
 
-					add(_getDeleteAssetListEntryActionConsumer());
+					add(_getDeleteAssetListEntryActionUnsafeConsumer());
 				}
 			}
 		};
 	}
 
-	private Consumer<DropdownItem> _getDeleteAssetListEntryActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getDeleteAssetListEntryActionUnsafeConsumer() {
+
 		PortletURL deleteAssetListEntryURL =
 			_liferayPortletResponse.createActionURL();
 
@@ -106,7 +107,9 @@ public class AssetEntryListActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getEditAssetListEntryActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getEditAssetListEntryActionUnsafeConsumer() {
+
 		return dropdownItem -> {
 			dropdownItem.setHref(
 				_liferayPortletResponse.createRenderURL(), "mvcPath",
@@ -117,7 +120,8 @@ public class AssetEntryListActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getPermissionsAssetListEntryActionConsumer()
+	private UnsafeConsumer<DropdownItem, Exception>
+			_getPermissionsAssetListEntryActionUnsafeConsumer()
 		throws Exception {
 
 		String permissionsAssetEntryListURL = PermissionsURLTag.doTag(
@@ -134,7 +138,9 @@ public class AssetEntryListActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getRenameAssetListEntryActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getRenameAssetListEntryActionUnsafeConsumer() {
+
 		PortletURL renameAssetListEntryURL =
 			_liferayPortletResponse.createActionURL();
 
@@ -157,28 +163,8 @@ public class AssetEntryListActionDropdownItems {
 		};
 	}
 
-	private Consumer<DropdownItem> _getViewAssetListContentActionConsumer()
-		throws Exception {
-
-		PortletURL viewAssetListContentURL =
-			_liferayPortletResponse.createRenderURL();
-
-		viewAssetListContentURL.setParameter("mvcPath", "/view_content.jsp");
-		viewAssetListContentURL.setParameter(
-			"assetListEntryId",
-			String.valueOf(_assetListEntry.getAssetListEntryId()));
-		viewAssetListContentURL.setWindowState(LiferayWindowState.POP_UP);
-
-		return dropdownItem -> {
-			dropdownItem.putData("action", "viewAssetListContent");
-			dropdownItem.putData(
-				"viewAssetListContentURL", viewAssetListContentURL.toString());
-			dropdownItem.setLabel(LanguageUtil.get(_request, "view-content"));
-		};
-	}
-
-	private Consumer<DropdownItem>
-		_getViewAssetListEntryUsagesActionConsumer() {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getViewAssetListEntryUsagesActionUnsafeConsumer() {
 
 		return dropdownItem -> {
 			dropdownItem.setHref(

@@ -132,6 +132,8 @@ public class LVEntryPersistenceTest {
 
 		newLVEntry.setDefaultLanguageId(RandomTestUtil.randomString());
 
+		newLVEntry.setCompanyId(RandomTestUtil.nextLong());
+
 		newLVEntry.setGroupId(RandomTestUtil.nextLong());
 
 		newLVEntry.setUniqueGroupKey(RandomTestUtil.randomString());
@@ -152,6 +154,8 @@ public class LVEntryPersistenceTest {
 		Assert.assertEquals(
 			existingLVEntry.getLvEntryId(), newLVEntry.getLvEntryId());
 		Assert.assertEquals(
+			existingLVEntry.getCompanyId(), newLVEntry.getCompanyId());
+		Assert.assertEquals(
 			existingLVEntry.getGroupId(), newLVEntry.getGroupId());
 		Assert.assertEquals(
 			existingLVEntry.getUniqueGroupKey(),
@@ -168,13 +172,54 @@ public class LVEntryPersistenceTest {
 	}
 
 	@Test
+	public void testCountByUuid_Head() throws Exception {
+		_persistence.countByUuid_Head("", RandomTestUtil.randomBoolean());
+
+		_persistence.countByUuid_Head("null", RandomTestUtil.randomBoolean());
+
+		_persistence.countByUuid_Head(
+			(String)null, RandomTestUtil.randomBoolean());
+	}
+
+	@Test
 	public void testCountByUUID_G() throws Exception {
-		_persistence.countByUUID_G(
+		_persistence.countByUUID_G("", RandomTestUtil.nextLong());
+
+		_persistence.countByUUID_G("null", 0L);
+
+		_persistence.countByUUID_G((String)null, 0L);
+	}
+
+	@Test
+	public void testCountByUUID_G_Head() throws Exception {
+		_persistence.countByUUID_G_Head(
 			"", RandomTestUtil.nextLong(), RandomTestUtil.randomBoolean());
 
-		_persistence.countByUUID_G("null", 0L, RandomTestUtil.randomBoolean());
+		_persistence.countByUUID_G_Head(
+			"null", 0L, RandomTestUtil.randomBoolean());
 
-		_persistence.countByUUID_G(
+		_persistence.countByUUID_G_Head(
+			(String)null, 0L, RandomTestUtil.randomBoolean());
+	}
+
+	@Test
+	public void testCountByUuid_C() throws Exception {
+		_persistence.countByUuid_C("", RandomTestUtil.nextLong());
+
+		_persistence.countByUuid_C("null", 0L);
+
+		_persistence.countByUuid_C((String)null, 0L);
+	}
+
+	@Test
+	public void testCountByUuid_C_Head() throws Exception {
+		_persistence.countByUuid_C_Head(
+			"", RandomTestUtil.nextLong(), RandomTestUtil.randomBoolean());
+
+		_persistence.countByUuid_C_Head(
+			"null", 0L, RandomTestUtil.randomBoolean());
+
+		_persistence.countByUuid_C_Head(
 			(String)null, 0L, RandomTestUtil.randomBoolean());
 	}
 
@@ -191,13 +236,38 @@ public class LVEntryPersistenceTest {
 	}
 
 	@Test
+	public void testCountByGroupId_Head() throws Exception {
+		_persistence.countByGroupId_Head(
+			RandomTestUtil.nextLong(), RandomTestUtil.randomBoolean());
+
+		_persistence.countByGroupId_Head(0L, RandomTestUtil.randomBoolean());
+	}
+
+	@Test
+	public void testCountByGroupId_HeadArrayable() throws Exception {
+		_persistence.countByGroupId_Head(
+			new long[] {RandomTestUtil.nextLong(), 0L},
+			RandomTestUtil.randomBoolean());
+	}
+
+	@Test
 	public void testCountByG_UGK() throws Exception {
-		_persistence.countByG_UGK(
+		_persistence.countByG_UGK(RandomTestUtil.nextLong(), "");
+
+		_persistence.countByG_UGK(0L, "null");
+
+		_persistence.countByG_UGK(0L, (String)null);
+	}
+
+	@Test
+	public void testCountByG_UGK_Head() throws Exception {
+		_persistence.countByG_UGK_Head(
 			RandomTestUtil.nextLong(), "", RandomTestUtil.randomBoolean());
 
-		_persistence.countByG_UGK(0L, "null", RandomTestUtil.randomBoolean());
+		_persistence.countByG_UGK_Head(
+			0L, "null", RandomTestUtil.randomBoolean());
 
-		_persistence.countByG_UGK(
+		_persistence.countByG_UGK_Head(
 			0L, (String)null, RandomTestUtil.randomBoolean());
 	}
 
@@ -234,8 +304,8 @@ public class LVEntryPersistenceTest {
 	protected OrderByComparator<LVEntry> getOrderByComparator() {
 		return OrderByComparatorFactoryUtil.create(
 			"LVEntry", "mvccVersion", true, "uuid", true, "headId", true,
-			"defaultLanguageId", true, "lvEntryId", true, "groupId", true,
-			"uniqueGroupKey", true);
+			"defaultLanguageId", true, "lvEntryId", true, "companyId", true,
+			"groupId", true, "uniqueGroupKey", true);
 	}
 
 	@Test
@@ -489,6 +559,8 @@ public class LVEntryPersistenceTest {
 		lvEntry.setHeadId(RandomTestUtil.nextLong());
 
 		lvEntry.setDefaultLanguageId(RandomTestUtil.randomString());
+
+		lvEntry.setCompanyId(RandomTestUtil.nextLong());
 
 		lvEntry.setGroupId(RandomTestUtil.nextLong());
 

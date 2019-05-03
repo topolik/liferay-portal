@@ -1,3 +1,5 @@
+@import "./ColumnOverlayGrid";
+
 @import "./DragDrop";
 
 @import "./ElementTopper";
@@ -10,9 +12,11 @@
 
 @import "./FragmentEntryLinkEditables";
 
-@import "./FragmentsEditorToolbar";
+@import "./FragmentsEditorShim";
 
 @import "./FragmentsEditorSidebar";
+
+@import "./FragmentsEditorToolbar";
 
 @import "./SegmentsExperienceSelector";
 
@@ -48,17 +52,21 @@
 }
 
 .has-control-menu.has-edit-mode-menu #wrapper {
+	height: calc(100vh - #{$controlMenuHeight + $managementBarHeight});
 	margin-top: $controlMenuHeight + $managementBarHeight;
+	overflow-y: auto;
 
 	@media (min-width: 768px) {
+		height: calc(100vh - #{$desktopControlMenuHeight + $desktopManagementBarHeight});
 		margin-top: $desktopControlMenuHeight + $desktopManagementBarHeight;
 	}
 }
 
 .fragment-entry-link-list-wrapper {
 	margin-right: $sidebarButtonsWidth;
-	transition: margin-right ease $productMenuTransitionDuration;
-	will-change: margin-right;
+	overflow: hidden;
+	transition: margin ease $productMenuTransitionDuration;
+	will-change: margin;
 
 	&--padded, &--padded.no-fragments-message {
 		margin-right: $sidebarWidth;

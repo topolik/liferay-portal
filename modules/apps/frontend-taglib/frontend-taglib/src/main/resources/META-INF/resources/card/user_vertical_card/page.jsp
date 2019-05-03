@@ -18,19 +18,10 @@
 
 <%@ include file="/card/vertical_card/start.jspf" %>
 
-<c:choose>
-	<c:when test="<%= Validator.isNotNull(portraitURL) %>">
-		<aui:a href="<%= url %>">
-			<div class="aspect-ratio aspect-ratio-bg-center aspect-ratio-bg-cover" style="background-image: url('<%= portraitURL %>')">
-				<img alt="" class="sr-only" src="<%= portraitURL %>" />
-			</div>
-		</aui:a>
-	</c:when>
-	<c:otherwise>
-		<div class="aspect-ratio aspect-ratio-bg-center aspect-ratio-bg-cover <%= colorCssClass %>">
-			<span class="h1 user-vertical-card-initials"><%= userInitials %></span>
-		</div>
-	</c:otherwise>
-</c:choose>
+<div class="aspect-ratio-item-center-middle aspect-ratio-item-fluid card-type-asset-icon">
+	<liferay-ui:user-portrait
+		user="<%= user2 %>"
+	/>
+</div>
 
 <%@ include file="/card/vertical_card/end.jspf" %>

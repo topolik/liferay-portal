@@ -17,7 +17,6 @@ package com.liferay.document.library.kernel.service;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.PortalBeanLocatorUtil;
-import com.liferay.portal.kernel.util.ReferenceRegistry;
 
 /**
  * Provides the remote service utility for DLFileEntryType. This utility wraps
@@ -116,6 +115,18 @@ public class DLFileEntryTypeServiceUtil {
 
 	public static java.util.List
 		<com.liferay.document.library.kernel.model.DLFileEntryType> search(
+				long companyId, long folderId, long[] groupIds, String keywords,
+				boolean includeBasicFileEntryType, boolean inherited, int start,
+				int end)
+			throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().search(
+			companyId, folderId, groupIds, keywords, includeBasicFileEntryType,
+			inherited, start, end);
+	}
+
+	public static java.util.List
+		<com.liferay.document.library.kernel.model.DLFileEntryType> search(
 			long companyId, long[] groupIds, String keywords,
 			boolean includeBasicFileEntryType, int start, int end,
 			com.liferay.portal.kernel.util.OrderByComparator
@@ -125,6 +136,15 @@ public class DLFileEntryTypeServiceUtil {
 		return getService().search(
 			companyId, groupIds, keywords, includeBasicFileEntryType, start,
 			end, orderByComparator);
+	}
+
+	public static int searchCount(
+		long companyId, long folderId, long[] groupIds, String keywords,
+		boolean includeBasicFileEntryType, boolean inherited) {
+
+		return getService().searchCount(
+			companyId, folderId, groupIds, keywords, includeBasicFileEntryType,
+			inherited);
 	}
 
 	public static int searchCount(
@@ -163,9 +183,6 @@ public class DLFileEntryTypeServiceUtil {
 		if (_service == null) {
 			_service = (DLFileEntryTypeService)PortalBeanLocatorUtil.locate(
 				DLFileEntryTypeService.class.getName());
-
-			ReferenceRegistry.registerReference(
-				DLFileEntryTypeServiceUtil.class, "_service");
 		}
 
 		return _service;

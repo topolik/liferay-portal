@@ -22,37 +22,6 @@ import com.liferay.portal.kernel.util.StringUtil;
  */
 public class UserIdException extends PortalException {
 
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by the inner classes
-	 */
-	@Deprecated
-	public UserIdException() {
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by the inner classes
-	 */
-	@Deprecated
-	public UserIdException(String msg) {
-		super(msg);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by the inner classes
-	 */
-	@Deprecated
-	public UserIdException(String msg, Throwable cause) {
-		super(msg, cause);
-	}
-
-	/**
-	 * @deprecated As of Wilberforce (7.0.x), replaced by the inner classes
-	 */
-	@Deprecated
-	public UserIdException(Throwable cause) {
-		super(cause);
-	}
-
 	public static class MustNotBeNull extends UserIdException {
 
 		public MustNotBeNull() {
@@ -76,6 +45,10 @@ public class UserIdException extends PortalException {
 		public final String[] reservedUserIds;
 		public final long userId;
 
+	}
+
+	private UserIdException(String msg) {
+		super(msg);
 	}
 
 }

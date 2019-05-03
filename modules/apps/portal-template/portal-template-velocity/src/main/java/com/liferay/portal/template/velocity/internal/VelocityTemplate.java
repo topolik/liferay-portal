@@ -18,7 +18,8 @@ import com.liferay.portal.kernel.template.StringTemplateResource;
 import com.liferay.portal.kernel.template.TemplateConstants;
 import com.liferay.portal.kernel.template.TemplateException;
 import com.liferay.portal.kernel.template.TemplateResource;
-import com.liferay.portal.template.AbstractSingleResourceTemplate;
+import com.liferay.portal.kernel.template.TemplateResourceCache;
+import com.liferay.portal.template.BaseTemplate;
 import com.liferay.portal.template.TemplateContextHelper;
 import com.liferay.portal.template.TemplateResourceThreadLocal;
 
@@ -34,27 +35,36 @@ import org.apache.velocity.exception.ParseErrorException;
 /**
  * @author Tina Tian
  */
-public class VelocityTemplate extends AbstractSingleResourceTemplate {
+public class VelocityTemplate extends BaseTemplate {
 
 	public VelocityTemplate(
-		TemplateResource templateResource,
-		TemplateResource errorTemplateResource, Map<String, Object> context,
+		TemplateResource templateResource, Map<String, Object> context,
 		VelocityEngine velocityEngine,
 		TemplateContextHelper templateContextHelper,
-		int resourceModificationCheckInterval) {
+		TemplateResourceCache templateResourceCache) {
 
-		super(
-			templateResource, errorTemplateResource, context,
-			templateContextHelper, TemplateConstants.LANG_TYPE_VM,
-			resourceModificationCheckInterval);
+		super(templateResource, context, templateContextHelper);
 
 		_velocityContext = new VelocityContext(super.context);
 		_velocityEngine = velocityEngine;
+		_templateResourceCache = templateResourceCache;
+
+		if (templateResourceCache.isEnabled()) {
+			cacheTemplateResource(templateResourceCache, templateResource);
+		}
 	}
 
 	@Override
-	protected void handleException(Exception exception, Writer writer)
+	protected void handleException(
+			TemplateResource templateResource,
+			TemplateResource errorTemplateResource, Exception exception,
+			Writer writer)
 		throws TemplateException {
+
+		if (_templateResourceCache.isEnabled()) {
+			cacheTemplateResource(
+				_templateResourceCache, errorTemplateResource);
+		}
 
 		put("exception", exception.getMessage());
 
@@ -104,6 +114,7 @@ public class VelocityTemplate extends AbstractSingleResourceTemplate {
 		}
 	}
 
+	private final TemplateResourceCache _templateResourceCache;
 	private final VelocityContext _velocityContext;
 	private final VelocityEngine _velocityEngine;
 

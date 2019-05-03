@@ -41,12 +41,21 @@ public class AssetListEntryServiceUtil {
 	 * Never modify this class directly. Add custom service methods to <code>com.liferay.asset.list.service.impl.AssetListEntryServiceImpl</code> and rerun ServiceBuilder to regenerate this class.
 	 */
 	public static void addAssetEntrySelection(
-			long assetListEntryId, long assetEntryId,
+			long assetListEntryId, long assetEntryId, long segmentsEntryId,
 			com.liferay.portal.kernel.service.ServiceContext serviceContext)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		getService().addAssetEntrySelection(
-			assetListEntryId, assetEntryId, serviceContext);
+			assetListEntryId, assetEntryId, segmentsEntryId, serviceContext);
+	}
+
+	public static void addAssetEntrySelections(
+			long assetListEntryId, long[] assetEntryIds, long segmentsEntryId,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		getService().addAssetEntrySelections(
+			assetListEntryId, assetEntryIds, segmentsEntryId, serviceContext);
 	}
 
 	public static com.liferay.asset.list.model.AssetListEntry addAssetListEntry(
@@ -79,10 +88,11 @@ public class AssetListEntryServiceUtil {
 	}
 
 	public static void deleteAssetEntrySelection(
-			long assetListEntryId, int position)
+			long assetListEntryId, long segmentsEntryId, int position)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
-		getService().deleteAssetEntrySelection(assetListEntryId, position);
+		getService().deleteAssetEntrySelection(
+			assetListEntryId, segmentsEntryId, position);
 	}
 
 	public static void deleteAssetListEntries(long[] assetListEntriesIds)
@@ -96,6 +106,13 @@ public class AssetListEntryServiceUtil {
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		return getService().deleteAssetListEntry(assetListEntryId);
+	}
+
+	public static void deleteAssetListEntry(
+			long assetListEntryId, long segmentsEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		getService().deleteAssetListEntry(assetListEntryId, segmentsEntryId);
 	}
 
 	public static com.liferay.asset.list.model.AssetListEntry
@@ -135,6 +152,27 @@ public class AssetListEntryServiceUtil {
 		return getService().getAssetListEntriesCount(groupId, title);
 	}
 
+	public static com.liferay.asset.list.model.AssetListEntry getAssetListEntry(
+			long assetListEntryId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().getAssetListEntry(assetListEntryId);
+	}
+
+	public static com.liferay.asset.list.model.AssetListEntry getAssetListEntry(
+			long groupId, String assetListEntryKey)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().getAssetListEntry(groupId, assetListEntryKey);
+	}
+
+	public static com.liferay.asset.list.model.AssetListEntry
+			getAssetListEntryByUuidAndGroupId(String uuid, long groupId)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		return getService().getAssetListEntryByUuidAndGroupId(uuid, groupId);
+	}
+
 	/**
 	 * Returns the OSGi service identifier.
 	 *
@@ -145,11 +183,21 @@ public class AssetListEntryServiceUtil {
 	}
 
 	public static void moveAssetEntrySelection(
-			long assetListEntryId, int position, int newPosition)
+			long assetListEntryId, long segmentsEntryId, int position,
+			int newPosition)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
 		getService().moveAssetEntrySelection(
-			assetListEntryId, position, newPosition);
+			assetListEntryId, segmentsEntryId, position, newPosition);
+	}
+
+	public static void updateAssetListEntry(
+			long assetListEntryId, long segmentsEntryId, String typeSettings,
+			com.liferay.portal.kernel.service.ServiceContext serviceContext)
+		throws com.liferay.portal.kernel.exception.PortalException {
+
+		getService().updateAssetListEntry(
+			assetListEntryId, segmentsEntryId, typeSettings, serviceContext);
 	}
 
 	public static com.liferay.asset.list.model.AssetListEntry
@@ -159,22 +207,12 @@ public class AssetListEntryServiceUtil {
 		return getService().updateAssetListEntry(assetListEntryId, title);
 	}
 
-	public static com.liferay.asset.list.model.AssetListEntry
-			updateAssetListEntryTypeSettings(
-				long assetListEntryId, String typeSettings)
+	public static void updateAssetListEntryTypeSettings(
+			long assetListEntryId, long segmentsEntryId, String typeSettings)
 		throws com.liferay.portal.kernel.exception.PortalException {
 
-		return getService().updateAssetListEntryTypeSettings(
-			assetListEntryId, typeSettings);
-	}
-
-	public static com.liferay.asset.list.model.AssetListEntry
-			updateAssetListEntryTypeSettingsProperties(
-				long assetListEntryId, String typeSettingsProperties)
-		throws com.liferay.portal.kernel.exception.PortalException {
-
-		return getService().updateAssetListEntryTypeSettingsProperties(
-			assetListEntryId, typeSettingsProperties);
+		getService().updateAssetListEntryTypeSettings(
+			assetListEntryId, segmentsEntryId, typeSettings);
 	}
 
 	public static AssetListEntryService getService() {

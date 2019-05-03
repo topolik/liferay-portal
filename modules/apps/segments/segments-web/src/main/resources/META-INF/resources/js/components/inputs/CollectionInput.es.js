@@ -1,5 +1,5 @@
-import React from 'react';
 import propTypes from 'prop-types';
+import React from 'react';
 
 /**
  * Input displayed for collection type properties. 2 inputs will be displayed
@@ -69,6 +69,7 @@ class CollectionInput extends React.Component {
 					data-testid="collection-key-input"
 					onChange={this._handleKeyChange}
 					onKeyDown={this._handleKeyDown}
+					placeholder={Liferay.Language.get('key')}
 					type="text"
 					value={key}
 				/>
@@ -78,6 +79,7 @@ class CollectionInput extends React.Component {
 					data-testid="collection-value-input"
 					onChange={this._handleValueChange}
 					onKeyDown={this._handleKeyDown}
+					placeholder={Liferay.Language.get('value')}
 					type="text"
 					value={value}
 				/>

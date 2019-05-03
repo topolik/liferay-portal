@@ -1,3 +1,10 @@
+/**
+ * The Hudcrumbs Component.
+ *
+ * @deprecated since 7.2, unused
+ * @module liferay-hudcrumbs
+ */
+
 AUI.add(
 	'liferay-hudcrumbs',
 	function(A) {

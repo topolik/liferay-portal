@@ -15,14 +15,101 @@
 package com.liferay.data.engine.rest.resource.v1_0.test;
 
 import com.liferay.arquillian.extension.junit.bridge.junit.Arquillian;
+import com.liferay.data.engine.rest.client.dto.v1_0.DataLayout;
+import com.liferay.data.engine.rest.client.dto.v1_0.LocalizedValue;
+import com.liferay.data.engine.rest.resource.v1_0.test.util.DataDefinitionTestUtil;
+import com.liferay.dynamic.data.mapping.model.DDMStructure;
+import com.liferay.portal.kernel.test.util.RandomTestUtil;
 
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 
 /**
- * @author Jeyvison Nascimento
+ * @author Marcelo Mello
  */
-@Ignore
 @RunWith(Arquillian.class)
 public class DataLayoutResourceTest extends BaseDataLayoutResourceTestCase {
+
+	@Before
+	public void setUp() throws Exception {
+		super.setUp();
+
+		_ddmStructure = DataDefinitionTestUtil.addDDMStructure(testGroup);
+		_irrelevantDDMStructure = DataDefinitionTestUtil.addDDMStructure(
+			irrelevantGroup);
+	}
+
+	@Override
+	protected String[] getAdditionalAssertFieldNames() {
+		return new String[] {"dataDefinitionId", "name"};
+	}
+
+	@Override
+	protected DataLayout randomDataLayout() {
+		return new DataLayout() {
+			{
+				dataDefinitionId = _ddmStructure.getStructureId();
+				dateCreated = RandomTestUtil.nextDate();
+				dateModified = RandomTestUtil.nextDate();
+				defaultLanguageId = "en_US";
+				id = RandomTestUtil.randomLong();
+				name = new LocalizedValue[] {
+					new LocalizedValue() {
+						{
+							key = "en_US";
+							value = RandomTestUtil.randomString();
+						}
+					}
+				};
+			}
+		};
+	}
+
+	@Override
+	protected DataLayout randomIrrelevantDataLayout() {
+		DataLayout dataLayout = randomDataLayout();
+
+		dataLayout.setDataDefinitionId(
+			_irrelevantDDMStructure.getStructureId());
+
+		return dataLayout;
+	}
+
+	@Override
+	protected DataLayout testDeleteDataLayout_addDataLayout() throws Exception {
+		return invokePostDataDefinitionDataLayout(
+			_ddmStructure.getStructureId(), randomDataLayout());
+	}
+
+	@Override
+	protected Long testGetDataDefinitionDataLayoutsPage_getDataDefinitionId()
+		throws Exception {
+
+		return _ddmStructure.getStructureId();
+	}
+
+	@Override
+	protected DataLayout testGetDataLayout_addDataLayout() throws Exception {
+		return invokePostDataDefinitionDataLayout(
+			_ddmStructure.getStructureId(), randomDataLayout());
+	}
+
+	@Override
+	protected DataLayout testGetSiteDataLayoutPage_addDataLayout(
+			Long siteId, DataLayout dataLayout)
+		throws Exception {
+
+		return invokePostDataDefinitionDataLayout(
+			dataLayout.getDataDefinitionId(), dataLayout);
+	}
+
+	@Override
+	protected DataLayout testPutDataLayout_addDataLayout() throws Exception {
+		return invokePostDataDefinitionDataLayout(
+			_ddmStructure.getStructureId(), randomDataLayout());
+	}
+
+	private DDMStructure _ddmStructure;
+	private DDMStructure _irrelevantDDMStructure;
+
 }

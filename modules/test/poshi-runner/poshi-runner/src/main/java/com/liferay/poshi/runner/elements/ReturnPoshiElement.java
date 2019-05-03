@@ -76,6 +76,10 @@ public class ReturnPoshiElement extends PoshiElement {
 			"\n\n", getPad(), "return \"", attributeValue("value"), "\";");
 	}
 
+	@Override
+	public void validatePoshiScript() throws PoshiScriptParserException {
+	}
+
 	protected ReturnPoshiElement() {
 	}
 

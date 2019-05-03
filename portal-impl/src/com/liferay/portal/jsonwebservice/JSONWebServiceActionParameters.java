@@ -16,15 +16,22 @@ package com.liferay.portal.jsonwebservice;
 
 import com.liferay.petra.string.CharPool;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.service.ServiceContextFactory;
 import com.liferay.portal.kernel.upload.FileItem;
 import com.liferay.portal.kernel.upload.UploadServletRequest;
 import com.liferay.portal.kernel.util.CamelCaseUtil;
+import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+
+import java.io.File;
+import java.io.IOException;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -195,17 +202,16 @@ public class JSONWebServiceActionParameters {
 	}
 
 	private void _collectFromRequestParameters(HttpServletRequest request) {
-		UploadServletRequest uploadServletRequest = null;
+		Map<String, FileItem[]> multipartParameterMap = null;
+
+		Set<String> parameterNames = new HashSet<>(
+			Collections.list(request.getParameterNames()));
 
 		if (request instanceof UploadServletRequest) {
-			uploadServletRequest = (UploadServletRequest)request;
-		}
+			UploadServletRequest uploadServletRequest =
+				(UploadServletRequest)request;
 
-		List<String> parameterNames = Collections.list(
-			request.getParameterNames());
-
-		if (uploadServletRequest != null) {
-			Map<String, FileItem[]> multipartParameterMap =
+			multipartParameterMap =
 				uploadServletRequest.getMultipartParameterMap();
 
 			parameterNames.addAll(multipartParameterMap.keySet());
@@ -214,10 +220,41 @@ public class JSONWebServiceActionParameters {
 		for (String parameterName : parameterNames) {
 			Object value = null;
 
-			if ((uploadServletRequest != null) &&
-				(uploadServletRequest.getFileName(parameterName) != null)) {
+			if ((multipartParameterMap != null) &&
+				multipartParameterMap.containsKey(parameterName)) {
 
-				value = uploadServletRequest.getFile(parameterName, true);
+				FileItem[] fileItems = multipartParameterMap.get(parameterName);
+
+				File[] files = new File[fileItems.length];
+
+				for (int i = 0; i < fileItems.length; i++) {
+					FileItem fileItem = fileItems[i];
+
+					File file = fileItem.getStoreLocation();
+
+					if (fileItem.isInMemory()) {
+						try {
+							FileUtil.write(file, fileItem.getInputStream());
+						}
+						catch (IOException ioe) {
+							if (_log.isWarnEnabled()) {
+								_log.warn(
+									"Unable to write temporary file " +
+										file.getAbsolutePath(),
+									ioe);
+							}
+						}
+					}
+
+					files[i] = file;
+				}
+
+				if (files.length == 1) {
+					value = files[0];
+				}
+				else {
+					value = files;
+				}
 			}
 			else {
 				String[] parameterValues = request.getParameterValues(
@@ -236,6 +273,9 @@ public class JSONWebServiceActionParameters {
 			_jsonWebServiceActionParameters.put(parameterName, value);
 		}
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		JSONWebServiceActionParameters.class);
 
 	private JSONRPCRequest _jsonRPCRequest;
 	private final JSONWebServiceActionParametersMap

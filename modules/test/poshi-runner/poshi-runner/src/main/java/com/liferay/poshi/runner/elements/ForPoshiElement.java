@@ -33,6 +33,15 @@ import org.dom4j.Node;
 public class ForPoshiElement extends PoshiElement {
 
 	@Override
+	public Element addAttribute(String name, String value) {
+		if (name.equals("list") || name.equals("table")) {
+			typeAttributeName = name;
+		}
+
+		return super.addAttribute(name, value);
+	}
+
+	@Override
 	public PoshiElement clone(Element element) {
 		if (isElementType(_ELEMENT_NAME, element)) {
 			return new ForPoshiElement(element);

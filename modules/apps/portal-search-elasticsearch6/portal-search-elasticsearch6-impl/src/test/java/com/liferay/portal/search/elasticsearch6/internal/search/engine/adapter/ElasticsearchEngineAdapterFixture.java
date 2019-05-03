@@ -95,20 +95,17 @@ public class ElasticsearchEngineAdapterFixture {
 			{
 				setClusterRequestExecutor(
 					clusterRequestExecutorFixture.getClusterRequestExecutor());
-
 				setDocumentRequestExecutor(
 					documentRequestExecutorFixture.
 						getDocumentRequestExecutor());
-
 				setIndexRequestExecutor(
 					indexRequestExecutorFixture.getIndexRequestExecutor());
-
 				setSearchRequestExecutor(
 					searchRequestExecutorFixture.getSearchRequestExecutor());
-
 				setSnapshotRequestExecutor(
 					snapshotRequestExecutorFixture.
 						getSnapshotRequestExecutor());
+				setThrowOriginalExceptions(true);
 			}
 		};
 	}

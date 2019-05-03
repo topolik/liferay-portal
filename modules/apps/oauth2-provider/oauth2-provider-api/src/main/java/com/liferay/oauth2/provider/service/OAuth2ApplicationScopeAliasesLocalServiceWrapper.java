@@ -340,6 +340,14 @@ public class OAuth2ApplicationScopeAliasesLocalServiceWrapper
 			primaryKeyObj);
 	}
 
+	@Override
+	public java.util.List<String> getScopeAliasesList(
+		long oAuth2ApplicationScopeAliasesId) {
+
+		return _oAuth2ApplicationScopeAliasesLocalService.getScopeAliasesList(
+			oAuth2ApplicationScopeAliasesId);
+	}
+
 	/**
 	 * Updates the o auth2 application scope aliases in the database or adds it if it does not yet exist. Also notifies the appropriate model listeners.
 	 *

@@ -37,6 +37,7 @@ import com.liferay.journal.util.JournalConverter;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.json.JSONUtil;
 import com.liferay.portal.kernel.model.Group;
 import com.liferay.portal.kernel.model.Layout;
 import com.liferay.portal.kernel.model.User;
@@ -609,12 +610,15 @@ public class JournalConverterUtilTest {
 		docLibraryField.setDDMStructureId(ddmStructureId);
 		docLibraryField.setName("document_library");
 
-		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
-
-		jsonObject.put("groupId", fileEntry.getGroupId());
-		jsonObject.put("title", fileEntry.getTitle());
-		jsonObject.put("uuid", fileEntry.getUuid());
-		jsonObject.put("version", fileEntry.getVersion());
+		JSONObject jsonObject = JSONUtil.put(
+			"groupId", fileEntry.getGroupId()
+		).put(
+			"title", fileEntry.getTitle()
+		).put(
+			"uuid", fileEntry.getUuid()
+		).put(
+			"version", fileEntry.getVersion()
+		);
 
 		docLibraryField.addValue(_enLocale, jsonObject.toString());
 
@@ -695,12 +699,18 @@ public class JournalConverterUtilTest {
 		JSONObject jsonObject = JSONFactoryUtil.createJSONObject();
 
 		if (includeGroupId) {
-			jsonObject.put("groupId", layout.getGroupId());
-			jsonObject.put("label", layout.getName(locale));
+			jsonObject.put(
+				"groupId", layout.getGroupId()
+			).put(
+				"label", layout.getName(locale)
+			);
 		}
 
-		jsonObject.put("layoutId", layout.getLayoutId());
-		jsonObject.put("privateLayout", layout.isPrivateLayout());
+		jsonObject.put(
+			"layoutId", layout.getLayoutId()
+		).put(
+			"privateLayout", layout.isPrivateLayout()
+		);
 
 		return jsonObject.toString();
 	}

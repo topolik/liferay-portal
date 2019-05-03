@@ -17,7 +17,6 @@ package com.liferay.gradle.plugins.poshi.runner;
 import com.liferay.gradle.util.GradleUtil;
 import com.liferay.gradle.util.OSDetector;
 import com.liferay.gradle.util.StringUtil;
-import com.liferay.gradle.util.Validator;
 
 import groovy.lang.Closure;
 
@@ -25,10 +24,12 @@ import java.io.File;
 
 import java.nio.charset.StandardCharsets;
 
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 
 import org.gradle.api.Action;
@@ -41,6 +42,8 @@ import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.plugins.BasePlugin;
+import org.gradle.api.plugins.ExtensionContainer;
+import org.gradle.api.plugins.ExtraPropertiesExtension;
 import org.gradle.api.plugins.PluginContainer;
 import org.gradle.api.reporting.DirectoryReport;
 import org.gradle.api.tasks.Copy;
@@ -58,6 +61,8 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 
 	public static final String EVALUATE_POSHI_CONSOLE_TASK_NAME =
 		"evaluatePoshiConsole";
+
+	public static final String EXECUTE_PQL_QUERY_TASK_NAME = "executePQLQuery";
 
 	public static final String EXPAND_POSHI_RUNNER_TASK_NAME =
 		"expandPoshiRunner";
@@ -89,6 +94,7 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 
 		_addConfigurationPoshiRunnerResources(project);
 
+		final JavaExec executePQLQueryTask = _addTaskExecutePQLQuery(project);
 		final JavaExec evaluatePoshiConsoleTask = _addTaskEvaluatePoshiConsole(
 			project);
 
@@ -116,6 +122,9 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 							poshiPropertiesFile);
 					}
 
+					_configureTaskExecutePQLQuery(
+						executePQLQueryTask, poshiProperties,
+						poshiRunnerExtension);
 					_configureTaskEvaluatePoshiConsole(
 						evaluatePoshiConsoleTask, poshiProperties,
 						poshiRunnerExtension);
@@ -245,6 +254,20 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 		return javaExec;
 	}
 
+	private JavaExec _addTaskExecutePQLQuery(Project project) {
+		JavaExec javaExec = GradleUtil.addTask(
+			project, EXECUTE_PQL_QUERY_TASK_NAME, JavaExec.class);
+
+		javaExec.args(Collections.singleton("executePQLQuery"));
+
+		javaExec.setClasspath(_getPoshiRunnerClasspath(project));
+		javaExec.setDescription("Execute the PQL query.");
+		javaExec.setGroup("verification");
+		javaExec.setMain("com.liferay.poshi.runner.PoshiRunnerCommandExecutor");
+
+		return javaExec;
+	}
+
 	private Copy _addTaskExpandPoshiRunner(final Project project) {
 		Copy copy = GradleUtil.addTask(
 			project, EXPAND_POSHI_RUNNER_TASK_NAME, Copy.class);
@@ -348,6 +371,15 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 	}
 
 	private void _configureTaskEvaluatePoshiConsole(
+		JavaExec javaExec, Properties poshiProperties,
+		PoshiRunnerExtension poshiRunnerExtension) {
+
+		_populateSystemProperties(
+			javaExec.getSystemProperties(), poshiProperties,
+			javaExec.getProject(), poshiRunnerExtension);
+	}
+
+	private void _configureTaskExecutePQLQuery(
 		JavaExec javaExec, Properties poshiProperties,
 		PoshiRunnerExtension poshiRunnerExtension) {
 
@@ -467,11 +499,31 @@ public class PoshiRunnerPlugin implements Plugin<Project> {
 				"test.name", CollectionUtils.join(",", testNames));
 		}
 
-		String testName = GradleUtil.getProperty(
-			project, "poshiTestName", (String)null);
+		ExtensionContainer extensionContainer = project.getExtensions();
 
-		if (Validator.isNotNull(testName)) {
-			systemProperties.put("test.name", testName);
+		ExtraPropertiesExtension extraPropertiesExtension =
+			extensionContainer.getExtraProperties();
+
+		Map<String, Object> properties =
+			extraPropertiesExtension.getProperties();
+
+		for (Map.Entry<String, Object> entry : properties.entrySet()) {
+			String propertyName = entry.getKey();
+
+			String[] array = propertyName.split("(?=\\p{Upper})");
+
+			if (Objects.equals(array[0], "poshi") && (array.length > 1)) {
+				StringBuilder sb = new StringBuilder();
+
+				for (int i = 1; i < array.length; i++) {
+					sb.append(array[i].toLowerCase());
+					sb.append('.');
+				}
+
+				sb.setLength(sb.length() - 1);
+
+				systemProperties.put(sb.toString(), entry.getValue());
+			}
 		}
 	}
 

@@ -14,11 +14,11 @@
 
 package com.liferay.portal.search.web.internal.search.options.portlet.shared.search;
 
-import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.search.constants.SearchContextAttributes;
+import com.liferay.portal.search.searcher.SearchRequestBuilder;
 import com.liferay.portal.search.web.internal.search.options.constants.SearchOptionsPortletKeys;
 import com.liferay.portal.search.web.internal.search.options.portlet.SearchOptionsPortletPreferences;
 import com.liferay.portal.search.web.internal.search.options.portlet.SearchOptionsPortletPreferencesImpl;
+import com.liferay.portal.search.web.internal.util.SearchStringUtil;
 import com.liferay.portal.search.web.portlet.shared.search.PortletSharedSearchContributor;
 import com.liferay.portal.search.web.portlet.shared.search.PortletSharedSearchSettings;
 
@@ -43,42 +43,22 @@ public class SearchOptionsPortletSharedSearchContributor
 			new SearchOptionsPortletPreferencesImpl(
 				portletSharedSearchSettings.getPortletPreferencesOptional());
 
-		enableBasicFacetSelection(
-			searchOptionsPortletPreferences, portletSharedSearchSettings);
+		SearchRequestBuilder searchRequestBuilder =
+			portletSharedSearchSettings.getFederatedSearchRequestBuilder(
+				searchOptionsPortletPreferences.
+					getFederatedSearchKeyOptional());
 
-		enableEmptySearches(
-			searchOptionsPortletPreferences, portletSharedSearchSettings);
-	}
-
-	protected void enableBasicFacetSelection(
-		SearchOptionsPortletPreferences searchOptionsPortletPreferences,
-		PortletSharedSearchSettings portletSharedSearchSettings) {
-
-		if (!searchOptionsPortletPreferences.isBasicFacetSelection()) {
-			return;
-		}
-
-		SearchContext searchContext =
-			portletSharedSearchSettings.getSearchContext();
-
-		searchContext.setAttribute(
-			SearchContextAttributes.ATTRIBUTE_KEY_BASIC_FACET_SELECTION,
-			Boolean.TRUE);
-	}
-
-	protected void enableEmptySearches(
-		SearchOptionsPortletPreferences searchOptionsPortletPreferences,
-		PortletSharedSearchSettings portletSharedSearchSettings) {
-
-		if (!searchOptionsPortletPreferences.isAllowEmptySearches()) {
-			return;
-		}
-
-		SearchContext searchContext =
-			portletSharedSearchSettings.getSearchContext();
-
-		searchContext.setAttribute(
-			SearchContextAttributes.ATTRIBUTE_KEY_EMPTY_SEARCH, Boolean.TRUE);
+		searchRequestBuilder.basicFacetSelection(
+			searchOptionsPortletPreferences.isBasicFacetSelection()
+		).emptySearchEnabled(
+			searchOptionsPortletPreferences.isAllowEmptySearches()
+		).fields(
+			SearchStringUtil.splitAndUnquote(
+				searchOptionsPortletPreferences.getFieldsToReturnOptional())
+		).indexes(
+			SearchStringUtil.splitAndUnquote(
+				searchOptionsPortletPreferences.getIndexesOptional())
+		);
 	}
 
 }

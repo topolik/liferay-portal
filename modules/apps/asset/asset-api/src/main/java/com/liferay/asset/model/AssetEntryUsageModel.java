@@ -17,10 +17,7 @@ package com.liferay.asset.model;
 import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.portal.kernel.bean.AutoEscape;
-import com.liferay.portal.kernel.model.AttachedModel;
 import com.liferay.portal.kernel.model.BaseModel;
-import com.liferay.portal.kernel.model.ShardedModel;
-import com.liferay.portal.kernel.model.StagedGroupedModel;
 
 import java.util.Date;
 
@@ -36,9 +33,7 @@ import java.util.Date;
  * @generated
  */
 @ProviderType
-public interface AssetEntryUsageModel
-	extends AttachedModel, BaseModel<AssetEntryUsage>, ShardedModel,
-			StagedGroupedModel {
+public interface AssetEntryUsageModel extends BaseModel<AssetEntryUsage> {
 
 	/*
 	 * NOTE FOR DEVELOPERS:
@@ -66,7 +61,6 @@ public interface AssetEntryUsageModel
 	 * @return the uuid of this asset entry usage
 	 */
 	@AutoEscape
-	@Override
 	public String getUuid();
 
 	/**
@@ -74,7 +68,6 @@ public interface AssetEntryUsageModel
 	 *
 	 * @param uuid the uuid of this asset entry usage
 	 */
-	@Override
 	public void setUuid(String uuid);
 
 	/**
@@ -96,7 +89,6 @@ public interface AssetEntryUsageModel
 	 *
 	 * @return the group ID of this asset entry usage
 	 */
-	@Override
 	public long getGroupId();
 
 	/**
@@ -104,80 +96,13 @@ public interface AssetEntryUsageModel
 	 *
 	 * @param groupId the group ID of this asset entry usage
 	 */
-	@Override
 	public void setGroupId(long groupId);
-
-	/**
-	 * Returns the company ID of this asset entry usage.
-	 *
-	 * @return the company ID of this asset entry usage
-	 */
-	@Override
-	public long getCompanyId();
-
-	/**
-	 * Sets the company ID of this asset entry usage.
-	 *
-	 * @param companyId the company ID of this asset entry usage
-	 */
-	@Override
-	public void setCompanyId(long companyId);
-
-	/**
-	 * Returns the user ID of this asset entry usage.
-	 *
-	 * @return the user ID of this asset entry usage
-	 */
-	@Override
-	public long getUserId();
-
-	/**
-	 * Sets the user ID of this asset entry usage.
-	 *
-	 * @param userId the user ID of this asset entry usage
-	 */
-	@Override
-	public void setUserId(long userId);
-
-	/**
-	 * Returns the user uuid of this asset entry usage.
-	 *
-	 * @return the user uuid of this asset entry usage
-	 */
-	@Override
-	public String getUserUuid();
-
-	/**
-	 * Sets the user uuid of this asset entry usage.
-	 *
-	 * @param userUuid the user uuid of this asset entry usage
-	 */
-	@Override
-	public void setUserUuid(String userUuid);
-
-	/**
-	 * Returns the user name of this asset entry usage.
-	 *
-	 * @return the user name of this asset entry usage
-	 */
-	@AutoEscape
-	@Override
-	public String getUserName();
-
-	/**
-	 * Sets the user name of this asset entry usage.
-	 *
-	 * @param userName the user name of this asset entry usage
-	 */
-	@Override
-	public void setUserName(String userName);
 
 	/**
 	 * Returns the create date of this asset entry usage.
 	 *
 	 * @return the create date of this asset entry usage
 	 */
-	@Override
 	public Date getCreateDate();
 
 	/**
@@ -185,7 +110,6 @@ public interface AssetEntryUsageModel
 	 *
 	 * @param createDate the create date of this asset entry usage
 	 */
-	@Override
 	public void setCreateDate(Date createDate);
 
 	/**
@@ -193,7 +117,6 @@ public interface AssetEntryUsageModel
 	 *
 	 * @return the modified date of this asset entry usage
 	 */
-	@Override
 	public Date getModifiedDate();
 
 	/**
@@ -201,7 +124,6 @@ public interface AssetEntryUsageModel
 	 *
 	 * @param modifiedDate the modified date of this asset entry usage
 	 */
-	@Override
 	public void setModifiedDate(Date modifiedDate);
 
 	/**
@@ -219,68 +141,67 @@ public interface AssetEntryUsageModel
 	public void setAssetEntryId(long assetEntryId);
 
 	/**
-	 * Returns the fully qualified class name of this asset entry usage.
+	 * Returns the container type of this asset entry usage.
 	 *
-	 * @return the fully qualified class name of this asset entry usage
+	 * @return the container type of this asset entry usage
 	 */
-	@Override
-	public String getClassName();
-
-	public void setClassName(String className);
+	public long getContainerType();
 
 	/**
-	 * Returns the class name ID of this asset entry usage.
+	 * Sets the container type of this asset entry usage.
 	 *
-	 * @return the class name ID of this asset entry usage
+	 * @param containerType the container type of this asset entry usage
 	 */
-	@Override
-	public long getClassNameId();
+	public void setContainerType(long containerType);
 
 	/**
-	 * Sets the class name ID of this asset entry usage.
+	 * Returns the container key of this asset entry usage.
 	 *
-	 * @param classNameId the class name ID of this asset entry usage
-	 */
-	@Override
-	public void setClassNameId(long classNameId);
-
-	/**
-	 * Returns the class pk of this asset entry usage.
-	 *
-	 * @return the class pk of this asset entry usage
-	 */
-	@Override
-	public long getClassPK();
-
-	/**
-	 * Sets the class pk of this asset entry usage.
-	 *
-	 * @param classPK the class pk of this asset entry usage
-	 */
-	@Override
-	public void setClassPK(long classPK);
-
-	/**
-	 * Returns the portlet ID of this asset entry usage.
-	 *
-	 * @return the portlet ID of this asset entry usage
+	 * @return the container key of this asset entry usage
 	 */
 	@AutoEscape
-	public String getPortletId();
+	public String getContainerKey();
 
 	/**
-	 * Sets the portlet ID of this asset entry usage.
+	 * Sets the container key of this asset entry usage.
 	 *
-	 * @param portletId the portlet ID of this asset entry usage
+	 * @param containerKey the container key of this asset entry usage
 	 */
-	public void setPortletId(String portletId);
+	public void setContainerKey(String containerKey);
+
+	/**
+	 * Returns the plid of this asset entry usage.
+	 *
+	 * @return the plid of this asset entry usage
+	 */
+	public long getPlid();
+
+	/**
+	 * Sets the plid of this asset entry usage.
+	 *
+	 * @param plid the plid of this asset entry usage
+	 */
+	public void setPlid(long plid);
+
+	/**
+	 * Returns the type of this asset entry usage.
+	 *
+	 * @return the type of this asset entry usage
+	 */
+	public int getType();
+
+	/**
+	 * Sets the type of this asset entry usage.
+	 *
+	 * @param type the type of this asset entry usage
+	 */
+	public void setType(int type);
 
 	/**
 	 * Returns the last publish date of this asset entry usage.
 	 *
 	 * @return the last publish date of this asset entry usage
 	 */
-	@Override
 	public Date getLastPublishDate();
 
 	/**
@@ -288,7 +209,6 @@ public interface AssetEntryUsageModel
 	 *
 	 * @param lastPublishDate the last publish date of this asset entry usage
 	 */
-	@Override
 	public void setLastPublishDate(Date lastPublishDate);
 
 }

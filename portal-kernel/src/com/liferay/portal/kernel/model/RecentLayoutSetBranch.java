@@ -31,7 +31,7 @@ import com.liferay.portal.kernel.util.Accessor;
 )
 @ProviderType
 public interface RecentLayoutSetBranch
-	extends RecentLayoutSetBranchModel, PersistedModel {
+	extends PersistedModel, RecentLayoutSetBranchModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

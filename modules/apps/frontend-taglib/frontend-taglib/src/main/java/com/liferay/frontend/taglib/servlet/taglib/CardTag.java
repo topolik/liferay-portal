@@ -36,6 +36,74 @@ public class CardTag extends IncludeTag {
 		return EVAL_BODY_INCLUDE;
 	}
 
+	public String getActionJsp() {
+		return _actionJsp;
+	}
+
+	public String getCardCssClass() {
+		return _cardCssClass;
+	}
+
+	public String getCheckboxCSSClass() {
+		return _checkboxCSSClass;
+	}
+
+	public Map<String, Object> getCheckboxData() {
+		return _checkboxData;
+	}
+
+	public String getCheckboxId() {
+		return _checkboxId;
+	}
+
+	public String getCheckboxName() {
+		return _checkboxName;
+	}
+
+	public String getCheckboxValue() {
+		return _checkboxValue;
+	}
+
+	public String getCssClass() {
+		return _cssClass;
+	}
+
+	public Map<String, Object> getData() {
+		return _data;
+	}
+
+	public String getImageCSSClass() {
+		return _imageCSSClass;
+	}
+
+	public String getImageUrl() {
+		return _imageUrl;
+	}
+
+	public ResultRow getResultRow() {
+		return _resultRow;
+	}
+
+	public RowChecker getRowChecker() {
+		return _rowChecker;
+	}
+
+	public String getUrl() {
+		return _url;
+	}
+
+	public boolean isCheckboxChecked() {
+		return _checkboxChecked;
+	}
+
+	public boolean isCheckboxDisabled() {
+		return _checkboxDisabled;
+	}
+
+	public boolean isShowCheckbox() {
+		return _showCheckbox;
+	}
+
 	public void setActionJsp(String actionJsp) {
 		_actionJsp = actionJsp;
 	}
@@ -44,6 +112,10 @@ public class CardTag extends IncludeTag {
 		ServletContext actionJspServletContext) {
 
 		_actionJspServletContext = actionJspServletContext;
+	}
+
+	public void setCardCssClass(String cardCssClass) {
+		_cardCssClass = cardCssClass;
 	}
 
 	public void setCheckboxChecked(boolean checkboxChecked) {
@@ -102,6 +174,10 @@ public class CardTag extends IncludeTag {
 	}
 
 	public void setRowChecker(RowChecker rowChecker) {
+		String cssClass = rowChecker.getCssClass();
+
+		rowChecker.setCssClass("custom-control-input " + cssClass);
+
 		_rowChecker = rowChecker;
 	}
 
@@ -119,6 +195,7 @@ public class CardTag extends IncludeTag {
 
 		_actionJsp = null;
 		_actionJspServletContext = null;
+		_cardCssClass = null;
 		_checkboxChecked = null;
 		_checkboxCSSClass = null;
 		_checkboxData = null;
@@ -150,6 +227,8 @@ public class CardTag extends IncludeTag {
 		request.setAttribute(
 			"liferay-frontend:card:actionJspServletContext",
 			getActionJspServletContext());
+		request.setAttribute(
+			"liferay-frontend:card:cardCssClass", _cardCssClass);
 		request.setAttribute(
 			"liferay-frontend:card:checkboxChecked",
 			String.valueOf(_checkboxChecked));
@@ -187,6 +266,7 @@ public class CardTag extends IncludeTag {
 
 	private String _actionJsp;
 	private ServletContext _actionJspServletContext;
+	private String _cardCssClass;
 	private Boolean _checkboxChecked;
 	private String _checkboxCSSClass;
 	private Map<String, Object> _checkboxData;

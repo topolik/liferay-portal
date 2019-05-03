@@ -17,6 +17,7 @@ package com.liferay.portal.workflow.web.internal.display.context;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItem;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.DropdownItemList;
 import com.liferay.frontend.taglib.clay.servlet.taglib.util.JSPCreationMenu;
+import com.liferay.petra.function.UnsafeConsumer;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.search.SearchContainer;
@@ -56,7 +57,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.portlet.PortletException;
@@ -589,9 +589,10 @@ public class WorkflowDefinitionDisplayContext {
 		return ParamUtil.getString(request, "orderByCol", "title");
 	}
 
-	private Consumer<DropdownItem> _getFilterNavigationDropdownItem(
-		String navigation, String currentNavigation,
-		String definitionsNavigation) {
+	private UnsafeConsumer<DropdownItem, Exception>
+		_getFilterNavigationDropdownItem(
+			String navigation, String currentNavigation,
+			String definitionsNavigation) {
 
 		return dropdownItem -> {
 			dropdownItem.setActive(
@@ -608,7 +609,7 @@ public class WorkflowDefinitionDisplayContext {
 		};
 	}
 
-	private Consumer<DropdownItem> _getOrderByDropdownItem(
+	private UnsafeConsumer<DropdownItem, Exception> _getOrderByDropdownItem(
 		String orderByCol, String currentOrder, HttpServletRequest request) {
 
 		return dropdownItem -> {

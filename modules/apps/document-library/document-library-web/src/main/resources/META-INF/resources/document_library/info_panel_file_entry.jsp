@@ -70,7 +70,6 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 	cssClass="navbar-no-collapse"
 	names="<%= tabsNames %>"
 	refresh="<%= false %>"
-	type="tabs nav-tabs-default"
 >
 	<liferay-ui:section>
 
@@ -92,16 +91,9 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 
 						<%
 						User owner = UserLocalServiceUtil.fetchUser(fileEntry.getUserId());
-
-						String ownerURL = StringPool.BLANK;
-
-						if ((owner != null) && !owner.isDefaultUser()) {
-							ownerURL = owner.getDisplayURL(themeDisplay);
-						}
 						%>
 
 						<liferay-ui:user-portrait
-							cssClass="sticker-lg"
 							user="<%= owner %>"
 						/>
 					</div>
@@ -110,7 +102,9 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 						<div class="autofit-row">
 							<div class="autofit-col autofit-col-expand">
 								<div class="component-title h4 username">
-									<a href="<%= ownerURL %>"><%= owner.getFullName() %></a>
+									<c:if test="<%= owner != null %>">
+										<a href="<%= owner.isDefaultUser() ? StringPool.BLANK : owner.getDisplayURL(themeDisplay) %>"><%= owner.getFullName() %></a>
+									</c:if>
 								</div>
 
 								<small class="text-muted">
@@ -129,7 +123,7 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 							<clay:link
 								buttonStyle="primary"
 								elementClasses='<%= "btn-sm" %>'
-								href="<%= DLURLHelperUtil.getDownloadURL(fileEntry, fileVersion, themeDisplay, StringPool.BLANK) %>"
+								href="<%= DLURLHelperUtil.getDownloadURL(fileEntry, fileVersion, themeDisplay, StringPool.BLANK, false, true) %>"
 								label='<%= LanguageUtil.get(resourceBundle, "download") %>'
 								title='<%= LanguageUtil.get(resourceBundle, "download") + " (" + TextFormatter.formatStorageSize(fileVersion.getSize(), locale) + ")" %>'
 							/>
@@ -357,6 +351,7 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 										classPK="<%= ddmStructure.getPrimaryKey() %>"
 										ddmFormValues="<%= ddmFormValues %>"
 										fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
+										groupId="<%= fileVersion.getGroupId() %>"
 										readOnly="<%= true %>"
 										requestedLocale="<%= locale %>"
 										showEmptyFieldLabel="<%= false %>"
@@ -429,6 +424,7 @@ if (dlViewFileVersionDisplayContext.isVersionInfoVisible()) {
 									classPK="<%= ddmStructure.getPrimaryKey() %>"
 									ddmFormValues="<%= ddmFormValues %>"
 									fieldsNamespace="<%= String.valueOf(ddmStructure.getPrimaryKey()) %>"
+									groupId="<%= fileVersion.getGroupId() %>"
 									readOnly="<%= true %>"
 									requestedLocale="<%= ddmFormValues.getDefaultLocale() %>"
 									showEmptyFieldLabel="<%= false %>"

@@ -10,11 +10,9 @@
 		<field name="userName" type="String" />
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
+		<field name="assetListEntryKey" type="String" />
 		<field name="title" type="String" />
 		<field name="type" type="int" />
-		<field name="typeSettings" type="String">
-			<hint-collection name="CLOB" />
-		</field>
 		<field name="lastPublishDate" type="Date" />
 	</model>
 	<model name="com.liferay.asset.list.model.AssetListEntryAssetEntryRel">
@@ -27,8 +25,8 @@
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
 		<field name="assetListEntryId" type="long" />
-		<field name="segmentsEntryId" type="long" />
 		<field name="assetEntryId" type="long" />
+		<field name="segmentsEntryId" type="long" />
 		<field name="position" type="int" />
 		<field name="lastPublishDate" type="Date" />
 	</model>

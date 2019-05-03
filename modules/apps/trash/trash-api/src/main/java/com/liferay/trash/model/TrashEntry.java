@@ -29,7 +29,7 @@ import com.liferay.portal.kernel.util.Accessor;
  */
 @ImplementationClassName("com.liferay.trash.model.impl.TrashEntryImpl")
 @ProviderType
-public interface TrashEntry extends TrashEntryModel, PersistedModel {
+public interface TrashEntry extends PersistedModel, TrashEntryModel {
 
 	/*
 	 * NOTE FOR DEVELOPERS:

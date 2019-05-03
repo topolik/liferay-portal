@@ -1,7 +1,35 @@
 import {Config} from 'metal-state';
 
-import {FRAGMENTS_EDITOR_ITEM_BORDERS} from '../utils/constants';
+import {EDITABLE_FRAGMENT_ENTRY_PROCESSOR, FRAGMENTS_EDITOR_ITEM_BORDERS, FRAGMENTS_EDITOR_ROW_TYPES} from '../utils/constants';
 import {setIn} from '../utils/FragmentsEditorUpdateUtils.es';
+
+const LayoutDataShape = Config.shapeOf(
+	{
+		nextColumnId: Config.number(),
+		nextRowId: Config.number(),
+		structure: Config.arrayOf(
+			Config.shapeOf(
+				{
+					columns: Config.arrayOf(
+						Config.shapeOf(
+							{
+								columnId: Config.string(),
+								fragmentEntryLinkIds: Config.arrayOf(
+									Config.string()
+								),
+								size: Config.string().value('')
+							}
+						)
+					),
+					rowId: Config.string(),
+					type: Config
+						.oneOf(Object.values(FRAGMENTS_EDITOR_ROW_TYPES))
+						.value(FRAGMENTS_EDITOR_ROW_TYPES.componentRow)
+				}
+			)
+		)
+	}
+);
 
 /**
  * Initial state
@@ -104,6 +132,26 @@ const INITIAL_STATE = {
 		.value({}),
 
 	/**
+	 * List of available segments
+	 * @default []
+	 * @review
+	 * @type {object[]}
+	 */
+	availableSegmentsExperiences: Config
+		.objectOf(
+			Config.shapeOf(
+				{
+					active: Config.bool(),
+					name: Config.string(),
+					priority: Config.number(),
+					segmentsEntryId: Config.string(),
+					segmentsExperienceId: Config.string()
+				}
+			)
+		)
+		.value({}),
+
+	/**
 	 * Class name id used for storing changes.
 	 * @default ''
 	 * @review
@@ -122,6 +170,15 @@ const INITIAL_STATE = {
 	classPK: Config
 		.string()
 		.value(''),
+
+	/**
+	 * Default configurations for AlloyEditor instances.
+	 * @default {}
+	 * @instance
+	 * @review
+	 * @type {object}
+	 */
+	defaultEditorConfigurations: Config.object().value({}),
 
 	/**
 	 * Default language id.
@@ -145,13 +202,13 @@ const INITIAL_STATE = {
 
 	/**
 	 * Default experience id.
-	 * @default ''
+	 * @default undefined
 	 * @review
 	 * @type {string}
 	 */
 	defaultSegmentsExperienceId: Config
 		.string()
-		.value(''),
+		.value(undefined),
 
 	/**
 	 * URL for removing fragment entries of the underlying model.
@@ -164,6 +221,27 @@ const INITIAL_STATE = {
 		.value(''),
 
 	/**
+	 * URL for removing a segmentsExperience and it's associated
+	 * fragmentEntryLinks.
+	 * @default ''
+	 * @review
+	 * @type {string}
+	 */
+	deleteSegmentsExperienceURL: Config
+		.string()
+		.value(''),
+
+	/**
+	 * URL to redirect after discard draft action.
+	 * @default ''
+	 * @review
+	 * @type {!string}
+	 */
+	discardDraftRedirectURL: Config
+		.string()
+		.value(''),
+
+	/**
 	 * URL to discard draft changes and return to the latest published version.
 	 * @default ''
 	 * @review
@@ -172,6 +250,62 @@ const INITIAL_STATE = {
 	discardDraftURL: Config
 		.string()
 		.value(''),
+
+	/**
+	 * Border of the target item where another item is being dragged to
+	 * @default null
+	 * @review
+	 * @type {string}
+	 */
+	dropTargetBorder: Config
+		.oneOf(Object.values(FRAGMENTS_EDITOR_ITEM_BORDERS))
+		.value(null),
+
+	/**
+	 * Id of the element where a fragment is being dragged over
+	 * @default ''
+	 * @review
+	 * @type {string}
+	 */
+	dropTargetItemId: Config
+		.string()
+		.value(''),
+
+	/**
+	 * Type of the element where a fragment is being dragged over
+	 * @default ''
+	 * @review
+	 * @type {string}
+	 */
+	dropTargetItemType: Config
+		.string()
+		.value(''),
+
+	/**
+	 * List of layoutData related to segmentsExperiences
+	 * @default ''
+	 * @review
+	 * @type {!array}
+	 */
+	layoutDataList: Config
+		.arrayOf(
+			Config.shapeOf(
+				{
+					layoutData: LayoutDataShape.required(),
+					segmentsExperienceId: Config.string().required()
+				}
+			)
+		)
+		.value([]),
+
+	/**
+	 * URL for updating a distinct fragment entries of the editor.
+	 * @default ''
+	 * @instance
+	 * @review
+	 * @type {string}
+	 */
+	editFragmentEntryLinkURL: Config.string().value(''),
 
 	/**
 	 * Available elements that can be dragged inside the existing Page Template,
@@ -209,70 +343,20 @@ const INITIAL_STATE = {
 		.value([]),
 
 	/**
-	 * List of available segments
-	 * @default []
-	 * @review
-	 * @type {object[]}
-	 */
-	availableSegmentsExperiences: Config
-		.objectOf(
-			Config.shapeOf(
-				{
-					name: Config.string(),
-					segmentsEntryId: Config.string(),
-					segmentsExperienceId: Config.string()
-				}
-			)
-		)
-		.value({}),
-
-	/**
-	 * Object to control the process of the experience creation
-	 * @default { creatingSegmentsExperience: false, error: null }
+	 * Fragment id to indicate if that fragment editor has to be cleared.
+	 * @default ''
 	 * @review
 	 * @type {object}
 	 */
-	experienceSegmentsCreation: Config
-		.shapeOf(
-			{
-				creatingSegmentsExperience: Config.bool().required(),
-				error: Config.string()
-			}
-		)
-		.value(
-			{
-				creatingSegmentsExperience: false,
-				error: null
-			}
-		),
+	fragmentEditorClear: Config.string().value(''),
 
 	/**
-	 * Object to control the process of the experience edition
-	 * @default { error: null, name: null, segmentsEntryId: null, segmentsExperienceId: null }
+	 * Fragment id to indicate if that fragment editor is enabled or not.
+	 * @default ''
 	 * @review
 	 * @type {object}
 	 */
-	segmentsExperienceEdition: Config
-		.shapeOf(
-			{
-				error: Config.string(),
-				name: Config.string(),
-				segmentsEntryId: Config.string(),
-				segmentsExperienceId: Config.string()
-			}
-		)
-		.value(
-			{
-				error: null,
-				name: null,
-				segmentsEntryId: null,
-				segmentsExperienceId: null
-			}
-		),
-
-	segmentsExperienceId: Config
-		.string()
-		.value(),
+	fragmentEditorEnabled: Config.string().value(''),
 
 	/**
 	 * List of fragment instances being used.
@@ -286,84 +370,38 @@ const INITIAL_STATE = {
 				{
 					config: Config.object().value({}),
 					content: Config.any().value(''),
-					editableValues: Config.objectOf(
-						Config.shapeOf(
-							{
-								classNameId: Config.string().value(''),
-								classPK: Config.string().value(''),
-								defaultValue: Config.string().required(),
-								fieldId: Config.string().value(''),
-								mappedField: Config.string().value('')
-							}
-						)
+					editableValues: Config.shapeOf(
+						{
+							[EDITABLE_FRAGMENT_ENTRY_PROCESSOR]: Config.objectOf(
+								Config.shapeOf(
+									{
+										classNameId: Config.string().value(''),
+										classPK: Config.string().value(''),
+										defaultValue: Config.string().required(),
+										fieldId: Config.string().value(''),
+										mappedField: Config.string().value('')
+									}
+								)
+							).value({})
+						}
 					).value({}),
+					fragmentEntryId: Config.oneOfType([Config.string(), Config.number()]).value(''),
 					fragmentEntryKey: Config.string().required(),
 					fragmentEntryLinkId: Config.string().required(),
-					name: Config.string().required()
+					name: Config.string().required(),
+					portletId: Config.string().value('')
 				}
 			)
 		)
 		.value({}),
 
 	/**
-	 * Allow opening/closing fragments editor sidebar
-	 * @default true
-	 * @review
-	 * @type {boolean}
-	 */
-	fragmentsEditorSidebarVisible: Config
-		.bool()
-		.value(true),
-
-	/**
-	 * Border of the target item where another item is being dragged to
-	 * @default null
-	 * @review
-	 * @type {string}
-	 */
-	dropTargetBorder: Config
-		.oneOf(Object.values(FRAGMENTS_EDITOR_ITEM_BORDERS))
-		.value(null),
-
-	/**
-	 * Id of the element where a fragment is being dragged over
+	 * URL for getting an asset field value
 	 * @default ''
 	 * @review
 	 * @type {string}
 	 */
-	dropTargetItemId: Config
-		.string()
-		.value(''),
-
-	/**
-	 * Type of the element where a fragment is being dragged over
-	 * @default ''
-	 * @review
-	 * @type {string}
-	 */
-	dropTargetItemType: Config
-		.string()
-		.value(''),
-
-	/**
-   * URL for obtaining the asset types for which asset display pages can be
-   * created.
-   * @default '''
-   * @review
-   * @type {string}
-   */
-	getAssetClassTypesURL: Config
-		.string()
-		.value(''),
-
-	/**
-   * URL for obtaining the asset types for which asset display pages can be
-   * created.
-   * @default '''
-   * @review
-   * @type {string}
-   */
-	getAssetDisplayContributorsURL: Config
+	getAssetFieldValueURL: Config
 		.string()
 		.value(''),
 
@@ -374,6 +412,28 @@ const INITIAL_STATE = {
 	 * @type {string}
 	 */
 	getAssetMappingFieldsURL: Config
+		.string()
+		.value(''),
+
+	/**
+	 * URL for obtaining the asset types for which info display pages can be
+	 * created.
+	 * @default '''
+	 * @review
+	 * @type {string}
+	 */
+	getInfoClassTypesURL: Config
+		.string()
+		.value(''),
+
+	/**
+	 * URL for obtaining the asset types for which info display pages can be
+	 * created.
+	 * @default '''
+	 * @review
+	 * @type {string}
+	 */
+	getInfoDisplayContributorsURL: Config
 		.string()
 		.value(''),
 
@@ -433,31 +493,7 @@ const INITIAL_STATE = {
 	 * @review
 	 * @type {{structure: Array}}
 	 */
-	layoutData: Config
-		.shapeOf(
-			{
-				nextColumnId: Config.number(),
-				nextRowId: Config.number(),
-				structure: Config.arrayOf(
-					Config.shapeOf(
-						{
-							columns: Config.arrayOf(
-								Config.shapeOf(
-									{
-										columnId: Config.string(),
-										fragmentEntryLinkIds: Config.arrayOf(
-											Config.string()
-										),
-										size: Config.string().value('')
-									}
-								)
-							),
-							rowId: Config.string()
-						}
-					)
-				)
-			}
-		)
+	layoutData: LayoutDataShape
 		.value(
 			{
 				nextColumnId: 0,
@@ -534,14 +570,49 @@ const INITIAL_STATE = {
 		.value(false),
 
 	/**
-	 * Editable type of the field that is being mapped
+	 * Available sections that can be dragged inside the existing Page Template,
+	 * organized by fragment categories.
+	 * @default []
+	 * @review
+	 * @type {Array<{
+	 *   fragmentCollectionId: !string,
+	 *   fragmentEntries: Array<{
+	 *     fragmentEntryKey: !string,
+	 *     imagePreviewURL: string,
+	 *     name: !string
+	 *   }>,
+	 *   name: !string
+	 * }>}
+	 */
+	sections: Config
+		.arrayOf(
+			Config.shapeOf(
+				{
+					fragmentCollectionId: Config.string().required(),
+					fragmentEntries: Config.arrayOf(
+						Config.shapeOf(
+							{
+								fragmentEntryKey: Config.string().required(),
+								imagePreviewURL: Config.string(),
+								name: Config.string().required()
+							}
+						).required()
+					).required(),
+					name: Config.string().required()
+				}
+			)
+		)
+		.value([]),
+
+	/**
+	 * The active segmentsExperience
 	 * @default ''
 	 * @review
 	 * @type {string}
 	 */
-	selectMappingDialogEditableType: Config
+	segmentsExperienceId: Config
 		.string()
-		.value(''),
+		.value(),
 
 	/**
 	 * EditableId of the field that is being mapped
@@ -550,6 +621,16 @@ const INITIAL_STATE = {
 	 * @type {string}
 	 */
 	selectMappingDialogEditableId: Config
+		.string()
+		.value(''),
+
+	/**
+	 * Editable type of the field that is being mapped
+	 * @default ''
+	 * @review
+	 * @type {string}
+	 */
+	selectMappingDialogEditableType: Config
 		.string()
 		.value(''),
 
@@ -628,49 +709,15 @@ const INITIAL_STATE = {
 		.value({}),
 
 	/**
-	 * Path of the available icons.
-	 * @default ''
+	 * Selected sidebar panel ID to be shown (null or empty)
+	 * when sidebar is hidden.
+	 * @default 'sections'
 	 * @review
 	 * @type {string}
 	 */
-	spritemap: Config
+	selectedSidebarPanelId: Config
 		.string()
-		.value(''),
-
-	/**
-	 * Available sections that can be dragged inside the existing Page Template,
-	 * organized by fragment categories.
-	 * @default []
-	 * @review
-	 * @type {Array<{
-	 *   fragmentCollectionId: !string,
-	 *   fragmentEntries: Array<{
-	 *     fragmentEntryKey: !string,
-	 *     imagePreviewURL: string,
-	 *     name: !string
-	 *   }>,
-	 *   name: !string
-	 * }>}
-	 */
-	sections: Config
-		.arrayOf(
-			Config.shapeOf(
-				{
-					fragmentCollectionId: Config.string().required(),
-					fragmentEntries: Config.arrayOf(
-						Config.shapeOf(
-							{
-								fragmentEntryKey: Config.string().required(),
-								imagePreviewURL: Config.string(),
-								name: Config.string().required()
-							}
-						).required()
-					).required(),
-					name: Config.string().required()
-				}
-			)
-		)
-		.value([]),
+		.value('sections'),
 
 	/**
 	 * List of sidebar panels
@@ -689,6 +736,16 @@ const INITIAL_STATE = {
 			)
 		)
 		.value([]),
+
+	/**
+	 * Path of the available icons.
+	 * @default ''
+	 * @review
+	 * @type {string}
+	 */
+	spritemap: Config
+		.string()
+		.value(''),
 
 	/**
 	 * @default ''

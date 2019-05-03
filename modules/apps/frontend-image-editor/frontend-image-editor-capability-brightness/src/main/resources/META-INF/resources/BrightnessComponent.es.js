@@ -17,9 +17,6 @@ class BrightnessComponent extends Component {
 	 * @inheritDoc
 	 */
 	attached() {
-
-		// Debounced version of requestImageEditorPreview
-
 		this.requestImageEditorPreview_ = debounce(this.requestImageEditorPreview, 50);
 
 		this.cache_ = {};
@@ -34,6 +31,7 @@ class BrightnessComponent extends Component {
 
 	/**
 	 * Applies a brightness filter to the image.
+	 *
 	 * @param  {ImageData} imageData The image data representation of the image.
 	 * @return {CancellablePromise} A promise that resolves when the webworker
 	 * finishes processing the image.
@@ -44,6 +42,7 @@ class BrightnessComponent extends Component {
 
 	/**
 	 * Applies a brightness filter to the image.
+	 *
 	 * @param  {ImageData} imageData The image data representation of the image.
 	 * @return {CancellablePromise} A promise that resolves when the webworker
 	 * finishes processing the image.
@@ -75,6 +74,7 @@ class BrightnessComponent extends Component {
 
 	/**
 	 * Spawns a webworker to process the image in a different thread.
+	 *
 	 * @param  {Object} message The image and brightness value.
 	 * @return {CancellablePromise} A promise that resolves when the webworker
 	 * finishes processing the image.
@@ -92,6 +92,7 @@ class BrightnessComponent extends Component {
 
 /**
  * State definition.
+ *
  * @static
  * @type {!Object}
  */
@@ -99,6 +100,7 @@ BrightnessComponent.STATE = {
 
 	/**
 	 * Path of this module.
+	 *
 	 * @type {String}
 	 */
 	modulePath: {
@@ -108,6 +110,7 @@ BrightnessComponent.STATE = {
 	/**
 	 * Injected method that notifies the editor that the component wants to
 	 * generate a preview version of the image.
+	 *
 	 * @type {Function}
 	 */
 	requestImageEditorPreview: {

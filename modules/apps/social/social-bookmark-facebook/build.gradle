@@ -6,4 +6,5 @@ dependencies {
 	compileOnly project(":apps:frontend-taglib:frontend-taglib-clay")
 	compileOnly project(":apps:frontend-taglib:frontend-taglib-soy")
 	compileOnly project(":apps:social:social-bookmarks-api")
+	compileOnly project(":core:petra:petra-function")
 }

@@ -15,16 +15,18 @@
 package com.liferay.portal.release.versions;
 
 import aQute.bnd.osgi.Constants;
-import aQute.bnd.version.Version;
 
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.kernel.io.unsync.UnsyncBufferedReader;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.ObjectValuePair;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
+import com.liferay.portal.kernel.version.Version;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -139,6 +141,27 @@ public class ReleaseVersionsTest {
 						return FileVisitResult.CONTINUE;
 					}
 
+					Path lfrbuildRelengIgnorePath = dirPath.resolve(
+						".lfrbuild-releng-ignore");
+
+					if (Files.exists(lfrbuildRelengIgnorePath)) {
+						return FileVisitResult.CONTINUE;
+					}
+
+					String dirName = String.valueOf(dirPath.getFileName());
+
+					if (dirName.endsWith("-test") ||
+						dirName.endsWith("-test-api") ||
+						dirName.endsWith("-test-impl") ||
+						dirName.endsWith("-test-service")) {
+
+						return FileVisitResult.CONTINUE;
+					}
+
+					if (_isInGitRepoReadOnly(dirPath)) {
+						return FileVisitResult.CONTINUE;
+					}
+
 					Path bndBndRelativePath = _portalPath.relativize(
 						bndBndPath);
 
@@ -189,9 +212,9 @@ public class ReleaseVersionsTest {
 		Properties otherBndProperties = _loadProperties(otherBndBndPath);
 
 		String bundleSymbolicName = bndProperties.getProperty(
-			Constants.BUNDLE_SYMBOLICNAME);
+			"Bundle-SymbolicName");
 		String otherBundleSymbolicName = otherBndProperties.getProperty(
-			Constants.BUNDLE_SYMBOLICNAME);
+			"Bundle-SymbolicName");
 
 		Assert.assertEquals(bundleSymbolicName, otherBundleSymbolicName);
 
@@ -213,7 +236,7 @@ public class ReleaseVersionsTest {
 		Version masterVersion = masterVersionPair.getKey();
 		Version releaseVersion = releaseVersionPair.getKey();
 
-		if (!releaseVersion.equals(Version.ONE) &&
+		if (!releaseVersion.equals(new Version(1, 0, 0)) &&
 			(masterVersion.getMajor() != (releaseVersion.getMajor() + 1))) {
 
 			StringBundler sb = new StringBundler(22);
@@ -279,12 +302,45 @@ public class ReleaseVersionsTest {
 			sb.append(" \"");
 			sb.append(Constants.BUNDLE_VERSION);
 			sb.append(updateVersionSeparator);
-			sb.append(new Version(releaseVersion.getMajor() + 1));
+			sb.append(new Version(releaseVersion.getMajor() + 1, 0, 0));
 			sb.append("\" in ");
 			sb.append(_portalPath.relativize(updateVersionPath));
 			sb.append(" for the 'master' branch.");
 
 			return sb.toString();
+		}
+
+		return null;
+	}
+
+	private boolean _contains(Path path, String... strings) throws IOException {
+		try (FileReader fileReader = new FileReader(path.toFile());
+			UnsyncBufferedReader unsyncBufferedReader =
+				new UnsyncBufferedReader(fileReader)) {
+
+			String line = null;
+
+			while ((line = unsyncBufferedReader.readLine()) != null) {
+				for (String s : strings) {
+					if (line.contains(s)) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private Path _getGitRepoPath(Path dirPath) {
+		while (dirPath != null) {
+			Path gitRepoPath = dirPath.resolve(_GIT_REPO_FILE_NAME);
+
+			if (Files.exists(gitRepoPath)) {
+				return gitRepoPath;
+			}
+
+			dirPath = dirPath.getParent();
 		}
 
 		return null;
@@ -337,6 +393,20 @@ public class ReleaseVersionsTest {
 			".properties";
 	}
 
+	private boolean _isInGitRepoReadOnly(Path dirPath) throws IOException {
+		Path gitRepoPath = _getGitRepoPath(dirPath);
+
+		if (gitRepoPath == null) {
+			return false;
+		}
+
+		if (_contains(gitRepoPath, "mode = pull")) {
+			return true;
+		}
+
+		return false;
+	}
+
 	private boolean _isRelease(Path path) {
 		if (Files.exists(path.resolve("modules/.releng"))) {
 			return true;
@@ -358,6 +428,8 @@ public class ReleaseVersionsTest {
 	private String _read(Path path) throws IOException {
 		return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 	}
+
+	private static final String _GIT_REPO_FILE_NAME = ".gitrepo";
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		ReleaseVersionsTest.class);

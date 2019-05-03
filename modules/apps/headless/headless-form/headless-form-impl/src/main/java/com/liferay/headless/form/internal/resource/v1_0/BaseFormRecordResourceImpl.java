@@ -17,7 +17,6 @@ package com.liferay.headless.form.internal.resource.v1_0;
 import com.liferay.headless.form.dto.v1_0.FormRecord;
 import com.liferay.headless.form.resource.v1_0.FormRecordResource;
 import com.liferay.petra.function.UnsafeFunction;
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.vulcan.accept.language.AcceptLanguage;
 import com.liferay.portal.vulcan.pagination.Page;
@@ -30,8 +29,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 
-import java.net.URI;
-
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -47,7 +45,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 /**
@@ -60,24 +57,32 @@ public abstract class BaseFormRecordResourceImpl implements FormRecordResource {
 
 	@Override
 	@GET
-	@Path("/form-records/{form-record-id}")
-	@Produces("application/json")
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "formRecordId")}
+	)
+	@Path("/form-records/{formRecordId}")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "FormRecord")})
 	public FormRecord getFormRecord(
-			@NotNull @PathParam("form-record-id") Long formRecordId)
+			@NotNull @Parameter(hidden = true) @PathParam("formRecordId") Long
+				formRecordId)
 		throws Exception {
 
 		return new FormRecord();
 	}
 
 	@Override
-	@Consumes("application/json")
+	@Consumes({"application/json", "application/xml"})
 	@PUT
-	@Path("/form-records/{form-record-id}")
-	@Produces("application/json")
+	@Parameters(
+		value = {@Parameter(in = ParameterIn.PATH, name = "formRecordId")}
+	)
+	@Path("/form-records/{formRecordId}")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "FormRecord")})
 	public FormRecord putFormRecord(
-			@NotNull @PathParam("form-record-id") Long formRecordId,
+			@NotNull @Parameter(hidden = true) @PathParam("formRecordId") Long
+				formRecordId,
 			FormRecord formRecord)
 		throws Exception {
 
@@ -88,15 +93,16 @@ public abstract class BaseFormRecordResourceImpl implements FormRecordResource {
 	@GET
 	@Parameters(
 		value = {
+			@Parameter(in = ParameterIn.PATH, name = "formId"),
 			@Parameter(in = ParameterIn.QUERY, name = "page"),
 			@Parameter(in = ParameterIn.QUERY, name = "pageSize")
 		}
 	)
-	@Path("/forms/{form-id}/form-records")
-	@Produces("application/json")
+	@Path("/forms/{formId}/form-records")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "FormRecord")})
 	public Page<FormRecord> getFormFormRecordsPage(
-			@NotNull @PathParam("form-id") Long formId,
+			@NotNull @Parameter(hidden = true) @PathParam("formId") Long formId,
 			@Context Pagination pagination)
 		throws Exception {
 
@@ -104,13 +110,28 @@ public abstract class BaseFormRecordResourceImpl implements FormRecordResource {
 	}
 
 	@Override
-	@Consumes("application/json")
+	@Consumes({"application/json", "application/xml"})
 	@POST
-	@Path("/forms/{form-id}/form-records")
-	@Produces("application/json")
+	@Parameters(value = {@Parameter(in = ParameterIn.PATH, name = "formId")})
+	@Path("/forms/{formId}/form-records")
+	@Produces({"application/json", "application/xml"})
 	@Tags(value = {@Tag(name = "FormRecord")})
 	public FormRecord postFormFormRecord(
-			@NotNull @PathParam("form-id") Long formId, FormRecord formRecord)
+			@NotNull @Parameter(hidden = true) @PathParam("formId") Long formId,
+			FormRecord formRecord)
+		throws Exception {
+
+		return new FormRecord();
+	}
+
+	@Override
+	@GET
+	@Parameters(value = {@Parameter(in = ParameterIn.PATH, name = "formId")})
+	@Path("/forms/{formId}/form-records/by-latest-draft")
+	@Produces({"application/json", "application/xml"})
+	@Tags(value = {@Tag(name = "FormRecord")})
+	public FormRecord getFormFormRecordByLatestDraft(
+			@NotNull @Parameter(hidden = true) @PathParam("formId") Long formId)
 		throws Exception {
 
 		return new FormRecord();
@@ -120,34 +141,15 @@ public abstract class BaseFormRecordResourceImpl implements FormRecordResource {
 		this.contextCompany = contextCompany;
 	}
 
-	protected String getJAXRSLink(String methodName, Object... values) {
-		String baseURIString = String.valueOf(contextUriInfo.getBaseUri());
-
-		if (baseURIString.endsWith(StringPool.FORWARD_SLASH)) {
-			baseURIString = baseURIString.substring(
-				0, baseURIString.length() - 1);
-		}
-
-		URI resourceURI = UriBuilder.fromResource(
-			BaseFormRecordResourceImpl.class
-		).build();
-
-		URI methodURI = UriBuilder.fromMethod(
-			BaseFormRecordResourceImpl.class, methodName
-		).build(
-			values
-		);
-
-		return baseURIString + resourceURI.toString() + methodURI.toString();
-	}
-
-	protected void preparePatch(FormRecord formRecord) {
+	protected void preparePatch(
+		FormRecord formRecord, FormRecord existingFormRecord) {
 	}
 
 	protected <T, R> List<R> transform(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction) {
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction) {
 
-		return TransformUtil.transform(list, unsafeFunction);
+		return TransformUtil.transform(collection, unsafeFunction);
 	}
 
 	protected <T, R> R[] transform(
@@ -158,10 +160,11 @@ public abstract class BaseFormRecordResourceImpl implements FormRecordResource {
 	}
 
 	protected <T, R> R[] transformToArray(
-		List<T> list, UnsafeFunction<T, R, Exception> unsafeFunction,
-		Class<?> clazz) {
+		Collection<T> collection,
+		UnsafeFunction<T, R, Exception> unsafeFunction, Class<?> clazz) {
 
-		return TransformUtil.transformToArray(list, unsafeFunction, clazz);
+		return TransformUtil.transformToArray(
+			collection, unsafeFunction, clazz);
 	}
 
 	protected <T, R> List<R> transformToList(

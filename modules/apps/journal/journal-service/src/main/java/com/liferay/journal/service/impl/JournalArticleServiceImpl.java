@@ -19,18 +19,18 @@ import com.liferay.journal.model.JournalArticle;
 import com.liferay.journal.model.JournalArticleConstants;
 import com.liferay.journal.model.JournalFolder;
 import com.liferay.journal.model.JournalFolderConstants;
+import com.liferay.journal.service.JournalFolderService;
 import com.liferay.journal.service.base.JournalArticleServiceBaseImpl;
 import com.liferay.petra.string.StringPool;
+import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.dao.orm.QueryDefinition;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.portlet.PortletRequestModel;
 import com.liferay.portal.kernel.search.Hits;
 import com.liferay.portal.kernel.security.permission.ActionKeys;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermission;
-import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionFactory;
 import com.liferay.portal.kernel.security.permission.resource.ModelResourcePermissionHelper;
 import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermission;
-import com.liferay.portal.kernel.security.permission.resource.PortletResourcePermissionFactory;
 import com.liferay.portal.kernel.service.ServiceContext;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.ArrayUtil;
@@ -48,6 +48,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+
 /**
  * Provides the remote service for accessing, adding, deleting, and updating web
  * content articles. Its methods include permission checks.
@@ -57,6 +60,13 @@ import java.util.Map;
  * @author Levente Hudák
  * @see    JournalArticleLocalServiceImpl
  */
+@Component(
+	property = {
+		"json.web.service.context.name=journal",
+		"json.web.service.context.path=JournalArticle"
+	},
+	service = AopService.class
+)
 public class JournalArticleServiceImpl extends JournalArticleServiceBaseImpl {
 
 	/**
@@ -752,8 +762,8 @@ public class JournalArticleServiceImpl extends JournalArticleServiceBaseImpl {
 			getPermissionChecker(), article, ActionKeys.VIEW);
 
 		return journalArticleLocalService.getArticleContent(
-			groupId, articleId, version, null, null, languageId,
-			portletRequestModel, themeDisplay);
+			groupId, articleId, version, null, article.getDDMTemplateKey(),
+			languageId, portletRequestModel, themeDisplay);
 	}
 
 	/**
@@ -813,8 +823,8 @@ public class JournalArticleServiceImpl extends JournalArticleServiceBaseImpl {
 			getPermissionChecker(), article, ActionKeys.VIEW);
 
 		return journalArticleLocalService.getArticleContent(
-			groupId, articleId, null, null, languageId, portletRequestModel,
-			themeDisplay);
+			groupId, articleId, null, article.getDDMTemplateKey(), languageId,
+			portletRequestModel, themeDisplay);
 	}
 
 	/**
@@ -1379,7 +1389,7 @@ public class JournalArticleServiceImpl extends JournalArticleServiceBaseImpl {
 		List<Long> folderIds = new ArrayList<>();
 
 		if (rootFolderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			folderIds = journalFolderService.getFolderIds(
+			folderIds = _journalFolderService.getFolderIds(
 				groupId, rootFolderId);
 		}
 
@@ -1424,7 +1434,7 @@ public class JournalArticleServiceImpl extends JournalArticleServiceBaseImpl {
 		List<Long> folderIds = new ArrayList<>();
 
 		if (rootFolderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			folderIds = journalFolderService.getFolderIds(
+			folderIds = _journalFolderService.getFolderIds(
 				groupId, rootFolderId);
 		}
 
@@ -1585,7 +1595,7 @@ public class JournalArticleServiceImpl extends JournalArticleServiceBaseImpl {
 		List<Long> folderIds = new ArrayList<>();
 
 		if (rootFolderId != JournalFolderConstants.DEFAULT_PARENT_FOLDER_ID) {
-			folderIds = journalFolderService.getFolderIds(
+			folderIds = _journalFolderService.getFolderIds(
 				groupId, rootFolderId);
 		}
 
@@ -2878,20 +2888,24 @@ public class JournalArticleServiceImpl extends JournalArticleServiceBaseImpl {
 			new HashMap<String, Serializable>());
 	}
 
-	private static volatile ModelResourcePermission<JournalArticle>
-		_journalArticleModelResourcePermission =
-			ModelResourcePermissionFactory.getInstance(
-				JournalArticleServiceImpl.class,
-				"_journalArticleModelResourcePermission", JournalArticle.class);
-	private static volatile ModelResourcePermission<JournalFolder>
-		_journalFolderModelResourcePermission =
-			ModelResourcePermissionFactory.getInstance(
-				JournalArticleServiceImpl.class,
-				"_journalFolderModelResourcePermission", JournalFolder.class);
-	private static volatile PortletResourcePermission
-		_portletResourcePermission =
-			PortletResourcePermissionFactory.getInstance(
-				JournalArticleServiceImpl.class, "_portletResourcePermission",
-				JournalConstants.RESOURCE_NAME);
+	@Reference(
+		target = "(model.class.name=com.liferay.journal.model.JournalArticle)"
+	)
+	private ModelResourcePermission<JournalArticle>
+		_journalArticleModelResourcePermission;
+
+	@Reference(
+		target = "(model.class.name=com.liferay.journal.model.JournalFolder)"
+	)
+	private ModelResourcePermission<JournalFolder>
+		_journalFolderModelResourcePermission;
+
+	@Reference
+	private JournalFolderService _journalFolderService;
+
+	@Reference(
+		target = "(resource.name=" + JournalConstants.RESOURCE_NAME + ")"
+	)
+	private PortletResourcePermission _portletResourcePermission;
 
 }
