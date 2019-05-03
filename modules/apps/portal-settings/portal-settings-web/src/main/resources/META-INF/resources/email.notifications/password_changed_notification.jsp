@@ -27,13 +27,13 @@ String sectionName = "password-changed-notification";
 
 <aui:input name="<%= Constants.CMD %>" type="hidden" value="<%= Constants.UPDATE %>" />
 
-<liferay-ui:error key="emailPasswordSentSubject" message="please-enter-a-valid-subject" />
-<liferay-ui:error key="emailPasswordSentBody" message="please-enter-a-valid-body" />
+<liferay-ui:error key="emailPasswordChangedSubject" message="please-enter-a-valid-subject" />
+<liferay-ui:error key="emailPasswordChangedBody" message="please-enter-a-valid-body" />
 
 <liferay-frontend:email-notification-settings
-	emailBody='<%= LocalizationUtil.getLocalizationXmlFromPreferences(companyPortletPreferences, renderRequest, "adminEmailPasswordSentBody", "settings", ContentUtil.get(PortalClassLoaderUtil.getClassLoader(), PropsValues.ADMIN_EMAIL_PASSWORD_SENT_BODY)) %>'
+	emailBody='<%= LocalizationUtil.getLocalizationXmlFromPreferences(companyPortletPreferences, renderRequest, "adminEmailPasswordSentBody", "settings", ContentUtil.get(PortalClassLoaderUtil.getClassLoader(), PropsValues.ADMIN_EMAIL_PASSWORD_CHANGED_BODY)) %>'
 	emailParam="adminEmailPasswordSent"
-	emailSubject='<%= LocalizationUtil.getLocalizationXmlFromPreferences(companyPortletPreferences, renderRequest, "adminEmailPasswordSentSubject", "settings", ContentUtil.get(PortalClassLoaderUtil.getClassLoader(), PropsValues.ADMIN_EMAIL_PASSWORD_SENT_SUBJECT)) %>'
+	emailSubject='<%= LocalizationUtil.getLocalizationXmlFromPreferences(companyPortletPreferences, renderRequest, "adminEmailPasswordSentSubject", "settings", ContentUtil.get(PortalClassLoaderUtil.getClassLoader(), PropsValues.ADMIN_EMAIL_PASSWORD_CHANGED_SUBJECT)) %>'
 	fieldPrefix="settings"
 	showEmailEnabled="<%= false %>"
 />

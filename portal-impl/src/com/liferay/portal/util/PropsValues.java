@@ -51,6 +51,12 @@ public class PropsValues {
 	public static String ADMIN_EMAIL_FROM_NAME = PropsUtil.get(
 		PropsKeys.ADMIN_EMAIL_FROM_NAME);
 
+	public static final String ADMIN_EMAIL_PASSWORD_CHANGED_BODY =
+		PropsUtil.get(PropsKeys.ADMIN_EMAIL_PASSWORD_CHANGED_BODY);
+
+	public static final String ADMIN_EMAIL_PASSWORD_CHANGED_SUBJECT =
+		PropsUtil.get(PropsKeys.ADMIN_EMAIL_PASSWORD_CHANGED_SUBJECT);
+
 	public static final String ADMIN_EMAIL_PASSWORD_RESET_BODY = PropsUtil.get(
 		PropsKeys.ADMIN_EMAIL_PASSWORD_RESET_BODY);
 
