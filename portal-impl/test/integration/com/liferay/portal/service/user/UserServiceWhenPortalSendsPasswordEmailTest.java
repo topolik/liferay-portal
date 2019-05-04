@@ -52,7 +52,7 @@ public class UserServiceWhenPortalSendsPasswordEmailTest {
 	}
 
 	@Test
-	public void testShouldSendNewPasswordEmailByEmailAddress()
+	public void testShouldSendChangePasswordEmailByEmailAddress()
 		throws Exception {
 
 		PortletPreferences portletPreferences =
@@ -70,7 +70,7 @@ public class UserServiceWhenPortalSendsPasswordEmailTest {
 				initialInboxSize + 1, MailServiceTestUtil.getInboxSize());
 			Assert.assertTrue(
 				MailServiceTestUtil.lastMailMessageContains(
-					"email_password_sent_body.tmpl"));
+					"email_password_changed_body.tmpl"));
 		}
 		finally {
 			restorePortletPreferences(portletPreferences);
@@ -78,7 +78,9 @@ public class UserServiceWhenPortalSendsPasswordEmailTest {
 	}
 
 	@Test
-	public void testShouldSendNewPasswordEmailByScreenName() throws Exception {
+	public void testShouldSendChangePasswordEmailByScreenName()
+		throws Exception {
+
 		PortletPreferences portletPreferences =
 			givenThatCompanySendsNewPassword();
 
@@ -94,7 +96,7 @@ public class UserServiceWhenPortalSendsPasswordEmailTest {
 				initialInboxSize + 1, MailServiceTestUtil.getInboxSize());
 			Assert.assertTrue(
 				MailServiceTestUtil.lastMailMessageContains(
-					"email_password_sent_body.tmpl"));
+					"email_password_changed_body.tmpl"));
 		}
 		finally {
 			restorePortletPreferences(portletPreferences);
@@ -102,7 +104,7 @@ public class UserServiceWhenPortalSendsPasswordEmailTest {
 	}
 
 	@Test
-	public void testShouldSendNewPasswordEmailByUserId() throws Exception {
+	public void testShouldSendChangePasswordEmailByUserId() throws Exception {
 		PortletPreferences portletPreferences =
 			givenThatCompanySendsNewPassword();
 
@@ -118,7 +120,7 @@ public class UserServiceWhenPortalSendsPasswordEmailTest {
 				initialInboxSize + 1, MailServiceTestUtil.getInboxSize());
 			Assert.assertTrue(
 				MailServiceTestUtil.lastMailMessageContains(
-					"email_password_sent_body.tmpl"));
+					"email_password_changed_body.tmpl"));
 		}
 		finally {
 			restorePortletPreferences(portletPreferences);
