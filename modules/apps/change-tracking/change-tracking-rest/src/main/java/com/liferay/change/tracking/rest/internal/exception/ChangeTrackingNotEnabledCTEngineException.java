@@ -19,18 +19,21 @@ import javax.ws.rs.core.Response;
 /**
  * @author Máté Thurzó
  */
-public class NoSuchUserEngineException extends CTJaxRsEngineException {
+public class ChangeTrackingNotEnabledCTEngineException
+	extends JaxRsCTEngineException {
 
-	public NoSuchUserEngineException(long companyId) {
+	public ChangeTrackingNotEnabledCTEngineException(long companyId) {
 		super(companyId);
 
-		setResponseStatus(Response.Status.BAD_REQUEST);
+		setResponseStatus(Response.Status.CONFLICT);
 	}
 
-	public NoSuchUserEngineException(long companyId, String msg) {
+	public ChangeTrackingNotEnabledCTEngineException(
+		long companyId, String msg) {
+
 		super(companyId, msg);
 
-		setResponseStatus(Response.Status.BAD_REQUEST);
+		setResponseStatus(Response.Status.CONFLICT);
 	}
 
 }

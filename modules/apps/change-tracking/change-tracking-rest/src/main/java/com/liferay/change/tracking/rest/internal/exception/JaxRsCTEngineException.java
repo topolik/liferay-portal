@@ -21,21 +21,21 @@ import javax.ws.rs.core.Response;
 /**
  * @author Máté Thurzó
  */
-public class CTJaxRsEngineException extends CTEngineException {
+public class JaxRsCTEngineException extends CTEngineException {
 
-	public CTJaxRsEngineException(long companyId) {
+	public JaxRsCTEngineException(long companyId) {
 		super(companyId);
 	}
 
-	public CTJaxRsEngineException(long companyId, String msg) {
+	public JaxRsCTEngineException(long companyId, String msg) {
 		super(companyId, msg);
 	}
 
-	public CTJaxRsEngineException(long companyId, String msg, Throwable cause) {
+	public JaxRsCTEngineException(long companyId, String msg, Throwable cause) {
 		super(companyId, msg, cause);
 	}
 
-	public CTJaxRsEngineException(long companyId, Throwable cause) {
+	public JaxRsCTEngineException(long companyId, Throwable cause) {
 		super(companyId, cause);
 	}
 

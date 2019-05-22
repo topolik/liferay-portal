@@ -686,6 +686,19 @@ AUI.add(
 						}
 					},
 
+					syncLabel: function(locale) {
+						var instance = this;
+
+						var fieldDefinition = instance.getFieldDefinition();
+
+						if (Lang.isUndefined(fieldDefinition.label[locale])) {
+							instance.setLabel(fieldDefinition.label[instance.getDefaultLocale()]);
+						}
+						else {
+							instance.setLabel(fieldDefinition.label[locale]);
+						}
+					},
+
 					syncReadOnlyUI: function() {
 						var instance = this;
 
@@ -891,6 +904,7 @@ AUI.add(
 
 						instance.set('displayLocale', displayLocale);
 
+						instance.syncLabel(displayLocale);
 						instance.syncValueUI();
 						instance.syncReadOnlyUI();
 					},

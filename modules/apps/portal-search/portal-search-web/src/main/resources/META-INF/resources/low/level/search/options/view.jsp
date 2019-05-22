@@ -1,3 +1,4 @@
+<%--
 /**
  * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
@@ -11,27 +12,14 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+--%>
 
-package com.liferay.change.tracking.rest.internal.exception;
+<%@ taglib uri="http://liferay.com/tld/aui" prefix="aui" %><%@
+taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %><%@
+taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
-import javax.ws.rs.core.Response;
+<liferay-theme:defineObjects />
 
-/**
- * @author Máté Thurzó
- */
-public class ChangeTrackingNotEnabledEngineException
-	extends CTJaxRsEngineException {
-
-	public ChangeTrackingNotEnabledEngineException(long companyId) {
-		super(companyId);
-
-		setResponseStatus(Response.Status.CONFLICT);
-	}
-
-	public ChangeTrackingNotEnabledEngineException(long companyId, String msg) {
-		super(companyId, msg);
-
-		setResponseStatus(Response.Status.CONFLICT);
-	}
-
-}
+<div class="alert alert-info text-center">
+	<aui:a href="javascript:;" onClick="<%= portletDisplay.getURLConfigurationJS() %>"><liferay-ui:message key="low-level-search-options-help" /></aui:a>
+</div>

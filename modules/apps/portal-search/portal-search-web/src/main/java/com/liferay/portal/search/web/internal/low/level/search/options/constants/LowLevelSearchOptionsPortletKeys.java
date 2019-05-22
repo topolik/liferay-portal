@@ -12,26 +12,15 @@
  * details.
  */
 
-package com.liferay.change.tracking.rest.internal.exception;
-
-import javax.ws.rs.core.Response;
+package com.liferay.portal.search.web.internal.low.level.search.options.constants;
 
 /**
- * @author Máté Thurzó
+ * @author Bryan Engler
  */
-public class CannotCreateCTCollectionEngineException
-	extends CTJaxRsEngineException {
+public class LowLevelSearchOptionsPortletKeys {
 
-	public CannotCreateCTCollectionEngineException(long companyId) {
-		super(companyId);
-
-		setResponseStatus(Response.Status.BAD_REQUEST);
-	}
-
-	public CannotCreateCTCollectionEngineException(long companyId, String msg) {
-		super(companyId, msg);
-
-		setResponseStatus(Response.Status.BAD_REQUEST);
-	}
+	public static final String LOW_LEVEL_SEARCH_OPTIONS =
+		"com_liferay_portal_search_web_low_level_search_options_portlet_" +
+			"LowLevelSearchOptionsPortlet";
 
 }
