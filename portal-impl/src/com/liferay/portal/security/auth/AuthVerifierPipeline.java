@@ -18,6 +18,7 @@ import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.security.auth.AccessControlContext;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifier;
 import com.liferay.portal.kernel.security.auth.verifier.AuthVerifierConfiguration;
@@ -283,6 +284,21 @@ public class AuthVerifierPipeline {
 
 			if (authVerifierResult.getState() !=
 					AuthVerifierResult.State.NOT_APPLICABLE) {
+
+				User user = UserLocalServiceUtil.fetchUser(
+					authVerifierResult.getUserId());
+
+				if ((user == null) || !user.isActive()) {
+					if (_log.isDebugEnabled()) {
+						Class<?> authVerifierClass = authVerifier.getClass();
+
+						_log.debug(
+							"Auth verifier " + authVerifierClass.getName() +
+								" returned a not active user");
+					}
+
+					continue;
+				}
 
 				Map<String, Object> settings = _mergeSettings(
 					properties, authVerifierResult.getSettings());
