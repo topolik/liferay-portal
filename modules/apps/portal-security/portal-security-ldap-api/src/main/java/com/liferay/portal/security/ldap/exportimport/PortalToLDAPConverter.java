@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.directory.Attributes;
+import javax.naming.ldap.LdapName;
+
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * @author Michael C. Han
@@ -33,8 +36,14 @@ import javax.naming.directory.Attributes;
  * @author Marcellus Tavares
  * @author Wesley Gong
  */
+@ProviderType
 public interface PortalToLDAPConverter {
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), replaced by {@link
+	 *             #getUserGroupLdapName(long, UserGroup, Properties)}
+	 */
+	@Deprecated
 	public String getGroupDNName(
 			long ldapServerId, UserGroup userGroup, Properties groupMappings)
 		throws Exception;
@@ -69,7 +78,20 @@ public interface PortalToLDAPConverter {
 			Properties userMappings, Properties userExpandoMappings)
 		throws Exception;
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), replaced by {@link
+	 *             #getUserLdapName(long, User, Properties)}
+	 */
+	@Deprecated
 	public String getUserDNName(
+			long ldapServerId, User user, Properties userMappings)
+		throws Exception;
+
+	public LdapName getUserGroupLdapName(
+			long ldapServerId, UserGroup userGroup, Properties groupMappings)
+		throws Exception;
+
+	public LdapName getUserLdapName(
 			long ldapServerId, User user, Properties userMappings)
 		throws Exception;
 

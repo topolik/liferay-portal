@@ -14,16 +14,51 @@
 
 package com.liferay.portal.security.ldap.validator;
 
+import com.liferay.petra.string.StringBundler;
+
+import java.util.Collections;
+
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * @author Vilmos Papp
  */
+@ProviderType
 public interface LDAPFilterValidator {
 
 	public boolean isValid(String filter);
 
-	public void validate(String filter) throws LDAPFilterException;
+	public default LDAPFilter validate(String filter)
+		throws LDAPFilterException {
 
-	public void validate(String filter, String filterPropertyName)
-		throws LDAPFilterException;
+		if (!isValid(filter)) {
+			throw new LDAPFilterException("Invalid filter " + filter);
+		}
+
+		if (filter == null) {
+			return null;
+		}
+
+		return new LDAPFilter(
+			new StringBundler(filter), Collections.emptyList());
+	}
+
+	public default LDAPFilter validate(String filter, String filterPropertyName)
+		throws LDAPFilterException {
+
+		if (!isValid(filter)) {
+			throw new LDAPFilterException(
+				StringBundler.concat(
+					"Invalid filter ", filter, " defined by ",
+					filterPropertyName));
+		}
+
+		if (filter == null) {
+			return null;
+		}
+
+		return new LDAPFilter(
+			new StringBundler(filter), Collections.emptyList());
+	}
 
 }

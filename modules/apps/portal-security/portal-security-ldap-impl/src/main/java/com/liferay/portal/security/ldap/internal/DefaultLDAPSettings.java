@@ -30,6 +30,7 @@ import com.liferay.portal.security.ldap.configuration.LDAPServerConfiguration;
 import com.liferay.portal.security.ldap.configuration.SystemLDAPConfiguration;
 import com.liferay.portal.security.ldap.exportimport.configuration.LDAPExportConfiguration;
 import com.liferay.portal.security.ldap.exportimport.configuration.LDAPImportConfiguration;
+import com.liferay.portal.security.ldap.validator.LDAPFilter;
 import com.liferay.portal.security.ldap.validator.LDAPFilterValidator;
 
 import java.util.Properties;
@@ -45,6 +46,10 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true, service = LDAPSettings.class)
 public class DefaultLDAPSettings implements LDAPSettings {
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), with no direct replacement
+	 */
+	@Deprecated
 	@Override
 	public String getAuthSearchFilter(
 			long ldapServerId, long companyId, String emailAddress,
@@ -57,6 +62,11 @@ public class DefaultLDAPSettings implements LDAPSettings {
 
 		String filter = ldapServerConfiguration.authSearchFilter();
 
+		_ldapFilterValidator.validate(
+			filter,
+			LDAPServerConfiguration.class.getSimpleName() +
+				".authSearchFilter");
+
 		if (_log.isDebugEnabled()) {
 			_log.debug("Search filter before transformation " + filter);
 		}
@@ -67,7 +77,10 @@ public class DefaultLDAPSettings implements LDAPSettings {
 				"@company_id@", "@email_address@", "@screen_name@", "@user_id@"
 			},
 			new String[] {
-				String.valueOf(companyId), emailAddress, screenName, userId
+				String.valueOf(companyId),
+				LDAPFilter.rfc2254Escape(emailAddress),
+				LDAPFilter.rfc2254Escape(screenName),
+				LDAPFilter.rfc2254Escape(userId)
 			});
 
 		_ldapFilterValidator.validate(filter);

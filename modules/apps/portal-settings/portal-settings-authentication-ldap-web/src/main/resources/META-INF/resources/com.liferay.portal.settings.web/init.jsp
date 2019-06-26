@@ -23,8 +23,7 @@ taglib uri="http://liferay.com/tld/frontend" prefix="liferay-frontend" %><%@
 taglib uri="http://liferay.com/tld/theme" prefix="liferay-theme" %><%@
 taglib uri="http://liferay.com/tld/ui" prefix="liferay-ui" %>
 
-<%@ page import="com.liferay.petra.string.StringBundler" %><%@
-page import="com.liferay.petra.string.StringPool" %><%@
+<%@ page import="com.liferay.petra.string.StringPool" %><%@
 page import="com.liferay.portal.kernel.language.LanguageUtil" %><%@
 page import="com.liferay.portal.kernel.language.UnicodeLanguageUtil" %><%@
 page import="com.liferay.portal.kernel.portlet.LiferayWindowState" %><%@
@@ -41,10 +40,12 @@ page import="com.liferay.portal.kernel.util.StringUtil" %><%@
 page import="com.liferay.portal.kernel.util.Validator" %><%@
 page import="com.liferay.portal.security.ldap.DuplicateLDAPServerNameException" %><%@
 page import="com.liferay.portal.security.ldap.LDAPServerNameException" %><%@
+page import="com.liferay.portal.security.ldap.SafeLdapContext" %><%@
 page import="com.liferay.portal.security.ldap.configuration.ConfigurationProvider" %><%@
 page import="com.liferay.portal.security.ldap.configuration.LDAPServerConfiguration" %><%@
 page import="com.liferay.portal.security.ldap.constants.LDAPConstants" %><%@
 page import="com.liferay.portal.security.ldap.util.LDAPUtil" %><%@
+page import="com.liferay.portal.security.ldap.validator.LDAPFilter" %><%@
 page import="com.liferay.portal.security.ldap.validator.LDAPFilterException" %><%@
 page import="com.liferay.portal.settings.authentication.ldap.web.internal.portlet.util.ConfigurationProviderUtil" %><%@
 page import="com.liferay.portal.settings.authentication.ldap.web.internal.util.LDAPFilterValidatorUtil" %><%@
@@ -55,11 +56,11 @@ page import="com.liferay.portal.util.PropsValues" %>
 page import="java.util.List" %><%@
 page import="java.util.Properties" %>
 
-<%@ page import="javax.naming.NameNotFoundException" %><%@
+<%@ page import="javax.naming.InvalidNameException" %><%@
+page import="javax.naming.NameNotFoundException" %><%@
 page import="javax.naming.directory.Attribute" %><%@
 page import="javax.naming.directory.Attributes" %><%@
-page import="javax.naming.directory.SearchResult" %><%@
-page import="javax.naming.ldap.LdapContext" %>
+page import="javax.naming.directory.SearchResult" %>
 
 <%@ page import="javax.portlet.PortletURL" %>
 

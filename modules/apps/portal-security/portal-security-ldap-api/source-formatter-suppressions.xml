@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<suppressions>
+	<checkstyle>
+		<suppress checks="MissingModifierCheck" files="src/main/java/com/liferay/portal/security/ldap/validator/LDAPFilter\.java" />
+	</checkstyle>
+</suppressions>

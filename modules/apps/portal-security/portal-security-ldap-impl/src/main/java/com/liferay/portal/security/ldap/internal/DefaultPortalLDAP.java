@@ -32,11 +32,14 @@ import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.ldap.PortalLDAP;
+import com.liferay.portal.security.ldap.SafeLdapContext;
 import com.liferay.portal.security.ldap.UserConverterKeys;
 import com.liferay.portal.security.ldap.configuration.ConfigurationProvider;
 import com.liferay.portal.security.ldap.configuration.LDAPServerConfiguration;
 import com.liferay.portal.security.ldap.configuration.SystemLDAPConfiguration;
+import com.liferay.portal.security.ldap.internal.validator.SafeLdapContextImpl;
 import com.liferay.portal.security.ldap.util.LDAPUtil;
+import com.liferay.portal.security.ldap.validator.LDAPFilter;
 import com.liferay.portal.security.ldap.validator.LDAPFilterValidator;
 
 import java.util.ArrayList;
@@ -45,7 +48,6 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.naming.Binding;
-import javax.naming.CompositeName;
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NameNotFoundException;
@@ -86,6 +88,14 @@ import org.osgi.service.component.annotations.ReferencePolicyOption;
 )
 public class DefaultPortalLDAP implements PortalLDAP {
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), replaced by {@link
+	 *             LDAPUtil#asLdapName(
+	 *             String)} for RDN escape and {@link
+	 *             LDAPFilter#rfc2254Escape(String)} to escape attribute value
+	 *             inside a filter
+	 */
+	@Deprecated
 	@Override
 	public String encodeFilterAttribute(String attribute, boolean rdnEscape) {
 		String[] oldString = {
@@ -96,8 +106,8 @@ public class DefaultPortalLDAP implements PortalLDAP {
 		String[] newString = {"\\5c", "\\29", "\\00", "\\28", "\\2a"};
 
 		if (rdnEscape) {
-			ArrayUtil.remove(oldString, StringPool.BACK_SLASH);
-			ArrayUtil.remove(newString, "\\5c");
+			oldString = ArrayUtil.remove(oldString, StringPool.BACK_SLASH);
+			newString = ArrayUtil.remove(newString, "\\5c");
 		}
 
 		String newAttribute = StringUtil.replace(
@@ -110,82 +120,31 @@ public class DefaultPortalLDAP implements PortalLDAP {
 		return newAttribute;
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getSafeLDAPContext(long, long)}
+	 */
+	@Deprecated
 	@Override
 	public LdapContext getContext(long ldapServerId, long companyId)
 		throws Exception {
 
-		LDAPServerConfiguration ldapServerConfiguration =
-			_ldapServerConfigurationProvider.getConfiguration(
-				companyId, ldapServerId);
-
-		String baseProviderURL = ldapServerConfiguration.baseProviderURL();
-		String securityPrincipal = ldapServerConfiguration.securityPrincipal();
-		String securityCredential =
-			ldapServerConfiguration.securityCredential();
-
-		return getContext(
-			companyId, baseProviderURL, securityPrincipal, securityCredential);
+		return getSafeLDAPContext(ldapServerId, companyId);
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getSafeLDAPContext(long, String, String, String)}
+	 */
+	@Deprecated
 	@Override
 	public LdapContext getContext(
 			long companyId, String providerURL, String principal,
 			String credentials)
 		throws Exception {
 
-		SystemLDAPConfiguration systemLDAPConfiguration =
-			_systemLDAPConfigurationProvider.getConfiguration(companyId);
-
-		Properties environmentProperties = new Properties();
-
-		environmentProperties.put(
-			Context.INITIAL_CONTEXT_FACTORY,
-			systemLDAPConfiguration.factoryInitial());
-		environmentProperties.put(Context.PROVIDER_URL, providerURL);
-		environmentProperties.put(
-			Context.REFERRAL, systemLDAPConfiguration.referral());
-		environmentProperties.put(Context.SECURITY_CREDENTIALS, credentials);
-		environmentProperties.put(Context.SECURITY_PRINCIPAL, principal);
-
-		String[] connectionProperties =
-			systemLDAPConfiguration.connectionProperties();
-
-		for (String connectionProperty : connectionProperties) {
-			String[] connectionPropertySplit = StringUtil.split(
-				connectionProperty, CharPool.EQUAL);
-
-			if (connectionPropertySplit.length != 2) {
-				if (_log.isWarnEnabled()) {
-					_log.warn(
-						"Invalid LDAP connection property: " +
-							connectionProperty);
-
-					continue;
-				}
-			}
-
-			environmentProperties.put(
-				connectionPropertySplit[0], connectionPropertySplit[1]);
-		}
-
-		if (_log.isDebugEnabled()) {
-			_log.debug(
-				MapUtil.toString(
-					environmentProperties, null, Context.SECURITY_CREDENTIALS));
-		}
-
-		LdapContext ldapContext = null;
-
-		try {
-			ldapContext = new InitialLdapContext(environmentProperties, null);
-		}
-		catch (Exception e) {
-			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to bind to the LDAP server", e);
-			}
-		}
-
-		return ldapContext;
+		return getSafeLDAPContext(
+			companyId, providerURL, principal, credentials);
 	}
 
 	@Override
@@ -196,50 +155,37 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			_ldapServerConfigurationProvider.getConfiguration(
 				companyId, ldapServerId);
 
-		LdapContext ldapContext = getContext(ldapServerId, companyId);
+		SafeLdapContext safeLdapContext = getSafeLDAPContext(
+			ldapServerId, companyId);
 
 		NamingEnumeration<SearchResult> enu = null;
 
 		try {
-			if (ldapContext == null) {
+			if (safeLdapContext == null) {
 				return null;
 			}
-
-			String groupsDN = ldapServerConfiguration.groupsDN();
-
-			String groupFilter = ldapServerConfiguration.groupSearchFilter();
-
-			_ldapFilterValidator.validate(
-				groupFilter, "SystemLDAPConfiguration.groupSearchFilter");
-
-			StringBundler sb = new StringBundler(
-				Validator.isNotNull(groupFilter) ? 9 : 5);
-
-			if (Validator.isNotNull(groupFilter)) {
-				sb.append(StringPool.OPEN_PARENTHESIS);
-				sb.append(StringPool.AMPERSAND);
-			}
-
-			sb.append(StringPool.OPEN_PARENTHESIS);
 
 			Properties groupMappings = _ldapSettings.getGroupMappings(
 				ldapServerId, companyId);
 
-			sb.append(groupMappings.getProperty("groupName"));
+			LDAPFilter ldapFilter = LDAPFilter.eq(
+				groupMappings.getProperty("groupName"), groupName);
 
-			sb.append(StringPool.EQUAL);
-			sb.append(encodeFilterAttribute(groupName, true));
-			sb.append(StringPool.CLOSE_PARENTHESIS);
+			LDAPFilter groupLDAPFilter = _ldapFilterValidator.validate(
+				ldapServerConfiguration.groupSearchFilter(),
+				LDAPServerConfiguration.class.getSimpleName() +
+					".groupSearchFilter");
 
-			if (Validator.isNotNull(groupFilter)) {
-				sb.append(groupFilter);
-				sb.append(StringPool.CLOSE_PARENTHESIS);
+			if (groupLDAPFilter != null) {
+				ldapFilter = ldapFilter.and(groupLDAPFilter);
 			}
 
 			SearchControls searchControls = new SearchControls(
 				SearchControls.SUBTREE_SCOPE, 1, 0, null, false, false);
 
-			enu = ldapContext.search(groupsDN, sb.toString(), searchControls);
+			enu = safeLdapContext.search(
+				LDAPUtil.asLdapName(ldapServerConfiguration.groupsDN()),
+				ldapFilter, searchControls);
 
 			if (enu.hasMoreElements()) {
 				return enu.nextElement();
@@ -252,8 +198,8 @@ public class DefaultPortalLDAP implements PortalLDAP {
 				enu.close();
 			}
 
-			if (ldapContext != null) {
-				ldapContext.close();
+			if (safeLdapContext != null) {
+				safeLdapContext.close();
 			}
 		}
 	}
@@ -261,17 +207,17 @@ public class DefaultPortalLDAP implements PortalLDAP {
 	@Override
 	public Attributes getGroupAttributes(
 			long ldapServerId, long companyId, LdapContext ldapContext,
-			String fullDistinguishedName)
+			Name userGroupDNName)
 		throws Exception {
 
 		return getGroupAttributes(
-			ldapServerId, companyId, ldapContext, fullDistinguishedName, false);
+			ldapServerId, companyId, ldapContext, userGroupDNName, false);
 	}
 
 	@Override
 	public Attributes getGroupAttributes(
 			long ldapServerId, long companyId, LdapContext ldapContext,
-			String fullDistinguishedName, boolean includeReferenceAttributes)
+			Name userGroupDNName, boolean includeReferenceAttributes)
 		throws Exception {
 
 		Properties groupMappings = _ldapSettings.getGroupMappings(
@@ -287,14 +233,13 @@ public class DefaultPortalLDAP implements PortalLDAP {
 		}
 
 		Attributes attributes = _getAttributes(
-			ldapContext, fullDistinguishedName,
+			ldapContext, userGroupDNName,
 			mappedGroupAttributeIds.toArray(new String[0]));
 
 		if (_log.isDebugEnabled()) {
 			if ((attributes == null) || (attributes.size() == 0)) {
 				_log.debug(
-					"No LDAP group attributes found for " +
-						fullDistinguishedName);
+					"No LDAP group attributes found for " + userGroupDNName);
 			}
 			else {
 				for (String attributeId : mappedGroupAttributeIds) {
@@ -312,10 +257,43 @@ public class DefaultPortalLDAP implements PortalLDAP {
 		return attributes;
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getGroupAttributes(long, long, LdapContext, Name)}
+	 */
+	@Deprecated
+	@Override
+	public Attributes getGroupAttributes(
+			long ldapServerId, long companyId, LdapContext ldapContext,
+			String fullDistinguishedName)
+		throws Exception {
+
+		return getGroupAttributes(
+			ldapServerId, companyId, ldapContext,
+			LDAPUtil.asLdapName(fullDistinguishedName), false);
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getGroupAttributes(long, long, LdapContext, Name, boolean)}
+	 */
+	@Deprecated
+	@Override
+	public Attributes getGroupAttributes(
+			long ldapServerId, long companyId, LdapContext ldapContext,
+			String fullDistinguishedName, boolean includeReferenceAttributes)
+		throws Exception {
+
+		return getGroupAttributes(
+			ldapServerId, companyId, ldapContext,
+			LDAPUtil.asLdapName(fullDistinguishedName),
+			includeReferenceAttributes);
+	}
+
 	@Override
 	public byte[] getGroups(
 			long companyId, LdapContext ldapContext, byte[] cookie,
-			int maxResults, String baseDN, String groupFilter,
+			int maxResults, Name baseDN, LDAPFilter groupFilter,
 			List<SearchResult> searchResults)
 		throws Exception {
 
@@ -327,13 +305,52 @@ public class DefaultPortalLDAP implements PortalLDAP {
 	@Override
 	public byte[] getGroups(
 			long companyId, LdapContext ldapContext, byte[] cookie,
-			int maxResults, String baseDN, String groupFilter,
+			int maxResults, Name baseDN, LDAPFilter groupFilter,
 			String[] attributeIds, List<SearchResult> searchResults)
 		throws Exception {
 
 		return searchLDAP(
 			companyId, ldapContext, cookie, maxResults, baseDN, groupFilter,
 			attributeIds, searchResults);
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getGroups(long, LdapContext, byte[], int, Name, LDAPFilter,
+	 *             List)}
+	 */
+	@Deprecated
+	@Override
+	public byte[] getGroups(
+			long companyId, LdapContext ldapContext, byte[] cookie,
+			int maxResults, String baseDN, String groupFilter,
+			List<SearchResult> searchResults)
+		throws Exception {
+
+		return getGroups(
+			companyId, ldapContext, cookie, maxResults,
+			LDAPUtil.asLdapName(baseDN),
+			_ldapFilterValidator.validate(groupFilter), searchResults);
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getGroups(long, LdapContext, byte[], int, Name, LDAPFilter,
+	 *             String[], List)}
+	 */
+	@Deprecated
+	@Override
+	public byte[] getGroups(
+			long companyId, LdapContext ldapContext, byte[] cookie,
+			int maxResults, String baseDN, String groupFilter,
+			String[] attributeIds, List<SearchResult> searchResults)
+		throws Exception {
+
+		return getGroups(
+			companyId, ldapContext, cookie, maxResults,
+			LDAPUtil.asLdapName(baseDN),
+			_ldapFilterValidator.validate(groupFilter), attributeIds,
+			searchResults);
 	}
 
 	@Override
@@ -346,12 +363,13 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			_ldapServerConfigurationProvider.getConfiguration(
 				companyId, ldapServerId);
 
-		String baseDN = ldapServerConfiguration.baseDN();
-		String groupSearchFilter = ldapServerConfiguration.groupSearchFilter();
+		Name baseDNName = LDAPUtil.asLdapName(ldapServerConfiguration.baseDN());
+		LDAPFilter ldapFilter = _ldapFilterValidator.validate(
+			ldapServerConfiguration.groupSearchFilter());
 
 		return getGroups(
-			companyId, ldapContext, cookie, maxResults, baseDN,
-			groupSearchFilter, searchResults);
+			companyId, ldapContext, cookie, maxResults, baseDNName, ldapFilter,
+			searchResults);
 	}
 
 	@Override
@@ -365,12 +383,15 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			_ldapServerConfigurationProvider.getConfiguration(
 				companyId, ldapServerId);
 
-		String baseDN = ldapServerConfiguration.baseDN();
-		String groupSearchFilter = ldapServerConfiguration.groupSearchFilter();
+		Name baseDNName = LDAPUtil.asLdapName(ldapServerConfiguration.baseDN());
+		LDAPFilter ldapFilter = _ldapFilterValidator.validate(
+			ldapServerConfiguration.groupSearchFilter(),
+			LDAPServerConfiguration.class.getSimpleName() +
+				".groupSearchFilter");
 
 		return getGroups(
-			companyId, ldapContext, cookie, maxResults, baseDN,
-			groupSearchFilter, attributeIds, searchResults);
+			companyId, ldapContext, cookie, maxResults, baseDNName, ldapFilter,
+			attributeIds, searchResults);
 	}
 
 	@Override
@@ -425,8 +446,8 @@ public class DefaultPortalLDAP implements PortalLDAP {
 
 	@Override
 	public Attribute getMultivaluedAttribute(
-			long companyId, LdapContext ldapContext, String baseDN,
-			String filter, Attribute attribute)
+			long companyId, LdapContext safeLdapContext, Name baseDN,
+			LDAPFilter ldapFilter, Attribute attribute)
 		throws Exception {
 
 		if (attribute.size() > 0) {
@@ -444,7 +465,7 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			List<SearchResult> searchResults = new ArrayList<>();
 
 			searchLDAP(
-				companyId, ldapContext, new byte[0], 0, baseDN, filter,
+				companyId, safeLdapContext, new byte[0], 0, baseDN, ldapFilter,
 				attributeIds, searchResults);
 
 			if (searchResults.size() != 1) {
@@ -496,6 +517,23 @@ public class DefaultPortalLDAP implements PortalLDAP {
 	}
 
 	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getMultivaluedAttribute(long, LdapContext, Name, LDAPFilter,
+	 *             Attribute)}
+	 */
+	@Deprecated
+	@Override
+	public Attribute getMultivaluedAttribute(
+			long companyId, LdapContext ldapContext, String baseDN,
+			String filter, Attribute attribute)
+		throws Exception {
+
+		return getMultivaluedAttribute(
+			companyId, ldapContext, LDAPUtil.asLdapName(baseDN),
+			_ldapFilterValidator.validate(filter), attribute);
+	}
+
+	/**
 	 * @deprecated As of Judson (7.1.x)
 	 */
 	@Deprecated
@@ -530,6 +568,79 @@ public class DefaultPortalLDAP implements PortalLDAP {
 	}
 
 	@Override
+	public SafeLdapContext getSafeLDAPContext(
+		long ldapServerId, long companyId) {
+
+		LDAPServerConfiguration ldapServerConfiguration =
+			_ldapServerConfigurationProvider.getConfiguration(
+				companyId, ldapServerId);
+
+		return getSafeLDAPContext(
+			companyId, ldapServerConfiguration.baseProviderURL(),
+			ldapServerConfiguration.securityPrincipal(),
+			ldapServerConfiguration.securityCredential());
+	}
+
+	@Override
+	public SafeLdapContext getSafeLDAPContext(
+		long companyId, String providerURL, String principal,
+		String credentials) {
+
+		SystemLDAPConfiguration systemLDAPConfiguration =
+			_systemLDAPConfigurationProvider.getConfiguration(companyId);
+
+		Properties environmentProperties = new Properties();
+
+		environmentProperties.put(
+			Context.INITIAL_CONTEXT_FACTORY,
+			systemLDAPConfiguration.factoryInitial());
+		environmentProperties.put(Context.PROVIDER_URL, providerURL);
+		environmentProperties.put(
+			Context.REFERRAL, systemLDAPConfiguration.referral());
+		environmentProperties.put(Context.SECURITY_CREDENTIALS, credentials);
+		environmentProperties.put(Context.SECURITY_PRINCIPAL, principal);
+
+		String[] connectionProperties =
+			systemLDAPConfiguration.connectionProperties();
+
+		for (String connectionPropertyString : connectionProperties) {
+			String[] connectionProperty = StringUtil.split(
+				connectionPropertyString, CharPool.EQUAL);
+
+			if (connectionProperty.length != 2) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"Invalid LDAP connection property: " +
+							connectionPropertyString);
+
+					continue;
+				}
+			}
+
+			environmentProperties.put(
+				connectionProperty[0], connectionProperty[1]);
+		}
+
+		if (_log.isDebugEnabled()) {
+			_log.debug(
+				MapUtil.toString(
+					environmentProperties, null, Context.SECURITY_CREDENTIALS));
+		}
+
+		try {
+			return new SafeLdapContextImpl(
+				new InitialLdapContext(environmentProperties, null));
+		}
+		catch (Exception e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to bind to the LDAP server", e);
+			}
+
+			return null;
+		}
+	}
+
+	@Override
 	public Binding getUser(
 			long ldapServerId, long companyId, String screenName,
 			String emailAddress)
@@ -545,12 +656,13 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			String emailAddress, boolean checkOriginalEmail)
 		throws Exception {
 
-		LdapContext ldapContext = getContext(ldapServerId, companyId);
+		SafeLdapContext safeLdapContext = getSafeLDAPContext(
+			ldapServerId, companyId);
 
 		NamingEnumeration<SearchResult> enu = null;
 
 		try {
-			if (ldapContext == null) {
+			if (safeLdapContext == null) {
 				if (_log.isDebugEnabled()) {
 					_log.debug(
 						StringBundler.concat(
@@ -561,29 +673,6 @@ public class DefaultPortalLDAP implements PortalLDAP {
 
 				return null;
 			}
-
-			LDAPServerConfiguration ldapServerConfiguration =
-				_ldapServerConfigurationProvider.getConfiguration(
-					companyId, ldapServerId);
-
-			String baseDN = LDAPUtil.escapeCharacters(
-				ldapServerConfiguration.baseDN());
-
-			String userSearchFilter =
-				ldapServerConfiguration.userSearchFilter();
-
-			_ldapFilterValidator.validate(
-				userSearchFilter, "LDAPServerConfiguration.userSearchFilter");
-
-			StringBundler sb = new StringBundler(
-				Validator.isNotNull(userSearchFilter) ? 9 : 5);
-
-			if (Validator.isNotNull(userSearchFilter)) {
-				sb.append(StringPool.OPEN_PARENTHESIS);
-				sb.append(StringPool.AMPERSAND);
-			}
-
-			sb.append(StringPool.OPEN_PARENTHESIS);
 
 			String loginMapping = null;
 			String login = null;
@@ -608,20 +697,27 @@ public class DefaultPortalLDAP implements PortalLDAP {
 				login = emailAddress;
 			}
 
-			sb.append(loginMapping);
-			sb.append(StringPool.EQUAL);
-			sb.append(encodeFilterAttribute(login, false));
-			sb.append(StringPool.CLOSE_PARENTHESIS);
+			LDAPFilter ldapFilter = LDAPFilter.eq(loginMapping, login);
 
-			if (Validator.isNotNull(userSearchFilter)) {
-				sb.append(userSearchFilter);
-				sb.append(StringPool.CLOSE_PARENTHESIS);
+			LDAPServerConfiguration ldapServerConfiguration =
+				_ldapServerConfigurationProvider.getConfiguration(
+					companyId, ldapServerId);
+
+			LDAPFilter userSearchLDAPFilter = _ldapFilterValidator.validate(
+				ldapServerConfiguration.userSearchFilter(),
+				LDAPServerConfiguration.class.getSimpleName() +
+					".userSearchFilter");
+
+			if (userSearchLDAPFilter != null) {
+				ldapFilter = ldapFilter.and(userSearchLDAPFilter);
 			}
 
 			SearchControls searchControls = new SearchControls(
 				SearchControls.SUBTREE_SCOPE, 1, 0, null, false, false);
 
-			enu = ldapContext.search(baseDN, sb.toString(), searchControls);
+			enu = safeLdapContext.search(
+				LDAPUtil.asLdapName(ldapServerConfiguration.baseDN()),
+				ldapFilter, searchControls);
 
 			if (enu.hasMoreElements()) {
 				return enu.nextElement();
@@ -656,8 +752,8 @@ public class DefaultPortalLDAP implements PortalLDAP {
 				enu.close();
 			}
 
-			if (ldapContext != null) {
-				ldapContext.close();
+			if (safeLdapContext != null) {
+				safeLdapContext.close();
 			}
 		}
 	}
@@ -665,7 +761,7 @@ public class DefaultPortalLDAP implements PortalLDAP {
 	@Override
 	public Attributes getUserAttributes(
 			long ldapServerId, long companyId, LdapContext ldapContext,
-			String fullDistinguishedName)
+			Name fullDistinguishedName)
 		throws Exception {
 
 		Properties userMappings = _ldapSettings.getUserMappings(
@@ -734,10 +830,26 @@ public class DefaultPortalLDAP implements PortalLDAP {
 		return attributes;
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getUserAttributes(long, long, LdapContext, Name)}
+	 */
+	@Deprecated
+	@Override
+	public Attributes getUserAttributes(
+			long ldapServerId, long companyId, LdapContext ldapContext,
+			String fullDistinguishedName)
+		throws Exception {
+
+		return getUserAttributes(
+			ldapServerId, companyId, ldapContext,
+			LDAPUtil.asLdapName(fullDistinguishedName));
+	}
+
 	@Override
 	public byte[] getUsers(
 			long companyId, LdapContext ldapContext, byte[] cookie,
-			int maxResults, String baseDN, String userFilter,
+			int maxResults, Name baseDN, LDAPFilter userFilter,
 			List<SearchResult> searchResults)
 		throws Exception {
 
@@ -749,13 +861,52 @@ public class DefaultPortalLDAP implements PortalLDAP {
 	@Override
 	public byte[] getUsers(
 			long companyId, LdapContext ldapContext, byte[] cookie,
-			int maxResults, String baseDN, String userFilter,
+			int maxResults, Name baseDN, LDAPFilter userFilter,
 			String[] attributeIds, List<SearchResult> searchResults)
 		throws Exception {
 
 		return searchLDAP(
 			companyId, ldapContext, cookie, maxResults, baseDN, userFilter,
 			attributeIds, searchResults);
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getUsers(long, LdapContext, byte[], int, Name, LDAPFilter,
+	 *             List)}
+	 */
+	@Deprecated
+	@Override
+	public byte[] getUsers(
+			long companyId, LdapContext ldapContext, byte[] cookie,
+			int maxResults, String baseDN, String userFilter,
+			List<SearchResult> searchResults)
+		throws Exception {
+
+		return getUsers(
+			companyId, ldapContext, cookie, maxResults,
+			LDAPUtil.asLdapName(baseDN),
+			_ldapFilterValidator.validate(userFilter), searchResults);
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #getUsers(long, LdapContext, byte[], int, Name, LDAPFilter,
+	 *             String[], List)}
+	 */
+	@Deprecated
+	@Override
+	public byte[] getUsers(
+			long companyId, LdapContext ldapContext, byte[] cookie,
+			int maxResults, String baseDN, String userFilter,
+			String[] attributeIds, List<SearchResult> searchResults)
+		throws Exception {
+
+		return getUsers(
+			companyId, ldapContext, cookie, maxResults,
+			LDAPUtil.asLdapName(baseDN),
+			_ldapFilterValidator.validate(userFilter), attributeIds,
+			searchResults);
 	}
 
 	@Override
@@ -768,8 +919,11 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			_ldapServerConfigurationProvider.getConfiguration(
 				companyId, ldapServerId);
 
-		String baseDN = ldapServerConfiguration.baseDN();
-		String userSearchFilter = ldapServerConfiguration.userSearchFilter();
+		Name baseDN = LDAPUtil.asLdapName(ldapServerConfiguration.baseDN());
+		LDAPFilter userSearchFilter = _ldapFilterValidator.validate(
+			ldapServerConfiguration.userSearchFilter(),
+			LDAPServerConfiguration.class.getSimpleName() +
+				".userSearchFilter");
 
 		return getUsers(
 			companyId, ldapContext, cookie, maxResults, baseDN,
@@ -787,8 +941,11 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			_ldapServerConfigurationProvider.getConfiguration(
 				companyId, ldapServerId);
 
-		String baseDN = ldapServerConfiguration.baseDN();
-		String userSearchFilter = ldapServerConfiguration.userSearchFilter();
+		Name baseDN = LDAPUtil.asLdapName(ldapServerConfiguration.baseDN());
+		LDAPFilter userSearchFilter = _ldapFilterValidator.validate(
+			ldapServerConfiguration.userSearchFilter(),
+			LDAPServerConfiguration.class.getSimpleName() +
+				".userSearchFilter");
 
 		return getUsers(
 			companyId, ldapContext, cookie, maxResults, baseDN,
@@ -823,39 +980,31 @@ public class DefaultPortalLDAP implements PortalLDAP {
 
 	@Override
 	public boolean isGroupMember(
-			long ldapServerId, long companyId, String groupDN, String userDN)
+			long ldapServerId, long companyId, Name groupDNName,
+			Name userDNName)
 		throws Exception {
 
-		LdapContext ldapContext = getContext(ldapServerId, companyId);
+		SafeLdapContext safeLdapContext = getSafeLDAPContext(
+			ldapServerId, companyId);
 
 		NamingEnumeration<SearchResult> enu = null;
 
 		try {
-			if (ldapContext == null) {
+			if (safeLdapContext == null) {
 				return false;
 			}
 
 			Properties groupMappings = _ldapSettings.getGroupMappings(
 				ldapServerId, companyId);
 
-			StringBundler sb = new StringBundler(5);
-
-			sb.append(StringPool.OPEN_PARENTHESIS);
-			sb.append(groupMappings.getProperty("user"));
-			sb.append(StringPool.EQUAL);
-			sb.append(
-				encodeFilterAttribute(
-					StringUtil.replace(userDN, '\\', "\\\\"), false));
-			sb.append(StringPool.CLOSE_PARENTHESIS);
+			LDAPFilter ldapFilter = LDAPFilter.eq(
+				groupMappings.getProperty("user"), userDNName);
 
 			SearchControls searchControls = new SearchControls(
 				SearchControls.SUBTREE_SCOPE, 1, 0, null, false, false);
 
-			Name name = new CompositeName();
-
-			name.add(groupDN);
-
-			enu = ldapContext.search(name, sb.toString(), searchControls);
+			enu = safeLdapContext.search(
+				groupDNName, ldapFilter, searchControls);
 
 			if (enu.hasMoreElements()) {
 				return true;
@@ -865,8 +1014,8 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
 					StringBundler.concat(
-						"Unable to determine if user DN ", userDN,
-						" is a member of group DN ", groupDN),
+						"Unable to determine if user DN ", userDNName,
+						" is a member of group DN ", groupDNName),
 					nnfe);
 			}
 		}
@@ -875,45 +1024,56 @@ public class DefaultPortalLDAP implements PortalLDAP {
 				enu.close();
 			}
 
-			if (ldapContext != null) {
-				ldapContext.close();
+			if (safeLdapContext != null) {
+				safeLdapContext.close();
 			}
 		}
 
 		return false;
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #isGroupMember(long, long, Name, Name)}
+	 */
+	@Deprecated
 	@Override
-	public boolean isUserGroupMember(
+	public boolean isGroupMember(
 			long ldapServerId, long companyId, String groupDN, String userDN)
 		throws Exception {
 
-		LdapContext ldapContext = getContext(ldapServerId, companyId);
+		return isGroupMember(
+			ldapServerId, companyId, LDAPUtil.asLdapName(groupDN),
+			LDAPUtil.asLdapName(userDN));
+	}
+
+	@Override
+	public boolean isUserGroupMember(
+			long ldapServerId, long companyId, Name groupDNName,
+			Name userDNName)
+		throws Exception {
+
+		SafeLdapContext safeLdapContext = getSafeLDAPContext(
+			ldapServerId, companyId);
 
 		NamingEnumeration<SearchResult> enu = null;
 
 		try {
-			if (ldapContext == null) {
+			if (safeLdapContext == null) {
 				return false;
 			}
 
 			Properties userMappings = _ldapSettings.getUserMappings(
 				ldapServerId, companyId);
 
-			StringBundler sb = new StringBundler(5);
-
-			sb.append(StringPool.OPEN_PARENTHESIS);
-			sb.append(userMappings.getProperty(UserConverterKeys.GROUP));
-			sb.append(StringPool.EQUAL);
-			sb.append(
-				encodeFilterAttribute(
-					StringUtil.replace(groupDN, '\\', "\\\\"), false));
-			sb.append(StringPool.CLOSE_PARENTHESIS);
+			LDAPFilter ldapFilter = LDAPFilter.eq(
+				userMappings.getProperty(UserConverterKeys.GROUP), groupDNName);
 
 			SearchControls searchControls = new SearchControls(
 				SearchControls.SUBTREE_SCOPE, 1, 0, null, false, false);
 
-			enu = ldapContext.search(userDN, sb.toString(), searchControls);
+			enu = safeLdapContext.search(
+				userDNName, ldapFilter, searchControls);
 
 			if (enu.hasMoreElements()) {
 				return true;
@@ -923,8 +1083,8 @@ public class DefaultPortalLDAP implements PortalLDAP {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
 					StringBundler.concat(
-						"Unable to determine if group DN ", groupDN,
-						" is a member of user DN ", userDN),
+						"Unable to determine if group DN ", groupDNName,
+						" is a member of user DN ", userDNName),
 					nnfe);
 			}
 		}
@@ -933,22 +1093,35 @@ public class DefaultPortalLDAP implements PortalLDAP {
 				enu.close();
 			}
 
-			if (ldapContext != null) {
-				ldapContext.close();
+			if (safeLdapContext != null) {
+				safeLdapContext.close();
 			}
 		}
 
 		return false;
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #isUserGroupMember(long, long, Name, Name)}
+	 */
+	@Deprecated
+	@Override
+	public boolean isUserGroupMember(
+			long ldapServerId, long companyId, String groupDN, String userDN)
+		throws Exception {
+
+		return isUserGroupMember(
+			ldapServerId, companyId, LDAPUtil.asLdapName(groupDN),
+			LDAPUtil.asLdapName(userDN));
+	}
+
 	@Override
 	public byte[] searchLDAP(
 			long companyId, LdapContext ldapContext, byte[] cookie,
-			int maxResults, String baseDN, String filter, String[] attributeIds,
-			List<SearchResult> searchResults)
+			int maxResults, Name baseDNName, LDAPFilter ldapFilter,
+			String[] attributeIds, List<SearchResult> searchResults)
 		throws Exception {
-
-		baseDN = LDAPUtil.escapeCharacters(baseDN);
 
 		SearchControls searchControls = new SearchControls(
 			SearchControls.SUBTREE_SCOPE, maxResults, 0, attributeIds, false,
@@ -979,7 +1152,18 @@ public class DefaultPortalLDAP implements PortalLDAP {
 						});
 				}
 
-				enu = ldapContext.search(baseDN, filter, searchControls);
+				if (ldapContext instanceof SafeLdapContext) {
+					SafeLdapContext safeLdapContext =
+						(SafeLdapContext)ldapContext;
+
+					enu = safeLdapContext.search(
+						baseDNName, ldapFilter, searchControls);
+				}
+				else {
+					enu = ldapContext.search(
+						baseDNName, ldapFilter.generateFilter(),
+						ldapFilter.getArguments(), searchControls);
+				}
 
 				while (enu.hasMoreElements()) {
 					searchResults.add(enu.nextElement());
@@ -995,7 +1179,17 @@ public class DefaultPortalLDAP implements PortalLDAP {
 
 			ldapContext.setRequestControls(null);
 
-			enu = ldapContext.search(baseDN, filter, searchControls);
+			if (ldapContext instanceof SafeLdapContext) {
+				SafeLdapContext safeLdapContext = (SafeLdapContext)ldapContext;
+
+				enu = safeLdapContext.search(
+					baseDNName, ldapFilter, searchControls);
+			}
+			else {
+				enu = ldapContext.search(
+					baseDNName, ldapFilter.generateFilter(),
+					ldapFilter.getArguments(), searchControls);
+			}
 
 			while (enu.hasMoreElements()) {
 				searchResults.add(enu.nextElement());
@@ -1010,6 +1204,25 @@ public class DefaultPortalLDAP implements PortalLDAP {
 		}
 
 		return null;
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x), please use {@link
+	 *             #searchLDAP(long, LdapContext, byte[], int, Name, LDAPFilter,
+	 *             String[], List)}
+	 */
+	@Deprecated
+	@Override
+	public byte[] searchLDAP(
+			long companyId, LdapContext ldapContext, byte[] cookie,
+			int maxResults, String baseDN, String filter, String[] attributeIds,
+			List<SearchResult> searchResults)
+		throws Exception {
+
+		return searchLDAP(
+			companyId, ldapContext, cookie, maxResults,
+			LDAPUtil.asLdapName(baseDN), _ldapFilterValidator.validate(filter),
+			attributeIds, searchResults);
 	}
 
 	@Reference(
@@ -1046,11 +1259,8 @@ public class DefaultPortalLDAP implements PortalLDAP {
 	}
 
 	private Attributes _getAttributes(
-			LdapContext ldapContext, String fullDistinguishedName,
-			String[] attributeIds)
+			LdapContext ldapContext, Name fullDN, String[] attributeIds)
 		throws Exception {
-
-		Name fullDN = new CompositeName().add(fullDistinguishedName);
 
 		Attributes attributes = null;
 

@@ -45,6 +45,7 @@ import com.liferay.portal.security.ldap.configuration.ConfigurationProvider;
 import com.liferay.portal.security.ldap.configuration.LDAPServerConfiguration;
 import com.liferay.portal.security.ldap.exportimport.Modifications;
 import com.liferay.portal.security.ldap.exportimport.PortalToLDAPConverter;
+import com.liferay.portal.security.ldap.util.LDAPUtil;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -60,7 +61,7 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
-import javax.naming.ldap.Rdn;
+import javax.naming.ldap.LdapName;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -87,31 +88,20 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 			UserConverterKeys.SCREEN_NAME, UserConverterKeys.SCREEN_NAME);
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), replaced by {@link
+	 *             #getUserGroupLdapName(long, UserGroup, Properties)}
+	 */
+	@Deprecated
 	@Override
 	public String getGroupDNName(
 			long ldapServerId, UserGroup userGroup, Properties groupMappings)
 		throws Exception {
 
-		Binding groupBinding = _portalLDAP.getGroup(
-			ldapServerId, userGroup.getCompanyId(), userGroup.getName());
+		LdapName groupDNLdapName = getUserGroupLdapName(
+			ldapServerId, userGroup, groupMappings);
 
-		if (groupBinding != null) {
-			return groupBinding.getNameInNamespace();
-		}
-
-		StringBundler sb = new StringBundler(5);
-
-		sb.append(
-			GetterUtil.getString(
-				groupMappings.getProperty(GroupConverterKeys.GROUP_NAME),
-				_DEFAULT_DN));
-		sb.append(StringPool.EQUAL);
-		sb.append(Rdn.escapeValue(userGroup.getName()));
-		sb.append(StringPool.COMMA);
-		sb.append(
-			_portalLDAP.getGroupsDN(ldapServerId, userGroup.getCompanyId()));
-
-		return sb.toString();
+		return groupDNLdapName.toString();
 	}
 
 	@Override
@@ -180,23 +170,29 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 		Modifications modifications = getModifications(
 			userGroup, groupMappings, new HashMap<String, String>());
 
-		String groupDN = getGroupDNName(ldapServerId, userGroup, groupMappings);
-		String userDN = getUserDNName(ldapServerId, user, userMappings);
+		LdapName groupDNLdapName = getUserGroupLdapName(
+			ldapServerId, userGroup, groupMappings);
+
+		LdapName userDNLdapName = getUserLdapName(
+			ldapServerId, user, userMappings);
 
 		if (_portalLDAP.isGroupMember(
-				ldapServerId, user.getCompanyId(), groupDN, userDN)) {
+				ldapServerId, user.getCompanyId(), groupDNLdapName,
+				userDNLdapName)) {
 
 			if (userOperation == UserOperation.REMOVE) {
 				modifications.addItem(
 					DirContext.REMOVE_ATTRIBUTE,
-					groupMappings.getProperty(GroupConverterKeys.USER), userDN);
+					groupMappings.getProperty(GroupConverterKeys.USER),
+					userDNLdapName);
 			}
 		}
 		else {
 			if (userOperation == UserOperation.ADD) {
 				modifications.addItem(
 					DirContext.ADD_ATTRIBUTE,
-					groupMappings.getProperty(GroupConverterKeys.USER), userDN);
+					groupMappings.getProperty(GroupConverterKeys.USER),
+					userDNLdapName);
 			}
 		}
 
@@ -279,20 +275,23 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 		Properties groupMappings = _ldapSettings.getGroupMappings(
 			ldapServerId, user.getCompanyId());
 
-		String userDN = getUserDNName(ldapServerId, user, userMappings);
+		LdapName userDNLdapName = getUserLdapName(
+			ldapServerId, user, userMappings);
 
 		for (UserGroup userGroup : userGroups) {
-			String groupDN = getGroupDNName(
+			LdapName groupDNLdapName = getUserGroupLdapName(
 				ldapServerId, userGroup, groupMappings);
 
 			if (_portalLDAP.isUserGroupMember(
-					ldapServerId, user.getCompanyId(), groupDN, userDN)) {
+					ldapServerId, user.getCompanyId(), groupDNLdapName,
+					userDNLdapName)) {
 
 				continue;
 			}
 
 			modifications.addItem(
-				DirContext.ADD_ATTRIBUTE, groupMappingAttributeName, groupDN);
+				DirContext.ADD_ATTRIBUTE, groupMappingAttributeName,
+				groupDNLdapName);
 		}
 
 		return modifications;
@@ -336,8 +335,47 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 		return modifications;
 	}
 
+	/**
+	 * @deprecated As of Mueller (7.2.x), replaced by {@link
+	 *             #getUserLdapName(long, User, Properties)}
+	 */
+	@Deprecated
 	@Override
 	public String getUserDNName(
+			long ldapServerId, User user, Properties userMappings)
+		throws Exception {
+
+		LdapName userDNLdapName = getUserLdapName(
+			ldapServerId, user, userMappings);
+
+		return userDNLdapName.toString();
+	}
+
+	@Override
+	public LdapName getUserGroupLdapName(
+			long ldapServerId, UserGroup userGroup, Properties groupMappings)
+		throws Exception {
+
+		Binding groupBinding = _portalLDAP.getGroup(
+			ldapServerId, userGroup.getCompanyId(), userGroup.getName());
+
+		if (groupBinding != null) {
+			return LDAPUtil.asLdapName(groupBinding.getNameInNamespace());
+		}
+
+		String groupsDN = _portalLDAP.getGroupsDN(
+			ldapServerId, userGroup.getCompanyId());
+
+		String rdnType = GetterUtil.getString(
+			groupMappings.getProperty(GroupConverterKeys.GROUP_NAME),
+			_DEFAULT_DN);
+
+		return LDAPUtil.asLdapName(
+			rdnType, userGroup.getName(), LDAPUtil.asLdapName(groupsDN));
+	}
+
+	@Override
+	public LdapName getUserLdapName(
 			long ldapServerId, User user, Properties userMappings)
 		throws Exception {
 
@@ -346,20 +384,20 @@ public class DefaultPortalToLDAPConverter implements PortalToLDAPConverter {
 			user.getEmailAddress());
 
 		if (userBinding != null) {
-			return userBinding.getNameInNamespace();
+			return LDAPUtil.asLdapName(userBinding.getNameInNamespace());
 		}
 
-		StringBundler sb = new StringBundler(5);
+		String usersDN = _portalLDAP.getUsersDN(
+			ldapServerId, user.getCompanyId());
 
-		sb.append(
-			GetterUtil.getString(
-				userMappings.getProperty(_userDNFieldName), _DEFAULT_DN));
-		sb.append(StringPool.EQUAL);
-		sb.append(BeanPropertiesUtil.getStringSilent(user, _userDNFieldName));
-		sb.append(StringPool.COMMA);
-		sb.append(_portalLDAP.getUsersDN(ldapServerId, user.getCompanyId()));
+		String rdnType = GetterUtil.getString(
+			userMappings.getProperty(_userDNFieldName), _DEFAULT_DN);
 
-		return sb.toString();
+		String rdnValue = BeanPropertiesUtil.getStringSilent(
+			user, _userDNFieldName);
+
+		return LDAPUtil.asLdapName(
+			rdnType, rdnValue, LDAPUtil.asLdapName(usersDN));
 	}
 
 	public void setContactReservedFieldNames(

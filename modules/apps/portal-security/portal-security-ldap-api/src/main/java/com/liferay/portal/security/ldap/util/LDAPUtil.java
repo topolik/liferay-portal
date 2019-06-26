@@ -22,12 +22,17 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.text.DateFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
+import javax.naming.InvalidNameException;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
@@ -40,6 +45,32 @@ import org.apache.commons.lang.StringEscapeUtils;
  */
 public class LDAPUtil {
 
+	public static LdapName asLdapName(Rdn prefix, LdapName baseDN) {
+		List<Rdn> rdnList = new ArrayList<>(baseDN.getRdns());
+
+		rdnList.add(prefix);
+
+		return new LdapName(rdnList);
+	}
+
+	public static LdapName asLdapName(String fullDN)
+		throws InvalidNameException {
+
+		return new LdapName(fullDN);
+	}
+
+	public static LdapName asLdapName(
+			String rdnName, String rdnValue, LdapName baseDN)
+		throws InvalidNameException {
+
+		return asLdapName(new Rdn(rdnName, rdnValue), baseDN);
+	}
+
+	/**
+	 * @deprecated As of Mueller (7.2.x), replaced by {@link
+	 *             com.liferay.portal.security.ldap.validator.LDAPFilter}
+	 */
+	@Deprecated
 	public static String escapeCharacters(String attribute) {
 		if (attribute.contains(StringPool.BACK_SLASH)) {
 			String escapedSingleBackSlash = StringPool.DOUBLE_BACK_SLASH.concat(

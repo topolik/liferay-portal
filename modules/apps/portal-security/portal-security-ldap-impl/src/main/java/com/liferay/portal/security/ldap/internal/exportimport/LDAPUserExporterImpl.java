@@ -100,7 +100,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 		long ldapServerId = _portalLDAP.getLdapServerId(
 			companyId, user.getScreenName(), user.getEmailAddress());
 
-		LdapContext ldapContext = _portalLDAP.getContext(
+		LdapContext ldapContext = _portalLDAP.getSafeLDAPContext(
 			ldapServerId, companyId);
 
 		try {
@@ -185,7 +185,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 		long ldapServerId = _portalLDAP.getLdapServerId(
 			companyId, user.getScreenName(), user.getEmailAddress());
 
-		LdapContext ldapContext = _portalLDAP.getContext(
+		LdapContext ldapContext = _portalLDAP.getSafeLDAPContext(
 			ldapServerId, companyId);
 
 		if (ldapContext == null) {
@@ -199,10 +199,10 @@ public class LDAPUserExporterImpl implements UserExporter {
 		Properties userMappings = _ldapSettings.getUserMappings(
 			ldapServerId, companyId);
 
-		Binding binding = _portalLDAP.getGroup(
+		Binding userGroupBinding = _portalLDAP.getGroup(
 			ldapServerId, companyId, userGroup.getName());
 
-		if (binding == null) {
+		if (userGroupBinding == null) {
 			if (userOperation == UserOperation.ADD) {
 				addGroup(
 					ldapServerId, ldapContext, userGroup, user, groupMappings,
@@ -219,9 +219,8 @@ public class LDAPUserExporterImpl implements UserExporter {
 			return;
 		}
 
-		Name name = new CompositeName();
-
-		name.add(binding.getNameInNamespace());
+		Name userGroupDNName = LDAPUtil.asLdapName(
+			userGroupBinding.getNameInNamespace());
 
 		try {
 			Modifications modifications =
@@ -231,7 +230,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 
 			ModificationItem[] modificationItems = modifications.getItems();
 
-			ldapContext.modifyAttributes(name, modificationItems);
+			ldapContext.modifyAttributes(userGroupDNName, modificationItems);
 		}
 		catch (SchemaViolationException sve) {
 			if (_log.isInfoEnabled()) {
@@ -241,16 +240,14 @@ public class LDAPUserExporterImpl implements UserExporter {
 					sve);
 			}
 
-			String fullGroupDN = binding.getNameInNamespace();
-
 			Attributes attributes = _portalLDAP.getGroupAttributes(
-				ldapServerId, companyId, ldapContext, fullGroupDN, true);
+				ldapServerId, companyId, ldapContext, userGroupDNName, true);
 
 			Attribute groupMembers = attributes.get(
 				groupMappings.getProperty(GroupConverterKeys.USER));
 
 			if ((groupMembers != null) && (groupMembers.size() == 1)) {
-				ldapContext.unbind(name);
+				ldapContext.unbind(userGroupDNName);
 			}
 		}
 		finally {
@@ -287,7 +284,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 		long ldapServerId = _portalLDAP.getLdapServerId(
 			companyId, user.getScreenName(), user.getEmailAddress());
 
-		LdapContext ldapContext = _portalLDAP.getContext(
+		LdapContext ldapContext = _portalLDAP.getSafeLDAPContext(
 			ldapServerId, companyId);
 
 		try {
@@ -311,7 +308,7 @@ public class LDAPUserExporterImpl implements UserExporter {
 			else {
 				Attributes attributes = _portalLDAP.getUserAttributes(
 					ldapServerId, companyId, ldapContext,
-					binding.getNameInNamespace());
+					LDAPUtil.asLdapName(binding.getNameInNamespace()));
 
 				String modifyTimestamp = LDAPUtil.getAttributeString(
 					attributes, "modifyTimestamp");
