@@ -1444,6 +1444,12 @@ public class PropsValues {
 	public static final String[] JSON_SERVICE_INVALID_METHOD_NAMES =
 		PropsUtil.getArray(PropsKeys.JSON_SERVICE_INVALID_METHOD_NAMES);
 
+	public static final String[]
+		JSON_WEB_SERVICE_ALLOWED_CUSTOM_INSTANTIATION_CLASSES =
+			PropsUtil.getArray(
+				PropsKeys.
+					JSONWS_WEB_SERVICE_ALLOWED_CUSTOM_INSTANTIATION_CLASSES);
+
 	public static final boolean JSON_WEB_SERVICE_ENABLED =
 		GetterUtil.getBoolean(
 			PropsUtil.get(PropsKeys.JSON_WEB_SERVICE_ENABLED));
