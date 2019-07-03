@@ -36,6 +36,7 @@
 	<bean class="com.liferay.portal.format.IdenticalPhoneNumberFormatImpl" id="com.liferay.portal.format.IdenticalPhoneNumberFormatImpl" />
 	<bean class="com.liferay.portal.internal.increment.BufferedIncrementProcessorUtil" />
 	<bean factory-bean="com.liferay.portal.kernel.json.JSONFactory" factory-method="getLiferayJSONDeserializationWhitelist" id="com.liferay.portal.json.jabsorb.serializer.LiferayJSONDeserializationWhitelist" />
+	<bean class="com.liferay.portal.jsonwebservice.JSONWebServiceSecurityContext" id="com.liferay.portal.jsonwebservice.JSONWebServiceSecurityContext" />
 	<bean class="com.liferay.portal.kernel.bean.BeanPropertiesUtil" id="com.liferay.portal.kernel.bean.BeanPropertiesUtil">
 		<property name="beanProperties">
 			<bean class="com.liferay.portal.bean.BeanPropertiesImpl" />
@@ -138,7 +139,9 @@
 	<bean class="com.liferay.portal.kernel.json.JSONFactoryUtil" id="com.liferay.portal.kernel.json.JSONFactoryUtil">
 		<property name="JSONFactory" ref="com.liferay.portal.kernel.json.JSONFactory" />
 	</bean>
-	<bean class="com.liferay.portal.jsonwebservice.JSONWebServiceActionsManagerImpl" id="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManager" />
+	<bean class="com.liferay.portal.jsonwebservice.JSONWebServiceActionsManagerImpl" id="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManager">
+		<property name="jsonWebServiceSecurityContext" ref="com.liferay.portal.jsonwebservice.JSONWebServiceSecurityContext" />
+	</bean>
 	<bean class="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManagerUtil" id="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManagerUtil">
 		<property name="JSONWebServiceActionsManager" ref="com.liferay.portal.kernel.jsonwebservice.JSONWebServiceActionsManager" />
 	</bean>
