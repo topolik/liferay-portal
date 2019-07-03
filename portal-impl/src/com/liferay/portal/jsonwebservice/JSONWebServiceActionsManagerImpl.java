@@ -119,7 +119,7 @@ public class JSONWebServiceActionsManagerImpl
 
 		return new JSONWebServiceActionImpl(
 			jsonWebServiceActionConfig, jsonWebServiceActionParameters,
-			_jsonWebServiceNaming);
+			_jsonWebServiceNaming, _jsonWebServiceSecurityContext);
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public class JSONWebServiceActionsManagerImpl
 
 		return new JSONWebServiceActionImpl(
 			jsonWebServiceActionConfig, jsonWebServiceActionParameters,
-			_jsonWebServiceNaming);
+			_jsonWebServiceNaming, _jsonWebServiceSecurityContext);
 	}
 
 	@Override

@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import jodd.bean.BeanCopy;
 import jodd.bean.BeanUtil;
@@ -56,11 +57,13 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 	public JSONWebServiceActionImpl(
 		JSONWebServiceActionConfig jsonWebServiceActionConfig,
 		JSONWebServiceActionParameters jsonWebServiceActionParameters,
-		JSONWebServiceNaming jsonWebServiceNaming) {
+		JSONWebServiceNaming jsonWebServiceNaming,
+		JSONWebServiceSecurityContext jsonWebServiceSecurityContext) {
 
 		_jsonWebServiceActionConfig = jsonWebServiceActionConfig;
 		_jsonWebServiceActionParameters = jsonWebServiceActionParameters;
 		_jsonWebServiceNaming = jsonWebServiceNaming;
+		_jsonWebServiceSecurityContext = jsonWebServiceSecurityContext;
 	}
 
 	@Override
@@ -90,6 +93,35 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 		}
 
 		return new JSONRPCResponse(jsonRPCRequest, result, exception);
+	}
+
+	private void _checkTypeIsAssignable(
+		int argumentPos, Class<?> targetClass, Class<?> parameterType) {
+
+		if (Objects.equals(targetClass, parameterType)) {
+			return;
+		}
+
+		String parameterTypeName = parameterType.getName();
+
+		if (!ReflectUtil.isTypeOf(parameterType, targetClass)) {
+			throw new IllegalArgumentException(
+				StringBundler.concat(
+					"Unmatched argument type ", parameterTypeName,
+					" for method argument ", argumentPos));
+		}
+
+		if (!parameterTypeName.equals(
+				_jsonWebServiceNaming.convertModelClassToImplClassName(
+					targetClass))) {
+
+			if (!_jsonWebServiceSecurityContext.isCustomInstantiationAllowed(
+					parameterType)) {
+
+				throw new TypeConversionException(
+					parameterTypeName + " is not allowed to be instantiated");
+			}
+		}
 	}
 
 	private Object _convertListToArray(List<?> list, Class<?> componentType) {
@@ -443,7 +475,9 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 			Object parameterValue = null;
 
 			if (value != null) {
-				Class<?> parameterType = methodParameters[i].getType();
+				Class<?> targetClass = methodParameters[i].getType();
+
+				Class<?> parameterType = targetClass;
 
 				String parameterTypeName =
 					_jsonWebServiceActionParameters.getParameterTypeName(
@@ -454,15 +488,7 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 
 					parameterType = classLoader.loadClass(parameterTypeName);
 
-					if (!ReflectUtil.isTypeOf(
-							parameterType, methodParameters[i].getType())) {
-
-						throw new IllegalArgumentException(
-							StringBundler.concat(
-								"Unmatched argument type ",
-								parameterType.getName(),
-								" for method argument ", i));
-					}
+					_checkTypeIsAssignable(i, targetClass, parameterType);
 				}
 
 				if (value.equals(Void.TYPE)) {
@@ -507,5 +533,6 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 	private final JSONWebServiceActionParameters
 		_jsonWebServiceActionParameters;
 	private final JSONWebServiceNaming _jsonWebServiceNaming;
+	private final JSONWebServiceSecurityContext _jsonWebServiceSecurityContext;
 
 }
