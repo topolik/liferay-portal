@@ -30,6 +30,8 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MethodParameter;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.util.PropsUtil;
+import com.liferay.registry.collections.ServiceTrackerCollections;
+import com.liferay.registry.collections.ServiceTrackerMap;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -132,6 +134,12 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 
 		if (ArrayUtil.contains(
 				_JSONWS_WEB_SERVICE_PARAMETER_TYPE_WHITELIST_CLASS_NAMES,
+				parameterTypeName)) {
+
+			return;
+		}
+
+		if (_osgiJSONWebServiceParameterTypeWhitelistClassNames.containsKey(
 				parameterTypeName)) {
 
 			return;
@@ -544,6 +552,13 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		JSONWebServiceActionImpl.class);
+
+	private static final ServiceTrackerMap<String, Object>
+		_osgiJSONWebServiceParameterTypeWhitelistClassNames =
+			ServiceTrackerCollections.openSingleValueMap(
+				Object.class,
+				PropsKeys.
+					JSONWS_WEB_SERVICE_PARAMETER_TYPE_WHITELIST_CLASS_NAMES);
 
 	private final JSONWebServiceActionConfig _jsonWebServiceActionConfig;
 	private final JSONWebServiceActionParameters
