@@ -30,8 +30,10 @@ import com.liferay.portal.kernel.util.LocaleUtil;
 import com.liferay.portal.kernel.util.MethodParameter;
 import com.liferay.portal.kernel.util.PropsKeys;
 import com.liferay.portal.util.PropsUtil;
-import com.liferay.registry.collections.ServiceTrackerCollections;
-import com.liferay.registry.collections.ServiceTrackerMap;
+import com.liferay.registry.Registry;
+import com.liferay.registry.RegistryUtil;
+import com.liferay.registry.ServiceReference;
+import com.liferay.registry.ServiceTracker;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -139,10 +141,16 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 			return;
 		}
 
-		if (_osgiJSONWebServiceParameterTypeWhitelistClassNames.containsKey(
-				parameterTypeName)) {
+		for (ServiceReference<Object> serviceReference :
+				_serviceTracker.getServiceReferences()) {
 
-			return;
+			Object whitelistedTypeClassName = serviceReference.getProperty(
+				PropsKeys.
+					JSONWS_WEB_SERVICE_PARAMETER_TYPE_WHITELIST_CLASS_NAMES);
+
+			if (parameterTypeName.equals(whitelistedTypeClassName)) {
+				return;
+			}
 		}
 
 		throw new TypeConversionException(
@@ -553,12 +561,21 @@ public class JSONWebServiceActionImpl implements JSONWebServiceAction {
 	private static final Log _log = LogFactoryUtil.getLog(
 		JSONWebServiceActionImpl.class);
 
-	private static final ServiceTrackerMap<String, Object>
-		_osgiJSONWebServiceParameterTypeWhitelistClassNames =
-			ServiceTrackerCollections.openSingleValueMap(
-				Object.class,
-				PropsKeys.
-					JSONWS_WEB_SERVICE_PARAMETER_TYPE_WHITELIST_CLASS_NAMES);
+	private static final ServiceTracker<Object, Object> _serviceTracker;
+
+	static {
+		Registry registry = RegistryUtil.getRegistry();
+
+		_serviceTracker = registry.trackServices(
+			registry.getFilter(
+				StringBundler.concat(
+					"(",
+					PropsKeys.
+						JSONWS_WEB_SERVICE_PARAMETER_TYPE_WHITELIST_CLASS_NAMES,
+					"=*)")));
+
+		_serviceTracker.open();
+	}
 
 	private final JSONWebServiceActionConfig _jsonWebServiceActionConfig;
 	private final JSONWebServiceActionParameters
