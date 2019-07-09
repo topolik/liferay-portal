@@ -1672,6 +1672,10 @@ public interface PropsKeys {
 	public static final String JSON_WEB_SERVICE_ENABLED =
 		"json.web.service.enabled";
 
+	public static final String
+		JSONWS_WEB_SERVICE_ALLOWED_CUSTOM_INSTANTIATION_CLASSES =
+			"jsonws.web.service.allowed.custom.instantiation.classes";
+
 	public static final String JSONWS_WEB_SERVICE_API_DISCOVERABLE =
 		"jsonws.web.service.api.discoverable";
 

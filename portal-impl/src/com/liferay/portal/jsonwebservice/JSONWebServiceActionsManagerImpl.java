@@ -119,7 +119,7 @@ public class JSONWebServiceActionsManagerImpl
 
 		return new JSONWebServiceActionImpl(
 			jsonWebServiceActionConfig, jsonWebServiceActionParameters,
-			_jsonWebServiceNaming);
+			_jsonWebServiceNaming, _jsonWebServiceSecurityContext);
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public class JSONWebServiceActionsManagerImpl
 
 		return new JSONWebServiceActionImpl(
 			jsonWebServiceActionConfig, jsonWebServiceActionParameters,
-			_jsonWebServiceNaming);
+			_jsonWebServiceNaming, _jsonWebServiceSecurityContext);
 	}
 
 	@Override
@@ -343,6 +343,12 @@ public class JSONWebServiceActionsManagerImpl
 		}
 
 		return count;
+	}
+
+	public void setJsonWebServiceSecurityContext(
+		JSONWebServiceSecurityContext jsonWebServiceSecurityContext) {
+
+		_jsonWebServiceSecurityContext = jsonWebServiceSecurityContext;
 	}
 
 	@Override
@@ -709,6 +715,7 @@ public class JSONWebServiceActionsManagerImpl
 			new ConcurrentHashMap<>();
 	private final JSONWebServiceNaming _jsonWebServiceNaming =
 		new JSONWebServiceNaming();
+	private JSONWebServiceSecurityContext _jsonWebServiceSecurityContext;
 	private final Map<String, List<JSONWebServiceActionConfig>>
 		_pathIndexedJSONWebServiceActionConfigs = new ConcurrentHashMap<>();
 	private final ConcurrentMap<String, JSONWebServiceActionConfig>
