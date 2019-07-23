@@ -32,9 +32,6 @@ import java.util.Set;
  */
 public class ModelPermissions implements Cloneable, Serializable {
 
-	public ModelPermissions() {
-	}
-
 	protected ModelPermissions(String resourceName) {
 		setResourceName(resourceName);
 	}
