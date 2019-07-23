@@ -40,6 +40,10 @@ public class ModelPermissionsFactory {
 
 	public static final String MODEL_PERMISSIONS_PREFIX = "modelPermissions";
 
+	public static ModelPermissions create() {
+		return new ModelPermissions(null);
+	}
+
 	public static ModelPermissions create(
 		HttpServletRequest httpServletRequest) {
 
@@ -106,6 +110,10 @@ public class ModelPermissionsFactory {
 			portletRequest.getParameterMap(), className);
 	}
 
+	public static ModelPermissions create(String className) {
+		return new ModelPermissions(className);
+	}
+
 	public static ModelPermissions create(
 		String[] groupPermissions, String[] guestPermissions) {
 
@@ -124,14 +132,6 @@ public class ModelPermissionsFactory {
 			RoleConstants.GUEST, guestPermissions);
 
 		return modelPermissions;
-	}
-
-	public static ModelPermissions create() {
-		return new ModelPermissions(null);
-	}
-
-	public static ModelPermissions create(String className) {
-		return new ModelPermissions(className);
 	}
 
 	public static ModelPermissions createWithDefaultPermissions(

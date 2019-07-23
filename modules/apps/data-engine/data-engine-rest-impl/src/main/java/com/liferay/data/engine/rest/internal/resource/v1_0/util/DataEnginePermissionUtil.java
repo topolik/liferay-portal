@@ -128,7 +128,8 @@ public class DataEnginePermissionUtil {
 		if (StringUtil.equalsIgnoreCase(
 				DataEngineConstants.OPERATION_SAVE_PERMISSION, operation)) {
 
-			ModelPermissions modelPermissions = ModelPermissionsFactory.create();
+			ModelPermissions modelPermissions =
+				ModelPermissionsFactory.create();
 
 			for (String roleName : roleNames) {
 				modelPermissions.addRolePermissions(

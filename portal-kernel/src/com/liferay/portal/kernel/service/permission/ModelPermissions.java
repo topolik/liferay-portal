@@ -32,10 +32,6 @@ import java.util.Set;
  */
 public class ModelPermissions implements Cloneable, Serializable {
 
-	protected ModelPermissions(String resourceName) {
-		setResourceName(resourceName);
-	}
-
 	public void addRolePermissions(String roleName, String actionId) {
 		Set<String> roleNames = _roleNamesMap.get(actionId);
 
@@ -135,6 +131,10 @@ public class ModelPermissions implements Cloneable, Serializable {
 		_roleNamesMap.putAll(roleNamesMap);
 		_actionIdsMap.putAll(actionIdsMap);
 		_resourceName = Objects.requireNonNull(resourceName);
+	}
+
+	protected ModelPermissions(String resourceName) {
+		setResourceName(resourceName);
 	}
 
 	private static final String _RESOURCE_NAME_ALL_RESOURCES =
