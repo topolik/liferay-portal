@@ -126,6 +126,14 @@ public class ModelPermissionsFactory {
 		return modelPermissions;
 	}
 
+	public static ModelPermissions create() {
+		return new ModelPermissions(null);
+	}
+
+	public static ModelPermissions create(String className) {
+		return new ModelPermissions(className);
+	}
+
 	public static ModelPermissions createWithDefaultPermissions(
 		String className) {
 

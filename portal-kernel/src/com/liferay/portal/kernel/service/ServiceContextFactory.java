@@ -142,7 +142,7 @@ public class ServiceContextFactory {
 		ServiceContext serviceContext) {
 
 		if (serviceContext.getModelPermissions() == null) {
-			serviceContext.setModelPermissions(new ModelPermissions());
+			serviceContext.setModelPermissions(ModelPermissionsFactory.create());
 		}
 	}
 

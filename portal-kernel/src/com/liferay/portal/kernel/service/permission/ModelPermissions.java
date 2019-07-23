@@ -35,7 +35,7 @@ public class ModelPermissions implements Cloneable, Serializable {
 	public ModelPermissions() {
 	}
 
-	public ModelPermissions(String resourceName) {
+	protected ModelPermissions(String resourceName) {
 		setResourceName(resourceName);
 	}
 
