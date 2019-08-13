@@ -1,0 +1,5 @@
+Bundle-Name: Liferay Portal Security Credential Generator PBKDF2
+Bundle-SymbolicName: com.liferay.portal.security.credential.generator.pbkdf2
+Bundle-Version: 1.0.0
+Liferay-Require-SchemaVersion: 3.0.0
+Liferay-Service: true

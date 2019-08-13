@@ -1,5 +1,0 @@
-Bundle-Name: Liferay Portal Security Credential Generator
-Bundle-SymbolicName: com.liferay.portal.security.credential.generator
-Bundle-Version: 1.0.0
-Liferay-Require-SchemaVersion: 3.0.0
-Liferay-Service: true
