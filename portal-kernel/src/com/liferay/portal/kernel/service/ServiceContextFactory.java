@@ -141,8 +141,14 @@ public class ServiceContextFactory {
 	private static void _ensureValidModelPermissions(
 		ServiceContext serviceContext) {
 
-		if (serviceContext.getModelPermissions() == null) {
-			serviceContext.setModelPermissions(new ModelPermissions());
+		ModelPermissions modelPermissions =
+			serviceContext.getModelPermissions();
+
+		if ((modelPermissions == null) ||
+			Validator.isNull(modelPermissions.getResourceName())) {
+
+			serviceContext.setModelPermissions(
+				ModelPermissionsFactory.create());
 		}
 	}
 

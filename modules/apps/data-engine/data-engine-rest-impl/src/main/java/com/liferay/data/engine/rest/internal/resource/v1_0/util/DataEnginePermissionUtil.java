@@ -33,6 +33,7 @@ import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.service.ResourcePermissionLocalService;
 import com.liferay.portal.kernel.service.RoleLocalService;
 import com.liferay.portal.kernel.service.permission.ModelPermissions;
+import com.liferay.portal.kernel.service.permission.ModelPermissionsFactory;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 
@@ -127,7 +128,8 @@ public class DataEnginePermissionUtil {
 		if (StringUtil.equalsIgnoreCase(
 				DataEngineConstants.OPERATION_SAVE_PERMISSION, operation)) {
 
-			ModelPermissions modelPermissions = new ModelPermissions();
+			ModelPermissions modelPermissions = ModelPermissionsFactory.create(
+				resourceName);
 
 			for (String roleName : roleNames) {
 				modelPermissions.addRolePermissions(
