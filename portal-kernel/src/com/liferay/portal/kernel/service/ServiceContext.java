@@ -31,6 +31,7 @@ import com.liferay.portal.kernel.portlet.PortletIdCodec;
 import com.liferay.portal.kernel.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portal.kernel.security.permission.ResourceActionsUtil;
 import com.liferay.portal.kernel.service.permission.ModelPermissions;
+import com.liferay.portal.kernel.service.permission.ModelPermissionsFactory;
 import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.theme.ThemeDisplay;
 import com.liferay.portal.kernel.util.Constants;
@@ -213,7 +214,7 @@ public class ServiceContext implements Cloneable, Serializable {
 		ModelPermissions modelPermissions = getModelPermissions();
 
 		if (modelPermissions == null) {
-			modelPermissions = new ModelPermissions(modelName);
+			modelPermissions = ModelPermissionsFactory.create(modelName);
 		}
 
 		modelPermissions.addRolePermissions(
@@ -1336,7 +1337,7 @@ public class ServiceContext implements Cloneable, Serializable {
 	@Deprecated
 	public void setGroupPermissions(String[] groupPermissions) {
 		if (_modelPermissions == null) {
-			_modelPermissions = new ModelPermissions();
+			_modelPermissions = ModelPermissionsFactory.create();
 		}
 
 		_modelPermissions.addRolePermissions(
@@ -1355,7 +1356,7 @@ public class ServiceContext implements Cloneable, Serializable {
 	@Deprecated
 	public void setGuestPermissions(String[] guestPermissions) {
 		if (_modelPermissions == null) {
-			_modelPermissions = new ModelPermissions();
+			_modelPermissions = ModelPermissionsFactory.create();
 		}
 
 		_modelPermissions.addRolePermissions(
