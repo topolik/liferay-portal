@@ -1688,6 +1688,9 @@ public interface PropsKeys {
 	public static final String JSON_WEB_SERVICE_ENABLED =
 		"json.web.service.enabled";
 
+	public static final String JSONWS_WEB_SERVICE_ALLOW_CHANGE_USER_PASSWORD =
+		"jsonws.web.service.allow.change.user.password";
+
 	public static final String JSONWS_WEB_SERVICE_API_DISCOVERABLE =
 		"jsonws.web.service.api.discoverable";
 

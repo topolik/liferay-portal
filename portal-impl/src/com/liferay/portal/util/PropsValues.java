@@ -1464,6 +1464,11 @@ public class PropsValues {
 		GetterUtil.getBoolean(
 			PropsUtil.get(PropsKeys.JSON_WEB_SERVICE_ENABLED));
 
+	public static final boolean JSONWS_WEB_SERVICE_ALLOW_CHANGE_USER_PASSWORD =
+		GetterUtil.getBoolean(
+			PropsUtil.get(
+				PropsKeys.JSONWS_WEB_SERVICE_ALLOW_CHANGE_USER_PASSWORD));
+
 	public static final boolean JSONWS_WEB_SERVICE_API_DISCOVERABLE =
 		GetterUtil.getBoolean(
 			PropsUtil.get(PropsKeys.JSONWS_WEB_SERVICE_API_DISCOVERABLE));

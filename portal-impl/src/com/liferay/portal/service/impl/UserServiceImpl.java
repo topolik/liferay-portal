@@ -39,6 +39,7 @@ import com.liferay.portal.kernel.model.Website;
 import com.liferay.portal.kernel.model.role.RoleConstants;
 import com.liferay.portal.kernel.search.Indexer;
 import com.liferay.portal.kernel.search.IndexerRegistryUtil;
+import com.liferay.portal.kernel.security.access.control.AccessControlThreadLocal;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.membershippolicy.OrganizationMembershipPolicyUtil;
@@ -1743,6 +1744,14 @@ public class UserServiceImpl extends UserServiceBaseImpl {
 			long userId, String password1, String password2,
 			boolean passwordReset)
 		throws PortalException {
+
+		if (!PropsValues.JSONWS_WEB_SERVICE_ALLOW_CHANGE_USER_PASSWORD &&
+			AccessControlThreadLocal.isRemoteAccess()) {
+
+			throw new PortalException(
+				"Portal is configured not to allow remote requests to change " +
+					"user passwords");
+		}
 
 		UserPermissionUtil.check(
 			getPermissionChecker(), userId, ActionKeys.UPDATE);
