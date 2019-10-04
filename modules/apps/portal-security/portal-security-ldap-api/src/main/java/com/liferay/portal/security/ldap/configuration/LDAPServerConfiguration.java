@@ -17,6 +17,12 @@ package com.liferay.portal.security.ldap.configuration;
 import aQute.bnd.annotation.metatype.Meta;
 
 import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
+import com.liferay.portal.security.ldap.SafeLdapFilter;
+import com.liferay.portal.security.ldap.SafeLdapName;
+import com.liferay.portal.security.ldap.validator.LDAPFilterException;
+import com.liferay.portal.security.ldap.validator.LDAPFilterValidator;
+
+import javax.naming.InvalidNameException;
 
 /**
  * @author Michael C. Han
@@ -154,5 +160,86 @@ public interface LDAPServerConfiguration {
 		name = "group-default-object-classes", required = false
 	)
 	public String[] groupDefaultObjectClasses();
+
+	public default SafeLdapName getBaseDNSafeLdapName()
+		throws InvalidNameException {
+
+		return SafeLdapName.fromUnsafe(baseDN());
+	}
+
+	public default SafeLdapName getGroupsDNSafeLdapName()
+		throws InvalidNameException {
+
+		return SafeLdapName.fromUnsafe(groupsDN());
+	}
+
+	public default SafeLdapName getUsersDNSafeLdapName()
+		throws InvalidNameException {
+
+		return SafeLdapName.fromUnsafe(usersDN());
+	}
+
+	public default SafeLdapFilter getAuthSearchSafeLdapFilter(
+			LDAPFilterValidator ldapFilterValidator)
+		throws LDAPFilterException {
+
+		if (authSearchFilter() == null) {
+			return null;
+		}
+
+		try {
+			return SafeLdapFilter.validate(
+				authSearchFilter(), ldapFilterValidator);
+		}
+		catch (LDAPFilterException ldapfe) {
+			throw new LDAPFilterException(
+				"Invalid filter " +
+					LDAPServerConfiguration.class.getSimpleName() +
+						".authSearchFilter",
+				ldapfe);
+		}
+	}
+
+	public default SafeLdapFilter getGroupSearchSafeLdapFilter(
+			LDAPFilterValidator ldapFilterValidator)
+		throws LDAPFilterException {
+
+		if (groupSearchFilter() == null) {
+			return null;
+		}
+
+		try {
+			return SafeLdapFilter.validate(
+				groupSearchFilter(), ldapFilterValidator);
+		}
+		catch (LDAPFilterException ldapfe) {
+			throw new LDAPFilterException(
+				"Invalid filter " +
+					LDAPServerConfiguration.class.getSimpleName() +
+						".groupSearchFilter",
+				ldapfe);
+		}
+	}
+
+	public default SafeLdapFilter getUserSearchSafeLdapFilter(
+			LDAPFilterValidator ldapFilterValidator)
+		throws LDAPFilterException {
+
+		if (groupSearchFilter() == null) {
+			return null;
+		}
+
+		try {
+			return SafeLdapFilter.validate(
+				userSearchFilter(), ldapFilterValidator);
+		}
+		catch (LDAPFilterException ldapfe) {
+			throw new LDAPFilterException(
+				"Invalid filter " +
+					LDAPServerConfiguration.class.getSimpleName() +
+						".userSearchFilter",
+				ldapfe);
+		}
+	}
 
 }
