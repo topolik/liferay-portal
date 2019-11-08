@@ -1,9 +1,0 @@
-{
-	"name": "portal-workflow-kaleo-forms-web",
-	"scripts": {
-		"build": "liferay-npm-scripts build",
-		"checkFormat": "liferay-npm-scripts check",
-		"format": "liferay-npm-scripts fix"
-	},
-	"version": "4.0.0"
-}
