@@ -12,7 +12,7 @@ cat lib/portal/dependencies.properties | cut -d '=' -f 2 | while read dep; do
 EOF
 done
 
-find -name 'build.gradle' | while read buildFile; do
+git ls-files | grep 'build.gradle' | while read buildFile; do
     DIR=$(dirname "$buildFile")
     DIR_NAME=$(basename "$DIR")
 
