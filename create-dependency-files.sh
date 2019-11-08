@@ -1,6 +1,18 @@
 #!/bin/bash
+
+echo -n '' > package.json
+echo -n '' > package-dependencies.json
+
+git ls-files | grep 'package\(-lock\)\?.json' | while read p; do cat $p | jq '.dependencies?' >> package-dependencies.json; done
+git ls-files | grep 'package\(-lock\)\?.json' | xargs git rm
+
+grep ':[". ^0-9,]\+' package-dependencies.json | sed 's/\([^,]\)$/\1,/g' | sort -u | tr '\n' '#' | sed 's/^\(.*\),#$/{\1}/' | tr '#' '\n' | jq '{"name":"liferay-portal", "version": "master", "dependencies": .}' > package.json
+
+git add package.json
+
 echo -n '' > pom-dependencies-portal.xml
 echo -n '' > pom-dependencies-modules.xml
+echo -n '' > pom.xml
 
 cat lib/portal/dependencies.properties | cut -d '=' -f 2 | while read dep; do
         GROUP=$(echo "$dep" | cut -d ':' -f 1)
@@ -55,4 +67,7 @@ $(cat pom-dependencies-*.xml | sort -u)
 </project>
 EOF
 
+git add pom.xml
+
 mvn validate
+
