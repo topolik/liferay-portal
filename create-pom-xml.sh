@@ -1,7 +1,18 @@
 #!/bin/bash
-echo -n '' > dependencies.xml
+echo -n '' > pom-dependencies-portal.xml
+echo -n '' > pom-dependencies-modules.xml
 
-find -name 'build.gradle' | (while read buildFile; do 
+cat lib/portal/dependencies.properties | cut -d '=' -f 2 | while read dep; do
+        GROUP=$(echo "$dep" | cut -d ':' -f 1)
+        NAME=$(echo "$dep" | cut -d ':' -f 2)
+        VERSION=$(echo "$dep" | cut -d ':' -f 3)
+
+        cat >> pom-dependencies-portal.xml <<EOF
+        <dependency><groupId>$GROUP</groupId><artifactId>$NAME</artifactId><version>$VERSION</version></dependency>
+EOF
+done
+
+find -name 'build.gradle' | while read buildFile; do
     DIR=$(dirname "$buildFile")
     DIR_NAME=$(basename "$DIR")
 
@@ -14,12 +25,18 @@ find -name 'build.gradle' | (while read buildFile; do
         NAME=$(echo "$dep" | cut -d '"' -f 4)
         VERSION=$(echo "$dep" | cut -d '"' -f 6)
 
-        cat >> dependencies.xml <<EOF
+        # String elasticsearchVersion = "6.5.0"
+        # compileInclude group: "com.liferay", name: "org.elasticsearch.analysis.common", version: elasticsearchVersion
+        if [ "$VERSION" == "" ]; then
+            versionVar=$(echo "$dep" | sed 's/.*version: //')
+            VERSION=$(grep "$versionVar[ ]\?=[^=]" "$buildFile" | tail -n 1 | cut -d '"' -f 2)
+        fi
+
+        cat >> pom-dependencies-modules.xml <<EOF
         <dependency><groupId>$GROUP</groupId><artifactId>$NAME</artifactId><version>$VERSION</version></dependency>
 EOF
     done
-    
-done)
+done
 
 cat > "pom.xml" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -32,9 +49,10 @@ cat > "pom.xml" <<EOF
     <packaging>jar</packaging>
     <dependencies>
 
-$(cat dependencies.xml | sort -u)
+$(cat pom-dependencies-*.xml | sort -u)
 
     </dependencies>
 </project>
 EOF
 
+mvn validate
