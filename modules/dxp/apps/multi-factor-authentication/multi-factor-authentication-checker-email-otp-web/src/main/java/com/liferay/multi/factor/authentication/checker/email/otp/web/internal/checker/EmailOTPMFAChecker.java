@@ -203,10 +203,8 @@ public class EmailOTPMFAChecker {
 	}
 
 	protected boolean isThrottlingEnabled(long userId) {
-		User user = _userLocalService.getUser(userId);
-
 		EmailOTPConfiguration emailOTPConfiguration = _getEmailOTPConfiguration(
-			user.getCompanyId());
+			userId);
 
 		long retryTimeout = emailOTPConfiguration.retryTimeout();
 
@@ -255,10 +253,15 @@ public class EmailOTPMFAChecker {
 	}
 
 	private EmailOTPConfiguration _getEmailOTPConfiguration(long userId) {
-		User user = _userLocalService.getUser(userId);
+		try {
+			User user = _userLocalService.getUser(userId);
 
-		return ConfigurationProviderUtil.getCompanyConfiguration(
-			EmailOTPConfiguration.class, user.getCompanyId());
+			return ConfigurationProviderUtil.getCompanyConfiguration(
+				EmailOTPConfiguration.class, user.getCompanyId());
+		}
+		catch (Exception e) {
+			return null;
+		}
 	}
 
 	@SuppressWarnings("unchecked")

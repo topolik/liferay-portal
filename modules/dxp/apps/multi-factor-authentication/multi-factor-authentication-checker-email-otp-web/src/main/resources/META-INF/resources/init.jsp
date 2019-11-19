@@ -26,6 +26,8 @@ taglib uri="http://liferay.com/tld/util" prefix="liferay-util" %>
 <%@ page import="com.liferay.multi.factor.authentication.checker.email.otp.web.internal.checker.EmailOTPMFAChecker" %><%@
 page import="com.liferay.multi.factor.authentication.checker.email.otp.web.internal.configuration.EmailOTPConfiguration" %><%@
 page import="com.liferay.multi.factor.authentication.checker.email.otp.web.internal.constants.MFAPortletKeys" %><%@
+page import="com.liferay.portal.kernel.module.configuration.ConfigurationProviderUtil" %><%@
+page import="com.liferay.portal.kernel.settings.LocalizedValuesMap" %><%@
 page import="com.liferay.portal.kernel.util.HtmlUtil" %><%@
 page import="com.liferay.portal.kernel.util.ParamUtil" %>
 

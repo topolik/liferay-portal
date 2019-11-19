@@ -134,11 +134,13 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 			MailTemplateContext mailTemplateContext =
 				mailTemplateContextBuilder.build();
 
-			String emailTemplateSubject =
-				emailOTPConfiguration.emailTemplateSubject();
+			String emailTemplateSubject = "";
 
-			String emailTemplateBody =
-				emailOTPConfiguration.emailTemplateBody();
+			//	emailOTPConfiguration.emailTemplateSubject();
+
+			String emailTemplateBody = "";
+
+			// emailOTPConfiguration.emailTemplateBody();
 
 			return _sendNotificationEmail(
 				emailOTPConfiguration.emailTemplateFrom(),

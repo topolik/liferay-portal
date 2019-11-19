@@ -16,80 +16,52 @@ package com.liferay.multi.factor.authentication.checker.email.otp.web.internal.c
 
 import aQute.bnd.annotation.metatype.Meta;
 
-import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
-
 /**
  * @author Tomas Polesovsky
  */
-@ExtendedObjectClassDefinition(
-	category = "multi-factor-authentication",
-	scope = ExtendedObjectClassDefinition.Scope.COMPANY
-)
+//@ExtendedObjectClassDefinition(category = "multi-factor-authentication")
 @Meta.OCD(
 	id = "com.liferay.multi.factor.authentication.checker.email.otp.web.internal.configuration.EmailOTPConfiguration",
 	localization = "content/Language", name = "email-otp-configuration-name"
 )
 public interface EmailOTPConfiguration {
 
-	@Meta.AD(
-		deflt = "-1", description = "retry-timeout-description",
-		name = "retry-timeout", required = false
-	)
+	@Meta.AD(deflt = "-1", name = "retry-timeout", required = false)
 	public long retryTimeout();
 
 	@Meta.AD(deflt = "false", name = "enabled", required = false)
 	public boolean enabled();
 
-	@Meta.AD(
-		deflt = "30", description = "resend-email-timeout-description",
-		name = "resend-email-timeout", required = false
-	)
+	@Meta.AD(deflt = "30", name = "resend-email-timeout", required = false)
 	public long resendEmailTimeout();
 
 	@Meta.AD(
-		deflt = "-1", description = "validation-expiration-time-description",
-		name = "validation-expiration-time", required = false
+		deflt = "-1", name = "validation-expiration-time", required = false
 	)
 	public long validationExpirationTime();
 
 	@Meta.AD(
 		deflt = "${server-property://com.liferay.portal/admin.email.from.address}",
-		description = "email-template-from-description",
 		name = "email-template-from", required = false
 	)
 	public String emailTemplateFrom();
 
 	@Meta.AD(
 		deflt = "${server-property://com.liferay.portal/admin.email.from.name}",
-		description = "email-template-from-name-description",
 		name = "email-template-from-name", required = false
 	)
 	public String emailTemplateFromName();
 
-	@Meta.AD(
-		deflt = "${resource:com/liferay/multi/factor/authentication/checker/email/otp/dependencies/email_multi_factor_authentication_email_otp_subject.tmpl}",
-		description = "email-template-subject-description",
-		name = "email-template-subject", required = false
-	)
+	@Meta.AD(deflt = "", name = "email-template-subject", required = false)
 	public String emailTemplateSubject();
 
-	@Meta.AD(
-		deflt = "${resource:com/liferay/multi/factor/authentication/checker/email/otp/dependencies/email_multi_factor_authentication_email_otp_body.tmpl}",
-		description = "email-template-body-description",
-		name = "email-template-body", required = false
-	)
+	@Meta.AD(deflt = "", name = "email-template-body", required = false)
 	public String emailTemplateBody();
 
-	@Meta.AD(
-		deflt = "-1", description = "failed-attempts-allowed-description",
-		name = "failed-attempts-allowed", required = false
-	)
+	@Meta.AD(deflt = "-1", name = "failed-attempts-allowed", required = false)
 	public int failedAttemptsAllowed();
 
-	@Meta.AD(
-		deflt = "6", description = "otp-size-description", name = "otp-size",
-		required = false
-	)
+	@Meta.AD(deflt = "6", name = "otp-size", required = false)
 	public int otpSize();
 
 }
