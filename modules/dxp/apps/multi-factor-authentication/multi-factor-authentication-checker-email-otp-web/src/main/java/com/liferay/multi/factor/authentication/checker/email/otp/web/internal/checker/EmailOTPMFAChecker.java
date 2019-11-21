@@ -14,9 +14,12 @@
 
 package com.liferay.multi.factor.authentication.checker.email.otp.web.internal.checker;
 
+import com.liferay.multi.factor.authentication.checker.audit.util.MFACheckerAuditUtil;
 import com.liferay.multi.factor.authentication.checker.email.otp.model.MFAEmailOTPEntry;
 import com.liferay.multi.factor.authentication.checker.email.otp.service.MFAEmailOTPEntryLocalService;
 import com.liferay.multi.factor.authentication.checker.email.otp.web.internal.configuration.EmailOTPConfiguration;
+import com.liferay.portal.kernel.audit.AuditMessage;
+import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.User;
@@ -25,7 +28,6 @@ import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.Portal;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.util.PropsValues;
 
 import java.io.IOException;
@@ -109,11 +111,18 @@ public class EmailOTPMFAChecker {
 		HttpServletRequest httpServletRequest,
 		HttpServletResponse httpServletResponse, long userId) {
 
-		String userInput = ParamUtil.getString(httpServletRequest, "otp");
+		User user = null;
 
-		if (Validator.isBlank(userInput)) {
+		try {
+			user = _userLocalService.getUser(userId);
+		}
+		catch (PortalException pe) {
+			_log.error(pe.getMessage(), pe);
+
 			return false;
 		}
+
+		String userInput = ParamUtil.getString(httpServletRequest, "otp");
 
 		HttpServletRequest originalHttpServletRequest =
 			_portal.getOriginalServletRequest(httpServletRequest);
@@ -136,6 +145,13 @@ public class EmailOTPMFAChecker {
 					_mfaEmailOTPEntryLocalService.resetFailedAttempts(userId);
 				}
 				else {
+					AuditMessage auditMessage =
+						MFACheckerAuditUtil.buildVerificationFailureMessage(
+							user, getClass().getName(),
+							"Reached Maximum allowed attempts");
+
+					MFACheckerAuditUtil.routeAuditMessage(auditMessage);
+
 					return false;
 				}
 			}
@@ -160,16 +176,36 @@ public class EmailOTPMFAChecker {
 				_mfaEmailOTPEntryLocalService.updateAttempts(
 					userId, userIP, true);
 
+				AuditMessage auditMessage =
+					MFACheckerAuditUtil.buildVerificationSuccessMessage(
+						user, getClass().getName());
+
+				MFACheckerAuditUtil.routeAuditMessage(auditMessage);
+
 				return true;
 			}
 
+			AuditMessage auditMessage =
+				MFACheckerAuditUtil.buildVerificationFailureMessage(
+					user, getClass().getName(), "Incorrect Email OTP");
+
+			MFACheckerAuditUtil.routeAuditMessage(auditMessage);
+
 			_mfaEmailOTPEntryLocalService.updateAttempts(userId, userIP, false);
+
+			return false;
 		}
 		catch (Exception e) {
-			_log.error(e.getMessage(), e);
-		}
+			AuditMessage auditMessage =
+				MFACheckerAuditUtil.buildVerificationFailureMessage(
+					user, getClass().getName(), e.getMessage());
 
-		return false;
+			MFACheckerAuditUtil.routeAuditMessage(auditMessage);
+
+			_log.error(e.getMessage(), e);
+
+			return false;
+		}
 	}
 
 	@Activate
