@@ -14,9 +14,7 @@
 
 package com.liferay.multi.factor.authentication.checker.email.otp.web.internal.configuration;
 
-import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.settings.LocalizedValuesMap;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.UnicodeProperties;
 
 import java.util.Locale;
@@ -38,14 +36,9 @@ public class EmailOTPConfigurationLocalizedValuesMap
 
 			String[] localeData = key.split("_");
 
-			String value = StringUtil.replace(
-				entry.getValue(), _SAFE_NEWLINE_CHARACTER, StringPool.NEW_LINE);
-
-			super.put(new Locale(localeData[0], localeData[1]), value);
+			super.put(
+				new Locale(localeData[0], localeData[1]), entry.getValue());
 		}
 	}
-
-	private static final String _SAFE_NEWLINE_CHARACTER =
-		"_SAFE_NEWLINE_CHARACTER_";
 
 }

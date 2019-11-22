@@ -97,40 +97,31 @@ public class EmailOTPPortalSettingsConfigurationScreenContributor
 			}
 		}
 
+		httpServletRequest.setAttribute(
+			"bodyLocalizedValuesMap",
+			_getEmailOTPTemplate(
+				EmailOTPConfiguration.DEFAULT_EMAIL_OTP_BODY,
+				emailOTPConfiguration.emailTemplateBody()));
+		httpServletRequest.setAttribute(
+			"subjectLocalizedValuesMap",
+			_getEmailOTPTemplate(
+				EmailOTPConfiguration.DEFAULT_EMAIL_OTP_SUBJECT,
+				emailOTPConfiguration.emailTemplateSubject()));
+	}
+
+	private EmailOTPConfigurationLocalizedValuesMap _getEmailOTPTemplate(
+		String defaultTemplate, String properties) {
+
 		Class<?> clazz = getClass();
 
-		String defaultEmailOTPBody = StringUtil.read(
-			clazz,
-			"/META-INF/resources/dependencies" +
-				"/email_multi_factor_authentication_email_otp_body.tmpl");
+		String defaultValue = StringUtil.read(clazz, defaultTemplate);
 
-		String defaultEmailOTPSubject = StringUtil.read(
-			clazz,
-			"/META-INF/resources/dependencies" +
-				"/email_multi_factor_authentication_email_otp_subject.tmpl");
+		UnicodeProperties unicodeProperties = new UnicodeProperties(true);
 
-		UnicodeProperties emailOTPBodyProperties = new UnicodeProperties();
+		unicodeProperties.fastLoad(properties);
 
-		emailOTPBodyProperties.fastLoad(
-			emailOTPConfiguration.emailTemplateBody());
-
-		UnicodeProperties emailOTPSubjectProperties = new UnicodeProperties();
-
-		emailOTPSubjectProperties.fastLoad(
-			emailOTPConfiguration.emailTemplateSubject());
-
-		EmailOTPConfigurationLocalizedValuesMap bodyLocalizedValuesMap =
-			new EmailOTPConfigurationLocalizedValuesMap(
-				defaultEmailOTPBody, emailOTPBodyProperties);
-
-		EmailOTPConfigurationLocalizedValuesMap subjectLocalizedValuesMap =
-			new EmailOTPConfigurationLocalizedValuesMap(
-				defaultEmailOTPSubject, emailOTPSubjectProperties);
-
-		httpServletRequest.setAttribute(
-			"bodyLocalizedValuesMap", bodyLocalizedValuesMap);
-		httpServletRequest.setAttribute(
-			"subjectLocalizedValuesMap", subjectLocalizedValuesMap);
+		return new EmailOTPConfigurationLocalizedValuesMap(
+			defaultValue, unicodeProperties);
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(

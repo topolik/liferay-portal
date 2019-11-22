@@ -19,7 +19,6 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * @author Tomas Polesovsky
  */
-//@ExtendedObjectClassDefinition(category = "multi-factor-authentication")
 @Meta.OCD(
 	id = "com.liferay.multi.factor.authentication.checker.email.otp.web.internal.configuration.EmailOTPConfiguration",
 	localization = "content/Language", name = "email-otp-configuration-name"
@@ -63,5 +62,13 @@ public interface EmailOTPConfiguration {
 
 	@Meta.AD(deflt = "6", name = "otp-size", required = false)
 	public int otpSize();
+
+	public final String DEFAULT_EMAIL_OTP_BODY =
+		"/META-INF/resources/dependencies" +
+			"/email_multi_factor_authentication_email_otp_body.tmpl";
+
+	public final String DEFAULT_EMAIL_OTP_SUBJECT =
+		"/META-INF/resources/dependencies" +
+			"/email_multi_factor_authentication_email_otp_subject.tmpl";
 
 }

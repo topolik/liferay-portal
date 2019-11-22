@@ -22,6 +22,7 @@ import com.liferay.mail.kernel.template.MailTemplateContextBuilder;
 import com.liferay.mail.kernel.template.MailTemplateFactoryUtil;
 import com.liferay.multi.factor.authentication.checker.email.otp.web.internal.checker.EmailOTPMFAChecker;
 import com.liferay.multi.factor.authentication.checker.email.otp.web.internal.configuration.EmailOTPConfiguration;
+import com.liferay.multi.factor.authentication.checker.email.otp.web.internal.configuration.EmailOTPConfigurationLocalizedValuesMap;
 import com.liferay.multi.factor.authentication.checker.email.otp.web.internal.constants.MFAPortletKeys;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
@@ -40,6 +41,8 @@ import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.Portal;
 import com.liferay.portal.kernel.util.PwdGenerator;
 import com.liferay.portal.kernel.util.StringBundler;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.UnicodeProperties;
 
 import java.io.IOException;
 
@@ -134,13 +137,38 @@ public class SendEmailOTPMVCResourceCommand implements MVCResourceCommand {
 			MailTemplateContext mailTemplateContext =
 				mailTemplateContextBuilder.build();
 
-			String emailTemplateSubject = "";
+			String defaultSubjectValue = StringUtil.read(
+				EmailOTPConfiguration.class,
+				EmailOTPConfiguration.DEFAULT_EMAIL_OTP_SUBJECT);
 
-			//	emailOTPConfiguration.emailTemplateSubject();
+			UnicodeProperties unicodeSubjectProperties = new UnicodeProperties(
+				true);
 
-			String emailTemplateBody = "";
+			unicodeSubjectProperties.fastLoad(
+				emailOTPConfiguration.emailTemplateSubject());
 
-			// emailOTPConfiguration.emailTemplateBody();
+			EmailOTPConfigurationLocalizedValuesMap subjectProperties =
+				new EmailOTPConfigurationLocalizedValuesMap(
+					defaultSubjectValue, unicodeSubjectProperties);
+
+			String emailTemplateSubject = subjectProperties.get(
+				user.getLocale());
+
+			String defaultBodyValue = StringUtil.read(
+				EmailOTPConfiguration.class,
+				EmailOTPConfiguration.DEFAULT_EMAIL_OTP_BODY);
+
+			UnicodeProperties unicodeBodyProperties = new UnicodeProperties(
+				true);
+
+			unicodeBodyProperties.fastLoad(
+				emailOTPConfiguration.emailTemplateBody());
+
+			EmailOTPConfigurationLocalizedValuesMap bodyProperties =
+				new EmailOTPConfigurationLocalizedValuesMap(
+					defaultBodyValue, unicodeBodyProperties);
+
+			String emailTemplateBody = bodyProperties.get(user.getLocale());
 
 			return _sendNotificationEmail(
 				emailOTPConfiguration.emailTemplateFrom(),
