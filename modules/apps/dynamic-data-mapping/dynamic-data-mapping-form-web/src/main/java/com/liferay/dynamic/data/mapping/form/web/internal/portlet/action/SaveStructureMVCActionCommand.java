@@ -24,6 +24,7 @@ import com.liferay.dynamic.data.mapping.model.DDMFormInstance;
 import com.liferay.dynamic.data.mapping.model.DDMFormLayout;
 import com.liferay.dynamic.data.mapping.model.DDMStructure;
 import com.liferay.dynamic.data.mapping.model.DDMStructureConstants;
+import com.liferay.dynamic.data.mapping.security.permission.DDMPermissionSupport;
 import com.liferay.dynamic.data.mapping.service.DDMStructureService;
 import com.liferay.dynamic.data.mapping.storage.StorageType;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -74,8 +75,12 @@ public class SaveStructureMVCActionCommand extends BaseMVCActionCommand {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
+		String structureModelResourceName =
+			_ddmPermissionSupport.getStructureModelResourceName(
+				DDMFormInstance.class.getName());
+
 		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			DDMStructure.class.getName(), actionRequest);
+			structureModelResourceName, actionRequest);
 
 		long groupId = ParamUtil.getLong(actionRequest, "groupId");
 		long structureId = ParamUtil.getLong(actionRequest, "structureId");
@@ -190,6 +195,9 @@ public class SaveStructureMVCActionCommand extends BaseMVCActionCommand {
 	)
 	protected DDMFormContextDeserializer<DDMFormLayout>
 		ddlFormBuilderContextToDDMFormLayout;
+
+	@Reference
+	private DDMPermissionSupport _ddmPermissionSupport;
 
 	@Reference
 	protected JSONFactory jsonFactory;
