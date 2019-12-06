@@ -49,7 +49,6 @@ public class ThreadLocalScopeContextScopeChecker
 		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants = new ArrayList<>(
 			_oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
 				_companyIdThreadLocal.get(), _applicationNameThreadLocal.get(),
-				_bundleSymbolicNameThreadLocal.get(),
 				_accessTokenThreadLocal.get()));
 
 		if (scopes.length > oAuth2ScopeGrants.size()) {
@@ -80,7 +79,6 @@ public class ThreadLocalScopeContextScopeChecker
 		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
 			_oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
 				_companyIdThreadLocal.get(), _applicationNameThreadLocal.get(),
-				_bundleSymbolicNameThreadLocal.get(),
 				_accessTokenThreadLocal.get());
 
 		for (String scope : scopes) {
@@ -109,7 +107,6 @@ public class ThreadLocalScopeContextScopeChecker
 		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants =
 			_oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
 				_companyIdThreadLocal.get(), _applicationNameThreadLocal.get(),
-				_bundleSymbolicNameThreadLocal.get(),
 				_accessTokenThreadLocal.get());
 
 		for (OAuth2ScopeGrant oAuth2ScopeGrant : oAuth2ScopeGrants) {
