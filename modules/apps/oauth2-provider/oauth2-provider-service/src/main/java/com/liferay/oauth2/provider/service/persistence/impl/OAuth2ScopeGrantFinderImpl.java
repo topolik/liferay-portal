@@ -40,20 +40,19 @@ import org.osgi.service.component.annotations.Reference;
 public class OAuth2ScopeGrantFinderImpl
 	extends OAuth2ScopeGrantFinderBaseImpl implements OAuth2ScopeGrantFinder {
 
-	public static final String FIND_BY_C_A_B_A =
-		OAuth2ScopeGrantFinder.class.getName() + ".findByC_A_B_A";
+	public static final String FIND_BY_C_A_A =
+		OAuth2ScopeGrantFinder.class.getName() + ".findByC_A_A";
 
 	@Override
-	public Collection<OAuth2ScopeGrant> findByC_A_B_A(
-		long companyId, String applicationName, String bundleSymbolicName,
-		String accessTokenContent) {
+	public Collection<OAuth2ScopeGrant> findByC_A_A(
+		long companyId, String applicationName, String accessTokenContent) {
 
 		Session session = null;
 
 		try {
 			session = openSession();
 
-			String sql = _customSQL.get(getClass(), FIND_BY_C_A_B_A);
+			String sql = _customSQL.get(getClass(), FIND_BY_C_A_A);
 
 			SQLQuery q = session.createSynchronizedSQLQuery(sql);
 
@@ -64,7 +63,6 @@ public class OAuth2ScopeGrantFinderImpl
 
 			qPos.add(companyId);
 			qPos.add(applicationName);
-			qPos.add(bundleSymbolicName);
 			qPos.add(accessTokenContent.hashCode());
 
 			List<Object[]> rows = (List<Object[]>)QueryUtil.list(

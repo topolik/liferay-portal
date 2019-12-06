@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <custom-sql>
-	<sql id="com.liferay.oauth2.provider.service.persistence.OAuth2ScopeGrantFinder.findByC_A_B_A">
+	<sql id="com.liferay.oauth2.provider.service.persistence.OAuth2ScopeGrantFinder.findByC_A_A">
 		<![CDATA[
 			SELECT
 				{OAuth2ScopeGrant.*}, {OAuth2Authorization.*}
@@ -16,7 +16,6 @@
 			WHERE
 				(OAuth2ScopeGrant.companyId = ?) AND
 				(OAuth2ScopeGrant.applicationName = ?) AND
-				(OAuth2ScopeGrant.bundleSymbolicName = ?) AND
 				(OAuth2Authorization.accessTokenContentHash = ?)
 		]]>
 	</sql>

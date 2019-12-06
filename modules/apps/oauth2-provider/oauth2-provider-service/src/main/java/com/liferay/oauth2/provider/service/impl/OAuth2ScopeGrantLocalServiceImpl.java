@@ -44,23 +44,13 @@ public class OAuth2ScopeGrantLocalServiceImpl
 	@Override
 	public OAuth2ScopeGrant createOAuth2ScopeGrant(
 			long companyId, long oAuth2ApplicationScopeAliasesId,
-			String applicationName, String bundleSymbolicName, String scope)
-		throws DuplicateOAuth2ScopeGrantException {
-
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public OAuth2ScopeGrant createOAuth2ScopeGrant(
-			long companyId, long oAuth2ApplicationScopeAliasesId,
-			String applicationName, String bundleSymbolicName, String scope,
-			List<String> scopeAliases)
+			String applicationName, String scope, List<String> scopeAliases)
 		throws DuplicateOAuth2ScopeGrantException {
 
 		OAuth2ScopeGrant oAuth2ScopeGrant =
-			oAuth2ScopeGrantPersistence.fetchByC_O_A_B_S(
+			oAuth2ScopeGrantPersistence.fetchByC_O_A_S(
 				companyId, oAuth2ApplicationScopeAliasesId, applicationName,
-				bundleSymbolicName, scope);
+				scope);
 
 		if (oAuth2ScopeGrant != null) {
 			throw new DuplicateOAuth2ScopeGrantException();
@@ -76,12 +66,20 @@ public class OAuth2ScopeGrantLocalServiceImpl
 		oAuth2ScopeGrant.setOAuth2ApplicationScopeAliasesId(
 			oAuth2ApplicationScopeAliasesId);
 		oAuth2ScopeGrant.setApplicationName(applicationName);
-		oAuth2ScopeGrant.setBundleSymbolicName(bundleSymbolicName);
 		oAuth2ScopeGrant.setScope(scope);
 
 		oAuth2ScopeGrant.setScopeAliasesList(scopeAliases);
 
 		return oAuth2ScopeGrantPersistence.update(oAuth2ScopeGrant);
+	}
+
+	@Override
+	public OAuth2ScopeGrant createOAuth2ScopeGrant(
+			long companyId, long oAuth2ApplicationScopeAliasesId,
+			String applicationName, String bundleSymbolicName, String scope)
+		throws DuplicateOAuth2ScopeGrantException {
+
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -121,11 +119,10 @@ public class OAuth2ScopeGrantLocalServiceImpl
 
 	@Override
 	public Collection<OAuth2ScopeGrant> getOAuth2ScopeGrants(
-		long companyId, String applicationName, String bundleSymbolicName,
-		String accessTokenContent) {
+		long companyId, String applicationName, String accessTokenContent) {
 
-		return oAuth2ScopeGrantFinder.findByC_A_B_A(
-			companyId, applicationName, bundleSymbolicName, accessTokenContent);
+		return oAuth2ScopeGrantFinder.findByC_A_A(
+			companyId, applicationName, accessTokenContent);
 	}
 
 	@Override

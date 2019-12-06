@@ -211,8 +211,7 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 
 			_oAuth2ScopeGrantLocalService.createOAuth2ScopeGrant(
 				companyId, oAuth2ApplicationScopeAliasesId,
-				simpleEntry.getKey(), null, simpleEntry.getValue(),
-				entry.getValue());
+				simpleEntry.getKey(), simpleEntry.getValue(), entry.getValue());
 		}
 	}
 

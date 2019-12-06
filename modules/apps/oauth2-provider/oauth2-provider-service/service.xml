@@ -155,11 +155,10 @@
 		<finder name="OAuth2ApplicationScopeAliasesId" return-type="Collection">
 			<finder-column name="oAuth2ApplicationScopeAliasesId" />
 		</finder>
-		<finder name="C_O_A_B_S" return-type="OAuth2ScopeGrant">
+		<finder name="C_O_A_S" return-type="OAuth2ScopeGrant">
 			<finder-column name="companyId" />
 			<finder-column name="oAuth2ApplicationScopeAliasesId" />
 			<finder-column name="applicationName" />
-			<finder-column name="bundleSymbolicName" />
 			<finder-column name="scope" />
 		</finder>
 
