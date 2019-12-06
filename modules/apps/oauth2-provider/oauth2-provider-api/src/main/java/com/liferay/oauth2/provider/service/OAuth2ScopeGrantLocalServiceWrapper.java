@@ -115,6 +115,20 @@ public class OAuth2ScopeGrantLocalServiceWrapper
 	public com.liferay.oauth2.provider.model.OAuth2ScopeGrant
 			createOAuth2ScopeGrant(
 				long companyId, long oAuth2ApplicationScopeAliasesId,
+				String applicationName, String scope,
+				java.util.List<String> scopeAliases)
+		throws com.liferay.oauth2.provider.exception.
+			DuplicateOAuth2ScopeGrantException {
+
+		return _oAuth2ScopeGrantLocalService.createOAuth2ScopeGrant(
+			companyId, oAuth2ApplicationScopeAliasesId, applicationName, scope,
+			scopeAliases);
+	}
+
+	@Override
+	public com.liferay.oauth2.provider.model.OAuth2ScopeGrant
+			createOAuth2ScopeGrant(
+				long companyId, long oAuth2ApplicationScopeAliasesId,
 				String applicationName, String bundleSymbolicName, String scope)
 		throws com.liferay.oauth2.provider.exception.
 			DuplicateOAuth2ScopeGrantException {
@@ -122,20 +136,6 @@ public class OAuth2ScopeGrantLocalServiceWrapper
 		return _oAuth2ScopeGrantLocalService.createOAuth2ScopeGrant(
 			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
 			bundleSymbolicName, scope);
-	}
-
-	@Override
-	public com.liferay.oauth2.provider.model.OAuth2ScopeGrant
-			createOAuth2ScopeGrant(
-				long companyId, long oAuth2ApplicationScopeAliasesId,
-				String applicationName, String bundleSymbolicName, String scope,
-				java.util.List<String> scopeAliases)
-		throws com.liferay.oauth2.provider.exception.
-			DuplicateOAuth2ScopeGrantException {
-
-		return _oAuth2ScopeGrantLocalService.createOAuth2ScopeGrant(
-			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
-			bundleSymbolicName, scope, scopeAliases);
 	}
 
 	@Override
@@ -449,10 +449,10 @@ public class OAuth2ScopeGrantLocalServiceWrapper
 		<com.liferay.oauth2.provider.model.OAuth2ScopeGrant>
 			getOAuth2ScopeGrants(
 				long companyId, String applicationName,
-				String bundleSymbolicName, String accessTokenContent) {
+				String accessTokenContent) {
 
 		return _oAuth2ScopeGrantLocalService.getOAuth2ScopeGrants(
-			companyId, applicationName, bundleSymbolicName, accessTokenContent);
+			companyId, applicationName, accessTokenContent);
 	}
 
 	/**

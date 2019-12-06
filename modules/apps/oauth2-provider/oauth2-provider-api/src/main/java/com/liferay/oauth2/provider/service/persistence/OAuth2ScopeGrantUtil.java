@@ -314,105 +314,95 @@ public class OAuth2ScopeGrantUtil {
 	}
 
 	/**
-	 * Returns the o auth2 scope grant where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and bundleSymbolicName = &#63; and scope = &#63; or throws a <code>NoSuchOAuth2ScopeGrantException</code> if it could not be found.
+	 * Returns the o auth2 scope grant where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and scope = &#63; or throws a <code>NoSuchOAuth2ScopeGrantException</code> if it could not be found.
 	 *
 	 * @param companyId the company ID
 	 * @param oAuth2ApplicationScopeAliasesId the o auth2 application scope aliases ID
 	 * @param applicationName the application name
-	 * @param bundleSymbolicName the bundle symbolic name
 	 * @param scope the scope
 	 * @return the matching o auth2 scope grant
 	 * @throws NoSuchOAuth2ScopeGrantException if a matching o auth2 scope grant could not be found
 	 */
-	public static OAuth2ScopeGrant findByC_O_A_B_S(
+	public static OAuth2ScopeGrant findByC_O_A_S(
 			long companyId, long oAuth2ApplicationScopeAliasesId,
-			String applicationName, String bundleSymbolicName, String scope)
+			String applicationName, String scope)
 		throws com.liferay.oauth2.provider.exception.
 			NoSuchOAuth2ScopeGrantException {
 
-		return getPersistence().findByC_O_A_B_S(
-			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
-			bundleSymbolicName, scope);
+		return getPersistence().findByC_O_A_S(
+			companyId, oAuth2ApplicationScopeAliasesId, applicationName, scope);
 	}
 
 	/**
-	 * Returns the o auth2 scope grant where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and bundleSymbolicName = &#63; and scope = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
+	 * Returns the o auth2 scope grant where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and scope = &#63; or returns <code>null</code> if it could not be found. Uses the finder cache.
 	 *
 	 * @param companyId the company ID
 	 * @param oAuth2ApplicationScopeAliasesId the o auth2 application scope aliases ID
 	 * @param applicationName the application name
-	 * @param bundleSymbolicName the bundle symbolic name
 	 * @param scope the scope
 	 * @return the matching o auth2 scope grant, or <code>null</code> if a matching o auth2 scope grant could not be found
 	 */
-	public static OAuth2ScopeGrant fetchByC_O_A_B_S(
+	public static OAuth2ScopeGrant fetchByC_O_A_S(
 		long companyId, long oAuth2ApplicationScopeAliasesId,
-		String applicationName, String bundleSymbolicName, String scope) {
+		String applicationName, String scope) {
 
-		return getPersistence().fetchByC_O_A_B_S(
-			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
-			bundleSymbolicName, scope);
+		return getPersistence().fetchByC_O_A_S(
+			companyId, oAuth2ApplicationScopeAliasesId, applicationName, scope);
 	}
 
 	/**
-	 * Returns the o auth2 scope grant where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and bundleSymbolicName = &#63; and scope = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
+	 * Returns the o auth2 scope grant where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and scope = &#63; or returns <code>null</code> if it could not be found, optionally using the finder cache.
 	 *
 	 * @param companyId the company ID
 	 * @param oAuth2ApplicationScopeAliasesId the o auth2 application scope aliases ID
 	 * @param applicationName the application name
-	 * @param bundleSymbolicName the bundle symbolic name
 	 * @param scope the scope
 	 * @param useFinderCache whether to use the finder cache
 	 * @return the matching o auth2 scope grant, or <code>null</code> if a matching o auth2 scope grant could not be found
 	 */
-	public static OAuth2ScopeGrant fetchByC_O_A_B_S(
+	public static OAuth2ScopeGrant fetchByC_O_A_S(
 		long companyId, long oAuth2ApplicationScopeAliasesId,
-		String applicationName, String bundleSymbolicName, String scope,
-		boolean useFinderCache) {
+		String applicationName, String scope, boolean useFinderCache) {
 
-		return getPersistence().fetchByC_O_A_B_S(
-			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
-			bundleSymbolicName, scope, useFinderCache);
+		return getPersistence().fetchByC_O_A_S(
+			companyId, oAuth2ApplicationScopeAliasesId, applicationName, scope,
+			useFinderCache);
 	}
 
 	/**
-	 * Removes the o auth2 scope grant where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and bundleSymbolicName = &#63; and scope = &#63; from the database.
+	 * Removes the o auth2 scope grant where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and scope = &#63; from the database.
 	 *
 	 * @param companyId the company ID
 	 * @param oAuth2ApplicationScopeAliasesId the o auth2 application scope aliases ID
 	 * @param applicationName the application name
-	 * @param bundleSymbolicName the bundle symbolic name
 	 * @param scope the scope
 	 * @return the o auth2 scope grant that was removed
 	 */
-	public static OAuth2ScopeGrant removeByC_O_A_B_S(
+	public static OAuth2ScopeGrant removeByC_O_A_S(
 			long companyId, long oAuth2ApplicationScopeAliasesId,
-			String applicationName, String bundleSymbolicName, String scope)
+			String applicationName, String scope)
 		throws com.liferay.oauth2.provider.exception.
 			NoSuchOAuth2ScopeGrantException {
 
-		return getPersistence().removeByC_O_A_B_S(
-			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
-			bundleSymbolicName, scope);
+		return getPersistence().removeByC_O_A_S(
+			companyId, oAuth2ApplicationScopeAliasesId, applicationName, scope);
 	}
 
 	/**
-	 * Returns the number of o auth2 scope grants where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and bundleSymbolicName = &#63; and scope = &#63;.
+	 * Returns the number of o auth2 scope grants where companyId = &#63; and oAuth2ApplicationScopeAliasesId = &#63; and applicationName = &#63; and scope = &#63;.
 	 *
 	 * @param companyId the company ID
 	 * @param oAuth2ApplicationScopeAliasesId the o auth2 application scope aliases ID
 	 * @param applicationName the application name
-	 * @param bundleSymbolicName the bundle symbolic name
 	 * @param scope the scope
 	 * @return the number of matching o auth2 scope grants
 	 */
-	public static int countByC_O_A_B_S(
+	public static int countByC_O_A_S(
 		long companyId, long oAuth2ApplicationScopeAliasesId,
-		String applicationName, String bundleSymbolicName, String scope) {
+		String applicationName, String scope) {
 
-		return getPersistence().countByC_O_A_B_S(
-			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
-			bundleSymbolicName, scope);
+		return getPersistence().countByC_O_A_S(
+			companyId, oAuth2ApplicationScopeAliasesId, applicationName, scope);
 	}
 
 	/**

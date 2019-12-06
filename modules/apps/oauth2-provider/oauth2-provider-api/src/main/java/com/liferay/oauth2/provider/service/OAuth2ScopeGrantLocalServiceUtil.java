@@ -110,6 +110,19 @@ public class OAuth2ScopeGrantLocalServiceUtil {
 	public static com.liferay.oauth2.provider.model.OAuth2ScopeGrant
 			createOAuth2ScopeGrant(
 				long companyId, long oAuth2ApplicationScopeAliasesId,
+				String applicationName, String scope,
+				java.util.List<String> scopeAliases)
+		throws com.liferay.oauth2.provider.exception.
+			DuplicateOAuth2ScopeGrantException {
+
+		return getService().createOAuth2ScopeGrant(
+			companyId, oAuth2ApplicationScopeAliasesId, applicationName, scope,
+			scopeAliases);
+	}
+
+	public static com.liferay.oauth2.provider.model.OAuth2ScopeGrant
+			createOAuth2ScopeGrant(
+				long companyId, long oAuth2ApplicationScopeAliasesId,
 				String applicationName, String bundleSymbolicName, String scope)
 		throws com.liferay.oauth2.provider.exception.
 			DuplicateOAuth2ScopeGrantException {
@@ -117,19 +130,6 @@ public class OAuth2ScopeGrantLocalServiceUtil {
 		return getService().createOAuth2ScopeGrant(
 			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
 			bundleSymbolicName, scope);
-	}
-
-	public static com.liferay.oauth2.provider.model.OAuth2ScopeGrant
-			createOAuth2ScopeGrant(
-				long companyId, long oAuth2ApplicationScopeAliasesId,
-				String applicationName, String bundleSymbolicName, String scope,
-				java.util.List<String> scopeAliases)
-		throws com.liferay.oauth2.provider.exception.
-			DuplicateOAuth2ScopeGrantException {
-
-		return getService().createOAuth2ScopeGrant(
-			companyId, oAuth2ApplicationScopeAliasesId, applicationName,
-			bundleSymbolicName, scope, scopeAliases);
 	}
 
 	public static void deleteOAuth2AuthorizationOAuth2ScopeGrant(
@@ -416,10 +416,10 @@ public class OAuth2ScopeGrantLocalServiceUtil {
 		<com.liferay.oauth2.provider.model.OAuth2ScopeGrant>
 			getOAuth2ScopeGrants(
 				long companyId, String applicationName,
-				String bundleSymbolicName, String accessTokenContent) {
+				String accessTokenContent) {
 
 		return getService().getOAuth2ScopeGrants(
-			companyId, applicationName, bundleSymbolicName, accessTokenContent);
+			companyId, applicationName, accessTokenContent);
 	}
 
 	/**

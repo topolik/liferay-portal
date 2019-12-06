@@ -99,13 +99,12 @@ public interface OAuth2ScopeGrantLocalService
 
 	public OAuth2ScopeGrant createOAuth2ScopeGrant(
 			long companyId, long oAuth2ApplicationScopeAliasesId,
-			String applicationName, String bundleSymbolicName, String scope)
+			String applicationName, String scope, List<String> scopeAliases)
 		throws DuplicateOAuth2ScopeGrantException;
 
 	public OAuth2ScopeGrant createOAuth2ScopeGrant(
 			long companyId, long oAuth2ApplicationScopeAliasesId,
-			String applicationName, String bundleSymbolicName, String scope,
-			List<String> scopeAliases)
+			String applicationName, String bundleSymbolicName, String scope)
 		throws DuplicateOAuth2ScopeGrantException;
 
 	public void deleteOAuth2AuthorizationOAuth2ScopeGrant(
@@ -286,8 +285,7 @@ public interface OAuth2ScopeGrantLocalService
 
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public Collection<OAuth2ScopeGrant> getOAuth2ScopeGrants(
-		long companyId, String applicationName, String bundleSymbolicName,
-		String accessTokenContent);
+		long companyId, String applicationName, String accessTokenContent);
 
 	/**
 	 * Returns the number of o auth2 scope grants.

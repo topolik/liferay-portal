@@ -102,16 +102,14 @@ public class OAuth2ScopeGrantModelImpl
 
 	public static final long APPLICATIONNAME_COLUMN_BITMASK = 1L;
 
-	public static final long BUNDLESYMBOLICNAME_COLUMN_BITMASK = 2L;
-
-	public static final long COMPANYID_COLUMN_BITMASK = 4L;
+	public static final long COMPANYID_COLUMN_BITMASK = 2L;
 
 	public static final long OAUTH2APPLICATIONSCOPEALIASESID_COLUMN_BITMASK =
-		8L;
+		4L;
 
-	public static final long SCOPE_COLUMN_BITMASK = 16L;
+	public static final long SCOPE_COLUMN_BITMASK = 8L;
 
-	public static final long OAUTH2SCOPEGRANTID_COLUMN_BITMASK = 32L;
+	public static final long OAUTH2SCOPEGRANTID_COLUMN_BITMASK = 16L;
 
 	public static void setEntityCacheEnabled(boolean entityCacheEnabled) {
 		_entityCacheEnabled = entityCacheEnabled;
@@ -403,17 +401,7 @@ public class OAuth2ScopeGrantModelImpl
 
 	@Override
 	public void setBundleSymbolicName(String bundleSymbolicName) {
-		_columnBitmask |= BUNDLESYMBOLICNAME_COLUMN_BITMASK;
-
-		if (_originalBundleSymbolicName == null) {
-			_originalBundleSymbolicName = _bundleSymbolicName;
-		}
-
 		_bundleSymbolicName = bundleSymbolicName;
-	}
-
-	public String getOriginalBundleSymbolicName() {
-		return GetterUtil.getString(_originalBundleSymbolicName);
 	}
 
 	@Override
@@ -576,9 +564,6 @@ public class OAuth2ScopeGrantModelImpl
 		oAuth2ScopeGrantModelImpl._originalApplicationName =
 			oAuth2ScopeGrantModelImpl._applicationName;
 
-		oAuth2ScopeGrantModelImpl._originalBundleSymbolicName =
-			oAuth2ScopeGrantModelImpl._bundleSymbolicName;
-
 		oAuth2ScopeGrantModelImpl._originalScope =
 			oAuth2ScopeGrantModelImpl._scope;
 
@@ -718,7 +703,6 @@ public class OAuth2ScopeGrantModelImpl
 	private String _applicationName;
 	private String _originalApplicationName;
 	private String _bundleSymbolicName;
-	private String _originalBundleSymbolicName;
 	private String _scope;
 	private String _originalScope;
 	private String _scopeAliases;
