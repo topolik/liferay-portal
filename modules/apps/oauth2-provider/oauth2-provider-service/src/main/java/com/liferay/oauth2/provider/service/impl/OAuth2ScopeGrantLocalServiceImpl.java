@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -179,16 +178,6 @@ public class OAuth2ScopeGrantLocalServiceImpl
 
 		if (!Objects.equals(
 				oAuth2ScopeGrant.getScope(), liferayOAuth2Scope.getScope())) {
-
-			return false;
-		}
-
-		Bundle bundle = liferayOAuth2Scope.getBundle();
-
-		String bundleSymbolicName = bundle.getSymbolicName();
-
-		if (!Objects.equals(
-				oAuth2ScopeGrant.getBundleSymbolicName(), bundleSymbolicName)) {
 
 			return false;
 		}

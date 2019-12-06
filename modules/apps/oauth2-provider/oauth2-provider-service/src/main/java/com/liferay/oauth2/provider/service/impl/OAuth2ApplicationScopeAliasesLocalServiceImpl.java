@@ -42,7 +42,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -70,8 +69,7 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 
 		return _addOAuth2ApplicationScopeAliases(
 			companyId, userId, userName, oAuth2ApplicationId,
-			_getLiferayOAuth2ScopesScopeAliases(
-				companyId, simpleEntryScopeAliases));
+			simpleEntryScopeAliases);
 	}
 
 	@Override
@@ -87,12 +85,9 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 			}
 		}
 
-		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopesScopeAliases =
-			_getLiferayOAuth2ScopesScopeAliases(companyId, scopeAliasesList);
-
 		return _addOAuth2ApplicationScopeAliases(
 			companyId, userId, userName, oAuth2ApplicationId,
-			liferayOAuth2ScopesScopeAliases);
+			_getLiferayOAuth2ScopesScopeAliases(companyId, scopeAliasesList));
 	}
 
 	@Override
@@ -179,12 +174,12 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 
 		List<String> scopeAliasesList = _getScopeAliasesList(oAuth2ScopeGrants);
 
-		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopesScopeAliases =
-			_getLiferayOAuth2ScopesScopeAliases(
+		Map<AbstractMap.SimpleEntry<String, String>, List<String>>
+			simpleEntryScopeAliases = _getLiferayOAuth2ScopesScopeAliases(
 				oAuth2ApplicationScopeAliases.getCompanyId(), scopeAliasesList);
 
 		if (_hasUpToDateScopeGrants(
-				oAuth2ScopeGrants, liferayOAuth2ScopesScopeAliases)) {
+				oAuth2ScopeGrants, simpleEntryScopeAliases)) {
 
 			return oAuth2ApplicationScopeAliases;
 		}
@@ -195,7 +190,7 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 				oAuth2ApplicationScopeAliases.getUserId(),
 				oAuth2ApplicationScopeAliases.getUserName(),
 				oAuth2ApplicationScopeAliases.getOAuth2ApplicationId(),
-				liferayOAuth2ScopesScopeAliases);
+				simpleEntryScopeAliases);
 		}
 		catch (PortalException pe) {
 			throw new IllegalArgumentException(pe);
@@ -204,21 +199,19 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 
 	protected void createScopeGrants(
 			long companyId, long oAuth2ApplicationScopeAliasesId,
-			Map<LiferayOAuth2Scope, List<String>>
-				liferayOAuth2ScopesScopeAliases)
+			Map<AbstractMap.SimpleEntry<String, String>, List<String>>
+				simpleEntryScopeAliases)
 		throws PortalException {
 
-		for (Map.Entry<LiferayOAuth2Scope, List<String>> entry :
-				liferayOAuth2ScopesScopeAliases.entrySet()) {
+		for (Map.Entry<AbstractMap.SimpleEntry<String, String>, List<String>>
+				entry : simpleEntryScopeAliases.entrySet()) {
 
-			LiferayOAuth2Scope liferayOAuth2Scope = entry.getKey();
-
-			Bundle bundle = liferayOAuth2Scope.getBundle();
+			AbstractMap.SimpleEntry<String, String> simpleEntry =
+				entry.getKey();
 
 			_oAuth2ScopeGrantLocalService.createOAuth2ScopeGrant(
 				companyId, oAuth2ApplicationScopeAliasesId,
-				liferayOAuth2Scope.getApplicationName(),
-				bundle.getSymbolicName(), liferayOAuth2Scope.getScope(),
+				simpleEntry.getKey(), null, simpleEntry.getValue(),
 				entry.getValue());
 		}
 	}
@@ -293,8 +286,8 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 	private OAuth2ApplicationScopeAliases _addOAuth2ApplicationScopeAliases(
 			long companyId, long userId, String userName,
 			long oAuth2ApplicationId,
-			Map<LiferayOAuth2Scope, List<String>>
-				liferayOAuth2ScopesScopeAliases)
+			Map<AbstractMap.SimpleEntry<String, String>, List<String>>
+				simpleEntryScopeAliases)
 		throws PortalException {
 
 		long oAuth2ApplicationScopeAliasesId = counterLocalService.increment(
@@ -317,17 +310,17 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 
 		createScopeGrants(
 			companyId, oAuth2ApplicationScopeAliasesId,
-			liferayOAuth2ScopesScopeAliases);
+			simpleEntryScopeAliases);
 
 		return oAuth2ApplicationScopeAliases;
 	}
 
-	private Map<LiferayOAuth2Scope, List<String>>
+	private Map<AbstractMap.SimpleEntry<String, String>, List<String>>
 		_getLiferayOAuth2ScopesScopeAliases(
 			long companyId, List<String> scopeAliasesList) {
 
-		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopesScopeAliases =
-			new HashMap<>();
+		Map<AbstractMap.SimpleEntry<String, String>, List<String>>
+			simpleEntryScopeAliases = new HashMap<>();
 
 		for (String scopeAlias : ListUtil.sort(scopeAliasesList)) {
 			for (LiferayOAuth2Scope liferayOAuth2Scope :
@@ -335,32 +328,17 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 						companyId, scopeAlias)) {
 
 				List<String> scopeAliases =
-					liferayOAuth2ScopesScopeAliases.computeIfAbsent(
-						liferayOAuth2Scope, x -> new ArrayList<>());
+					simpleEntryScopeAliases.computeIfAbsent(
+						new AbstractMap.SimpleEntry<>(
+							liferayOAuth2Scope.getApplicationName(),
+							liferayOAuth2Scope.getScope()),
+						x -> new ArrayList<>());
 
 				scopeAliases.add(scopeAlias);
 			}
 		}
 
-		return liferayOAuth2ScopesScopeAliases;
-	}
-
-	private Map<LiferayOAuth2Scope, List<String>>
-		_getLiferayOAuth2ScopesScopeAliases(
-			long companyId,
-			Map<AbstractMap.SimpleEntry<String, String>, List<String>>
-				simpleEntryScopeAliases) {
-
-		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopeListMap =
-			new HashMap<>();
-
-		simpleEntryScopeAliases.forEach(
-			(simpleEntry, scopeAliases) -> liferayOAuth2ScopeListMap.put(
-				_scopeLocator.getLiferayOAuth2Scope(
-					companyId, simpleEntry.getKey(), simpleEntry.getValue()),
-				scopeAliases));
-
-		return liferayOAuth2ScopeListMap;
+		return simpleEntryScopeAliases;
 	}
 
 	private List<String> _getScopeAliasesList(
@@ -379,33 +357,29 @@ public class OAuth2ApplicationScopeAliasesLocalServiceImpl
 
 	private boolean _hasUpToDateScopeGrants(
 		Collection<OAuth2ScopeGrant> oAuth2ScopeGrants,
-		Map<LiferayOAuth2Scope, List<String>> liferayOAuth2ScopesScopeAliases) {
+		Map<AbstractMap.SimpleEntry<String, String>, List<String>>
+			simpleEntryScopeAliases) {
 
-		if (liferayOAuth2ScopesScopeAliases.size() !=
-				oAuth2ScopeGrants.size()) {
-
+		if (simpleEntryScopeAliases.size() != oAuth2ScopeGrants.size()) {
 			return false;
 		}
 
 		oAuth2ScopeGrants = new ArrayList<>(oAuth2ScopeGrants);
 
-		for (Map.Entry<LiferayOAuth2Scope, List<String>> entry :
-				liferayOAuth2ScopesScopeAliases.entrySet()) {
+		for (Map.Entry<AbstractMap.SimpleEntry<String, String>, List<String>>
+				entry : simpleEntryScopeAliases.entrySet()) {
 
-			LiferayOAuth2Scope liferayOAuth2Scope = entry.getKey();
+			AbstractMap.SimpleEntry<String, String> simpleEntry =
+				entry.getKey();
 			List<String> scopeAliases = entry.getValue();
-			Bundle bundle = liferayOAuth2Scope.getBundle();
 
 			boolean found = oAuth2ScopeGrants.removeIf(
 				oAuth2ScopeGrant -> {
 					if (Objects.equals(
-							liferayOAuth2Scope.getApplicationName(),
+							simpleEntry.getKey(),
 							oAuth2ScopeGrant.getApplicationName()) &&
 						Objects.equals(
-							bundle.getSymbolicName(),
-							oAuth2ScopeGrant.getBundleSymbolicName()) &&
-						Objects.equals(
-							liferayOAuth2Scope.getScope(),
+							simpleEntry.getValue(),
 							oAuth2ScopeGrant.getScope())) {
 
 						List<String> oAuth2ScopeGrantScopeAliases =

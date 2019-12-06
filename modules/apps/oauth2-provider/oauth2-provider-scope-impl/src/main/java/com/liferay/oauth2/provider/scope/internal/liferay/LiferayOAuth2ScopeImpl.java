@@ -18,18 +18,13 @@ import com.liferay.oauth2.provider.scope.liferay.LiferayOAuth2Scope;
 
 import java.util.Objects;
 
-import org.osgi.framework.Bundle;
-
 /**
  * @author Carlos Sierra Andrés
  */
 public class LiferayOAuth2ScopeImpl implements LiferayOAuth2Scope {
 
-	public LiferayOAuth2ScopeImpl(
-		String applicationName, Bundle bundle, String scope) {
-
+	public LiferayOAuth2ScopeImpl(String applicationName, String scope) {
 		_applicationName = applicationName;
-		_bundle = bundle;
 		_scope = scope;
 	}
 
@@ -48,7 +43,6 @@ public class LiferayOAuth2ScopeImpl implements LiferayOAuth2Scope {
 
 		if (Objects.equals(
 				_applicationName, liferayOAuth2ScopeImpl._applicationName) &&
-			Objects.equals(_bundle, liferayOAuth2ScopeImpl._bundle) &&
 			Objects.equals(_scope, liferayOAuth2ScopeImpl._scope)) {
 
 			return true;
@@ -63,18 +57,13 @@ public class LiferayOAuth2ScopeImpl implements LiferayOAuth2Scope {
 	}
 
 	@Override
-	public Bundle getBundle() {
-		return _bundle;
-	}
-
-	@Override
 	public String getScope() {
 		return _scope;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(_applicationName, _bundle, _scope);
+		return Objects.hash(_applicationName, _scope);
 	}
 
 	@Override
@@ -83,7 +72,6 @@ public class LiferayOAuth2ScopeImpl implements LiferayOAuth2Scope {
 	}
 
 	private final String _applicationName;
-	private final Bundle _bundle;
 	private final String _scope;
 
 }
