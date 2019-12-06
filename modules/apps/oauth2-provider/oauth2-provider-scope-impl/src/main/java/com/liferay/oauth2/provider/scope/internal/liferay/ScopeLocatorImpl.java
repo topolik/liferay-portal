@@ -30,6 +30,7 @@ import com.liferay.osgi.service.tracker.collections.ServiceReferenceServiceTuple
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,7 +41,9 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Supplier;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
@@ -62,15 +65,8 @@ public class ScopeLocatorImpl implements ScopeLocator {
 	public LiferayOAuth2Scope getLiferayOAuth2Scope(
 		long companyId, String applicationName, String scope) {
 
-		ServiceReferenceServiceTuple<?, ScopeFinder>
-			serviceReferenceServiceTuple =
-				_scopeFinderByNameServiceTrackerMap.getService(applicationName);
-
-		if (serviceReferenceServiceTuple == null) {
-			return null;
-		}
-
-		return new LiferayOAuth2ScopeImpl(applicationName, scope);
+		return new LiferayOAuth2ScopeImpl(
+			applicationName, getBundleSupplier(applicationName), scope);
 	}
 
 	@Override
@@ -92,7 +88,9 @@ public class ScopeLocatorImpl implements ScopeLocator {
 			}
 
 			for (String scope : scopeFinder.findScopes()) {
-				liferayOAuth2Scopes.add(new LiferayOAuth2ScopeImpl(key, scope));
+				liferayOAuth2Scopes.add(
+					new LiferayOAuth2ScopeImpl(
+						key, getBundleSupplier(key), scope));
 			}
 		}
 
@@ -185,7 +183,9 @@ public class ScopeLocatorImpl implements ScopeLocator {
 			processedScopes.add(scope);
 
 			locatedScopes.add(
-				new LiferayOAuth2ScopeImpl(applicationName, scope));
+				new LiferayOAuth2ScopeImpl(
+					applicationName, getBundleSupplier(applicationName),
+					scope));
 
 			if (!scopeLocatorConfiguration.
 					includeScopesImpliedBeforeScopeMapping()) {
@@ -353,6 +353,43 @@ public class ScopeLocatorImpl implements ScopeLocator {
 		_scopeLocatorConfigurationProvidersScopedServiceTrackerMap.close();
 		_scopeMappersScopedServiceTrackerMap.close();
 		_scopeMatcherFactoriesServiceTrackerMap.close();
+	}
+
+	protected Supplier<Bundle> getBundleSupplier(String applicationName) {
+		return () -> {
+			ServiceReferenceServiceTuple<?, ScopeFinder>
+				serviceReferenceServiceTuple =
+					_scopeFinderByNameServiceTrackerMap.getService(
+						applicationName);
+
+			if (serviceReferenceServiceTuple == null) {
+				return null;
+			}
+
+			ServiceReference<?> serviceReference =
+				serviceReferenceServiceTuple.getServiceReference();
+
+			Object property = serviceReference.getProperty(
+				"original.service.bundleid");
+
+			if (property == null) {
+				return serviceReference.getBundle();
+			}
+
+			long bundleId = GetterUtil.getLong(property, -1L);
+
+			if (bundleId == -1) {
+				return serviceReference.getBundle();
+			}
+
+			Bundle bundle = _bundleContext.getBundle(bundleId);
+
+			if (bundle == null) {
+				return serviceReference.getBundle();
+			}
+
+			return bundle;
+		};
 	}
 
 	protected ScopeMatcherFactory getScopeMatcherFactory(long companyId) {

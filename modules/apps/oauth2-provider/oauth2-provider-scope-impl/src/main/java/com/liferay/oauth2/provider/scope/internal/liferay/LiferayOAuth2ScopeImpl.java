@@ -17,14 +17,20 @@ package com.liferay.oauth2.provider.scope.internal.liferay;
 import com.liferay.oauth2.provider.scope.liferay.LiferayOAuth2Scope;
 
 import java.util.Objects;
+import java.util.function.Supplier;
+
+import org.osgi.framework.Bundle;
 
 /**
  * @author Carlos Sierra Andrés
  */
 public class LiferayOAuth2ScopeImpl implements LiferayOAuth2Scope {
 
-	public LiferayOAuth2ScopeImpl(String applicationName, String scope) {
+	public LiferayOAuth2ScopeImpl(
+		String applicationName, Supplier<Bundle> bundleSupplier, String scope) {
+
 		_applicationName = applicationName;
+		_bundleSupplier = bundleSupplier;
 		_scope = scope;
 	}
 
@@ -57,6 +63,11 @@ public class LiferayOAuth2ScopeImpl implements LiferayOAuth2Scope {
 	}
 
 	@Override
+	public Bundle getBundle() {
+		return _bundleSupplier.get();
+	}
+
+	@Override
 	public String getScope() {
 		return _scope;
 	}
@@ -72,6 +83,7 @@ public class LiferayOAuth2ScopeImpl implements LiferayOAuth2Scope {
 	}
 
 	private final String _applicationName;
+	private final Supplier<Bundle> _bundleSupplier;
 	private final String _scope;
 
 }
