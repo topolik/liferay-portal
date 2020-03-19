@@ -63,7 +63,15 @@ if (referer.equals(themeDisplay.getPathMain() + "/portal/update_reminder_query")
 					</div>
 				</c:if>
 
-				<aui:input autocomplete="off" cssClass="reminder-query-answer" label="answer" maxlength="<%= ModelHintsConstants.TEXT_MAX_LENGTH %>" name="reminderQueryAnswer" showRequiredLabel="<%= false %>" size="50" type="text" value="<%= user.getReminderQueryAnswer() %>">
+				<%
+				String answer = user.getReminderQueryAnswer();
+
+				if (Validator.isNotNull(answer)) {
+					answer = Portal.TEMP_OBFUSCATION_VALUE;
+				}
+				%>
+
+				<aui:input autocomplete="off" cssClass="reminder-query-answer" label="answer" maxlength="<%= ModelHintsConstants.TEXT_MAX_LENGTH %>" name="reminderQueryAnswer" showRequiredLabel="<%= false %>" size="50" type="password" value="<%= answer %>">
 					<aui:validator name="required" />
 				</aui:input>
 			</aui:fieldset>
