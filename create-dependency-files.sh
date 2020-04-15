@@ -5,6 +5,7 @@ echo -n '' > package-dependencies.json
 
 git ls-files | grep 'package\(-lock\)\?.json' | while read p; do cat $p | (jq '.dependencies?' >> package-dependencies.json || echo "Error in reading $p"); done
 git ls-files | grep 'package\(-lock\)\?.json' | xargs git rm
+git ls-files | grep 'pom.xml' | xargs git rm
 
 grep ':[". ^0-9,]\+' package-dependencies.json | sed 's/\([^,]\)$/\1,/g' | sort -u | tr '\n' '#' | sed 's/^\(.*\),#$/{\1}/' | tr '#' '\n' | jq '{"name":"liferay-portal", "version": "master", "dependencies": .}' > package.json
 
