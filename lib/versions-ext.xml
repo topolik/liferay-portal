@@ -2284,13 +2284,13 @@
 			</library>
 			<library>
 				<file-name>lib/portal/jstl-impl.jar</file-name>
-				<version>1.2</version>
-				<project-name>JSTL</project-name>
-				<project-url>https://jstl.dev.java.net</project-url>
+				<version>1.2.5</version>
+				<project-name>Apache Taglibs</project-name>
+				<project-url>https://tomcat.apache.org/taglibs/standard/</project-url>
 				<licenses>
 					<license>
-						<license-name>CDDL 1.1</license-name>
-						<license-url>http://web.archive.org/web/20090305064954/http://www.sun.com/cddl/cddl.html</license-url>
+						<license-name>Apache License 2.0</license-name>
+						<license-url>http://www.apache.org/licenses/LICENSE-2.0</license-url>
 					</license>
 				</licenses>
 			</library>
