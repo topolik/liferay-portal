@@ -68,6 +68,10 @@ public class Encryptor {
 
 		byte[] encryptedBytes = Base64.decode(encryptedString);
 
+		if ((encryptedBytes == null) || (encryptedBytes.length == 0)) {
+			return StringPool.BLANK;
+		}
+
 		return decryptUnencodedAsString(key, encryptedBytes);
 	}
 

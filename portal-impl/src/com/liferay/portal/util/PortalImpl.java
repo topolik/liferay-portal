@@ -7671,7 +7671,9 @@ public class PortalImpl implements Portal {
 						"Unable to impersonate " + doAsUserIdString +
 							" because the string cannot be decrypted");
 				}
+			}
 
+			if (doAsUserId == 0) {
 				return 0;
 			}
 		}
