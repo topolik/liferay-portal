@@ -624,27 +624,6 @@ com/liferay/frontend/taglib/clay/internal/servlet/taglib/BaseContainerTag.setId(
 com/liferay/frontend/taglib/clay/internal/servlet/taglib/BaseContainerTag.setPropsTransformer(Ljava/lang/String;)V:0
 --com/liferay/frontend/taglib/clay/internal/servlet/taglib/BaseContainerTag.setPropsTransformerServletContext(Ljavax/servlet/ServletContext;)V:0
 
-
-
--- clay:data-set-display
-com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setActionParameterName(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setBulkActionDropdownItems(Ljava/util/List;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setContextParams(Ljava/util/Map;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setCreationMenu(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/CreationMenu;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setDataProviderKey(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setDeltaParam(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setFormId(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setId(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setNamespace(Ljava/lang/String;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setNestedItemsKey(Ljava/lang/String;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setNestedItemsReferenceKey(Ljava/lang/String;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setPortletURL(Ljavax/portlet/PortletURL;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setSelectedItems(Ljava/util/List;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setSelectedItemsKey(Ljava/lang/String;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setSelectionType(Ljava/lang/String;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setSortItemList(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/SortItemList;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/DataSetDisplayTag.setStyle(Ljava/lang/String;)V:0
-
 -- clay:dropdown-menu
 com/liferay/frontend/taglib/clay/servlet/taglib/DropdownMenuTag.setButtonLabel(Ljava/lang/String;)V:0
 com/liferay/frontend/taglib/clay/servlet/taglib/DropdownMenuTag.setButtonStyle(Ljava/lang/String;)V:0
@@ -653,24 +632,6 @@ com/liferay/frontend/taglib/clay/servlet/taglib/DropdownMenuTag.setButtonType(Lj
 com/liferay/frontend/taglib/clay/servlet/taglib/DropdownMenuTag.setItemsIconAlignment(Ljava/lang/String;)V:0
 com/liferay/frontend/taglib/clay/servlet/taglib/DropdownMenuTag.setTriggerCssClasses(Ljava/lang/String;)V:0
 com/liferay/frontend/taglib/clay/servlet/taglib/DropdownMenuTag.setTriggerTitle(Ljava/lang/String;)V:0
-
--- clay:headless-data-set-display
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setActionParameterName(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setApiURL(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setBulkActionDropdownItems(Ljava/util/List;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setClayDataSetActionDropdownItems(Ljava/util/List;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setCreationMenu(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/CreationMenu;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setFormId(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setId(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setNamespace(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setNestedItemsKey(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setNestedItemsReferenceKey(Ljava/lang/String;)V:0
---com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setPortletURL(Ljavax/portlet/PortletURL;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setSelectedItems(Ljava/util/List;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setSelectedItemsKey(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setSelectionType(Ljava/lang/String;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setSortItemList(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/SortItemList;)V:0
-com/liferay/frontend/taglib/clay/servlet/taglib/HeadlessDataSetDisplayTag.setStyle(Ljava/lang/String;)V:0
 
 -- clay:icon
 com/liferay/frontend/taglib/clay/servlet/taglib/IconTag.setSpritemap(Ljava/lang/String;)V:0
@@ -717,6 +678,43 @@ com/liferay/frontend/taglib/clay/servlet/taglib/NavigationBarTag.setNavigationIt
 -- liferay-commerce-product:product-list-entry-renderer
 -- liferay-commerce-product:product-list-renderer
 -- SAFE
+
+-- frontend-data-set:classic-display
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setActionParameterName(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setBulkActionDropdownItems(Ljava/util/List;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setContextParams(Ljava/util/Map;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setCreationMenu(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/CreationMenu;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setDataProviderKey(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setDeltaParam(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setFormId(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setId(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setNamespace(Ljava/lang/String;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setNestedItemsKey(Ljava/lang/String;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setNestedItemsReferenceKey(Ljava/lang/String;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setPortletURL(Ljavax/portlet/PortletURL;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setSelectedItems(Ljava/util/List;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setSelectedItemsKey(Ljava/lang/String;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setSelectionType(Ljava/lang/String;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setSortItemList(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/SortItemList;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setStyle(Ljava/lang/String;)V:0
+
+-- frontend-data-set:headless-display
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setActionParameterName(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setApiURL(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setBulkActionDropdownItems(Ljava/util/List;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setClayDataSetActionDropdownItems(Ljava/util/List;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setCreationMenu(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/CreationMenu;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setFormId(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setId(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setNamespace(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setNestedItemsKey(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setNestedItemsReferenceKey(Ljava/lang/String;)V:0
+--com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setPortletURL(Ljavax/portlet/PortletURL;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setSelectedItems(Ljava/util/List;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setSelectedItemsKey(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setSelectionType(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setSortItemList(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/SortItemList;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setStyle(Ljava/lang/String;)V:0
 
 -- liferay-ddm:template-renderer
 -- liferay-ddm:template-selector
