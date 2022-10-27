@@ -647,7 +647,7 @@ public class MirrorsGetTask extends Task {
 		}
 
 		if (!isValidMD5(
-			targetFile, new URL(sourceURL.toExternalForm() + ".md5"))) {
+				targetFile, new URL(sourceURL.toExternalForm() + ".md5"))) {
 
 			targetFile.delete();
 
