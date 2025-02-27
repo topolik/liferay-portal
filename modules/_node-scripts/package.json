@@ -39,7 +39,7 @@
 		"estraverse": "^5.3.0",
 		"execa": "^9.1.0",
 		"fast-glob": "^3.3.2",
-		"gulp": "4.0.2",
+		"gulp": "5.0.0",
 		"jest": "25.1.0",
 		"jest-environment-jsdom-sixteen": "2.0.0",
 		"jest-environment-jsdom-thirteen": "1.0.1",
