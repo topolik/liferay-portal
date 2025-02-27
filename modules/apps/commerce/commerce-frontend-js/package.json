@@ -29,7 +29,7 @@
 		"@liferay/frontend-js-react-web": "*",
 		"@liferay/frontend-js-state-web": "*",
 		"classnames": "2.3.1",
-		"fetch-mock": "5.13.1",
+		"fetch-mock": "10.1.0",
 		"frontend-js-web": "*",
 		"lodash": "4.17.21",
 		"prop-types": "15.7.2",
@@ -38,7 +38,7 @@
 	},
 	"devDependencies": {
 		"faker": "^5.1.0",
-		"fetch-mock": "5.13.1"
+		"fetch-mock": "10.1.0"
 	},
 	"jest": {
 		"collectCoverageFrom": [
