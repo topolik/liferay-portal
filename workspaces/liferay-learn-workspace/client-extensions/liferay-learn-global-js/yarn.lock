@@ -1820,10 +1820,10 @@ postcss@^8.4.21:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
-prismjs@^1.29.0:
-  version "1.29.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.29.0.tgz#f113555a8fa9b57c35e637bba27509dcf802dd12"
-  integrity sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==
+prismjs@^1.30.0:
+  version "1.30.0"
+  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.30.0.tgz#d9709969d9d4e16403f6f348c63553b19f0975a9"
+  integrity sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==
 
 punycode@^2.1.0:
   version "2.3.0"
@@ -1992,6 +1992,11 @@ source-map@^0.6.0:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
+
+spatial-navigation-js@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/spatial-navigation-js/-/spatial-navigation-js-1.0.0.tgz#d499149ff44ddae200c02c7ae7952ce8b4d17cf5"
+  integrity sha512-RZ0/q7LCL/x4Hz8oUEwkkBIOx4YZt6Nn6o1YhXm6bVDjxZykJQ2tDeVZrYCbq+jDaneszRctl55WedO+l1LePg==
 
 style-loader@^3.3.1:
   version "3.3.3"
