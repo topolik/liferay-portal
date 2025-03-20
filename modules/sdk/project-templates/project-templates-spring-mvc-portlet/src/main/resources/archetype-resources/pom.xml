@@ -29,7 +29,7 @@
 		<spring.scope>provided</spring.scope>
 #end
 #if (${framework.equals("portletmvc4spring")})
-		<spring.security.version>5.5.1</spring.security.version>
+		<spring.security.version>6.3.8</spring.security.version>
 		<spring.version>5.3.27</spring.version>
 #elseif (${framework.equals("springportletmvc")})
 		<spring.version>4.1.9.RELEASE</spring.version>
