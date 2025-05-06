@@ -7,7 +7,7 @@
 		"sha256": "c444e746a07d3ed9cf2bc84fe0b29b22dd78e0d59920a1e662266e0107da3a36"
 	},
 	"dependencies": {
-		"@babel/preset-env": "7.24.7",
+		"@babel/preset-env": "7.27.1",
 		"@babel/preset-react": "7.24.7",
 		"@babel/preset-typescript": "7.10.4",
 		"@liferay/jest-junit-reporter": "^1.2.1",
