@@ -8,7 +8,7 @@
 		"dagre": "0.8.2",
 		"frontend-js-web": "*",
 		"react": "18.2.0",
-		"react-flow-renderer": "9.7.0"
+		"react-flow-renderer": "10.3.17"
 	},
 	"jest": {
 		"collectCoverageFrom": [
