@@ -16,7 +16,7 @@
 		"@liferay/frontend-js-state-web": "*",
 		"classnames": "2.3.1",
 		"commerce-frontend-js": "*",
-		"d3": "5.9.3",
+		"d3": "7.0.0",
 		"fetch-mock": "5.13.1",
 		"frontend-js-components-web": "*",
 		"frontend-js-web": "*",
