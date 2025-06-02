@@ -12,7 +12,7 @@
 		"@clayui/popover": "3.136.0",
 		"@clayui/tooltip": "3.136.0",
 		"classnames": "2.3.1",
-		"d3": "5.9.3",
+		"d3": "7.0.0",
 		"frontend-js-web": "*",
 		"react": "18.2.0",
 		"recharts": "^2.8.0"
