@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"compass-mixins": "0.12.10",
-		"gulp": "4.0.2",
+		"gulp": "5.0.0",
 		"liferay-frontend-css-common": "6.0.4",
 		"liferay-frontend-theme-styled": "*",
 		"liferay-frontend-theme-unstyled": "*",
