@@ -4,13 +4,17 @@
 		"@clayui/core": "3.151.0",
 		"@clayui/form": "3.151.0",
 		"@clayui/icon": "3.144.1",
+		"@clayui/label": "3.144.1",
+		"@clayui/loading-indicator": "3.144.1",
+		"@clayui/modal": "3.151.0",
+		"@clayui/progress-bar": "3.144.1",
 		"classnames": "2.3.1",
 		"frontend-js-components-web": "*",
 		"frontend-js-web": "*",
 		"prop-types": "15.7.2",
 		"react": "18.2.0"
 	},
-	"main": "js/index.js",
+	"main": "js/index.ts",
 	"name": "staging-taglib",
 	"scripts": {
 		"build": "node-scripts build",

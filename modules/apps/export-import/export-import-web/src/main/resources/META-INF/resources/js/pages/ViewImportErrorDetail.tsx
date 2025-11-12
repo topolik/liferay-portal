@@ -47,8 +47,10 @@ interface ErrorDetail {
 	id: number;
 	modelName: string;
 	scope: {
+		externalReferenceCode: string;
+		key: string;
 		label: string;
-		type: string;
+		type: 'AssetLibrary' | 'Site' | 'Space';
 	};
 	type: {
 		code: number;
@@ -223,16 +225,18 @@ export function ViewImportErrorDetail({
 
 							<ClayLayout.Row>
 								<DetailViewDefinitionCol
-									body={Liferay.Language.get(scope.type)}
+									body={scope ? scope.type : 'Company'}
 									md={6}
 									title={Liferay.Language.get('scope')}
 								/>
 
-								<DetailViewDefinitionCol
-									body={scope.label}
-									md={6}
-									title={Liferay.Language.get('site')}
-								/>
+								{scope && (
+									<DetailViewDefinitionCol
+										body={scope.label}
+										md={6}
+										title={Liferay.Language.get('site')}
+									/>
+								)}
 							</ClayLayout.Row>
 						</ClayLayout.SheetSection>
 					</ClayLayout.Sheet>

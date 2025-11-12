@@ -10,7 +10,7 @@
  */
 
 module.exports = {
-	hash: 'a51de2eb56ac4846952bb87882733472258f9f9a8846ac88d76f302defdf879f',
+	hash: 'db038aa6fb1f27fe156e2c38791a9613e4be0f214d134125b627f9a31d805fb7',
 	imports: {
 		'@liferay/accessibility-menu-web': [],
 		'@liferay/accessibility-settings-state-web': [],
@@ -80,7 +80,6 @@ module.exports = {
 		'@liferay/fragment-video-streaming': [],
 		'@liferay/friendly-url-taglib': [],
 		'@liferay/friendly-url-web': [],
-		'@liferay/frontend-css-cadmin-sample-web': [],
 		'@liferay/frontend-css-cadmin-web': [],
 		'@liferay/frontend-css-common': [],
 		'@liferay/frontend-data-set-admin-web': [],
@@ -129,7 +128,6 @@ module.exports = {
 			'moment/min/moment-with-locales',
 			'numeral',
 			'object-hash',
-			'pkce-challenge',
 			'qs',
 			'react-text-mask',
 			'text-mask-addons',

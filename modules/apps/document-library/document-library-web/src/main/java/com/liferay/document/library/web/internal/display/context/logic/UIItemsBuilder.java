@@ -830,11 +830,11 @@ public class UIItemsBuilder {
 	}
 
 	public boolean isHistoryActionAvailable() throws PortalException {
-		if (_fileShortcut == null) {
-			return true;
+		if (_fileShortcut != null) {
+			return _fileShortcutDisplayContextHelper.isHistoryActionAvailable();
 		}
 
-		return false;
+		return _fileEntryDisplayContextHelper.isHistoryActionAvailable();
 	}
 
 	public boolean isMoveActionAvailable() throws PortalException {
@@ -938,6 +938,15 @@ public class UIItemsBuilder {
 		}
 
 		return false;
+	}
+
+	public boolean isViewUsagesActionAvailable() throws PortalException {
+		if (_fileShortcut != null) {
+			return _fileShortcutDisplayContextHelper.
+				isViewUsagesActionAvailable();
+		}
+
+		return _fileEntryDisplayContextHelper.isViewUsagesActionAvailable();
 	}
 
 	public boolean isViewVersionActionAvailable() {

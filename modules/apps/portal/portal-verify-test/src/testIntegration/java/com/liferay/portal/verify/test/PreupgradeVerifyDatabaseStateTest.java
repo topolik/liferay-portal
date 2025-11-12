@@ -33,7 +33,6 @@ import com.liferay.portal.verify.VerifyProcess;
 import com.liferay.portal.verify.test.util.BaseVerifyProcessTestCase;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -127,14 +126,12 @@ public class PreupgradeVerifyDatabaseStateTest
 	}
 
 	@Test
-	public void testVerifyPreupgradeMissingTable() throws SQLException {
+	public void testVerifyPreupgradeMissingTable() throws Exception {
 		ServiceComponent serviceComponent =
 			_serviceComponentLocalService.createServiceComponent(
 				RandomTestUtil.nextLong());
 
-		DBInspector dbInspector = new DBInspector(DataAccess.getConnection());
-
-		String tableName = dbInspector.normalizeName("TestTable");
+		String tableName = _getNormalizedName("TestTable");
 
 		serviceComponent.setMvccVersion(0);
 		serviceComponent.setBuildNamespace("com.liferay.test.service.impl");
@@ -171,10 +168,7 @@ public class PreupgradeVerifyDatabaseStateTest
 			Assert.fail();
 		}
 		catch (Exception exception) {
-			DBInspector dbInspector = new DBInspector(
-				DataAccess.getConnection());
-
-			String viewName = dbInspector.normalizeName("Release_");
+			String viewName = _getNormalizedName("Release_");
 
 			Assert.assertEquals(
 				StringBundler.concat(
@@ -188,9 +182,7 @@ public class PreupgradeVerifyDatabaseStateTest
 	}
 
 	@Test
-	public void testVerifyPreupgradePartiallyUpgradedTable()
-		throws SQLException {
-
+	public void testVerifyPreupgradePartiallyUpgradedTable() throws Exception {
 		ServiceComponent serviceComponent = _getServiceComponent();
 
 		String originalData = serviceComponent.getData();
@@ -207,16 +199,17 @@ public class PreupgradeVerifyDatabaseStateTest
 			Assert.fail();
 		}
 		catch (Exception exception) {
-			DBInspector dbInspector = new DBInspector(
-				DataAccess.getConnection());
+			try (Connection connection = DataAccess.getConnection()) {
+				DBInspector dbInspector = new DBInspector(connection);
 
-			Set<String> tableNames = DBResourceUtil.parseCreateTableSQL(
-				dbInspector, originalData);
+				Set<String> tableNames = DBResourceUtil.parseCreateTableSQL(
+					dbInspector, originalData);
 
-			Assert.assertEquals(
-				"Stale tables from a previous upgrade detected: " +
-					new TreeSet<>(tableNames),
-				exception.getMessage());
+				Assert.assertEquals(
+					"Stale tables from a previous upgrade detected: " +
+						new TreeSet<>(tableNames),
+					exception.getMessage());
+			}
 		}
 		finally {
 			serviceComponent.setData(originalData);
@@ -229,6 +222,14 @@ public class PreupgradeVerifyDatabaseStateTest
 	@Override
 	protected VerifyProcess getVerifyProcess() {
 		return new PreupgradeVerifyDatabaseState();
+	}
+
+	private String _getNormalizedName(String tableName) throws Exception {
+		try (Connection connection = DataAccess.getConnection()) {
+			DBInspector dbInspector = new DBInspector(connection);
+
+			return dbInspector.normalizeName(tableName);
+		}
 	}
 
 	private ServiceComponent _getServiceComponent() {

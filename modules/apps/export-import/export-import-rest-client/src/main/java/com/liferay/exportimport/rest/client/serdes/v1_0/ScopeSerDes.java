@@ -44,6 +44,20 @@ public class ScopeSerDes {
 
 		sb.append("{");
 
+		if (scope.getExternalReferenceCode() != null) {
+			if (sb.length() > 1) {
+				sb.append(", ");
+			}
+
+			sb.append("\"externalReferenceCode\": ");
+
+			sb.append("\"");
+
+			sb.append(_escape(scope.getExternalReferenceCode()));
+
+			sb.append("\"");
+		}
+
 		if (scope.getKey() != null) {
 			if (sb.length() > 1) {
 				sb.append(", ");
@@ -80,9 +94,7 @@ public class ScopeSerDes {
 			sb.append("\"type\": ");
 
 			sb.append("\"");
-
-			sb.append(_escape(scope.getType()));
-
+			sb.append(scope.getType());
 			sb.append("\"");
 		}
 
@@ -103,6 +115,15 @@ public class ScopeSerDes {
 		}
 
 		Map<String, String> map = new TreeMap<>();
+
+		if (scope.getExternalReferenceCode() == null) {
+			map.put("externalReferenceCode", null);
+		}
+		else {
+			map.put(
+				"externalReferenceCode",
+				String.valueOf(scope.getExternalReferenceCode()));
+		}
 
 		if (scope.getKey() == null) {
 			map.put("key", null);
@@ -142,7 +163,10 @@ public class ScopeSerDes {
 
 		@Override
 		protected boolean parseMaps(String jsonParserFieldName) {
-			if (Objects.equals(jsonParserFieldName, "key")) {
+			if (Objects.equals(jsonParserFieldName, "externalReferenceCode")) {
+				return false;
+			}
+			else if (Objects.equals(jsonParserFieldName, "key")) {
 				return false;
 			}
 			else if (Objects.equals(jsonParserFieldName, "label")) {
@@ -160,7 +184,13 @@ public class ScopeSerDes {
 			Scope scope, String jsonParserFieldName,
 			Object jsonParserFieldValue) {
 
-			if (Objects.equals(jsonParserFieldName, "key")) {
+			if (Objects.equals(jsonParserFieldName, "externalReferenceCode")) {
+				if (jsonParserFieldValue != null) {
+					scope.setExternalReferenceCode(
+						(String)jsonParserFieldValue);
+				}
+			}
+			else if (Objects.equals(jsonParserFieldName, "key")) {
 				if (jsonParserFieldValue != null) {
 					scope.setKey((String)jsonParserFieldValue);
 				}
@@ -172,7 +202,8 @@ public class ScopeSerDes {
 			}
 			else if (Objects.equals(jsonParserFieldName, "type")) {
 				if (jsonParserFieldValue != null) {
-					scope.setType((String)jsonParserFieldValue);
+					scope.setType(
+						Scope.Type.create((String)jsonParserFieldValue));
 				}
 			}
 		}

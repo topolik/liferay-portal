@@ -5,6 +5,34 @@
 	navClass = "light-nav"
 /]
 
+[#assign uiAvatarsURL = "" /]
+
+[#if themeDisplay.isSignedIn()]
+	[#assign userName = user.getFullName() /]
+
+	[#assign names = userName?trim?split(' ', 'r') /]
+
+	[#if (names?size > 0)]
+		[#assign firstInitial = names[0]?substring(0,1) /]
+
+		[#assign initials = firstInitial /]
+
+		[#if (names?size > 1)]
+			[#assign lastNameIndex = names?size - 1 /]
+
+			[#assign lastInitial = names[lastNameIndex]?substring(0, 1) /]
+
+			[#assign initials = firstInitial + lastInitial /]
+		[/#if]
+
+		[#assign initials = initials?upper_case /]
+
+		[#assign uiAvatarsURL = "https://ui-avatars.com/api/" + initials + "/128/0B5FFF/FFFFFF/2/0.33/true/true/true" /]
+	[#else]
+		[#assign uiAvatarsURL = "https://ui-avatars.com/api/??/128/0B5FFF/FFFFFF/2/0.33/true/true/true" /]
+	[/#if]
+[/#if]
+
 [#if configuration.darkNav]
 	[#assign navClass = "dark-nav" /]
 [/#if]
@@ -94,7 +122,7 @@
 					<div class="account-info align-items-center d-flex ${themeDisplay.isSignedIn()?then('py-1 pl-2', '')}" data-toggle="liferay-dropdown" id="account-menu-id">
 						[#if themeDisplay.isSignedIn()]
 						<div class="user-avatar">
-							<img class="h-100 mx-100" src="${user.fetchPortraitURL(themeDisplay)}" />
+							<img class="h-100 mx-100" src="${uiAvatarsURL}" />
 						</div>
 						[#else]
 						<div class="py-2 signed-out-account">
@@ -117,7 +145,7 @@
 								<div class="create-account-settings">
 									[#if themeDisplay.isSignedIn()]
 									<div class="signed-in-account">
-										<a class="account-menu-item d-flex font-weight-bold p-3 settings text-decoration-none" data-lfr-editable-id="link_okta" data-lfr-editable-type="link" href="https://liferay.okta.com/enduser/settings" target="_blank">
+										<a class="account-menu-item d-flex font-weight-bold p-3 settings text-decoration-none" data-lfr-editable-id="link_okta" data-lfr-editable-type="link" href="https://login.liferay.com/enduser/settings" target="_blank">
 											<span class="account-menu-icon align-items-center d-flex opacity-70 pr-2 pt-1">
 												[@clay["icon"] symbol="cog"/]
 											</span>
@@ -195,7 +223,7 @@
 					<div class="account mobile position-relative">
 						<div class="account-info align-items-center d-flex px-2">
 							<div class="user-avatar">
-								<img class="h-100 mx-100" src="${user.fetchPortraitURL(themeDisplay)}" />
+								<img class="h-100 mx-100" src="${uiAvatarsURL}" />
 							</div>
 
 							<span class="pl-1">[@clay["icon"] symbol="caret-bottom-l"/]</span>
@@ -250,7 +278,7 @@
 				<div class="account position-relative primary">
 					<div class="account-info align-items-center d-flex px-2 py-3">
 						<div class="user-avatar">
-							<img class="h-100 mx-100" src="${user.fetchPortraitURL(themeDisplay)}" />
+							<img class="h-100 mx-100" src="${uiAvatarsURL}" />
 						</div>
 
 						<span class="pl-1">[@clay["icon"] symbol="caret-bottom-l"/]</span>

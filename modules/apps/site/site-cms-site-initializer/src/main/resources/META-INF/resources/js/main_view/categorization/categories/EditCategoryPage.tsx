@@ -104,16 +104,20 @@ const EditCategoryPage = ({
 	}
 
 	function validateForm() {
-		if (category.name.trim() === '') {
+		if (!category.name.trim().length) {
 			setNameInputError(
 				sub(
 					Liferay.Language.get('the-x-field-is-required'),
 					Liferay.Language.get('name')
 				)
 			);
+
+			return false;
 		}
 		else {
 			setNameInputError('');
+
+			return true;
 		}
 	}
 
@@ -124,9 +128,7 @@ const EditCategoryPage = ({
 	}
 
 	async function handleSave() {
-		validateForm();
-
-		if (nameInputError !== '') {
+		if (!validateForm()) {
 			return;
 		}
 
@@ -241,9 +243,7 @@ const EditCategoryPage = ({
 	}
 
 	async function handleSaveAndAddAnother() {
-		validateForm();
-
-		if (nameInputError !== '') {
+		if (!validateForm()) {
 			return;
 		}
 
@@ -368,6 +368,7 @@ const EditCategoryPage = ({
 						{isCreateNew && (
 							<ClayButton
 								data-testid="save-and-add-another-button"
+								disabled={!category.name.trim()}
 								displayType="secondary"
 								onClick={handleSaveAndAddAnother}
 								size="sm"
@@ -379,6 +380,7 @@ const EditCategoryPage = ({
 						<ClayButton
 							className="inline-item-after"
 							data-testid="save-button"
+							disabled={!category.name.trim()}
 							displayType="primary"
 							onClick={handleSave}
 							size="sm"

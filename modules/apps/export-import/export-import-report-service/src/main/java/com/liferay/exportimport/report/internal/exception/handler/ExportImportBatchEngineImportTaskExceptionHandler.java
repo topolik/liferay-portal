@@ -15,6 +15,7 @@ import com.liferay.exportimport.report.service.ExportImportReportEntryLocalServi
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.ClassNameLocalService;
+import com.liferay.portal.kernel.service.GroupLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -46,6 +47,12 @@ public class ExportImportBatchEngineImportTaskExceptionHandler
 		long groupId = GetterUtil.getLong(
 			batchEngineImportTask.getParameterValue("siteId"));
 
+		if (ExportImportReportEntryUtil.isCompanyScoped(
+				groupId, _groupLocalService)) {
+
+			groupId = 0;
+		}
+
 		_exportImportReportEntryLocalService.addErrorExportImportReportEntry(
 			groupId, batchEngineImportTask.getCompanyId(),
 			_getExternalReferenceCode(item),
@@ -56,9 +63,7 @@ public class ExportImportBatchEngineImportTaskExceptionHandler
 				ExportImportThreadLocal.getExportImportConfigurationId()),
 			exception.getMessage(), _getErrorStackTrace(exception),
 			batchEngineImportTask.getParameterValue("modelName"),
-			ExportImportReportEntryConstants.ORIGIN_BATCH,
-			ExportImportReportEntryUtil.getScope(groupId),
-			ExportImportReportEntryUtil.getScopeKey(groupId));
+			ExportImportReportEntryConstants.ORIGIN_BATCH);
 	}
 
 	private String _getErrorStackTrace(Throwable throwable) {
@@ -112,5 +117,8 @@ public class ExportImportBatchEngineImportTaskExceptionHandler
 	@Reference
 	private ExportImportReportEntryLocalService
 		_exportImportReportEntryLocalService;
+
+	@Reference
+	private GroupLocalService _groupLocalService;
 
 }

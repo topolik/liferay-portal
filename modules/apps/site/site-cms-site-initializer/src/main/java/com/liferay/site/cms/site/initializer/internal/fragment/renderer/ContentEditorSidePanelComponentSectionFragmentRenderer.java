@@ -145,6 +145,10 @@ public class ContentEditorSidePanelComponentSectionFragmentRenderer
 				return null;
 			}
 		).put(
+			"assetLibraryId", objectEntry.getGroupId()
+		).put(
+			"cmsGroupId", themeDisplay.getScopeGroupId()
+		).put(
 			"comments",
 			() -> {
 				JSONArray jsonArray = _jsonFactory.createJSONArray();
@@ -237,8 +241,6 @@ public class ContentEditorSidePanelComponentSectionFragmentRenderer
 					expirationDate, "yyyy-MM-dd'T'HH:mm",
 					themeDisplay.getLocale());
 			}
-		).put(
-			"groupId", themeDisplay.getScopeGroupId()
 		).put(
 			"hasUpdatePermission",
 			() -> {

@@ -888,13 +888,20 @@ public class FragmentEntryLinkLocalServiceImpl
 		FragmentEntryLink fragmentEntryLink =
 			fragmentEntryLinkPersistence.findByPrimaryKey(fragmentEntryLinkId);
 
-		long groupId = _getFragmentEntryGroupId(
-			fragmentEntryLink.getCompanyId(), fragmentEntryLink.getGroupId(),
-			fragmentEntryLink.getFragmentEntryScopeERC());
-
 		FragmentEntry fragmentEntry =
 			_fragmentEntryPersistence.fetchByERC_G_Head(
-				fragmentEntryLink.getFragmentEntryERC(), groupId, true);
+				fragmentEntryLink.getFragmentEntryERC(),
+				_getFragmentEntryGroupId(
+					fragmentEntryLink.getCompanyId(),
+					fragmentEntryLink.getGroupId(),
+					fragmentEntryLink.getFragmentEntryScopeERC()),
+				true);
+
+		if (fragmentEntry == null) {
+			throw new UnsupportedOperationException(
+				"Unable to propagate fragment entry link " +
+					fragmentEntryLinkId);
+		}
 
 		updateLatestChanges(fragmentEntry, fragmentEntryLink);
 	}
@@ -910,20 +917,21 @@ public class FragmentEntryLinkLocalServiceImpl
 	}
 
 	private long _getFragmentEntryGroupId(
-			long companyId, long groupId, String fragmentEntryScopeERC)
-		throws PortalException {
+		long companyId, long groupId, String fragmentEntryScopeERC) {
 
-		long fragmentEntryGroupId = groupId;
-
-		if (Validator.isNotNull(fragmentEntryScopeERC)) {
-			Group fragmentEntryGroup =
-				_groupLocalService.getGroupByExternalReferenceCode(
-					fragmentEntryScopeERC, companyId);
-
-			fragmentEntryGroupId = fragmentEntryGroup.getGroupId();
+		if (Validator.isNull(fragmentEntryScopeERC)) {
+			return groupId;
 		}
 
-		return fragmentEntryGroupId;
+		Group fragmentEntryGroup =
+			_groupLocalService.fetchGroupByExternalReferenceCode(
+				fragmentEntryScopeERC, companyId);
+
+		if (fragmentEntryGroup == null) {
+			return 0;
+		}
+
+		return fragmentEntryGroup.getGroupId();
 	}
 
 	private String _getProcessedHTML(

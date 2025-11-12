@@ -538,6 +538,29 @@ components:
                             type: string
                     type: object
             type: object
+        DisplayPageFormContainerSubmissionResult:
+            # @review
+            allOf:
+                -   $ref: "#/components/schemas/SuccessFormContainerSubmissionResult"
+                -   properties:
+                        defaultDisplayPage:
+                            # @review
+                            description:
+                                Default display page when a form container submission is successful.
+                            type: boolean
+                        itemExternalReference:
+                            $ref: "#/components/schemas/ItemExternalReference"
+                            # @review
+                            description:
+                                A reference to a site page when a form container submission is successful.
+                        successNotificationMessage:
+                            $ref: "#/components/schemas/SuccessNotificationMessage"
+                            # @review
+                            description:
+                                The success notification message.
+            description:
+                The definition of a submission result of type page.
+            type: object
         DisplayPageTemplate:
             # @review
             description:
@@ -779,6 +802,24 @@ components:
             description:
                 Represent a page element definition of a drop zone.
             type: object
+        EmbeddedMessageFormContainerSubmissionResult:
+            # @review
+            allOf:
+                -   $ref: "#/components/schemas/SuccessFormContainerSubmissionResult"
+                -   properties:
+                        message:
+                            $ref: "#/components/schemas/FragmentInlineValue"
+                            # @review
+                            description:
+                                The localized submission of message type.
+                        successNotificationMessage:
+                            $ref: "#/components/schemas/SuccessNotificationMessage"
+                            # @review
+                            description:
+                                The success notification message.
+            description:
+                The definition of a submission result of type embedded message.
+            type: object
         EmptyCollectionConfig:
             properties:
                 displayMessage:
@@ -829,92 +870,113 @@ components:
                 A unique reference to a FavIcon of type ItemExternalReference which remains constant across
                 environments.
             type: object
-        FormConfig:
+        FormContainerClassSubtypeReference:
+            # @review
+            allOf:
+                -   $ref: "#/components/schemas/ClassSubtypeReference"
+                -   $ref: "#/components/schemas/FormContainerReference"
+            description:
+                A unique reference to a FormContainerReference of type FormContainerClassSubtypeReference which remains
+                constant across environments.
+            type: object
+        FormContainerConfig:
             # @review
             description:
-                The form page element definition form's configuration.
+                The form container page element definition form's container configuration.
             properties:
-                formReference:
+                formContainerReference:
                     # @review
+                    $ref: "#/components/schemas/FormContainerReference"
                     description:
-                        The form reference.
-                    oneOf:
-                        -   $ref: "#/components/schemas/ClassSubtypeReference"
-                        -   $ref: "#/components/schemas/ContextReference"
-                formType:
+                        The form container reference.
+                formContainerType:
                     enum: [Multistep, Simple]
                     type: string
                 numberOfSteps:
                     # @review
                     description:
-                        The form page element's number of steps.
+                        The form container page element's number of steps.
                     type: integer
-                successFormSubmissionResult:
+                successFormContainerSubmissionResult:
                     # @review
+                    $ref: "#/components/schemas/SuccessFormContainerSubmissionResult"
                     description:
-                        The definition of the result when a form submission is successful.
-                    oneOf:
-                        -   $ref: "#/components/schemas/MessageFormSubmissionResult"
-                        -   $ref: "#/components/schemas/SitePageFormSubmissionResult"
-                        -   $ref: "#/components/schemas/URLFormSubmissionResult"
-                    type: object
+                        The definition of the result when a form container submission is successful.
             type: object            
-        FormPageElementDefinition:
+        FormContainerContextReference:
+            # @review
+            allOf:
+                -   $ref: "#/components/schemas/ContextReference"
+                -   $ref: "#/components/schemas/FormContainerReference"
+            description:
+                A unique reference to a FormContainerReference of type FormContainerContextReference which remains
+                constant across environments.
+            type: object
+        FormContainerPageElementDefinition:
             allOf:
                 -   $ref: "#/components/schemas/PageElementDefinition"
                 -   properties:
                         cssClasses:
                             # @review
                             description:
-                                A list of CSS classes that are applied to the form page element.
+                                A list of CSS classes that are applied to the form container page element.
                             items:
                                 type: string
                             type: array
                         customCSS:
                             # @review
                             description:
-                                Custom CSS that is applied on the form page element.
+                                Custom CSS that is applied on the form container page element.
                             type: string
-                        customCSSViewports:
-                            # @review
-                            description:
-                                The custom CSS viewports of the page form.
-                            items:
-                                $ref: "#/components/schemas/CustomCSSViewport"
-                            type: array
-                        formConfig:
-                            $ref: "#/components/schemas/FormConfig"
-                            type: object
+                        formContainerConfig:
+                            $ref: "#/components/schemas/FormContainerConfig"
                         fragmentStyle:
                             $ref: "#/components/schemas/FragmentStyle"
                             # @review
                             description:
-                                The fragment style of a form page element.
+                                The fragment style of a form container page element.
                         fragmentViewports:
                             # @review
                             description:
-                                A list of fragment viewports of a form page element.
+                                A list of fragment viewports of a form container page element.
                             items:
                                 $ref: "#/components/schemas/FragmentViewport"
                             type: array
                         indexed:
                             # @review
                             description:
-                                A flag that indicates whether the page fragment instance is indexed or not.
+                                A flag that indicates whether the form container is indexed or not.
                             type: boolean
                         layout:
                             $ref: "#/components/schemas/Layout"
                             # @review
                             description:
-                                The form page element's layout.
+                                The form container page element's layout.
                         name:
                             # @review
                             description:
-                                The custom name of a form page element.
+                                The custom name of a form container page element.
                             type: string
             # @review
             description:
                 The page element definition of a form.
+            type: object
+        FormContainerReference:
+            # @review
+            description:
+                The form container reference.
+            discriminator:
+                mapping:
+                    FormContainerClassSubtypeReference: "#/components/schemas/FormContainerClassSubtypeReference"
+                    FormContainerContextReference: "#/components/schemas/FormContainerContextReference"
+                propertyName: type
+            properties:
+                type:
+                    # @review
+                    description:
+                        The form container reference. Can be a class subtype reference or a context reference.
+                    enum: [FormContainerClassSubtypeReference, FormContainerContextReference]
+                    type: string
             type: object
         FormStepContainerPageElementDefinition:
             allOf:
@@ -2198,24 +2260,6 @@ components:
                     description:
                         A valid external identifier to reference this page.
                     type: string
-        MessageFormSubmissionResult:
-            # @review
-            description:
-                The definition of a submission result of type message.
-            properties:
-                message:
-                    $ref: "#/components/schemas/FragmentInlineValue"
-                    # @review
-                    description:
-                        The localized submission of message type.
-                messageType:
-                    # @review
-                    description:
-                        The message form submission type (embedded, none).
-                    enum: [Embedded, None]
-                    type: string
-                showNotification:
-                    type: boolean
             type: object
         ModulePageElementDefinition:
             allOf:
@@ -2578,7 +2622,7 @@ components:
                     CollectionItem: "#/components/schemas/CollectionItemPageElementDefinition"
                     Container: "#/components/schemas/ContainerPageElementDefinition"
                     DropZone: "#/components/schemas/DropZonePageElementDefinition"
-                    Form: "#/components/schemas/FormPageElementDefinition"
+                    FormContainer: "#/components/schemas/FormContainerPageElementDefinition"
                     FormStep: "#/components/schemas/FormStepPageElementDefinition"
                     FormStepContainer: "#/components/schemas/FormStepContainerPageElementDefinition"
                     Fragment: "#/components/schemas/FragmentInstancePageElementDefinition"
@@ -2593,14 +2637,14 @@ components:
                     # @review
                     description:
                         The page element definition's type (collection display, collection item, container, drop zone,
-                        form, form step, form step container, fragment, fragment composition, fragment drop zone, grid, 
-                        module or widget).
+                        form container, form step, form step container, fragment, fragment composition, fragment drop
+                        zone, grid,  module or widget).
                     enum:
                         -   CollectionDisplay
                         -   CollectionItem
                         -   Container
                         -   DropZone
-                        -   Form
+                        -   FormContainer
                         -   FormStep
                         -   FormStepContainer
                         -   Fragment
@@ -3159,6 +3203,8 @@ components:
                 active:
                     type: boolean
                 description:
+                    type: string
+                description_i18n:
                     additionalProperties:
                         type: string
                     type: object
@@ -3353,16 +3399,23 @@ components:
                     description:
                         The reference to a page.
             type: object
-        SitePageFormSubmissionResult:
+        SitePageFormContainerSubmissionResult:
             # @review
+            allOf:
+                -   $ref: "#/components/schemas/SuccessFormContainerSubmissionResult"
+                -   properties:
+                        itemExternalReference:
+                            $ref: "#/components/schemas/ItemExternalReference"
+                            # @review
+                            description:
+                                A reference to a site page when a form container submission is successful.
+                        successNotificationMessage:
+                            $ref: "#/components/schemas/SuccessNotificationMessage"
+                            # @review
+                            description:
+                                The success notification message.
             description:
                 The definition of a submission result of type page.
-            properties:
-                itemReference:
-                    $ref: "#/components/schemas/ItemExternalReference"
-                    # @review
-                    description:
-                        The localized submission of page type.
             type: object
         SitePageNavigationSettings:
             allOf:
@@ -3427,6 +3480,52 @@ components:
                     maximum: 1
                     minimum: 0
                     type: number
+            type: object
+        StayInPageFormContainerSubmissionResult:
+            # @review
+            allOf:
+                -   $ref: "#/components/schemas/SuccessFormContainerSubmissionResult"
+                -   properties:
+                        successNotificationMessage:
+                            $ref: "#/components/schemas/SuccessNotificationMessage"
+                            # @review
+                            description:
+                                The success notification message.
+            description:
+                The definition of a submission result of type stay in page.
+            type: object
+        SuccessFormContainerSubmissionResult:
+            # @review
+            description:
+                The form container success form container submission result.
+            discriminator:
+                mapping:
+                    DisplayPage: "#/components/schemas/DisplayPageFormContainerSubmissionResult"
+                    EmbeddedMessage : "#/components/schemas/EmbeddedMessageFormContainerSubmissionResult"
+                    SitePage: "#/components/schemas/SitePageFormContainerSubmissionResult"
+                    StayInPage : "#/components/schemas/StayInPageFormContainerSubmissionResult"
+                    Url: "#/components/schemas/URLFormContainerSubmissionResult"
+                propertyName: type
+            properties:
+                type:
+                    # @review
+                    description:
+                        The form container success form container submission result type.
+                    enum: [DisplayPage,EmbeddedMessage, SitePage,StayInPage, Url]
+                    type: string
+            type: object
+        SuccessNotificationMessage:
+            # @review
+            description:
+                The success notification message.
+            properties:
+                message:
+                    $ref: "#/components/schemas/FragmentInlineValue"
+                    # @review
+                    description:
+                        The localized success notification message.
+                showNotification:
+                    type: boolean
             type: object
         TemplateListStyle:
             # @review
@@ -3498,16 +3597,18 @@ components:
                     description:
                         The localized action execution result of type URL.
             type: object
-        URLFormSubmissionResult:
+        URLFormContainerSubmissionResult:
             # @review
+            allOf:
+                -   $ref: "#/components/schemas/SuccessFormContainerSubmissionResult"
+                -   properties:
+                        url:
+                            $ref: "#/components/schemas/FragmentInlineValue"
+                            # @review
+                            description:
+                                The localized submission of URL type.
             description:
                 The definition of a submission result of type URL.
-            properties:
-                url:
-                    $ref: "#/components/schemas/FragmentInlineValue"
-                    # @review
-                    description:
-                        The localized submission of URL type.
             type: object
         URLFragmentConfigurationFieldValue:
             allOf:
@@ -4250,7 +4351,7 @@ components:
 info:
     description:
         "A Java client JAR is available for use with the group ID 'com.liferay', artifact ID
-        'com.liferay.headless.admin.site.client', and version '1.0.17'."
+        'com.liferay.headless.admin.site.client', and version '1.0.19'."
     license:
         name: Apache 2.0
         url: http://www.apache.org/licenses/LICENSE-2.0.html

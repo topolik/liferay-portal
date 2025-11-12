@@ -521,7 +521,7 @@ public class AssetVocabularyLocalServiceImpl
 	public AssetVocabulary updateVocabulary(
 			long vocabularyId, String title, Map<Locale, String> titleMap,
 			Map<Locale, String> descriptionMap, String settings,
-			ServiceContext serviceContext)
+			int visibilityType, ServiceContext serviceContext)
 		throws PortalException {
 
 		AssetVocabulary vocabulary =
@@ -535,12 +535,23 @@ public class AssetVocabularyLocalServiceImpl
 
 		vocabulary.setDescriptionMap(descriptionMap);
 		vocabulary.setSettings(settings);
+		vocabulary.setVisibilityType(visibilityType);
 
 		if (vocabulary.getStatus() == WorkflowConstants.STATUS_EMPTY) {
 			vocabulary.setStatus(WorkflowConstants.STATUS_APPROVED);
 		}
 
-		return assetVocabularyPersistence.update(vocabulary);
+		vocabulary = assetVocabularyPersistence.update(vocabulary);
+
+		if (serviceContext.isAddGroupPermissions() ||
+			serviceContext.isAddGuestPermissions()) {
+
+			addVocabularyResources(
+				vocabulary, serviceContext.isAddGroupPermissions(),
+				serviceContext.isAddGuestPermissions());
+		}
+
+		return vocabulary;
 	}
 
 	protected SearchContext buildSearchContext(

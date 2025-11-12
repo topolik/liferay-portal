@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
+import Alert from '@clayui/alert';
 import {useModal} from '@clayui/modal';
 import {IFrontendDataSetProps, IView} from '@liferay/frontend-data-set-web';
 import {ItemSelectorModal} from '@liferay/frontend-js-item-selector-web';
@@ -32,9 +33,9 @@ type Folder = {
 
 const SPACES_URL = `${window.location.origin}/o/headless-asset-library/v1.0/asset-libraries?filter=type eq 'Space'`;
 
-const SUCCESS_MESSAGE_KEYS = {
-	copy: 'x-was-successfully-copied-to-x',
-	move: 'x-was-successfully-moved-to-x',
+const SUCCESS_MESSAGES = {
+	copy: Liferay.Language.get('x-was-successfully-copied-to-x'),
+	move: Liferay.Language.get('x-was-successfully-moved-to-x'),
 };
 
 const FDS_DEFAULT_PROPS: Partial<IFrontendDataSetProps> = {
@@ -56,9 +57,9 @@ const displayInfoToast = (
 ) => {
 	openToast({
 		message: sub(
-			Liferay.Language.get(
-				action === 'copy' ? 'copying-x-to-x' : 'moving-x-to-x'
-			),
+			action === 'copy'
+				? Liferay.Language.get('copying-x-to-x')
+				: Liferay.Language.get('moving-x-to-x'),
 			`${Liferay.Util.escapeHTML(itemData.embedded.title)}`,
 			`<strong>${Liferay.Util.escapeHTML(folder.title)}</strong>`
 		),
@@ -66,9 +67,9 @@ const displayInfoToast = (
 	});
 };
 
-const displaySuccessToast = (messageKey: string, ...args: string[]) => {
+const displaySuccessToast = (message: string, ...args: string[]) => {
 	openToast({
-		message: sub(Liferay.Language.get(messageKey), args),
+		message: sub(message, args),
 		type: 'success',
 	});
 };
@@ -77,14 +78,14 @@ const displayToast = (
 	error: any,
 	folder: Folder,
 	itemData: ItemData,
-	messageKey: string
+	message: string
 ) => {
 	if (error) {
 		displayErrorToast(error);
 	}
 	else {
 		displaySuccessToast(
-			messageKey,
+			message,
 			`${Liferay.Util.escapeHTML(itemData.embedded.title)}`,
 			`<strong>${Liferay.Util.escapeHTML(folder.title)}</strong>`
 		);
@@ -168,12 +169,7 @@ function FolderItemSelectorModalContent({
 					loadData();
 				}
 
-				displayToast(
-					error,
-					folder,
-					itemData,
-					SUCCESS_MESSAGE_KEYS[action]
-				);
+				displayToast(error, folder, itemData, SUCCESS_MESSAGES[action]);
 			});
 		}
 		else {
@@ -187,12 +183,7 @@ function FolderItemSelectorModalContent({
 					loadData();
 				}
 
-				displayToast(
-					error,
-					folder,
-					itemData,
-					SUCCESS_MESSAGE_KEYS[action]
-				);
+				displayToast(error, folder, itemData, SUCCESS_MESSAGES[action]);
 			});
 		}
 	};
@@ -290,6 +281,21 @@ function FolderItemSelectorModalContent({
 									label: 'name',
 									value: 'id',
 								}
+					}
+					message={
+						<Alert
+							className="alert-dismissible alert-fluid p-3"
+							displayType="warning"
+							title="Warning"
+						>
+							{action === 'copy'
+								? Liferay.Language.get(
+										'only-categories-and-tags-also-available-in-the-destination-will-be-copied'
+									)
+								: Liferay.Language.get(
+										'only-categories-and-tags-also-available-in-the-destination-will-be-retained'
+									)}
+						</Alert>
 					}
 					observer={observer}
 					onItemsChange={(items: Folder[]) => {

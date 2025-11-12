@@ -87,9 +87,12 @@ public class EditAssetVocabularyMVCActionCommand extends BaseMVCActionCommand {
 
 			// Update vocabulary
 
+			vocabulary = _assetVocabularyService.getVocabulary(vocabularyId);
+
 			vocabulary = _assetVocabularyService.updateVocabulary(
 				vocabularyId, StringPool.BLANK, titleMap, descriptionMap,
-				_getSettings(actionRequest), serviceContext);
+				_getSettings(actionRequest), vocabulary.getVisibilityType(),
+				serviceContext);
 		}
 
 		actionRequest.setAttribute(

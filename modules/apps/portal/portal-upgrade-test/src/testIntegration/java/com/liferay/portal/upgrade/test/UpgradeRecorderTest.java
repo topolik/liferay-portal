@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import java.util.Collections;
 import java.util.List;
@@ -277,7 +276,7 @@ public class UpgradeRecorderTest {
 	}
 
 	@Test
-	public void testFailureStatusByPendingCoreUpgrade() throws SQLException {
+	public void testFailureStatusByPendingCoreUpgrade() throws Exception {
 		try (Connection connection = DataAccess.getConnection()) {
 			Version version = PortalUpgradeProcess.getCurrentSchemaVersion(
 				connection);

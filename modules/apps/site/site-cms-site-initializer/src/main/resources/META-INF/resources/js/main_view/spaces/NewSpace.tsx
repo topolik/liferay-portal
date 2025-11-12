@@ -5,6 +5,7 @@
 
 import ClayButton from '@clayui/button';
 import ClayLayout from '@clayui/layout';
+import ClayLink from '@clayui/link';
 import {useFormik} from 'formik';
 import {ILearnResourceContext, openToast} from 'frontend-js-components-web';
 import {navigate} from 'frontend-js-web';
@@ -26,11 +27,19 @@ import {NewSpaceFormSection} from './NewSpaceFormSection';
 import BaseFields from './SpaceBaseFields';
 
 export interface NewSpaceProps {
+	backURL: string;
 	baseAddSpaceMembersURL: string;
+	description: string;
 	learnResources: ILearnResourceContext;
 }
 
-const NewSpace = ({baseAddSpaceMembersURL, learnResources}: NewSpaceProps) => {
+const NewSpace = (props: NewSpaceProps) => {
+	const {
+		backURL,
+		baseAddSpaceMembersURL,
+		description: formDescription,
+		learnResources,
+	} = props;
 	const {
 		errors,
 		handleBlur,
@@ -94,9 +103,7 @@ const NewSpace = ({baseAddSpaceMembersURL, learnResources}: NewSpaceProps) => {
 		<ClayLayout.Row className="m-2 m-md-4">
 			<ClayLayout.Col className="px-md-4 px-xl-9" lg={6}>
 				<NewSpaceFormSection
-					description={Liferay.Language.get(
-						'spaces-are-essential-for-organizing-defining-and-managing-your-content-and-files'
-					)}
+					description={formDescription}
 					learnResourceKey="general"
 					learnResources={learnResources}
 					onSubmit={handleSubmit}
@@ -117,9 +124,16 @@ const NewSpace = ({baseAddSpaceMembersURL, learnResources}: NewSpaceProps) => {
 						values={values}
 					/>
 
-					<ClayButton.Group className="mb-0 w-100" spaced vertical>
+					<ClayButton.Group className="mb-0 mt-4 w-100" spaced>
+						<ClayLink
+							className="btn btn-outline-borderless btn-outline-secondary"
+							href={backURL}
+						>
+							{Liferay.Language.get('cancel')}
+						</ClayLink>
+
 						<ClayButton
-							className="mt-4"
+							className="flex-grow-1"
 							disabled={shouldDisableContinueBtn}
 							onClick={() => {
 								if (errors.name) {

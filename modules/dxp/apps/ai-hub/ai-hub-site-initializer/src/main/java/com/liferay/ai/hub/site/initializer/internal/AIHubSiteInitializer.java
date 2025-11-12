@@ -5,6 +5,11 @@
 
 package com.liferay.ai.hub.site.initializer.internal;
 
+import com.liferay.ai.hub.site.initializer.internal.workflow.kaleo.runtime.node.ChangeToneTaskNodeExecutorAIDelegate;
+import com.liferay.ai.hub.site.initializer.internal.workflow.kaleo.runtime.node.FixSpellingAndGrammarTaskNodeExecutorAIDelegate;
+import com.liferay.ai.hub.site.initializer.internal.workflow.kaleo.runtime.node.ImproveWritingTaskNodeExecutorAIDelegate;
+import com.liferay.ai.hub.site.initializer.internal.workflow.kaleo.runtime.node.MakeLongerTaskNodeExecutorAIDelegate;
+import com.liferay.ai.hub.site.initializer.internal.workflow.kaleo.runtime.node.MakeShorterTaskNodeExecutorAIDelegate;
 import com.liferay.petra.string.StringPool;
 import com.liferay.portal.kernel.feature.flag.FeatureFlagManagerUtil;
 import com.liferay.portal.kernel.language.Language;
@@ -76,18 +81,17 @@ public class AIHubSiteInitializer implements SiteInitializer {
 		return FeatureFlagManagerUtil.isEnabled(companyId, "LPD-62272");
 	}
 
-	private void _initialize(long groupId) throws Exception {
-		Group group = _groupLocalService.getGroup(groupId);
+	private void _deployWorkflowDefinition(
+			Company company, String externalReferenceCode,
+			String workflowDefinitionName, String workflowTaskName)
+		throws Exception {
 
 		int count = _workflowDefinitionManager.getWorkflowDefinitionsCount(
-			group.getCompanyId(),
-			WorkflowDefinitionConstants.NAME_IMPROVE_WRITING);
+			company.getCompanyId(), workflowDefinitionName);
 
 		if (count > 0) {
 			return;
 		}
-
-		Company company = _companyLocalService.getCompany(group.getCompanyId());
 
 		Map<String, String> titleMap = new HashMap<>();
 
@@ -96,21 +100,58 @@ public class AIHubSiteInitializer implements SiteInitializer {
 
 			titleMap.put(
 				_language.getLanguageId(locale),
-				_language.get(
-					locale, WorkflowDefinitionConstants.NAME_IMPROVE_WRITING));
+				_language.get(locale, workflowDefinitionName));
 		}
 
-		String json = StringUtil.read(
-			AIHubSiteInitializer.class.getResourceAsStream(
-				"dependencies/improve-writing-workflow-definition.json"));
+		String json = StringUtil.replace(
+			StringUtil.read(
+				AIHubSiteInitializer.class.getResourceAsStream(
+					"dependencies/workflow-definition.json.tpl")),
+			new String[] {
+				"[$WORKFLOW_DEFINITION_NAME$]", "[$WORKFLOW_TASK_NAME$]"
+			},
+			new String[] {workflowDefinitionName, workflowTaskName});
 
 		_workflowDefinitionManager.deployWorkflowDefinition(
-			WorkflowDefinitionConstants.EXTERNAL_REFERENCE_CODE_IMPROVE_WRITING,
-			company.getCompanyId(), PrincipalThreadLocal.getUserId(),
+			externalReferenceCode, company.getCompanyId(),
+			PrincipalThreadLocal.getUserId(),
 			_localization.getXml(
 				titleMap, _language.getLanguageId(company.getLocale()),
 				"title"),
-			WorkflowDefinitionConstants.NAME_IMPROVE_WRITING, json.getBytes());
+			workflowDefinitionName, json.getBytes());
+	}
+
+	private void _initialize(long groupId) throws Exception {
+		Group group = _groupLocalService.getGroup(groupId);
+
+		Company company = _companyLocalService.getCompany(group.getCompanyId());
+
+		_deployWorkflowDefinition(
+			company,
+			WorkflowDefinitionConstants.EXTERNAL_REFERENCE_CODE_CHANGE_TONE,
+			WorkflowDefinitionConstants.NAME_CHANGE_TONE,
+			ChangeToneTaskNodeExecutorAIDelegate.KEY);
+		_deployWorkflowDefinition(
+			company,
+			WorkflowDefinitionConstants.
+				EXTERNAL_REFERENCE_CODE_FIX_SPELLING_AND_GRAMMAR,
+			WorkflowDefinitionConstants.NAME_FIX_SPELLING_AND_GRAMMAR,
+			FixSpellingAndGrammarTaskNodeExecutorAIDelegate.KEY);
+		_deployWorkflowDefinition(
+			company,
+			WorkflowDefinitionConstants.EXTERNAL_REFERENCE_CODE_IMPROVE_WRITING,
+			WorkflowDefinitionConstants.NAME_IMPROVE_WRITING,
+			ImproveWritingTaskNodeExecutorAIDelegate.KEY);
+		_deployWorkflowDefinition(
+			company,
+			WorkflowDefinitionConstants.EXTERNAL_REFERENCE_CODE_MAKE_LONGER,
+			WorkflowDefinitionConstants.NAME_MAKE_LONGER,
+			MakeLongerTaskNodeExecutorAIDelegate.KEY);
+		_deployWorkflowDefinition(
+			company,
+			WorkflowDefinitionConstants.EXTERNAL_REFERENCE_CODE_MAKE_SHORTER,
+			WorkflowDefinitionConstants.NAME_MAKE_SHORTER,
+			MakeShorterTaskNodeExecutorAIDelegate.KEY);
 	}
 
 	@Reference

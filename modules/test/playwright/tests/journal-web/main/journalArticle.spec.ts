@@ -26,7 +26,7 @@ import {nextPage, setItemsPerPage} from '../../../utils/pagination';
 import addApprovedStructuredContent from '../../../utils/structured-content/addApprovedStructuredContent';
 import getBasicWebContentStructureId from '../../../utils/structured-content/getBasicWebContentStructureId';
 import {waitForAlert} from '../../../utils/waitForAlert';
-import {ckeditor4PageTest} from '../../frontend-editor-ckeditor-web/main/fixtures/ckeditor4PageTest';
+import {ClassicPage as CKEditor4ClassicPage} from '../../frontend-editor-ckeditor-sample-web/pages/ckeditor4/ClassicPage';
 import {journalPagesTest} from './fixtures/journalPagesTest';
 import getDataStructureDefinition from './utils/getDataStructureDefinition';
 
@@ -81,7 +81,7 @@ const assetPublisherDeprecationTest = mergeTests(
 	})
 );
 
-const ckeditor4Test = mergeTests(baseTest, ckeditor4PageTest);
+const ckeditor4Test = mergeTests(baseTest);
 
 const ckeditor5Test = mergeTests(
 	baseTest,
@@ -145,6 +145,39 @@ baseTest(
 			{enabled: false, locator: '#guest_ACTION_ADD_DISCUSSION'},
 			{enabled: false, locator: '#site-member_ACTION_ADD_DISCUSSION'},
 		]);
+	}
+);
+
+baseTest(
+	' Published After Draft can schedule',
+	{
+		tag: '@LPD-70137',
+	},
+	async ({journalEditArticlePage, page, site}) => {
+		await journalEditArticlePage.goto({siteUrl: site.friendlyUrlPath});
+
+		await journalEditArticlePage.saveAsDraftWithPermissions(
+			getRandomString()
+		);
+
+		await page.getByRole('button', {name: 'Publish'}).click();
+
+		await page
+			.getByRole('menuitem', {name: 'Schedule Publication'})
+			.click();
+
+		await page
+			.getByPlaceholder('YYYY-MM-DD HH:mm')
+			.fill('9987-11-26 13:00');
+
+		await page
+			.getByLabel('Schedule Publication')
+			.getByRole('button', {name: 'Schedule'})
+			.click();
+
+		await expect(
+			page.locator('span').filter({hasText: 'Scheduled'}).nth(1)
+		).toBeVisible();
 	}
 );
 
@@ -1910,10 +1943,12 @@ assetPublisherDeprecationTest(
 ckeditor4Test(
 	'Change image from context menu, in editor with "adaptivemedia" plugin',
 	{tag: ['@LPD-53880']},
-	async ({ckeditor4Page, journalEditArticlePage, site}) => {
+	async ({journalEditArticlePage, page, site}) => {
 		await ckeditor4Test.step('Open new Basic Web Content', async () => {
 			await journalEditArticlePage.goto({siteUrl: site.friendlyUrlPath});
 		});
+
+		const ckeditor4Page = new CKEditor4ClassicPage(page);
 
 		await ckeditor4Page.page.getByLabel('Image', {exact: true}).click();
 

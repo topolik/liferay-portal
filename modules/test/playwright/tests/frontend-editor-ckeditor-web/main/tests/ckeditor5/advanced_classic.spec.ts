@@ -6,31 +6,17 @@
 import {expect, mergeTests} from '@playwright/test';
 
 import {featureFlagsTest} from '../../../../../fixtures/featureFlagsTest';
-import {isolatedSiteTest} from '../../../../../fixtures/isolatedSiteTest';
 import {loginTest} from '../../../../../fixtures/loginTest';
-import {waitForEditor} from '../../../../../utils/waitFor';
-import {ckeditorSamplePageTest} from '../../fixtures/ckeditorSamplePageTest';
-import {classicPageTest} from './fixtures/classicPageTest';
+import {advancedClassicPageTest} from '../../../../frontend-editor-ckeditor-sample-web/fixtures/ckeditor5/classicPageTest';
 
 export const test = mergeTests(
-	ckeditorSamplePageTest,
-	classicPageTest,
+	advancedClassicPageTest,
 	featureFlagsTest({
 		'LPD-11235': {enabled: true},
 		'LPS-178052': {enabled: true},
 	}),
-	isolatedSiteTest,
 	loginTest()
 );
-
-test.beforeEach(async ({ckeditorSamplePage, page, site}) => {
-	await ckeditorSamplePage.createAndGotoSitePage({site});
-
-	await ckeditorSamplePage.selectTab('CKEditor 5');
-	await ckeditorSamplePage.selectTab('Advanced Classic');
-
-	await waitForEditor({page});
-});
 
 test(
 	'Editor configuration is applied',
@@ -238,5 +224,37 @@ test(
 		await expect(AICreatorButton).toBeEnabled();
 		await expect(imageButton).toBeEnabled();
 		await expect(videoButton).toBeEnabled();
+	}
+);
+
+test(
+	'Pasting HTML content works',
+	{tag: '@LPD-65963'},
+	async ({classicPage, context}) => {
+		const newPage = await context.newPage();
+
+		await newPage.goto(
+			'http://www.standards-schmandards.com/exhibits/wysiwyg/sampledoc.htm'
+		);
+
+		await newPage.locator('body').focus();
+		await newPage.locator('html').press('ControlOrMeta+a');
+		await newPage.locator('html').press('ControlOrMeta+c');
+
+		await classicPage.editable.focus();
+		await classicPage.editable.press('ControlOrMeta+a');
+		await classicPage.editable.press('ControlOrMeta+v');
+
+		await expect(
+			classicPage.editable.getByRole('img', {
+				name: 'A beautiful redheaded man',
+			})
+		).toBeVisible();
+
+		await expect(
+			classicPage.editable.getByRole('figure', {
+				name: 'Top banana importers 1998 (',
+			})
+		).toBeVisible();
 	}
 );

@@ -648,14 +648,24 @@ public class BaseDownstreamBuild extends BaseBuild implements DownstreamBuild {
 	public void saveBuildURLInBuildDatabase() {
 		BuildDatabase buildDatabase = getBuildDatabase();
 
+		if (isBuildCached()) {
+			buildDatabase.putProperty(
+				CACHED_BUILD_URLS_PROPERTIES_KEY, getBuildURL(), "", false);
+
+			return;
+		}
+
 		buildDatabase.putProperty(
 			BUILD_URLS_PROPERTIES_KEY, getAxisName(), getBuildURL(), false);
 
 		_saveBadBuildURLsInBuildDatabase(getBadBuildURLs());
 	}
 
-	protected BaseDownstreamBuild(String url, TopLevelBuild topLevelBuild) {
-		super(url, topLevelBuild);
+	protected BaseDownstreamBuild(
+		String buildURL, DownstreamBuildReport cachedDownstreamBuildReport,
+		TopLevelBuild topLevelBuild) {
+
+		super(buildURL, cachedDownstreamBuildReport, topLevelBuild);
 	}
 
 	@Override

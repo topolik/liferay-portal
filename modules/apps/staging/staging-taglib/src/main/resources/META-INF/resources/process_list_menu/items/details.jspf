@@ -16,4 +16,24 @@
 			<liferay-ui:message key="view-details" />
 		</a>
 	</li>
+	<li>
+		<button class="dropdown-item">
+			<liferay-ui:message key="export-report-entries" />
+		</button>
+
+		<react:component
+			module="{ExportReportEntriesAction} from staging-taglib"
+			props='<%=
+				HashMapBuilder.<String, Object>put(
+					"backgroundTaskId", backgroundTask.getBackgroundTaskId()
+				).put(
+					"filename",
+					backgroundTask.getName(
+					).replace(
+						".lar", "_report_entries.zip"
+					)
+				).build()
+			%>'
+		/>
+	</li>
 </c:if>
