@@ -22,7 +22,7 @@
 		"react-dropzone": "11.4.2",
 		"react-flow-renderer": "9.7.0",
 		"react-helmet": "^6.1.0",
-		"react-router-dom": "^5.0.1",
+		"react-router-dom": "^6.30.2",
 		"react-text-mask": "5.4.3",
 		"react-transition-group": "4.4.1",
 		"text-mask-addons": "3.8.0",
