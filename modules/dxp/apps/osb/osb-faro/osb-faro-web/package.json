@@ -61,7 +61,7 @@
 		"odata-v4-parser": "^0.1.29",
 		"path-to-regexp": "^2.1.0",
 		"react": "^16.8.6",
-		"react-billboardjs": "^1.5.2",
+		"react-billboardjs": "^3.0.0",
 		"react-dnd": "11.1.1",
 		"react-dnd-html5-backend": "11.1.1",
 		"react-dom": "^16.8.2",
