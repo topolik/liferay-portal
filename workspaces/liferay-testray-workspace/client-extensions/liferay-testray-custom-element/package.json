@@ -33,10 +33,10 @@
 		"react-dom": "^18.2.0",
 		"react-hook-form": "7.30.0",
 		"react-hotkeys-hook": "^3.4.7",
-		"react-markdown": "^8.0.3",
+		"react-markdown": "^9.0.0",
 		"react-router-dom": "^6.3.0",
 		"react-select": "^5.3.2",
-		"remark-gfm": "^3.0.1",
+		"remark-gfm": "^4.0.0",
 		"sass": "1.52.1",
 		"swr": "^2.0.0",
 		"yup": "^0.32.11"
