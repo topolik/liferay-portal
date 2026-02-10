@@ -6,7 +6,7 @@
 		"@clayui/charts": "*",
 		"@clayui/core": "*",
 		"@clayui/css": "*",
-		"@clayui/drop-down": "*",
+		"@clayui/drop-down": "3.136.2",
 		"@clayui/empty-state": "*",
 		"@clayui/form": "*",
 		"@clayui/icon": "*",
