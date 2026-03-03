@@ -1,0 +1,6 @@
+include ':com.liferay.keymanager.api'
+include ':com.liferay.keymanager.service'
+include ':com.liferay.keymanager.provider.keystore'
+include ':com.liferay.keymanager.provider.gcp'
+include ':com.liferay.keymanager.upgrade'
+include ':com.liferay.keymanager.web'

@@ -1,0 +1,3 @@
+Bundle-Name: Liferay Key Manager GCP Providers
+Bundle-SymbolicName: com.liferay.keymanager.provider.gcp
+Bundle-Version: 1.0.0

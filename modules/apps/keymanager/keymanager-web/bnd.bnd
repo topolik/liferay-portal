@@ -1,0 +1,3 @@
+Bundle-Name: Liferay Key Manager Web
+Bundle-SymbolicName: com.liferay.keymanager.web
+Bundle-Version: 1.0.0
