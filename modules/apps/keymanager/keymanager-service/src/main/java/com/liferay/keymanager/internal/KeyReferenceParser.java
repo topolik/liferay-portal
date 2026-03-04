@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 @Component(service = KeyReferenceParser.class)
 public class KeyReferenceParser {

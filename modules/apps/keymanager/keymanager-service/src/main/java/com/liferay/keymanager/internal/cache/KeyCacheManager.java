@@ -24,7 +24,7 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 @Component(immediate = true, service = KeyCacheManager.class)
 @Designate(ocd = KeyCacheManager.Configuration.class)

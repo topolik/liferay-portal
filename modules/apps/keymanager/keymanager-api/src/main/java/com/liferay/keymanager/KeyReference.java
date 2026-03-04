@@ -16,7 +16,7 @@ import java.util.Objects;
  * A key reference string looks like: ${keyref:provider/alias}
  * </p>
  *
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 public class KeyReference implements Serializable {
 

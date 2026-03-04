@@ -23,6 +23,9 @@ import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
+/**
+ * @author Tomas Polesovsky
+ */
 @Component(
 	immediate = true,
 	service = KeyProvider.class,

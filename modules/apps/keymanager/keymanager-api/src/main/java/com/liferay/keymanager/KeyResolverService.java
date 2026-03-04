@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Service responsible for resolving key references into their actual values.
  *
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 @ProviderType
 public interface KeyResolverService {

@@ -13,7 +13,7 @@ import com.liferay.portal.kernel.security.auth.PrincipalThreadLocal;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 @Component(immediate = true, service = KeyAccessAuditService.class)
 public class KeyAccessAuditService {

@@ -8,7 +8,7 @@ package com.liferay.keymanager.exception;
 import com.liferay.portal.kernel.exception.PortalException;
 
 /**
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 public class KeyResolutionException extends PortalException {
 

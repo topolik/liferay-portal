@@ -10,6 +10,7 @@ import com.liferay.keymanager.KeyProviderRegistry;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +24,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 @Component(immediate = true, service = KeyProviderRegistry.class)
 public class KeyProviderRegistryImpl implements KeyProviderRegistry {
@@ -40,7 +41,7 @@ public class KeyProviderRegistryImpl implements KeyProviderRegistry {
 		).filter(
 			KeyProvider::isAvailable
 		).sorted(
-			(a, b) -> Integer.compare(a.getPriority(), b.getPriority())
+			Comparator.comparingInt(KeyProvider::getPriority)
 		).collect(
 			Collectors.toList()
 		);
@@ -73,22 +74,14 @@ public class KeyProviderRegistryImpl implements KeyProviderRegistry {
 		}
 	}
 
-	@Reference(
-		cardinality = ReferenceCardinality.MULTIPLE,
-		policy = ReferencePolicy.DYNAMIC,
-		policyOption = ReferencePolicyOption.GREEDY, unbind = "_removeProvider"
-	)
-	private void _addProvider(KeyProvider keyProvider) {
-		registerProvider(keyProvider);
-	}
-
-	private void _removeProvider(KeyProvider keyProvider) {
-		unregisterProvider(keyProvider.getProviderId());
-	}
-
 	private static final Log _log = LogFactoryUtil.getLog(
 		KeyProviderRegistryImpl.class);
 
+	@Reference(
+		bind = "registerProvider", cardinality = ReferenceCardinality.MULTIPLE,
+		policy = ReferencePolicy.DYNAMIC,
+		policyOption = ReferencePolicyOption.GREEDY, unbind = "unregisterProvider"
+	)
 	private final Map<String, KeyProvider> _providers =
 		new ConcurrentHashMap<>();
 

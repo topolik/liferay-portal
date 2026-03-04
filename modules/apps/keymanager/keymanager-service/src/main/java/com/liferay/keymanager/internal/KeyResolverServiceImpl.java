@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 @Component(immediate = true, service = KeyResolverService.class)
 public class KeyResolverServiceImpl implements KeyResolverService {

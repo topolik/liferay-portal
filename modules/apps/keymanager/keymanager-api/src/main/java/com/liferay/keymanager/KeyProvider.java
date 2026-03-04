@@ -15,7 +15,7 @@ import java.util.List;
  * SPI interface for key storage backends. Each provider (KeyStore, GCP KMS, etc.)
  * implements this interface and registers as an OSGi service.
  *
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 @ConsumerType
 public interface KeyProvider {

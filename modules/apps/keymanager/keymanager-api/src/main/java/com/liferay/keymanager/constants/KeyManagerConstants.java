@@ -6,7 +6,7 @@
 package com.liferay.keymanager.constants;
 
 /**
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 public class KeyManagerConstants {
 

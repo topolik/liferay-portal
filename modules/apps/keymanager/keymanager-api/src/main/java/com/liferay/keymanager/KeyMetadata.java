@@ -12,7 +12,7 @@ import java.time.Instant;
 /**
  * Metadata for a key managed by a key provider.
  *
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 public class KeyMetadata implements Serializable {
 

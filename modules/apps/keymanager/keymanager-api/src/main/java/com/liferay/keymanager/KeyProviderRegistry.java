@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * Registry for managing and retrieving key providers.
  *
- * @author Liferay
+ * @author Tomas Polesovsky
  */
 @ProviderType
 public interface KeyProviderRegistry {
