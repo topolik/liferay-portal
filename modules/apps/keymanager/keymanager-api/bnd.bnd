@@ -1,7 +1,7 @@
 Bundle-Name: Liferay Key Manager API
 Bundle-SymbolicName: com.liferay.keymanager.api
 Bundle-Version: 1.0.0
-Export-Package: \
+Export-Package:\
 	com.liferay.keymanager,\
 	com.liferay.keymanager.constants,\
 	com.liferay.keymanager.exception

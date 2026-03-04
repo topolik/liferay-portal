@@ -1,5 +1,8 @@
 package com.liferay.keymanager.provider.gcp;
 
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+
 import com.liferay.keymanager.KeyMetadata;
 import com.liferay.keymanager.KeyProvider;
 import com.liferay.keymanager.constants.KeyManagerConstants;
@@ -45,14 +48,26 @@ public class GoogleAdcProvider implements KeyProvider {
 
 		if (_enabled) {
 			try {
-				// In production: GoogleCredentials.getApplicationDefault()
+				_credentials = GoogleCredentials.getApplicationDefault()
+					.createScoped(_defaultScopes);
+
+				_credentials.refreshIfExpired();
+
 				_available = true;
+
+				if (_log.isInfoEnabled()) {
+					_log.info("Google ADC provider initialized");
+				}
 			}
 			catch (Exception e) {
 				_available = false;
 
 				_log.error("Failed to initialize Google ADC provider.", e);
 			}
+		}
+		else {
+			_available = false;
+			_credentials = null;
 		}
 	}
 
@@ -68,7 +83,24 @@ public class GoogleAdcProvider implements KeyProvider {
 
 	@Override
 	public char[] resolveKey(String alias) throws KeyProviderException {
-		throw new KeyProviderException("Google ADC provider requires google-auth-library dependency.");
+		if (!_enabled || _credentials == null) {
+			throw new KeyProviderException("Google ADC provider is not enabled or initialized");
+		}
+
+		if (!"access-token".equals(alias)) {
+			throw new KeyProviderException("Unsupported alias for ADC provider: " + alias);
+		}
+
+		try {
+			_credentials.refreshIfExpired();
+
+			AccessToken accessToken = _credentials.getAccessToken();
+
+			return accessToken.getTokenValue().toCharArray();
+		}
+		catch (Exception e) {
+			throw new KeyProviderException("Failed to resolve access token via ADC", e);
+		}
 	}
 
 	@Override
@@ -98,7 +130,7 @@ public class GoogleAdcProvider implements KeyProvider {
 
 	@Override
 	public boolean containsKey(String alias) throws KeyProviderException {
-		return "access-token".equals(alias) || alias.startsWith("id-token:");
+		return "access-token".equals(alias);
 	}
 
 	@Override
@@ -108,6 +140,10 @@ public class GoogleAdcProvider implements KeyProvider {
 
 	@Override
 	public KeyMetadata getKeyMetadata(String alias) throws KeyProviderException {
+		if (!containsKey(alias)) {
+			return null;
+		}
+
 		return new KeyMetadata.Builder()
 			.alias(alias)
 			.provider(getProviderId())
@@ -129,6 +165,7 @@ public class GoogleAdcProvider implements KeyProvider {
 	private List<String> _defaultScopes;
 	private boolean _enabled;
 	private volatile boolean _available = false;
+	private GoogleCredentials _credentials;
 
 	private static final Log _log = LogFactoryUtil.getLog(GoogleAdcProvider.class);
 

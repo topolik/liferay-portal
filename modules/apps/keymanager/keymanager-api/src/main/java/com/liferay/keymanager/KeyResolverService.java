@@ -1,30 +1,48 @@
+/**
+ * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
+ */
+
 package com.liferay.keymanager;
+
+import aQute.bnd.annotation.ProviderType;
 
 import com.liferay.keymanager.exception.KeyResolutionException;
 
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service responsible for resolving key references into their actual values.
+ *
+ * @author Liferay
+ */
+@ProviderType
 public interface KeyResolverService {
 
-	boolean isKeyReference(String value);
+	public String createReference(String providerId, String alias);
 
-	String resolve(String value) throws KeyResolutionException;
+	public List<KeyProvider> getAvailableProviders();
 
-	char[] resolveSecure(KeyReference reference) throws KeyResolutionException;
+	public void invalidateAllCaches();
 
-	Map<String, String> resolveAll(Map<String, String> properties) throws KeyResolutionException;
+	public void invalidateCache(String referenceString);
 
-	KeyReference parseReference(String referenceString) throws KeyResolutionException;
+	public boolean isKeyReference(String value);
 
-	String createReference(String providerId, String alias);
+	public KeyReference parseReference(String referenceString)
+		throws KeyResolutionException;
 
-	String storeAndReference(String providerId, String alias, char[] value) throws KeyResolutionException;
+	public String resolve(String value) throws KeyResolutionException;
 
-	List<KeyProvider> getAvailableProviders();
+	public Map<String, String> resolveAll(Map<String, String> properties)
+		throws KeyResolutionException;
 
-	void invalidateCache(String referenceString);
+	public char[] resolveSecure(KeyReference reference)
+		throws KeyResolutionException;
 
-	void invalidateAllCaches();
+	public String storeAndReference(
+			String providerId, String alias, char[] value)
+		throws KeyResolutionException;
 
 }

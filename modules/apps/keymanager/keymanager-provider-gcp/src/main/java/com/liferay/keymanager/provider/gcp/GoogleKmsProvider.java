@@ -1,5 +1,11 @@
 package com.liferay.keymanager.provider.gcp;
 
+import com.google.cloud.kms.v1.CryptoKeyName;
+import com.google.cloud.kms.v1.DecryptResponse;
+import com.google.cloud.kms.v1.EncryptResponse;
+import com.google.cloud.kms.v1.KeyManagementServiceClient;
+import com.google.protobuf.ByteString;
+
 import com.liferay.keymanager.KeyMetadata;
 import com.liferay.keymanager.KeyProvider;
 import com.liferay.keymanager.constants.KeyManagerConstants;
@@ -7,7 +13,11 @@ import com.liferay.keymanager.exception.KeyProviderException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +53,9 @@ public class GoogleKmsProvider implements KeyProvider {
 		@AttributeDefinition(name = "Default Key Ring")
 		String keyRing() default "liferay";
 
+		@AttributeDefinition(name = "Default Crypto Key")
+		String cryptoKey() default "config-key";
+
 		@AttributeDefinition(name = "Enabled")
 		boolean enabled() default false;
 
@@ -54,11 +67,12 @@ public class GoogleKmsProvider implements KeyProvider {
 		_projectId = configuration.projectId();
 		_location = configuration.location();
 		_keyRing = configuration.keyRing();
+		_cryptoKey = configuration.cryptoKey();
 		_enabled = configuration.enabled();
 
 		if (_enabled) {
 			try {
-				// In production: _kmsClient = KeyManagementServiceClient.create();
+				_kmsClient = KeyManagementServiceClient.create();
 				_available = true;
 
 				if (_log.isInfoEnabled()) {
@@ -71,11 +85,15 @@ public class GoogleKmsProvider implements KeyProvider {
 				_log.error("Failed to initialize Google Cloud KMS client", e);
 			}
 		}
+		else {
+			_available = false;
+			_closeKmsClient();
+		}
 	}
 
 	@Deactivate
 	protected void deactivate() {
-		// Close KMS client if initialized
+		_closeKmsClient();
 	}
 
 	@Override
@@ -90,15 +108,36 @@ public class GoogleKmsProvider implements KeyProvider {
 
 	@Override
 	public char[] resolveKey(String alias) throws KeyProviderException {
-		String ciphertext = _encryptedStore.get(alias);
-
-		if (ciphertext == null) {
-			throw new KeyProviderException("No encrypted value found for alias: " + alias);
+		if (!_enabled || _kmsClient == null) {
+			throw new KeyProviderException("GCP KMS provider is not enabled or initialized");
 		}
 
-		// In production: decrypt using GCP KMS client
-		// DecryptResponse response = _kmsClient.decrypt(resourceName, ByteString.copyFrom(ciphertextBytes));
-		throw new KeyProviderException("GCP KMS integration requires google-cloud-kms dependency. Configure and enable in System Settings.");
+		String encodedCiphertext = _encryptedStore.get(alias);
+
+		if (encodedCiphertext == null) {
+			return null;
+		}
+
+		try {
+			byte[] ciphertext = Base64.getDecoder().decode(encodedCiphertext);
+
+			CryptoKeyName keyName = CryptoKeyName.of(_projectId, _location, _keyRing, _cryptoKey);
+
+			DecryptResponse response = _kmsClient.decrypt(keyName, ByteString.copyFrom(ciphertext));
+
+			ByteString plaintext = response.getPlaintext();
+
+			ByteBuffer byteBuffer = plaintext.asReadOnlyByteBuffer();
+			CharBuffer charBuffer = StandardCharsets.UTF_8.decode(byteBuffer);
+
+			char[] result = new char[charBuffer.remaining()];
+			charBuffer.get(result);
+
+			return result;
+		}
+		catch (Exception e) {
+			throw new KeyProviderException("Failed to decrypt key: " + alias, e);
+		}
 	}
 
 	@Override
@@ -109,11 +148,7 @@ public class GoogleKmsProvider implements KeyProvider {
 			return null;
 		}
 
-		byte[] bytes = new byte[chars.length];
-
-		for (int i = 0; i < chars.length; i++) {
-			bytes[i] = (byte)chars[i];
-		}
+		byte[] bytes = StandardCharsets.UTF_8.encode(CharBuffer.wrap(chars)).array();
 
 		Arrays.fill(chars, '\0');
 
@@ -122,8 +157,25 @@ public class GoogleKmsProvider implements KeyProvider {
 
 	@Override
 	public void storeKey(String alias, char[] value) throws KeyProviderException {
-		// In production: encrypt using GCP KMS then store ciphertext
-		throw new KeyProviderException("GCP KMS store requires google-cloud-kms dependency.");
+		if (!_enabled || _kmsClient == null) {
+			throw new KeyProviderException("GCP KMS provider is not enabled or initialized");
+		}
+
+		try {
+			CryptoKeyName keyName = CryptoKeyName.of(_projectId, _location, _keyRing, _cryptoKey);
+
+			ByteBuffer byteBuffer = StandardCharsets.UTF_8.encode(CharBuffer.wrap(value));
+			ByteString plaintext = ByteString.copyFrom(byteBuffer);
+
+			EncryptResponse response = _kmsClient.encrypt(keyName, plaintext);
+
+			byte[] ciphertext = response.getCiphertext().toByteArray();
+
+			_encryptedStore.put(alias, Base64.getEncoder().encodeToString(ciphertext));
+		}
+		catch (Exception e) {
+			throw new KeyProviderException("Failed to encrypt and store key: " + alias, e);
+		}
 	}
 
 	@Override
@@ -165,11 +217,20 @@ public class GoogleKmsProvider implements KeyProvider {
 		return _available;
 	}
 
+	private void _closeKmsClient() {
+		if (_kmsClient != null) {
+			_kmsClient.close();
+			_kmsClient = null;
+		}
+	}
+
 	private String _projectId;
 	private String _location;
 	private String _keyRing;
+	private String _cryptoKey;
 	private boolean _enabled;
 	private volatile boolean _available = false;
+	private KeyManagementServiceClient _kmsClient;
 	private final Map<String, String> _encryptedStore = new ConcurrentHashMap<>();
 
 	private static final Log _log = LogFactoryUtil.getLog(GoogleKmsProvider.class);

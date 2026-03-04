@@ -1,3 +1,8 @@
+/**
+ * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
+ */
+
 package com.liferay.keymanager.internal.interceptor;
 
 import com.liferay.keymanager.KeyResolverService;
@@ -13,6 +18,9 @@ import org.osgi.service.cm.ConfigurationPlugin;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+/**
+ * @author Liferay
+ */
 @Component(
 	immediate = true,
 	property = {
@@ -24,11 +32,15 @@ import org.osgi.service.component.annotations.Reference;
 public class ConfigurationInterceptor implements ConfigurationPlugin {
 
 	@Override
-	public void modifyConfiguration(ServiceReference<?> reference, Dictionary<String, Object> properties) {
-		Enumeration<String> keys = properties.keys();
+	public void modifyConfiguration(
+		ServiceReference<?> serviceReference,
+		Dictionary<String, Object> properties) {
 
-		while (keys.hasMoreElements()) {
-			String key = keys.nextElement();
+		Enumeration<String> enu = properties.keys();
+
+		while (enu.hasMoreElements()) {
+			String key = enu.nextElement();
+
 			Object value = properties.get(key);
 
 			if (value instanceof String) {
@@ -36,28 +48,41 @@ public class ConfigurationInterceptor implements ConfigurationPlugin {
 
 				if (_keyResolverService.isKeyReference(stringValue)) {
 					try {
-						String resolved = _keyResolverService.resolve(stringValue);
+						String resolved = _keyResolverService.resolve(
+							stringValue);
 
 						properties.put(key, resolved);
 					}
-					catch (KeyResolutionException e) {
-						_log.error("Failed to resolve key reference for property '" + key + "'", e);
+					catch (KeyResolutionException kre) {
+						if (_log.isErrorEnabled()) {
+							_log.error(
+								"Failed to resolve key reference for " +
+									"property '" + key + "'",
+								kre);
+						}
 					}
 				}
 			}
 			else if (value instanceof String[]) {
 				String[] arrayValue = (String[])value;
+
 				boolean modified = false;
 
 				for (int i = 0; i < arrayValue.length; i++) {
 					if (_keyResolverService.isKeyReference(arrayValue[i])) {
 						try {
-							arrayValue[i] = _keyResolverService.resolve(arrayValue[i]);
+							arrayValue[i] = _keyResolverService.resolve(
+								arrayValue[i]);
 
 							modified = true;
 						}
-						catch (KeyResolutionException e) {
-							_log.error("Failed to resolve key reference in array property '" + key + "'", e);
+						catch (KeyResolutionException kre) {
+							if (_log.isErrorEnabled()) {
+								_log.error(
+									"Failed to resolve key reference in " +
+										"array property '" + key + "'",
+									kre);
+							}
 						}
 					}
 				}
@@ -69,9 +94,10 @@ public class ConfigurationInterceptor implements ConfigurationPlugin {
 		}
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		ConfigurationInterceptor.class);
+
 	@Reference
 	private KeyResolverService _keyResolverService;
-
-	private static final Log _log = LogFactoryUtil.getLog(ConfigurationInterceptor.class);
 
 }

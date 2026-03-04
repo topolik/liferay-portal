@@ -1,3 +1,8 @@
+/**
+ * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
+ */
+
 package com.liferay.keymanager.internal;
 
 import com.liferay.keymanager.KeyProvider;
@@ -11,6 +16,7 @@ import com.liferay.keymanager.internal.audit.KeyAccessAuditService;
 import com.liferay.keymanager.internal.cache.KeyCacheManager;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,39 +26,72 @@ import java.util.Map;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+/**
+ * @author Liferay
+ */
 @Component(immediate = true, service = KeyResolverService.class)
 public class KeyResolverServiceImpl implements KeyResolverService {
 
 	@Override
+	public String createReference(String providerId, String alias) {
+		return KeyManagerConstants.KEY_REFERENCE_PREFIX + providerId +
+			KeyManagerConstants.PROVIDER_ALIAS_SEPARATOR + alias +
+			KeyManagerConstants.KEY_REFERENCE_SUFFIX;
+	}
+
+	@Override
+	public List<KeyProvider> getAvailableProviders() {
+		return _keyProviderRegistry.getAvailableProviders();
+	}
+
+	@Override
+	public void invalidateAllCaches() {
+		_keyCacheManager.invalidateAll();
+	}
+
+	@Override
+	public void invalidateCache(String referenceString) {
+		_keyCacheManager.invalidate(referenceString);
+	}
+
+	@Override
 	public boolean isKeyReference(String value) {
-		return _parser.isKeyReference(value);
+		return _keyReferenceParser.isKeyReference(value);
+	}
+
+	@Override
+	public KeyReference parseReference(String referenceString)
+		throws KeyResolutionException {
+
+		return _keyReferenceParser.parse(referenceString);
 	}
 
 	@Override
 	public String resolve(String value) throws KeyResolutionException {
-		if (value == null || !_parser.isKeyReference(value)) {
+		if (Validator.isNull(value) ||
+			!_keyReferenceParser.isKeyReference(value)) {
+
 			return value;
 		}
 
-		return _parser.replaceAll(value, ref -> {
-			char[] resolved = _resolveFromProvider(ref);
+		return _keyReferenceParser.replaceAll(
+			value,
+			ref -> {
+				char[] resolved = _resolveFromProvider(ref);
 
-			try {
-				return new String(resolved);
-			}
-			finally {
-				Arrays.fill(resolved, '\0');
-			}
-		});
+				try {
+					return new String(resolved);
+				}
+				finally {
+					Arrays.fill(resolved, '\0');
+				}
+			});
 	}
 
 	@Override
-	public char[] resolveSecure(KeyReference reference) throws KeyResolutionException {
-		return _resolveFromProvider(reference);
-	}
+	public Map<String, String> resolveAll(Map<String, String> properties)
+		throws KeyResolutionException {
 
-	@Override
-	public Map<String, String> resolveAll(Map<String, String> properties) throws KeyResolutionException {
 		Map<String, String> resolved = new HashMap<>();
 
 		for (Map.Entry<String, String> entry : properties.entrySet()) {
@@ -63,101 +102,99 @@ public class KeyResolverServiceImpl implements KeyResolverService {
 	}
 
 	@Override
-	public KeyReference parseReference(String referenceString) throws KeyResolutionException {
-		return _parser.parse(referenceString);
+	public char[] resolveSecure(KeyReference reference)
+		throws KeyResolutionException {
+
+		return _resolveFromProvider(reference);
 	}
 
 	@Override
-	public String createReference(String providerId, String alias) {
-		return KeyManagerConstants.KEY_REFERENCE_PREFIX +
-			providerId + KeyManagerConstants.PROVIDER_ALIAS_SEPARATOR +
-			alias + KeyManagerConstants.KEY_REFERENCE_SUFFIX;
-	}
+	public String storeAndReference(
+			String providerId, String alias, char[] value)
+		throws KeyResolutionException {
 
-	@Override
-	public String storeAndReference(String providerId, String alias, char[] value) throws KeyResolutionException {
-		KeyProvider provider = _getProvider(providerId);
+		KeyProvider keyProvider = _getProvider(providerId);
 
 		try {
-			provider.storeKey(alias, value);
+			keyProvider.storeKey(alias, value);
 
-			KeyReference ref = new KeyReference(providerId, alias, createReference(providerId, alias));
+			KeyReference keyReference = new KeyReference(
+				providerId, alias, createReference(providerId, alias));
 
-			_auditService.auditKeyAccess(KeyManagerConstants.AUDIT_EVENT_STORE, ref, true);
+			_keyAccessAuditService.auditKeyAccess(
+				KeyManagerConstants.AUDIT_EVENT_STORE, keyReference, true);
 
 			return createReference(providerId, alias);
 		}
-		catch (KeyProviderException e) {
-			throw new KeyResolutionException("Failed to store key with provider " + providerId, e);
+		catch (KeyProviderException kpe) {
+			throw new KeyResolutionException(
+				"Failed to store key with provider " + providerId, kpe);
 		}
 	}
 
-	@Override
-	public List<KeyProvider> getAvailableProviders() {
-		return _registry.getAvailableProviders();
+	private KeyProvider _getProvider(String providerId)
+		throws KeyResolutionException {
+
+		return _keyProviderRegistry.getProvider(providerId).orElseThrow(
+			() -> new KeyResolutionException(
+				"No key provider found with id: " + providerId));
 	}
 
-	@Override
-	public void invalidateCache(String referenceString) {
-		_cacheManager.invalidate(referenceString);
-	}
+	private char[] _resolveFromProvider(KeyReference keyReference)
+		throws KeyResolutionException {
 
-	@Override
-	public void invalidateAllCaches() {
-		_cacheManager.invalidateAll();
-	}
+		String cacheKey = keyReference.getRawReference();
 
-	private char[] _resolveFromProvider(KeyReference reference) throws KeyResolutionException {
-		String cacheKey = reference.getRawReference();
-
-		char[] cached = _cacheManager.get(cacheKey);
+		char[] cached = _keyCacheManager.get(cacheKey);
 
 		if (cached != null) {
-			_auditService.auditKeyAccess(KeyManagerConstants.AUDIT_EVENT_RESOLVE, reference, true);
+			_keyAccessAuditService.auditKeyAccess(
+				KeyManagerConstants.AUDIT_EVENT_RESOLVE, keyReference, true);
 
 			return cached;
 		}
 
-		KeyProvider provider = _getProvider(reference.getProvider());
+		KeyProvider keyProvider = _getProvider(keyReference.getProvider());
 
 		try {
-			char[] resolved = provider.resolveKey(reference.getAlias());
+			char[] resolved = keyProvider.resolveKey(keyReference.getAlias());
 
 			if (resolved == null) {
 				throw new KeyResolutionException(
-					"Key not found: " + reference.getAlias() + " in provider " + reference.getProvider());
+					"Key not found: " + keyReference.getAlias() +
+						" in provider " + keyReference.getProvider());
 			}
 
-			_cacheManager.put(cacheKey, resolved);
+			_keyCacheManager.put(cacheKey, resolved);
 
-			_auditService.auditKeyAccess(KeyManagerConstants.AUDIT_EVENT_RESOLVE, reference, true);
+			_keyAccessAuditService.auditKeyAccess(
+				KeyManagerConstants.AUDIT_EVENT_RESOLVE, keyReference, true);
 
 			return resolved;
 		}
-		catch (KeyProviderException e) {
-			_auditService.auditKeyAccess(KeyManagerConstants.AUDIT_EVENT_RESOLVE, reference, false);
+		catch (KeyProviderException kpe) {
+			_keyAccessAuditService.auditKeyAccess(
+				KeyManagerConstants.AUDIT_EVENT_RESOLVE, keyReference, false);
 
-			throw new KeyResolutionException("Failed to resolve key: " + reference.getRawReference(), e);
+			throw new KeyResolutionException(
+				"Failed to resolve key: " + keyReference.getRawReference(),
+				kpe);
 		}
 	}
 
-	private KeyProvider _getProvider(String providerId) throws KeyResolutionException {
-		return _registry.getProvider(providerId).orElseThrow(
-			() -> new KeyResolutionException("No key provider found with id: " + providerId));
-	}
+	private static final Log _log = LogFactoryUtil.getLog(
+		KeyResolverServiceImpl.class);
 
 	@Reference
-	private KeyProviderRegistry _registry;
+	private KeyAccessAuditService _keyAccessAuditService;
 
 	@Reference
-	private KeyReferenceParser _parser;
+	private KeyCacheManager _keyCacheManager;
 
 	@Reference
-	private KeyCacheManager _cacheManager;
+	private KeyProviderRegistry _keyProviderRegistry;
 
 	@Reference
-	private KeyAccessAuditService _auditService;
-
-	private static final Log _log = LogFactoryUtil.getLog(KeyResolverServiceImpl.class);
+	private KeyReferenceParser _keyReferenceParser;
 
 }
