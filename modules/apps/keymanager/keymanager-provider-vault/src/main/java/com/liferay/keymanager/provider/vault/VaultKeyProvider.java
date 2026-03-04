@@ -8,6 +8,7 @@ import com.liferay.keymanager.KeyMetadata;
 import com.liferay.keymanager.KeyProvider;
 import com.liferay.keymanager.constants.KeyManagerConstants;
 import com.liferay.keymanager.exception.KeyProviderException;
+import com.liferay.keymanager.provider.vault.internal.configuration.VaultKeyProviderConfiguration;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -18,6 +19,7 @@ import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
@@ -27,39 +29,18 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
  * @author Tomas Polesovsky
  */
 @Component(
-	immediate = true,
-	service = KeyProvider.class,
-	property = "provider.id=" + KeyManagerConstants.PROVIDER_VAULT
+	configurationPid = "com.liferay.keymanager.provider.vault.internal.configuration.VaultKeyProviderConfiguration",
+	configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true,
+	service = KeyProvider.class
 )
-@Designate(ocd = VaultKeyProvider.Configuration.class)
+@Designate(ocd = VaultKeyProviderConfiguration.class)
 public class VaultKeyProvider implements KeyProvider {
-
-	@ObjectClassDefinition(
-		name = "HashiCorp Vault Provider Configuration",
-		description = "Configuration for HashiCorp Vault key provider"
-	)
-	public @interface Configuration {
-
-		@AttributeDefinition(name = "Vault URL")
-		String vaultAddress() default "http://127.0.0.1:8200";
-
-		@AttributeDefinition(name = "Vault Token")
-		String vaultToken() default "";
-
-		@AttributeDefinition(name = "KV Engine Path")
-		String enginePath() default "secret";
-
-		@AttributeDefinition(name = "KV Engine Version")
-		int engineVersion() default 2;
-
-		@AttributeDefinition(name = "Enabled")
-		boolean enabled() default false;
-
-	}
 
 	@Activate
 	@Modified
-	protected void activate(Configuration configuration) {
+	protected void activate(VaultKeyProviderConfiguration configuration) {
+		_providerId = configuration.providerId();
+		_displayName = configuration.displayName();
 		_address = configuration.vaultAddress();
 		_token = configuration.vaultToken();
 		_enginePath = configuration.enginePath();
@@ -78,7 +59,9 @@ public class VaultKeyProvider implements KeyProvider {
 				_available = true;
 
 				if (_log.isInfoEnabled()) {
-					_log.info("Vault provider initialized: " + _address);
+					_log.info(
+						"Vault provider initialized: id=" + _providerId +
+							", address=" + _address);
 				}
 			}
 			catch (Exception e) {
@@ -94,12 +77,12 @@ public class VaultKeyProvider implements KeyProvider {
 
 	@Override
 	public String getProviderId() {
-		return KeyManagerConstants.PROVIDER_VAULT;
+		return _providerId;
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "HashiCorp Vault";
+		return _displayName;
 	}
 
 	@Override
@@ -222,6 +205,8 @@ public class VaultKeyProvider implements KeyProvider {
 	}
 
 	private String _address;
+	private String _displayName;
+	private String _providerId;
 	private String _token;
 	private String _enginePath;
 	private int _engineVersion;

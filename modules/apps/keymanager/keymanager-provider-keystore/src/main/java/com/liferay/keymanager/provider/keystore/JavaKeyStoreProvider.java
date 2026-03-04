@@ -4,6 +4,7 @@ import com.liferay.keymanager.KeyMetadata;
 import com.liferay.keymanager.KeyProvider;
 import com.liferay.keymanager.constants.KeyManagerConstants;
 import com.liferay.keymanager.exception.KeyProviderException;
+import com.liferay.keymanager.provider.keystore.internal.configuration.JavaKeyStoreProviderConfiguration;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -25,45 +26,30 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @Component(
-	immediate = true,
-	service = KeyProvider.class,
-	property = "provider.id=" + KeyManagerConstants.PROVIDER_KEYSTORE
+	configurationPid = "com.liferay.keymanager.provider.keystore.internal.configuration.JavaKeyStoreProviderConfiguration",
+	configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true,
+	service = KeyProvider.class
 )
-@Designate(ocd = JavaKeyStoreProvider.Configuration.class)
+@Designate(ocd = JavaKeyStoreProviderConfiguration.class)
 public class JavaKeyStoreProvider implements KeyProvider {
-
-	@ObjectClassDefinition(
-		name = "Java KeyStore Provider Configuration",
-		description = "Configuration for the Java KeyStore key provider"
-	)
-	public @interface Configuration {
-
-		@AttributeDefinition(name = "KeyStore Path")
-		String keystorePath() default "${liferay.home}/data/keymanager.jceks";
-
-		@AttributeDefinition(name = "KeyStore Type")
-		String keystoreType() default "JCEKS";
-
-		@AttributeDefinition(name = "KeyStore Password")
-		String keystorePassword() default "";
-
-		@AttributeDefinition(name = "Auto-create KeyStore")
-		boolean autoCreate() default true;
-
-	}
 
 	@Activate
 	@Modified
-	protected void activate(Configuration configuration) {
+	protected void activate(JavaKeyStoreProviderConfiguration configuration) {
+		_providerId = configuration.providerId();
+		_displayName = configuration.displayName();
 		_keystorePath = _resolveEnvVars(configuration.keystorePath());
 		_keystoreType = configuration.keystoreType();
-		_keystorePassword = _resolveEnvVars(configuration.keystorePassword()).toCharArray();
+		_keystorePassword = _resolveEnvVars(
+			configuration.keystorePassword()
+		).toCharArray();
 		_autoCreate = configuration.autoCreate();
 
 		try {
@@ -72,7 +58,9 @@ public class JavaKeyStoreProvider implements KeyProvider {
 			_available = true;
 
 			if (_log.isInfoEnabled()) {
-				_log.info("Java KeyStore provider initialized: " + _keystorePath);
+				_log.info(
+					"Java KeyStore provider initialized: id=" + _providerId +
+						", path=" + _keystorePath);
 			}
 		}
 		catch (Exception e) {
@@ -84,12 +72,12 @@ public class JavaKeyStoreProvider implements KeyProvider {
 
 	@Override
 	public String getProviderId() {
-		return KeyManagerConstants.PROVIDER_KEYSTORE;
+		return _providerId;
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "Java KeyStore";
+		return _displayName;
 	}
 
 	@Override
@@ -169,7 +157,7 @@ public class JavaKeyStoreProvider implements KeyProvider {
 
 			_saveKeyStore();
 		}
-		catch (KeyStoreException e) {
+		catch (Exception e) {
 			throw new KeyProviderException("Failed to delete key '" + alias + "'", e);
 		}
 	}
@@ -299,6 +287,8 @@ public class JavaKeyStoreProvider implements KeyProvider {
 		return value;
 	}
 
+	private String _displayName;
+	private String _providerId;
 	private KeyStore _keyStore;
 	private String _keystorePath;
 	private String _keystoreType;

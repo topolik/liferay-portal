@@ -10,6 +10,7 @@ import com.liferay.keymanager.KeyMetadata;
 import com.liferay.keymanager.KeyProvider;
 import com.liferay.keymanager.constants.KeyManagerConstants;
 import com.liferay.keymanager.exception.KeyProviderException;
+import com.liferay.keymanager.provider.gcp.internal.configuration.GoogleKmsProviderConfiguration;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -24,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
@@ -31,39 +33,18 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @Component(
-	immediate = true,
-	service = KeyProvider.class,
-	property = "provider.id=" + KeyManagerConstants.PROVIDER_GCP_KMS
+	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GoogleKmsProviderConfiguration",
+	configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true,
+	service = KeyProvider.class
 )
-@Designate(ocd = GoogleKmsProvider.Configuration.class)
+@Designate(ocd = GoogleKmsProviderConfiguration.class)
 public class GoogleKmsProvider implements KeyProvider {
-
-	@ObjectClassDefinition(
-		name = "Google Cloud KMS Provider Configuration",
-		description = "Configuration for the Google Cloud KMS key provider"
-	)
-	public @interface Configuration {
-
-		@AttributeDefinition(name = "Default Project ID")
-		String projectId() default "";
-
-		@AttributeDefinition(name = "Default Location")
-		String location() default "global";
-
-		@AttributeDefinition(name = "Default Key Ring")
-		String keyRing() default "liferay";
-
-		@AttributeDefinition(name = "Default Crypto Key")
-		String cryptoKey() default "config-key";
-
-		@AttributeDefinition(name = "Enabled")
-		boolean enabled() default false;
-
-	}
 
 	@Activate
 	@Modified
-	protected void activate(Configuration configuration) {
+	protected void activate(GoogleKmsProviderConfiguration configuration) {
+		_providerId = configuration.providerId();
+		_displayName = configuration.displayName();
 		_projectId = configuration.projectId();
 		_location = configuration.location();
 		_keyRing = configuration.keyRing();
@@ -76,7 +57,9 @@ public class GoogleKmsProvider implements KeyProvider {
 				_available = true;
 
 				if (_log.isInfoEnabled()) {
-					_log.info("Google Cloud KMS provider initialized: project=" + _projectId);
+					_log.info(
+						"Google Cloud KMS provider initialized: id=" +
+							_providerId + ", project=" + _projectId);
 				}
 			}
 			catch (Exception e) {
@@ -87,6 +70,7 @@ public class GoogleKmsProvider implements KeyProvider {
 		}
 		else {
 			_available = false;
+
 			_closeKmsClient();
 		}
 	}
@@ -98,12 +82,12 @@ public class GoogleKmsProvider implements KeyProvider {
 
 	@Override
 	public String getProviderId() {
-		return KeyManagerConstants.PROVIDER_GCP_KMS;
+		return _providerId;
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "Google Cloud KMS";
+		return _displayName;
 	}
 
 	@Override
@@ -224,6 +208,8 @@ public class GoogleKmsProvider implements KeyProvider {
 		}
 	}
 
+	private String _displayName;
+	private String _providerId;
 	private String _projectId;
 	private String _location;
 	private String _keyRing;

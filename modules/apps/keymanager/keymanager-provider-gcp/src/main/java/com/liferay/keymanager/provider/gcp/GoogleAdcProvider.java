@@ -7,6 +7,7 @@ import com.liferay.keymanager.KeyMetadata;
 import com.liferay.keymanager.KeyProvider;
 import com.liferay.keymanager.constants.KeyManagerConstants;
 import com.liferay.keymanager.exception.KeyProviderException;
+import com.liferay.keymanager.provider.gcp.internal.configuration.GoogleAdcProviderConfiguration;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -15,34 +16,23 @@ import java.util.List;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @Component(
-	immediate = true,
-	service = KeyProvider.class,
-	property = "provider.id=" + KeyManagerConstants.PROVIDER_GCP_ADC
+	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GoogleAdcProviderConfiguration",
+	configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true,
+	service = KeyProvider.class
 )
-@Designate(ocd = GoogleAdcProvider.Configuration.class)
+@Designate(ocd = GoogleAdcProviderConfiguration.class)
 public class GoogleAdcProvider implements KeyProvider {
 
-	@ObjectClassDefinition(
-		name = "Google ADC Provider Configuration",
-		description = "Configuration for Google Application Default Credentials provider"
-	)
-	public @interface Configuration {
-
-		@AttributeDefinition(name = "Default Scopes")
-		String[] defaultScopes() default {"https://www.googleapis.com/auth/cloud-platform"};
-
-		@AttributeDefinition(name = "Enabled")
-		boolean enabled() default false;
-
-	}
-
 	@Activate
-	protected void activate(Configuration configuration) {
+	protected void activate(GoogleAdcProviderConfiguration configuration) {
+		_providerId = configuration.providerId();
+		_displayName = configuration.displayName();
 		_defaultScopes = List.of(configuration.defaultScopes());
 		_enabled = configuration.enabled();
 
@@ -56,7 +46,8 @@ public class GoogleAdcProvider implements KeyProvider {
 				_available = true;
 
 				if (_log.isInfoEnabled()) {
-					_log.info("Google ADC provider initialized");
+					_log.info(
+						"Google ADC provider initialized: id=" + _providerId);
 				}
 			}
 			catch (Exception e) {
@@ -73,12 +64,12 @@ public class GoogleAdcProvider implements KeyProvider {
 
 	@Override
 	public String getProviderId() {
-		return KeyManagerConstants.PROVIDER_GCP_ADC;
+		return _providerId;
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "Google Application Default Credentials";
+		return _displayName;
 	}
 
 	@Override
@@ -162,6 +153,8 @@ public class GoogleAdcProvider implements KeyProvider {
 		return _available;
 	}
 
+	private String _displayName;
+	private String _providerId;
 	private List<String> _defaultScopes;
 	private boolean _enabled;
 	private volatile boolean _available = false;

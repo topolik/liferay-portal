@@ -41,7 +41,7 @@ public class KeyProviderRegistryImpl implements KeyProviderRegistry {
 		).filter(
 			KeyProvider::isAvailable
 		).sorted(
-			Comparator.comparingInt(KeyProvider::getPriority)
+			Comparator.comparing(KeyProvider::getProviderId)
 		).collect(
 			Collectors.toList()
 		);

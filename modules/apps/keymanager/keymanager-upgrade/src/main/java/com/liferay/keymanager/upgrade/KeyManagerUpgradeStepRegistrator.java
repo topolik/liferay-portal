@@ -1,5 +1,6 @@
 package com.liferay.keymanager.upgrade;
 
+import com.liferay.keymanager.upgrade.internal.configuration.KeyManagerUpgradeStepRegistratorConfiguration;
 import com.liferay.keymanager.upgrade.migration.MigrationStrategy;
 import com.liferay.keymanager.upgrade.migration.SecretMigrationService;
 import com.liferay.keymanager.upgrade.report.MigrationReportService;
@@ -16,22 +17,8 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @Component(immediate = true, service = UpgradeStepRegistrator.class)
-@Designate(ocd = KeyManagerUpgradeStepRegistrator.Configuration.class)
+@Designate(ocd = KeyManagerUpgradeStepRegistratorConfiguration.class)
 public class KeyManagerUpgradeStepRegistrator implements UpgradeStepRegistrator {
-
-	@ObjectClassDefinition(name = "Key Manager Upgrade Configuration")
-	public @interface Configuration {
-
-		@AttributeDefinition(name = "Migration Strategy")
-		String migrationStrategy() default "DRY_RUN";
-
-		@AttributeDefinition(name = "Target Provider ID")
-		String targetProviderId() default "keystore";
-
-		@AttributeDefinition(name = "Auto-migrate on Upgrade")
-		boolean autoMigrate() default false;
-
-	}
 
 	@Override
 	public void register(Registry registry) {
@@ -53,7 +40,7 @@ public class KeyManagerUpgradeStepRegistrator implements UpgradeStepRegistrator 
 	}
 
 	@Activate
-	protected void activate(Configuration configuration) {
+	protected void activate(KeyManagerUpgradeStepRegistratorConfiguration configuration) {
 		_migrationStrategy = configuration.migrationStrategy();
 		_targetProviderId = configuration.targetProviderId();
 		_autoMigrate = configuration.autoMigrate();

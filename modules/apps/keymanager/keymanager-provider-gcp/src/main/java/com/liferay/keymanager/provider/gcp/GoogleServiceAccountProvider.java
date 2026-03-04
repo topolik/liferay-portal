@@ -8,6 +8,7 @@ import com.liferay.keymanager.KeyMetadata;
 import com.liferay.keymanager.KeyProvider;
 import com.liferay.keymanager.constants.KeyManagerConstants;
 import com.liferay.keymanager.exception.KeyProviderException;
+import com.liferay.keymanager.provider.gcp.internal.configuration.GoogleServiceAccountProviderConfiguration;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -17,39 +18,27 @@ import java.util.List;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.metatype.annotations.AttributeDefinition;
 import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 @Component(
-	immediate = true,
-	service = KeyProvider.class,
-	property = "provider.id=" + KeyManagerConstants.PROVIDER_GCP_SERVICE_ACCOUNT
+	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GoogleServiceAccountProviderConfiguration",
+	configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true,
+	service = KeyProvider.class
 )
-@Designate(ocd = GoogleServiceAccountProvider.Configuration.class)
+@Designate(ocd = GoogleServiceAccountProviderConfiguration.class)
 public class GoogleServiceAccountProvider implements KeyProvider {
-
-	@ObjectClassDefinition(
-		name = "Google Service Account Provider Configuration",
-		description = "Configuration for Google Service Account token provider"
-	)
-	public @interface Configuration {
-
-		@AttributeDefinition(name = "Service Account Key File Path")
-		String serviceAccountKeyPath() default "";
-
-		@AttributeDefinition(name = "Default Scopes")
-		String[] defaultScopes() default {"https://www.googleapis.com/auth/cloud-platform"};
-
-		@AttributeDefinition(name = "Enabled")
-		boolean enabled() default false;
-
-	}
 
 	@Activate
 	@Modified
-	protected void activate(Configuration configuration) {
+	protected void activate(
+		GoogleServiceAccountProviderConfiguration configuration) {
+
+		_providerId = configuration.providerId();
+		_displayName = configuration.displayName();
 		_serviceAccountKeyPath = configuration.serviceAccountKeyPath();
 		_defaultScopes = List.of(configuration.defaultScopes());
 		_enabled = configuration.enabled();
@@ -64,7 +53,9 @@ public class GoogleServiceAccountProvider implements KeyProvider {
 				_available = true;
 
 				if (_log.isInfoEnabled()) {
-					_log.info("Google Service Account provider initialized: " + _serviceAccountKeyPath);
+					_log.info(
+						"Google Service Account provider initialized: id=" +
+							_providerId + ", path=" + _serviceAccountKeyPath);
 				}
 			}
 			catch (Exception e) {
@@ -81,12 +72,12 @@ public class GoogleServiceAccountProvider implements KeyProvider {
 
 	@Override
 	public String getProviderId() {
-		return KeyManagerConstants.PROVIDER_GCP_SERVICE_ACCOUNT;
+		return _providerId;
 	}
 
 	@Override
 	public String getDisplayName() {
-		return "Google Service Account";
+		return _displayName;
 	}
 
 	@Override
@@ -166,6 +157,8 @@ public class GoogleServiceAccountProvider implements KeyProvider {
 		return _available;
 	}
 
+	private String _displayName;
+	private String _providerId;
 	private String _serviceAccountKeyPath;
 	private List<String> _defaultScopes;
 	private boolean _enabled;

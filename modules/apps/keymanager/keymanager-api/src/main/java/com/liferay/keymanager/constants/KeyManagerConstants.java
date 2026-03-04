@@ -32,6 +32,8 @@ public class KeyManagerConstants {
 
 	public static final String PROVIDER_GCP_KMS = "gcp-kms";
 
+	public static final String PROVIDER_GCP_SECRET_MANAGER = "gcp-sm";
+
 	public static final String PROVIDER_GCP_SERVICE_ACCOUNT = "gcp-sa";
 
 	public static final String PROVIDER_KEYSTORE = "keystore";

@@ -5,8 +5,6 @@
 
 package com.liferay.keymanager;
 
-import aQute.bnd.annotation.ConsumerType;
-
 import com.liferay.keymanager.exception.KeyProviderException;
 
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.List;
  *
  * @author Tomas Polesovsky
  */
-@ConsumerType
 public interface KeyProvider {
 
 	public boolean containsKey(String alias) throws KeyProviderException;

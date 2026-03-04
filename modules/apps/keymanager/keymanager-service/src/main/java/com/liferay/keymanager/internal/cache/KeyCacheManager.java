@@ -6,6 +6,7 @@
 package com.liferay.keymanager.internal.cache;
 
 import com.liferay.keymanager.constants.KeyManagerConstants;
+import com.liferay.keymanager.internal.cache.configuration.KeyCacheManagerConfiguration;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
@@ -27,29 +28,12 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
  * @author Tomas Polesovsky
  */
 @Component(immediate = true, service = KeyCacheManager.class)
-@Designate(ocd = KeyCacheManager.Configuration.class)
+@Designate(ocd = KeyCacheManagerConfiguration.class)
 public class KeyCacheManager {
-
-	@ObjectClassDefinition(
-		description = "Configures caching behavior for resolved key references",
-		name = "Key Manager Cache Configuration"
-	)
-	public @interface Configuration {
-
-		@AttributeDefinition(name = "Cache Enabled")
-		public boolean cacheEnabled() default true;
-
-		@AttributeDefinition(name = "Cache TTL (seconds)")
-		public long cacheTtlSeconds() default KeyManagerConstants.DEFAULT_CACHE_TTL_SECONDS;
-
-		@AttributeDefinition(name = "Max Cache Size")
-		public int maxCacheSize() default KeyManagerConstants.DEFAULT_CACHE_MAX_SIZE;
-
-	}
 
 	@Activate
 	@Modified
-	protected void activate(Configuration configuration) {
+	protected void activate(KeyCacheManagerConfiguration configuration) {
 		_enabled = configuration.cacheEnabled();
 		_ttlSeconds = configuration.cacheTtlSeconds();
 		_maxSize = configuration.maxCacheSize();
