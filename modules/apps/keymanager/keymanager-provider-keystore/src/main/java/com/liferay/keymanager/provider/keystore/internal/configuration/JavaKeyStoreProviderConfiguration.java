@@ -1,5 +1,5 @@
 /**
- * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-FileCopyrightText: (c) 2026 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
@@ -7,37 +7,55 @@ package com.liferay.keymanager.provider.keystore.internal.configuration;
 
 import aQute.bnd.annotation.metatype.Meta;
 
-import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
  * @author Tomas Polesovsky
  */
-@ExtendedObjectClassDefinition(category = "key-manager")
-@Meta.OCD(
+@ObjectClassDefinition(
 	id = "com.liferay.keymanager.provider.keystore.internal.configuration.JavaKeyStoreProviderConfiguration",
-	name = "Java KeyStore Provider Configuration"
+	localization = "content/Language",
+	name = "java-keystore-provider-configuration"
 )
-public interface JavaKeyStoreProviderConfiguration {
+public @interface JavaKeyStoreProviderConfiguration {
 
-	@Meta.AD(deflt = "keystore", name = "Provider ID", required = false)
-	public String providerId();
+	@Meta.AD(
+		deflt = "true", description = "auto-create-description",
+		name = "auto-create", required = false
+	)
+	public boolean autoCreate();
 
-	@Meta.AD(deflt = "Java KeyStore", name = "Display Name", required = false)
+	@Meta.AD(
+		deflt = "Java KeyStore Provider",
+		description = "display-name-description", name = "display-name",
+		required = false
+	)
 	public String displayName();
 
 	@Meta.AD(
-		deflt = "${liferay.home}/data/keymanager.jceks", name = "KeyStore Path",
+		deflt = "${keyref:gcp-sm/keystore-master-password}",
+		description = "keystore-password-description",
+		name = "keystore-password", required = false
+	)
+	public String keystorePassword();
+
+	@Meta.AD(
+		deflt = "${liferay.home}/data/keystore.p12",
+		description = "keystore-path-description", name = "keystore-path",
 		required = false
 	)
 	public String keystorePath();
 
-	@Meta.AD(deflt = "JCEKS", name = "KeyStore Type", required = false)
+	@Meta.AD(
+		deflt = "PKCS12", description = "keystore-type-description",
+		name = "keystore-type", required = false
+	)
 	public String keystoreType();
 
-	@Meta.AD(deflt = "", name = "KeyStore Password", required = false)
-	public String keystorePassword();
-
-	@Meta.AD(deflt = "true", name = "Auto-create KeyStore", required = false)
-	public boolean autoCreate();
+	@Meta.AD(
+		deflt = "keystore", description = "provider-id-description",
+		name = "provider-id", required = false
+	)
+	public String providerId();
 
 }

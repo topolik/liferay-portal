@@ -1,42 +1,67 @@
 /**
- * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-FileCopyrightText: (c) 2026 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
 package com.liferay.keymanager.internal.cache;
 
-import com.liferay.keymanager.constants.KeyManagerConstants;
-import com.liferay.keymanager.internal.cache.configuration.KeyCacheManagerConfiguration;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.keymanager.SecureSecret;
 
 import java.time.Instant;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
-import org.osgi.service.metatype.annotations.AttributeDefinition;
-import org.osgi.service.metatype.annotations.Designate;
-import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(immediate = true, service = KeyCacheManager.class)
-@Designate(ocd = KeyCacheManagerConfiguration.class)
+@Component(service = {})
 public class KeyCacheManager {
 
-	@Activate
-	@Modified
-	protected void activate(KeyCacheManagerConfiguration configuration) {
-		_enabled = configuration.cacheEnabled();
-		_ttlSeconds = configuration.cacheTtlSeconds();
-		_maxSize = configuration.maxCacheSize();
+	public SecureSecret get(String cacheKey) {
+		CacheEntry entry = _cache.get(cacheKey);
+
+		if (entry == null) {
+			return null;
+		}
+
+		if (entry.isExpired()) {
+			_cache.remove(cacheKey);
+
+			entry.close();
+
+			return null;
+		}
+
+		// Return a copy so the caller's close() doesn't clear the cache entry
+
+		return new SecureSecret(
+			entry.getSecret(
+			).getChars());
+	}
+
+	public void invalidateAll() {
+		for (CacheEntry entry : _cache.values()) {
+			entry.close();
+		}
+
+		_cache.clear();
+	}
+
+	public void put(String cacheKey, SecureSecret secret, long ttlSeconds) {
+		_evictExpired();
+
+		_cache.put(
+			cacheKey,
+			new CacheEntry(
+				new SecureSecret(secret.getChars()),
+				Instant.now(
+				).plusSeconds(
+					ttlSeconds
+				)));
 	}
 
 	@Deactivate
@@ -44,72 +69,15 @@ public class KeyCacheManager {
 		invalidateAll();
 	}
 
-	public char[] get(String referenceKey) {
-		if (!_enabled) {
-			return null;
-		}
-
-		CacheEntry cacheEntry = _cache.get(referenceKey);
-
-		if (cacheEntry == null) {
-			return null;
-		}
-
-		if (cacheEntry.isExpired(_ttlSeconds)) {
-			_cache.remove(referenceKey);
-
-			cacheEntry.clear();
-
-			return null;
-		}
-
-		return cacheEntry.getValue();
-	}
-
-	public void invalidate(String referenceKey) {
-		CacheEntry cacheEntry = _cache.remove(referenceKey);
-
-		if (cacheEntry != null) {
-			cacheEntry.clear();
-		}
-	}
-
-	public void invalidateAll() {
-		_cache.values(
-		).forEach(
-			CacheEntry::clear
-		);
-
-		_cache.clear();
-	}
-
-	public void put(String referenceKey, char[] value) {
-		if (!_enabled) {
-			return;
-		}
-
-		if (_cache.size() >= _maxSize) {
-			_evictExpired();
-		}
-
-		char[] copy = Arrays.copyOf(value, value.length);
-
-		CacheEntry previousCacheEntry = _cache.put(
-			referenceKey, new CacheEntry(copy));
-
-		if (previousCacheEntry != null) {
-			previousCacheEntry.clear();
-		}
-	}
-
 	private void _evictExpired() {
 		_cache.entrySet(
 		).removeIf(
 			entry -> {
-				CacheEntry cacheEntry = entry.getValue();
+				if (entry.getValue(
+					).isExpired()) {
 
-				if (cacheEntry.isExpired(_ttlSeconds)) {
-					cacheEntry.clear();
+					entry.getValue(
+					).close();
 
 					return true;
 				}
@@ -119,36 +87,33 @@ public class KeyCacheManager {
 		);
 	}
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		KeyCacheManager.class);
-
 	private final Map<String, CacheEntry> _cache = new ConcurrentHashMap<>();
-	private volatile boolean _enabled = true;
-	private volatile int _maxSize = KeyManagerConstants.DEFAULT_CACHE_MAX_SIZE;
-	private volatile long _ttlSeconds =
-		KeyManagerConstants.DEFAULT_CACHE_TTL_SECONDS;
 
-	private static class CacheEntry {
+	private static class CacheEntry implements AutoCloseable {
 
-		public CacheEntry(char[] value) {
-			_value = value;
-			_createdAt = Instant.now();
+		public CacheEntry(SecureSecret secret, Instant expiresAt) {
+			_secret = secret;
+			_expiresAt = expiresAt;
 		}
 
-		public void clear() {
-			Arrays.fill(_value, '\0');
+		@Override
+		public void close() {
+			_secret.close();
 		}
 
-		public char[] getValue() {
-			return Arrays.copyOf(_value, _value.length);
+		public SecureSecret getSecret() {
+			return _secret;
 		}
 
-		public boolean isExpired(long ttlSeconds) {
-			return Instant.now().isAfter(_createdAt.plusSeconds(ttlSeconds));
+		public boolean isExpired() {
+			return Instant.now(
+			).isAfter(
+				_expiresAt
+			);
 		}
 
-		private final Instant _createdAt;
-		private final char[] _value;
+		private final Instant _expiresAt;
+		private final SecureSecret _secret;
 
 	}
 

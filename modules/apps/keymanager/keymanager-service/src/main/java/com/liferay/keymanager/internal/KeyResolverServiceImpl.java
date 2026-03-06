@@ -1,200 +1,180 @@
 /**
- * SPDX-FileCopyrightText: (c) 2000 Liferay, Inc. https://liferay.com
+ * SPDX-FileCopyrightText: (c) 2026 Liferay, Inc. https://liferay.com
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
 package com.liferay.keymanager.internal;
 
-import com.liferay.keymanager.KeyProvider;
-import com.liferay.keymanager.KeyProviderRegistry;
-import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.KeyResolutionException;
 import com.liferay.keymanager.KeyResolverService;
-import com.liferay.keymanager.constants.KeyManagerConstants;
-import com.liferay.keymanager.exception.KeyProviderException;
-import com.liferay.keymanager.exception.KeyResolutionException;
-import com.liferay.keymanager.internal.audit.KeyAccessAuditService;
+import com.liferay.keymanager.SecureSecret;
+import com.liferay.keymanager.internal.audit.KeyAuditService;
 import com.liferay.keymanager.internal.cache.KeyCacheManager;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.Validator;
+import com.liferay.keymanager.spi.KeyProvider;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(immediate = true, service = KeyResolverService.class)
+@Component(service = KeyResolverService.class)
 public class KeyResolverServiceImpl implements KeyResolverService {
 
 	@Override
-	public String createReference(String providerId, String alias) {
-		return KeyManagerConstants.KEY_REFERENCE_PREFIX + providerId +
-			KeyManagerConstants.PROVIDER_ALIAS_SEPARATOR + alias +
-			KeyManagerConstants.KEY_REFERENCE_SUFFIX;
-	}
-
-	@Override
-	public List<KeyProvider> getAvailableProviders() {
-		return _keyProviderRegistry.getAvailableProviders();
-	}
-
-	@Override
-	public void invalidateAllCaches() {
-		_keyCacheManager.invalidateAll();
-	}
-
-	@Override
-	public void invalidateCache(String referenceString) {
-		_keyCacheManager.invalidate(referenceString);
-	}
-
-	@Override
 	public boolean isKeyReference(String value) {
-		return _keyReferenceParser.isKeyReference(value);
-	}
-
-	@Override
-	public KeyReference parseReference(String referenceString)
-		throws KeyResolutionException {
-
-		return _keyReferenceParser.parse(referenceString);
-	}
-
-	@Override
-	public String resolve(String value) throws KeyResolutionException {
-		if (Validator.isNull(value) ||
-			!_keyReferenceParser.isKeyReference(value)) {
-
-			return value;
+		if (value == null) {
+			return false;
 		}
 
-		return _keyReferenceParser.replaceAll(
-			value,
-			ref -> {
-				char[] resolved = _resolveFromProvider(ref);
-
-				try {
-					return new String(resolved);
-				}
-				finally {
-					Arrays.fill(resolved, '\0');
-				}
-			});
+		return value.contains("${keyref:");
 	}
 
 	@Override
-	public Map<String, String> resolveAll(Map<String, String> properties)
+	public String resolve(String referenceString)
 		throws KeyResolutionException {
 
-		Map<String, String> resolved = new HashMap<>();
-
-		for (Map.Entry<String, String> entry : properties.entrySet()) {
-			resolved.put(entry.getKey(), resolve(entry.getValue()));
+		if (!isKeyReference(referenceString)) {
+			return referenceString;
 		}
 
-		return resolved;
-	}
+		Matcher matcher = _keyRefPattern.matcher(referenceString);
 
-	@Override
-	public char[] resolveSecure(KeyReference reference)
-		throws KeyResolutionException {
+		StringBuilder sb = new StringBuilder();
 
-		return _resolveFromProvider(reference);
-	}
+		while (matcher.find()) {
+			try (SecureSecret secret = resolveSecure(matcher.group(0))) {
+				char[] chars = secret.getChars();
 
-	@Override
-	public String storeAndReference(
-			String providerId, String alias, char[] value)
-		throws KeyResolutionException {
-
-		KeyProvider keyProvider = _getProvider(providerId);
-
-		try {
-			keyProvider.storeKey(alias, value);
-
-			KeyReference keyReference = new KeyReference(
-				providerId, alias, createReference(providerId, alias));
-
-			_keyAccessAuditService.auditKeyAccess(
-				KeyManagerConstants.AUDIT_EVENT_STORE, keyReference, true);
-
-			return createReference(providerId, alias);
+				matcher.appendReplacement(
+					sb, Matcher.quoteReplacement(new String(chars)));
+			}
+			catch (KeyResolutionException keyResolutionException) {
+				throw keyResolutionException;
+			}
+			catch (Exception exception) {
+				throw new KeyResolutionException(exception);
+			}
 		}
-		catch (KeyProviderException kpe) {
+
+		matcher.appendTail(sb);
+
+		return sb.toString();
+	}
+
+	@Override
+	public SecureSecret resolveSecure(String referenceString)
+		throws KeyResolutionException {
+
+		Matcher matcher = _keyRefPattern.matcher(referenceString);
+
+		if (!matcher.matches()) {
 			throw new KeyResolutionException(
-				"Failed to store key with provider " + providerId, kpe);
+				"Invalid key reference: " + referenceString);
 		}
-	}
 
-	private KeyProvider _getProvider(String providerId)
-		throws KeyResolutionException {
+		String providerId = matcher.group(1);
 
-		return _keyProviderRegistry.getProvider(providerId).orElseThrow(
-			() -> new KeyResolutionException(
-				"No key provider found with id: " + providerId));
-	}
+		String alias = matcher.group(2);
 
-	private char[] _resolveFromProvider(KeyReference keyReference)
-		throws KeyResolutionException {
+		String version = matcher.group(4);
 
-		String cacheKey = keyReference.getRawReference();
+		String aliasWithVersion =
+			(version != null) ? (alias + ":" + version) : alias;
 
-		char[] cached = _keyCacheManager.get(cacheKey);
+		// 1. Check Cache
+
+		SecureSecret cached = _keyCacheManager.get(referenceString);
 
 		if (cached != null) {
-			_keyAccessAuditService.auditKeyAccess(
-				KeyManagerConstants.AUDIT_EVENT_RESOLVE, keyReference, true);
+			_keyAuditService.auditAccess(
+				providerId, aliasWithVersion, true, "Cache hit");
 
 			return cached;
 		}
 
-		KeyProvider keyProvider = _getProvider(keyReference.getProvider());
+		// 2. Resolve from Provider
 
-		try {
-			char[] resolved = keyProvider.resolveKey(keyReference.getAlias());
+		KeyProvider provider = _getProvider(providerId);
 
-			if (resolved == null) {
-				throw new KeyResolutionException(
-					"Key not found: " + keyReference.getAlias() +
-						" in provider " + keyReference.getProvider());
-			}
-
-			_keyCacheManager.put(cacheKey, resolved);
-
-			_keyAccessAuditService.auditKeyAccess(
-				KeyManagerConstants.AUDIT_EVENT_RESOLVE, keyReference, true);
-
-			return resolved;
-		}
-		catch (KeyProviderException kpe) {
-			_keyAccessAuditService.auditKeyAccess(
-				KeyManagerConstants.AUDIT_EVENT_RESOLVE, keyReference, false);
+		if ((provider == null) || !provider.isAvailable()) {
+			_keyAuditService.auditAccess(
+				providerId, aliasWithVersion, false,
+				"Provider not found or unavailable");
 
 			throw new KeyResolutionException(
-				"Failed to resolve key: " + keyReference.getRawReference(),
-				kpe);
+				"KeyProvider not found or unavailable: " + providerId);
+		}
+
+		try {
+			SecureSecret secret = provider.resolveKey(
+				aliasWithVersion, Collections.emptyMap());
+
+			// 3. Update Cache (Default 300s TTL)
+
+			_keyCacheManager.put(referenceString, secret, 300);
+
+			_keyAuditService.auditAccess(
+				providerId, aliasWithVersion, true, "Provider resolve");
+
+			return secret;
+		}
+		catch (Exception exception) {
+			_keyAuditService.auditAccess(
+				providerId, aliasWithVersion, false, exception.getMessage());
+
+			throw new KeyResolutionException(exception);
 		}
 	}
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		KeyResolverServiceImpl.class);
+	@Activate
+	protected void activate(BundleContext bundleContext) {
+		_serviceTracker = new ServiceTracker<>(
+			bundleContext, KeyProvider.class, null);
+
+		_serviceTracker.open();
+	}
+
+	@Deactivate
+	protected void deactivate() {
+		_serviceTracker.close();
+	}
+
+	private KeyProvider _getProvider(String providerId) {
+		Object[] services = _serviceTracker.getServices();
+
+		if (services == null) {
+			return null;
+		}
+
+		for (Object service : services) {
+			KeyProvider keyProvider = (KeyProvider)service;
+
+			if (providerId.equals(keyProvider.getProviderId())) {
+				return keyProvider;
+			}
+		}
+
+		return null;
+	}
+
+	private static final Pattern _keyRefPattern = Pattern.compile(
+		"\\$\\{keyref:([a-zA-Z0-9\\-_]+)/([^:}]+)(:([^}]+))?\\}");
 
 	@Reference
-	private KeyAccessAuditService _keyAccessAuditService;
+	private KeyAuditService _keyAuditService;
 
 	@Reference
 	private KeyCacheManager _keyCacheManager;
 
-	@Reference
-	private KeyProviderRegistry _keyProviderRegistry;
-
-	@Reference
-	private KeyReferenceParser _keyReferenceParser;
+	private ServiceTracker<KeyProvider, KeyProvider> _serviceTracker;
 
 }
