@@ -1,0 +1,6 @@
+Bundle-Name: Liferay Key Manager Provider DB Service
+Bundle-SymbolicName: com.liferay.keymanager.provider.db.service
+Bundle-Version: 1.0.0
+Liferay-Releng-Module-Group-Title: Key Manager
+Liferay-Require-SchemaVersion: 1.0.0
+Liferay-Service: true

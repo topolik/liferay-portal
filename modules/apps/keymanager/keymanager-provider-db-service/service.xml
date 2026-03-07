@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 7.4.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_7_4_0.dtd">
+
+<service-builder auto-import-default-references="false" dependency-injector="ds" mvcc-enabled="true" package-path="com.liferay.keymanager.provider.db">
+	<namespace>KeyManagerDB</namespace>
+	<entity local-service="true" name="SecretEntry" remote-service="false" uuid="false">
+
+		<!-- PK -->
+
+		<column name="secretEntryId" primary="true" type="long" />
+
+		<!-- Identity -->
+
+		<column name="companyId" type="long" />
+		<column name="alias" type="String" />
+
+		<!-- Payload (Encrypted Secret) -->
+
+		<column name="ciphertextBlob" type="Blob" />
+		<column name="iv" type="String" />
+
+		<!-- Wrapped Key (Encrypted DEK) -->
+
+		<column name="encryptedDEKBlob" type="Blob" />
+		<column name="dekIv" type="String" />
+
+		<!-- Metadata -->
+
+		<column name="kekReference" type="String" />
+		<column name="algorithm" type="String" />
+
+		<!-- Audit -->
+
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Finder -->
+
+		<finder name="C_A" return-type="SecretEntry">
+			<finder-column name="companyId" />
+			<finder-column name="alias" />
+		</finder>
+	</entity>
+</service-builder>

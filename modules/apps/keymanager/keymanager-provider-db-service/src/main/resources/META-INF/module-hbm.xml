@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false" default-lazy="false">
+	<import class="com.liferay.keymanager.provider.db.model.SecretEntry" />
+	<class dynamic-update="true" name="com.liferay.keymanager.provider.db.model.impl.SecretEntryImpl" table="KeyManagerDB_SecretEntry">
+		<id access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="secretEntryId" type="long">
+			<generator class="assigned" />
+		</id>
+		<version access="com.liferay.portal.dao.orm.hibernate.PrivateFieldPropertyAccessor" name="mvccVersion" type="long" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" column="alias_" name="alias" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<one-to-one access="com.liferay.portal.dao.orm.hibernate.PrivateFieldPropertyAccessor" cascade="save-update" class="com.liferay.keymanager.provider.db.model.SecretEntryCiphertextBlobBlobModel" constrained="false" name="ciphertextBlobBlobModel" outer-join="false" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="iv" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<one-to-one access="com.liferay.portal.dao.orm.hibernate.PrivateFieldPropertyAccessor" cascade="save-update" class="com.liferay.keymanager.provider.db.model.SecretEntryEncryptedDEKBlobBlobModel" constrained="false" name="encryptedDEKBlobBlobModel" outer-join="false" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="dekIv" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="kekReference" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="algorithm" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="createDate" type="org.hibernate.type.TimestampType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="modifiedDate" type="org.hibernate.type.TimestampType" />
+	</class>
+	<class dynamic-update="true" lazy="true" name="com.liferay.keymanager.provider.db.model.SecretEntryCiphertextBlobBlobModel" table="KeyManagerDB_SecretEntry">
+		<id column="secretEntryId" name="secretEntryId">
+			<generator class="foreign">
+				<param name="property">com.liferay.keymanager.provider.db.model.impl.SecretEntryImpl</param>
+			</generator>
+		</id>
+		<property column="ciphertextBlob" name="ciphertextBlobBlob" type="blob" />
+	</class>
+	<class dynamic-update="true" lazy="true" name="com.liferay.keymanager.provider.db.model.SecretEntryEncryptedDEKBlobBlobModel" table="KeyManagerDB_SecretEntry">
+		<id column="secretEntryId" name="secretEntryId">
+			<generator class="foreign">
+				<param name="property">com.liferay.keymanager.provider.db.model.impl.SecretEntryImpl</param>
+			</generator>
+		</id>
+		<property column="encryptedDEKBlob" name="encryptedDEKBlobBlob" type="blob" />
+	</class>
+</hibernate-mapping>

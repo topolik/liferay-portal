@@ -1,0 +1,1 @@
+create index IX_F2DA8C96 on KeyManagerDB_SecretEntry (companyId, alias_[$COLUMN_LENGTH:75$]);

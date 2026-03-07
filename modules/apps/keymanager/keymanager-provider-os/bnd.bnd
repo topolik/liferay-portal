@@ -1,0 +1,5 @@
+Bundle-Name: Liferay Key Manager Provider OS
+Bundle-SymbolicName: com.liferay.keymanager.provider.os
+Bundle-Version: 1.0.0
+Liferay-Releng-Module-Group-Description:
+Liferay-Releng-Module-Group-Title: Key Manager
