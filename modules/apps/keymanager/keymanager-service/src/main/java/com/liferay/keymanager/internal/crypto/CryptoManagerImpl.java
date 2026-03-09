@@ -15,7 +15,6 @@ import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory
 import com.liferay.petra.string.StringBundler;
 
 import java.security.Key;
-import java.security.PublicKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,16 +119,6 @@ public class CryptoManagerImpl implements CryptoManager {
 	@Override
 	public List<String> getProviders() throws CryptoManagerException {
 		return new ArrayList<>(_serviceTrackerMap.keySet());
-	}
-
-	@Override
-	public PublicKey getPublicKey(KeyReference keyReference)
-		throws CryptoManagerException {
-
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
-
-		return cryptoVaultProvider.getPublicKey(keyReference.getIdentifier());
 	}
 
 	@Override

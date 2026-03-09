@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -61,7 +62,7 @@ public class DBSecretVaultProviderTest {
 				"providerId", "db"
 			).build());
 
-		CompanyThreadLocal.setCompanyId(_COMPANY_ID);
+		CompanyThreadLocal.setCompanyIdWithSafeCloseable(_COMPANY_ID);
 	}
 
 	@Test
@@ -78,7 +79,11 @@ public class DBSecretVaultProviderTest {
 
 		_dbSecretVaultProvider.deleteSecret(identifier);
 
-		Mockito.verify(_secretEntryLocalService).deleteSecretEntry(secretEntry);
+		Mockito.verify(
+			_secretEntryLocalService
+		).deleteSecretEntry(
+			secretEntry
+		);
 	}
 
 	@Test
@@ -89,9 +94,10 @@ public class DBSecretVaultProviderTest {
 			Collections.singletonList("secret-1")
 		);
 
-		List<String> identifiers = _dbSecretVaultProvider.getSecretIdentifiers();
+		List<String> identifiers =
+			_dbSecretVaultProvider.getSecretIdentifiers();
 
-		Assert.assertEquals(1, identifiers.size());
+		Assert.assertEquals(identifiers.toString(), 1, identifiers.size());
 		Assert.assertEquals("secret-1", identifiers.get(0));
 	}
 
@@ -106,9 +112,11 @@ public class DBSecretVaultProviderTest {
 		SecureSecret secureSecret = new SecureSecret(keyRef, originalPlaintext);
 
 		// Use a real SecretEntryImpl to act as a data carrier
+
 		SecretEntry secretEntry = new SecretEntryImpl();
 
-		// 1. Mock CryptoManager statefully to capture the dynamically generated DEK
+		// 1. Mock CryptoManager statefully to capture the dynamically
+		// generated DEK
 
 		AtomicReference<Key> capturedDekReference = new AtomicReference<>();
 
@@ -118,6 +126,7 @@ public class DBSecretVaultProviderTest {
 		).thenAnswer(
 			invocation -> {
 				capturedDekReference.set(invocation.getArgument(1));
+
 				return "wrapped-dek-material".getBytes();
 			}
 		);
@@ -164,6 +173,7 @@ public class DBSecretVaultProviderTest {
 		// 5. Verify
 
 		Assert.assertArrayEquals(originalPlaintext, retrievedSecret.getBytes());
+
 		Assert.assertEquals(_COMPANY_ID, secretEntry.getCompanyId());
 	}
 
@@ -171,6 +181,7 @@ public class DBSecretVaultProviderTest {
 		try {
 			Field field = DBSecretVaultProvider.class.getDeclaredField(
 				fieldName);
+
 			field.setAccessible(true);
 			field.set(_dbSecretVaultProvider, value);
 		}
@@ -184,9 +195,9 @@ public class DBSecretVaultProviderTest {
 	@Mock
 	private CryptoManager _cryptoManager;
 
+	private DBSecretVaultProvider _dbSecretVaultProvider;
+
 	@Mock
 	private SecretEntryLocalService _secretEntryLocalService;
-
-	private DBSecretVaultProvider _dbSecretVaultProvider;
 
 }

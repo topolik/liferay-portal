@@ -11,8 +11,8 @@ import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -43,12 +43,13 @@ public class KeyEntryLocalServiceImpl extends KeyEntryLocalServiceBaseImpl {
 		List<KeyEntry> keyEntries = keyEntryPersistence.findByCompanyId(
 			companyId);
 
-		return keyEntries.stream(
-		).map(
-			KeyEntry::getAlias
-		).collect(
-			Collectors.toList()
-		);
+		List<String> identifiers = new ArrayList<>(keyEntries.size());
+
+		for (KeyEntry keyEntry : keyEntries) {
+			identifiers.add(keyEntry.getAlias());
+		}
+
+		return identifiers;
 	}
 
 }

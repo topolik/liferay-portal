@@ -8,7 +8,6 @@ package com.liferay.keymanager.crypto;
 import com.liferay.keymanager.KeyReference;
 
 import java.security.Key;
-import java.security.PublicKey;
 
 import java.util.List;
 
@@ -42,9 +41,6 @@ public interface CryptoManager {
 		throws CryptoManagerException;
 
 	public List<String> getProviders() throws CryptoManagerException;
-
-	public PublicKey getPublicKey(KeyReference keyReference)
-		throws CryptoManagerException;
 
 	public Key unwrap(
 			KeyReference masterKeyReference, byte[] wrappedKeyBytes,

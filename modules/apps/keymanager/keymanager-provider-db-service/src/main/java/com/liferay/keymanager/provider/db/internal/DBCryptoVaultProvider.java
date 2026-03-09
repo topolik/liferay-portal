@@ -30,10 +30,7 @@ import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -46,7 +43,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 
@@ -67,6 +63,68 @@ import org.osgi.service.component.annotations.Reference;
 public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
+	public void addPrivateKey(String identifier, CryptoKey privateKey)
+		throws CryptoManagerException {
+
+		try {
+			byte[] wrappedBytes = _cryptoManager.wrap(
+				KeyReference.fromString(_masterKeyReference),
+				privateKey.getKey());
+
+			_saveKeyEntry(
+				identifier, KeyType.PRIVATE,
+				privateKey.getKey(
+				).getAlgorithm(),
+				wrappedBytes, _masterKeyReference, privateKey.getCipherSpec());
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to put private key: " + identifier, exception);
+		}
+	}
+
+	@Override
+	public void addPublicKey(String identifier, CryptoKey publicKey)
+		throws CryptoManagerException {
+
+		try {
+			_saveKeyEntry(
+				identifier, KeyType.PUBLIC,
+				publicKey.getKey(
+				).getAlgorithm(),
+				publicKey.getKey(
+				).getEncoded(),
+				null, publicKey.getCipherSpec());
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to put public key: " + identifier, exception);
+		}
+	}
+
+	@Override
+	public void addSecretKey(String identifier, CryptoKey secretKey)
+		throws CryptoManagerException {
+
+		try {
+			byte[] wrappedKeyBytes = _cryptoManager.wrap(
+				KeyReference.fromString(_masterKeyReference),
+				secretKey.getKey());
+
+			_saveKeyEntry(
+				identifier, KeyType.SECRET,
+				secretKey.getKey(
+				).getAlgorithm(),
+				wrappedKeyBytes, _masterKeyReference,
+				secretKey.getCipherSpec());
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to put secret key: " + identifier, exception);
+		}
+	}
+
+	@Override
 	public byte[] decrypt(String identifier, byte[] ciphertext)
 		throws CryptoManagerException {
 
@@ -80,22 +138,25 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 			String transformation = _parseAlgorithm(cipherSpec);
 
-			Map<String, String> cipherSpecMap = _parseCipherSpec(cipherSpec);
-
 			Cipher cipher = Cipher.getInstance(transformation);
 
 			KeyType keyType = KeyType.valueOf(keyEntry.getKeyType());
 
 			if (keyType == KeyType.SECRET) {
+				Map<String, String> cipherSpecMap = _parseCipherSpec(
+					cipherSpec);
+
 				int ivSize = GetterUtil.getInteger(cipherSpecMap.get("ivSize"));
 				int gcmTag = GetterUtil.getInteger(cipherSpecMap.get("gcmTag"));
 
 				ByteBuffer byteBuffer = ByteBuffer.wrap(ciphertext);
 
 				byte[] iv = new byte[ivSize];
+
 				byteBuffer.get(iv);
 
 				byte[] actualCiphertext = new byte[byteBuffer.remaining()];
+
 				byteBuffer.get(actualCiphertext);
 
 				cipher.init(
@@ -147,20 +208,21 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 			String transformation = _parseAlgorithm(cipherSpec);
 
-			Map<String, String> configurationMap = _parseCipherSpec(
-				cipherSpec);
-
 			Cipher cipher = Cipher.getInstance(transformation);
 
 			KeyType keyType = KeyType.valueOf(keyEntry.getKeyType());
 
 			if (keyType == KeyType.SECRET) {
+				Map<String, String> configurationMap = _parseCipherSpec(
+					cipherSpec);
+
 				int ivSize = GetterUtil.getInteger(
 					configurationMap.get("ivSize"));
 				int gcmTag = GetterUtil.getInteger(
 					configurationMap.get("gcmTag"));
 
 				byte[] iv = new byte[ivSize];
+
 				_secureRandom.nextBytes(iv);
 
 				cipher.init(
@@ -173,6 +235,7 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 				ByteBuffer byteBuffer = ByteBuffer.allocate(
 					iv.length + ciphertext.length);
+
 				byteBuffer.put(iv);
 				byteBuffer.put(ciphertext);
 
@@ -188,31 +251,6 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to encrypt with key: " + identifier, exception);
-		}
-	}
-
-	public Certificate getCertificate(String identifier)
-		throws CryptoManagerException {
-
-		try {
-			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
-				_getCompanyId(), identifier);
-
-			if (!Objects.equals(keyEntry.getKeyType(), KeyType.CERTIFICATE.name())) {
-				return null;
-			}
-
-			byte[] encoded = _blobToBytes(keyEntry.getWrappedKeyBlob());
-
-			CertificateFactory certificateFactory =
-				CertificateFactory.getInstance("X.509");
-
-			return certificateFactory.generateCertificate(
-				new ByteArrayInputStream(encoded));
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to get certificate: " + identifier, exception);
 		}
 	}
 
@@ -234,14 +272,18 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
 				_getCompanyId(), identifier);
 
-			if (!Objects.equals(keyEntry.getKeyType(), KeyType.PRIVATE.name())) {
+			if (!Objects.equals(
+					keyEntry.getKeyType(), KeyType.PRIVATE.name())) {
+
 				return null;
 			}
 
 			Key key = _unwrapKey(keyEntry);
 
 			if (!(key instanceof PrivateKey)) {
+
 				// Reconstitute from PKCS8 if unwrapped as generic Key
+
 				KeyFactory keyFactory = KeyFactory.getInstance(
 					keyEntry.getAlgorithm());
 
@@ -254,108 +296,6 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to get private key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public PublicKey getPublicKey(String identifier)
-		throws CryptoManagerException {
-
-		try {
-			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
-				_getCompanyId(), identifier);
-
-			KeyType keyType = KeyType.valueOf(keyEntry.getKeyType());
-
-			if (keyType == KeyType.PUBLIC) {
-				byte[] encoded = _blobToBytes(keyEntry.getWrappedKeyBlob());
-
-				KeyFactory keyFactory = KeyFactory.getInstance(
-					keyEntry.getAlgorithm());
-
-				return keyFactory.generatePublic(new X509EncodedKeySpec(encoded));
-			}
-
-			// If it's a private key, the public key is often available in the
-			// certificate
-
-			Certificate certificate = getCertificate(identifier);
-
-			if (certificate != null) {
-				return certificate.getPublicKey();
-			}
-
-			return null;
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to get public key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addCertificate(String identifier, Certificate certificate)
-		throws CryptoManagerException {
-
-		try {
-			_saveKeyEntry(
-				identifier, KeyType.CERTIFICATE, "X.509",
-				certificate.getEncoded(), null, null);
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put certificate: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addPrivateKey(String identifier, CryptoKey privateKey)
-		throws CryptoManagerException {
-
-		try {
-			byte[] wrappedBytes = _cryptoManager.wrap(
-				KeyReference.fromString(_masterKeyReference), privateKey.getKey());
-
-			_saveKeyEntry(
-				identifier, KeyType.PRIVATE, privateKey.getKey().getAlgorithm(),
-				wrappedBytes, _masterKeyReference, privateKey.getCipherSpec());
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put private key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addPublicKey(String identifier, CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		try {
-			_saveKeyEntry(
-				identifier, KeyType.PUBLIC, publicKey.getKey().getAlgorithm(),
-				publicKey.getKey().getEncoded(), null, publicKey.getCipherSpec());
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put public key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addSecretKey(String identifier, CryptoKey secretKey)
-		throws CryptoManagerException {
-
-		try {
-			byte[] wrappedKeyBytes = _cryptoManager.wrap(
-				KeyReference.fromString(_masterKeyReference), secretKey.getKey());
-
-			_saveKeyEntry(
-				identifier, KeyType.SECRET, secretKey.getKey().getAlgorithm(),
-				wrappedKeyBytes, _masterKeyReference, secretKey.getCipherSpec());
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put secret key: " + identifier, exception);
 		}
 	}
 
@@ -373,6 +313,15 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		throws CryptoManagerException {
 
 		throw new CryptoManagerException("Operation not supported");
+	}
+
+	/**
+	 * @author Tomas Polesovsky
+	 */
+	public enum KeyType {
+
+		PRIVATE, PUBLIC, SECRET
+
 	}
 
 	@Activate
@@ -436,6 +385,7 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		String[] parts = StringUtil.split(configuration, ";");
 
 		// Skip the first part (the algorithm)
+
 		for (int i = 1; i < parts.length; i++) {
 			String[] keyValue = StringUtil.split(parts[i], "=");
 
@@ -478,12 +428,6 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	private Key _unwrapKey(KeyEntry keyEntry) throws Exception {
 		KeyType keyType = KeyType.valueOf(keyEntry.getKeyType());
 
-		if (keyType == KeyType.CERTIFICATE) {
-			Certificate certificate = getCertificate(keyEntry.getAlias());
-
-			return certificate.getPublicKey();
-		}
-
 		if (keyType == KeyType.PUBLIC) {
 			byte[] encoded = _blobToBytes(keyEntry.getWrappedKeyBlob());
 
@@ -517,16 +461,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	@Reference
 	private KeyEntryLocalService _keyEntryLocalService;
 
-	private String _masterKeyReference;
-	private String _providerId;
+	private volatile String _masterKeyReference;
+	private volatile String _providerId;
 	private final SecureRandom _secureRandom = new SecureRandom();
 
-	/**
-	 * @author Tomas Polesovsky
-	 */
-	public enum KeyType {
-	
-		CERTIFICATE, PRIVATE, PUBLIC, SECRET;
-	
-	}
 }

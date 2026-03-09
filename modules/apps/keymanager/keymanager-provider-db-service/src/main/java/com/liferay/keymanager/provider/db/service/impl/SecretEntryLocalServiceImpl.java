@@ -11,8 +11,8 @@ import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -23,7 +23,8 @@ import org.osgi.service.component.annotations.Component;
 	property = "model.class.name=com.liferay.keymanager.provider.db.model.SecretEntry",
 	service = AopService.class
 )
-public class SecretEntryLocalServiceImpl extends SecretEntryLocalServiceBaseImpl {
+public class SecretEntryLocalServiceImpl
+	extends SecretEntryLocalServiceBaseImpl {
 
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
@@ -42,15 +43,16 @@ public class SecretEntryLocalServiceImpl extends SecretEntryLocalServiceBaseImpl
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 	public List<String> getSecretIdentifiers(long companyId) {
-		List<SecretEntry> secretEntries = secretEntryPersistence.findByCompanyId(
-			companyId);
+		List<SecretEntry> secretEntries =
+			secretEntryPersistence.findByCompanyId(companyId);
 
-		return secretEntries.stream(
-		).map(
-			SecretEntry::getAlias
-		).collect(
-			Collectors.toList()
-		);
+		List<String> identifiers = new ArrayList<>(secretEntries.size());
+
+		for (SecretEntry secretEntry : secretEntries) {
+			identifiers.add(secretEntry.getAlias());
+		}
+
+		return identifiers;
 	}
 
 }

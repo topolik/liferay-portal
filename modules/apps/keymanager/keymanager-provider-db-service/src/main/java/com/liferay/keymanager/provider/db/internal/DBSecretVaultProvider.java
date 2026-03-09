@@ -93,22 +93,28 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 				masterKeyRef, dekBytes, _keyAlgorithm, Cipher.SECRET_KEY);
 
 			try {
+
 				// 2. Decrypt Secret
 
-				byte[] ciphertext = _blobToBytes(secretEntry.getCiphertextBlob());
+				byte[] ciphertext = _blobToBytes(
+					secretEntry.getCiphertextBlob());
 
-				byte[] plaintext = _decrypt(
-					dek, ciphertext, secretEntry.getIv(),
-					_encryptionAlgorithm);
+				byte[] plaintext = null;
 
 				try {
+					plaintext = _decrypt(
+						dek, ciphertext, secretEntry.getIv(),
+						_encryptionAlgorithm);
+
 					return new SecureSecret(
 						new KeyReference(
 							KeyReference.Type.SECRET, _providerId, identifier),
 						plaintext);
 				}
 				finally {
-					Arrays.fill(plaintext, (byte)0);
+					if (plaintext != null) {
+						Arrays.fill(plaintext, (byte)0);
+					}
 				}
 			}
 			finally {
@@ -129,7 +135,8 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 	@Override
 	public List<String> getSecretIdentifiers() throws SecretManagerException {
 		try {
-			return _secretEntryLocalService.getSecretIdentifiers(_getCompanyId());
+			return _secretEntryLocalService.getSecretIdentifiers(
+				_getCompanyId());
 		}
 		catch (Exception exception) {
 			throw new SecretManagerException(
@@ -144,6 +151,7 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 		byte[] dekBytes = null;
 
 		try {
+
 			// 1. Generate DEK
 
 			KeyGenerator keyGenerator = KeyGenerator.getInstance(_keyAlgorithm);
@@ -175,20 +183,27 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 			long companyId = _getCompanyId();
 
 			SecretEntry secretEntry = _secretEntryLocalService.fetchSecretEntry(
-				companyId, secureSecret.getKeyReference().getIdentifier());
+				companyId,
+				secureSecret.getKeyReference(
+				).getIdentifier());
 
 			if (secretEntry == null) {
 				secretEntry = _secretEntryLocalService.createSecretEntry(0);
 
 				secretEntry.setCompanyId(companyId);
 				secretEntry.setAlias(
-					secureSecret.getKeyReference().getIdentifier());
+					secureSecret.getKeyReference(
+					).getIdentifier());
 			}
 
 			secretEntry.setCiphertextBlob(
 				new OutputBlob(
 					new ByteArrayInputStream(ciphertext), ciphertext.length));
-			secretEntry.setIv(Base64.getEncoder().encodeToString(iv));
+			secretEntry.setIv(
+				Base64.getEncoder(
+				).encodeToString(
+					iv
+				));
 			secretEntry.setEncryptedDEKBlob(
 				new OutputBlob(
 					new ByteArrayInputStream(encryptedDek),
@@ -198,9 +213,10 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 			_secretEntryLocalService.updateSecretEntry(secretEntry);
 		}
 		catch (Exception exception) {
+			KeyReference keyReference = secureSecret.getKeyReference();
+
 			throw new SecretManagerException(
-				"Unable to put secret: " +
-					secureSecret.getKeyReference().getIdentifier(),
+				"Unable to put secret: " + keyReference.getIdentifier(),
 				exception);
 		}
 		finally {
@@ -264,7 +280,10 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 
 		Cipher cipher = Cipher.getInstance(algorithm);
 
-		byte[] iv = Base64.getDecoder().decode(ivBase64);
+		byte[] iv = Base64.getDecoder(
+		).decode(
+			ivBase64
+		);
 
 		cipher.init(Cipher.DECRYPT_MODE, key, _getParameterSpec(iv, algorithm));
 
@@ -312,6 +331,7 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 		String[] parts = StringUtil.split(configuration, ";");
 
 		// Skip the first part (the algorithm)
+
 		for (int i = 1; i < parts.length; i++) {
 			String[] keyValue = StringUtil.split(parts[i], "=");
 
@@ -326,16 +346,17 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 	@Reference
 	private CryptoManager _cryptoManager;
 
+	private volatile String _encryptionAlgorithm;
+	private volatile int _gcmTagLength;
+	private volatile int _ivLength;
+	private volatile String _keyAlgorithm;
+	private volatile int _keySize;
+	private volatile String _masterKeyReference;
+	private volatile String _providerId;
+
 	@Reference
 	private SecretEntryLocalService _secretEntryLocalService;
 
-	private String _encryptionAlgorithm;
-	private int _gcmTagLength;
-	private int _ivLength;
-	private String _keyAlgorithm;
-	private int _keySize;
-	private String _masterKeyReference;
-	private String _providerId;
 	private final SecureRandom _secureRandom = new SecureRandom();
 
 }

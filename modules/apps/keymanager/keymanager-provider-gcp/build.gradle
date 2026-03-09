@@ -1,17 +1,17 @@
 dependencies {
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "6.4.0"
 	compileOnly group: "com.google.api", name: "api-common", version: "2.43.0"
-	compileOnly group: "com.google.api", name: "gax", version: "2.54.1"
-	compileOnly group: "com.google.api-client", name: "google-api-client", version: "2.0.0"
-	compileOnly group: "com.google.api.grpc", name: "proto-google-common-protos", version: "2.51.0"
-	compileOnly group: "com.google.api.grpc", name: "proto-google-iam-v1", version: "1.0.7"
-	compileOnly group: "com.google.api.grpc", name: "proto-google-cloud-secretmanager-v1", version: "2.44.0"
+	compileOnly group: "com.google.api", name: "gax", version: "2.60.0"
+	compileOnly group: "com.google.api-client", name: "google-api-client", version: "2.7.2"
 	compileOnly group: "com.google.api.grpc", name: "proto-google-cloud-kms-v1", version: "0.112.0"
-	compileOnly group: "com.google.cloud", name: "google-cloud-core", version: "2.12.0"
+	compileOnly group: "com.google.api.grpc", name: "proto-google-cloud-secretmanager-v1", version: "2.44.0"
+	compileOnly group: "com.google.api.grpc", name: "proto-google-common-protos", version: "2.51.0"
+	compileOnly group: "com.google.api.grpc", name: "proto-google-iam-v1", version: "1.46.0"
+	compileOnly group: "com.google.cloud", name: "google-cloud-core", version: "2.50.0"
 	compileOnly group: "com.google.cloud", name: "google-cloud-kms", version: "2.12.0"
 	compileOnly group: "com.google.cloud", name: "google-cloud-secretmanager", version: "2.44.0"
-	compileOnly group: "com.google.http-client", name: "google-http-client", version: "1.42.3"
-	compileOnly group: "com.google.protobuf", name: "protobuf-java", version: "3.21.7"
+	compileOnly group: "com.google.http-client", name: "google-http-client", version: "1.45.3"
+	compileOnly group: "com.google.protobuf", name: "protobuf-java", version: "3.25.5"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.4.0"
 	compileOnly group: "org.osgi", name: "org.osgi.service.metatype.annotations", version: "1.4.0"
@@ -20,7 +20,6 @@ dependencies {
 	compileOnly project(":apps:portal-configuration:portal-configuration-metatype-definitions-annotations")
 	compileOnly project(":apps:static:portal-configuration:portal-configuration-metatype-api")
 	compileOnly project(":core:petra:petra-string")
-
 	testImplementation group: "com.liferay.portal", name: "com.liferay.portal.test", version: "default"
 	testImplementation group: "junit", name: "junit", version: "4.13.1"
 	testImplementation group: "org.mockito", name: "mockito-core", version: "4.4.0"

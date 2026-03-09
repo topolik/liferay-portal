@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.keymanager.provider.gcp.internal.configuration;
+package com.liferay.keymanager.provider.gcp.internal.configuration.definition;
 
+import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration;
 import com.liferay.portal.kernel.settings.definition.ConfigurationPidMapping;
 
 import org.osgi.service.component.annotations.Component;
@@ -13,17 +14,17 @@ import org.osgi.service.component.annotations.Component;
  * @author Tomas Polesovsky
  */
 @Component(service = ConfigurationPidMapping.class)
-public class GcpSecretManagerSecretVaultConfigurationPidMapping
-	implements ConfigurationPidMapping {
+public class GcpKmsConfigurationPidMapping implements ConfigurationPidMapping {
 
 	@Override
 	public Class<?> getConfigurationBeanClass() {
-		return GcpSecretManagerSecretVaultProviderConfiguration.class;
+		return GcpKmsCryptoVaultProviderConfiguration.class;
 	}
 
 	@Override
 	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration";
+		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
+			"GcpKmsCryptoVaultProviderConfiguration";
 	}
 
 }

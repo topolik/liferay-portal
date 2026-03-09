@@ -13,26 +13,15 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  * @author Tomas Polesovsky
  */
 @ExtendedObjectClassDefinition(
-	category = "security", scope = ExtendedObjectClassDefinition.Scope.COMPANY
+	category = "security-tools",
+	scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "gcp-secret-manager-secret-vault-provider-configuration"
+	name = "gcp-secret-manager-secret-vault-provider-configuration-name"
 )
 public interface GcpSecretManagerSecretVaultProviderConfiguration {
-
-	@Meta.AD(
-		deflt = "gcp-secrets", description = "provider-id-description",
-		name = "provider-id", required = true
-	)
-	public String providerId();
-
-	@Meta.AD(
-		description = "project-id-description", name = "project-id",
-		required = true
-	)
-	public String projectId();
 
 	@Meta.AD(
 		description = "kms-key-name-description", name = "kms-key-name",
@@ -45,5 +34,14 @@ public interface GcpSecretManagerSecretVaultProviderConfiguration {
 		required = false
 	)
 	public String[] locations();
+
+	@Meta.AD(description = "project-id-description", name = "project-id")
+	public String projectId();
+
+	@Meta.AD(
+		deflt = "gcp-secrets", description = "provider-id-description",
+		name = "provider-id"
+	)
+	public String providerId();
 
 }

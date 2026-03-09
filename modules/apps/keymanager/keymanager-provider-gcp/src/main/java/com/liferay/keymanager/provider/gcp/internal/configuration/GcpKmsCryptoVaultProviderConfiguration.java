@@ -13,37 +13,32 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  * @author Tomas Polesovsky
  */
 @ExtendedObjectClassDefinition(
-	category = "security", scope = ExtendedObjectClassDefinition.Scope.COMPANY
+	category = "security-tools",
+	scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "gcp-kms-crypto-vault-provider-configuration"
+	name = "gcp-kms-crypto-vault-provider-configuration-name"
 )
 public interface GcpKmsCryptoVaultProviderConfiguration {
 
-	@Meta.AD(
-		deflt = "gcp-kms", description = "provider-id-description",
-		name = "provider-id", required = true
-	)
-	public String providerId();
-
-	@Meta.AD(
-		description = "project-id-description", name = "project-id",
-		required = true
-	)
-	public String projectId();
+	@Meta.AD(description = "key-ring-id-description", name = "key-ring-id")
+	public String keyRingId();
 
 	@Meta.AD(
 		deflt = "global", description = "location-id-description",
-		name = "location-id", required = true
+		name = "location-id"
 	)
 	public String locationId();
 
+	@Meta.AD(description = "project-id-description", name = "project-id")
+	public String projectId();
+
 	@Meta.AD(
-		description = "key-ring-id-description", name = "key-ring-id",
-		required = true
+		deflt = "gcp-kms", description = "provider-id-description",
+		name = "provider-id"
 	)
-	public String keyRingId();
+	public String providerId();
 
 }

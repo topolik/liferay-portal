@@ -18,8 +18,6 @@ import java.io.FileOutputStream;
 
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -42,23 +40,6 @@ import org.osgi.service.component.annotations.Modified;
 	service = CryptoVaultProvider.class
 )
 public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
-
-	@Override
-	public void addCertificate(String identifier, Certificate certificate)
-		throws CryptoManagerException {
-
-		try {
-			KeyStore keyStore = _getKeyStore();
-
-			keyStore.setCertificateEntry(identifier, certificate);
-
-			_saveKeyStore(keyStore);
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put certificate: " + identifier, exception);
-		}
-	}
 
 	@Override
 	public void addPrivateKey(String identifier, CryptoKey privateKey)
@@ -150,26 +131,6 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to list key identifiers", exception);
-		}
-	}
-
-	public PublicKey getPublicKey(String identifier)
-		throws CryptoManagerException {
-
-		try {
-			KeyStore keyStore = _getKeyStore();
-
-			Certificate certificate = keyStore.getCertificate(identifier);
-
-			if (certificate != null) {
-				return certificate.getPublicKey();
-			}
-
-			return null;
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to get public key: " + identifier, exception);
 		}
 	}
 

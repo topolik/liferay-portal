@@ -57,6 +57,34 @@ public class SecretManagerImplTest {
 		).thenReturn(
 			_secretVaultProvider
 		);
+
+		Mockito.when(
+			_serviceTrackerMap.keySet()
+		).thenReturn(
+			Collections.singleton("test-provider")
+		);
+	}
+
+	@Test
+	public void testDeleteSecret() throws Exception {
+		KeyReference keyRef = KeyReference.fromString(
+			"${secretRef:test-provider:my-secret}");
+
+		_secretManagerImpl.deleteSecret(keyRef);
+
+		Mockito.verify(
+			_secretVaultProvider
+		).deleteSecret(
+			"my-secret"
+		);
+	}
+
+	@Test
+	public void testGetProviders() throws Exception {
+		List<String> result = _secretManagerImpl.getProviders();
+
+		Assert.assertEquals(result.toString(), 1, result.size());
+		Assert.assertEquals("test-provider", result.get(0));
 	}
 
 	@Test

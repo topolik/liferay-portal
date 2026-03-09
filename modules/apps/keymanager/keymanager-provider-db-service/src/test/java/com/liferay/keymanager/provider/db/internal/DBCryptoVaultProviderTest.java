@@ -6,6 +6,7 @@
 package com.liferay.keymanager.provider.db.internal;
 
 import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.provider.db.model.KeyEntry;
 import com.liferay.keymanager.provider.db.model.impl.KeyEntryImpl;
@@ -16,6 +17,7 @@ import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.io.ByteArrayInputStream;
+
 import java.lang.reflect.Field;
 
 import java.util.Collections;
@@ -29,6 +31,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -59,7 +62,46 @@ public class DBCryptoVaultProviderTest {
 				"providerId", "db"
 			).build());
 
-		CompanyThreadLocal.setCompanyId(_COMPANY_ID);
+		CompanyThreadLocal.setCompanyIdWithSafeCloseable(_COMPANY_ID);
+	}
+
+	@Test
+	public void testAddSecretKey() throws Exception {
+		String identifier = "new-key";
+
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+
+		keyGenerator.init(256);
+
+		SecretKey secretKey = keyGenerator.generateKey();
+
+		Mockito.when(
+			_cryptoManager.wrap(
+				Mockito.any(KeyReference.class), Mockito.any(SecretKey.class))
+		).thenReturn(
+			"wrapped-material".getBytes()
+		);
+
+		Mockito.when(
+			_keyEntryLocalService.createKeyEntry(Mockito.anyLong())
+		).thenReturn(
+			new KeyEntryImpl()
+		);
+
+		String cipherSpec =
+			"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128";
+
+		_dbCryptoVaultProvider.addSecretKey(
+			identifier,
+			new CryptoKey(
+				KeyReference.fromString("${keyRef:db:test-key}"), secretKey,
+				cipherSpec));
+
+		Mockito.verify(
+			_keyEntryLocalService
+		).updateKeyEntry(
+			Mockito.any(KeyEntry.class)
+		);
 	}
 
 	@Test
@@ -76,53 +118,11 @@ public class DBCryptoVaultProviderTest {
 
 		_dbCryptoVaultProvider.deleteKey(identifier);
 
-		Mockito.verify(_keyEntryLocalService).deleteKeyEntry(keyEntry);
-	}
-
-	@Test
-	public void testGetKeyIdentifiers() throws Exception {
-		Mockito.when(
-			_keyEntryLocalService.getKeyIdentifiers(_COMPANY_ID)
-		).thenReturn(
-			Collections.singletonList("key-1")
+		Mockito.verify(
+			_keyEntryLocalService
+		).deleteKeyEntry(
+			keyEntry
 		);
-
-		List<String> identifiers = _dbCryptoVaultProvider.getKeyIdentifiers();
-
-		Assert.assertEquals(1, identifiers.size());
-		Assert.assertEquals("key-1", identifiers.get(0));
-	}
-
-	@Test
-	public void testAddSecretKey() throws Exception {
-		String identifier = "new-key";
-
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-		keyGenerator.init(256);
-		SecretKey secretKey = keyGenerator.generateKey();
-
-		Mockito.when(
-			_cryptoManager.wrap(
-				Mockito.any(KeyReference.class), Mockito.any(SecretKey.class))
-		).thenReturn(
-			"wrapped-material".getBytes()
-		);
-
-		Mockito.when(
-			_keyEntryLocalService.createKeyEntry(Mockito.anyLong())
-		).thenReturn(
-			new KeyEntryImpl()
-		);
-
-		String cipherSpec = "AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128";
-
-		_dbCryptoVaultProvider.addSecretKey(
-			identifier,
-			new com.liferay.keymanager.crypto.CryptoKey(
-				com.liferay.keymanager.KeyReference.fromString("${keyRef:db:test-key}"), secretKey, cipherSpec));
-
-		Mockito.verify(_keyEntryLocalService).updateKeyEntry(
-			Mockito.any(KeyEntry.class));
 	}
 
 	@Test
@@ -131,18 +131,21 @@ public class DBCryptoVaultProviderTest {
 		byte[] plaintext = "liferay-data".getBytes();
 
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+
 		keyGenerator.init(256);
+
 		SecretKey keyMaterial = keyGenerator.generateKey();
 
 		KeyEntry keyEntry = new KeyEntryImpl();
+
 		keyEntry.setAlias(identifier);
 		keyEntry.setAlgorithm("AES");
+		keyEntry.setKeyType(DBCryptoVaultProvider.KeyType.SECRET.name());
 		keyEntry.setCipherSpec(
 			"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128");
 		keyEntry.setKekReference("${keyRef:keystore:master}");
 		keyEntry.setWrappedKeyBlob(
-			new OutputBlob(
-				new ByteArrayInputStream(new byte[32]), 32));
+			new OutputBlob(new ByteArrayInputStream(new byte[32]), 32));
 
 		Mockito.when(
 			_cryptoManager.unwrap(
@@ -169,10 +172,25 @@ public class DBCryptoVaultProviderTest {
 		Assert.assertArrayEquals(plaintext, recoveredPlaintext);
 	}
 
+	@Test
+	public void testGetKeyIdentifiers() throws Exception {
+		Mockito.when(
+			_keyEntryLocalService.getKeyIdentifiers(_COMPANY_ID)
+		).thenReturn(
+			Collections.singletonList("key-1")
+		);
+
+		List<String> identifiers = _dbCryptoVaultProvider.getKeyIdentifiers();
+
+		Assert.assertEquals(identifiers.toString(), 1, identifiers.size());
+		Assert.assertEquals("key-1", identifiers.get(0));
+	}
+
 	private void _injectField(String fieldName, Object value) {
 		try {
 			Field field = DBCryptoVaultProvider.class.getDeclaredField(
 				fieldName);
+
 			field.setAccessible(true);
 			field.set(_dbCryptoVaultProvider, value);
 		}
@@ -186,9 +204,9 @@ public class DBCryptoVaultProviderTest {
 	@Mock
 	private CryptoManager _cryptoManager;
 
+	private DBCryptoVaultProvider _dbCryptoVaultProvider;
+
 	@Mock
 	private KeyEntryLocalService _keyEntryLocalService;
-
-	private DBCryptoVaultProvider _dbCryptoVaultProvider;
 
 }

@@ -40,7 +40,6 @@
 		<finder name="CompanyId" return-type="Collection">
 			<finder-column name="companyId" />
 		</finder>
-
 		<finder name="C_A" return-type="SecretEntry">
 			<finder-column name="companyId" />
 			<finder-column name="alias" />
@@ -62,9 +61,17 @@
 
 		<!-- Metadata -->
 
-		<column name="keyType" type="String" /> <!-- SECRET, PRIVATE, PUBLIC -->
-		<column name="algorithm" type="String" /> <!-- e.g. AES -->
-		<column name="cipherSpec" type="String" /> <!-- e.g. cipher=AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128 -->
+		<column name="keyType" type="String" />
+
+		<!-- SECRET, PRIVATE, PUBLIC -->
+
+		<column name="algorithm" type="String" />
+
+		<!-- e.g. AES -->
+
+		<column name="cipherSpec" type="String" />
+
+		<!-- e.g. cipher=AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128 -->
 
 		<!-- Payload (Encrypted Key Material) -->
 
@@ -84,7 +91,6 @@
 		<finder name="CompanyId" return-type="Collection">
 			<finder-column name="companyId" />
 		</finder>
-
 		<finder name="C_A" return-type="KeyEntry">
 			<finder-column name="companyId" />
 			<finder-column name="alias" />

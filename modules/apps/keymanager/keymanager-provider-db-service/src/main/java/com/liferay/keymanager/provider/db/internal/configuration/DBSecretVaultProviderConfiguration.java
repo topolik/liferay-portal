@@ -13,33 +13,33 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  * @author Tomas Polesovsky
  */
 @ExtendedObjectClassDefinition(
-	category = "security", scope = ExtendedObjectClassDefinition.Scope.COMPANY
+	category = "security-tools",
+	scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.db.internal.configuration.DBSecretVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "db-secret-vault-provider-configuration"
+	name = "db-secret-vault-provider-configuration-name"
 )
 public interface DBSecretVaultProviderConfiguration {
 
 	@Meta.AD(
 		deflt = "AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128",
-		description = "dek-cipher-spec-description",
-		name = "dek-cipher-spec", required = false
+		description = "dek-cipher-spec-description", name = "dek-cipher-spec",
+		required = false
 	)
 	public String dekCipherSpec();
 
 	@Meta.AD(
 		deflt = "${keyRef:keystore:master-key}",
 		description = "master-key-reference-description",
-		name = "master-key-reference", required = true
+		name = "master-key-reference"
 	)
 	public String masterKeyReference();
 
 	@Meta.AD(
-		deflt = "db",
-		description = "provider-id-description",
-		name = "provider-id", required = true
+		deflt = "db", description = "provider-id-description",
+		name = "provider-id"
 	)
 	public String providerId();
 

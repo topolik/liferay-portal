@@ -11,6 +11,7 @@ import com.google.cloud.kms.v1.EncryptResponse;
 import com.google.cloud.kms.v1.KeyManagementServiceClient;
 import com.google.cloud.kms.v1.ListCryptoKeysRequest;
 import com.google.protobuf.ByteString;
+
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
@@ -21,17 +22,15 @@ import java.io.IOException;
 
 import java.security.Key;
 import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import java.util.ArrayList;
-import java.util.Base64;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.SecretKey;
+import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
@@ -51,6 +50,33 @@ import org.osgi.service.component.annotations.Modified;
 public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
+	public void addPrivateKey(
+			String identifier,
+			com.liferay.keymanager.crypto.CryptoKey privateKey)
+		throws CryptoManagerException {
+
+		throw new CryptoManagerException("Operation not supported");
+	}
+
+	@Override
+	public void addPublicKey(
+			String identifier,
+			com.liferay.keymanager.crypto.CryptoKey publicKey)
+		throws CryptoManagerException {
+
+		throw new CryptoManagerException("Operation not supported");
+	}
+
+	@Override
+	public void addSecretKey(
+			String identifier,
+			com.liferay.keymanager.crypto.CryptoKey secretKey)
+		throws CryptoManagerException {
+
+		throw new CryptoManagerException("Operation not supported");
+	}
+
+	@Override
 	public byte[] decrypt(String identifier, byte[] ciphertext)
 		throws CryptoManagerException {
 
@@ -60,7 +86,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 			DecryptResponse response = _client.decrypt(
 				name, ByteString.copyFrom(ciphertext));
 
-			return response.getPlaintext().toByteArray();
+			return response.getPlaintext(
+			).toByteArray();
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
@@ -83,7 +110,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 			EncryptResponse response = _client.encrypt(
 				name, ByteString.copyFrom(plaintext));
 
-			return response.getCiphertext().toByteArray();
+			return response.getCiphertext(
+			).toByteArray();
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
@@ -96,12 +124,12 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 		try {
 			List<String> identifiers = new ArrayList<>();
 
-			ListCryptoKeysRequest request = ListCryptoKeysRequest.newBuilder()
-				.setParent(
-					StringBundler.concat(
-						"projects/", _projectId, "/locations/", _locationId,
-						"/keyRings/", _keyRingId))
-				.build();
+			ListCryptoKeysRequest request = ListCryptoKeysRequest.newBuilder(
+			).setParent(
+				StringBundler.concat(
+					"projects/", _projectId, "/locations/", _locationId,
+					"/keyRings/", _keyRingId)
+			).build();
 
 			KeyManagementServiceClient.ListCryptoKeysPagedResponse response =
 				_client.listCryptoKeys(request);
@@ -120,83 +148,48 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 		}
 	}
 
-	public PrivateKey getPrivateKey(String identifier)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException(
-			"GCP KMS Private keys are not extractable. Use decrypt/sign.");
-	}
-
-	@Override
-	public PublicKey getPublicKey(String identifier)
-		throws CryptoManagerException {
-
-		try {
-			String name = _getGcpKeyVersionName(identifier);
-
-			com.google.cloud.kms.v1.PublicKey gcpPublicKey = _client.getPublicKey(
-				name);
-
-			String pem = gcpPublicKey.getPem();
-
-			// Strip PEM headers and footers
-
-			String base64 = pem.replace("-----BEGIN PUBLIC KEY-----", "")
-				.replace("-----END PUBLIC KEY-----", "")
-				.replaceAll("\\s", "");
-
-			byte[] encoded = Base64.getDecoder().decode(base64);
-
-			// We don't know the exact algorithm (RSA/EC) without more complex
-			// parsing, but we can try RSA as default or extract from GCP metadata
-
-			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-
-			return keyFactory.generatePublic(new X509EncodedKeySpec(encoded));
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to get GCP KMS public key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addCertificate(String identifier, Certificate certificate)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
-	public void addPrivateKey(String identifier, CryptoKey privateKey)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
-	public void addPublicKey(String identifier, CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
-	public void addSecretKey(String identifier, CryptoKey secretKey)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
 	@Override
 	public Key unwrap(
 			String identifier, byte[] wrappedKeyBytes,
 			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
 		throws CryptoManagerException {
 
-		byte[] plaintext = decrypt(identifier, wrappedKeyBytes);
-		// todo return SecretKey or PrivateKey based on wrappedKeyCipherType
-		return new SecretKeySpec(plaintext, wrappedKeyAlgorithm);
+		byte[] plaintext = null;
+
+		try {
+			plaintext = decrypt(identifier, wrappedKeyBytes);
+
+			if (wrappedKeyCipherType == Cipher.SECRET_KEY) {
+				return new SecretKeySpec(plaintext, wrappedKeyAlgorithm);
+			}
+
+			KeyFactory keyFactory = KeyFactory.getInstance(wrappedKeyAlgorithm);
+
+			if (wrappedKeyCipherType == Cipher.PRIVATE_KEY) {
+				return keyFactory.generatePrivate(
+					new PKCS8EncodedKeySpec(plaintext));
+			}
+
+			if (wrappedKeyCipherType == Cipher.PUBLIC_KEY) {
+				return keyFactory.generatePublic(
+					new X509EncodedKeySpec(plaintext));
+			}
+
+			throw new CryptoManagerException(
+				"Unsupported wrapped key cipher type: " + wrappedKeyCipherType);
+		}
+		catch (CryptoManagerException cryptoManagerException) {
+			throw cryptoManagerException;
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to unwrap GCP KMS key: " + identifier, exception);
+		}
+		finally {
+			if (plaintext != null) {
+				Arrays.fill(plaintext, (byte)0);
+			}
+		}
 	}
 
 	@Override
@@ -235,15 +228,10 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 			_keyRingId, "/cryptoKeys/", alias);
 	}
 
-	private String _getGcpKeyVersionName(String alias) {
-		// Use the primary version for public key retrieval
-		return StringBundler.concat(_getGcpKeyName(alias), "/cryptoKeyVersions/1");
-	}
-
-	private KeyManagementServiceClient _client;
-	private String _keyRingId;
-	private String _locationId;
-	private String _projectId;
-	private String _providerId;
+	private volatile KeyManagementServiceClient _client;
+	private volatile String _keyRingId;
+	private volatile String _locationId;
+	private volatile String _projectId;
+	private volatile String _providerId;
 
 }

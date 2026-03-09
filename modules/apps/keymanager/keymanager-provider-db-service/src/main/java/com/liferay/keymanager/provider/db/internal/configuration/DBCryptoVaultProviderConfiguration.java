@@ -13,11 +13,13 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  * @author Tomas Polesovsky
  */
 @ExtendedObjectClassDefinition(
-	category = "security", scope = ExtendedObjectClassDefinition.Scope.COMPANY
+	category = "security-tools",
+	scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.db.internal.configuration.DBCryptoVaultProviderConfiguration",
-	localization = "content/Language", name = "db-crypto-vault-provider-name"
+	localization = "content/Language",
+	name = "db-crypto-vault-provider-configuration-name"
 )
 public interface DBCryptoVaultProviderConfiguration {
 
