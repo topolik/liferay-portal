@@ -23,6 +23,22 @@ public class KeyReferenceTest {
 		LiferayUnitTestRule.INSTANCE;
 
 	@Test
+	public void testEqualsAndHashCode() {
+		KeyReference ref1 = KeyReference.fromString("${keyRef:p1:i1}");
+		KeyReference ref2 = KeyReference.fromString("${keyRef:p1:i1}");
+		KeyReference ref3 = KeyReference.fromString("${secretRef:p1:i1}");
+		KeyReference ref4 = KeyReference.fromString("${keyRef:p2:i1}");
+
+		Assert.assertEquals(ref1, ref2);
+		Assert.assertEquals(ref1.hashCode(), ref2.hashCode());
+
+		Assert.assertNotEquals(ref1, ref3);
+		Assert.assertNotEquals(ref1, ref4);
+		Assert.assertNotEquals(ref1, null);
+		Assert.assertNotEquals(ref1, "string");
+	}
+
+	@Test
 	public void testFromStringCrypto() {
 		String raw = "${keyRef:keystore:master-key}";
 
@@ -32,14 +48,18 @@ public class KeyReferenceTest {
 		Assert.assertEquals(KeyReference.Type.CRYPTO, keyReference.getType());
 		Assert.assertEquals("keystore", keyReference.getProviderId());
 		Assert.assertEquals("master-key", keyReference.getIdentifier());
-		Assert.assertEquals(raw, keyReference.getRawReference());
 		Assert.assertEquals(raw, keyReference.toString());
+
+		// Test dots and colons in identifier
+		raw = "${keyRef:gcp:my.key:v1}";
+		keyReference = KeyReference.fromString(raw);
+		Assert.assertEquals("gcp", keyReference.getProviderId());
+		Assert.assertEquals("my.key:v1", keyReference.getIdentifier());
 	}
 
 	@Test
 	public void testFromStringInvalid() {
 		Assert.assertNull(KeyReference.fromString("invalid"));
-		Assert.assertNull(KeyReference.fromString("${keyRef:too:many:parts}"));
 		Assert.assertNull(KeyReference.fromString("${unknownRef:provider:id}"));
 	}
 
@@ -53,7 +73,6 @@ public class KeyReferenceTest {
 		Assert.assertEquals(KeyReference.Type.SECRET, keyReference.getType());
 		Assert.assertEquals("db", keyReference.getProviderId());
 		Assert.assertEquals("jdbc-password", keyReference.getIdentifier());
-		Assert.assertEquals(raw, keyReference.getRawReference());
 		Assert.assertEquals(raw, keyReference.toString());
 	}
 

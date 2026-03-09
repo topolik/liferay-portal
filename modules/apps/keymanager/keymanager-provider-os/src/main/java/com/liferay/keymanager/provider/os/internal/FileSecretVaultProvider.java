@@ -16,6 +16,9 @@ import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.File;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
@@ -58,14 +61,33 @@ public class FileSecretVaultProvider implements SecretVaultProvider {
 
 			byte[] bytes = FileUtil.getBytes(file);
 
-			return new SecureSecret(
-				new KeyReference(
-					KeyReference.Type.SECRET, _providerId, identifier, ""),
-				bytes);
+			try {
+				return new SecureSecret(
+					new KeyReference(
+						KeyReference.Type.SECRET, _providerId, identifier),
+					bytes);
+			}
+			finally {
+				Arrays.fill(bytes, (byte)0);
+			}
 		}
 		catch (Exception exception) {
-			throw new SecretManagerException(exception);
+			throw new SecretManagerException(
+				"Unable to get secret: " + identifier, exception);
 		}
+	}
+
+	@Override
+	public List<String> getSecretIdentifiers() throws SecretManagerException {
+		List<String> identifiers = new ArrayList<>();
+
+		File secretsDir = new File(_secretsDirectory);
+
+		if (secretsDir.exists() && secretsDir.isDirectory()) {
+			_addSecretIdentifiers(secretsDir, "", identifiers);
+		}
+
+		return identifiers;
 	}
 
 	@Override
@@ -97,6 +119,31 @@ public class FileSecretVaultProvider implements SecretVaultProvider {
 		}
 		catch (Exception exception) {
 			throw new RuntimeException(exception);
+		}
+	}
+
+	private void _addSecretIdentifiers(
+		File directory, String relativePath, List<String> identifiers) {
+
+		File[] files = directory.listFiles();
+
+		if (files == null) {
+			return;
+		}
+
+		for (File file : files) {
+			String name = file.getName();
+
+			if (!relativePath.isEmpty()) {
+				name = relativePath + File.separator + name;
+			}
+
+			if (file.isDirectory()) {
+				_addSecretIdentifiers(file, name, identifiers);
+			}
+			else if (file.isFile()) {
+				identifiers.add(name);
+			}
 		}
 	}
 

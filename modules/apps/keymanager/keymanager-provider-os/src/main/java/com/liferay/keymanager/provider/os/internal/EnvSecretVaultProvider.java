@@ -12,9 +12,13 @@ import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.nio.charset.StandardCharsets;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
@@ -42,20 +46,42 @@ public class EnvSecretVaultProvider implements SecretVaultProvider {
 		throws SecretManagerException {
 
 		if (!StringUtil.startsWith(identifier, _envVariablePrefix)) {
-			throw new SecretManagerException(
-				"Access denied to environment variable: " + identifier);
+			throw new SecretManagerException("Access denied: " + identifier);
 		}
 
 		String value = getEnv(identifier);
 
-		if (value == null) {
+		if (Validator.isNull(value)) {
 			throw new SecretManagerException(
 				"Environment variable not found: " + identifier);
 		}
 
-		return new SecureSecret(
-			new KeyReference(KeyReference.Type.SECRET, _providerId, identifier, ""),
-			value.getBytes(StandardCharsets.UTF_8));
+		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+
+		try {
+			return new SecureSecret(
+				new KeyReference(
+					KeyReference.Type.SECRET, _providerId, identifier),
+				bytes);
+		}
+		finally {
+			Arrays.fill(bytes, (byte)0);
+		}
+	}
+
+	@Override
+	public List<String> getSecretIdentifiers() throws SecretManagerException {
+		List<String> identifiers = new ArrayList<>();
+
+		Map<String, String> env = System.getenv();
+
+		for (String key : env.keySet()) {
+			if (StringUtil.startsWith(key, _envVariablePrefix)) {
+				identifiers.add(key);
+			}
+		}
+
+		return identifiers;
 	}
 
 	@Override

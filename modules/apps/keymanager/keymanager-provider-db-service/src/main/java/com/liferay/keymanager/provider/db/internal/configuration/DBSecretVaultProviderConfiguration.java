@@ -23,11 +23,11 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 public interface DBSecretVaultProviderConfiguration {
 
 	@Meta.AD(
-		deflt = "AES/GCM/NoPadding;128;12;256",
-		description = "cipher-configuration-description",
-		name = "cipher-configuration", required = false
+		deflt = "AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128",
+		description = "dek-cipher-spec-description",
+		name = "dek-cipher-spec", required = false
 	)
-	public String cipherConfiguration();
+	public String dekCipherSpec();
 
 	@Meta.AD(
 		deflt = "${keyRef:keystore:master-key}",

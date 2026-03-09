@@ -38,12 +38,8 @@ public class SecretEntryTable extends BaseTable<SecretEntryTable> {
 		"iv", String.class, Types.VARCHAR, Column.FLAG_DEFAULT);
 	public final Column<SecretEntryTable, Blob> encryptedDEKBlob = createColumn(
 		"encryptedDEKBlob", Blob.class, Types.BLOB, Column.FLAG_DEFAULT);
-	public final Column<SecretEntryTable, String> dekIv = createColumn(
-		"dekIv", String.class, Types.VARCHAR, Column.FLAG_DEFAULT);
 	public final Column<SecretEntryTable, String> kekReference = createColumn(
 		"kekReference", String.class, Types.VARCHAR, Column.FLAG_DEFAULT);
-	public final Column<SecretEntryTable, String> algorithm = createColumn(
-		"algorithm", String.class, Types.VARCHAR, Column.FLAG_DEFAULT);
 	public final Column<SecretEntryTable, Date> createDate = createColumn(
 		"createDate", Date.class, Types.TIMESTAMP, Column.FLAG_DEFAULT);
 	public final Column<SecretEntryTable, Date> modifiedDate = createColumn(

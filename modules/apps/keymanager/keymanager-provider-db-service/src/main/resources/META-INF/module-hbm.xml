@@ -2,7 +2,31 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping auto-import="false" default-lazy="false">
+	<import class="com.liferay.keymanager.provider.db.model.KeyEntry" />
 	<import class="com.liferay.keymanager.provider.db.model.SecretEntry" />
+	<class dynamic-update="true" name="com.liferay.keymanager.provider.db.model.impl.KeyEntryImpl" table="KeyManagerDB_KeyEntry">
+		<id access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="keyEntryId" type="long">
+			<generator class="assigned" />
+		</id>
+		<version access="com.liferay.portal.dao.orm.hibernate.PrivateFieldPropertyAccessor" name="mvccVersion" type="long" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="companyId" type="com.liferay.portal.dao.orm.hibernate.LongType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" column="alias_" name="alias" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="keyType" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="algorithm" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="cipherSpec" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<one-to-one access="com.liferay.portal.dao.orm.hibernate.PrivateFieldPropertyAccessor" cascade="save-update" class="com.liferay.keymanager.provider.db.model.KeyEntryWrappedKeyBlobBlobModel" constrained="false" name="wrappedKeyBlobBlobModel" outer-join="false" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="kekReference" type="com.liferay.portal.dao.orm.hibernate.StringType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="createDate" type="org.hibernate.type.TimestampType" />
+		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="modifiedDate" type="org.hibernate.type.TimestampType" />
+	</class>
+	<class dynamic-update="true" lazy="true" name="com.liferay.keymanager.provider.db.model.KeyEntryWrappedKeyBlobBlobModel" table="KeyManagerDB_KeyEntry">
+		<id column="keyEntryId" name="keyEntryId">
+			<generator class="foreign">
+				<param name="property">com.liferay.keymanager.provider.db.model.impl.KeyEntryImpl</param>
+			</generator>
+		</id>
+		<property column="wrappedKeyBlob" name="wrappedKeyBlobBlob" type="blob" />
+	</class>
 	<class dynamic-update="true" name="com.liferay.keymanager.provider.db.model.impl.SecretEntryImpl" table="KeyManagerDB_SecretEntry">
 		<id access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="secretEntryId" type="long">
 			<generator class="assigned" />
@@ -13,9 +37,7 @@
 		<one-to-one access="com.liferay.portal.dao.orm.hibernate.PrivateFieldPropertyAccessor" cascade="save-update" class="com.liferay.keymanager.provider.db.model.SecretEntryCiphertextBlobBlobModel" constrained="false" name="ciphertextBlobBlobModel" outer-join="false" />
 		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="iv" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<one-to-one access="com.liferay.portal.dao.orm.hibernate.PrivateFieldPropertyAccessor" cascade="save-update" class="com.liferay.keymanager.provider.db.model.SecretEntryEncryptedDEKBlobBlobModel" constrained="false" name="encryptedDEKBlobBlobModel" outer-join="false" />
-		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="dekIv" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="kekReference" type="com.liferay.portal.dao.orm.hibernate.StringType" />
-		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="algorithm" type="com.liferay.portal.dao.orm.hibernate.StringType" />
 		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="createDate" type="org.hibernate.type.TimestampType" />
 		<property access="com.liferay.portal.dao.orm.hibernate.MethodPropertyAccessor" name="modifiedDate" type="org.hibernate.type.TimestampType" />
 	</class>

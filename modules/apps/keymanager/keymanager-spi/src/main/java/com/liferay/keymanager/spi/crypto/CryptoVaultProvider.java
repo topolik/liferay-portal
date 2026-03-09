@@ -7,36 +7,58 @@ package com.liferay.keymanager.spi.crypto;
 
 import com.liferay.keymanager.crypto.CryptoManagerException;
 
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 
+import java.util.List;
+
 import javax.crypto.SecretKey;
+
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * @author Tomas Polesovsky
  */
+@ConsumerType
 public interface CryptoVaultProvider {
 
-	public void deleteKey(String alias) throws CryptoManagerException;
-
-	public Certificate getCertificate(String alias)
+	public byte[] decrypt(String identifier, byte[] ciphertext)
 		throws CryptoManagerException;
 
-	public PrivateKey getPrivateKey(String alias) throws CryptoManagerException;
+	public void deleteKey(String identifier) throws CryptoManagerException;
 
-	public PublicKey getPublicKey(String alias) throws CryptoManagerException;
-
-	public SecretKey getSecretKey(String alias) throws CryptoManagerException;
-
-	public void putCertificate(String alias, Certificate certificate)
+	public byte[] encrypt(String identifier, byte[] plaintext)
 		throws CryptoManagerException;
 
-	public void putPrivateKey(
-			String alias, PrivateKey privateKey, Certificate[] certificateChain)
+	public List<String> getKeyIdentifiers() throws CryptoManagerException;
+
+	public PublicKey getPublicKey(String identifier)
 		throws CryptoManagerException;
 
-	public void putSecretKey(String alias, SecretKey secretKey)
+	public void addCertificate(String identifier, Certificate certificate)
+		throws CryptoManagerException;
+
+	public void addPrivateKey(
+			String identifier, PrivateKey privateKey,
+			Certificate[] certificateChain, String cipherSpec)
+		throws CryptoManagerException;
+
+	public void addPublicKey(
+			String identifier, PublicKey publicKey, String cipherSpec)
+		throws CryptoManagerException;
+
+	public void addSecretKey(
+			String identifier, SecretKey secretKey, String cipherSpec)
+		throws CryptoManagerException;
+
+	public Key unwrap(
+			String identifier, byte[] wrappedKeyBytes,
+			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
+		throws CryptoManagerException;
+
+	public byte[] wrap(String identifier, Key keyToWrap)
 		throws CryptoManagerException;
 
 }

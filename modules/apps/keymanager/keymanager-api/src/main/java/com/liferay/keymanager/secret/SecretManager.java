@@ -7,9 +7,14 @@ package com.liferay.keymanager.secret;
 
 import com.liferay.keymanager.KeyReference;
 
+import java.util.List;
+
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
  * @author Tomas Polesovsky
  */
+@ProviderType
 public interface SecretManager {
 
 	public void deleteSecret(KeyReference keyReference)
@@ -18,7 +23,13 @@ public interface SecretManager {
 	public SecureSecret getSecret(KeyReference keyReference)
 		throws SecretManagerException;
 
-	public SecureSecret putSecret(SecureSecret secureSecret)
+	public List<KeyReference> getSecretIdentifiers(String providerId)
+		throws SecretManagerException;
+
+	public List<String> getProviders()
+		throws SecretManagerException;
+
+	public void putSecret(SecureSecret secureSecret)
 		throws SecretManagerException;
 
 }

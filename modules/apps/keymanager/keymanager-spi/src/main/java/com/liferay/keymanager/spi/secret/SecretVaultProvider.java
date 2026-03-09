@@ -8,14 +8,22 @@ package com.liferay.keymanager.spi.secret;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 
+import java.util.List;
+
+import org.osgi.annotation.versioning.ConsumerType;
+
 /**
  * @author Tomas Polesovsky
  */
+@ConsumerType
 public interface SecretVaultProvider {
 
-	public void deleteSecret(String alias) throws SecretManagerException;
+	public void deleteSecret(String identifier) throws SecretManagerException;
 
-	public SecureSecret getSecret(String alias) throws SecretManagerException;
+	public SecureSecret getSecret(String identifier)
+		throws SecretManagerException;
+
+	public List<String> getSecretIdentifiers() throws SecretManagerException;
 
 	public SecureSecret putSecret(SecureSecret secureSecret)
 		throws SecretManagerException;

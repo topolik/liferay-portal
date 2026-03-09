@@ -263,6 +263,9 @@ public interface SecretEntryLocalService
 	public SecretEntry getSecretEntry(long companyId, String alias)
 		throws Exception;
 
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<String> getSecretIdentifiers(long companyId);
+
 	@Transactional(readOnly = true)
 	public InputStream openCiphertextBlobInputStream(long secretEntryId);
 

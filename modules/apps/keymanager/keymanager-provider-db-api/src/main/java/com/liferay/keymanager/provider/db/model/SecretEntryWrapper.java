@@ -42,9 +42,7 @@ public class SecretEntryWrapper
 		attributes.put("ciphertextBlob", getCiphertextBlob());
 		attributes.put("iv", getIv());
 		attributes.put("encryptedDEKBlob", getEncryptedDEKBlob());
-		attributes.put("dekIv", getDekIv());
 		attributes.put("kekReference", getKekReference());
-		attributes.put("algorithm", getAlgorithm());
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 
@@ -95,22 +93,10 @@ public class SecretEntryWrapper
 			setEncryptedDEKBlob(encryptedDEKBlob);
 		}
 
-		String dekIv = (String)attributes.get("dekIv");
-
-		if (dekIv != null) {
-			setDekIv(dekIv);
-		}
-
 		String kekReference = (String)attributes.get("kekReference");
 
 		if (kekReference != null) {
 			setKekReference(kekReference);
-		}
-
-		String algorithm = (String)attributes.get("algorithm");
-
-		if (algorithm != null) {
-			setAlgorithm(algorithm);
 		}
 
 		Date createDate = (Date)attributes.get("createDate");
@@ -129,16 +115,6 @@ public class SecretEntryWrapper
 	@Override
 	public SecretEntry cloneWithOriginalValues() {
 		return wrap(model.cloneWithOriginalValues());
-	}
-
-	/**
-	 * Returns the algorithm of this secret entry.
-	 *
-	 * @return the algorithm of this secret entry
-	 */
-	@Override
-	public String getAlgorithm() {
-		return model.getAlgorithm();
 	}
 
 	/**
@@ -179,16 +155,6 @@ public class SecretEntryWrapper
 	@Override
 	public Date getCreateDate() {
 		return model.getCreateDate();
-	}
-
-	/**
-	 * Returns the dek iv of this secret entry.
-	 *
-	 * @return the dek iv of this secret entry
-	 */
-	@Override
-	public String getDekIv() {
-		return model.getDekIv();
 	}
 
 	/**
@@ -267,16 +233,6 @@ public class SecretEntryWrapper
 	}
 
 	/**
-	 * Sets the algorithm of this secret entry.
-	 *
-	 * @param algorithm the algorithm of this secret entry
-	 */
-	@Override
-	public void setAlgorithm(String algorithm) {
-		model.setAlgorithm(algorithm);
-	}
-
-	/**
 	 * Sets the alias of this secret entry.
 	 *
 	 * @param alias the alias of this secret entry
@@ -314,16 +270,6 @@ public class SecretEntryWrapper
 	@Override
 	public void setCreateDate(Date createDate) {
 		model.setCreateDate(createDate);
-	}
-
-	/**
-	 * Sets the dek iv of this secret entry.
-	 *
-	 * @param dekIv the dek iv of this secret entry
-	 */
-	@Override
-	public void setDekIv(String dekIv) {
-		model.setDekIv(dekIv);
 	}
 
 	/**

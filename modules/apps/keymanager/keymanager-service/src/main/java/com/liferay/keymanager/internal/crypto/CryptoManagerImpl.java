@@ -12,9 +12,12 @@ import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+
+import java.util.List;
 
 import javax.crypto.SecretKey;
 
@@ -30,69 +33,130 @@ import org.osgi.service.component.annotations.Deactivate;
 public class CryptoManagerImpl implements CryptoManager {
 
 	@Override
+	public byte[] decrypt(KeyReference keyReference, byte[] ciphertext)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		return cryptoVaultProvider.decrypt(
+			keyReference.getIdentifier(), ciphertext);
+	}
+
+	@Override
 	public void deleteKey(KeyReference keyReference)
 		throws CryptoManagerException {
 
-		_getProvider(keyReference).deleteKey(keyReference.getIdentifier());
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		cryptoVaultProvider.deleteKey(keyReference.getIdentifier());
 	}
 
 	@Override
-	public Certificate getCertificate(KeyReference keyReference)
+	public byte[] encrypt(KeyReference keyReference, byte[] plaintext)
 		throws CryptoManagerException {
 
-		return _getProvider(keyReference).getCertificate(
-			keyReference.getIdentifier());
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		return cryptoVaultProvider.encrypt(
+			keyReference.getIdentifier(), plaintext);
 	}
 
 	@Override
-	public PrivateKey getPrivateKey(KeyReference keyReference)
+	public List<String> getKeyIdentifiers(String providerId)
 		throws CryptoManagerException {
 
-		return _getProvider(keyReference).getPrivateKey(
-			keyReference.getIdentifier());
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			providerId);
+
+		return cryptoVaultProvider.getKeyIdentifiers();
 	}
 
 	@Override
 	public PublicKey getPublicKey(KeyReference keyReference)
 		throws CryptoManagerException {
 
-		return _getProvider(keyReference).getPublicKey(
-			keyReference.getIdentifier());
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		return cryptoVaultProvider.getPublicKey(keyReference.getIdentifier());
 	}
 
 	@Override
-	public SecretKey getSecretKey(KeyReference keyReference)
-		throws CryptoManagerException {
-
-		return _getProvider(keyReference).getSecretKey(
-			keyReference.getIdentifier());
-	}
-
-	@Override
-	public void putCertificate(
+	public void addCertificate(
 			KeyReference keyReference, Certificate certificate)
 		throws CryptoManagerException {
 
-		_getProvider(keyReference).putCertificate(
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		cryptoVaultProvider.addCertificate(
 			keyReference.getIdentifier(), certificate);
 	}
 
 	@Override
-	public void putPrivateKey(
+	public void addPrivateKey(
 			KeyReference keyReference, PrivateKey privateKey,
-			Certificate[] certificateChain)
+			Certificate[] certificateChain, String cipherSpec)
 		throws CryptoManagerException {
 
-		_getProvider(keyReference).putPrivateKey(
-			keyReference.getIdentifier(), privateKey, certificateChain);
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		cryptoVaultProvider.addPrivateKey(
+			keyReference.getIdentifier(), privateKey, certificateChain,
+			cipherSpec);
 	}
 
 	@Override
-	public void putSecretKey(KeyReference keyReference, SecretKey secretKey)
+	public void addPublicKey(
+			KeyReference keyReference, PublicKey publicKey, String cipherSpec)
 		throws CryptoManagerException {
 
-		_getProvider(keyReference).putSecretKey(
-			keyReference.getIdentifier(), secretKey);
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		cryptoVaultProvider.addPublicKey(
+			keyReference.getIdentifier(), publicKey, cipherSpec);
+	}
+
+	@Override
+	public void addSecretKey(
+			KeyReference keyReference, SecretKey secretKey, String cipherSpec)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		cryptoVaultProvider.addSecretKey(
+			keyReference.getIdentifier(), secretKey, cipherSpec);
+	}
+
+	@Override
+	public Key unwrap(
+			KeyReference masterKeyReference, byte[] wrappedKeyBytes,
+			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			masterKeyReference.getProviderId());
+
+		return cryptoVaultProvider.unwrap(
+			masterKeyReference.getIdentifier(), wrappedKeyBytes,
+			wrappedKeyAlgorithm, wrappedKeyCipherType);
+	}
+
+	@Override
+	public byte[] wrap(KeyReference masterKeyReference, Key keyToWrap)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			masterKeyReference.getProviderId());
+
+		return cryptoVaultProvider.wrap(
+			masterKeyReference.getIdentifier(), keyToWrap);
 	}
 
 	@Activate
@@ -106,23 +170,15 @@ public class CryptoManagerImpl implements CryptoManager {
 		_serviceTrackerMap.close();
 	}
 
-	private CryptoVaultProvider _getProvider(KeyReference keyReference)
+	private CryptoVaultProvider _getCryptoVaultProvider(String providerId)
 		throws CryptoManagerException {
-
-		if (keyReference.getType() != KeyReference.Type.CRYPTO) {
-			throw new CryptoManagerException(
-				"Reference is not of type CRYPTO: " +
-					keyReference.getRawReference());
-		}
-
-		String providerId = keyReference.getProviderId();
 
 		CryptoVaultProvider cryptoVaultProvider = _serviceTrackerMap.getService(
 			providerId);
 
 		if (cryptoVaultProvider == null) {
 			throw new CryptoManagerException(
-				"Crypto provider not found: " + providerId);
+				"No crypto vault provider found for ID: " + providerId);
 		}
 
 		return cryptoVaultProvider;

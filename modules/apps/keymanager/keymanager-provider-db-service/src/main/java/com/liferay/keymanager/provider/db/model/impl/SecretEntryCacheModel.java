@@ -68,7 +68,7 @@ public class SecretEntryCacheModel
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(21);
+		StringBundler sb = new StringBundler(17);
 
 		sb.append("{mvccVersion=");
 		sb.append(mvccVersion);
@@ -80,12 +80,8 @@ public class SecretEntryCacheModel
 		sb.append(alias);
 		sb.append(", iv=");
 		sb.append(iv);
-		sb.append(", dekIv=");
-		sb.append(dekIv);
 		sb.append(", kekReference=");
 		sb.append(kekReference);
-		sb.append(", algorithm=");
-		sb.append(algorithm);
 		sb.append(", createDate=");
 		sb.append(createDate);
 		sb.append(", modifiedDate=");
@@ -117,25 +113,11 @@ public class SecretEntryCacheModel
 			secretEntryImpl.setIv(iv);
 		}
 
-		if (dekIv == null) {
-			secretEntryImpl.setDekIv("");
-		}
-		else {
-			secretEntryImpl.setDekIv(dekIv);
-		}
-
 		if (kekReference == null) {
 			secretEntryImpl.setKekReference("");
 		}
 		else {
 			secretEntryImpl.setKekReference(kekReference);
-		}
-
-		if (algorithm == null) {
-			secretEntryImpl.setAlgorithm("");
-		}
-		else {
-			secretEntryImpl.setAlgorithm(algorithm);
 		}
 
 		if (createDate == Long.MIN_VALUE) {
@@ -166,9 +148,7 @@ public class SecretEntryCacheModel
 		companyId = objectInput.readLong();
 		alias = objectInput.readUTF();
 		iv = objectInput.readUTF();
-		dekIv = objectInput.readUTF();
 		kekReference = objectInput.readUTF();
-		algorithm = objectInput.readUTF();
 		createDate = objectInput.readLong();
 		modifiedDate = objectInput.readLong();
 	}
@@ -195,25 +175,11 @@ public class SecretEntryCacheModel
 			objectOutput.writeUTF(iv);
 		}
 
-		if (dekIv == null) {
-			objectOutput.writeUTF("");
-		}
-		else {
-			objectOutput.writeUTF(dekIv);
-		}
-
 		if (kekReference == null) {
 			objectOutput.writeUTF("");
 		}
 		else {
 			objectOutput.writeUTF(kekReference);
-		}
-
-		if (algorithm == null) {
-			objectOutput.writeUTF("");
-		}
-		else {
-			objectOutput.writeUTF(algorithm);
 		}
 
 		objectOutput.writeLong(createDate);
@@ -225,9 +191,7 @@ public class SecretEntryCacheModel
 	public long companyId;
 	public String alias;
 	public String iv;
-	public String dekIv;
 	public String kekReference;
-	public String algorithm;
 	public long createDate;
 	public long modifiedDate;
 

@@ -1,6 +1,19 @@
 <?xml version="1.0"?>
 
 <model-hints>
+	<model name="com.liferay.keymanager.provider.db.model.KeyEntry">
+		<field name="mvccVersion" type="long" />
+		<field name="keyEntryId" type="long" />
+		<field name="companyId" type="long" />
+		<field name="alias" type="String" />
+		<field name="keyType" type="String" />
+		<field name="algorithm" type="String" />
+		<field name="cipherSpec" type="String" />
+		<field name="wrappedKeyBlob" type="Blob" />
+		<field name="kekReference" type="String" />
+		<field name="createDate" type="Date" />
+		<field name="modifiedDate" type="Date" />
+	</model>
 	<model name="com.liferay.keymanager.provider.db.model.SecretEntry">
 		<field name="mvccVersion" type="long" />
 		<field name="secretEntryId" type="long" />
@@ -9,9 +22,7 @@
 		<field name="ciphertextBlob" type="Blob" />
 		<field name="iv" type="String" />
 		<field name="encryptedDEKBlob" type="Blob" />
-		<field name="dekIv" type="String" />
 		<field name="kekReference" type="String" />
-		<field name="algorithm" type="String" />
 		<field name="createDate" type="Date" />
 		<field name="modifiedDate" type="Date" />
 	</model>

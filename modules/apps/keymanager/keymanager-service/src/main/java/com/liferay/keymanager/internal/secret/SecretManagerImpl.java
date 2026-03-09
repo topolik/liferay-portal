@@ -13,6 +13,8 @@ import com.liferay.keymanager.spi.secret.SecretVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 
+import java.util.List;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -28,21 +30,30 @@ public class SecretManagerImpl implements SecretManager {
 	public void deleteSecret(KeyReference keyReference)
 		throws SecretManagerException {
 
-		_getProvider(keyReference).deleteSecret(keyReference.getIdentifier());
+		_getSecretVaultProvider(keyReference).deleteSecret(
+			keyReference.getIdentifier());
 	}
 
 	@Override
 	public SecureSecret getSecret(KeyReference keyReference)
 		throws SecretManagerException {
 
-		return _getProvider(keyReference).getSecret(keyReference.getIdentifier());
+		return _getSecretVaultProvider(keyReference).getSecret(
+			keyReference.getIdentifier());
 	}
 
 	@Override
-	public SecureSecret putSecret(SecureSecret secureSecret)
+	public List<KeyReference> getSecretIdentifiers(String providerId)
 		throws SecretManagerException {
 
-		return _getProvider(secureSecret.getKeyReference()).putSecret(
+		return _getSecretVaultProvider(providerId).getSecretIdentifiers();
+	}
+
+	@Override
+	public void putSecret(SecureSecret secureSecret)
+		throws SecretManagerException {
+
+		_getSecretVaultProvider(secureSecret.getKeyReference()).putSecret(
 			secureSecret);
 	}
 
@@ -57,23 +68,22 @@ public class SecretManagerImpl implements SecretManager {
 		_serviceTrackerMap.close();
 	}
 
-	private SecretVaultProvider _getProvider(KeyReference keyReference)
+	private SecretVaultProvider _getSecretVaultProvider(
+			KeyReference keyReference)
 		throws SecretManagerException {
 
-		if (keyReference.getType() != KeyReference.Type.SECRET) {
-			throw new SecretManagerException(
-				"Reference is not of type SECRET: " +
-					keyReference.getRawReference());
-		}
+		return _getSecretVaultProvider(keyReference.getProviderId());
+	}
 
-		String providerId = keyReference.getProviderId();
+	private SecretVaultProvider _getSecretVaultProvider(String providerId)
+		throws SecretManagerException {
 
-		SecretVaultProvider secretVaultProvider =
-			_serviceTrackerMap.getService(providerId);
+		SecretVaultProvider secretVaultProvider = _serviceTrackerMap.getService(
+			providerId);
 
 		if (secretVaultProvider == null) {
 			throw new SecretManagerException(
-				"Secret provider not found: " + providerId);
+				"No secret vault provider found for ID: " + providerId);
 		}
 
 		return secretVaultProvider;

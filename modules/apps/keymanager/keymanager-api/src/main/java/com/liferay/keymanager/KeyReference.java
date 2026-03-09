@@ -47,19 +47,37 @@ public class KeyReference implements Serializable {
 		String providerId = matcher.group(2);
 		String identifier = matcher.group(3);
 
-		return new KeyReference(type, providerId, identifier, value);
+		return new KeyReference(type, providerId, identifier);
 	}
 
-	public KeyReference(
-		Type type, String providerId, String identifier, String rawReference) {
-
+	public KeyReference(Type type, String providerId, String identifier) {
 		_type = Objects.requireNonNull(type, "Type must not be null");
 		_providerId = Objects.requireNonNull(
 			providerId, "Provider ID must not be null");
 		_identifier = Objects.requireNonNull(
 			identifier, "Identifier must not be null");
-		_rawReference = Objects.requireNonNull(
-			rawReference, "Raw reference must not be null");
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
+
+		if (!(object instanceof KeyReference)) {
+			return false;
+		}
+
+		KeyReference keyReference = (KeyReference)object;
+
+		if ((_type == keyReference._type) &&
+			Objects.equals(_providerId, keyReference._providerId) &&
+			Objects.equals(_identifier, keyReference._identifier)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public String getIdentifier() {
@@ -70,12 +88,13 @@ public class KeyReference implements Serializable {
 		return _providerId;
 	}
 
-	public String getRawReference() {
-		return _rawReference;
-	}
-
 	public Type getType() {
 		return _type;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(_identifier, _providerId, _type);
 	}
 
 	@Override
@@ -97,12 +116,11 @@ public class KeyReference implements Serializable {
 	}
 
 	private static final Pattern _pattern = Pattern.compile(
-		"\\$\\{(keyRef|secretRef):([a-zA-Z0-9\\-_]+):([a-zA-Z0-9\\-_]+)\\}");
+		"\\$\\{(keyRef|secretRef):([^:]+):(.+)\\}");
 	private static final long serialVersionUID = 1L;
 
 	private final String _identifier;
 	private final String _providerId;
-	private final String _rawReference;
 	private final Type _type;
 
 }

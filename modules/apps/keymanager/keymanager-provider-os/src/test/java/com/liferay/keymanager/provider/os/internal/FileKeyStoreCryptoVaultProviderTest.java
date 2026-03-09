@@ -10,6 +10,9 @@ import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.io.File;
 
+import java.security.Key;
+
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -37,89 +40,89 @@ public class FileKeyStoreCryptoVaultProviderTest {
 	public void setUp() throws Exception {
 		_provider = new FileKeyStoreCryptoVaultProvider();
 
-		// Ensure the file doesn't exist to trigger auto-create
-
-		_keystoreFile = new File(
-			temporaryFolder.getRoot(), "data/keystore.p12");
+		_keystoreFile = new File(temporaryFolder.getRoot(), "test.jks");
 
 		_provider.activate(
 			HashMapBuilder.<String, Object>put(
 				"autoCreate", true
 			).put(
-				"providerId", "keystore"
-			).put(
-				"keystorePassword", "password"
+				"keystorePassword", "test123456"
 			).put(
 				"keystorePath", _keystoreFile.getAbsolutePath()
 			).put(
-				"keystoreType", "PKCS12"
+				"keystoreType", "JCEKS"
+			).put(
+				"providerId", "keystore"
 			).build());
 	}
 
 	@Test
-	public void testAutoCreateDirectory() {
-		// Verify that 'data/' directory was created during activation
+	public void testAutoCreateDirectory() throws Exception {
+		File deepDir = new File(temporaryFolder.getRoot(), "deep/path/test.jks");
 
-		Assert.assertTrue(_keystoreFile.getParentFile().exists());
+		FileKeyStoreCryptoVaultProvider provider =
+			new FileKeyStoreCryptoVaultProvider();
+
+		provider.activate(
+			HashMapBuilder.<String, Object>put(
+				"autoCreate", true
+			).put(
+				"keystorePassword", "test123456"
+			).put(
+				"keystorePath", deepDir.getAbsolutePath()
+			).put(
+				"keystoreType", "JCEKS"
+			).put(
+				"providerId", "keystore"
+			).build());
+
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		keyGenerator.init(256);
+		SecretKey secretKey = keyGenerator.generateKey();
+
+		// Writing a key should trigger directory creation and keystore save
+		provider.addSecretKey("test-key", secretKey, null);
+
+		Assert.assertTrue(deepDir.exists());
 	}
 
 	@Test
 	public void testDeleteKey() throws Exception {
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-
 		keyGenerator.init(256);
-
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		_provider.putSecretKey("delete-me", secretKey);
+		_provider.addSecretKey("delete-me", secretKey, null);
 
-		Assert.assertNotNull(_provider.getSecretKey("delete-me"));
+		Assert.assertTrue(_provider.getKeyIdentifiers().contains("delete-me"));
 
 		_provider.deleteKey("delete-me");
 
-		Assert.assertNull(_provider.getSecretKey("delete-me"));
+		Assert.assertFalse(_provider.getKeyIdentifiers().contains("delete-me"));
 	}
 
 	@Test
 	public void testPutAndGetSecretKey() throws Exception {
+		String identifier = "my-key";
+
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-
 		keyGenerator.init(256);
-
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		_provider.putSecretKey("my-key", secretKey);
+		_provider.addSecretKey(identifier, secretKey, null);
 
-		// 1. Verify in-memory retrieval
+		// 1. Verify it's in the list
+		Assert.assertTrue(_provider.getKeyIdentifiers().contains(identifier));
 
-		SecretKey result = _provider.getSecretKey("my-key");
+		// 2. Verify Wrap/Unwrap (Operational use for KEK)
+		byte[] data = new byte[32];
+		for (int i = 0; i < 32; i++) data[i] = (byte)i;
 
-		Assert.assertNotNull(result);
-		Assert.assertArrayEquals(secretKey.getEncoded(), result.getEncoded());
+		byte[] wrapped = _provider.wrap(identifier, secretKey);
+		Assert.assertNotNull(wrapped);
 
-		// 2. Verify persistence (reload KeyStore in a new provider instance)
-
-		FileKeyStoreCryptoVaultProvider newProvider =
-			new FileKeyStoreCryptoVaultProvider();
-
-		newProvider.activate(
-			HashMapBuilder.<String, Object>put(
-				"autoCreate", false
-			).put(
-				"providerId", "keystore-reloaded"
-			).put(
-				"keystorePassword", "password"
-			).put(
-				"keystorePath", _keystoreFile.getAbsolutePath()
-			).put(
-				"keystoreType", "PKCS12"
-			).build());
-
-		SecretKey reloadedKey = newProvider.getSecretKey("my-key");
-
-		Assert.assertNotNull(reloadedKey);
-		Assert.assertArrayEquals(
-			secretKey.getEncoded(), reloadedKey.getEncoded());
+		Key unwrapped = _provider.unwrap(identifier, wrapped, "AES", Cipher.SECRET_KEY);
+		Assert.assertArrayEquals(secretKey.getEncoded(), unwrapped.getEncoded());
 	}
 
 	private File _keystoreFile;

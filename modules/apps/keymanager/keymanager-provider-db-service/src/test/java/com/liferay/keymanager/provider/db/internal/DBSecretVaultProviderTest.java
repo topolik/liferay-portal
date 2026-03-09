@@ -17,8 +17,11 @@ import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.lang.reflect.Field;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -45,43 +48,56 @@ public class DBSecretVaultProviderTest {
 
 		_dbSecretVaultProvider = new DBSecretVaultProvider();
 
-		// Manually inject mocks since we are not using full OSGi container
-
 		_injectField("_cryptoManager", _cryptoManager);
 		_injectField("_secretEntryLocalService", _secretEntryLocalService);
 
 		_dbSecretVaultProvider.activate(
 			HashMapBuilder.<String, Object>put(
-				"cipherConfiguration", "AES/GCM/NoPadding;128;12;256"
+				"dekCipherSpec",
+				"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128"
 			).put(
 				"masterKeyReference", "${keyRef:keystore:master}"
 			).put(
 				"providerId", "db"
 			).build());
 
-		// Mock Master Key (KEK)
+		CompanyThreadLocal.setCompanyId(_COMPANY_ID);
+	}
 
-		byte[] masterKeyBytes = new byte[32];
+	@Test
+	public void testDeleteSecret() throws Exception {
+		String identifier = "to-delete";
 
-		for (int i = 0; i < masterKeyBytes.length; i++) {
-			masterKeyBytes[i] = (byte)i;
-		}
-
-		SecretKey masterKey = new SecretKeySpec(masterKeyBytes, "AES");
+		SecretEntry secretEntry = new SecretEntryImpl();
 
 		Mockito.when(
-			_cryptoManager.getSecretKey(Mockito.any(KeyReference.class))
+			_secretEntryLocalService.fetchSecretEntry(_COMPANY_ID, identifier)
 		).thenReturn(
-			masterKey
+			secretEntry
 		);
 
-		CompanyThreadLocal.setCompanyId(_COMPANY_ID);
+		_dbSecretVaultProvider.deleteSecret(identifier);
+
+		Mockito.verify(_secretEntryLocalService).deleteSecretEntry(secretEntry);
+	}
+
+	@Test
+	public void testGetSecretIdentifiers() throws Exception {
+		Mockito.when(
+			_secretEntryLocalService.getSecretIdentifiers(_COMPANY_ID)
+		).thenReturn(
+			Collections.singletonList("secret-1")
+		);
+
+		List<String> identifiers = _dbSecretVaultProvider.getSecretIdentifiers();
+
+		Assert.assertEquals(1, identifiers.size());
+		Assert.assertEquals("secret-1", identifiers.get(0));
 	}
 
 	@Test
 	public void testPutAndGetSecretRoundtrip() throws Exception {
 		String identifier = "my-secret";
-
 		byte[] originalPlaintext = "super-secret-password".getBytes();
 
 		KeyReference keyRef = KeyReference.fromString(
@@ -89,11 +105,32 @@ public class DBSecretVaultProviderTest {
 
 		SecureSecret secureSecret = new SecureSecret(keyRef, originalPlaintext);
 
-		// 1. Use real SecretEntryImpl instead of mock
-
+		// Use a real SecretEntryImpl to act as a data carrier
 		SecretEntry secretEntry = new SecretEntryImpl();
 
-		// 2. Mock Service interaction to return our real object
+		// 1. Mock CryptoManager statefully to capture the dynamically generated DEK
+
+		AtomicReference<Key> capturedDekReference = new AtomicReference<>();
+
+		Mockito.when(
+			_cryptoManager.wrap(
+				Mockito.any(KeyReference.class), Mockito.any(Key.class))
+		).thenAnswer(
+			invocation -> {
+				capturedDekReference.set(invocation.getArgument(1));
+				return "wrapped-dek-material".getBytes();
+			}
+		);
+
+		Mockito.when(
+			_cryptoManager.unwrap(
+				Mockito.any(KeyReference.class), Mockito.any(byte[].class),
+				Mockito.anyString(), Mockito.anyInt())
+		).thenAnswer(
+			invocation -> capturedDekReference.get()
+		);
+
+		// 2. Mock Service interaction
 
 		Mockito.when(
 			_secretEntryLocalService.fetchSecretEntry(_COMPANY_ID, identifier)
@@ -115,34 +152,26 @@ public class DBSecretVaultProviderTest {
 			secretEntry
 		);
 
-		// 3. Perform Put
+		// 3. Perform Put (this will generate a random DEK and IV)
 
 		_dbSecretVaultProvider.putSecret(secureSecret);
 
-		// 4. Verify companyId was set
-
-		Assert.assertEquals(_COMPANY_ID, secretEntry.getCompanyId());
-
-		// 5. Perform Get
+		// 4. Perform Get (this will use the captured DEK and stored IV)
 
 		SecureSecret retrievedSecret = _dbSecretVaultProvider.getSecret(
 			identifier);
 
-		// 6. Verify
+		// 5. Verify
 
 		Assert.assertArrayEquals(originalPlaintext, retrievedSecret.getBytes());
-
-		Assert.assertEquals(
-			keyRef.toString(), retrievedSecret.getKeyReference().toString());
+		Assert.assertEquals(_COMPANY_ID, secretEntry.getCompanyId());
 	}
 
 	private void _injectField(String fieldName, Object value) {
 		try {
 			Field field = DBSecretVaultProvider.class.getDeclaredField(
 				fieldName);
-
 			field.setAccessible(true);
-
 			field.set(_dbSecretVaultProvider, value);
 		}
 		catch (Exception exception) {

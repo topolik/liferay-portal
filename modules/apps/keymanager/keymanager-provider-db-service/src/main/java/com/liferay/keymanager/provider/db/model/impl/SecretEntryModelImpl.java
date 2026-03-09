@@ -62,8 +62,7 @@ public class SecretEntryModelImpl
 		{"mvccVersion", Types.BIGINT}, {"secretEntryId", Types.BIGINT},
 		{"companyId", Types.BIGINT}, {"alias_", Types.VARCHAR},
 		{"ciphertextBlob", Types.BLOB}, {"iv", Types.VARCHAR},
-		{"encryptedDEKBlob", Types.BLOB}, {"dekIv", Types.VARCHAR},
-		{"kekReference", Types.VARCHAR}, {"algorithm", Types.VARCHAR},
+		{"encryptedDEKBlob", Types.BLOB}, {"kekReference", Types.VARCHAR},
 		{"createDate", Types.TIMESTAMP}, {"modifiedDate", Types.TIMESTAMP}
 	};
 
@@ -78,15 +77,13 @@ public class SecretEntryModelImpl
 		TABLE_COLUMNS_MAP.put("ciphertextBlob", Types.BLOB);
 		TABLE_COLUMNS_MAP.put("iv", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("encryptedDEKBlob", Types.BLOB);
-		TABLE_COLUMNS_MAP.put("dekIv", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("kekReference", Types.VARCHAR);
-		TABLE_COLUMNS_MAP.put("algorithm", Types.VARCHAR);
 		TABLE_COLUMNS_MAP.put("createDate", Types.TIMESTAMP);
 		TABLE_COLUMNS_MAP.put("modifiedDate", Types.TIMESTAMP);
 	}
 
 	public static final String TABLE_SQL_CREATE =
-		"create table KeyManagerDB_SecretEntry (mvccVersion LONG default 0 not null,secretEntryId LONG not null primary key,companyId LONG,alias_ VARCHAR(75) null,ciphertextBlob BLOB,iv VARCHAR(75) null,encryptedDEKBlob BLOB,dekIv VARCHAR(75) null,kekReference VARCHAR(75) null,algorithm VARCHAR(75) null,createDate DATE null,modifiedDate DATE null)";
+		"create table KeyManagerDB_SecretEntry (mvccVersion LONG default 0 not null,secretEntryId LONG not null primary key,companyId LONG,alias_ VARCHAR(75) null,ciphertextBlob BLOB,iv VARCHAR(75) null,encryptedDEKBlob BLOB,kekReference VARCHAR(75) null,createDate DATE null,modifiedDate DATE null)";
 
 	public static final String TABLE_SQL_DROP =
 		"drop table KeyManagerDB_SecretEntry";
@@ -243,11 +240,8 @@ public class SecretEntryModelImpl
 			attributeGetterFunctions.put("iv", SecretEntry::getIv);
 			attributeGetterFunctions.put(
 				"encryptedDEKBlob", SecretEntry::getEncryptedDEKBlob);
-			attributeGetterFunctions.put("dekIv", SecretEntry::getDekIv);
 			attributeGetterFunctions.put(
 				"kekReference", SecretEntry::getKekReference);
-			attributeGetterFunctions.put(
-				"algorithm", SecretEntry::getAlgorithm);
 			attributeGetterFunctions.put(
 				"createDate", SecretEntry::getCreateDate);
 			attributeGetterFunctions.put(
@@ -290,14 +284,8 @@ public class SecretEntryModelImpl
 				(BiConsumer<SecretEntry, Blob>)
 					SecretEntry::setEncryptedDEKBlob);
 			attributeSetterBiConsumers.put(
-				"dekIv",
-				(BiConsumer<SecretEntry, String>)SecretEntry::setDekIv);
-			attributeSetterBiConsumers.put(
 				"kekReference",
 				(BiConsumer<SecretEntry, String>)SecretEntry::setKekReference);
-			attributeSetterBiConsumers.put(
-				"algorithm",
-				(BiConsumer<SecretEntry, String>)SecretEntry::setAlgorithm);
 			attributeSetterBiConsumers.put(
 				"createDate",
 				(BiConsumer<SecretEntry, Date>)SecretEntry::setCreateDate);
@@ -485,25 +473,6 @@ public class SecretEntryModelImpl
 	}
 
 	@Override
-	public String getDekIv() {
-		if (_dekIv == null) {
-			return "";
-		}
-		else {
-			return _dekIv;
-		}
-	}
-
-	@Override
-	public void setDekIv(String dekIv) {
-		if (_columnOriginalValues == Collections.EMPTY_MAP) {
-			_setColumnOriginalValues();
-		}
-
-		_dekIv = dekIv;
-	}
-
-	@Override
 	public String getKekReference() {
 		if (_kekReference == null) {
 			return "";
@@ -520,25 +489,6 @@ public class SecretEntryModelImpl
 		}
 
 		_kekReference = kekReference;
-	}
-
-	@Override
-	public String getAlgorithm() {
-		if (_algorithm == null) {
-			return "";
-		}
-		else {
-			return _algorithm;
-		}
-	}
-
-	@Override
-	public void setAlgorithm(String algorithm) {
-		if (_columnOriginalValues == Collections.EMPTY_MAP) {
-			_setColumnOriginalValues();
-		}
-
-		_algorithm = algorithm;
 	}
 
 	@Override
@@ -636,9 +586,7 @@ public class SecretEntryModelImpl
 		secretEntryImpl.setCompanyId(getCompanyId());
 		secretEntryImpl.setAlias(getAlias());
 		secretEntryImpl.setIv(getIv());
-		secretEntryImpl.setDekIv(getDekIv());
 		secretEntryImpl.setKekReference(getKekReference());
-		secretEntryImpl.setAlgorithm(getAlgorithm());
 		secretEntryImpl.setCreateDate(getCreateDate());
 		secretEntryImpl.setModifiedDate(getModifiedDate());
 
@@ -659,11 +607,8 @@ public class SecretEntryModelImpl
 			this.<Long>getColumnOriginalValue("companyId"));
 		secretEntryImpl.setAlias(this.<String>getColumnOriginalValue("alias_"));
 		secretEntryImpl.setIv(this.<String>getColumnOriginalValue("iv"));
-		secretEntryImpl.setDekIv(this.<String>getColumnOriginalValue("dekIv"));
 		secretEntryImpl.setKekReference(
 			this.<String>getColumnOriginalValue("kekReference"));
-		secretEntryImpl.setAlgorithm(
-			this.<String>getColumnOriginalValue("algorithm"));
 		secretEntryImpl.setCreateDate(
 			this.<Date>getColumnOriginalValue("createDate"));
 		secretEntryImpl.setModifiedDate(
@@ -772,28 +717,12 @@ public class SecretEntryModelImpl
 			secretEntryCacheModel.iv = null;
 		}
 
-		secretEntryCacheModel.dekIv = getDekIv();
-
-		String dekIv = secretEntryCacheModel.dekIv;
-
-		if ((dekIv != null) && (dekIv.length() == 0)) {
-			secretEntryCacheModel.dekIv = null;
-		}
-
 		secretEntryCacheModel.kekReference = getKekReference();
 
 		String kekReference = secretEntryCacheModel.kekReference;
 
 		if ((kekReference != null) && (kekReference.length() == 0)) {
 			secretEntryCacheModel.kekReference = null;
-		}
-
-		secretEntryCacheModel.algorithm = getAlgorithm();
-
-		String algorithm = secretEntryCacheModel.algorithm;
-
-		if ((algorithm != null) && (algorithm.length() == 0)) {
-			secretEntryCacheModel.algorithm = null;
 		}
 
 		Date createDate = getCreateDate();
@@ -819,7 +748,7 @@ public class SecretEntryModelImpl
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(25);
+		StringBundler sb = new StringBundler(21);
 
 		sb.append("{\"mvccVersion\": ");
 
@@ -841,17 +770,9 @@ public class SecretEntryModelImpl
 
 		sb.append("\"" + getIv() + "\"");
 
-		sb.append(", \"dekIv\": ");
-
-		sb.append("\"" + getDekIv() + "\"");
-
 		sb.append(", \"kekReference\": ");
 
 		sb.append("\"" + getKekReference() + "\"");
-
-		sb.append(", \"algorithm\": ");
-
-		sb.append("\"" + getAlgorithm() + "\"");
 
 		sb.append(", \"createDate\": ");
 
@@ -884,9 +805,7 @@ public class SecretEntryModelImpl
 	private String _iv;
 	private transient SecretEntryEncryptedDEKBlobBlobModel
 		_encryptedDEKBlobBlobModel;
-	private String _dekIv;
 	private String _kekReference;
-	private String _algorithm;
 	private Date _createDate;
 	private Date _modifiedDate;
 	private boolean _setModifiedDate;
@@ -926,9 +845,7 @@ public class SecretEntryModelImpl
 		_columnOriginalValues.put("companyId", _companyId);
 		_columnOriginalValues.put("alias_", _alias);
 		_columnOriginalValues.put("iv", _iv);
-		_columnOriginalValues.put("dekIv", _dekIv);
 		_columnOriginalValues.put("kekReference", _kekReference);
-		_columnOriginalValues.put("algorithm", _algorithm);
 		_columnOriginalValues.put("createDate", _createDate);
 		_columnOriginalValues.put("modifiedDate", _modifiedDate);
 	}
@@ -968,15 +885,11 @@ public class SecretEntryModelImpl
 
 		columnBitmasks.put("encryptedDEKBlob", 64L);
 
-		columnBitmasks.put("dekIv", 128L);
+		columnBitmasks.put("kekReference", 128L);
 
-		columnBitmasks.put("kekReference", 256L);
+		columnBitmasks.put("createDate", 256L);
 
-		columnBitmasks.put("algorithm", 512L);
-
-		columnBitmasks.put("createDate", 1024L);
-
-		columnBitmasks.put("modifiedDate", 2048L);
+		columnBitmasks.put("modifiedDate", 512L);
 
 		_columnBitmasks = Collections.unmodifiableMap(columnBitmasks);
 	}

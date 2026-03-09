@@ -8,6 +8,7 @@ package com.liferay.keymanager.secret;
 import com.liferay.keymanager.KeyReference;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * @author Tomas Polesovsky
@@ -30,6 +31,19 @@ public final class SecureSecret implements AutoCloseable {
 		if (_bytes != null) {
 			Arrays.fill(_bytes, (byte)0);
 		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof SecureSecret that))
+			return false;
+		
+		return Objects.deepEquals(_bytes, that._bytes) && Objects.equals(_keyReference, that._keyReference);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(Arrays.hashCode(_bytes), _keyReference);
 	}
 
 	public byte[] getBytes() {

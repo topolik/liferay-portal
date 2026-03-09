@@ -6,6 +6,8 @@
 package com.liferay.keymanager.internal.secret;
 
 import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.secret.SecretManager;
+import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
@@ -13,12 +15,17 @@ import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.lang.reflect.Field;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 /**
  * @author Tomas Polesovsky
@@ -32,53 +39,86 @@ public class SecretManagerImplTest {
 
 	@Before
 	public void setUp() throws Exception {
-		_secretManagerImpl = new SecretManagerImpl();
+		MockitoAnnotations.openMocks(this);
 
-		_mockProvider = Mockito.mock(SecretVaultProvider.class);
-		_mockServiceTrackerMap = Mockito.mock(ServiceTrackerMap.class);
+		_secretManager = new SecretManagerImpl();
 
-		Mockito.when(
-			_mockServiceTrackerMap.getService("test-vault")
-		).thenReturn(
-			_mockProvider
-		);
+		// Manually inject mock ServiceTrackerMap
 
 		Field field = SecretManagerImpl.class.getDeclaredField(
 			"_serviceTrackerMap");
 
 		field.setAccessible(true);
 
-		field.set(_secretManagerImpl, _mockServiceTrackerMap);
+		field.set(_secretManager, _serviceTrackerMap);
+
+		Mockito.when(
+			_serviceTrackerMap.getService("test-provider")
+		).thenReturn(
+			_secretVaultProvider
+		);
 	}
 
 	@Test
 	public void testGetSecret() throws Exception {
-		KeyReference keyReference = KeyReference.fromString(
-			"${secretRef:test-vault:my-secret}");
+		KeyReference keyRef = KeyReference.fromString(
+			"${secretRef:test-provider:my-secret}");
 
-		SecureSecret mockSecret = Mockito.mock(SecureSecret.class);
+		SecureSecret mockSecret = new SecureSecret(keyRef, "data".getBytes());
 
 		Mockito.when(
-			_mockProvider.getSecret("my-secret")
+			_secretVaultProvider.getSecret("my-secret")
 		).thenReturn(
 			mockSecret
 		);
 
-		SecureSecret result = _secretManagerImpl.getSecret(keyReference);
+		SecureSecret result = _secretManager.getSecret(keyRef);
 
-		Assert.assertSame(mockSecret, result);
+		Assert.assertEquals(mockSecret, result);
 	}
 
-	@Test(expected = Exception.class)
-	public void testGetSecretWrongType() throws Exception {
-		KeyReference keyReference = KeyReference.fromString(
-			"${keyRef:test-vault:my-key}");
+	@Test
+	public void testGetSecretIdentifiers() throws Exception {
+		List<String> identifiers = Collections.singletonList("secret-1");
 
-		_secretManagerImpl.getSecret(keyReference);
+		Mockito.when(
+			_secretVaultProvider.getSecretIdentifiers()
+		).thenReturn(
+			identifiers
+		);
+
+		List<String> result = _secretManager.getSecretIdentifiers(
+			"test-provider");
+
+		Assert.assertEquals(identifiers, result);
 	}
 
-	private SecretManagerImpl _secretManagerImpl;
-	private SecretVaultProvider _mockProvider;
-	private ServiceTrackerMap<String, SecretVaultProvider> _mockServiceTrackerMap;
+	@Test
+	public void testPutSecret() throws Exception {
+		KeyReference keyRef = KeyReference.fromString(
+			"${secretRef:test-provider:my-new-secret}");
+
+		SecureSecret secureSecret = new SecureSecret(keyRef, "new-data".getBytes());
+
+		_secretManager.putSecret(secureSecret);
+
+		Mockito.verify(_secretVaultProvider).putSecret(secureSecret);
+	}
+
+	@Test(expected = SecretManagerException.class)
+	public void testGetSecretWrongProvider() throws Exception {
+		KeyReference keyRef = KeyReference.fromString(
+			"${secretRef:wrong-provider:my-secret}");
+
+		_secretManager.getSecret(keyRef);
+	}
+
+	@Mock
+	private SecretVaultProvider _secretVaultProvider;
+
+	@Mock
+	private ServiceTrackerMap<String, SecretVaultProvider> _serviceTrackerMap;
+
+	private SecretManagerImpl _secretManager;
 
 }

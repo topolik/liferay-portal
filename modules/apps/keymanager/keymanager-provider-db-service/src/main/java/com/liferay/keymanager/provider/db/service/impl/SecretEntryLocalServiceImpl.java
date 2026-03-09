@@ -11,6 +11,9 @@ import com.liferay.portal.aop.AopService;
 import com.liferay.portal.kernel.transaction.Propagation;
 import com.liferay.portal.kernel.transaction.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -34,6 +37,20 @@ public class SecretEntryLocalServiceImpl extends SecretEntryLocalServiceBaseImpl
 		throws Exception {
 
 		return secretEntryPersistence.findByC_A(companyId, alias);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public List<String> getSecretIdentifiers(long companyId) {
+		List<SecretEntry> secretEntries = secretEntryPersistence.findByCompanyId(
+			companyId);
+
+		return secretEntries.stream(
+		).map(
+			SecretEntry::getAlias
+		).collect(
+			Collectors.toList()
+		);
 	}
 
 }

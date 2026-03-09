@@ -3,6 +3,9 @@
 
 <service-builder auto-import-default-references="false" dependency-injector="ds" mvcc-enabled="true" package-path="com.liferay.keymanager.provider.db">
 	<namespace>KeyManagerDB</namespace>
+
+	<!-- Entity for Opaque Secrets (Passwords, Tokens) -->
+
 	<entity local-service="true" name="SecretEntry" remote-service="false" uuid="false">
 
 		<!-- PK -->
@@ -19,15 +22,13 @@
 		<column name="ciphertextBlob" type="Blob" />
 		<column name="iv" type="String" />
 
-		<!-- Wrapped Key (Encrypted DEK) -->
+		<!-- Envelope Key (Encrypted DEK) -->
 
 		<column name="encryptedDEKBlob" type="Blob" />
-		<column name="dekIv" type="String" />
 
 		<!-- Metadata -->
 
 		<column name="kekReference" type="String" />
-		<column name="algorithm" type="String" />
 
 		<!-- Audit -->
 
@@ -36,7 +37,55 @@
 
 		<!-- Finder -->
 
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+
 		<finder name="C_A" return-type="SecretEntry">
+			<finder-column name="companyId" />
+			<finder-column name="alias" />
+		</finder>
+	</entity>
+
+	<!-- Entity for Cryptographic Keys (AES, RSA) -->
+
+	<entity local-service="true" name="KeyEntry" remote-service="false" uuid="false">
+
+		<!-- PK -->
+
+		<column name="keyEntryId" primary="true" type="long" />
+
+		<!-- Identity -->
+
+		<column name="companyId" type="long" />
+		<column name="alias" type="String" />
+
+		<!-- Metadata -->
+
+		<column name="keyType" type="String" /> <!-- SECRET, PRIVATE, PUBLIC -->
+		<column name="algorithm" type="String" /> <!-- e.g. AES -->
+		<column name="cipherSpec" type="String" /> <!-- e.g. cipher=AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128 -->
+
+		<!-- Payload (Encrypted Key Material) -->
+
+		<column name="wrappedKeyBlob" type="Blob" />
+
+		<!-- Master Key -->
+
+		<column name="kekReference" type="String" />
+
+		<!-- Audit -->
+
+		<column name="createDate" type="Date" />
+		<column name="modifiedDate" type="Date" />
+
+		<!-- Finder -->
+
+		<finder name="CompanyId" return-type="Collection">
+			<finder-column name="companyId" />
+		</finder>
+
+		<finder name="C_A" return-type="KeyEntry">
 			<finder-column name="companyId" />
 			<finder-column name="alias" />
 		</finder>

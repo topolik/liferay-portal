@@ -19,10 +19,13 @@ import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
+import java.security.Key;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
@@ -30,14 +33,14 @@ import java.sql.Blob;
 
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -66,7 +69,8 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 			}
 		}
 		catch (Exception exception) {
-			throw new SecretManagerException(exception);
+			throw new SecretManagerException(
+				"Unable to delete secret: " + identifier, exception);
 		}
 	}
 
@@ -78,43 +82,58 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 			SecretEntry secretEntry = _secretEntryLocalService.getSecretEntry(
 				_getCompanyId(), identifier);
 
-			// 1. Fetch Master Key (KEK)
+			// 1. Unwrap DEK
 
 			KeyReference masterKeyRef = KeyReference.fromString(
 				secretEntry.getKekReference());
 
-			SecretKey masterKey = _cryptoManager.getSecretKey(masterKeyRef);
-
-			// 2. Unwrap DEK
-
 			byte[] dekBytes = _blobToBytes(secretEntry.getEncryptedDEKBlob());
 
-			byte[] unwrappedDek = _decrypt(
-				masterKey, dekBytes, secretEntry.getDekIv(),
-				secretEntry.getAlgorithm());
+			Key dek = _cryptoManager.unwrap(
+				masterKeyRef, dekBytes, _keyAlgorithm, Cipher.SECRET_KEY);
 
 			try {
-				SecretKey dek = new SecretKeySpec(unwrappedDek, _keyAlgorithm);
-
-				// 3. Decrypt Secret
+				// 2. Decrypt Secret
 
 				byte[] ciphertext = _blobToBytes(secretEntry.getCiphertextBlob());
 
 				byte[] plaintext = _decrypt(
 					dek, ciphertext, secretEntry.getIv(),
-					secretEntry.getAlgorithm());
+					_encryptionAlgorithm);
 
-				return new SecureSecret(
-					new KeyReference(
-						KeyReference.Type.SECRET, _providerId, identifier, ""),
-					plaintext);
+				try {
+					return new SecureSecret(
+						new KeyReference(
+							KeyReference.Type.SECRET, _providerId, identifier),
+						plaintext);
+				}
+				finally {
+					Arrays.fill(plaintext, (byte)0);
+				}
 			}
 			finally {
-				Arrays.fill(unwrappedDek, (byte)0);
+				if ((dek != null) && (dek.getEncoded() != null)) {
+					Arrays.fill(dek.getEncoded(), (byte)0);
+				}
 			}
 		}
+		catch (SecretManagerException secretManagerException) {
+			throw secretManagerException;
+		}
 		catch (Exception exception) {
-			throw new SecretManagerException(exception);
+			throw new SecretManagerException(
+				"Unable to get secret: " + identifier, exception);
+		}
+	}
+
+	@Override
+	public List<String> getSecretIdentifiers() throws SecretManagerException {
+		try {
+			return _secretEntryLocalService.getSecretIdentifiers(_getCompanyId());
+		}
+		catch (Exception exception) {
+			throw new SecretManagerException(
+				"Unable to list secret identifiers", exception);
 		}
 	}
 
@@ -131,7 +150,7 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 
 			keyGenerator.init(_keySize, _secureRandom);
 
-			SecretKey dek = keyGenerator.generateKey();
+			Key dek = keyGenerator.generateKey();
 
 			dekBytes = dek.getEncoded();
 
@@ -144,23 +163,14 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 			byte[] ciphertext = _encrypt(
 				dek, secureSecret.getBytes(), iv, _encryptionAlgorithm);
 
-			// 3. Fetch Master Key (KEK)
+			// 3. Wrap DEK
 
 			KeyReference masterKeyRef = KeyReference.fromString(
 				_masterKeyReference);
 
-			SecretKey masterKey = _cryptoManager.getSecretKey(masterKeyRef);
+			byte[] encryptedDek = _cryptoManager.wrap(masterKeyRef, dek);
 
-			// 4. Wrap DEK
-
-			byte[] dekIv = new byte[_ivLength];
-
-			_secureRandom.nextBytes(dekIv);
-
-			byte[] encryptedDek = _encrypt(
-				masterKey, dekBytes, dekIv, _encryptionAlgorithm);
-
-			// 5. Persist
+			// 4. Persist
 
 			long companyId = _getCompanyId();
 
@@ -183,16 +193,17 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 				new OutputBlob(
 					new ByteArrayInputStream(encryptedDek),
 					encryptedDek.length));
-			secretEntry.setDekIv(Base64.getEncoder().encodeToString(dekIv));
 			secretEntry.setKekReference(_masterKeyReference);
-			secretEntry.setAlgorithm(_encryptionAlgorithm);
 
 			_secretEntryLocalService.updateSecretEntry(secretEntry);
 
 			return secureSecret;
 		}
 		catch (Exception exception) {
-			throw new SecretManagerException(exception);
+			throw new SecretManagerException(
+				"Unable to put secret: " +
+					secureSecret.getKeyReference().getIdentifier(),
+				exception);
 		}
 		finally {
 			if (dekBytes != null) {
@@ -212,20 +223,26 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 		_masterKeyReference =
 			dbSecretVaultProviderConfiguration.masterKeyReference();
 
-		String cipherConfiguration =
-			dbSecretVaultProviderConfiguration.cipherConfiguration();
+		String dekCipherSpec =
+			dbSecretVaultProviderConfiguration.dekCipherSpec();
 
-		String[] parts = StringUtil.split(cipherConfiguration, ";");
+		_encryptionAlgorithm = _parseAlgorithm(dekCipherSpec);
 
-		if (parts.length != 4) {
+		Map<String, String> configurationMap = _parseConfiguration(
+			dekCipherSpec);
+
+		_keySize = GetterUtil.getInteger(configurationMap.get("keySize"));
+		_ivLength = GetterUtil.getInteger(configurationMap.get("ivSize"));
+		_gcmTagLength = GetterUtil.getInteger(configurationMap.get("gcmTag"));
+
+		if (Validator.isNull(_encryptionAlgorithm) ||
+			(!_encryptionAlgorithm.contains("/GCM/") &&
+			 !_encryptionAlgorithm.contains("/CBC/"))) {
+
 			throw new IllegalArgumentException(
-				"Invalid cipher configuration: " + cipherConfiguration);
+				"Only GCM and CBC modes are supported: " +
+					_encryptionAlgorithm);
 		}
-
-		_encryptionAlgorithm = parts[0];
-		_gcmTagLength = GetterUtil.getInteger(parts[1]);
-		_ivLength = GetterUtil.getInteger(parts[2]);
-		_keySize = GetterUtil.getInteger(parts[3]);
 
 		// Key algorithm is the first part of the transformation (e.g. AES)
 
@@ -233,15 +250,18 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 	}
 
 	private byte[] _blobToBytes(Blob blob) throws Exception {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		try (InputStream inputStream = blob.getBinaryStream()) {
+			ByteArrayOutputStream byteArrayOutputStream =
+				new ByteArrayOutputStream();
 
-		StreamUtil.transfer(blob.getBinaryStream(), byteArrayOutputStream);
+			StreamUtil.transfer(inputStream, byteArrayOutputStream);
 
-		return byteArrayOutputStream.toByteArray();
+			return byteArrayOutputStream.toByteArray();
+		}
 	}
 
 	private byte[] _decrypt(
-			SecretKey key, byte[] ciphertext, String ivBase64, String algorithm)
+			Key key, byte[] ciphertext, String ivBase64, String algorithm)
 		throws Exception {
 
 		Cipher cipher = Cipher.getInstance(algorithm);
@@ -254,7 +274,7 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 	}
 
 	private byte[] _encrypt(
-			SecretKey key, byte[] plaintext, byte[] iv, String algorithm)
+			Key key, byte[] plaintext, byte[] iv, String algorithm)
 		throws Exception {
 
 		Cipher cipher = Cipher.getInstance(algorithm);
@@ -276,6 +296,33 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 		}
 
 		return new IvParameterSpec(iv);
+	}
+
+	private String _parseAlgorithm(String configuration) {
+		String[] parts = StringUtil.split(configuration, ";");
+
+		if (parts.length > 0) {
+			return parts[0].trim();
+		}
+
+		return null;
+	}
+
+	private Map<String, String> _parseConfiguration(String configuration) {
+		Map<String, String> map = new HashMap<>();
+
+		String[] parts = StringUtil.split(configuration, ";");
+
+		// Skip the first part (the algorithm)
+		for (int i = 1; i < parts.length; i++) {
+			String[] keyValue = StringUtil.split(parts[i], "=");
+
+			if (keyValue.length == 2) {
+				map.put(keyValue[0].trim(), keyValue[1].trim());
+			}
+		}
+
+		return map;
 	}
 
 	@Reference

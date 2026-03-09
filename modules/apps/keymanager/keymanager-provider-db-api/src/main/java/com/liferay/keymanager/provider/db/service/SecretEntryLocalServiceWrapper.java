@@ -339,6 +339,11 @@ public class SecretEntryLocalServiceWrapper
 	}
 
 	@Override
+	public java.util.List<String> getSecretIdentifiers(long companyId) {
+		return _secretEntryLocalService.getSecretIdentifiers(companyId);
+	}
+
+	@Override
 	public java.io.InputStream openCiphertextBlobInputStream(
 		long secretEntryId) {
 

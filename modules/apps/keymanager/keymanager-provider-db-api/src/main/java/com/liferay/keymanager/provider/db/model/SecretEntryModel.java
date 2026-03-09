@@ -156,21 +156,6 @@ public interface SecretEntryModel
 	public void setEncryptedDEKBlob(Blob encryptedDEKBlob);
 
 	/**
-	 * Returns the dek iv of this secret entry.
-	 *
-	 * @return the dek iv of this secret entry
-	 */
-	@AutoEscape
-	public String getDekIv();
-
-	/**
-	 * Sets the dek iv of this secret entry.
-	 *
-	 * @param dekIv the dek iv of this secret entry
-	 */
-	public void setDekIv(String dekIv);
-
-	/**
 	 * Returns the kek reference of this secret entry.
 	 *
 	 * @return the kek reference of this secret entry
@@ -184,21 +169,6 @@ public interface SecretEntryModel
 	 * @param kekReference the kek reference of this secret entry
 	 */
 	public void setKekReference(String kekReference);
-
-	/**
-	 * Returns the algorithm of this secret entry.
-	 *
-	 * @return the algorithm of this secret entry
-	 */
-	@AutoEscape
-	public String getAlgorithm();
-
-	/**
-	 * Sets the algorithm of this secret entry.
-	 *
-	 * @param algorithm the algorithm of this secret entry
-	 */
-	public void setAlgorithm(String algorithm);
 
 	/**
 	 * Returns the create date of this secret entry.

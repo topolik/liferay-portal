@@ -295,6 +295,10 @@ public class SecretEntryLocalServiceUtil {
 		return getService().getSecretEntry(companyId, alias);
 	}
 
+	public static List<String> getSecretIdentifiers(long companyId) {
+		return getService().getSecretIdentifiers(companyId);
+	}
+
 	public static InputStream openCiphertextBlobInputStream(
 		long secretEntryId) {
 
