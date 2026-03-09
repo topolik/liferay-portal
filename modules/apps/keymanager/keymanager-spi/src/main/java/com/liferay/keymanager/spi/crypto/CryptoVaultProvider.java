@@ -17,7 +17,8 @@ import java.util.List;
  */
 public interface CryptoVaultProvider {
 
-	public void addPrivateKey(String identifier, CryptoKey privateKey)
+	public void addPrivateKey(
+			String identifier, CryptoKey privateKey, CryptoKey publicKey)
 		throws CryptoManagerException;
 
 	public void addPublicKey(String identifier, CryptoKey publicKey)

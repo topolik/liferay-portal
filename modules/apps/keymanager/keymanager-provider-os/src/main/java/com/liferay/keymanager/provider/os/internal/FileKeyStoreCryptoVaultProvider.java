@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.cert.Certificate;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -42,14 +43,16 @@ import org.osgi.service.component.annotations.Modified;
 public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
-	public void addPrivateKey(String identifier, CryptoKey privateKey)
+	public void addPrivateKey(
+			String identifier, CryptoKey privateKey, CryptoKey publicKey)
 		throws CryptoManagerException {
 
 		try {
 			KeyStore keyStore = _getKeyStore();
 
 			keyStore.setKeyEntry(
-				identifier, privateKey.getKey(), _password.toCharArray(), null);
+				identifier, privateKey.getKey(), _password.toCharArray(),
+				new Certificate[] {_createDummyCertificate()});
 
 			_saveKeyStore(keyStore);
 		}
@@ -193,6 +196,17 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 			fileKeyStoreCryptoVaultProviderConfiguration.keystorePassword();
 		_path = fileKeyStoreCryptoVaultProviderConfiguration.keystorePath();
 		_type = fileKeyStoreCryptoVaultProviderConfiguration.keystoreType();
+	}
+
+	private Certificate _createDummyCertificate() throws Exception {
+
+		// Java KeyStore requires a certificate chain for private keys. Since we
+		// don't use certificates for KeyManager, we generate a dummy one. For
+		// simplicity we throw an exception here requiring a real
+		// implementation.
+
+		throw new UnsupportedOperationException(
+			"Generation of dummy certificates is not yet implemented");
 	}
 
 	private KeyStore _getKeyStore() throws Exception {

@@ -8,6 +8,7 @@ package com.liferay.keymanager.provider.db.internal;
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
+import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.db.model.KeyEntry;
 import com.liferay.keymanager.provider.db.model.impl.KeyEntryImpl;
 import com.liferay.keymanager.provider.db.service.KeyEntryLocalService;
@@ -19,6 +20,10 @@ import com.liferay.portal.test.rule.LiferayUnitTestRule;
 import java.io.ByteArrayInputStream;
 
 import java.lang.reflect.Field;
+
+import java.security.Key;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,6 +68,38 @@ public class DBCryptoVaultProviderTest {
 			).build());
 
 		CompanyThreadLocal.setCompanyIdWithSafeCloseable(_COMPANY_ID);
+	}
+
+	@Test
+	public void testAddPublicKey() throws Exception {
+		String identifier = "new-public-key";
+
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+
+		keyPairGenerator.initialize(2048);
+
+		PublicKey publicKey = keyPairGenerator.generateKeyPair(
+		).getPublic();
+
+		Mockito.when(
+			_keyEntryLocalService.createKeyEntry(Mockito.anyLong())
+		).thenReturn(
+			new KeyEntryImpl()
+		);
+
+		String cipherSpec = "RSA";
+
+		_dbCryptoVaultProvider.addPublicKey(
+			identifier,
+			new CryptoKey(
+				KeyReference.fromString("${keyRef:db:test-pub-key}"), publicKey,
+				cipherSpec));
+
+		Mockito.verify(
+			_keyEntryLocalService
+		).updateKeyEntry(
+			Mockito.any(KeyEntry.class)
+		);
 	}
 
 	@Test
@@ -184,6 +221,14 @@ public class DBCryptoVaultProviderTest {
 
 		Assert.assertEquals(identifiers.toString(), 1, identifiers.size());
 		Assert.assertEquals("key-1", identifiers.get(0));
+	}
+
+	@Test(expected = CryptoManagerException.class)
+	public void testWrap() throws Exception {
+		String identifier = "test-key";
+		Key keyToWrap = Mockito.mock(Key.class);
+
+		_dbCryptoVaultProvider.wrap(identifier, keyToWrap);
 	}
 
 	private void _injectField(String fieldName, Object value) {

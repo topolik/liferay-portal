@@ -29,10 +29,8 @@ import java.nio.ByteBuffer;
 
 import java.security.Key;
 import java.security.KeyFactory;
-import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import java.sql.Blob;
@@ -40,7 +38,6 @@ import java.sql.Blob;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -63,7 +60,8 @@ import org.osgi.service.component.annotations.Reference;
 public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
-	public void addPrivateKey(String identifier, CryptoKey privateKey)
+	public void addPrivateKey(
+			String identifier, CryptoKey privateKey, CryptoKey publicKey)
 		throws CryptoManagerException {
 
 		try {
@@ -262,40 +260,6 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to list key identifiers", exception);
-		}
-	}
-
-	public PrivateKey getPrivateKey(String identifier)
-		throws CryptoManagerException {
-
-		try {
-			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
-				_getCompanyId(), identifier);
-
-			if (!Objects.equals(
-					keyEntry.getKeyType(), KeyType.PRIVATE.name())) {
-
-				return null;
-			}
-
-			Key key = _unwrapKey(keyEntry);
-
-			if (!(key instanceof PrivateKey)) {
-
-				// Reconstitute from PKCS8 if unwrapped as generic Key
-
-				KeyFactory keyFactory = KeyFactory.getInstance(
-					keyEntry.getAlgorithm());
-
-				return keyFactory.generatePrivate(
-					new PKCS8EncodedKeySpec(key.getEncoded()));
-			}
-
-			return (PrivateKey)key;
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to get private key: " + identifier, exception);
 		}
 	}
 

@@ -81,15 +81,15 @@ public class CryptoManagerImplTest {
 
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		CryptoKey cryptoKey = new CryptoKey(keyRef, secretKey, "cipher");
+		CryptoKey privateKey = new CryptoKey(keyRef, secretKey, "cipher");
+		CryptoKey publicKey = new CryptoKey(keyRef, secretKey, "cipher");
 
-		_cryptoManagerImpl.addPrivateKey(keyRef, cryptoKey);
+		_cryptoManagerImpl.addPrivateKey(keyRef, privateKey, publicKey);
 
 		Mockito.verify(
 			_cryptoVaultProvider
 		).addPrivateKey(
-			"my-priv-key", cryptoKey
-		);
+			"my-priv-key", privateKey, publicKey);
 	}
 
 	@Test

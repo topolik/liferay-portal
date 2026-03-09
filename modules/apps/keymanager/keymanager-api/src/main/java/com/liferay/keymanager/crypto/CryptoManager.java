@@ -19,7 +19,9 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface CryptoManager {
 
-	public void addPrivateKey(KeyReference keyReference, CryptoKey privateKey)
+	public void addPrivateKey(
+			KeyReference keyReference, CryptoKey privateKey,
+			CryptoKey publicKey)
 		throws CryptoManagerException;
 
 	public void addPublicKey(KeyReference keyReference, CryptoKey publicKey)

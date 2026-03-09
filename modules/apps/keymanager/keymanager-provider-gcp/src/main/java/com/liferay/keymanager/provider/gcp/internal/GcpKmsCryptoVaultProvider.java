@@ -52,7 +52,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	@Override
 	public void addPrivateKey(
 			String identifier,
-			com.liferay.keymanager.crypto.CryptoKey privateKey)
+			com.liferay.keymanager.crypto.CryptoKey privateKey,
+			com.liferay.keymanager.crypto.CryptoKey publicKey)
 		throws CryptoManagerException {
 
 		throw new CryptoManagerException("Operation not supported");

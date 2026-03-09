@@ -31,14 +31,16 @@ import org.osgi.service.component.annotations.Deactivate;
 public class CryptoManagerImpl implements CryptoManager {
 
 	@Override
-	public void addPrivateKey(KeyReference keyReference, CryptoKey privateKey)
+	public void addPrivateKey(
+			KeyReference keyReference, CryptoKey privateKey,
+			CryptoKey publicKey)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
 			keyReference.getProviderId());
 
 		cryptoVaultProvider.addPrivateKey(
-			keyReference.getIdentifier(), privateKey);
+			keyReference.getIdentifier(), privateKey, publicKey);
 	}
 
 	@Override

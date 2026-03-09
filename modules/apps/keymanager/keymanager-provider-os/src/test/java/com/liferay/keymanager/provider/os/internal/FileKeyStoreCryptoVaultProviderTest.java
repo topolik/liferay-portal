@@ -7,12 +7,17 @@ package com.liferay.keymanager.provider.os.internal;
 
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
+import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.io.File;
 
 import java.security.Key;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -55,6 +60,43 @@ public class FileKeyStoreCryptoVaultProviderTest {
 			).build());
 	}
 
+	@Test(expected = CryptoManagerException.class)
+	public void testAddPrivateKey() throws Exception {
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+
+		keyPairGenerator.initialize(2048);
+
+		KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
+		PrivateKey privateKey = keyPair.getPrivate();
+		PublicKey publicKey = keyPair.getPublic();
+
+		_provider.addPrivateKey(
+			"test-private-key",
+			new CryptoKey(
+				KeyReference.fromString("${keyRef:os:test-private-key}"),
+				privateKey, null),
+			new CryptoKey(
+				KeyReference.fromString("${keyRef:os:test-public-key}"),
+				publicKey, null));
+	}
+
+	@Test(expected = CryptoManagerException.class)
+	public void testAddPublicKey() throws Exception {
+		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+
+		keyPairGenerator.initialize(2048);
+
+		PublicKey publicKey = keyPairGenerator.generateKeyPair(
+		).getPublic();
+
+		_provider.addPublicKey(
+			"test-public-key",
+			new CryptoKey(
+				KeyReference.fromString("${keyRef:os:test-public-key}"),
+				publicKey, null));
+	}
+
 	@Test
 	public void testAutoCreateDirectory() throws Exception {
 		File deepDir = new File(
@@ -93,6 +135,11 @@ public class FileKeyStoreCryptoVaultProviderTest {
 		Assert.assertTrue(deepDir.exists());
 	}
 
+	@Test(expected = CryptoManagerException.class)
+	public void testDecrypt() throws Exception {
+		_provider.decrypt("identifier", "ciphertext".getBytes());
+	}
+
 	@Test
 	public void testDeleteKey() throws Exception {
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
@@ -120,6 +167,11 @@ public class FileKeyStoreCryptoVaultProviderTest {
 			).contains(
 				"delete-me"
 			));
+	}
+
+	@Test(expected = CryptoManagerException.class)
+	public void testEncrypt() throws Exception {
+		_provider.encrypt("identifier", "plaintext".getBytes());
 	}
 
 	@Test
