@@ -8,15 +8,10 @@ package com.liferay.keymanager.crypto;
 import com.liferay.keymanager.KeyReference;
 
 import java.security.Key;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 
 import java.util.List;
 
-import javax.crypto.SecretKey;
-
-import com.liferay.keymanager.secret.SecretManagerException;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -24,6 +19,15 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public interface CryptoManager {
+
+	public void addPrivateKey(KeyReference keyReference, CryptoKey privateKey)
+		throws CryptoManagerException;
+
+	public void addPublicKey(KeyReference keyReference, CryptoKey publicKey)
+		throws CryptoManagerException;
+
+	public void addSecretKey(KeyReference keyReference, CryptoKey secretKey)
+		throws CryptoManagerException;
 
 	public byte[] decrypt(KeyReference keyReference, byte[] ciphertext)
 		throws CryptoManagerException;
@@ -37,21 +41,9 @@ public interface CryptoManager {
 	public List<KeyReference> getKeyIdentifiers(String providerId)
 		throws CryptoManagerException;
 
+	public List<String> getProviders() throws CryptoManagerException;
+
 	public PublicKey getPublicKey(KeyReference keyReference)
-		throws CryptoManagerException;
-
-	public List<String> getProviders() throws SecretManagerException;
-
-	public void addPrivateKey(
-			KeyReference keyReference, CryptoKey privateKey)
-		throws CryptoManagerException;
-
-	public void addPublicKey(
-			KeyReference keyReference, CryptoKey publicKey)
-		throws CryptoManagerException;
-
-	public void addSecretKey(
-			KeyReference keyReference, CryptoKey secretKey)
 		throws CryptoManagerException;
 
 	public Key unwrap(

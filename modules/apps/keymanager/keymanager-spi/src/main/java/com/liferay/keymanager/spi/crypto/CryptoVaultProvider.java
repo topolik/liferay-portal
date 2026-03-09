@@ -5,24 +5,31 @@
 
 package com.liferay.keymanager.spi.crypto;
 
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 
 import java.security.Key;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 
 import java.util.List;
 
-import javax.crypto.SecretKey;
-
-import org.osgi.annotation.versioning.ConsumerType;
-
 /**
  * @author Tomas Polesovsky
  */
-@ConsumerType
 public interface CryptoVaultProvider {
+
+	public void addCertificate(String identifier, Certificate certificate)
+		throws CryptoManagerException;
+
+	public void addPrivateKey(String identifier, CryptoKey privateKey)
+		throws CryptoManagerException;
+
+	public void addPublicKey(String identifier, CryptoKey publicKey)
+		throws CryptoManagerException;
+
+	public void addSecretKey(String identifier, CryptoKey secretKey)
+		throws CryptoManagerException;
 
 	public byte[] decrypt(String identifier, byte[] ciphertext)
 		throws CryptoManagerException;
@@ -35,22 +42,6 @@ public interface CryptoVaultProvider {
 	public List<String> getKeyIdentifiers() throws CryptoManagerException;
 
 	public PublicKey getPublicKey(String identifier)
-		throws CryptoManagerException;
-
-	public void addCertificate(String identifier, Certificate certificate)
-		throws CryptoManagerException;
-
-	public void addPrivateKey(
-			String identifier, PrivateKey privateKey,
-			Certificate[] certificateChain, String cipherSpec)
-		throws CryptoManagerException;
-
-	public void addPublicKey(
-			String identifier, PublicKey publicKey, String cipherSpec)
-		throws CryptoManagerException;
-
-	public void addSecretKey(
-			String identifier, SecretKey secretKey, String cipherSpec)
 		throws CryptoManagerException;
 
 	public Key unwrap(

@@ -5,6 +5,8 @@
 
 package com.liferay.keymanager.provider.os.internal;
 
+import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
@@ -33,9 +35,6 @@ public class FileKeyStoreCryptoVaultProviderTest {
 	public static final LiferayUnitTestRule liferayUnitTestRule =
 		LiferayUnitTestRule.INSTANCE;
 
-	@Rule
-	public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
 	@Before
 	public void setUp() throws Exception {
 		_provider = new FileKeyStoreCryptoVaultProvider();
@@ -58,7 +57,8 @@ public class FileKeyStoreCryptoVaultProviderTest {
 
 	@Test
 	public void testAutoCreateDirectory() throws Exception {
-		File deepDir = new File(temporaryFolder.getRoot(), "deep/path/test.jks");
+		File deepDir = new File(
+			temporaryFolder.getRoot(), "deep/path/test.jks");
 
 		FileKeyStoreCryptoVaultProvider provider =
 			new FileKeyStoreCryptoVaultProvider();
@@ -77,11 +77,18 @@ public class FileKeyStoreCryptoVaultProviderTest {
 			).build());
 
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+
 		keyGenerator.init(256);
+
 		SecretKey secretKey = keyGenerator.generateKey();
 
 		// Writing a key should trigger directory creation and keystore save
-		provider.addSecretKey("test-key", secretKey, null);
+
+		provider.addSecretKey(
+			"test-key",
+			new CryptoKey(
+				KeyReference.fromString("${keyRef:os:test-key}"), secretKey,
+				null));
 
 		Assert.assertTrue(deepDir.exists());
 	}
@@ -89,16 +96,30 @@ public class FileKeyStoreCryptoVaultProviderTest {
 	@Test
 	public void testDeleteKey() throws Exception {
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+
 		keyGenerator.init(256);
+
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		_provider.addSecretKey("delete-me", secretKey, null);
+		_provider.addSecretKey(
+			"delete-me",
+			new CryptoKey(
+				KeyReference.fromString("${keyRef:os:delete-me}"), secretKey,
+				null));
 
-		Assert.assertTrue(_provider.getKeyIdentifiers().contains("delete-me"));
+		Assert.assertTrue(
+			_provider.getKeyIdentifiers(
+			).contains(
+				"delete-me"
+			));
 
 		_provider.deleteKey("delete-me");
 
-		Assert.assertFalse(_provider.getKeyIdentifiers().contains("delete-me"));
+		Assert.assertFalse(
+			_provider.getKeyIdentifiers(
+			).contains(
+				"delete-me"
+			));
 	}
 
 	@Test
@@ -106,24 +127,46 @@ public class FileKeyStoreCryptoVaultProviderTest {
 		String identifier = "my-key";
 
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+
 		keyGenerator.init(256);
+
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		_provider.addSecretKey(identifier, secretKey, null);
+		_provider.addSecretKey(
+			identifier,
+			new CryptoKey(
+				KeyReference.fromString("${keyRef:os:" + identifier + "}"),
+				secretKey, null));
 
 		// 1. Verify it's in the list
-		Assert.assertTrue(_provider.getKeyIdentifiers().contains(identifier));
+
+		Assert.assertTrue(
+			_provider.getKeyIdentifiers(
+			).contains(
+				identifier
+			));
 
 		// 2. Verify Wrap/Unwrap (Operational use for KEK)
+
 		byte[] data = new byte[32];
-		for (int i = 0; i < 32; i++) data[i] = (byte)i;
+
+		for (int i = 0; i < 32; i++) {
+			data[i] = (byte)i;
+		}
 
 		byte[] wrapped = _provider.wrap(identifier, secretKey);
+
 		Assert.assertNotNull(wrapped);
 
-		Key unwrapped = _provider.unwrap(identifier, wrapped, "AES", Cipher.SECRET_KEY);
-		Assert.assertArrayEquals(secretKey.getEncoded(), unwrapped.getEncoded());
+		Key unwrapped = _provider.unwrap(
+			identifier, wrapped, "AES", Cipher.SECRET_KEY);
+
+		Assert.assertArrayEquals(
+			secretKey.getEncoded(), unwrapped.getEncoded());
 	}
+
+	@Rule
+	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
 	private File _keystoreFile;
 	private FileKeyStoreCryptoVaultProvider _provider;

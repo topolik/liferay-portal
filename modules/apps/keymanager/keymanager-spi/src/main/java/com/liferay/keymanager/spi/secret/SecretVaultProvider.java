@@ -10,12 +10,9 @@ import com.liferay.keymanager.secret.SecureSecret;
 
 import java.util.List;
 
-import org.osgi.annotation.versioning.ConsumerType;
-
 /**
  * @author Tomas Polesovsky
  */
-@ConsumerType
 public interface SecretVaultProvider {
 
 	public void deleteSecret(String identifier) throws SecretManagerException;
@@ -25,7 +22,7 @@ public interface SecretVaultProvider {
 
 	public List<String> getSecretIdentifiers() throws SecretManagerException;
 
-	public SecureSecret putSecret(SecureSecret secureSecret)
+	public void putSecret(SecureSecret secureSecret)
 		throws SecretManagerException;
 
 }

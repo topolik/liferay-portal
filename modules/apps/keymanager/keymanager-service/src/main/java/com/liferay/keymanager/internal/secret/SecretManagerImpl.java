@@ -12,7 +12,9 @@ import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.petra.string.StringBundler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.osgi.framework.BundleContext;
@@ -30,31 +32,58 @@ public class SecretManagerImpl implements SecretManager {
 	public void deleteSecret(KeyReference keyReference)
 		throws SecretManagerException {
 
-		_getSecretVaultProvider(keyReference).deleteSecret(
-			keyReference.getIdentifier());
+		_getSecretVaultProvider(
+			keyReference
+		).deleteSecret(
+			keyReference.getIdentifier()
+		);
+	}
+
+	@Override
+	public List<String> getProviders() throws SecretManagerException {
+		return new ArrayList<>(_serviceTrackerMap.keySet());
 	}
 
 	@Override
 	public SecureSecret getSecret(KeyReference keyReference)
 		throws SecretManagerException {
 
-		return _getSecretVaultProvider(keyReference).getSecret(
-			keyReference.getIdentifier());
+		return _getSecretVaultProvider(
+			keyReference
+		).getSecret(
+			keyReference.getIdentifier()
+		);
 	}
 
 	@Override
 	public List<KeyReference> getSecretIdentifiers(String providerId)
 		throws SecretManagerException {
 
-		return _getSecretVaultProvider(providerId).getSecretIdentifiers();
+		List<String> identifiers = _getSecretVaultProvider(
+			providerId
+		).getSecretIdentifiers();
+
+		List<KeyReference> keyReferences = new ArrayList<>(identifiers.size());
+
+		for (String identifier : identifiers) {
+			keyReferences.add(
+				KeyReference.fromString(
+					StringBundler.concat(
+						"${secretRef:", providerId, ":", identifier, "}")));
+		}
+
+		return keyReferences;
 	}
 
 	@Override
 	public void putSecret(SecureSecret secureSecret)
 		throws SecretManagerException {
 
-		_getSecretVaultProvider(secureSecret.getKeyReference()).putSecret(
-			secureSecret);
+		_getSecretVaultProvider(
+			secureSecret.getKeyReference()
+		).putSecret(
+			secureSecret
+		);
 	}
 
 	@Activate

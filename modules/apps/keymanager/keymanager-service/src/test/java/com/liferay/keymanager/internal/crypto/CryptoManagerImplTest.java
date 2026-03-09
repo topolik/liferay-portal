@@ -6,6 +6,7 @@
 package com.liferay.keymanager.internal.crypto;
 
 import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
@@ -24,6 +25,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -42,7 +44,7 @@ public class CryptoManagerImplTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
-		_cryptoManager = new CryptoManagerImpl();
+		_cryptoManagerImpl = new CryptoManagerImpl();
 
 		// Manually inject mock ServiceTrackerMap
 
@@ -51,12 +53,37 @@ public class CryptoManagerImplTest {
 
 		field.setAccessible(true);
 
-		field.set(_cryptoManager, _serviceTrackerMap);
+		field.set(_cryptoManagerImpl, _serviceTrackerMap);
 
 		Mockito.when(
 			_serviceTrackerMap.getService("test-crypto-provider")
 		).thenReturn(
 			_cryptoVaultProvider
+		);
+	}
+
+	@Test
+	public void testAddSecretKey() throws Exception {
+		KeyReference keyRef = KeyReference.fromString(
+			"${keyRef:test-crypto-provider:my-key}");
+
+		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+
+		keyGenerator.init(256);
+
+		SecretKey secretKey = keyGenerator.generateKey();
+
+		String cipherSpec =
+			"cipher=AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128";
+
+		CryptoKey cryptoKey = new CryptoKey(keyRef, secretKey, cipherSpec);
+
+		_cryptoManagerImpl.addSecretKey(keyRef, cryptoKey);
+
+		Mockito.verify(
+			_cryptoVaultProvider
+		).addSecretKey(
+			"my-key", cryptoKey
 		);
 	}
 
@@ -74,9 +101,17 @@ public class CryptoManagerImplTest {
 			ciphertext
 		);
 
-		byte[] result = _cryptoManager.encrypt(keyRef, plaintext);
+		byte[] result = _cryptoManagerImpl.encrypt(keyRef, plaintext);
 
 		Assert.assertArrayEquals(ciphertext, result);
+	}
+
+	@Test(expected = CryptoManagerException.class)
+	public void testEncryptWrongProvider() throws Exception {
+		KeyReference keyRef = KeyReference.fromString(
+			"${keyRef:wrong-provider:my-key}");
+
+		_cryptoManagerImpl.encrypt(keyRef, "data".getBytes());
 	}
 
 	@Test
@@ -89,43 +124,28 @@ public class CryptoManagerImplTest {
 			identifiers
 		);
 
-		List<String> result = _cryptoManager.getKeyIdentifiers(
+		List<KeyReference> result = _cryptoManagerImpl.getKeyIdentifiers(
 			"test-crypto-provider");
 
-		Assert.assertEquals(identifiers, result);
+		Assert.assertEquals(result.toString(), 1, result.size());
+		Assert.assertEquals(
+			"key-1",
+			result.get(
+				0
+			).getIdentifier());
+		Assert.assertEquals(
+			"test-crypto-provider",
+			result.get(
+				0
+			).getProviderId());
 	}
 
-	@Test
-	public void testAddSecretKey() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${keyRef:test-crypto-provider:my-key}");
-
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-		keyGenerator.init(256);
-		SecretKey secretKey = keyGenerator.generateKey();
-
-		String cipherSpec = "cipher=AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128";
-
-		_cryptoManager.addSecretKey(keyRef, secretKey, cipherSpec);
-
-		Mockito.verify(_cryptoVaultProvider).addSecretKey(
-			"my-key", secretKey, cipherSpec);
-	}
-
-	@Test(expected = CryptoManagerException.class)
-	public void testEncryptWrongProvider() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${keyRef:wrong-provider:my-key}");
-
-		_cryptoManager.encrypt(keyRef, "data".getBytes());
-	}
+	private CryptoManagerImpl _cryptoManagerImpl;
 
 	@Mock
 	private CryptoVaultProvider _cryptoVaultProvider;
 
 	@Mock
 	private ServiceTrackerMap<String, CryptoVaultProvider> _serviceTrackerMap;
-
-	private CryptoManagerImpl _cryptoManager;
 
 }

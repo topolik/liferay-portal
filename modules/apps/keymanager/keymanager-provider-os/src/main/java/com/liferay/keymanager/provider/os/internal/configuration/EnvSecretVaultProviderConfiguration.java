@@ -12,23 +12,24 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 /**
  * @author Tomas Polesovsky
  */
-@ExtendedObjectClassDefinition(category = "security")
+@ExtendedObjectClassDefinition(category = "security-tools")
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "env-secret-vault-provider-configuration"
+	name = "env-secret-vault-provider-configuration-name"
 )
 public interface EnvSecretVaultProviderConfiguration {
 
 	@Meta.AD(
-		deflt = "LIFERAY_SECRET_", description = "env-variable-prefix-description",
+		deflt = "LIFERAY_SECRET_",
+		description = "env-variable-prefix-description",
 		name = "env-variable-prefix", required = false
 	)
 	public String envVariablePrefix();
 
 	@Meta.AD(
 		deflt = "env", description = "provider-id-description",
-		name = "provider-id", required = true
+		name = "provider-id"
 	)
 	public String providerId();
 

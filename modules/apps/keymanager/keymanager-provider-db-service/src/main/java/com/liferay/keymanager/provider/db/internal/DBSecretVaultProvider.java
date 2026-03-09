@@ -138,7 +138,7 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 	}
 
 	@Override
-	public SecureSecret putSecret(SecureSecret secureSecret)
+	public void putSecret(SecureSecret secureSecret)
 		throws SecretManagerException {
 
 		byte[] dekBytes = null;
@@ -196,8 +196,6 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 			secretEntry.setKekReference(_masterKeyReference);
 
 			_secretEntryLocalService.updateSecretEntry(secretEntry);
-
-			return secureSecret;
 		}
 		catch (Exception exception) {
 			throw new SecretManagerException(

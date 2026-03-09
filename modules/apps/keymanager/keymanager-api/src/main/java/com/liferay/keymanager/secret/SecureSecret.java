@@ -34,16 +34,24 @@ public final class SecureSecret implements AutoCloseable {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof SecureSecret that))
-			return false;
-		
-		return Objects.deepEquals(_bytes, that._bytes) && Objects.equals(_keyReference, that._keyReference);
-	}
+	public boolean equals(Object object) {
+		if (this == object) {
+			return true;
+		}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(Arrays.hashCode(_bytes), _keyReference);
+		if (!(object instanceof SecureSecret)) {
+			return false;
+		}
+
+		SecureSecret secureSecret = (SecureSecret)object;
+
+		if (Arrays.equals(_bytes, secureSecret._bytes) &&
+			Objects.equals(_keyReference, secureSecret._keyReference)) {
+
+			return true;
+		}
+
+		return false;
 	}
 
 	public byte[] getBytes() {
@@ -52,6 +60,11 @@ public final class SecureSecret implements AutoCloseable {
 
 	public KeyReference getKeyReference() {
 		return _keyReference;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(Arrays.hashCode(_bytes), _keyReference);
 	}
 
 	private final byte[] _bytes;

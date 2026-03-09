@@ -6,7 +6,6 @@
 package com.liferay.keymanager.internal.secret;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
@@ -23,6 +22,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -41,7 +41,7 @@ public class SecretManagerImplTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
-		_secretManager = new SecretManagerImpl();
+		_secretManagerImpl = new SecretManagerImpl();
 
 		// Manually inject mock ServiceTrackerMap
 
@@ -50,7 +50,7 @@ public class SecretManagerImplTest {
 
 		field.setAccessible(true);
 
-		field.set(_secretManager, _serviceTrackerMap);
+		field.set(_secretManagerImpl, _serviceTrackerMap);
 
 		Mockito.when(
 			_serviceTrackerMap.getService("test-provider")
@@ -72,7 +72,7 @@ public class SecretManagerImplTest {
 			mockSecret
 		);
 
-		SecureSecret result = _secretManager.getSecret(keyRef);
+		SecureSecret result = _secretManagerImpl.getSecret(keyRef);
 
 		Assert.assertEquals(mockSecret, result);
 	}
@@ -87,22 +87,20 @@ public class SecretManagerImplTest {
 			identifiers
 		);
 
-		List<String> result = _secretManager.getSecretIdentifiers(
+		List<KeyReference> result = _secretManagerImpl.getSecretIdentifiers(
 			"test-provider");
 
-		Assert.assertEquals(identifiers, result);
-	}
-
-	@Test
-	public void testPutSecret() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${secretRef:test-provider:my-new-secret}");
-
-		SecureSecret secureSecret = new SecureSecret(keyRef, "new-data".getBytes());
-
-		_secretManager.putSecret(secureSecret);
-
-		Mockito.verify(_secretVaultProvider).putSecret(secureSecret);
+		Assert.assertEquals(result.toString(), 1, result.size());
+		Assert.assertEquals(
+			"secret-1",
+			result.get(
+				0
+			).getIdentifier());
+		Assert.assertEquals(
+			"test-provider",
+			result.get(
+				0
+			).getProviderId());
 	}
 
 	@Test(expected = SecretManagerException.class)
@@ -110,15 +108,32 @@ public class SecretManagerImplTest {
 		KeyReference keyRef = KeyReference.fromString(
 			"${secretRef:wrong-provider:my-secret}");
 
-		_secretManager.getSecret(keyRef);
+		_secretManagerImpl.getSecret(keyRef);
 	}
+
+	@Test
+	public void testPutSecret() throws Exception {
+		KeyReference keyRef = KeyReference.fromString(
+			"${secretRef:test-provider:my-new-secret}");
+
+		SecureSecret secureSecret = new SecureSecret(
+			keyRef, "new-data".getBytes());
+
+		_secretManagerImpl.putSecret(secureSecret);
+
+		Mockito.verify(
+			_secretVaultProvider
+		).putSecret(
+			secureSecret
+		);
+	}
+
+	private SecretManagerImpl _secretManagerImpl;
 
 	@Mock
 	private SecretVaultProvider _secretVaultProvider;
 
 	@Mock
 	private ServiceTrackerMap<String, SecretVaultProvider> _serviceTrackerMap;
-
-	private SecretManagerImpl _secretManager;
 
 }

@@ -20,13 +20,12 @@ public interface SecretManager {
 	public void deleteSecret(KeyReference keyReference)
 		throws SecretManagerException;
 
+	public List<String> getProviders() throws SecretManagerException;
+
 	public SecureSecret getSecret(KeyReference keyReference)
 		throws SecretManagerException;
 
 	public List<KeyReference> getSecretIdentifiers(String providerId)
-		throws SecretManagerException;
-
-	public List<String> getProviders()
 		throws SecretManagerException;
 
 	public void putSecret(SecureSecret secureSecret)

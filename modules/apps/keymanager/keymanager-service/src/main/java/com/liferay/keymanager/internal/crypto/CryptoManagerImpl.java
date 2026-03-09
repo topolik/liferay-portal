@@ -6,20 +6,19 @@
 package com.liferay.keymanager.internal.crypto;
 
 import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.petra.string.StringBundler;
 
 import java.security.Key;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.cert.Certificate;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.crypto.SecretKey;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
@@ -31,6 +30,39 @@ import org.osgi.service.component.annotations.Deactivate;
  */
 @Component(service = CryptoManager.class)
 public class CryptoManagerImpl implements CryptoManager {
+
+	@Override
+	public void addPrivateKey(KeyReference keyReference, CryptoKey privateKey)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		cryptoVaultProvider.addPrivateKey(
+			keyReference.getIdentifier(), privateKey);
+	}
+
+	@Override
+	public void addPublicKey(KeyReference keyReference, CryptoKey publicKey)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		cryptoVaultProvider.addPublicKey(
+			keyReference.getIdentifier(), publicKey);
+	}
+
+	@Override
+	public void addSecretKey(KeyReference keyReference, CryptoKey secretKey)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		cryptoVaultProvider.addSecretKey(
+			keyReference.getIdentifier(), secretKey);
+	}
 
 	@Override
 	public byte[] decrypt(KeyReference keyReference, byte[] ciphertext)
@@ -65,13 +97,29 @@ public class CryptoManagerImpl implements CryptoManager {
 	}
 
 	@Override
-	public List<String> getKeyIdentifiers(String providerId)
+	public List<KeyReference> getKeyIdentifiers(String providerId)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
 			providerId);
 
-		return cryptoVaultProvider.getKeyIdentifiers();
+		List<String> identifiers = cryptoVaultProvider.getKeyIdentifiers();
+
+		List<KeyReference> keyReferences = new ArrayList<>(identifiers.size());
+
+		for (String identifier : identifiers) {
+			keyReferences.add(
+				KeyReference.fromString(
+					StringBundler.concat(
+						"${keyRef:", providerId, ":", identifier, "}")));
+		}
+
+		return keyReferences;
+	}
+
+	@Override
+	public List<String> getProviders() throws CryptoManagerException {
+		return new ArrayList<>(_serviceTrackerMap.keySet());
 	}
 
 	@Override
@@ -82,56 +130,6 @@ public class CryptoManagerImpl implements CryptoManager {
 			keyReference.getProviderId());
 
 		return cryptoVaultProvider.getPublicKey(keyReference.getIdentifier());
-	}
-
-	@Override
-	public void addCertificate(
-			KeyReference keyReference, Certificate certificate)
-		throws CryptoManagerException {
-
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
-
-		cryptoVaultProvider.addCertificate(
-			keyReference.getIdentifier(), certificate);
-	}
-
-	@Override
-	public void addPrivateKey(
-			KeyReference keyReference, PrivateKey privateKey,
-			Certificate[] certificateChain, String cipherSpec)
-		throws CryptoManagerException {
-
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
-
-		cryptoVaultProvider.addPrivateKey(
-			keyReference.getIdentifier(), privateKey, certificateChain,
-			cipherSpec);
-	}
-
-	@Override
-	public void addPublicKey(
-			KeyReference keyReference, PublicKey publicKey, String cipherSpec)
-		throws CryptoManagerException {
-
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
-
-		cryptoVaultProvider.addPublicKey(
-			keyReference.getIdentifier(), publicKey, cipherSpec);
-	}
-
-	@Override
-	public void addSecretKey(
-			KeyReference keyReference, SecretKey secretKey, String cipherSpec)
-		throws CryptoManagerException {
-
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
-
-		cryptoVaultProvider.addSecretKey(
-			keyReference.getIdentifier(), secretKey, cipherSpec);
 	}
 
 	@Override

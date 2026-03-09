@@ -85,7 +85,7 @@ public class EnvSecretVaultProvider implements SecretVaultProvider {
 	}
 
 	@Override
-	public SecureSecret putSecret(SecureSecret secureSecret)
+	public void putSecret(SecureSecret secureSecret)
 		throws SecretManagerException {
 
 		throw new SecretManagerException("Read-only provider");
@@ -108,7 +108,7 @@ public class EnvSecretVaultProvider implements SecretVaultProvider {
 		return System.getenv(name);
 	}
 
-	private String _envVariablePrefix;
-	private String _providerId;
+	private volatile String _envVariablePrefix;
+	private volatile String _providerId;
 
 }

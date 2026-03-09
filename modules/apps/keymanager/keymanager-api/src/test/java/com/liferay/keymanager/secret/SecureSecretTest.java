@@ -40,6 +40,21 @@ public class SecureSecretTest {
 	}
 
 	@Test
+	public void testSecureSecretReturnsSameInstance() {
+		KeyReference keyReference = KeyReference.fromString(
+			"${secretRef:db:alias}");
+
+		byte[] data = {1, 2, 3, 4};
+
+		SecureSecret secureSecret = new SecureSecret(keyReference, data);
+
+		byte[] internalBytes1 = secureSecret.getBytes();
+		byte[] internalBytes2 = secureSecret.getBytes();
+
+		Assert.assertSame(internalBytes1, internalBytes2);
+	}
+
+	@Test
 	public void testSecureSecretZeroing() {
 		KeyReference keyReference = KeyReference.fromString(
 			"${secretRef:db:alias}");

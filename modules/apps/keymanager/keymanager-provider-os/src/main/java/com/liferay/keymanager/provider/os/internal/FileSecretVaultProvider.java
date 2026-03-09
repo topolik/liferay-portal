@@ -48,15 +48,17 @@ public class FileSecretVaultProvider implements SecretVaultProvider {
 		try {
 			File file = new File(_secretsDirectory, identifier);
 
-			String canonicalPath = file.getCanonicalPath();
+			if (!StringUtil.startsWith(
+					file.getCanonicalPath(), _secretsDirectoryPath)) {
 
-			if (!StringUtil.startsWith(canonicalPath, _secretsDirectoryPath)) {
 				throw new SecretManagerException(
-					"Invalid secret identifier (Path Traversal): " + identifier);
+					"Invalid secret identifier (Path Traversal): " +
+						identifier);
 			}
 
 			if (!file.exists()) {
-				throw new SecretManagerException("Secret file not found: " + file);
+				throw new SecretManagerException(
+					"Secret file not found: " + file);
 			}
 
 			byte[] bytes = FileUtil.getBytes(file);
@@ -91,7 +93,7 @@ public class FileSecretVaultProvider implements SecretVaultProvider {
 	}
 
 	@Override
-	public SecureSecret putSecret(SecureSecret secureSecret)
+	public void putSecret(SecureSecret secureSecret)
 		throws SecretManagerException {
 
 		throw new SecretManagerException("Read-only provider");
@@ -106,11 +108,14 @@ public class FileSecretVaultProvider implements SecretVaultProvider {
 					FileSecretVaultProviderConfiguration.class, properties);
 
 		_providerId = fileSecretVaultProviderConfiguration.providerId();
+
 		_secretsDirectory =
 			fileSecretVaultProviderConfiguration.secretsDirectory();
 
 		try {
-			_secretsDirectoryPath = new File(_secretsDirectory).getCanonicalPath();
+			_secretsDirectoryPath = new File(
+				_secretsDirectory
+			).getCanonicalPath();
 
 			if (!_secretsDirectoryPath.endsWith(File.separator)) {
 				_secretsDirectoryPath = _secretsDirectoryPath.concat(
@@ -147,8 +152,8 @@ public class FileSecretVaultProvider implements SecretVaultProvider {
 		}
 	}
 
-	private String _providerId;
-	private String _secretsDirectory;
-	private String _secretsDirectoryPath;
+	private volatile String _providerId;
+	private volatile String _secretsDirectory;
+	private volatile String _secretsDirectoryPath;
 
 }

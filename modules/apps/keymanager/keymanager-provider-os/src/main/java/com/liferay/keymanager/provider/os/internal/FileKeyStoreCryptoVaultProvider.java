@@ -5,12 +5,12 @@
 
 package com.liferay.keymanager.provider.os.internal;
 
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.os.internal.configuration.FileKeyStoreCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +18,6 @@ import java.io.FileOutputStream;
 
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -44,6 +42,66 @@ import org.osgi.service.component.annotations.Modified;
 	service = CryptoVaultProvider.class
 )
 public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
+
+	@Override
+	public void addCertificate(String identifier, Certificate certificate)
+		throws CryptoManagerException {
+
+		try {
+			KeyStore keyStore = _getKeyStore();
+
+			keyStore.setCertificateEntry(identifier, certificate);
+
+			_saveKeyStore(keyStore);
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to put certificate: " + identifier, exception);
+		}
+	}
+
+	@Override
+	public void addPrivateKey(String identifier, CryptoKey privateKey)
+		throws CryptoManagerException {
+
+		try {
+			KeyStore keyStore = _getKeyStore();
+
+			keyStore.setKeyEntry(
+				identifier, privateKey.getKey(), _password.toCharArray(), null);
+
+			_saveKeyStore(keyStore);
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to add private key: " + identifier, exception);
+		}
+	}
+
+	@Override
+	public void addPublicKey(String identifier, CryptoKey publicKey)
+		throws CryptoManagerException {
+
+		throw new CryptoManagerException("Operation not supported");
+	}
+
+	@Override
+	public void addSecretKey(String identifier, CryptoKey secretKey)
+		throws CryptoManagerException {
+
+		try {
+			KeyStore keyStore = _getKeyStore();
+
+			keyStore.setKeyEntry(
+				identifier, secretKey.getKey(), _password.toCharArray(), null);
+
+			_saveKeyStore(keyStore);
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to add secret key: " + identifier, exception);
+		}
+	}
 
 	@Override
 	public byte[] decrypt(String identifier, byte[] ciphertext)
@@ -81,10 +139,10 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 
 			List<String> identifiers = new ArrayList<>();
 
-			Enumeration<String> aliases = keyStore.aliases();
+			Enumeration<String> enumeration = keyStore.aliases();
 
-			while (aliases.hasMoreElements()) {
-				identifiers.add(aliases.nextElement());
+			while (enumeration.hasMoreElements()) {
+				identifiers.add(enumeration.nextElement());
 			}
 
 			return identifiers;
@@ -112,71 +170,6 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to get public key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addCertificate(String identifier, Certificate certificate)
-		throws CryptoManagerException {
-
-		try {
-			KeyStore keyStore = _getKeyStore();
-
-			keyStore.setCertificateEntry(identifier, certificate);
-
-			_saveKeyStore(keyStore);
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put certificate: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addPrivateKey(
-			String identifier, PrivateKey privateKey,
-			Certificate[] certificateChain, String cipherSpec)
-		throws CryptoManagerException {
-
-		try {
-			KeyStore keyStore = _getKeyStore();
-
-			keyStore.setKeyEntry(
-				identifier, privateKey, _password.toCharArray(),
-				certificateChain);
-
-			_saveKeyStore(keyStore);
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put private key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addPublicKey(
-			String identifier, PublicKey publicKey, String cipherSpec)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
-	public void addSecretKey(
-			String identifier, SecretKey secretKey, String cipherSpec)
-		throws CryptoManagerException {
-
-		try {
-			KeyStore keyStore = _getKeyStore();
-
-			keyStore.setKeyEntry(
-				identifier, secretKey, _password.toCharArray(), null);
-
-			_saveKeyStore(keyStore);
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put secret key: " + identifier, exception);
 		}
 	}
 
@@ -235,7 +228,8 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 					properties);
 
 		_autoCreate = fileKeyStoreCryptoVaultProviderConfiguration.autoCreate();
-		_password = fileKeyStoreCryptoVaultProviderConfiguration.keystorePassword();
+		_password =
+			fileKeyStoreCryptoVaultProviderConfiguration.keystorePassword();
 		_path = fileKeyStoreCryptoVaultProviderConfiguration.keystorePath();
 		_type = fileKeyStoreCryptoVaultProviderConfiguration.keystoreType();
 	}
@@ -246,15 +240,16 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		File file = new File(_path);
 
 		if (file.exists()) {
-			try (FileInputStream fis = new FileInputStream(file)) {
-				keyStore.load(fis, _password.toCharArray());
+			try (FileInputStream fileInputStream = new FileInputStream(file)) {
+				keyStore.load(fileInputStream, _password.toCharArray());
 			}
 		}
 		else if (_autoCreate) {
 			keyStore.load(null, _password.toCharArray());
 		}
 		else {
-			throw new CryptoManagerException("KeyStore file not found: " + _path);
+			throw new CryptoManagerException(
+				"KeyStore file not found: " + _path);
 		}
 
 		return keyStore;
@@ -265,14 +260,14 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 
 		FileUtil.mkdirs(file.getParentFile());
 
-		try (FileOutputStream fos = new FileOutputStream(file)) {
-			keyStore.store(fos, _password.toCharArray());
+		try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+			keyStore.store(fileOutputStream, _password.toCharArray());
 		}
 	}
 
-	private boolean _autoCreate;
-	private String _password;
-	private String _path;
-	private String _type;
+	private volatile boolean _autoCreate;
+	private volatile String _password;
+	private volatile String _path;
+	private volatile String _type;
 
 }

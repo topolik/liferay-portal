@@ -12,11 +12,11 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 /**
  * @author Tomas Polesovsky
  */
-@ExtendedObjectClassDefinition(category = "security")
+@ExtendedObjectClassDefinition(category = "security-tools")
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.os.internal.configuration.FileKeyStoreCryptoVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "file-keystore-crypto-vault-provider-configuration"
+	name = "file-keystore-crypto-vault-provider-configuration-name"
 )
 public interface FileKeyStoreCryptoVaultProviderConfiguration {
 
@@ -27,28 +27,27 @@ public interface FileKeyStoreCryptoVaultProviderConfiguration {
 	public boolean autoCreate();
 
 	@Meta.AD(
-		deflt = "file-keystore", description = "provider-id-description",
-		name = "provider-id", required = true
-	)
-	public String providerId();
-
-	@Meta.AD(
 		deflt = "password", description = "keystore-password-description",
-		name = "keystore-password", required = true
+		name = "keystore-password"
 	)
 	public String keystorePassword();
 
 	@Meta.AD(
 		deflt = "${liferay.home}/data/keystore.p12",
-		description = "keystore-path-description", name = "keystore-path",
-		required = true
+		description = "keystore-path-description", name = "keystore-path"
 	)
 	public String keystorePath();
 
 	@Meta.AD(
 		deflt = "PKCS12", description = "keystore-type-description",
-		name = "keystore-type", required = true
+		name = "keystore-type"
 	)
 	public String keystoreType();
+
+	@Meta.AD(
+		deflt = "file-keystore", description = "provider-id-description",
+		name = "provider-id"
+	)
+	public String providerId();
 
 }

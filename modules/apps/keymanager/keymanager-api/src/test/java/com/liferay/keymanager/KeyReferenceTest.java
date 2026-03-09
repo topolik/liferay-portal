@@ -51,8 +51,11 @@ public class KeyReferenceTest {
 		Assert.assertEquals(raw, keyReference.toString());
 
 		// Test dots and colons in identifier
+
 		raw = "${keyRef:gcp:my.key:v1}";
+
 		keyReference = KeyReference.fromString(raw);
+
 		Assert.assertEquals("gcp", keyReference.getProviderId());
 		Assert.assertEquals("my.key:v1", keyReference.getIdentifier());
 	}
