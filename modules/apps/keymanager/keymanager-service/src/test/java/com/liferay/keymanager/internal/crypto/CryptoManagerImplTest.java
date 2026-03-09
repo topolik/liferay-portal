@@ -6,7 +6,7 @@
 package com.liferay.keymanager.internal.crypto;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKey;
+import com.liferay.keymanager.crypto.CryptoKeyMetadata;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
@@ -18,9 +18,6 @@ import java.security.Key;
 
 import java.util.Collections;
 import java.util.List;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -67,75 +64,6 @@ public class CryptoManagerImplTest {
 			_serviceTrackerMap.keySet()
 		).thenReturn(
 			Collections.singleton("test-crypto-provider")
-		);
-	}
-
-	@Test
-	public void testAddPrivateKey() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${keyRef:test-crypto-provider:my-priv-key}");
-
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-
-		keyGenerator.init(256);
-
-		SecretKey secretKey = keyGenerator.generateKey();
-
-		CryptoKey privateKey = new CryptoKey(keyRef, secretKey, "cipher");
-		CryptoKey publicKey = new CryptoKey(keyRef, secretKey, "cipher");
-
-		_cryptoManagerImpl.addPrivateKey(keyRef, privateKey, publicKey);
-
-		Mockito.verify(
-			_cryptoVaultProvider
-		).addPrivateKey(
-			"my-priv-key", privateKey, publicKey);
-	}
-
-	@Test
-	public void testAddPublicKey() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${keyRef:test-crypto-provider:my-pub-key}");
-
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-
-		keyGenerator.init(256);
-
-		SecretKey secretKey = keyGenerator.generateKey();
-
-		CryptoKey cryptoKey = new CryptoKey(keyRef, secretKey, "cipher");
-
-		_cryptoManagerImpl.addPublicKey(keyRef, cryptoKey);
-
-		Mockito.verify(
-			_cryptoVaultProvider
-		).addPublicKey(
-			"my-pub-key", cryptoKey
-		);
-	}
-
-	@Test
-	public void testAddSecretKey() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${keyRef:test-crypto-provider:my-key}");
-
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-
-		keyGenerator.init(256);
-
-		SecretKey secretKey = keyGenerator.generateKey();
-
-		String cipherSpec =
-			"cipher=AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128";
-
-		CryptoKey cryptoKey = new CryptoKey(keyRef, secretKey, cipherSpec);
-
-		_cryptoManagerImpl.addSecretKey(keyRef, cryptoKey);
-
-		Mockito.verify(
-			_cryptoVaultProvider
-		).addSecretKey(
-			"my-key", cryptoKey
 		);
 	}
 
@@ -200,6 +128,36 @@ public class CryptoManagerImplTest {
 	}
 
 	@Test
+	public void testGenerateAsymmetricKeyPair() throws Exception {
+		Mockito.when(
+			_cryptoVaultProvider.generateAsymmetricKeyPair("my-key", "RSA")
+		).thenReturn(
+			"my-key"
+		);
+
+		KeyReference result = _cryptoManagerImpl.generateAsymmetricKeyPair(
+			"test-crypto-provider", "my-key", "RSA");
+
+		Assert.assertEquals("test-crypto-provider", result.getProviderId());
+		Assert.assertEquals("my-key", result.getIdentifier());
+	}
+
+	@Test
+	public void testGenerateSecretKey() throws Exception {
+		Mockito.when(
+			_cryptoVaultProvider.generateSecretKey("my-key", "AES")
+		).thenReturn(
+			"my-key"
+		);
+
+		KeyReference result = _cryptoManagerImpl.generateSecretKey(
+			"test-crypto-provider", "my-key", "AES");
+
+		Assert.assertEquals("test-crypto-provider", result.getProviderId());
+		Assert.assertEquals("my-key", result.getIdentifier());
+	}
+
+	@Test
 	public void testGetKeyIdentifiers() throws Exception {
 		List<String> identifiers = Collections.singletonList("key-1");
 
@@ -226,11 +184,48 @@ public class CryptoManagerImplTest {
 	}
 
 	@Test
+	public void testGetKeyMetadata() throws Exception {
+		KeyReference keyRef = KeyReference.fromString(
+			"${keyRef:test-crypto-provider:my-key}");
+
+		CryptoKeyMetadata metadata = new CryptoKeyMetadata(
+			keyRef, "AES", "AES/GCM/NoPadding", 123456789L);
+
+		Mockito.when(
+			_cryptoVaultProvider.getKeyMetadata("my-key")
+		).thenReturn(
+			metadata
+		);
+
+		CryptoKeyMetadata result = _cryptoManagerImpl.getKeyMetadata(keyRef);
+
+		Assert.assertEquals(metadata, result);
+	}
+
+	@Test
 	public void testGetProviders() throws Exception {
 		List<String> result = _cryptoManagerImpl.getProviders();
 
 		Assert.assertEquals(result.toString(), 1, result.size());
 		Assert.assertEquals("test-crypto-provider", result.get(0));
+	}
+
+	@Test
+	public void testImportSecretKey() throws Exception {
+		byte[] rawKeyMaterial = "secret".getBytes();
+
+		Mockito.when(
+			_cryptoVaultProvider.importSecretKey(
+				"my-key", rawKeyMaterial, "AES")
+		).thenReturn(
+			"my-key"
+		);
+
+		KeyReference result = _cryptoManagerImpl.importSecretKey(
+			"test-crypto-provider", "my-key", rawKeyMaterial, "AES");
+
+		Assert.assertEquals("test-crypto-provider", result.getProviderId());
+		Assert.assertEquals("my-key", result.getIdentifier());
 	}
 
 	@Test

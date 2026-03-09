@@ -24,6 +24,12 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 public interface GcpSecretManagerSecretVaultProviderConfiguration {
 
 	@Meta.AD(
+		description = "gcp-auth-key-reference-description",
+		name = "gcp-auth-key-reference", required = false
+	)
+	public String gcpAuthKeyReference();
+
+	@Meta.AD(
 		description = "kms-key-name-description", name = "kms-key-name",
 		required = false
 	)

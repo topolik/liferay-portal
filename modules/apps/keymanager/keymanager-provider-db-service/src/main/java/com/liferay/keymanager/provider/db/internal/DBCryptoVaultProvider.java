@@ -6,13 +6,14 @@
 package com.liferay.keymanager.provider.db.internal;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKey;
+import com.liferay.keymanager.crypto.CryptoKeyMetadata;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.db.internal.configuration.DBCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.provider.db.model.KeyEntry;
 import com.liferay.keymanager.provider.db.service.KeyEntryLocalService;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
@@ -29,19 +30,25 @@ import java.nio.ByteBuffer;
 
 import java.security.Key;
 import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
 
 import java.sql.Blob;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -58,69 +65,6 @@ import org.osgi.service.component.annotations.Reference;
 	service = CryptoVaultProvider.class
 )
 public class DBCryptoVaultProvider implements CryptoVaultProvider {
-
-	@Override
-	public void addPrivateKey(
-			String identifier, CryptoKey privateKey, CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		try {
-			byte[] wrappedBytes = _cryptoManager.wrap(
-				KeyReference.fromString(_masterKeyReference),
-				privateKey.getKey());
-
-			_saveKeyEntry(
-				identifier, KeyType.PRIVATE,
-				privateKey.getKey(
-				).getAlgorithm(),
-				wrappedBytes, _masterKeyReference, privateKey.getCipherSpec());
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put private key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addPublicKey(String identifier, CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		try {
-			_saveKeyEntry(
-				identifier, KeyType.PUBLIC,
-				publicKey.getKey(
-				).getAlgorithm(),
-				publicKey.getKey(
-				).getEncoded(),
-				null, publicKey.getCipherSpec());
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put public key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addSecretKey(String identifier, CryptoKey secretKey)
-		throws CryptoManagerException {
-
-		try {
-			byte[] wrappedKeyBytes = _cryptoManager.wrap(
-				KeyReference.fromString(_masterKeyReference),
-				secretKey.getKey());
-
-			_saveKeyEntry(
-				identifier, KeyType.SECRET,
-				secretKey.getKey(
-				).getAlgorithm(),
-				wrappedKeyBytes, _masterKeyReference,
-				secretKey.getCipherSpec());
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to put secret key: " + identifier, exception);
-		}
-	}
 
 	@Override
 	public byte[] decrypt(String identifier, byte[] ciphertext)
@@ -253,6 +197,81 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
+	public String generateAsymmetricKeyPair(
+			String identifier, String algorithmSpec)
+		throws CryptoManagerException {
+
+		try {
+			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
+				_parseKeyAlgorithm(algorithmSpec));
+
+			Map<String, String> specMap = _parseCipherSpec(algorithmSpec);
+
+			int keySize = GetterUtil.getInteger(specMap.get("keySize"), 2048);
+
+			keyPairGenerator.initialize(keySize);
+
+			KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
+			byte[] wrappedPrivateKeyBytes = _cryptoManager.wrap(
+				KeyReference.fromString(_masterKeyReference),
+				keyPair.getPrivate());
+
+			_saveKeyEntry(
+				identifier, KeyType.PRIVATE,
+				keyPair.getPrivate(
+				).getAlgorithm(),
+				wrappedPrivateKeyBytes, _masterKeyReference, algorithmSpec);
+
+			_saveKeyEntry(
+				identifier + ".pub", KeyType.PUBLIC,
+				keyPair.getPublic(
+				).getAlgorithm(),
+				keyPair.getPublic(
+				).getEncoded(),
+				null, algorithmSpec);
+
+			return identifier;
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to generate asymmetric key pair: " + identifier,
+				exception);
+		}
+	}
+
+	@Override
+	public String generateSecretKey(String identifier, String algorithmSpec)
+		throws CryptoManagerException {
+
+		try {
+			KeyGenerator keyGenerator = KeyGenerator.getInstance(
+				_parseKeyAlgorithm(algorithmSpec));
+
+			Map<String, String> specMap = _parseCipherSpec(algorithmSpec);
+
+			int keySize = GetterUtil.getInteger(specMap.get("keySize"), 256);
+
+			keyGenerator.init(keySize);
+
+			SecretKey secretKey = keyGenerator.generateKey();
+
+			byte[] wrappedKeyBytes = _cryptoManager.wrap(
+				KeyReference.fromString(_masterKeyReference), secretKey);
+
+			_saveKeyEntry(
+				identifier, KeyType.SECRET, secretKey.getAlgorithm(),
+				wrappedKeyBytes, _masterKeyReference, algorithmSpec);
+
+			return identifier;
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to generate secret key: " + identifier, exception);
+		}
+	}
+
+	@Override
 	public List<String> getKeyIdentifiers() throws CryptoManagerException {
 		try {
 			return _keyEntryLocalService.getKeyIdentifiers(_getCompanyId());
@@ -260,6 +279,58 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to list key identifiers", exception);
+		}
+	}
+
+	@Override
+	public CryptoKeyMetadata getKeyMetadata(String identifier)
+		throws CryptoManagerException {
+
+		try {
+			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
+				_getCompanyId(), identifier);
+
+			return new CryptoKeyMetadata(
+				KeyReference.fromString(
+					StringBundler.concat(
+						"${keyRef:", _providerId, ":", identifier, "}")),
+				keyEntry.getAlgorithm(), keyEntry.getCipherSpec(),
+				keyEntry.getCreateDate(
+				).getTime());
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to get key metadata for: " + identifier, exception);
+		}
+	}
+
+	@Override
+	public String importSecretKey(
+			String identifier, byte[] rawKeyMaterial, String algorithmSpec)
+		throws CryptoManagerException {
+
+		try {
+			String algorithm = _parseKeyAlgorithm(algorithmSpec);
+
+			SecretKey secretKey = new SecretKeySpec(rawKeyMaterial, algorithm);
+
+			byte[] wrappedKeyBytes = _cryptoManager.wrap(
+				KeyReference.fromString(_masterKeyReference), secretKey);
+
+			_saveKeyEntry(
+				identifier, KeyType.SECRET, secretKey.getAlgorithm(),
+				wrappedKeyBytes, _masterKeyReference, algorithmSpec);
+
+			return identifier;
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to import secret key: " + identifier, exception);
+		}
+		finally {
+			if (rawKeyMaterial != null) {
+				Arrays.fill(rawKeyMaterial, (byte)0);
+			}
 		}
 	}
 
@@ -332,11 +403,7 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 		String[] parts = StringUtil.split(configuration, ";");
 
-		if (parts.length > 0) {
-			return parts[0].trim();
-		}
-
-		return null;
+		return parts[0].trim();
 	}
 
 	private Map<String, String> _parseCipherSpec(String configuration) {
@@ -359,6 +426,22 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		}
 
 		return map;
+	}
+
+	private String _parseKeyAlgorithm(String algorithmSpec) {
+		String algorithm = _parseAlgorithm(algorithmSpec);
+
+		if (algorithm == null) {
+			return null;
+		}
+
+		int pos = algorithm.indexOf('/');
+
+		if (pos > 0) {
+			return algorithm.substring(0, pos);
+		}
+
+		return algorithm;
 	}
 
 	private void _saveKeyEntry(

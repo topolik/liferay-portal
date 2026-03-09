@@ -5,12 +5,13 @@
 
 package com.liferay.keymanager.provider.os.internal;
 
-import com.liferay.keymanager.crypto.CryptoKey;
+import com.liferay.keymanager.crypto.CryptoKeyMetadata;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.os.internal.configuration.FileKeyStoreCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,14 +19,16 @@ import java.io.FileOutputStream;
 
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.cert.Certificate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -41,51 +44,6 @@ import org.osgi.service.component.annotations.Modified;
 	service = CryptoVaultProvider.class
 )
 public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
-
-	@Override
-	public void addPrivateKey(
-			String identifier, CryptoKey privateKey, CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		try {
-			KeyStore keyStore = _getKeyStore();
-
-			keyStore.setKeyEntry(
-				identifier, privateKey.getKey(), _password.toCharArray(),
-				new Certificate[] {_createDummyCertificate()});
-
-			_saveKeyStore(keyStore);
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to add private key: " + identifier, exception);
-		}
-	}
-
-	@Override
-	public void addPublicKey(String identifier, CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
-	public void addSecretKey(String identifier, CryptoKey secretKey)
-		throws CryptoManagerException {
-
-		try {
-			KeyStore keyStore = _getKeyStore();
-
-			keyStore.setKeyEntry(
-				identifier, secretKey.getKey(), _password.toCharArray(), null);
-
-			_saveKeyStore(keyStore);
-		}
-		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to add secret key: " + identifier, exception);
-		}
-	}
 
 	@Override
 	public byte[] decrypt(String identifier, byte[] ciphertext)
@@ -117,6 +75,21 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
+	public String generateAsymmetricKeyPair(
+			String identifier, String algorithmSpec)
+		throws CryptoManagerException {
+
+		throw new CryptoManagerException("Operation not supported");
+	}
+
+	@Override
+	public String generateSecretKey(String identifier, String algorithmSpec)
+		throws CryptoManagerException {
+
+		throw new CryptoManagerException("Operation not supported");
+	}
+
+	@Override
 	public List<String> getKeyIdentifiers() throws CryptoManagerException {
 		try {
 			KeyStore keyStore = _getKeyStore();
@@ -134,6 +107,42 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to list key identifiers", exception);
+		}
+	}
+
+	@Override
+	public CryptoKeyMetadata getKeyMetadata(String identifier)
+		throws CryptoManagerException {
+
+		throw new CryptoManagerException("Operation not supported");
+	}
+
+	@Override
+	public String importSecretKey(
+			String identifier, byte[] rawKeyMaterial, String algorithmSpec)
+		throws CryptoManagerException {
+
+		try {
+			KeyStore keyStore = _getKeyStore();
+
+			SecretKey secretKey = new SecretKeySpec(
+				rawKeyMaterial, _parseAlgorithm(algorithmSpec));
+
+			keyStore.setKeyEntry(
+				identifier, secretKey, _password.toCharArray(), null);
+
+			_saveKeyStore(keyStore);
+
+			return identifier;
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to import secret key: " + identifier, exception);
+		}
+		finally {
+			if (rawKeyMaterial != null) {
+				Arrays.fill(rawKeyMaterial, (byte)0);
+			}
 		}
 	}
 
@@ -198,17 +207,6 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		_type = fileKeyStoreCryptoVaultProviderConfiguration.keystoreType();
 	}
 
-	private Certificate _createDummyCertificate() throws Exception {
-
-		// Java KeyStore requires a certificate chain for private keys. Since we
-		// don't use certificates for KeyManager, we generate a dummy one. For
-		// simplicity we throw an exception here requiring a real
-		// implementation.
-
-		throw new UnsupportedOperationException(
-			"Generation of dummy certificates is not yet implemented");
-	}
-
 	private KeyStore _getKeyStore() throws Exception {
 		KeyStore keyStore = KeyStore.getInstance(_type);
 
@@ -228,6 +226,12 @@ public class FileKeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		}
 
 		return keyStore;
+	}
+
+	private String _parseAlgorithm(String algorithmSpec) {
+		String[] parts = StringUtil.split(algorithmSpec, ";");
+
+		return parts[0];
 	}
 
 	private void _saveKeyStore(KeyStore keyStore) throws Exception {

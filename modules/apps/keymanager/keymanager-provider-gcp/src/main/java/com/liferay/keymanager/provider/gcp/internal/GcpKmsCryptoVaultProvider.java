@@ -6,14 +6,25 @@
 package com.liferay.keymanager.provider.gcp.internal;
 
 import com.google.cloud.kms.v1.CryptoKey;
+import com.google.cloud.kms.v1.CryptoKeyVersion;
+import com.google.cloud.kms.v1.CryptoKeyVersionTemplate;
 import com.google.cloud.kms.v1.DecryptResponse;
 import com.google.cloud.kms.v1.EncryptResponse;
 import com.google.cloud.kms.v1.KeyManagementServiceClient;
+import com.google.cloud.kms.v1.KeyManagementServiceSettings;
+import com.google.cloud.kms.v1.KeyRingName;
 import com.google.cloud.kms.v1.ListCryptoKeysRequest;
+import com.google.cloud.kms.v1.ProtectionLevel;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
 
+import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.crypto.CryptoKeyMetadata;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration;
+import com.liferay.keymanager.provider.gcp.internal.util.GcpClientManager;
+import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
@@ -29,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -38,6 +51,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
@@ -50,45 +64,20 @@ import org.osgi.service.component.annotations.Modified;
 public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
-	public void addPrivateKey(
-			String identifier,
-			com.liferay.keymanager.crypto.CryptoKey privateKey,
-			com.liferay.keymanager.crypto.CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
-	public void addPublicKey(
-			String identifier,
-			com.liferay.keymanager.crypto.CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
-	public void addSecretKey(
-			String identifier,
-			com.liferay.keymanager.crypto.CryptoKey secretKey)
-		throws CryptoManagerException {
-
-		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
 	public byte[] decrypt(String identifier, byte[] ciphertext)
 		throws CryptoManagerException {
 
 		try {
-			String name = _getGcpKeyName(identifier);
+			return _gcpClientManager.execute(
+				client -> {
+					String name = _getGcpKeyName(identifier);
 
-			DecryptResponse response = _client.decrypt(
-				name, ByteString.copyFrom(ciphertext));
+					DecryptResponse response = client.decrypt(
+						name, ByteString.copyFrom(ciphertext));
 
-			return response.getPlaintext(
-			).toByteArray();
+					return response.getPlaintext(
+					).toByteArray();
+				});
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
@@ -106,13 +95,16 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 		throws CryptoManagerException {
 
 		try {
-			String name = _getGcpKeyName(identifier);
+			return _gcpClientManager.execute(
+				client -> {
+					String name = _getGcpKeyName(identifier);
 
-			EncryptResponse response = _client.encrypt(
-				name, ByteString.copyFrom(plaintext));
+					EncryptResponse response = client.encrypt(
+						name, ByteString.copyFrom(plaintext));
 
-			return response.getCiphertext(
-			).toByteArray();
+					return response.getCiphertext(
+					).toByteArray();
+				});
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
@@ -121,32 +113,181 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
+	public String generateAsymmetricKeyPair(
+			String identifier, String algorithmSpec)
+		throws CryptoManagerException {
+
+		try {
+			return _gcpClientManager.execute(
+				client -> {
+					CryptoKey.Builder cryptoKeyBuilder = CryptoKey.newBuilder();
+
+					cryptoKeyBuilder.setPurpose(
+						CryptoKey.CryptoKeyPurpose.ASYMMETRIC_DECRYPT);
+
+					CryptoKeyVersionTemplate.Builder
+						cryptoKeyVersionTemplateBuilder =
+							CryptoKeyVersionTemplate.newBuilder();
+
+					cryptoKeyVersionTemplateBuilder.setAlgorithm(
+						_getAsymmetricAlgorithm(algorithmSpec));
+
+					cryptoKeyVersionTemplateBuilder.setProtectionLevel(
+						_protectionLevel);
+
+					cryptoKeyBuilder.setVersionTemplate(
+						cryptoKeyVersionTemplateBuilder.build());
+
+					client.createCryptoKey(
+						KeyRingName.of(_projectId, _locationId, _keyRingId),
+						identifier, cryptoKeyBuilder.build());
+
+					return identifier;
+				});
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to generate asymmetric key pair: " + identifier,
+				exception);
+		}
+	}
+
+	@Override
+	public String generateSecretKey(String identifier, String algorithmSpec)
+		throws CryptoManagerException {
+
+		try {
+			return _gcpClientManager.execute(
+				client -> {
+					if (algorithmSpec == null) {
+						return null;
+					}
+
+					CryptoKey.Builder cryptoKeyBuilder = CryptoKey.newBuilder();
+
+					cryptoKeyBuilder.setPurpose(
+						CryptoKey.CryptoKeyPurpose.ENCRYPT_DECRYPT);
+
+					CryptoKeyVersionTemplate.Builder
+						cryptoKeyVersionTemplateBuilder =
+							CryptoKeyVersionTemplate.newBuilder();
+
+					cryptoKeyVersionTemplateBuilder.setAlgorithm(
+						CryptoKeyVersion.CryptoKeyVersionAlgorithm.
+							GOOGLE_SYMMETRIC_ENCRYPTION);
+
+					cryptoKeyVersionTemplateBuilder.setProtectionLevel(
+						_protectionLevel);
+
+					cryptoKeyBuilder.setVersionTemplate(
+						cryptoKeyVersionTemplateBuilder.build());
+
+					if (_rotationPeriodSeconds > 0) {
+						cryptoKeyBuilder.setRotationPeriod(
+							Duration.newBuilder(
+							).setSeconds(
+								_rotationPeriodSeconds
+							).build());
+
+						cryptoKeyBuilder.setNextRotationTime(
+							Timestamp.newBuilder(
+							).setSeconds(
+								(System.currentTimeMillis() / 1000) +
+									_rotationPeriodSeconds
+							).build());
+					}
+
+					client.createCryptoKey(
+						KeyRingName.of(_projectId, _locationId, _keyRingId),
+						identifier, cryptoKeyBuilder.build());
+
+					return identifier;
+				});
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to generate secret key: " + identifier, exception);
+		}
+	}
+
+	@Override
 	public List<String> getKeyIdentifiers() throws CryptoManagerException {
 		try {
-			List<String> identifiers = new ArrayList<>();
+			return _gcpClientManager.execute(
+				client -> {
+					List<String> identifiers = new ArrayList<>();
 
-			ListCryptoKeysRequest request = ListCryptoKeysRequest.newBuilder(
-			).setParent(
-				StringBundler.concat(
-					"projects/", _projectId, "/locations/", _locationId,
-					"/keyRings/", _keyRingId)
-			).build();
+					ListCryptoKeysRequest request =
+						ListCryptoKeysRequest.newBuilder(
+						).setParent(
+							StringBundler.concat(
+								"projects/", _projectId, "/locations/",
+								_locationId, "/keyRings/", _keyRingId)
+						).build();
 
-			KeyManagementServiceClient.ListCryptoKeysPagedResponse response =
-				_client.listCryptoKeys(request);
+					KeyManagementServiceClient.ListCryptoKeysPagedResponse
+						response = client.listCryptoKeys(request);
 
-			for (CryptoKey cryptoKey : response.iterateAll()) {
-				String name = cryptoKey.getName();
+					for (CryptoKey cryptoKey : response.iterateAll()) {
+						String name = cryptoKey.getName();
 
-				identifiers.add(name.substring(name.lastIndexOf('/') + 1));
-			}
+						identifiers.add(
+							name.substring(name.lastIndexOf('/') + 1));
+					}
 
-			return identifiers;
+					return identifiers;
+				});
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to list GCP KMS keys", exception);
 		}
+	}
+
+	@Override
+	public CryptoKeyMetadata getKeyMetadata(String identifier)
+		throws CryptoManagerException {
+
+		try {
+			return _gcpClientManager.execute(
+				client -> {
+					String name = _getGcpKeyName(identifier);
+
+					CryptoKey cryptoKey = client.getCryptoKey(name);
+
+					Timestamp createTime = cryptoKey.getCreateTime();
+
+					long seconds = createTime.getSeconds();
+
+					return new CryptoKeyMetadata(
+						KeyReference.fromString(
+							StringBundler.concat(
+								"${keyRef:", _providerId, ":", identifier,
+								"}")),
+						cryptoKey.getPurpose(
+						).name(),
+						cryptoKey.getVersionTemplate(
+						).getAlgorithm(
+						).name(),
+						seconds * 1000);
+				});
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to get GCP KMS key metadata: " + identifier, exception);
+		}
+	}
+
+	@Override
+	public String importSecretKey(
+			String identifier, byte[] rawKeyMaterial, String algorithmSpec)
+		throws CryptoManagerException {
+
+		if ((rawKeyMaterial == null) || (algorithmSpec == null)) {
+			throw new CryptoManagerException("Operation not supported");
+		}
+
+		throw new CryptoManagerException("Operation not supported");
 	}
 
 	@Override
@@ -209,18 +350,65 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 					GcpKmsCryptoVaultProviderConfiguration.class, properties);
 
 		_providerId = gcpKmsCryptoVaultProviderConfiguration.providerId();
-		_projectId = gcpKmsCryptoVaultProviderConfiguration.projectId();
-		_locationId = gcpKmsCryptoVaultProviderConfiguration.locationId();
-		_keyRingId = gcpKmsCryptoVaultProviderConfiguration.keyRingId();
 
-		_client = KeyManagementServiceClient.create();
+		String keyRingPath =
+			gcpKmsCryptoVaultProviderConfiguration.keyRingPath();
+
+		Matcher matcher = _keyRingPattern.matcher(keyRingPath);
+
+		if (!matcher.matches()) {
+			throw new IllegalArgumentException(
+				"Invalid key ring path: " + keyRingPath);
+		}
+
+		_projectId = matcher.group(1);
+		_locationId = matcher.group(2);
+		_keyRingId = matcher.group(3);
+
+		_protectionLevel = ProtectionLevel.valueOf(
+			gcpKmsCryptoVaultProviderConfiguration.newKeyProtectionLevel());
+		_rotationPeriodSeconds =
+			gcpKmsCryptoVaultProviderConfiguration.
+				newKeyRotationPeriodSeconds();
+
+		if (_gcpClientManager == null) {
+			_gcpClientManager = new GcpClientManager<>(
+				_secretManager,
+				gcpKmsCryptoVaultProviderConfiguration.gcpAuthKeyReference(),
+				fixedCredentialsProvider -> KeyManagementServiceClient.create(
+					KeyManagementServiceSettings.newBuilder(
+					).setCredentialsProvider(
+						fixedCredentialsProvider
+					).build()));
+		}
+		else {
+			_gcpClientManager.setGcpAuthKeyReference(
+				gcpKmsCryptoVaultProviderConfiguration.gcpAuthKeyReference());
+
+			_gcpClientManager.close();
+		}
 	}
 
 	@Deactivate
 	protected void deactivate() {
-		if (_client != null) {
-			_client.close();
+		_gcpClientManager.close();
+	}
+
+	private CryptoKeyVersion.CryptoKeyVersionAlgorithm _getAsymmetricAlgorithm(
+		String algorithmSpec) {
+
+		if (algorithmSpec.contains("RSA")) {
+			return CryptoKeyVersion.CryptoKeyVersionAlgorithm.
+				RSA_DECRYPT_OAEP_2048_SHA256;
 		}
+
+		if (algorithmSpec.contains("EC")) {
+			return CryptoKeyVersion.CryptoKeyVersionAlgorithm.
+				EC_SIGN_P256_SHA256;
+		}
+
+		return CryptoKeyVersion.CryptoKeyVersionAlgorithm.
+			CRYPTO_KEY_VERSION_ALGORITHM_UNSPECIFIED;
 	}
 
 	private String _getGcpKeyName(String alias) {
@@ -229,10 +417,19 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 			_keyRingId, "/cryptoKeys/", alias);
 	}
 
-	private volatile KeyManagementServiceClient _client;
+	private static final Pattern _keyRingPattern = Pattern.compile(
+		"projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)");
+
+	private volatile GcpClientManager<KeyManagementServiceClient>
+		_gcpClientManager;
 	private volatile String _keyRingId;
 	private volatile String _locationId;
 	private volatile String _projectId;
+	private volatile ProtectionLevel _protectionLevel;
 	private volatile String _providerId;
+	private volatile long _rotationPeriodSeconds;
+
+	@Reference
+	private SecretManager _secretManager;
 
 }

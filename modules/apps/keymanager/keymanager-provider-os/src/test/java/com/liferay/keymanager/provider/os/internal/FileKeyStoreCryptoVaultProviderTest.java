@@ -5,8 +5,6 @@
 
 package com.liferay.keymanager.provider.os.internal;
 
-import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
@@ -14,10 +12,6 @@ import com.liferay.portal.test.rule.LiferayUnitTestRule;
 import java.io.File;
 
 import java.security.Key;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -60,43 +54,6 @@ public class FileKeyStoreCryptoVaultProviderTest {
 			).build());
 	}
 
-	@Test(expected = CryptoManagerException.class)
-	public void testAddPrivateKey() throws Exception {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-
-		keyPairGenerator.initialize(2048);
-
-		KeyPair keyPair = keyPairGenerator.generateKeyPair();
-
-		PrivateKey privateKey = keyPair.getPrivate();
-		PublicKey publicKey = keyPair.getPublic();
-
-		_provider.addPrivateKey(
-			"test-private-key",
-			new CryptoKey(
-				KeyReference.fromString("${keyRef:os:test-private-key}"),
-				privateKey, null),
-			new CryptoKey(
-				KeyReference.fromString("${keyRef:os:test-public-key}"),
-				publicKey, null));
-	}
-
-	@Test(expected = CryptoManagerException.class)
-	public void testAddPublicKey() throws Exception {
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-
-		keyPairGenerator.initialize(2048);
-
-		PublicKey publicKey = keyPairGenerator.generateKeyPair(
-		).getPublic();
-
-		_provider.addPublicKey(
-			"test-public-key",
-			new CryptoKey(
-				KeyReference.fromString("${keyRef:os:test-public-key}"),
-				publicKey, null));
-	}
-
 	@Test
 	public void testAutoCreateDirectory() throws Exception {
 		File deepDir = new File(
@@ -126,11 +83,7 @@ public class FileKeyStoreCryptoVaultProviderTest {
 
 		// Writing a key should trigger directory creation and keystore save
 
-		provider.addSecretKey(
-			"test-key",
-			new CryptoKey(
-				KeyReference.fromString("${keyRef:os:test-key}"), secretKey,
-				null));
+		provider.importSecretKey("test-key", secretKey.getEncoded(), "AES");
 
 		Assert.assertTrue(deepDir.exists());
 	}
@@ -148,11 +101,7 @@ public class FileKeyStoreCryptoVaultProviderTest {
 
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		_provider.addSecretKey(
-			"delete-me",
-			new CryptoKey(
-				KeyReference.fromString("${keyRef:os:delete-me}"), secretKey,
-				null));
+		_provider.importSecretKey("delete-me", secretKey.getEncoded(), "AES");
 
 		Assert.assertTrue(
 			_provider.getKeyIdentifiers(
@@ -174,8 +123,23 @@ public class FileKeyStoreCryptoVaultProviderTest {
 		_provider.encrypt("identifier", "plaintext".getBytes());
 	}
 
+	@Test(expected = CryptoManagerException.class)
+	public void testGenerateAsymmetricKeyPair() throws Exception {
+		_provider.generateAsymmetricKeyPair("test-key", "RSA");
+	}
+
+	@Test(expected = CryptoManagerException.class)
+	public void testGenerateSecretKey() throws Exception {
+		_provider.generateSecretKey("test-key", "AES");
+	}
+
+	@Test(expected = CryptoManagerException.class)
+	public void testGetKeyMetadata() throws Exception {
+		_provider.getKeyMetadata("test-key");
+	}
+
 	@Test
-	public void testPutAndGetSecretKey() throws Exception {
+	public void testImportSecretKey() throws Exception {
 		String identifier = "my-key";
 
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
@@ -184,11 +148,7 @@ public class FileKeyStoreCryptoVaultProviderTest {
 
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		_provider.addSecretKey(
-			identifier,
-			new CryptoKey(
-				KeyReference.fromString("${keyRef:os:" + identifier + "}"),
-				secretKey, null));
+		_provider.importSecretKey(identifier, secretKey.getEncoded(), "AES");
 
 		// 1. Verify it's in the list
 

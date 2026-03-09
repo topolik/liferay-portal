@@ -6,7 +6,7 @@
 package com.liferay.keymanager.internal.crypto;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKey;
+import com.liferay.keymanager.crypto.CryptoKeyMetadata;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
@@ -29,41 +29,6 @@ import org.osgi.service.component.annotations.Deactivate;
  */
 @Component(service = CryptoManager.class)
 public class CryptoManagerImpl implements CryptoManager {
-
-	@Override
-	public void addPrivateKey(
-			KeyReference keyReference, CryptoKey privateKey,
-			CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
-
-		cryptoVaultProvider.addPrivateKey(
-			keyReference.getIdentifier(), privateKey, publicKey);
-	}
-
-	@Override
-	public void addPublicKey(KeyReference keyReference, CryptoKey publicKey)
-		throws CryptoManagerException {
-
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
-
-		cryptoVaultProvider.addPublicKey(
-			keyReference.getIdentifier(), publicKey);
-	}
-
-	@Override
-	public void addSecretKey(KeyReference keyReference, CryptoKey secretKey)
-		throws CryptoManagerException {
-
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
-
-		cryptoVaultProvider.addSecretKey(
-			keyReference.getIdentifier(), secretKey);
-	}
 
 	@Override
 	public byte[] decrypt(KeyReference keyReference, byte[] ciphertext)
@@ -98,6 +63,38 @@ public class CryptoManagerImpl implements CryptoManager {
 	}
 
 	@Override
+	public KeyReference generateAsymmetricKeyPair(
+			String providerId, String identifier, String algorithmSpec)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			providerId);
+
+		String finalIdentifier = cryptoVaultProvider.generateAsymmetricKeyPair(
+			identifier, algorithmSpec);
+
+		return KeyReference.fromString(
+			StringBundler.concat(
+				"${keyRef:", providerId, ":", finalIdentifier, "}"));
+	}
+
+	@Override
+	public KeyReference generateSecretKey(
+			String providerId, String identifier, String algorithmSpec)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			providerId);
+
+		String finalIdentifier = cryptoVaultProvider.generateSecretKey(
+			identifier, algorithmSpec);
+
+		return KeyReference.fromString(
+			StringBundler.concat(
+				"${keyRef:", providerId, ":", finalIdentifier, "}"));
+	}
+
+	@Override
 	public List<KeyReference> getKeyIdentifiers(String providerId)
 		throws CryptoManagerException {
 
@@ -119,8 +116,35 @@ public class CryptoManagerImpl implements CryptoManager {
 	}
 
 	@Override
+	public CryptoKeyMetadata getKeyMetadata(KeyReference keyReference)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			keyReference.getProviderId());
+
+		return cryptoVaultProvider.getKeyMetadata(keyReference.getIdentifier());
+	}
+
+	@Override
 	public List<String> getProviders() throws CryptoManagerException {
 		return new ArrayList<>(_serviceTrackerMap.keySet());
+	}
+
+	@Override
+	public KeyReference importSecretKey(
+			String providerId, String identifier, byte[] rawKeyMaterial,
+			String algorithmSpec)
+		throws CryptoManagerException {
+
+		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+			providerId);
+
+		String finalIdentifier = cryptoVaultProvider.importSecretKey(
+			identifier, rawKeyMaterial, algorithmSpec);
+
+		return KeyReference.fromString(
+			StringBundler.concat(
+				"${keyRef:", providerId, ":", finalIdentifier, "}"));
 	}
 
 	@Override

@@ -1,0 +1,46 @@
+/**
+ * SPDX-FileCopyrightText: (c) 2026 Liferay, Inc. https://liferay.com
+ * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
+ */
+
+package com.liferay.keymanager.crypto;
+
+import com.liferay.keymanager.KeyReference;
+
+/**
+ * @author Tomas Polesovsky
+ */
+public class CryptoKeyMetadata {
+
+	public CryptoKeyMetadata(
+		KeyReference keyReference, String algorithm, String cipherSpec,
+		long creationDate) {
+
+		_keyReference = keyReference;
+		_algorithm = algorithm;
+		_cipherSpec = cipherSpec;
+		_creationDate = creationDate;
+	}
+
+	public String getAlgorithm() {
+		return _algorithm;
+	}
+
+	public String getCipherSpec() {
+		return _cipherSpec;
+	}
+
+	public long getCreationDate() {
+		return _creationDate;
+	}
+
+	public KeyReference getKeyReference() {
+		return _keyReference;
+	}
+
+	private final String _algorithm;
+	private final String _cipherSpec;
+	private final long _creationDate;
+	private final KeyReference _keyReference;
+
+}

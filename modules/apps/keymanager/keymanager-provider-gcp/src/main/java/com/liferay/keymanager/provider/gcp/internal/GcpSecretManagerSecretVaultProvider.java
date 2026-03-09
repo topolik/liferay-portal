@@ -16,11 +16,14 @@ import com.google.cloud.secretmanager.v1.ListSecretsRequest;
 import com.google.cloud.secretmanager.v1.Replication;
 import com.google.cloud.secretmanager.v1.Secret;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
+import com.google.cloud.secretmanager.v1.SecretManagerServiceSettings;
 import com.google.cloud.secretmanager.v1.SecretPayload;
 import com.google.protobuf.ByteString;
 
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration;
+import com.liferay.keymanager.provider.gcp.internal.util.GcpClientManager;
+import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
@@ -35,7 +38,6 @@ import com.liferay.portal.kernel.util.Validator;
 import java.io.IOException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +46,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
@@ -59,14 +62,20 @@ public class GcpSecretManagerSecretVaultProvider
 	@Override
 	public void deleteSecret(String identifier) throws SecretManagerException {
 		try {
-			DeleteSecretRequest request = DeleteSecretRequest.newBuilder(
-			).setName(
-				StringBundler.concat(
-					"projects/", _projectId, "/secrets/",
-					_getSecretId(identifier))
-			).build();
+			_gcpClientManager.execute(
+				client -> {
+					DeleteSecretRequest request =
+						DeleteSecretRequest.newBuilder(
+						).setName(
+							StringBundler.concat(
+								"projects/", _projectId, "/secrets/",
+								_getSecretId(identifier))
+						).build();
 
-			_client.deleteSecret(request);
+					client.deleteSecret(request);
+
+					return null;
+				});
 		}
 		catch (Exception exception) {
 			throw new SecretManagerException(
@@ -79,55 +88,56 @@ public class GcpSecretManagerSecretVaultProvider
 		throws SecretManagerException {
 
 		try {
-			String name = StringBundler.concat(
-				"projects/", _projectId, "/secrets/", _getSecretId(identifier),
-				"/versions/", _getVersionId(identifier));
+			return _gcpClientManager.execute(
+				client -> {
+					String name = StringBundler.concat(
+						"projects/", _projectId, "/secrets/",
+						_getSecretId(identifier), "/versions/",
+						_getVersionId(identifier));
 
-			AccessSecretVersionResponse response = _client.accessSecretVersion(
-				name);
+					AccessSecretVersionResponse response =
+						client.accessSecretVersion(name);
 
-			byte[] bytes = response.getPayload(
-			).getData(
-			).toByteArray();
+					byte[] bytes = response.getPayload(
+					).getData(
+					).toByteArray();
 
-			try {
-				return new SecureSecret(
-					new KeyReference(
-						KeyReference.Type.SECRET, _providerId, identifier),
-					bytes);
-			}
-			finally {
-				Arrays.fill(bytes, (byte)0);
-			}
+					return new SecureSecret(
+						new KeyReference(
+							KeyReference.Type.SECRET, _providerId, identifier),
+						bytes);
+				});
 		}
 		catch (Exception exception) {
 			throw new SecretManagerException(
-				"Unable to get GCP secret: " + identifier, exception);
+				"Unable to fetch GCP secret: " + identifier, exception);
 		}
 	}
 
 	@Override
 	public List<String> getSecretIdentifiers() throws SecretManagerException {
 		try {
-			List<String> identifiers = new ArrayList<>();
+			return _gcpClientManager.execute(
+				client -> {
+					List<String> identifiers = new ArrayList<>();
 
-			ListSecretsRequest request = ListSecretsRequest.newBuilder(
-			).setParent(
-				"projects/" + _projectId
-			).build();
+					ListSecretsRequest request = ListSecretsRequest.newBuilder(
+					).setParent(
+						"projects/" + _projectId
+					).build();
 
-			SecretManagerServiceClient.ListSecretsPagedResponse response =
-				_client.listSecrets(request);
+					SecretManagerServiceClient.ListSecretsPagedResponse
+						response = client.listSecrets(request);
 
-			for (Secret secret : response.iterateAll()) {
-				String name = secret.getName();
+					for (Secret secret : response.iterateAll()) {
+						String name = secret.getName();
 
-				// Strip the prefix "projects/.../secrets/"
+						identifiers.add(
+							name.substring(name.lastIndexOf('/') + 1));
+					}
 
-				identifiers.add(name.substring(name.lastIndexOf('/') + 1));
-			}
-
-			return identifiers;
+					return identifiers;
+				});
 		}
 		catch (Exception exception) {
 			throw new SecretManagerException(
@@ -140,97 +150,106 @@ public class GcpSecretManagerSecretVaultProvider
 		throws SecretManagerException {
 
 		try {
-			String secretId = _getSecretId(
-				secureSecret.getKeyReference(
-				).getIdentifier());
+			_gcpClientManager.execute(
+				client -> {
+					KeyReference keyReference = secureSecret.getKeyReference();
 
-			String secretPath = StringBundler.concat(
-				"projects/", _projectId, "/secrets/", secretId);
+					String secretId = _getSecretId(
+						keyReference.getIdentifier());
 
-			// 1. Ensure secret exists
+					String secretPath = StringBundler.concat(
+						"projects/", _projectId, "/secrets/", secretId);
 
-			try {
-				GetSecretRequest getSecretRequest = GetSecretRequest.newBuilder(
-				).setName(
-					secretPath
-				).build();
+					// 1. Ensure secret exists
 
-				_client.getSecret(getSecretRequest);
-			}
-			catch (NotFoundException notFoundException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						"Secret not found, creating a new one: " + secretPath,
-						notFoundException);
-				}
+					try {
+						GetSecretRequest getSecretRequest =
+							GetSecretRequest.newBuilder(
+							).setName(
+								secretPath
+							).build();
 
-				Secret.Builder secretBuilder = Secret.newBuilder();
+						client.getSecret(getSecretRequest);
+					}
+					catch (NotFoundException notFoundException) {
+						if (_log.isDebugEnabled()) {
+							_log.debug(
+								"Secret not found, creating a new one: " +
+									secretPath,
+								notFoundException);
+						}
 
-				// Configure Replication
+						Secret.Builder secretBuilder = Secret.newBuilder();
 
-				Replication.Builder replicationBuilder =
-					Replication.newBuilder();
+						// Configure Replication
 
-				if (ArrayUtil.isEmpty(_locations)) {
-					replicationBuilder.setAutomatic(
-						Replication.Automatic.newBuilder(
-						).build());
-				}
-				else {
-					Replication.UserManaged.Builder userManagedBuilder =
-						Replication.UserManaged.newBuilder();
+						Replication.Builder replicationBuilder =
+							Replication.newBuilder();
 
-					for (String location : _locations) {
-						userManagedBuilder.addReplicas(
-							Replication.UserManaged.Replica.newBuilder(
-							).setLocation(
-								location
-							).build());
+						if (ArrayUtil.isEmpty(_locations)) {
+							replicationBuilder.setAutomatic(
+								Replication.Automatic.newBuilder(
+								).build());
+						}
+						else {
+							Replication.UserManaged.Builder userManagedBuilder =
+								Replication.UserManaged.newBuilder();
+
+							for (String location : _locations) {
+								userManagedBuilder.addReplicas(
+									Replication.UserManaged.Replica.newBuilder(
+									).setLocation(
+										location
+									).build());
+							}
+
+							replicationBuilder.setUserManaged(
+								userManagedBuilder.build());
+						}
+
+						secretBuilder.setReplication(
+							replicationBuilder.build());
+
+						// Configure CMEK
+
+						if (Validator.isNotNull(_kmsKeyName)) {
+							secretBuilder.setCustomerManagedEncryption(
+								CustomerManagedEncryption.newBuilder(
+								).setKmsKeyName(
+									_kmsKeyName
+								).build());
+						}
+
+						CreateSecretRequest createSecretRequest =
+							CreateSecretRequest.newBuilder(
+							).setParent(
+								"projects/" + _projectId
+							).setSecretId(
+								secretId
+							).setSecret(
+								secretBuilder.build()
+							).build();
+
+						client.createSecret(createSecretRequest);
 					}
 
-					replicationBuilder.setUserManaged(
-						userManagedBuilder.build());
-				}
+					// 2. Add new version
 
-				secretBuilder.setReplication(replicationBuilder.build());
+					AddSecretVersionRequest addSecretVersionRequest =
+						AddSecretVersionRequest.newBuilder(
+						).setParent(
+							secretPath
+						).setPayload(
+							SecretPayload.newBuilder(
+							).setData(
+								ByteString.copyFrom(secureSecret.getBytes())
+							).build()
+						).build();
 
-				// Configure CMEK
+					client.addSecretVersion(addSecretVersionRequest);
 
-				if (Validator.isNotNull(_kmsKeyName)) {
-					secretBuilder.setCustomerManagedEncryption(
-						CustomerManagedEncryption.newBuilder(
-						).setKmsKeyName(
-							_kmsKeyName
-						).build());
-				}
-
-				CreateSecretRequest createSecretRequest =
-					CreateSecretRequest.newBuilder(
-					).setParent(
-						"projects/" + _projectId
-					).setSecretId(
-						secretId
-					).setSecret(
-						secretBuilder.build()
-					).build();
-
-				_client.createSecret(createSecretRequest);
-			}
-
-			// 2. Add new version
-
-			AddSecretVersionRequest addSecretVersionRequest =
-				AddSecretVersionRequest.newBuilder(
-				).setParent(
-					secretPath
-				).setPayload(
-					SecretPayload.newBuilder(
-					).setData(
-						ByteString.copyFrom(secureSecret.getBytes())
-					).build()
-				).build();
-
-			_client.addSecretVersion(addSecretVersionRequest);
+					return null;
+				});
 		}
 		catch (Exception exception) {
 			KeyReference keyReference = secureSecret.getKeyReference();
@@ -260,14 +279,29 @@ public class GcpSecretManagerSecretVaultProvider
 		_locations =
 			gcpSecretManagerSecretVaultProviderConfiguration.locations();
 
-		_client = SecretManagerServiceClient.create();
+		if (_gcpClientManager == null) {
+			_gcpClientManager = new GcpClientManager<>(
+				_secretManager,
+				gcpSecretManagerSecretVaultProviderConfiguration.
+					gcpAuthKeyReference(),
+				fixedCredentialsProvider -> SecretManagerServiceClient.create(
+					SecretManagerServiceSettings.newBuilder(
+					).setCredentialsProvider(
+						fixedCredentialsProvider
+					).build()));
+		}
+		else {
+			_gcpClientManager.setGcpAuthKeyReference(
+				gcpSecretManagerSecretVaultProviderConfiguration.
+					gcpAuthKeyReference());
+
+			_gcpClientManager.close();
+		}
 	}
 
 	@Deactivate
 	protected void deactivate() {
-		if (_client != null) {
-			_client.close();
-		}
+		_gcpClientManager.close();
 	}
 
 	private String _getSecretId(String identifier) {
@@ -293,10 +327,14 @@ public class GcpSecretManagerSecretVaultProvider
 	private static final Log _log = LogFactoryUtil.getLog(
 		GcpSecretManagerSecretVaultProvider.class);
 
-	private volatile SecretManagerServiceClient _client;
+	private volatile GcpClientManager<SecretManagerServiceClient>
+		_gcpClientManager;
 	private volatile String _kmsKeyName;
 	private volatile String[] _locations;
 	private volatile String _projectId;
 	private volatile String _providerId;
+
+	@Reference
+	private SecretManager _secretManager;
 
 }

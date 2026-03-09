@@ -19,17 +19,6 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface CryptoManager {
 
-	public void addPrivateKey(
-			KeyReference keyReference, CryptoKey privateKey,
-			CryptoKey publicKey)
-		throws CryptoManagerException;
-
-	public void addPublicKey(KeyReference keyReference, CryptoKey publicKey)
-		throws CryptoManagerException;
-
-	public void addSecretKey(KeyReference keyReference, CryptoKey secretKey)
-		throws CryptoManagerException;
-
 	public byte[] decrypt(KeyReference keyReference, byte[] ciphertext)
 		throws CryptoManagerException;
 
@@ -39,10 +28,26 @@ public interface CryptoManager {
 	public byte[] encrypt(KeyReference keyReference, byte[] plaintext)
 		throws CryptoManagerException;
 
+	public KeyReference generateAsymmetricKeyPair(
+			String providerId, String identifier, String algorithmSpec)
+		throws CryptoManagerException;
+
+	public KeyReference generateSecretKey(
+			String providerId, String identifier, String algorithmSpec)
+		throws CryptoManagerException;
+
 	public List<KeyReference> getKeyIdentifiers(String providerId)
 		throws CryptoManagerException;
 
+	public CryptoKeyMetadata getKeyMetadata(KeyReference keyReference)
+		throws CryptoManagerException;
+
 	public List<String> getProviders() throws CryptoManagerException;
+
+	public KeyReference importSecretKey(
+			String providerId, String identifier, byte[] rawKeyMaterial,
+			String algorithmSpec)
+		throws CryptoManagerException;
 
 	public Key unwrap(
 			KeyReference masterKeyReference, byte[] wrappedKeyBytes,
