@@ -12,7 +12,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 /**
  * @author Tomas Polesovsky
  */
-@ExtendedObjectClassDefinition(category = "security-tools")
+@ExtendedObjectClassDefinition(category = "keymanager")
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration",
 	localization = "content/Language",

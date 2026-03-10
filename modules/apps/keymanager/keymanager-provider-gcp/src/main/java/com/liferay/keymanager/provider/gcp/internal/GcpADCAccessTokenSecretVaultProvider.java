@@ -19,6 +19,7 @@ import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import java.io.IOException;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -52,12 +53,17 @@ public class GcpADCAccessTokenSecretVaultProvider
 
 			AccessToken accessToken = _credentials.getAccessToken();
 
+			long expiresAt = Long.MAX_VALUE;
+
+			Date expirationTime = accessToken.getExpirationTime();
+
+			if (expirationTime != null) {
+				expiresAt = expirationTime.getTime();
+			}
+
 			String json = StringBundler.concat(
 				"{\"access_token\":\"", accessToken.getTokenValue(),
-				"\", \"expires_at\":",
-				accessToken.getExpirationTime(
-				).getTime(),
-				"}");
+				"\", \"expires_at\":", expiresAt, "}");
 
 			try {
 				return new SecureSecret(
@@ -69,8 +75,10 @@ public class GcpADCAccessTokenSecretVaultProvider
 			}
 		}
 		catch (Exception exception) {
-			throw new SecretManagerException(
-				"Unable to fetch ADC token", exception);
+			String msg =
+				"Unable to fetch ADC token. Run 'gcloud auth application-default login'.";
+
+			throw new SecretManagerException(msg, exception);
 		}
 	}
 
