@@ -48,8 +48,10 @@ public class GcpClientManager<T extends AutoCloseable> {
 		_tokenExpirationTime = 0;
 	}
 
-	public <R> R execute(GcpOperation<T, R> gcpOperation) throws Exception {
-		T client = _getClient();
+	public <R> R execute(long companyId, GcpOperation<T, R> gcpOperation)
+		throws Exception {
+
+		T client = _getClient(companyId);
 
 		try {
 			return gcpOperation.execute(client);
@@ -61,7 +63,7 @@ public class GcpClientManager<T extends AutoCloseable> {
 			if (statusCodeCode == StatusCode.Code.UNAUTHENTICATED) {
 				close();
 
-				client = _getClient();
+				client = _getClient(companyId);
 
 				return gcpOperation.execute(client);
 			}
@@ -110,7 +112,7 @@ public class GcpClientManager<T extends AutoCloseable> {
 		}
 	}
 
-	private T _getClient() throws Exception {
+	private T _getClient(long companyId) throws Exception {
 		long currentTime = System.currentTimeMillis();
 
 		T client = _client;
@@ -128,7 +130,7 @@ public class GcpClientManager<T extends AutoCloseable> {
 				return _client;
 			}
 
-			GoogleCredentials credentials = _getGoogleCredentials();
+			GoogleCredentials credentials = _getGoogleCredentials(companyId);
 
 			_closeClient();
 
@@ -139,7 +141,9 @@ public class GcpClientManager<T extends AutoCloseable> {
 		}
 	}
 
-	private GoogleCredentials _getGoogleCredentials() throws Exception {
+	private GoogleCredentials _getGoogleCredentials(long companyId)
+		throws Exception {
+
 		String gcpAuthKeyReference = _gcpAuthKeyReference;
 
 		if (Validator.isNull(gcpAuthKeyReference)) {
@@ -147,7 +151,7 @@ public class GcpClientManager<T extends AutoCloseable> {
 		}
 
 		try (SecureSecret secureSecret = _secretManager.getSecret(
-				KeyReference.fromString(gcpAuthKeyReference))) {
+				companyId, KeyReference.fromString(gcpAuthKeyReference))) {
 
 			byte[] bytes = secureSecret.getBytes();
 

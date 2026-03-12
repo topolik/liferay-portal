@@ -13,8 +13,10 @@ import com.liferay.keymanager.provider.gcp.internal.configuration.GcpADCAccessTo
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
+import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 
 import java.io.IOException;
 
@@ -25,27 +27,28 @@ import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
  */
 @Component(
-	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpADCAccessTokenSecretVaultProviderConfiguration",
-	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	service = SecretVaultProvider.class
+	factory = "com.liferay.keymanager.provider.gcp.internal.GcpADCAccessTokenSecretVaultProvider",
+	property = "providerId=gcp-adc", service = SecretVaultProvider.class
 )
 public class GcpADCAccessTokenSecretVaultProvider
 	implements SecretVaultProvider {
 
 	@Override
-	public void deleteSecret(String identifier) throws SecretManagerException {
+	public void deleteSecret(long companyId, String identifier)
+		throws SecretManagerException {
+
 		throw new SecretManagerException("Read-only provider");
 	}
 
 	@Override
-	public SecureSecret getSecret(String identifier)
+	public SecureSecret getSecret(long companyId, String identifier)
 		throws SecretManagerException {
 
 		try {
@@ -76,19 +79,30 @@ public class GcpADCAccessTokenSecretVaultProvider
 		}
 		catch (Exception exception) {
 			String msg =
-				"Unable to fetch ADC token. Run 'gcloud auth application-default login'.";
+				"Unable to fetch ADC token. Run 'gcloud auth login'.";
 
 			throw new SecretManagerException(msg, exception);
 		}
 	}
 
 	@Override
-	public List<String> getSecretIdentifiers() throws SecretManagerException {
+	public List<String> getSecretIdentifiers(long companyId)
+		throws SecretManagerException {
+
 		return Arrays.asList("default");
 	}
 
 	@Override
-	public void putSecret(SecureSecret secureSecret)
+	public boolean isAllowedCompany(long companyId) {
+		if (_companyId == companyId) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public void putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException {
 
 		throw new SecretManagerException("Read-only provider");
@@ -103,6 +117,8 @@ public class GcpADCAccessTokenSecretVaultProvider
 					GcpADCAccessTokenSecretVaultProviderConfiguration.class,
 					properties);
 
+		_companyId = ConfigurationFactoryUtil.getCompanyId(
+			_companyLocalService, properties);
 		_providerId =
 			gcpADCAccessTokenSecretVaultProviderConfiguration.providerId();
 
@@ -118,6 +134,11 @@ public class GcpADCAccessTokenSecretVaultProvider
 
 		_credentials = credentials;
 	}
+
+	private volatile long _companyId;
+
+	@Reference
+	private CompanyLocalService _companyLocalService;
 
 	private volatile GoogleCredentials _credentials;
 	private volatile String _providerId;

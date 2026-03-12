@@ -26,7 +26,7 @@ public class GcpADCImpersonationAccessTokenConfigurationPidMapping
 	@Override
 	public String getConfigurationPid() {
 		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
-			"GcpADCImpersonationAccessTokenSecretVaultProviderConfiguration";
+			"GcpADCImpersonationAccessTokenSecretVaultProviderConfiguration.scoped";
 	}
 
 }

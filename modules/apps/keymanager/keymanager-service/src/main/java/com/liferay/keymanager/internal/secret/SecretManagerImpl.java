@@ -10,17 +10,22 @@ import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
-import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
-import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Tomas Polesovsky
@@ -29,95 +34,143 @@ import org.osgi.service.component.annotations.Deactivate;
 public class SecretManagerImpl implements SecretManager {
 
 	@Override
-	public void deleteSecret(KeyReference keyReference)
+	public void deleteSecret(long companyId, KeyReference keyReference)
 		throws SecretManagerException {
 
-		_getSecretVaultProvider(
-			keyReference
-		).deleteSecret(
-			keyReference.getIdentifier()
-		);
+		SecretVaultProvider secretVaultProvider = _getSecretVaultProvider(
+			companyId, keyReference.getProviderId());
+
+		secretVaultProvider.deleteSecret(companyId, keyReference.getIdentifier());
 	}
 
 	@Override
-	public List<String> getProviders() throws SecretManagerException {
-		return new ArrayList<>(_serviceTrackerMap.keySet());
+	public List<String> getProviders(long companyId)
+		throws SecretManagerException {
+
+		List<String> providerIds = new ArrayList<>();
+
+		Map<ServiceReference<SecretVaultProvider>, SecretVaultProvider>
+			tracked = _serviceTracker.getTracked();
+
+		for (Map.Entry<ServiceReference<SecretVaultProvider>, SecretVaultProvider>
+				entry : tracked.entrySet()) {
+
+			ServiceReference<SecretVaultProvider> serviceReference =
+				entry.getKey();
+			SecretVaultProvider provider = entry.getValue();
+
+			if (provider.isAllowedCompany(companyId)) {
+				providerIds.add(
+					GetterUtil.getString(
+						serviceReference.getProperty("providerId")));
+			}
+		}
+
+		return providerIds;
 	}
 
 	@Override
-	public SecureSecret getSecret(KeyReference keyReference)
+	public SecureSecret getSecret(long companyId, KeyReference keyReference)
 		throws SecretManagerException {
 
-		return _getSecretVaultProvider(
-			keyReference
-		).getSecret(
-			keyReference.getIdentifier()
-		);
+		SecretVaultProvider secretVaultProvider = _getSecretVaultProvider(
+			companyId, keyReference.getProviderId());
+
+		return secretVaultProvider.getSecret(
+			companyId, keyReference.getIdentifier());
 	}
 
 	@Override
-	public List<KeyReference> getSecretIdentifiers(String providerId)
+	public List<KeyReference> getSecretIdentifiers(
+			long companyId, String providerId)
 		throws SecretManagerException {
 
-		List<String> identifiers = _getSecretVaultProvider(
-			providerId
-		).getSecretIdentifiers();
+		SecretVaultProvider secretVaultProvider = _getSecretVaultProvider(
+			companyId, providerId);
+
+		List<String> identifiers = secretVaultProvider.getSecretIdentifiers(
+			companyId);
 
 		List<KeyReference> keyReferences = new ArrayList<>(identifiers.size());
 
 		for (String identifier : identifiers) {
 			keyReferences.add(
-				KeyReference.fromString(
-					StringBundler.concat(
-						"${secretRef:", providerId, ":", identifier, "}")));
+				new KeyReference(
+					KeyReference.Type.SECRET, providerId, identifier));
 		}
 
 		return keyReferences;
 	}
 
 	@Override
-	public void putSecret(SecureSecret secureSecret)
+	public void putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException {
 
-		_getSecretVaultProvider(
-			secureSecret.getKeyReference()
-		).putSecret(
-			secureSecret
-		);
+		KeyReference keyReference = secureSecret.getKeyReference();
+
+		SecretVaultProvider secretVaultProvider = _getSecretVaultProvider(
+			companyId, keyReference.getProviderId());
+
+		secretVaultProvider.putSecret(companyId, secureSecret);
 	}
 
 	@Activate
 	protected void activate(BundleContext bundleContext) {
-		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, SecretVaultProvider.class, "providerId");
+		_serviceTracker = new ServiceTracker<>(
+			bundleContext, SecretVaultProvider.class, null);
+
+		_serviceTracker.open();
 	}
 
 	@Deactivate
 	protected void deactivate() {
-		_serviceTrackerMap.close();
+		_serviceTracker.close();
 	}
 
 	private SecretVaultProvider _getSecretVaultProvider(
-			KeyReference keyReference)
+			long companyId, String providerId)
 		throws SecretManagerException {
 
-		return _getSecretVaultProvider(keyReference.getProviderId());
-	}
+		Map<ServiceReference<SecretVaultProvider>, SecretVaultProvider>
+			tracked = _serviceTracker.getTracked();
 
-	private SecretVaultProvider _getSecretVaultProvider(String providerId)
-		throws SecretManagerException {
+		for (Map.Entry<ServiceReference<SecretVaultProvider>, SecretVaultProvider>
+				entry : tracked.entrySet()) {
 
-		SecretVaultProvider secretVaultProvider = _serviceTrackerMap.getService(
-			providerId);
+			ServiceReference<SecretVaultProvider> serviceReference =
+				entry.getKey();
 
-		if (secretVaultProvider == null) {
-			throw new SecretManagerException(
-				"No secret vault provider found for ID: " + providerId);
+			String trackedProviderId = GetterUtil.getString(
+				serviceReference.getProperty("providerId"));
+
+			if (providerId.equals(trackedProviderId)) {
+				SecretVaultProvider provider = entry.getValue();
+
+				if (provider.isAllowedCompany(companyId)) {
+					return provider;
+				}
+			}
 		}
 
-		return secretVaultProvider;
+		throw new SecretManagerException(
+			StringBundler.concat(
+				"No secret vault provider found for ID: ", providerId,
+				" and company ID: ", companyId));
 	}
 
-	private ServiceTrackerMap<String, SecretVaultProvider> _serviceTrackerMap;
+	@Reference(
+		cardinality = ReferenceCardinality.MULTIPLE,
+		policy = ReferencePolicy.DYNAMIC, service = SecretVaultProvider.class
+	)
+	protected void addSecretVaultProvider(
+		SecretVaultProvider secretVaultProvider) {
+	}
+
+	protected void removeSecretVaultProvider(
+		SecretVaultProvider secretVaultProvider) {
+	}
+
+	private ServiceTracker<SecretVaultProvider, SecretVaultProvider>
+		_serviceTracker;
 
 }

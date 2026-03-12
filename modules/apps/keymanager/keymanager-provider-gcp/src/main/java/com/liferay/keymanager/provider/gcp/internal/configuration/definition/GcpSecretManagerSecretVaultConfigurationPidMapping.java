@@ -25,7 +25,7 @@ public class GcpSecretManagerSecretVaultConfigurationPidMapping
 	@Override
 	public String getConfigurationPid() {
 		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
-			"GcpSecretManagerSecretVaultProviderConfiguration";
+			"GcpSecretManagerSecretVaultProviderConfiguration.scoped";
 	}
 
 }

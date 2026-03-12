@@ -11,13 +11,9 @@ import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
-import java.nio.charset.StandardCharsets;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -32,52 +28,57 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	service = SecretVaultProvider.class
+	property = "providerId=env", service = SecretVaultProvider.class
 )
 public class EnvSecretVaultProvider implements SecretVaultProvider {
 
 	@Override
-	public void deleteSecret(String identifier) throws SecretManagerException {
+	public void deleteSecret(long companyId, String identifier)
+		throws SecretManagerException {
+
 		throw new SecretManagerException("Read-only provider");
 	}
 
 	@Override
-	public SecureSecret getSecret(String identifier)
+	public SecureSecret getSecret(long companyId, String identifier)
 		throws SecretManagerException {
 
-		if (!StringUtil.startsWith(identifier, _envVariablePrefix)) {
-			throw new SecretManagerException("Access denied: " + identifier);
+		String envVariableName = identifier;
+
+		if (Validator.isNotNull(_envVariablePrefix)) {
+			envVariableName = _envVariablePrefix + identifier;
 		}
 
-		String value = getEnv(identifier);
+		String value = getEnv(envVariableName);
 
 		if (Validator.isNull(value)) {
 			throw new SecretManagerException(
-				"Environment variable not found: " + identifier);
+				"Environment variable not found: " + envVariableName);
 		}
 
-		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-
-		try {
-			return new SecureSecret(
-				new KeyReference(
-					KeyReference.Type.SECRET, _providerId, identifier),
-				bytes);
-		}
-		finally {
-			Arrays.fill(bytes, (byte)0);
-		}
+		return new SecureSecret(
+			new KeyReference(KeyReference.Type.SECRET, _providerId, identifier),
+			value.getBytes());
 	}
 
 	@Override
-	public List<String> getSecretIdentifiers() throws SecretManagerException {
+	public List<String> getSecretIdentifiers(long companyId)
+		throws SecretManagerException {
+
 		List<String> identifiers = new ArrayList<>();
 
-		Map<String, String> env = System.getenv();
+		Map<String, String> env = getEnv();
 
 		for (String key : env.keySet()) {
-			if (StringUtil.startsWith(key, _envVariablePrefix)) {
-				identifiers.add(key);
+			if (Validator.isNull(_envVariablePrefix) ||
+				key.startsWith(_envVariablePrefix)) {
+
+				if (Validator.isNotNull(_envVariablePrefix)) {
+					identifiers.add(key.substring(_envVariablePrefix.length()));
+				}
+				else {
+					identifiers.add(key);
+				}
 			}
 		}
 
@@ -85,7 +86,12 @@ public class EnvSecretVaultProvider implements SecretVaultProvider {
 	}
 
 	@Override
-	public void putSecret(SecureSecret secureSecret)
+	public boolean isAllowedCompany(long companyId) {
+		return true;
+	}
+
+	@Override
+	public void putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException {
 
 		throw new SecretManagerException("Read-only provider");
@@ -94,14 +100,17 @@ public class EnvSecretVaultProvider implements SecretVaultProvider {
 	@Activate
 	@Modified
 	protected void activate(Map<String, Object> properties) {
-		EnvSecretVaultProviderConfiguration
-			envSecretVaultProviderConfiguration =
-				ConfigurableUtil.createConfigurable(
-					EnvSecretVaultProviderConfiguration.class, properties);
+		EnvSecretVaultProviderConfiguration envSecretVaultProviderConfiguration =
+			ConfigurableUtil.createConfigurable(
+				EnvSecretVaultProviderConfiguration.class, properties);
 
-		_providerId = envSecretVaultProviderConfiguration.providerId();
 		_envVariablePrefix =
 			envSecretVaultProviderConfiguration.envVariablePrefix();
+		_providerId = envSecretVaultProviderConfiguration.providerId();
+	}
+
+	protected Map<String, String> getEnv() {
+		return System.getenv();
 	}
 
 	protected String getEnv(String name) {

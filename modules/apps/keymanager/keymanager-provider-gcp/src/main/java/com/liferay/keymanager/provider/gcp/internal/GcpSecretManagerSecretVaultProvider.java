@@ -27,10 +27,12 @@ import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
+import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -43,7 +45,6 @@ import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
@@ -52,17 +53,19 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tomas Polesovsky
  */
 @Component(
-	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration",
-	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	service = SecretVaultProvider.class
+	factory = "com.liferay.keymanager.provider.gcp.internal.GcpSecretManagerSecretVaultProvider",
+	property = "providerId=gcp-secret-manager", service = SecretVaultProvider.class
 )
 public class GcpSecretManagerSecretVaultProvider
 	implements SecretVaultProvider {
 
 	@Override
-	public void deleteSecret(String identifier) throws SecretManagerException {
+	public void deleteSecret(long companyId, String identifier)
+		throws SecretManagerException {
+
 		try {
 			_gcpClientManager.execute(
+				companyId,
 				client -> {
 					DeleteSecretRequest request =
 						DeleteSecretRequest.newBuilder(
@@ -84,11 +87,12 @@ public class GcpSecretManagerSecretVaultProvider
 	}
 
 	@Override
-	public SecureSecret getSecret(String identifier)
+	public SecureSecret getSecret(long companyId, String identifier)
 		throws SecretManagerException {
 
 		try {
 			return _gcpClientManager.execute(
+				companyId,
 				client -> {
 					String name = StringBundler.concat(
 						"projects/", _projectId, "/secrets/",
@@ -115,9 +119,12 @@ public class GcpSecretManagerSecretVaultProvider
 	}
 
 	@Override
-	public List<String> getSecretIdentifiers() throws SecretManagerException {
+	public List<String> getSecretIdentifiers(long companyId)
+		throws SecretManagerException {
+
 		try {
 			return _gcpClientManager.execute(
+				companyId,
 				client -> {
 					List<String> identifiers = new ArrayList<>();
 
@@ -146,11 +153,21 @@ public class GcpSecretManagerSecretVaultProvider
 	}
 
 	@Override
-	public void putSecret(SecureSecret secureSecret)
+	public boolean isAllowedCompany(long companyId) {
+		if (_companyId == companyId) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public void putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException {
 
 		try {
 			_gcpClientManager.execute(
+				companyId,
 				client -> {
 					KeyReference keyReference = secureSecret.getKeyReference();
 
@@ -270,6 +287,8 @@ public class GcpSecretManagerSecretVaultProvider
 					GcpSecretManagerSecretVaultProviderConfiguration.class,
 					properties);
 
+		_companyId = ConfigurationFactoryUtil.getCompanyId(
+			_companyLocalService, properties);
 		_providerId =
 			gcpSecretManagerSecretVaultProviderConfiguration.providerId();
 		_projectId =
@@ -301,7 +320,9 @@ public class GcpSecretManagerSecretVaultProvider
 
 	@Deactivate
 	protected void deactivate() {
-		_gcpClientManager.close();
+		if (_gcpClientManager != null) {
+			_gcpClientManager.close();
+		}
 	}
 
 	private String _getSecretId(String identifier) {
@@ -327,14 +348,17 @@ public class GcpSecretManagerSecretVaultProvider
 	private static final Log _log = LogFactoryUtil.getLog(
 		GcpSecretManagerSecretVaultProvider.class);
 
-	private volatile GcpClientManager<SecretManagerServiceClient>
-		_gcpClientManager;
+	@Reference
+	private CompanyLocalService _companyLocalService;
+
+	@Reference
+	private SecretManager _secretManager;
+
+	private volatile long _companyId;
+	private GcpClientManager<SecretManagerServiceClient> _gcpClientManager;
 	private volatile String _kmsKeyName;
 	private volatile String[] _locations;
 	private volatile String _projectId;
 	private volatile String _providerId;
-
-	@Reference
-	private SecretManager _secretManager;
 
 }

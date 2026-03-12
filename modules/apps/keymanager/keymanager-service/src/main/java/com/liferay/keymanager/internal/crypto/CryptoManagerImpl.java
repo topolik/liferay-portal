@@ -10,19 +10,24 @@ import com.liferay.keymanager.crypto.CryptoKeyMetadata;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
-import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
-import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.petra.string.StringBundler;
+import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.security.Key;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Tomas Polesovsky
@@ -31,47 +36,50 @@ import org.osgi.service.component.annotations.Deactivate;
 public class CryptoManagerImpl implements CryptoManager {
 
 	@Override
-	public byte[] decrypt(KeyReference keyReference, byte[] ciphertext)
+	public byte[] decrypt(
+			long companyId, KeyReference keyReference, byte[] ciphertext)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
+			companyId, keyReference.getProviderId());
 
 		return cryptoVaultProvider.decrypt(
-			keyReference.getIdentifier(), ciphertext);
+			companyId, keyReference.getIdentifier(), ciphertext);
 	}
 
 	@Override
-	public void deleteKey(KeyReference keyReference)
+	public void deleteKey(long companyId, KeyReference keyReference)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
+			companyId, keyReference.getProviderId());
 
-		cryptoVaultProvider.deleteKey(keyReference.getIdentifier());
+		cryptoVaultProvider.deleteKey(companyId, keyReference.getIdentifier());
 	}
 
 	@Override
-	public byte[] encrypt(KeyReference keyReference, byte[] plaintext)
+	public byte[] encrypt(
+			long companyId, KeyReference keyReference, byte[] plaintext)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
+			companyId, keyReference.getProviderId());
 
 		return cryptoVaultProvider.encrypt(
-			keyReference.getIdentifier(), plaintext);
+			companyId, keyReference.getIdentifier(), plaintext);
 	}
 
 	@Override
 	public KeyReference generateAsymmetricKeyPair(
-			String providerId, String identifier, String algorithmSpec)
+			long companyId, String providerId, String identifier,
+			String algorithmSpec)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			providerId);
+			companyId, providerId);
 
 		String finalIdentifier = cryptoVaultProvider.generateAsymmetricKeyPair(
-			identifier, algorithmSpec);
+			companyId, identifier, algorithmSpec);
 
 		return KeyReference.fromString(
 			StringBundler.concat(
@@ -80,14 +88,15 @@ public class CryptoManagerImpl implements CryptoManager {
 
 	@Override
 	public KeyReference generateSecretKey(
-			String providerId, String identifier, String algorithmSpec)
+			long companyId, String providerId, String identifier,
+			String algorithmSpec)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			providerId);
+			companyId, providerId);
 
 		String finalIdentifier = cryptoVaultProvider.generateSecretKey(
-			identifier, algorithmSpec);
+			companyId, identifier, algorithmSpec);
 
 		return KeyReference.fromString(
 			StringBundler.concat(
@@ -95,13 +104,15 @@ public class CryptoManagerImpl implements CryptoManager {
 	}
 
 	@Override
-	public List<KeyReference> getKeyIdentifiers(String providerId)
+	public List<KeyReference> getKeyIdentifiers(
+			long companyId, String providerId)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			providerId);
+			companyId, providerId);
 
-		List<String> identifiers = cryptoVaultProvider.getKeyIdentifiers();
+		List<String> identifiers = cryptoVaultProvider.getKeyIdentifiers(
+			companyId);
 
 		List<KeyReference> keyReferences = new ArrayList<>(identifiers.size());
 
@@ -116,31 +127,54 @@ public class CryptoManagerImpl implements CryptoManager {
 	}
 
 	@Override
-	public CryptoKeyMetadata getKeyMetadata(KeyReference keyReference)
+	public CryptoKeyMetadata getKeyMetadata(
+			long companyId, KeyReference keyReference)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			keyReference.getProviderId());
+			companyId, keyReference.getProviderId());
 
-		return cryptoVaultProvider.getKeyMetadata(keyReference.getIdentifier());
+		return cryptoVaultProvider.getKeyMetadata(
+			companyId, keyReference.getIdentifier());
 	}
 
 	@Override
-	public List<String> getProviders() throws CryptoManagerException {
-		return new ArrayList<>(_serviceTrackerMap.keySet());
+	public List<String> getProviders(long companyId)
+		throws CryptoManagerException {
+
+		List<String> providerIds = new ArrayList<>();
+
+		Map<ServiceReference<CryptoVaultProvider>, CryptoVaultProvider>
+			tracked = _serviceTracker.getTracked();
+
+		for (Map.Entry<ServiceReference<CryptoVaultProvider>, CryptoVaultProvider>
+				entry : tracked.entrySet()) {
+
+			ServiceReference<CryptoVaultProvider> serviceReference =
+				entry.getKey();
+			CryptoVaultProvider provider = entry.getValue();
+
+			if (provider.isAllowedCompany(companyId)) {
+				providerIds.add(
+					GetterUtil.getString(
+						serviceReference.getProperty("providerId")));
+			}
+		}
+
+		return providerIds;
 	}
 
 	@Override
 	public KeyReference importSecretKey(
-			String providerId, String identifier, byte[] rawKeyMaterial,
-			String algorithmSpec)
+			long companyId, String providerId, String identifier,
+			byte[] rawKeyMaterial, String algorithmSpec)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			providerId);
+			companyId, providerId);
 
 		String finalIdentifier = cryptoVaultProvider.importSecretKey(
-			identifier, rawKeyMaterial, algorithmSpec);
+			companyId, identifier, rawKeyMaterial, algorithmSpec);
 
 		return KeyReference.fromString(
 			StringBundler.concat(
@@ -149,54 +183,88 @@ public class CryptoManagerImpl implements CryptoManager {
 
 	@Override
 	public Key unwrap(
-			KeyReference masterKeyReference, byte[] wrappedKeyBytes,
-			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
+			long companyId, KeyReference masterKeyReference,
+			byte[] wrappedKeyBytes, String wrappedKeyAlgorithm,
+			int wrappedKeyCipherType)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			masterKeyReference.getProviderId());
+			companyId, masterKeyReference.getProviderId());
 
 		return cryptoVaultProvider.unwrap(
-			masterKeyReference.getIdentifier(), wrappedKeyBytes,
+			companyId, masterKeyReference.getIdentifier(), wrappedKeyBytes,
 			wrappedKeyAlgorithm, wrappedKeyCipherType);
 	}
 
 	@Override
-	public byte[] wrap(KeyReference masterKeyReference, Key keyToWrap)
+	public byte[] wrap(
+			long companyId, KeyReference masterKeyReference, Key keyToWrap)
 		throws CryptoManagerException {
 
 		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			masterKeyReference.getProviderId());
+			companyId, masterKeyReference.getProviderId());
 
 		return cryptoVaultProvider.wrap(
-			masterKeyReference.getIdentifier(), keyToWrap);
+			companyId, masterKeyReference.getIdentifier(), keyToWrap);
 	}
 
 	@Activate
 	protected void activate(BundleContext bundleContext) {
-		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, CryptoVaultProvider.class, "providerId");
+		_serviceTracker = new ServiceTracker<>(
+			bundleContext, CryptoVaultProvider.class, null);
+
+		_serviceTracker.open();
 	}
 
 	@Deactivate
 	protected void deactivate() {
-		_serviceTrackerMap.close();
+		_serviceTracker.close();
 	}
 
-	private CryptoVaultProvider _getCryptoVaultProvider(String providerId)
+	private CryptoVaultProvider _getCryptoVaultProvider(
+			long companyId, String providerId)
 		throws CryptoManagerException {
 
-		CryptoVaultProvider cryptoVaultProvider = _serviceTrackerMap.getService(
-			providerId);
+		Map<ServiceReference<CryptoVaultProvider>, CryptoVaultProvider>
+			tracked = _serviceTracker.getTracked();
 
-		if (cryptoVaultProvider == null) {
-			throw new CryptoManagerException(
-				"No crypto vault provider found for ID: " + providerId);
+		for (Map.Entry<ServiceReference<CryptoVaultProvider>, CryptoVaultProvider>
+				entry : tracked.entrySet()) {
+
+			ServiceReference<CryptoVaultProvider> serviceReference =
+				entry.getKey();
+
+			String trackedProviderId = GetterUtil.getString(
+				serviceReference.getProperty("providerId"));
+
+			if (providerId.equals(trackedProviderId)) {
+				CryptoVaultProvider provider = entry.getValue();
+
+				if (provider.isAllowedCompany(companyId)) {
+					return provider;
+				}
+			}
 		}
 
-		return cryptoVaultProvider;
+		throw new CryptoManagerException(
+			StringBundler.concat(
+				"No crypto vault provider found for ID: ", providerId,
+				" and company ID: ", companyId));
 	}
 
-	private ServiceTrackerMap<String, CryptoVaultProvider> _serviceTrackerMap;
+	@Reference(
+		cardinality = ReferenceCardinality.MULTIPLE,
+		policy = ReferencePolicy.DYNAMIC, service = CryptoVaultProvider.class
+	)
+	protected void addCryptoVaultProvider(
+		CryptoVaultProvider cryptoVaultProvider) {
+	}
+
+	protected void removeCryptoVaultProvider(
+		CryptoVaultProvider cryptoVaultProvider) {
+	}
+
+	private ServiceTracker<CryptoVaultProvider, CryptoVaultProvider>
+		_serviceTracker;
 
 }

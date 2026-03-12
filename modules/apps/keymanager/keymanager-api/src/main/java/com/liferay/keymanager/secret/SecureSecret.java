@@ -7,6 +7,11 @@ package com.liferay.keymanager.secret;
 
 import com.liferay.keymanager.KeyReference;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -30,6 +35,10 @@ public final class SecureSecret implements AutoCloseable {
 	public void close() {
 		if (_bytes != null) {
 			Arrays.fill(_bytes, (byte)0);
+		}
+
+		if (_chars != null) {
+			Arrays.fill(_chars, '\0');
 		}
 	}
 
@@ -58,6 +67,24 @@ public final class SecureSecret implements AutoCloseable {
 		return _bytes;
 	}
 
+	public char[] getChars() {
+		return getChars(StandardCharsets.UTF_8);
+	}
+
+	public char[] getChars(Charset charset) {
+		if (_chars != null) {
+			return _chars;
+		}
+
+		CharBuffer charBuffer = charset.decode(ByteBuffer.wrap(_bytes));
+
+		_chars = new char[charBuffer.remaining()];
+
+		charBuffer.get(_chars);
+
+		return _chars;
+	}
+
 	public KeyReference getKeyReference() {
 		return _keyReference;
 	}
@@ -68,6 +95,7 @@ public final class SecureSecret implements AutoCloseable {
 	}
 
 	private final byte[] _bytes;
+	private char[] _chars;
 	private final KeyReference _keyReference;
 
 }

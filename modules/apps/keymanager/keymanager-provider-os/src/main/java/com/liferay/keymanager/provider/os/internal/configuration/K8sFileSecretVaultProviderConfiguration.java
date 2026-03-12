@@ -14,21 +14,21 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  */
 @ExtendedObjectClassDefinition(category = "keymanager")
 @Meta.OCD(
-	id = "com.liferay.keymanager.provider.os.internal.configuration.FileSecretVaultProviderConfiguration",
+	id = "com.liferay.keymanager.provider.os.internal.configuration.K8sFileSecretVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "file-secret-vault-provider-configuration-name"
+	name = "k8s-file-secret-vault-provider-configuration-name"
 )
-public interface FileSecretVaultProviderConfiguration {
+public interface K8sFileSecretVaultProviderConfiguration {
 
 	@Meta.AD(
-		deflt = "k8s", description = "provider-id-description",
-		name = "provider-id"
+		deflt = "k8s-file", description = "provider-id-description",
+		name = "provider-id", required = false
 	)
 	public String providerId();
 
 	@Meta.AD(
 		deflt = "/run/secrets", description = "secrets-directory-description",
-		name = "secrets-directory"
+		name = "secrets-directory", required = false
 	)
 	public String secretsDirectory();
 

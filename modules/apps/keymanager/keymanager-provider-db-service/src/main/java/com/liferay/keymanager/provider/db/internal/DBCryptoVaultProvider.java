@@ -13,10 +13,11 @@ import com.liferay.keymanager.provider.db.internal.configuration.DBCryptoVaultPr
 import com.liferay.keymanager.provider.db.model.KeyEntry;
 import com.liferay.keymanager.provider.db.service.KeyEntryLocalService;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
+import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
-import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -60,21 +61,20 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tomas Polesovsky
  */
 @Component(
-	configurationPid = "com.liferay.keymanager.provider.db.internal.configuration.DBCryptoVaultProviderConfiguration",
-	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	service = CryptoVaultProvider.class
+	factory = "com.liferay.keymanager.provider.db.internal.DBCryptoVaultProvider",
+	property = "providerId=db", service = CryptoVaultProvider.class
 )
 public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
-	public byte[] decrypt(String identifier, byte[] ciphertext)
+	public byte[] decrypt(long companyId, String identifier, byte[] ciphertext)
 		throws CryptoManagerException {
 
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
-				_getCompanyId(), identifier);
+				companyId, identifier);
 
-			Key key = _unwrapKey(keyEntry);
+			Key key = _unwrapKey(companyId, keyEntry);
 
 			String cipherSpec = keyEntry.getCipherSpec();
 
@@ -121,10 +121,12 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public void deleteKey(String identifier) throws CryptoManagerException {
+	public void deleteKey(long companyId, String identifier)
+		throws CryptoManagerException {
+
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.fetchKeyEntry(
-				_getCompanyId(), identifier);
+				companyId, identifier);
 
 			if (keyEntry != null) {
 				_keyEntryLocalService.deleteKeyEntry(keyEntry);
@@ -137,14 +139,14 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public byte[] encrypt(String identifier, byte[] plaintext)
+	public byte[] encrypt(long companyId, String identifier, byte[] plaintext)
 		throws CryptoManagerException {
 
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
-				_getCompanyId(), identifier);
+				companyId, identifier);
 
-			Key key = _unwrapKey(keyEntry);
+			Key key = _unwrapKey(companyId, keyEntry);
 
 			String cipherSpec = keyEntry.getCipherSpec();
 
@@ -198,7 +200,7 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
 	public String generateAsymmetricKeyPair(
-			String identifier, String algorithmSpec)
+			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException {
 
 		try {
@@ -214,17 +216,17 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
 			byte[] wrappedPrivateKeyBytes = _cryptoManager.wrap(
-				KeyReference.fromString(_masterKeyReference),
+				companyId, KeyReference.fromString(_masterKeyReference),
 				keyPair.getPrivate());
 
 			_saveKeyEntry(
-				identifier, KeyType.PRIVATE,
+				companyId, identifier, KeyType.PRIVATE,
 				keyPair.getPrivate(
 				).getAlgorithm(),
 				wrappedPrivateKeyBytes, _masterKeyReference, algorithmSpec);
 
 			_saveKeyEntry(
-				identifier + ".pub", KeyType.PUBLIC,
+				companyId, identifier + ".pub", KeyType.PUBLIC,
 				keyPair.getPublic(
 				).getAlgorithm(),
 				keyPair.getPublic(
@@ -241,7 +243,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public String generateSecretKey(String identifier, String algorithmSpec)
+	public String generateSecretKey(
+			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException {
 
 		try {
@@ -257,11 +260,13 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			SecretKey secretKey = keyGenerator.generateKey();
 
 			byte[] wrappedKeyBytes = _cryptoManager.wrap(
-				KeyReference.fromString(_masterKeyReference), secretKey);
+				companyId, KeyReference.fromString(_masterKeyReference),
+				secretKey);
 
 			_saveKeyEntry(
-				identifier, KeyType.SECRET, secretKey.getAlgorithm(),
-				wrappedKeyBytes, _masterKeyReference, algorithmSpec);
+				companyId, identifier, KeyType.SECRET,
+				secretKey.getAlgorithm(), wrappedKeyBytes, _masterKeyReference,
+				algorithmSpec);
 
 			return identifier;
 		}
@@ -272,9 +277,11 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public List<String> getKeyIdentifiers() throws CryptoManagerException {
+	public List<String> getKeyIdentifiers(long companyId)
+		throws CryptoManagerException {
+
 		try {
-			return _keyEntryLocalService.getKeyIdentifiers(_getCompanyId());
+			return _keyEntryLocalService.getKeyIdentifiers(companyId);
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
@@ -283,12 +290,12 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public CryptoKeyMetadata getKeyMetadata(String identifier)
+	public CryptoKeyMetadata getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException {
 
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
-				_getCompanyId(), identifier);
+				companyId, identifier);
 
 			return new CryptoKeyMetadata(
 				KeyReference.fromString(
@@ -306,7 +313,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
 	public String importSecretKey(
-			String identifier, byte[] rawKeyMaterial, String algorithmSpec)
+			long companyId, String identifier, byte[] rawKeyMaterial,
+			String algorithmSpec)
 		throws CryptoManagerException {
 
 		try {
@@ -315,11 +323,13 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			SecretKey secretKey = new SecretKeySpec(rawKeyMaterial, algorithm);
 
 			byte[] wrappedKeyBytes = _cryptoManager.wrap(
-				KeyReference.fromString(_masterKeyReference), secretKey);
+				companyId, KeyReference.fromString(_masterKeyReference),
+				secretKey);
 
 			_saveKeyEntry(
-				identifier, KeyType.SECRET, secretKey.getAlgorithm(),
-				wrappedKeyBytes, _masterKeyReference, algorithmSpec);
+				companyId, identifier, KeyType.SECRET,
+				secretKey.getAlgorithm(), wrappedKeyBytes, _masterKeyReference,
+				algorithmSpec);
 
 			return identifier;
 		}
@@ -335,8 +345,17 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
+	public boolean isAllowedCompany(long companyId) {
+		if (_companyId == companyId) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
 	public Key unwrap(
-			String identifier, byte[] wrappedKeyBytes,
+			long companyId, String identifier, byte[] wrappedKeyBytes,
 			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
 		throws CryptoManagerException {
 
@@ -344,7 +363,7 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public byte[] wrap(String identifier, Key keyToWrap)
+	public byte[] wrap(long companyId, String identifier, Key keyToWrap)
 		throws CryptoManagerException {
 
 		throw new CryptoManagerException("Operation not supported");
@@ -366,6 +385,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			ConfigurableUtil.createConfigurable(
 				DBCryptoVaultProviderConfiguration.class, properties);
 
+		_companyId = ConfigurationFactoryUtil.getCompanyId(
+			_companyLocalService, properties);
 		_masterKeyReference =
 			dbCryptoVaultProviderConfiguration.masterKeyReference();
 		_providerId = dbCryptoVaultProviderConfiguration.providerId();
@@ -380,10 +401,6 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 			return byteArrayOutputStream.toByteArray();
 		}
-	}
-
-	private long _getCompanyId() {
-		return CompanyThreadLocal.getCompanyId();
 	}
 
 	private AlgorithmParameterSpec _getParameterSpec(
@@ -445,11 +462,9 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	private void _saveKeyEntry(
-			String alias, KeyType keyType, String algorithm, byte[] blobBytes,
-			String kekReference, String cipherSpec)
+			long companyId, String alias, KeyType keyType, String algorithm,
+			byte[] blobBytes, String kekReference, String cipherSpec)
 		throws Exception {
-
-		long companyId = _getCompanyId();
 
 		KeyEntry keyEntry = _keyEntryLocalService.fetchKeyEntry(
 			companyId, alias);
@@ -472,7 +487,7 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		_keyEntryLocalService.updateKeyEntry(keyEntry);
 	}
 
-	private Key _unwrapKey(KeyEntry keyEntry) throws Exception {
+	private Key _unwrapKey(long companyId, KeyEntry keyEntry) throws Exception {
 		KeyType keyType = KeyType.valueOf(keyEntry.getKeyType());
 
 		if (keyType == KeyType.PUBLIC) {
@@ -498,9 +513,14 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 		}
 
 		return _cryptoManager.unwrap(
-			masterKeyRef, encryptedKeyBytes, keyEntry.getAlgorithm(),
+			companyId, masterKeyRef, encryptedKeyBytes, keyEntry.getAlgorithm(),
 			wrappedType);
 	}
+
+	private long _companyId;
+
+	@Reference
+	private CompanyLocalService _companyLocalService;
 
 	@Reference
 	private CryptoManager _cryptoManager;

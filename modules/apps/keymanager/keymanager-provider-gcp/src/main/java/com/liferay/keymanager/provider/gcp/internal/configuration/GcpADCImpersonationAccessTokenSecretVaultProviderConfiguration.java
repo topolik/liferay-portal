@@ -21,8 +21,10 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 	localization = "content/Language",
 	name = "gcp-adc-impersonation-access-token-secret-vault-provider-configuration-name"
 )
-public interface
-	GcpADCImpersonationAccessTokenSecretVaultProviderConfiguration {
+public interface GcpADCImpersonationAccessTokenSecretVaultProviderConfiguration {
+
+	@Meta.AD(required = false)
+	public long companyId();
 
 	@Meta.AD(
 		deflt = "gcp-adc-impersonation",

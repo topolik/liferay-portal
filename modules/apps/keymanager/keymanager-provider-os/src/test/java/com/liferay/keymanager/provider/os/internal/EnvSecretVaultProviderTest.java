@@ -37,6 +37,11 @@ public class EnvSecretVaultProviderTest {
 		_provider = new EnvSecretVaultProvider() {
 
 			@Override
+			protected Map<String, String> getEnv() {
+				return _mockEnv;
+			}
+
+			@Override
 			protected String getEnv(String name) {
 				return _mockEnv.get(name);
 			}
@@ -56,7 +61,7 @@ public class EnvSecretVaultProviderTest {
 		_mockEnv.put("LIFERAY_SECRET_PASSWORD", "secret123");
 
 		try (SecureSecret secret = _provider.getSecret(
-				"LIFERAY_SECRET_PASSWORD")) {
+				0L, "PASSWORD")) {
 
 			Assert.assertArrayEquals("secret123".getBytes(), secret.getBytes());
 		}
@@ -64,24 +69,23 @@ public class EnvSecretVaultProviderTest {
 
 	@Test(expected = SecretManagerException.class)
 	public void testGetSecretAccessDenied() throws Exception {
-		_provider.getSecret("PATH");
+		_provider.getSecret(0L, "PATH");
 	}
 
 	@Test
 	public void testGetSecretIdentifiers() throws Exception {
+		_mockEnv.put("LIFERAY_SECRET_A", "1");
+		_mockEnv.put("OTHER_VAR", "2");
 
-		// Note: The provider currently uses System.getenv() directly for
-		// listing identifiers, which we cannot mock easily without PowerMock.
-		// However, we can verify it doesn't throw exceptions.
+		List<String> identifiers = _provider.getSecretIdentifiers(0L);
 
-		List<String> identifiers = _provider.getSecretIdentifiers();
-
-		Assert.assertNotNull(identifiers);
+		Assert.assertTrue(identifiers.contains("A"));
+		Assert.assertFalse(identifiers.contains("OTHER_VAR"));
 	}
 
 	@Test(expected = SecretManagerException.class)
 	public void testGetSecretNotFound() throws Exception {
-		_provider.getSecret("LIFERAY_SECRET_MISSING");
+		_provider.getSecret(0L, "LIFERAY_SECRET_MISSING");
 	}
 
 	private Map<String, String> _mockEnv;

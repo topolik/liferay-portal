@@ -23,6 +23,9 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface GcpADCAccessTokenSecretVaultProviderConfiguration {
 
+	@Meta.AD(required = false)
+	public long companyId();
+
 	@Meta.AD(
 		deflt = "gcp-adc", description = "provider-id-description",
 		name = "provider-id"

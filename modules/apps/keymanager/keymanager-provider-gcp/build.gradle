@@ -26,12 +26,17 @@ dependencies {
 
 	compileOnly group: "biz.aQute.bnd", name: "biz.aQute.bndlib", version: "6.4.0"
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "default"
+	compileOnly project(":apps:static:osgi:osgi-util")
+	compileOnly group: "org.osgi", name: "org.osgi.framework", version: "1.9.0"
+	compileOnly group: "org.osgi", name: "org.osgi.service.component", version: "1.4.0"
 	compileOnly group: "org.osgi", name: "org.osgi.service.component.annotations", version: "1.4.0"
 	compileOnly group: "org.osgi", name: "org.osgi.service.metatype.annotations", version: "1.4.0"
 	compileOnly project(":apps:keymanager:keymanager-api")
 	compileOnly project(":apps:keymanager:keymanager-spi")
 	compileOnly project(":apps:portal-configuration:portal-configuration-metatype-definitions-annotations")
+	compileOnly project(":apps:portal-configuration:portal-configuration-module-configuration-api")
 	compileOnly project(":apps:static:portal-configuration:portal-configuration-metatype-api")
+	compileOnly project(":apps:static:portal-configuration:portal-configuration-persistence-api")
 	compileOnly project(":core:petra:petra-string")
 
 	testImplementation group: "com.google.api", name: "gax", version: "2.60.0"

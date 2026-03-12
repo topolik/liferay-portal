@@ -23,6 +23,9 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface DBSecretVaultProviderConfiguration {
 
+	@Meta.AD(required = false)
+	public long companyId();
+
 	@Meta.AD(
 		deflt = "AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128",
 		description = "dek-cipher-spec-description", name = "dek-cipher-spec",

@@ -24,7 +24,7 @@ public class GcpKmsConfigurationPidMapping implements ConfigurationPidMapping {
 	@Override
 	public String getConfigurationPid() {
 		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
-			"GcpKmsCryptoVaultProviderConfiguration";
+			"GcpKmsCryptoVaultProviderConfiguration.scoped";
 	}
 
 }

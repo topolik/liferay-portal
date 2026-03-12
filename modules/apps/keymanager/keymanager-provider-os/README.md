@@ -4,14 +4,14 @@ This module bridges the Key Manager with the underlying host operating system an
 
 ## Providers
 
-### 1. FileKeyStore (Primary KEK Provider)
+### 1. KeyStore (Primary KEK Provider)
 
 Backed by a local filesystem KeyStore (`PKCS12`).
 *   **Purpose**: Acts as the local "Root of Trust" for development and standard deployments.
 *   **Engine**: BouncyCastle FIPS.
 *   **Security**: Supports specialized **Key Wrap (RFC 5649)** modes.
 
-### 2. File Provider (K8s Secrets)
+### 2. File Provider (File Secrets)
 
 Reads secrets directly from the filesystem.
 *   **Standard Path**: Defaults to `/run/secrets`.

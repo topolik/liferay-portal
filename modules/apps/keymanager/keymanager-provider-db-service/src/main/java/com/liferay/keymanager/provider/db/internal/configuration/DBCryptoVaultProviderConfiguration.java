@@ -23,6 +23,9 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface DBCryptoVaultProviderConfiguration {
 
+	@Meta.AD(required = false)
+	public long companyId();
+
 	@Meta.AD(
 		deflt = "${keyRef:keystore:master}",
 		description = "master-key-reference-description",

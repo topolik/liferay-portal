@@ -26,7 +26,7 @@ import org.junit.rules.TemporaryFolder;
 /**
  * @author Tomas Polesovsky
  */
-public class FileSecretVaultProviderTest {
+public class K8sFileSecretVaultProviderTest {
 
 	@ClassRule
 	@Rule
@@ -35,13 +35,13 @@ public class FileSecretVaultProviderTest {
 
 	@Before
 	public void setUp() throws Exception {
-		_provider = new FileSecretVaultProvider();
+		_provider = new K8sFileSecretVaultProvider();
 
 		_secretsDir = temporaryFolder.newFolder("secrets");
 
 		_provider.activate(
 			HashMapBuilder.<String, Object>put(
-				"providerId", "k8s"
+				"providerId", "k8s-file"
 			).put(
 				"secretsDirectory", _secretsDir.getAbsolutePath()
 			).build());
@@ -53,7 +53,7 @@ public class FileSecretVaultProviderTest {
 
 		Files.write(secretFile.toPath(), "password123".getBytes());
 
-		try (SecureSecret secret = _provider.getSecret("my-password")) {
+		try (SecureSecret secret = _provider.getSecret(0L, "my-password")) {
 			Assert.assertArrayEquals(
 				"password123".getBytes(), secret.getBytes());
 		}
@@ -72,7 +72,7 @@ public class FileSecretVaultProviderTest {
 			).toPath(),
 			"d2".getBytes());
 
-		List<String> identifiers = _provider.getSecretIdentifiers();
+		List<String> identifiers = _provider.getSecretIdentifiers(0L);
 
 		Assert.assertEquals(identifiers.toString(), 2, identifiers.size());
 		Assert.assertTrue(identifiers.contains("s1"));
@@ -81,7 +81,7 @@ public class FileSecretVaultProviderTest {
 
 	@Test(expected = SecretManagerException.class)
 	public void testGetSecretNotFound() throws Exception {
-		_provider.getSecret("non-existent-secret");
+		_provider.getSecret(0L, "non-existent-secret");
 	}
 
 	@Test(expected = SecretManagerException.class)
@@ -89,13 +89,13 @@ public class FileSecretVaultProviderTest {
 
 		// Attempt to read a file outside the secrets directory (security check)
 
-		_provider.getSecret("../outside-secret");
+		_provider.getSecret(0L, "../outside-secret");
 	}
 
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-	private FileSecretVaultProvider _provider;
+	private K8sFileSecretVaultProvider _provider;
 	private File _secretsDir;
 
 }

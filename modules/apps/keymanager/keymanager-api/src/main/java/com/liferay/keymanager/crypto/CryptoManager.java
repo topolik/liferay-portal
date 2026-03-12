@@ -19,42 +19,50 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public interface CryptoManager {
 
-	public byte[] decrypt(KeyReference keyReference, byte[] ciphertext)
+	public byte[] decrypt(
+			long companyId, KeyReference keyReference, byte[] ciphertext)
 		throws CryptoManagerException;
 
-	public void deleteKey(KeyReference keyReference)
+	public void deleteKey(long companyId, KeyReference keyReference)
 		throws CryptoManagerException;
 
-	public byte[] encrypt(KeyReference keyReference, byte[] plaintext)
+	public byte[] encrypt(
+			long companyId, KeyReference keyReference, byte[] plaintext)
 		throws CryptoManagerException;
 
 	public KeyReference generateAsymmetricKeyPair(
-			String providerId, String identifier, String algorithmSpec)
-		throws CryptoManagerException;
-
-	public KeyReference generateSecretKey(
-			String providerId, String identifier, String algorithmSpec)
-		throws CryptoManagerException;
-
-	public List<KeyReference> getKeyIdentifiers(String providerId)
-		throws CryptoManagerException;
-
-	public CryptoKeyMetadata getKeyMetadata(KeyReference keyReference)
-		throws CryptoManagerException;
-
-	public List<String> getProviders() throws CryptoManagerException;
-
-	public KeyReference importSecretKey(
-			String providerId, String identifier, byte[] rawKeyMaterial,
+			long companyId, String providerId, String identifier,
 			String algorithmSpec)
 		throws CryptoManagerException;
 
-	public Key unwrap(
-			KeyReference masterKeyReference, byte[] wrappedKeyBytes,
-			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
+	public KeyReference generateSecretKey(
+			long companyId, String providerId, String identifier,
+			String algorithmSpec)
 		throws CryptoManagerException;
 
-	public byte[] wrap(KeyReference masterKeyReference, Key keyToWrap)
+	public List<KeyReference> getKeyIdentifiers(long companyId, String providerId)
+		throws CryptoManagerException;
+
+	public CryptoKeyMetadata getKeyMetadata(
+			long companyId, KeyReference keyReference)
+		throws CryptoManagerException;
+
+	public List<String> getProviders(long companyId)
+		throws CryptoManagerException;
+
+	public KeyReference importSecretKey(
+			long companyId, String providerId, String identifier,
+			byte[] rawKeyMaterial, String algorithmSpec)
+		throws CryptoManagerException;
+
+	public Key unwrap(
+			long companyId, KeyReference masterKeyReference,
+			byte[] wrappedKeyBytes, String wrappedKeyAlgorithm,
+			int wrappedKeyCipherType)
+		throws CryptoManagerException;
+
+	public byte[] wrap(
+			long companyId, KeyReference masterKeyReference, Key keyToWrap)
 		throws CryptoManagerException;
 
 }

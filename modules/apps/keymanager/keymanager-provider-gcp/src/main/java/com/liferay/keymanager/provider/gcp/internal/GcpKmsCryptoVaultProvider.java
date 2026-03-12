@@ -26,8 +26,10 @@ import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVa
 import com.liferay.keymanager.provider.gcp.internal.util.GcpClientManager;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
+import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 
 import java.io.IOException;
 
@@ -57,18 +59,18 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tomas Polesovsky
  */
 @Component(
-	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration",
-	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	service = CryptoVaultProvider.class
+	factory = "com.liferay.keymanager.provider.gcp.internal.GcpKmsCryptoVaultProvider",
+	property = "providerId=gcp-kms", service = CryptoVaultProvider.class
 )
 public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
-	public byte[] decrypt(String identifier, byte[] ciphertext)
+	public byte[] decrypt(long companyId, String identifier, byte[] ciphertext)
 		throws CryptoManagerException {
 
 		try {
 			return _gcpClientManager.execute(
+				companyId,
 				client -> {
 					String name = _getGcpKeyName(identifier);
 
@@ -86,16 +88,19 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public void deleteKey(String identifier) throws CryptoManagerException {
+	public void deleteKey(long companyId, String identifier)
+		throws CryptoManagerException {
+
 		throw new CryptoManagerException("Operation not supported");
 	}
 
 	@Override
-	public byte[] encrypt(String identifier, byte[] plaintext)
+	public byte[] encrypt(long companyId, String identifier, byte[] plaintext)
 		throws CryptoManagerException {
 
 		try {
 			return _gcpClientManager.execute(
+				companyId,
 				client -> {
 					String name = _getGcpKeyName(identifier);
 
@@ -114,11 +119,12 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
 	public String generateAsymmetricKeyPair(
-			String identifier, String algorithmSpec)
+			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException {
 
 		try {
 			return _gcpClientManager.execute(
+				companyId,
 				client -> {
 					CryptoKey.Builder cryptoKeyBuilder = CryptoKey.newBuilder();
 
@@ -153,11 +159,13 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public String generateSecretKey(String identifier, String algorithmSpec)
+	public String generateSecretKey(
+			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException {
 
 		try {
 			return _gcpClientManager.execute(
+				companyId,
 				client -> {
 					if (algorithmSpec == null) {
 						return null;
@@ -211,9 +219,12 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public List<String> getKeyIdentifiers() throws CryptoManagerException {
+	public List<String> getKeyIdentifiers(long companyId)
+		throws CryptoManagerException {
+
 		try {
 			return _gcpClientManager.execute(
+				companyId,
 				client -> {
 					List<String> identifiers = new ArrayList<>();
 
@@ -245,11 +256,12 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public CryptoKeyMetadata getKeyMetadata(String identifier)
+	public CryptoKeyMetadata getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException {
 
 		try {
 			return _gcpClientManager.execute(
+				companyId,
 				client -> {
 					String name = _getGcpKeyName(identifier);
 
@@ -280,7 +292,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
 	public String importSecretKey(
-			String identifier, byte[] rawKeyMaterial, String algorithmSpec)
+			long companyId, String identifier, byte[] rawKeyMaterial,
+			String algorithmSpec)
 		throws CryptoManagerException {
 
 		if ((rawKeyMaterial == null) || (algorithmSpec == null)) {
@@ -291,15 +304,24 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
+	public boolean isAllowedCompany(long companyId) {
+		if (_companyId == companyId) {
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
 	public Key unwrap(
-			String identifier, byte[] wrappedKeyBytes,
+			long companyId, String identifier, byte[] wrappedKeyBytes,
 			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
 		throws CryptoManagerException {
 
 		byte[] plaintext = null;
 
 		try {
-			plaintext = decrypt(identifier, wrappedKeyBytes);
+			plaintext = decrypt(companyId, identifier, wrappedKeyBytes);
 
 			if (wrappedKeyCipherType == Cipher.SECRET_KEY) {
 				return new SecretKeySpec(plaintext, wrappedKeyAlgorithm);
@@ -335,10 +357,10 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public byte[] wrap(String identifier, Key keyToWrap)
+	public byte[] wrap(long companyId, String identifier, Key keyToWrap)
 		throws CryptoManagerException {
 
-		return encrypt(identifier, keyToWrap.getEncoded());
+		return encrypt(companyId, identifier, keyToWrap.getEncoded());
 	}
 
 	@Activate
@@ -349,6 +371,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 				ConfigurableUtil.createConfigurable(
 					GcpKmsCryptoVaultProviderConfiguration.class, properties);
 
+		_companyId = ConfigurationFactoryUtil.getCompanyId(
+			_companyLocalService, properties);
 		_providerId = gcpKmsCryptoVaultProviderConfiguration.providerId();
 
 		String keyRingPath =
@@ -391,7 +415,9 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Deactivate
 	protected void deactivate() {
-		_gcpClientManager.close();
+		if (_gcpClientManager != null) {
+			_gcpClientManager.close();
+		}
 	}
 
 	private CryptoKeyVersion.CryptoKeyVersionAlgorithm _getAsymmetricAlgorithm(
@@ -420,8 +446,12 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	private static final Pattern _keyRingPattern = Pattern.compile(
 		"projects/([^/]+)/locations/([^/]+)/keyRings/([^/]+)");
 
-	private volatile GcpClientManager<KeyManagementServiceClient>
-		_gcpClientManager;
+	private volatile long _companyId;
+
+	@Reference
+	private CompanyLocalService _companyLocalService;
+
+	private GcpClientManager<KeyManagementServiceClient> _gcpClientManager;
 	private volatile String _keyRingId;
 	private volatile String _locationId;
 	private volatile String _projectId;

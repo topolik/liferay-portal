@@ -14,6 +14,10 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(service = ConfigurationCategory.class)
 public class KeyManagerConfigurationCategory implements ConfigurationCategory {
+	@Override
+	public String getBundleSymbolicName() {
+		return "com.liferay.keymanager";
+	}
 
 	@Override
 	public String getCategoryIcon() {

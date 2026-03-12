@@ -15,14 +15,18 @@ import java.util.List;
  */
 public interface SecretVaultProvider {
 
-	public void deleteSecret(String identifier) throws SecretManagerException;
-
-	public SecureSecret getSecret(String identifier)
+	public void deleteSecret(long companyId, String identifier)
 		throws SecretManagerException;
 
-	public List<String> getSecretIdentifiers() throws SecretManagerException;
+	public SecureSecret getSecret(long companyId, String identifier)
+		throws SecretManagerException;
 
-	public void putSecret(SecureSecret secureSecret)
+	public List<String> getSecretIdentifiers(long companyId)
+		throws SecretManagerException;
+
+	public boolean isAllowedCompany(long companyId);
+
+	public void putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException;
 
 }

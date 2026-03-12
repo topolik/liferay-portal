@@ -26,7 +26,7 @@ public class GcpServiceAccountKeyAccessTokenConfigurationPidMapping
 	@Override
 	public String getConfigurationPid() {
 		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
-			"GcpServiceAccountKeyAccessTokenSecretVaultProviderConfiguration";
+			"GcpServiceAccountKeyAccessTokenSecretVaultProviderConfiguration.scoped";
 	}
 
 }

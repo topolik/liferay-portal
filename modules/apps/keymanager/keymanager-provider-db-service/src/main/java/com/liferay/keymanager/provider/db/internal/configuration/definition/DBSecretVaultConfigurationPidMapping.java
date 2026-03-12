@@ -25,7 +25,7 @@ public class DBSecretVaultConfigurationPidMapping
 	@Override
 	public String getConfigurationPid() {
 		return "com.liferay.keymanager.provider.db.internal.configuration." +
-			"DBSecretVaultProviderConfiguration";
+			"DBSecretVaultProviderConfiguration.scoped";
 	}
 
 }

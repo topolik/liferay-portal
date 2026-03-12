@@ -17,36 +17,42 @@ import java.util.List;
  */
 public interface CryptoVaultProvider {
 
-	public byte[] decrypt(String identifier, byte[] ciphertext)
+	public byte[] decrypt(long companyId, String identifier, byte[] ciphertext)
 		throws CryptoManagerException;
 
-	public void deleteKey(String identifier) throws CryptoManagerException;
+	public void deleteKey(long companyId, String identifier)
+		throws CryptoManagerException;
 
-	public byte[] encrypt(String identifier, byte[] plaintext)
+	public byte[] encrypt(long companyId, String identifier, byte[] plaintext)
 		throws CryptoManagerException;
 
 	public String generateAsymmetricKeyPair(
-			String identifier, String algorithmSpec)
+			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException;
 
-	public String generateSecretKey(String identifier, String algorithmSpec)
+	public String generateSecretKey(
+			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException;
 
-	public List<String> getKeyIdentifiers() throws CryptoManagerException;
+	public List<String> getKeyIdentifiers(long companyId)
+		throws CryptoManagerException;
 
-	public CryptoKeyMetadata getKeyMetadata(String identifier)
+	public CryptoKeyMetadata getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException;
 
 	public String importSecretKey(
-			String identifier, byte[] rawKeyMaterial, String algorithmSpec)
+			long companyId, String identifier, byte[] rawKeyMaterial,
+			String algorithmSpec)
 		throws CryptoManagerException;
 
+	public boolean isAllowedCompany(long companyId);
+
 	public Key unwrap(
-			String identifier, byte[] wrappedKeyBytes,
+			long companyId, String identifier, byte[] wrappedKeyBytes,
 			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
 		throws CryptoManagerException;
 
-	public byte[] wrap(String identifier, Key keyToWrap)
+	public byte[] wrap(long companyId, String identifier, Key keyToWrap)
 		throws CryptoManagerException;
 
 }
