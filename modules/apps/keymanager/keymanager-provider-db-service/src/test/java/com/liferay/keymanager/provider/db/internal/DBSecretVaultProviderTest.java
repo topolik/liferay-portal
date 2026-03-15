@@ -11,7 +11,6 @@ import com.liferay.keymanager.provider.db.model.SecretEntry;
 import com.liferay.keymanager.provider.db.model.impl.SecretEntryImpl;
 import com.liferay.keymanager.provider.db.service.SecretEntryLocalService;
 import com.liferay.keymanager.secret.SecureSecret;
-import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
@@ -54,6 +53,8 @@ public class DBSecretVaultProviderTest {
 
 		_dbSecretVaultProvider.activate(
 			HashMapBuilder.<String, Object>put(
+				"companyId", _COMPANY_ID
+			).put(
 				"dekCipherSpec",
 				"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128"
 			).put(
@@ -61,8 +62,6 @@ public class DBSecretVaultProviderTest {
 			).put(
 				"providerId", "db"
 			).build());
-
-		CompanyThreadLocal.setCompanyIdWithSafeCloseable(_COMPANY_ID);
 	}
 
 	@Test
@@ -77,7 +76,7 @@ public class DBSecretVaultProviderTest {
 			secretEntry
 		);
 
-		_dbSecretVaultProvider.deleteSecret(identifier);
+		_dbSecretVaultProvider.deleteSecret(_COMPANY_ID, identifier);
 
 		Mockito.verify(
 			_secretEntryLocalService
@@ -95,7 +94,7 @@ public class DBSecretVaultProviderTest {
 		);
 
 		List<String> identifiers =
-			_dbSecretVaultProvider.getSecretIdentifiers();
+			_dbSecretVaultProvider.getSecretIdentifiers(_COMPANY_ID);
 
 		Assert.assertEquals(identifiers.toString(), 1, identifiers.size());
 		Assert.assertEquals("secret-1", identifiers.get(0));
@@ -122,10 +121,11 @@ public class DBSecretVaultProviderTest {
 
 		Mockito.when(
 			_cryptoManager.wrap(
-				Mockito.any(KeyReference.class), Mockito.any(Key.class))
+				Mockito.anyLong(), Mockito.any(KeyReference.class),
+				Mockito.any(Key.class))
 		).thenAnswer(
 			invocation -> {
-				capturedDekReference.set(invocation.getArgument(1));
+				capturedDekReference.set(invocation.getArgument(2));
 
 				return "wrapped-dek-material".getBytes();
 			}
@@ -133,8 +133,9 @@ public class DBSecretVaultProviderTest {
 
 		Mockito.when(
 			_cryptoManager.unwrap(
-				Mockito.any(KeyReference.class), Mockito.any(byte[].class),
-				Mockito.anyString(), Mockito.anyInt())
+				Mockito.anyLong(), Mockito.any(KeyReference.class),
+				Mockito.any(byte[].class), Mockito.anyString(),
+				Mockito.anyInt())
 		).thenAnswer(
 			invocation -> capturedDekReference.get()
 		);
@@ -163,12 +164,12 @@ public class DBSecretVaultProviderTest {
 
 		// 3. Perform Put (this will generate a random DEK and IV)
 
-		_dbSecretVaultProvider.putSecret(secureSecret);
+		_dbSecretVaultProvider.putSecret(_COMPANY_ID, secureSecret);
 
 		// 4. Perform Get (this will use the captured DEK and stored IV)
 
 		SecureSecret retrievedSecret = _dbSecretVaultProvider.getSecret(
-			identifier);
+			_COMPANY_ID, identifier);
 
 		// 5. Verify
 

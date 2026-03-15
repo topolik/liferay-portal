@@ -49,7 +49,7 @@ public interface GcpKmsCryptoVaultProviderConfiguration {
 	public long newKeyRotationPeriodSeconds();
 
 	@Meta.AD(
-		deflt = "gcp-kms", description = "provider-id-description",
+		deflt = "gcp-kms", description = "gcp-kms-provider-id-description",
 		name = "provider-id"
 	)
 	public String providerId();

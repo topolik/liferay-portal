@@ -28,7 +28,8 @@ public interface GcpADCImpersonationAccessTokenSecretVaultProviderConfiguration 
 
 	@Meta.AD(
 		deflt = "gcp-adc-impersonation",
-		description = "provider-id-description", name = "provider-id"
+		description = "gcp-adc-impersonation-provider-id-description",
+		name = "provider-id"
 	)
 	public String providerId();
 

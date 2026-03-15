@@ -20,6 +20,7 @@
 		<!-- Payload (Encrypted Secret) -->
 
 		<column name="ciphertextBlob" type="Blob" />
+		<column name="cipherSpec" type="String" />
 		<column name="iv" type="String" />
 
 		<!-- Envelope Key (Encrypted DEK) -->

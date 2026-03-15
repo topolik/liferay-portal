@@ -47,7 +47,7 @@ public interface KeyStoreCryptoVaultProviderConfiguration {
 	public String keystoreType();
 
 	@Meta.AD(
-		deflt = "keystore", description = "provider-id-description",
+		deflt = "keystore", description = "keystore-provider-id-description",
 		name = "provider-id", required = false
 	)
 	public String providerId();

@@ -21,7 +21,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 public interface K8sFileSecretVaultProviderConfiguration {
 
 	@Meta.AD(
-		deflt = "k8s-file", description = "provider-id-description",
+		deflt = "k8s-file", description = "k8s-file-provider-id-description",
 		name = "provider-id", required = false
 	)
 	public String providerId();

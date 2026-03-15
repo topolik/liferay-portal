@@ -27,7 +27,7 @@ public interface GcpADCAccessTokenSecretVaultProviderConfiguration {
 	public long companyId();
 
 	@Meta.AD(
-		deflt = "gcp-adc", description = "provider-id-description",
+		deflt = "gcp-adc", description = "gcp-adc-provider-id-description",
 		name = "provider-id"
 	)
 	public String providerId();

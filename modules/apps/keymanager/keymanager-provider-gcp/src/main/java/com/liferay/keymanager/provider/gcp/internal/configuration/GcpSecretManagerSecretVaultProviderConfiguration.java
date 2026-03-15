@@ -48,7 +48,8 @@ public interface GcpSecretManagerSecretVaultProviderConfiguration {
 	public String projectId();
 
 	@Meta.AD(
-		deflt = "gcp-secrets", description = "provider-id-description",
+		deflt = "gcp-secrets",
+		description = "gcp-secrets-provider-id-description",
 		name = "provider-id"
 	)
 	public String providerId();

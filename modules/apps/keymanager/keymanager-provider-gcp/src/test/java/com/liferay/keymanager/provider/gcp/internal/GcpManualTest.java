@@ -9,6 +9,7 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
@@ -24,6 +25,8 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
+
+import org.mockito.Mockito;
 
 /**
  * A manual test class to verify GCP configurations.
@@ -50,6 +53,8 @@ public class GcpManualTest {
 		_projectId = System.getenv("GCP_PROJECT_ID");
 		_keyRingPath = System.getenv("GCP_KMS_KEY_RING_PATH");
 		_saJsonKey = System.getenv("GCP_SA_JSON_KEY");
+
+		_companyLocalService = Mockito.mock(CompanyLocalService.class);
 	}
 
 	@Test
@@ -57,9 +62,13 @@ public class GcpManualTest {
 		GcpADCAccessTokenSecretVaultProvider provider =
 			new GcpADCAccessTokenSecretVaultProvider();
 
+		_inject(provider, "_companyLocalService", _companyLocalService);
+
 		_activate(
 			provider,
 			HashMapBuilder.<String, Object>put(
+				"companyId", 12345L
+			).put(
 				"provider-id", "gcp-adc"
 			).put(
 				"providerId", "gcp-adc"
@@ -68,7 +77,7 @@ public class GcpManualTest {
 				new String[] {"https://www.googleapis.com/auth/cloud-platform"}
 			).build());
 
-		try (SecureSecret secret = provider.getSecret("default")) {
+		try (SecureSecret secret = provider.getSecret(12345L, "default")) {
 			System.out.println("ADC Token: " + new String(secret.getBytes()));
 		}
 	}
@@ -79,11 +88,14 @@ public class GcpManualTest {
 
 		GcpKmsCryptoVaultProvider provider = new GcpKmsCryptoVaultProvider();
 
+		_inject(provider, "_companyLocalService", _companyLocalService);
 		_inject(provider, "_secretManager", new MockSecretManager(_saJsonKey));
 
 		_activate(
 			provider,
 			HashMapBuilder.<String, Object>put(
+				"companyId", 12345L
+			).put(
 				"gcp-auth-key-reference", "db:sa-key"
 			).put(
 				"gcpAuthKeyReference", "db:sa-key"
@@ -105,16 +117,16 @@ public class GcpManualTest {
 				"providerId", "gcp-kms"
 			).build());
 
-		List<String> aliases = provider.getKeyIdentifiers();
+		List<String> aliases = provider.getKeyIdentifiers(12345L);
 
 		System.out.println("KMS Keys: " + aliases);
 
 		if (!aliases.isEmpty()) {
 			String alias = aliases.get(0);
 
-			byte[] encrypted = provider.encrypt(alias, "test".getBytes());
+			byte[] encrypted = provider.encrypt(12345L, alias, "test".getBytes());
 
-			byte[] decrypted = provider.decrypt(alias, encrypted);
+			byte[] decrypted = provider.decrypt(12345L, alias, encrypted);
 
 			System.out.println("KMS Roundtrip: " + new String(decrypted));
 		}
@@ -127,11 +139,14 @@ public class GcpManualTest {
 		GcpSecretManagerSecretVaultProvider provider =
 			new GcpSecretManagerSecretVaultProvider();
 
+		_inject(provider, "_companyLocalService", _companyLocalService);
 		_inject(provider, "_secretManager", new MockSecretManager(_saJsonKey));
 
 		_activate(
 			provider,
 			HashMapBuilder.<String, Object>put(
+				"companyId", 12345L
+			).put(
 				"gcp-auth-key-reference", "db:sa-key"
 			).put(
 				"gcpAuthKeyReference", "db:sa-key"
@@ -151,7 +166,7 @@ public class GcpManualTest {
 				"locations", new String[0]
 			).build());
 
-		List<String> ids = provider.getSecretIdentifiers();
+		List<String> ids = provider.getSecretIdentifiers(12345L);
 
 		System.out.println("SSM Secrets: " + ids);
 	}
@@ -163,12 +178,15 @@ public class GcpManualTest {
 		GcpServiceAccountKeyAccessTokenSecretVaultProvider provider =
 			new GcpServiceAccountKeyAccessTokenSecretVaultProvider();
 
+		_inject(provider, "_companyLocalService", _companyLocalService);
 		_inject(
 			provider, "_secretManager", new MockSecretManager(_saJsonKey));
 
 		_activate(
 			provider,
 			HashMapBuilder.<String, Object>put(
+				"companyId", 12345L
+			).put(
 				"provider-id", "gcp-sa-key"
 			).put(
 				"providerId", "gcp-sa-key"
@@ -181,7 +199,7 @@ public class GcpManualTest {
 				new String[] {"https://www.googleapis.com/auth/cloud-platform"}
 			).build());
 
-		try (SecureSecret secret = provider.getSecret("default")) {
+		try (SecureSecret secret = provider.getSecret(12345L, "default")) {
 			System.out.println("SA Token: " + new String(secret.getBytes()));
 		}
 	}
@@ -233,6 +251,7 @@ public class GcpManualTest {
 		field.set(target, value);
 	}
 
+	private CompanyLocalService _companyLocalService;
 	private String _projectId;
 	private String _keyRingPath;
 	private String _saJsonKey;
@@ -244,16 +263,16 @@ public class GcpManualTest {
 		}
 
 		@Override
-		public void deleteSecret(KeyReference keyReference) {
+		public void deleteSecret(long companyId, KeyReference keyReference) {
 		}
 
 		@Override
-		public List<String> getProviders() {
+		public List<String> getProviders(long companyId) {
 			return Collections.emptyList();
 		}
 
 		@Override
-		public SecureSecret getSecret(KeyReference keyReference)
+		public SecureSecret getSecret(long companyId, KeyReference keyReference)
 			throws SecretManagerException {
 
 			if (_saJsonKey != null) {
@@ -264,12 +283,14 @@ public class GcpManualTest {
 		}
 
 		@Override
-		public List<KeyReference> getSecretIdentifiers(String providerId) {
+		public List<KeyReference> getSecretIdentifiers(
+			long companyId, String providerId) {
+
 			return Collections.emptyList();
 		}
 
 		@Override
-		public void putSecret(SecureSecret secureSecret) {
+		public void putSecret(long companyId, SecureSecret secureSecret) {
 		}
 
 		private final String _saJsonKey;

@@ -13,7 +13,6 @@ import com.liferay.keymanager.provider.db.model.KeyEntry;
 import com.liferay.keymanager.provider.db.model.impl.KeyEntryImpl;
 import com.liferay.keymanager.provider.db.service.KeyEntryLocalService;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
-import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
@@ -61,12 +60,12 @@ public class DBCryptoVaultProviderTest {
 
 		_dbCryptoVaultProvider.activate(
 			HashMapBuilder.<String, Object>put(
+				"companyId", _COMPANY_ID
+			).put(
 				"masterKeyReference", "${keyRef:keystore:master}"
 			).put(
 				"providerId", "db"
 			).build());
-
-		CompanyThreadLocal.setCompanyIdWithSafeCloseable(_COMPANY_ID);
 	}
 
 	@Test
@@ -81,7 +80,7 @@ public class DBCryptoVaultProviderTest {
 			keyEntry
 		);
 
-		_dbCryptoVaultProvider.deleteKey(identifier);
+		_dbCryptoVaultProvider.deleteKey(_COMPANY_ID, identifier);
 
 		Mockito.verify(
 			_keyEntryLocalService
@@ -114,8 +113,9 @@ public class DBCryptoVaultProviderTest {
 
 		Mockito.when(
 			_cryptoManager.unwrap(
-				Mockito.any(KeyReference.class), Mockito.any(byte[].class),
-				Mockito.anyString(), Mockito.anyInt())
+				Mockito.anyLong(), Mockito.any(KeyReference.class),
+				Mockito.any(byte[].class), Mockito.anyString(),
+				Mockito.anyInt())
 		).thenReturn(
 			keyMaterial
 		);
@@ -127,12 +127,12 @@ public class DBCryptoVaultProviderTest {
 		);
 
 		byte[] ciphertext = _dbCryptoVaultProvider.encrypt(
-			identifier, plaintext);
+			_COMPANY_ID, identifier, plaintext);
 
 		Assert.assertNotNull(ciphertext);
 
 		byte[] recoveredPlaintext = _dbCryptoVaultProvider.decrypt(
-			identifier, ciphertext);
+			_COMPANY_ID, identifier, ciphertext);
 
 		Assert.assertArrayEquals(plaintext, recoveredPlaintext);
 	}
@@ -149,7 +149,8 @@ public class DBCryptoVaultProviderTest {
 
 		Mockito.when(
 			_cryptoManager.wrap(
-				Mockito.any(KeyReference.class), Mockito.any(Key.class))
+				Mockito.anyLong(), Mockito.any(KeyReference.class),
+				Mockito.any(Key.class))
 		).thenReturn(
 			"wrapped".getBytes()
 		);
@@ -157,7 +158,7 @@ public class DBCryptoVaultProviderTest {
 		String cipherSpec = "RSA";
 
 		String result = _dbCryptoVaultProvider.generateAsymmetricKeyPair(
-			identifier, cipherSpec);
+			_COMPANY_ID, identifier, cipherSpec);
 
 		Assert.assertEquals(identifier, result);
 
@@ -180,7 +181,8 @@ public class DBCryptoVaultProviderTest {
 
 		Mockito.when(
 			_cryptoManager.wrap(
-				Mockito.any(KeyReference.class), Mockito.any(Key.class))
+				Mockito.anyLong(), Mockito.any(KeyReference.class),
+				Mockito.any(Key.class))
 		).thenReturn(
 			"wrapped".getBytes()
 		);
@@ -189,7 +191,7 @@ public class DBCryptoVaultProviderTest {
 			"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128";
 
 		String result = _dbCryptoVaultProvider.generateSecretKey(
-			identifier, cipherSpec);
+			_COMPANY_ID, identifier, cipherSpec);
 
 		Assert.assertEquals(identifier, result);
 
@@ -208,7 +210,8 @@ public class DBCryptoVaultProviderTest {
 			Collections.singletonList("key-1")
 		);
 
-		List<String> identifiers = _dbCryptoVaultProvider.getKeyIdentifiers();
+		List<String> identifiers = _dbCryptoVaultProvider.getKeyIdentifiers(
+			_COMPANY_ID);
 
 		Assert.assertEquals(identifiers.toString(), 1, identifiers.size());
 		Assert.assertEquals("key-1", identifiers.get(0));
@@ -231,7 +234,7 @@ public class DBCryptoVaultProviderTest {
 		);
 
 		CryptoKeyMetadata result = _dbCryptoVaultProvider.getKeyMetadata(
-			identifier);
+			_COMPANY_ID, identifier);
 
 		Assert.assertEquals("AES", result.getAlgorithm());
 		Assert.assertEquals("AES/GCM/NoPadding", result.getCipherSpec());
@@ -258,7 +261,8 @@ public class DBCryptoVaultProviderTest {
 
 		Mockito.when(
 			_cryptoManager.wrap(
-				Mockito.any(KeyReference.class), Mockito.any(Key.class))
+				Mockito.anyLong(), Mockito.any(KeyReference.class),
+				Mockito.any(Key.class))
 		).thenReturn(
 			"wrapped".getBytes()
 		);
@@ -268,7 +272,7 @@ public class DBCryptoVaultProviderTest {
 		byte[] rawKeyMaterial = new byte[32];
 
 		String result = _dbCryptoVaultProvider.importSecretKey(
-			identifier, rawKeyMaterial, cipherSpec);
+			_COMPANY_ID, identifier, rawKeyMaterial, cipherSpec);
 
 		Assert.assertEquals(identifier, result);
 
@@ -284,7 +288,7 @@ public class DBCryptoVaultProviderTest {
 		String identifier = "test-key";
 		Key keyToWrap = Mockito.mock(Key.class);
 
-		_dbCryptoVaultProvider.wrap(identifier, keyToWrap);
+		_dbCryptoVaultProvider.wrap(_COMPANY_ID, identifier, keyToWrap);
 	}
 
 	private void _injectField(String fieldName, Object value) {

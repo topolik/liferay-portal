@@ -34,7 +34,7 @@ public interface
 	public String gcpAuthKeyReference();
 
 	@Meta.AD(
-		deflt = "gcp-sa-key", description = "provider-id-description",
+		deflt = "gcp-sa-key", description = "gcp-sa-key-provider-id-description",
 		name = "provider-id"
 	)
 	public String providerId();

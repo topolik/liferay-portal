@@ -41,7 +41,7 @@ public interface DBSecretVaultProviderConfiguration {
 	public String masterKeyReference();
 
 	@Meta.AD(
-		deflt = "db", description = "provider-id-description",
+		deflt = "db", description = "db-secret-provider-id-description",
 		name = "provider-id"
 	)
 	public String providerId();
