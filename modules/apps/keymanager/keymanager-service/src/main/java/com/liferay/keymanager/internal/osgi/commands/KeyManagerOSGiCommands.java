@@ -6,7 +6,7 @@
 package com.liferay.keymanager.internal.osgi.commands;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecureSecret;
@@ -168,7 +168,7 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 	@Descriptor("Get key metadata: getKeyMetadata <companyId> <keyReferenceString>")
 	public String getKeyMetadata(long companyId, String keyReferenceString) {
 		try {
-			CryptoKeyMetadata cryptoKeyMetadata = _cryptoManager.getKeyMetadata(
+			CryptoKey cryptoKeyMetadata = _cryptoManager.getKeyMetadata(
 				companyId, _parseKeyReference(keyReferenceString));
 
 			return StringBundler.concat(

@@ -46,6 +46,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
@@ -54,7 +55,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	factory = "com.liferay.keymanager.provider.db.internal.DBSecretVaultProvider",
-	property = "providerId=db", service = SecretVaultProvider.class
+	service = SecretVaultProvider.class
 )
 public class DBSecretVaultProvider implements SecretVaultProvider {
 
@@ -81,7 +82,7 @@ public class DBSecretVaultProvider implements SecretVaultProvider {
 		throws SecretManagerException {
 
 		try {
-			SecretEntry secretEntry = _secretEntryLocalService.getSecretEntry(
+			SecretEntry secretEntry = _secretEntryLocalService.fetchSecretEntry(
 				companyId, identifier);
 
 			// 1. Unwrap DEK

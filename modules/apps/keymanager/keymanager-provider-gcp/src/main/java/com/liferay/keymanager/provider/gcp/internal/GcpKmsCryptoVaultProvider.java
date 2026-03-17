@@ -5,7 +5,6 @@
 
 package com.liferay.keymanager.provider.gcp.internal;
 
-import com.google.cloud.kms.v1.CryptoKey;
 import com.google.cloud.kms.v1.CryptoKeyVersion;
 import com.google.cloud.kms.v1.CryptoKeyVersionTemplate;
 import com.google.cloud.kms.v1.DecryptResponse;
@@ -20,7 +19,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.provider.gcp.internal.util.GcpClientManager;
@@ -50,7 +49,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
@@ -126,10 +124,10 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 			return _gcpClientManager.execute(
 				companyId,
 				client -> {
-					CryptoKey.Builder cryptoKeyBuilder = CryptoKey.newBuilder();
+					com.google.cloud.kms.v1.CryptoKey.Builder cryptoKeyBuilder = com.google.cloud.kms.v1.CryptoKey.newBuilder();
 
 					cryptoKeyBuilder.setPurpose(
-						CryptoKey.CryptoKeyPurpose.ASYMMETRIC_DECRYPT);
+						com.google.cloud.kms.v1.CryptoKey.CryptoKeyPurpose.ASYMMETRIC_DECRYPT);
 
 					CryptoKeyVersionTemplate.Builder
 						cryptoKeyVersionTemplateBuilder =
@@ -171,10 +169,10 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 						return null;
 					}
 
-					CryptoKey.Builder cryptoKeyBuilder = CryptoKey.newBuilder();
+					com.google.cloud.kms.v1.CryptoKey.Builder cryptoKeyBuilder = com.google.cloud.kms.v1.CryptoKey.newBuilder();
 
 					cryptoKeyBuilder.setPurpose(
-						CryptoKey.CryptoKeyPurpose.ENCRYPT_DECRYPT);
+						com.google.cloud.kms.v1.CryptoKey.CryptoKeyPurpose.ENCRYPT_DECRYPT);
 
 					CryptoKeyVersionTemplate.Builder
 						cryptoKeyVersionTemplateBuilder =
@@ -239,7 +237,7 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 					KeyManagementServiceClient.ListCryptoKeysPagedResponse
 						response = client.listCryptoKeys(request);
 
-					for (CryptoKey cryptoKey : response.iterateAll()) {
+					for (com.google.cloud.kms.v1.CryptoKey cryptoKey : response.iterateAll()) {
 						String name = cryptoKey.getName();
 
 						identifiers.add(
@@ -256,7 +254,7 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public CryptoKeyMetadata getKeyMetadata(long companyId, String identifier)
+	public CryptoKey getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException {
 
 		try {
@@ -265,13 +263,13 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 				client -> {
 					String name = _getGcpKeyName(identifier);
 
-					CryptoKey cryptoKey = client.getCryptoKey(name);
+					com.google.cloud.kms.v1.CryptoKey cryptoKey = client.getCryptoKey(name);
 
 					Timestamp createTime = cryptoKey.getCreateTime();
 
 					long seconds = createTime.getSeconds();
 
-					return new CryptoKeyMetadata(
+					return new CryptoKey(
 						KeyReference.fromString(
 							StringBundler.concat(
 								"${keyRef:", _providerId, ":", identifier,

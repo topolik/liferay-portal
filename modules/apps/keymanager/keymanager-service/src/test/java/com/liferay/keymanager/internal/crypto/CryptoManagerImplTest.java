@@ -6,7 +6,7 @@
 package com.liferay.keymanager.internal.crypto;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
@@ -188,7 +188,7 @@ public class CryptoManagerImplTest {
 		KeyReference keyRef = KeyReference.fromString(
 			"${keyRef:test-crypto-provider:my-key}");
 
-		CryptoKeyMetadata metadata = new CryptoKeyMetadata(
+		CryptoKey metadata = new CryptoKey(
 			keyRef, "AES", "AES/GCM/NoPadding", 123456789L);
 
 		Mockito.when(
@@ -197,7 +197,7 @@ public class CryptoManagerImplTest {
 			metadata
 		);
 
-		CryptoKeyMetadata result = _cryptoManagerImpl.getKeyMetadata(keyRef);
+		CryptoKey result = _cryptoManagerImpl.getKeyMetadata(keyRef);
 
 		Assert.assertEquals(metadata, result);
 	}

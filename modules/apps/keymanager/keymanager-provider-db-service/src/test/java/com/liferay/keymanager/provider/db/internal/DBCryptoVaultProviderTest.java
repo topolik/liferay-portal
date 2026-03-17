@@ -6,7 +6,7 @@
 package com.liferay.keymanager.provider.db.internal;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.db.model.KeyEntry;
@@ -233,7 +233,7 @@ public class DBCryptoVaultProviderTest {
 			keyEntry
 		);
 
-		CryptoKeyMetadata result = _dbCryptoVaultProvider.getKeyMetadata(
+		CryptoKey result = _dbCryptoVaultProvider.getKeyMetadata(
 			_COMPANY_ID, identifier);
 
 		Assert.assertEquals("AES", result.getAlgorithm());

@@ -5,7 +5,7 @@
 
 package com.liferay.keymanager.spi.crypto;
 
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 
 import java.security.Key;
@@ -37,7 +37,7 @@ public interface CryptoVaultProvider {
 	public List<String> getKeyIdentifiers(long companyId)
 		throws CryptoManagerException;
 
-	public CryptoKeyMetadata getKeyMetadata(long companyId, String identifier)
+	public CryptoKey getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException;
 
 	public String importSecretKey(

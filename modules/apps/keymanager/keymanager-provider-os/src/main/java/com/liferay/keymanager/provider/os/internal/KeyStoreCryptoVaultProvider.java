@@ -6,7 +6,7 @@
 package com.liferay.keymanager.provider.os.internal;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.os.internal.configuration.KeyStoreCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.secret.SecretManager;
@@ -19,13 +19,11 @@ import com.liferay.portal.kernel.util.Validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -240,7 +238,7 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public CryptoKeyMetadata getKeyMetadata(long companyId, String identifier)
+	public CryptoKey getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException {
 
 		try {
@@ -277,7 +275,7 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 					).getAlgorithm();
 				}
 
-				return new CryptoKeyMetadata(
+				return new CryptoKey(
 					KeyReference.fromString(
 						StringBundler.concat(
 							"${keyRef:", _providerId, ":", identifier, "}")),
@@ -376,11 +374,11 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 
 		if (file.exists()) {
 			try (FileInputStream fis = new FileInputStream(file)) {
-				keyStore.load(fis, password);
+				keyStore.load(fis, password); // here
 			}
 		}
 		else {
-			keyStore.load(null, password);
+			keyStore.load(null, password); // here
 		}
 
 		return keyStore;
@@ -443,7 +441,7 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		}
 
 		try (FileOutputStream fos = new FileOutputStream(file)) {
-			keyStore.store(fos, password);
+			keyStore.store(fos, password);  // here
 		}
 	}
 

@@ -6,6 +6,7 @@
 package com.liferay.keymanager;
 
 import com.liferay.petra.string.StringBundler;
+import com.liferay.petra.string.StringPool;
 
 import java.io.Serializable;
 
@@ -17,6 +18,20 @@ import java.util.regex.Pattern;
  * @author Tomas Polesovsky
  */
 public class KeyReference implements Serializable {
+
+	public static boolean isKeyReference(String value) {
+		if (value == null) {
+			return false;
+		}
+
+		Matcher matcher = _pattern.matcher(value);
+
+		if (!matcher.matches()) {
+			return false;
+		}
+		
+		return true;
+	}
 
 	public static KeyReference fromString(String value) {
 		if (value == null) {
@@ -114,6 +129,8 @@ public class KeyReference implements Serializable {
 		CRYPTO, SECRET
 
 	}
+	
+	public static final String ANY_PROVIDER = StringPool.STAR;
 
 	private static final Pattern _pattern = Pattern.compile(
 		"\\$\\{(keyRef|secretRef):([^:]+):(.+)\\}");

@@ -6,7 +6,7 @@
 package com.liferay.keymanager.internal.crypto;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
@@ -127,7 +127,7 @@ public class CryptoManagerImpl implements CryptoManager {
 	}
 
 	@Override
-	public CryptoKeyMetadata getKeyMetadata(
+	public CryptoKey getKeyMetadata(
 			long companyId, KeyReference keyReference)
 		throws CryptoManagerException {
 

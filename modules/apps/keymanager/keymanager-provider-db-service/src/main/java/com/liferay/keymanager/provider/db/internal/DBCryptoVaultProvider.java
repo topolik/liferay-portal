@@ -6,7 +6,7 @@
 package com.liferay.keymanager.provider.db.internal;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.provider.db.internal.configuration.DBCryptoVaultProviderConfiguration;
@@ -62,7 +62,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	factory = "com.liferay.keymanager.provider.db.internal.DBCryptoVaultProvider",
-	property = "providerId=db", service = CryptoVaultProvider.class
+	service = CryptoVaultProvider.class
 )
 public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
@@ -290,14 +290,14 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
-	public CryptoKeyMetadata getKeyMetadata(long companyId, String identifier)
+	public CryptoKey getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException {
 
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
 				companyId, identifier);
 
-			return new CryptoKeyMetadata(
+			return new CryptoKey(
 				KeyReference.fromString(
 					StringBundler.concat(
 						"${keyRef:", _providerId, ":", identifier, "}")),

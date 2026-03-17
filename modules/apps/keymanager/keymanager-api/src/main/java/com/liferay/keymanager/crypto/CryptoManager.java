@@ -43,7 +43,7 @@ public interface CryptoManager {
 	public List<KeyReference> getKeyIdentifiers(long companyId, String providerId)
 		throws CryptoManagerException;
 
-	public CryptoKeyMetadata getKeyMetadata(
+	public CryptoKey getKeyMetadata(
 			long companyId, KeyReference keyReference)
 		throws CryptoManagerException;
 

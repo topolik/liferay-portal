@@ -8,6 +8,7 @@ dependencies {
 	compileOnly group: "org.osgi", name: "org.osgi.util.tracker", version: "1.5.2"
 	compileOnly project(":apps:configuration-admin:configuration-admin-api")
 	compileOnly project(":apps:static:osgi:osgi-util")
+	compileOnly project(":apps:static:portal-configuration:portal-configuration-metatype-api")
 	compileOnly project(":apps:static:portal-configuration:portal-configuration-persistence-api")
 	compileOnly project(":apps:keymanager:keymanager-api")
 	compileOnly project(":apps:keymanager:keymanager-spi")

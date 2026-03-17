@@ -7,18 +7,18 @@ package com.liferay.keymanager.secret;
 
 import com.liferay.keymanager.KeyReference;
 
+import javax.security.auth.Destroyable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * @author Tomas Polesovsky
  */
-public final class SecureSecret implements AutoCloseable {
+public final class SecureSecret implements AutoCloseable, Destroyable {
 
 	public SecureSecret(KeyReference keyReference, byte[] bytes) {
 		_keyReference = keyReference;
@@ -30,9 +30,38 @@ public final class SecureSecret implements AutoCloseable {
 			_bytes = Arrays.copyOf(bytes, bytes.length);
 		}
 	}
+	
+	public SecureSecret(KeyReference keyReference, char[] chars) {
+		_keyReference = keyReference;
+
+		if (_chars == null) {
+			_bytes = new byte[0];
+		}
+		else {
+			_chars = Arrays.copyOf(chars, chars.length);
+
+			ByteBuffer byteBuffer = 
+				StandardCharsets.UTF_8.encode(CharBuffer.wrap(chars));
+
+			_bytes = new byte[byteBuffer.remaining()];
+
+			byteBuffer.get(_bytes);
+		}
+	}
+
+	public SecureSecret(KeyReference keyReference, String value) {
+		this(keyReference, value != null ? value.toCharArray() : null);
+	}
 
 	@Override
 	public void close() {
+		destroy();
+	}
+
+	@Override
+	public synchronized void destroy() {
+		_destroyed = true;
+
 		if (_bytes != null) {
 			Arrays.fill(_bytes, (byte)0);
 		}
@@ -43,27 +72,15 @@ public final class SecureSecret implements AutoCloseable {
 	}
 
 	@Override
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		}
-
-		if (!(object instanceof SecureSecret)) {
-			return false;
-		}
-
-		SecureSecret secureSecret = (SecureSecret)object;
-
-		if (Arrays.equals(_bytes, secureSecret._bytes) &&
-			Objects.equals(_keyReference, secureSecret._keyReference)) {
-
-			return true;
-		}
-
-		return false;
+	public synchronized boolean isDestroyed() {
+		return _destroyed;
 	}
 
-	public byte[] getBytes() {
+	public synchronized byte[] getBytes() {
+		if (_destroyed) {
+			throw new IllegalArgumentException("Secret is destroyed");
+		}
+
 		return _bytes;
 	}
 
@@ -71,7 +88,11 @@ public final class SecureSecret implements AutoCloseable {
 		return getChars(StandardCharsets.UTF_8);
 	}
 
-	public char[] getChars(Charset charset) {
+	private synchronized char[] getChars(Charset charset) {
+		if (_destroyed) {
+			throw new IllegalArgumentException("Secret is destroyed");
+		}
+		
 		if (_chars != null) {
 			return _chars;
 		}
@@ -89,13 +110,8 @@ public final class SecureSecret implements AutoCloseable {
 		return _keyReference;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(Arrays.hashCode(_bytes), _keyReference);
-	}
-
-	private final byte[] _bytes;
-	private char[] _chars;
+	private volatile byte[] _bytes;
+	private volatile char[] _chars;
+	private volatile boolean _destroyed;
 	private final KeyReference _keyReference;
-
 }

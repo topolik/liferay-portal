@@ -7,33 +7,40 @@ package com.liferay.keymanager.crypto;
 
 import com.liferay.keymanager.KeyReference;
 
-import java.security.Key;
-
 /**
  * @author Tomas Polesovsky
  */
 public class CryptoKey {
 
-	public CryptoKey(KeyReference keyReference, Key key, String cipherSpec) {
+	public CryptoKey(
+		KeyReference keyReference, String algorithm, String cipherSpec,
+		long creationDate) {
+
 		_keyReference = keyReference;
-		_key = key;
+		_algorithm = algorithm;
 		_cipherSpec = cipherSpec;
+		_creationDate = creationDate;
+	}
+
+	public String getAlgorithm() {
+		return _algorithm;
 	}
 
 	public String getCipherSpec() {
 		return _cipherSpec;
 	}
 
-	public Key getKey() {
-		return _key;
+	public long getCreationDate() {
+		return _creationDate;
 	}
 
 	public KeyReference getKeyReference() {
 		return _keyReference;
 	}
 
+	private final String _algorithm;
 	private final String _cipherSpec;
-	private final Key _key;
+	private final long _creationDate;
 	private final KeyReference _keyReference;
 
 }

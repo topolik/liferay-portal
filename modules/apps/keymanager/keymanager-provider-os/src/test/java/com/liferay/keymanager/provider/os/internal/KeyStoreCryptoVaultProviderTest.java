@@ -11,7 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.crypto.CryptoKeyMetadata;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecureSecret;
@@ -21,8 +21,6 @@ import com.liferay.portal.test.rule.LiferayUnitTestRule;
 import java.io.File;
 
 import java.nio.charset.StandardCharsets;
-
-import java.security.Key;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -165,7 +163,7 @@ public class KeyStoreCryptoVaultProviderTest {
 
 		_provider.importSecretKey(0L, "meta-key", secretKey.getEncoded(), "AES");
 
-		CryptoKeyMetadata metadata = _provider.getKeyMetadata(0L, "meta-key");
+		CryptoKey metadata = _provider.getKeyMetadata(0L, "meta-key");
 
 		Assert.assertNotNull(metadata);
 		Assert.assertEquals("AES", metadata.getAlgorithm());
