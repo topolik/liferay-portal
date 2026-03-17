@@ -12,7 +12,7 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.provider.gcp.internal.configuration.GcpADCAccessTokenSecretVaultProviderConfiguration;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
-import com.liferay.keymanager.spi.secret.SecretVaultProvider;
+import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
@@ -35,17 +35,10 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	factory = "com.liferay.keymanager.provider.gcp.internal.GcpADCAccessTokenSecretVaultProvider",
-	property = "providerId=gcp-adc", service = SecretVaultProvider.class
+	property = "providerId=gcp-adc", service = SecretVaultReader.class
 )
 public class GcpADCAccessTokenSecretVaultProvider
-	implements SecretVaultProvider {
-
-	@Override
-	public void deleteSecret(long companyId, String identifier)
-		throws SecretManagerException {
-
-		throw new SecretManagerException("Read-only provider");
-	}
+	implements SecretVaultReader {
 
 	@Override
 	public SecureSecret getSecret(long companyId, String identifier)
@@ -99,13 +92,6 @@ public class GcpADCAccessTokenSecretVaultProvider
 		}
 
 		return false;
-	}
-
-	@Override
-	public void putSecret(long companyId, SecureSecret secureSecret)
-		throws SecretManagerException {
-
-		throw new SecretManagerException("Read-only provider");
 	}
 
 	@Activate

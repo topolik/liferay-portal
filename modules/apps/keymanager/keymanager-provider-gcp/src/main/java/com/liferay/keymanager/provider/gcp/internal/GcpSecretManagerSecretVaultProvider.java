@@ -27,6 +27,8 @@ import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
+import com.liferay.keymanager.spi.secret.SecretVaultReader;
+import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
@@ -54,10 +56,14 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	factory = "com.liferay.keymanager.provider.gcp.internal.GcpSecretManagerSecretVaultProvider",
-	property = "providerId=gcp-secret-manager", service = SecretVaultProvider.class
+	property = "providerId=gcp-secret-manager",
+	service = {
+		SecretVaultProvider.class, SecretVaultReader.class,
+		SecretVaultWriter.class
+	}
 )
 public class GcpSecretManagerSecretVaultProvider
-	implements SecretVaultProvider {
+	implements SecretVaultProvider, SecretVaultReader, SecretVaultWriter {
 
 	@Override
 	public void deleteSecret(long companyId, String identifier)

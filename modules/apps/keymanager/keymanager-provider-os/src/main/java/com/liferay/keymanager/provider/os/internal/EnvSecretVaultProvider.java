@@ -9,7 +9,7 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
-import com.liferay.keymanager.spi.secret.SecretVaultProvider;
+import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -28,16 +28,9 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	property = "providerId=env", service = SecretVaultProvider.class
+	property = "providerId=env", service = SecretVaultReader.class
 )
-public class EnvSecretVaultProvider implements SecretVaultProvider {
-
-	@Override
-	public void deleteSecret(long companyId, String identifier)
-		throws SecretManagerException {
-
-		throw new SecretManagerException("Read-only provider");
-	}
+public class EnvSecretVaultProvider implements SecretVaultReader {
 
 	@Override
 	public SecureSecret getSecret(long companyId, String identifier)
@@ -88,13 +81,6 @@ public class EnvSecretVaultProvider implements SecretVaultProvider {
 	@Override
 	public boolean isAllowedCompany(long companyId) {
 		return true;
-	}
-
-	@Override
-	public void putSecret(long companyId, SecureSecret secureSecret)
-		throws SecretManagerException {
-
-		throw new SecretManagerException("Read-only provider");
 	}
 
 	@Activate

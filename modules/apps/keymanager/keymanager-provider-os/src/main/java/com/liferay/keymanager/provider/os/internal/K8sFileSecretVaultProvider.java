@@ -10,6 +10,8 @@ import com.liferay.keymanager.provider.os.internal.configuration.K8sFileSecretVa
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
+import com.liferay.keymanager.spi.secret.SecretVaultReader;
+import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.Validator;
@@ -32,9 +34,14 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.K8sFileSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	property = "providerId=k8s-file", service = SecretVaultProvider.class
+	property = "providerId=k8s-file",
+	service = {
+		SecretVaultProvider.class, SecretVaultReader.class,
+		SecretVaultWriter.class
+	}
 )
-public class K8sFileSecretVaultProvider implements SecretVaultProvider {
+public class K8sFileSecretVaultProvider
+	implements SecretVaultProvider, SecretVaultReader, SecretVaultWriter {
 
 	@Override
 	public void deleteSecret(long companyId, String identifier)

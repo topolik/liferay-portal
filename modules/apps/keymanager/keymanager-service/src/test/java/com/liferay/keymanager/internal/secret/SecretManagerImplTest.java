@@ -9,13 +9,16 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
-import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
+import com.liferay.keymanager.spi.secret.SecretVaultReader;
+import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.lang.reflect.Field;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,6 +29,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Tomas Polesovsky
@@ -43,25 +49,66 @@ public class SecretManagerImplTest {
 
 		_secretManagerImpl = new SecretManagerImpl();
 
-		// Manually inject mock ServiceTrackerMap
+		// Manually inject mock ServiceTrackers
 
-		Field field = SecretManagerImpl.class.getDeclaredField(
-			"_serviceTrackerMap");
+		Field readerField = SecretManagerImpl.class.getDeclaredField(
+			"_readerServiceTracker");
 
-		field.setAccessible(true);
+		readerField.setAccessible(true);
 
-		field.set(_secretManagerImpl, _serviceTrackerMap);
+		readerField.set(_secretManagerImpl, _readerServiceTracker);
+
+		Field writerField = SecretManagerImpl.class.getDeclaredField(
+			"_writerServiceTracker");
+
+		writerField.setAccessible(true);
+
+		writerField.set(_secretManagerImpl, _writerServiceTracker);
+
+		ServiceReference<SecretVaultReader> readerServiceReference =
+			Mockito.mock(ServiceReference.class);
 
 		Mockito.when(
-			_serviceTrackerMap.getService("test-provider")
+			readerServiceReference.getProperty("providerId")
 		).thenReturn(
-			_secretVaultProvider
+			"test-provider"
+		);
+
+		SortedMap<ServiceReference<SecretVaultReader>, SecretVaultReader>
+			readers = new TreeMap<>();
+
+		readers.put(readerServiceReference, _secretVaultReader);
+
+		Mockito.when(
+			_readerServiceTracker.getTracked()
+		).thenReturn(
+			readers
+		);
+
+		ServiceReference<SecretVaultWriter> writerServiceReference =
+			Mockito.mock(ServiceReference.class);
+
+		Mockito.when(
+			writerServiceReference.getProperty("providerId")
+		).thenReturn(
+			"test-provider"
+		);
+
+		SortedMap<ServiceReference<SecretVaultWriter>, SecretVaultWriter>
+			writers = new TreeMap<>();
+
+		writers.put(writerServiceReference, _secretVaultWriter);
+
+		Mockito.when(
+			_writerServiceTracker.getTracked()
+		).thenReturn(
+			writers
 		);
 
 		Mockito.when(
-			_serviceTrackerMap.keySet()
+			_secretVaultReader.isAllowedCompany(Mockito.anyLong())
 		).thenReturn(
-			Collections.singleton("test-provider")
+			true
 		);
 	}
 
@@ -70,18 +117,18 @@ public class SecretManagerImplTest {
 		KeyReference keyRef = KeyReference.fromString(
 			"${secretRef:test-provider:my-secret}");
 
-		_secretManagerImpl.deleteSecret(keyRef);
+		_secretManagerImpl.deleteSecret(0L, keyRef);
 
 		Mockito.verify(
-			_secretVaultProvider
+			_secretVaultWriter
 		).deleteSecret(
-			"my-secret"
+			0L, "my-secret"
 		);
 	}
 
 	@Test
 	public void testGetProviders() throws Exception {
-		List<String> result = _secretManagerImpl.getProviders();
+		List<String> result = _secretManagerImpl.getProviders(0L);
 
 		Assert.assertEquals(result.toString(), 1, result.size());
 		Assert.assertEquals("test-provider", result.get(0));
@@ -95,12 +142,12 @@ public class SecretManagerImplTest {
 		SecureSecret mockSecret = new SecureSecret(keyRef, "data".getBytes());
 
 		Mockito.when(
-			_secretVaultProvider.getSecret("my-secret")
+			_secretVaultReader.getSecret(0L, "my-secret")
 		).thenReturn(
 			mockSecret
 		);
 
-		SecureSecret result = _secretManagerImpl.getSecret(keyRef);
+		SecureSecret result = _secretManagerImpl.getSecret(0L, keyRef);
 
 		Assert.assertEquals(mockSecret, result);
 	}
@@ -110,13 +157,13 @@ public class SecretManagerImplTest {
 		List<String> identifiers = Collections.singletonList("secret-1");
 
 		Mockito.when(
-			_secretVaultProvider.getSecretIdentifiers()
+			_secretVaultReader.getSecretIdentifiers(0L)
 		).thenReturn(
 			identifiers
 		);
 
 		List<KeyReference> result = _secretManagerImpl.getSecretIdentifiers(
-			"test-provider");
+			0L, "test-provider");
 
 		Assert.assertEquals(result.toString(), 1, result.size());
 		Assert.assertEquals(
@@ -136,7 +183,7 @@ public class SecretManagerImplTest {
 		KeyReference keyRef = KeyReference.fromString(
 			"${secretRef:wrong-provider:my-secret}");
 
-		_secretManagerImpl.getSecret(keyRef);
+		_secretManagerImpl.getSecret(0L, keyRef);
 	}
 
 	@Test
@@ -147,21 +194,49 @@ public class SecretManagerImplTest {
 		SecureSecret secureSecret = new SecureSecret(
 			keyRef, "new-data".getBytes());
 
-		_secretManagerImpl.putSecret(secureSecret);
+		_secretManagerImpl.putSecret(0L, secureSecret);
 
 		Mockito.verify(
-			_secretVaultProvider
+			_secretVaultWriter
 		).putSecret(
-			secureSecret
+			0L, secureSecret
 		);
+	}
+
+	@Test
+	public void testGetSecretAnyProvider() throws Exception {
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.SECRET, KeyReference.ANY_PROVIDER, "my-secret");
+
+		SecureSecret mockSecret = new SecureSecret(
+			KeyReference.fromString("${secretRef:test-provider:my-secret}"),
+			"any-data".getBytes());
+
+		Mockito.when(
+			_secretVaultReader.getSecret(0L, "my-secret")
+		).thenReturn(
+			mockSecret
+		);
+
+		SecureSecret result = _secretManagerImpl.getSecret(0L, keyRef);
+
+		Assert.assertEquals(mockSecret, result);
 	}
 
 	private SecretManagerImpl _secretManagerImpl;
 
 	@Mock
-	private SecretVaultProvider _secretVaultProvider;
+	private SecretVaultReader _secretVaultReader;
 
 	@Mock
-	private ServiceTrackerMap<String, SecretVaultProvider> _serviceTrackerMap;
+	private SecretVaultWriter _secretVaultWriter;
+
+	@Mock
+	private ServiceTracker<SecretVaultReader, SecretVaultReader>
+		_readerServiceTracker;
+
+	@Mock
+	private ServiceTracker<SecretVaultWriter, SecretVaultWriter>
+		_writerServiceTracker;
 
 }

@@ -13,6 +13,8 @@ import com.liferay.keymanager.provider.db.service.SecretEntryLocalService;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
+import com.liferay.keymanager.spi.secret.SecretVaultReader;
+import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
@@ -55,9 +57,13 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(
 	factory = "com.liferay.keymanager.provider.db.internal.DBSecretVaultProvider",
-	service = SecretVaultProvider.class
+	service = {
+		SecretVaultProvider.class, SecretVaultReader.class,
+		SecretVaultWriter.class
+	}
 )
-public class DBSecretVaultProvider implements SecretVaultProvider {
+public class DBSecretVaultProvider
+	implements SecretVaultProvider, SecretVaultReader, SecretVaultWriter {
 
 	@Override
 	public void deleteSecret(long companyId, String identifier)

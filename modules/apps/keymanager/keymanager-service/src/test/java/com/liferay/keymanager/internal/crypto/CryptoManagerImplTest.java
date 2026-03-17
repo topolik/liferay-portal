@@ -9,7 +9,6 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
-import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.lang.reflect.Field;
@@ -18,6 +17,8 @@ import java.security.Key;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +29,9 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Tomas Polesovsky
@@ -45,25 +49,38 @@ public class CryptoManagerImplTest {
 
 		_cryptoManagerImpl = new CryptoManagerImpl();
 
-		// Manually inject mock ServiceTrackerMap
+		// Manually inject mock ServiceTracker
 
-		Field field = CryptoManagerImpl.class.getDeclaredField(
-			"_serviceTrackerMap");
+		Field field = CryptoManagerImpl.class.getDeclaredField("_serviceTracker");
 
 		field.setAccessible(true);
 
-		field.set(_cryptoManagerImpl, _serviceTrackerMap);
+		field.set(_cryptoManagerImpl, _serviceTracker);
+
+		ServiceReference<CryptoVaultProvider> serviceReference =
+			Mockito.mock(ServiceReference.class);
 
 		Mockito.when(
-			_serviceTrackerMap.getService("test-crypto-provider")
+			serviceReference.getProperty("providerId")
 		).thenReturn(
-			_cryptoVaultProvider
+			"test-crypto-provider"
+		);
+
+		SortedMap<ServiceReference<CryptoVaultProvider>, CryptoVaultProvider>
+			tracked = new TreeMap<>();
+
+		tracked.put(serviceReference, _cryptoVaultProvider);
+
+		Mockito.when(
+			_serviceTracker.getTracked()
+		).thenReturn(
+			tracked
 		);
 
 		Mockito.when(
-			_serviceTrackerMap.keySet()
+			_cryptoVaultProvider.isAllowedCompany(Mockito.anyLong())
 		).thenReturn(
-			Collections.singleton("test-crypto-provider")
+			true
 		);
 	}
 
@@ -76,12 +93,12 @@ public class CryptoManagerImplTest {
 		byte[] plaintext = "plaintext".getBytes();
 
 		Mockito.when(
-			_cryptoVaultProvider.decrypt("my-key", ciphertext)
+			_cryptoVaultProvider.decrypt(0L, "my-key", ciphertext)
 		).thenReturn(
 			plaintext
 		);
 
-		byte[] result = _cryptoManagerImpl.decrypt(keyRef, ciphertext);
+		byte[] result = _cryptoManagerImpl.decrypt(0L, keyRef, ciphertext);
 
 		Assert.assertArrayEquals(plaintext, result);
 	}
@@ -91,12 +108,12 @@ public class CryptoManagerImplTest {
 		KeyReference keyRef = KeyReference.fromString(
 			"${keyRef:test-crypto-provider:my-key}");
 
-		_cryptoManagerImpl.deleteKey(keyRef);
+		_cryptoManagerImpl.deleteKey(0L, keyRef);
 
 		Mockito.verify(
 			_cryptoVaultProvider
 		).deleteKey(
-			"my-key"
+			0L, "my-key"
 		);
 	}
 
@@ -109,12 +126,12 @@ public class CryptoManagerImplTest {
 		byte[] ciphertext = "encrypted".getBytes();
 
 		Mockito.when(
-			_cryptoVaultProvider.encrypt("my-key", plaintext)
+			_cryptoVaultProvider.encrypt(0L, "my-key", plaintext)
 		).thenReturn(
 			ciphertext
 		);
 
-		byte[] result = _cryptoManagerImpl.encrypt(keyRef, plaintext);
+		byte[] result = _cryptoManagerImpl.encrypt(0L, keyRef, plaintext);
 
 		Assert.assertArrayEquals(ciphertext, result);
 	}
@@ -124,19 +141,19 @@ public class CryptoManagerImplTest {
 		KeyReference keyRef = KeyReference.fromString(
 			"${keyRef:wrong-provider:my-key}");
 
-		_cryptoManagerImpl.encrypt(keyRef, "data".getBytes());
+		_cryptoManagerImpl.encrypt(0L, keyRef, "data".getBytes());
 	}
 
 	@Test
 	public void testGenerateAsymmetricKeyPair() throws Exception {
 		Mockito.when(
-			_cryptoVaultProvider.generateAsymmetricKeyPair("my-key", "RSA")
+			_cryptoVaultProvider.generateAsymmetricKeyPair(0L, "my-key", "RSA")
 		).thenReturn(
 			"my-key"
 		);
 
 		KeyReference result = _cryptoManagerImpl.generateAsymmetricKeyPair(
-			"test-crypto-provider", "my-key", "RSA");
+			0L, "test-crypto-provider", "my-key", "RSA");
 
 		Assert.assertEquals("test-crypto-provider", result.getProviderId());
 		Assert.assertEquals("my-key", result.getIdentifier());
@@ -145,13 +162,13 @@ public class CryptoManagerImplTest {
 	@Test
 	public void testGenerateSecretKey() throws Exception {
 		Mockito.when(
-			_cryptoVaultProvider.generateSecretKey("my-key", "AES")
+			_cryptoVaultProvider.generateSecretKey(0L, "my-key", "AES")
 		).thenReturn(
 			"my-key"
 		);
 
 		KeyReference result = _cryptoManagerImpl.generateSecretKey(
-			"test-crypto-provider", "my-key", "AES");
+			0L, "test-crypto-provider", "my-key", "AES");
 
 		Assert.assertEquals("test-crypto-provider", result.getProviderId());
 		Assert.assertEquals("my-key", result.getIdentifier());
@@ -162,13 +179,13 @@ public class CryptoManagerImplTest {
 		List<String> identifiers = Collections.singletonList("key-1");
 
 		Mockito.when(
-			_cryptoVaultProvider.getKeyIdentifiers()
+			_cryptoVaultProvider.getKeyIdentifiers(0L)
 		).thenReturn(
 			identifiers
 		);
 
 		List<KeyReference> result = _cryptoManagerImpl.getKeyIdentifiers(
-			"test-crypto-provider");
+			0L, "test-crypto-provider");
 
 		Assert.assertEquals(result.toString(), 1, result.size());
 		Assert.assertEquals(
@@ -192,19 +209,19 @@ public class CryptoManagerImplTest {
 			keyRef, "AES", "AES/GCM/NoPadding", 123456789L);
 
 		Mockito.when(
-			_cryptoVaultProvider.getKeyMetadata("my-key")
+			_cryptoVaultProvider.getKeyMetadata(0L, "my-key")
 		).thenReturn(
 			metadata
 		);
 
-		CryptoKey result = _cryptoManagerImpl.getKeyMetadata(keyRef);
+		CryptoKey result = _cryptoManagerImpl.getKeyMetadata(0L, keyRef);
 
 		Assert.assertEquals(metadata, result);
 	}
 
 	@Test
 	public void testGetProviders() throws Exception {
-		List<String> result = _cryptoManagerImpl.getProviders();
+		List<String> result = _cryptoManagerImpl.getProviders(0L);
 
 		Assert.assertEquals(result.toString(), 1, result.size());
 		Assert.assertEquals("test-crypto-provider", result.get(0));
@@ -216,13 +233,13 @@ public class CryptoManagerImplTest {
 
 		Mockito.when(
 			_cryptoVaultProvider.importSecretKey(
-				"my-key", rawKeyMaterial, "AES")
+				0L, "my-key", rawKeyMaterial, "AES")
 		).thenReturn(
 			"my-key"
 		);
 
 		KeyReference result = _cryptoManagerImpl.importSecretKey(
-			"test-crypto-provider", "my-key", rawKeyMaterial, "AES");
+			0L, "test-crypto-provider", "my-key", rawKeyMaterial, "AES");
 
 		Assert.assertEquals("test-crypto-provider", result.getProviderId());
 		Assert.assertEquals("my-key", result.getIdentifier());
@@ -237,13 +254,13 @@ public class CryptoManagerImplTest {
 		Key unwrappedKey = Mockito.mock(Key.class);
 
 		Mockito.when(
-			_cryptoVaultProvider.unwrap("my-key", wrappedKeyBytes, "AES", 1)
+			_cryptoVaultProvider.unwrap(0L, "my-key", wrappedKeyBytes, "AES", 1)
 		).thenReturn(
 			unwrappedKey
 		);
 
 		Key result = _cryptoManagerImpl.unwrap(
-			keyRef, wrappedKeyBytes, "AES", 1);
+			0L, keyRef, wrappedKeyBytes, "AES", 1);
 
 		Assert.assertEquals(unwrappedKey, result);
 	}
@@ -257,12 +274,108 @@ public class CryptoManagerImplTest {
 		byte[] wrappedKeyBytes = "wrapped".getBytes();
 
 		Mockito.when(
-			_cryptoVaultProvider.wrap("my-key", keyToWrap)
+			_cryptoVaultProvider.wrap(0L, "my-key", keyToWrap)
 		).thenReturn(
 			wrappedKeyBytes
 		);
 
-		byte[] result = _cryptoManagerImpl.wrap(keyRef, keyToWrap);
+		byte[] result = _cryptoManagerImpl.wrap(0L, keyRef, keyToWrap);
+
+		Assert.assertArrayEquals(wrappedKeyBytes, result);
+	}
+
+	@Test
+	public void testDecryptAnyProvider() throws Exception {
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.CRYPTO, KeyReference.ANY_PROVIDER, "my-key");
+
+		byte[] ciphertext = "ciphertext".getBytes();
+		byte[] plaintext = "plaintext".getBytes();
+
+		Mockito.when(
+			_cryptoVaultProvider.decrypt(0L, "my-key", ciphertext)
+		).thenReturn(
+			plaintext
+		);
+
+		byte[] result = _cryptoManagerImpl.decrypt(0L, keyRef, ciphertext);
+
+		Assert.assertArrayEquals(plaintext, result);
+	}
+
+	@Test
+	public void testEncryptAnyProvider() throws Exception {
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.CRYPTO, KeyReference.ANY_PROVIDER, "my-key");
+
+		byte[] plaintext = "hello".getBytes();
+		byte[] ciphertext = "encrypted".getBytes();
+
+		Mockito.when(
+			_cryptoVaultProvider.encrypt(0L, "my-key", plaintext)
+		).thenReturn(
+			ciphertext
+		);
+
+		byte[] result = _cryptoManagerImpl.encrypt(0L, keyRef, plaintext);
+
+		Assert.assertArrayEquals(ciphertext, result);
+	}
+
+	@Test
+	public void testGetKeyMetadataAnyProvider() throws Exception {
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.CRYPTO, KeyReference.ANY_PROVIDER, "my-key");
+
+		CryptoKey metadata = new CryptoKey(
+			keyRef, "AES", "AES/GCM/NoPadding", 123456789L);
+
+		Mockito.when(
+			_cryptoVaultProvider.getKeyMetadata(0L, "my-key")
+		).thenReturn(
+			metadata
+		);
+
+		CryptoKey result = _cryptoManagerImpl.getKeyMetadata(0L, keyRef);
+
+		Assert.assertEquals(metadata, result);
+	}
+
+	@Test
+	public void testUnwrapAnyProvider() throws Exception {
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.CRYPTO, KeyReference.ANY_PROVIDER, "my-key");
+
+		byte[] wrappedKeyBytes = "wrapped".getBytes();
+		Key unwrappedKey = Mockito.mock(Key.class);
+
+		Mockito.when(
+			_cryptoVaultProvider.unwrap(0L, "my-key", wrappedKeyBytes, "AES", 1)
+		).thenReturn(
+			unwrappedKey
+		);
+
+		Key result = _cryptoManagerImpl.unwrap(
+			0L, keyRef, wrappedKeyBytes, "AES", 1);
+
+		Assert.assertEquals(unwrappedKey, result);
+	}
+
+	@Test
+	public void testWrapAnyProvider() throws Exception {
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.CRYPTO, KeyReference.ANY_PROVIDER, "my-key");
+
+		Key keyToWrap = Mockito.mock(Key.class);
+		byte[] wrappedKeyBytes = "wrapped".getBytes();
+
+		Mockito.when(
+			_cryptoVaultProvider.wrap(0L, "my-key", keyToWrap)
+		).thenReturn(
+			wrappedKeyBytes
+		);
+
+		byte[] result = _cryptoManagerImpl.wrap(0L, keyRef, keyToWrap);
 
 		Assert.assertArrayEquals(wrappedKeyBytes, result);
 	}
@@ -273,6 +386,7 @@ public class CryptoManagerImplTest {
 	private CryptoVaultProvider _cryptoVaultProvider;
 
 	@Mock
-	private ServiceTrackerMap<String, CryptoVaultProvider> _serviceTrackerMap;
+	private ServiceTracker<CryptoVaultProvider, CryptoVaultProvider>
+		_serviceTracker;
 
 }
