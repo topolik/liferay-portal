@@ -74,4 +74,30 @@ public class SecureSecretTest {
 		}
 	}
 
+	@Test
+	public void testSecureSecretFromChars() {
+		KeyReference keyReference = KeyReference.fromString(
+			"${secretRef:db:alias}");
+
+		char[] data = {'a', 'b', 'c', 'd'};
+
+		SecureSecret secureSecret = new SecureSecret(keyReference, data);
+
+		Assert.assertArrayEquals(data, secureSecret.getChars());
+		Assert.assertTrue(secureSecret.getBytes().length > 0);
+	}
+
+	@Test
+	public void testSecureSecretFromString() {
+		KeyReference keyReference = KeyReference.fromString(
+			"${secretRef:db:alias}");
+
+		String data = "password";
+
+		SecureSecret secureSecret = new SecureSecret(keyReference, data);
+
+		Assert.assertArrayEquals(data.toCharArray(), secureSecret.getChars());
+		Assert.assertTrue(secureSecret.getBytes().length > 0);
+	}
+
 }
