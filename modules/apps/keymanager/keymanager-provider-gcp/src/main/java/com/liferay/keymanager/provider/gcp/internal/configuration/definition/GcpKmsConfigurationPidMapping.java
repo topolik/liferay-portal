@@ -14,17 +14,14 @@ import org.osgi.service.component.annotations.Component;
  * @author Tomas Polesovsky
  */
 @Component(service = ConfigurationPidMapping.class)
-public class GcpKmsConfigurationPidMapping implements ConfigurationPidMapping {
+public class GcpKmsConfigurationPidMapping
+	extends BaseGcpConfigurationPidMapping {
 
-	@Override
-	public Class<?> getConfigurationBeanClass() {
-		return GcpKmsCryptoVaultProviderConfiguration.class;
-	}
-
-	@Override
-	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
-			"GcpKmsCryptoVaultProviderConfiguration.scoped";
+	public GcpKmsConfigurationPidMapping() {
+		super(
+			GcpKmsCryptoVaultProviderConfiguration.class,
+			"com.liferay.keymanager.provider.gcp.internal.configuration." +
+				"GcpKmsCryptoVaultProviderConfiguration.scoped");
 	}
 
 }

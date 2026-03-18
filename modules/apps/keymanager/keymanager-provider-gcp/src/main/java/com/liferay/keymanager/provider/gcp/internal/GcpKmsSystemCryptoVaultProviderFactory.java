@@ -18,15 +18,15 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tomas Polesovsky
  */
 @Component(
-	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration.scoped",
+	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsSystemCryptoVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE, service = {}
 )
-public class GcpSecretManagerSecretVaultProviderFactory
-	extends BaseGcpFactory<GcpSecretManagerSecretVaultProvider> {
+public class GcpKmsSystemCryptoVaultProviderFactory
+	extends BaseGcpFactory<GcpKmsCryptoVaultProvider> {
 
 	@Activate
 	protected void activate(Map<String, Object> properties) {
-		super.activate(properties, _componentFactory, false);
+		super.activate(properties, _componentFactory, true);
 	}
 
 	@Deactivate
@@ -36,9 +36,8 @@ public class GcpSecretManagerSecretVaultProviderFactory
 	}
 
 	@Reference(
-		target = "(component.factory=com.liferay.keymanager.provider.gcp.internal.GcpSecretManagerSecretVaultProvider)"
+		target = "(component.factory=com.liferay.keymanager.provider.gcp.internal.GcpKmsCryptoVaultProvider)"
 	)
-	private ComponentFactory<GcpSecretManagerSecretVaultProvider>
-		_componentFactory;
+	private ComponentFactory<GcpKmsCryptoVaultProvider> _componentFactory;
 
 }

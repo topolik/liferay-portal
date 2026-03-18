@@ -5,13 +5,9 @@
 
 package com.liferay.keymanager.provider.gcp.internal;
 
-import com.liferay.portal.kernel.util.HashMapDictionaryBuilder;
-
 import java.util.Map;
 
-import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentFactory;
-import org.osgi.service.component.ComponentInstance;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
@@ -25,30 +21,23 @@ import org.osgi.service.component.annotations.Reference;
 	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration.scoped",
 	configurationPolicy = ConfigurationPolicy.REQUIRE, service = {}
 )
-public class GcpKmsCryptoVaultProviderFactory {
+public class GcpKmsCryptoVaultProviderFactory
+	extends BaseGcpFactory<GcpKmsCryptoVaultProvider> {
 
 	@Activate
 	protected void activate(Map<String, Object> properties) {
-		_componentInstance = _componentFactory.newInstance(
-			HashMapDictionaryBuilder.<String, Object>putAll(
-				properties
-			).remove(
-				Constants.SERVICE_PID
-			).build());
+		super.activate(properties, _componentFactory, false);
 	}
 
 	@Deactivate
+	@Override
 	protected void deactivate() {
-		if (_componentInstance != null) {
-			_componentInstance.dispose();
-		}
+		super.deactivate();
 	}
 
 	@Reference(
 		target = "(component.factory=com.liferay.keymanager.provider.gcp.internal.GcpKmsCryptoVaultProvider)"
 	)
 	private ComponentFactory<GcpKmsCryptoVaultProvider> _componentFactory;
-
-	private ComponentInstance<GcpKmsCryptoVaultProvider> _componentInstance;
 
 }

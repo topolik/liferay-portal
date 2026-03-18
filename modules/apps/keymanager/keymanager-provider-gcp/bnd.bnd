@@ -2,3 +2,4 @@ Bundle-Name: Liferay Key Manager Provider GCP
 Bundle-SymbolicName: com.liferay.keymanager.provider.gcp
 Bundle-Version: 1.0.0
 Liferay-Releng-Module-Group-Title: Key Manager
+-metatype-inherit: true

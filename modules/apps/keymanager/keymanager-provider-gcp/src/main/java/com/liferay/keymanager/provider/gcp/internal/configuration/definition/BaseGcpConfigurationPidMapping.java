@@ -5,27 +5,32 @@
 
 package com.liferay.keymanager.provider.gcp.internal.configuration.definition;
 
-import com.liferay.keymanager.provider.gcp.internal.configuration.GcpADCAccessTokenSecretVaultProviderConfiguration;
 import com.liferay.portal.kernel.settings.definition.ConfigurationPidMapping;
-
-import org.osgi.service.component.annotations.Component;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(service = ConfigurationPidMapping.class)
-public class GcpADCAccessTokenConfigurationPidMapping
+public abstract class BaseGcpConfigurationPidMapping
 	implements ConfigurationPidMapping {
+
+	public BaseGcpConfigurationPidMapping(
+		Class<?> configurationBeanClass, String configurationPid) {
+
+		_configurationBeanClass = configurationBeanClass;
+		_configurationPid = configurationPid;
+	}
 
 	@Override
 	public Class<?> getConfigurationBeanClass() {
-		return GcpADCAccessTokenSecretVaultProviderConfiguration.class;
+		return _configurationBeanClass;
 	}
 
 	@Override
 	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
-			"GcpADCAccessTokenSecretVaultProviderConfiguration.scoped";
+		return _configurationPid;
 	}
+
+	private final Class<?> _configurationBeanClass;
+	private final String _configurationPid;
 
 }

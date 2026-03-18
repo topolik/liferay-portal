@@ -21,32 +21,18 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 	localization = "content/Language",
 	name = "gcp-kms-crypto-vault-provider-configuration-name"
 )
-public interface GcpKmsCryptoVaultProviderConfiguration {
+public interface GcpKmsCryptoVaultProviderConfiguration
+	extends GcpKmsBaseConfiguration {
 
 	@Meta.AD(required = false)
 	public long companyId();
 
 	@Meta.AD(
-		description = "gcp-auth-key-reference-description",
-		name = "gcp-auth-key-reference", required = false
+		description = "gcp-service-account-key-description",
+		name = "gcp-service-account-key", required = false,
+		type = Meta.Type.Password
 	)
-	public String gcpAuthKeyReference();
-
-	@Meta.AD(description = "key-ring-path-description", name = "key-ring-path")
-	public String keyRingPath();
-
-	@Meta.AD(
-		deflt = "HSM", description = "new-key-protection-level-description",
-		name = "new-key-protection-level", required = false
-	)
-	public String newKeyProtectionLevel();
-
-	@Meta.AD(
-		deflt = "7776000",
-		description = "new-key-rotation-period-seconds-description",
-		name = "new-key-rotation-period-seconds", required = false
-	)
-	public long newKeyRotationPeriodSeconds();
+	public String gcpServiceAccountKey();
 
 	@Meta.AD(
 		deflt = "gcp-kms", description = "gcp-kms-provider-id-description",

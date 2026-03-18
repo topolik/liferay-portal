@@ -21,31 +21,18 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 	localization = "content/Language",
 	name = "gcp-secret-manager-secret-vault-provider-configuration-name"
 )
-public interface GcpSecretManagerSecretVaultProviderConfiguration {
+public interface GcpSecretManagerSecretVaultProviderConfiguration
+	extends GcpSecretManagerBaseConfiguration {
 
 	@Meta.AD(required = false)
 	public long companyId();
 
 	@Meta.AD(
-		description = "gcp-auth-key-reference-description",
-		name = "gcp-auth-key-reference", required = false
+		description = "gcp-service-account-key-description",
+		name = "gcp-service-account-key", required = false,
+		type = Meta.Type.Password
 	)
-	public String gcpAuthKeyReference();
-
-	@Meta.AD(
-		description = "kms-key-name-description", name = "kms-key-name",
-		required = false
-	)
-	public String kmsKeyName();
-
-	@Meta.AD(
-		description = "locations-description", name = "locations",
-		required = false
-	)
-	public String[] locations();
-
-	@Meta.AD(description = "project-id-description", name = "project-id")
-	public String projectId();
+	public String gcpServiceAccountKey();
 
 	@Meta.AD(
 		deflt = "gcp-secrets",

@@ -58,32 +58,7 @@ public class GcpManualTest {
 	}
 
 	@Test
-	public void testAdcIdentityProvider() throws Exception {
-		GcpADCAccessTokenSecretVaultProvider provider =
-			new GcpADCAccessTokenSecretVaultProvider();
-
-		_inject(provider, "_companyLocalService", _companyLocalService);
-
-		_activate(
-			provider,
-			HashMapBuilder.<String, Object>put(
-				"companyId", 12345L
-			).put(
-				"provider-id", "gcp-adc"
-			).put(
-				"providerId", "gcp-adc"
-			).put(
-				"scopes",
-				new String[] {"https://www.googleapis.com/auth/cloud-platform"}
-			).build());
-
-		try (SecureSecret secret = provider.getSecret(12345L, "default")) {
-			System.out.println("ADC Token: " + new String(secret.getBytes()));
-		}
-	}
-
-	@Test
-	public void testGcpKms() throws Exception {
+	public void testGcpKmsCompanyScoped() throws Exception {
 		Assume.assumeNotNull(_keyRingPath);
 
 		GcpKmsCryptoVaultProvider provider = new GcpKmsCryptoVaultProvider();
@@ -96,9 +71,9 @@ public class GcpManualTest {
 			HashMapBuilder.<String, Object>put(
 				"companyId", 12345L
 			).put(
-				"gcp-auth-key-reference", "db:sa-key"
+				"gcp-service-account-key", "db:sa-key"
 			).put(
-				"gcpAuthKeyReference", "db:sa-key"
+				"gcpServiceAccountKey", "db:sa-key"
 			).put(
 				"key-ring-path", _keyRingPath
 			).put(
@@ -120,20 +95,50 @@ public class GcpManualTest {
 		List<String> aliases = provider.getKeyIdentifiers(12345L);
 
 		System.out.println("KMS Keys: " + aliases);
-
-		if (!aliases.isEmpty()) {
-			String alias = aliases.get(0);
-
-			byte[] encrypted = provider.encrypt(12345L, alias, "test".getBytes());
-
-			byte[] decrypted = provider.decrypt(12345L, alias, encrypted);
-
-			System.out.println("KMS Roundtrip: " + new String(decrypted));
-		}
 	}
 
 	@Test
-	public void testGcpSecretManager() throws Exception {
+	public void testGcpKmsSystemScoped() throws Exception {
+		Assume.assumeNotNull(_keyRingPath);
+
+		GcpKmsCryptoVaultProvider provider = new GcpKmsCryptoVaultProvider();
+
+		_inject(provider, "_companyLocalService", _companyLocalService);
+		_inject(provider, "_secretManager", new MockSecretManager(null));
+
+		_activate(
+			provider,
+			HashMapBuilder.<String, Object>put(
+				"systemScope", true
+			).put(
+				"gcp-auth-type", "adc"
+			).put(
+				"gcpAuthType", "adc"
+			).put(
+				"key-ring-path", _keyRingPath
+			).put(
+				"keyRingPath", _keyRingPath
+			).put(
+				"new-key-protection-level", "HSM"
+			).put(
+				"newKeyProtectionLevel", "HSM"
+			).put(
+				"new-key-rotation-period-seconds", 7776000L
+			).put(
+				"newKeyRotationPeriodSeconds", 7776000L
+			).put(
+				"provider-id", "gcp-kms-system"
+			).put(
+				"providerId", "gcp-kms-system"
+			).build());
+
+		List<String> aliases = provider.getKeyIdentifiers(0L);
+
+		System.out.println("KMS System Keys: " + aliases);
+	}
+
+	@Test
+	public void testGcpSecretManagerCompanyScoped() throws Exception {
 		Assume.assumeNotNull(_projectId);
 
 		GcpSecretManagerSecretVaultProvider provider =
@@ -147,9 +152,9 @@ public class GcpManualTest {
 			HashMapBuilder.<String, Object>put(
 				"companyId", 12345L
 			).put(
-				"gcp-auth-key-reference", "db:sa-key"
+				"gcp-service-account-key", "db:sa-key"
 			).put(
-				"gcpAuthKeyReference", "db:sa-key"
+				"gcpServiceAccountKey", "db:sa-key"
 			).put(
 				"project-id", _projectId
 			).put(
@@ -169,39 +174,6 @@ public class GcpManualTest {
 		List<String> ids = provider.getSecretIdentifiers(12345L);
 
 		System.out.println("SSM Secrets: " + ids);
-	}
-
-	@Test
-	public void testSaKeyIdentityProvider() throws Exception {
-		Assume.assumeNotNull(_saJsonKey);
-
-		GcpServiceAccountKeyAccessTokenSecretVaultProvider provider =
-			new GcpServiceAccountKeyAccessTokenSecretVaultProvider();
-
-		_inject(provider, "_companyLocalService", _companyLocalService);
-		_inject(
-			provider, "_secretManager", new MockSecretManager(_saJsonKey));
-
-		_activate(
-			provider,
-			HashMapBuilder.<String, Object>put(
-				"companyId", 12345L
-			).put(
-				"provider-id", "gcp-sa-key"
-			).put(
-				"providerId", "gcp-sa-key"
-			).put(
-				"gcp-auth-key-reference", "db:sa-key"
-			).put(
-				"gcpAuthKeyReference", "db:sa-key"
-			).put(
-				"scopes",
-				new String[] {"https://www.googleapis.com/auth/cloud-platform"}
-			).build());
-
-		try (SecureSecret secret = provider.getSecret(12345L, "default")) {
-			System.out.println("SA Token: " + new String(secret.getBytes()));
-		}
 	}
 
 	private void _activate(Object target, Map<String, Object> properties)
