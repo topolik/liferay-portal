@@ -61,7 +61,7 @@ public class K8sFileSecretVaultProvider
 		File file = new File(_secretsDirectory, identifier);
 
 		if (!file.exists()) {
-			throw new SecretManagerException("Secret file not found: " + file);
+			return null;
 		}
 
 		try {

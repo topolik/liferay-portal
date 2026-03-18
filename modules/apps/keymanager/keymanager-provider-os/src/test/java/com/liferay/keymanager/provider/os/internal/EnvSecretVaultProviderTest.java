@@ -5,7 +5,6 @@
 
 package com.liferay.keymanager.provider.os.internal;
 
-import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
@@ -67,9 +66,9 @@ public class EnvSecretVaultProviderTest {
 		}
 	}
 
-	@Test(expected = SecretManagerException.class)
+	@Test
 	public void testGetSecretAccessDenied() throws Exception {
-		_provider.getSecret(0L, "PATH");
+		Assert.assertNull(_provider.getSecret(0L, "PATH"));
 	}
 
 	@Test
@@ -83,9 +82,9 @@ public class EnvSecretVaultProviderTest {
 		Assert.assertFalse(identifiers.contains("OTHER_VAR"));
 	}
 
-	@Test(expected = SecretManagerException.class)
+	@Test
 	public void testGetSecretNotFound() throws Exception {
-		_provider.getSecret(0L, "LIFERAY_SECRET_MISSING");
+		Assert.assertNull(_provider.getSecret(0L, "LIFERAY_SECRET_MISSING"));
 	}
 
 	private Map<String, String> _mockEnv;

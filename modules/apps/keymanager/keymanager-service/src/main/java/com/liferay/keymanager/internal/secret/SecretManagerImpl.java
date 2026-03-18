@@ -11,24 +11,21 @@ import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.keymanager.spi.secret.SecretVaultWriter;
+import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
+import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.petra.string.StringBundler;
-import com.liferay.portal.kernel.util.GetterUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * @author Tomas Polesovsky
@@ -40,8 +37,14 @@ public class SecretManagerImpl implements SecretManager {
 	public void deleteSecret(long companyId, KeyReference keyReference)
 		throws SecretManagerException {
 
+		String providerId = keyReference.getProviderId();
+
+		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
+			providerId = _getDefaultSecretVaultWriterProviderId(companyId);
+		}
+
 		SecretVaultWriter secretVaultWriter = _getSecretVaultWriter(
-			companyId, keyReference.getProviderId());
+			companyId, providerId);
 
 		secretVaultWriter.deleteSecret(companyId, keyReference.getIdentifier());
 	}
@@ -50,71 +53,35 @@ public class SecretManagerImpl implements SecretManager {
 	public List<String> getProviders(long companyId)
 		throws SecretManagerException {
 
-		List<String> providerIds = new ArrayList<>();
-
-		Map<ServiceReference<SecretVaultReader>, SecretVaultReader>
-			tracked = _readerServiceTracker.getTracked();
-
-		for (Map.Entry<ServiceReference<SecretVaultReader>, SecretVaultReader>
-				entry : tracked.entrySet()) {
-
-			ServiceReference<SecretVaultReader> serviceReference =
-				entry.getKey();
-			SecretVaultReader reader = entry.getValue();
-
-			if (reader.isAllowedCompany(companyId)) {
-				providerIds.add(
-					GetterUtil.getString(
-						serviceReference.getProperty("providerId")));
-			}
-		}
-
-		return providerIds;
+		return _getSecretVaultReaderProviderIds(
+			companyId, KeyReference.ANY_PROVIDER);
 	}
 
 	@Override
 	public SecureSecret getSecret(long companyId, KeyReference keyReference)
 		throws SecretManagerException {
 
-		String providerId = keyReference.getProviderId();
+		for (SecretVaultReader reader : _getSecretVaultReaders(
+				companyId, keyReference.getProviderId())) {
 
-		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
-			Map<ServiceReference<SecretVaultReader>, SecretVaultReader>
-				tracked = _readerServiceTracker.getTracked();
+			try {
+				SecureSecret secureSecret = reader.getSecret(
+					companyId, keyReference.getIdentifier());
 
-			List<ServiceReference<SecretVaultReader>> serviceReferences =
-				new ArrayList<>(tracked.keySet());
-
-			Collections.sort(serviceReferences);
-			Collections.reverse(serviceReferences);
-
-			for (ServiceReference<SecretVaultReader> serviceReference :
-					serviceReferences) {
-
-				SecretVaultReader reader = tracked.get(serviceReference);
-
-				if (!reader.isAllowedCompany(companyId)) {
-					continue;
-				}
-
-				try {
-					return reader.getSecret(
-						companyId, keyReference.getIdentifier());
-				}
-				catch (SecretManagerException secretManagerException) {
+				if (secureSecret != null) {
+					return secureSecret;
 				}
 			}
-
-			throw new SecretManagerException(
-				"No secret found for identifier: " +
-					keyReference.getIdentifier());
+			catch (SecretManagerException secretManagerException) {
+				if (_log.isDebugEnabled()) {
+					_log.debug(
+						"Unable to fetch secret from reader",
+						secretManagerException);
+				}
+			}
 		}
 
-		SecretVaultReader secretVaultReader = _getSecretVaultReader(
-			companyId, providerId);
-
-		return secretVaultReader.getSecret(
-			companyId, keyReference.getIdentifier());
+		return null;
 	}
 
 	@Override
@@ -122,77 +89,111 @@ public class SecretManagerImpl implements SecretManager {
 			long companyId, String providerId)
 		throws SecretManagerException {
 
-		SecretVaultReader secretVaultReader = _getSecretVaultReader(
-			companyId, providerId);
+		List<KeyReference> keyReferences = new ArrayList<>();
 
-		List<String> identifiers = secretVaultReader.getSecretIdentifiers(
-			companyId);
+		for (String trackedProviderId : _getSecretVaultReaderProviderIds(
+				companyId, providerId)) {
 
-		List<KeyReference> keyReferences = new ArrayList<>(identifiers.size());
+			SecretVaultReader reader = _readerServiceTrackerMap.getService(
+				trackedProviderId);
 
-		for (String identifier : identifiers) {
-			keyReferences.add(
-				new KeyReference(
-					KeyReference.Type.SECRET, providerId, identifier));
+			if (reader == null) {
+				continue;
+			}
+
+			List<String> identifiers = reader.getSecretIdentifiers(companyId);
+
+			for (String identifier : identifiers) {
+				keyReferences.add(
+					new KeyReference(
+						KeyReference.Type.SECRET, trackedProviderId,
+						identifier));
+			}
 		}
 
 		return keyReferences;
 	}
 
 	@Override
-	public void putSecret(long companyId, SecureSecret secureSecret)
+	public KeyReference putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException {
 
 		KeyReference keyReference = secureSecret.getKeyReference();
 
+		String providerId = keyReference.getProviderId();
+
+		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
+			providerId = _getDefaultSecretVaultWriterProviderId(companyId);
+		}
+
 		SecretVaultWriter secretVaultWriter = _getSecretVaultWriter(
-			companyId, keyReference.getProviderId());
+			companyId, providerId);
 
 		secretVaultWriter.putSecret(companyId, secureSecret);
+
+		return new KeyReference(
+			KeyReference.Type.SECRET, providerId, keyReference.getIdentifier());
 	}
 
 	@Activate
 	protected void activate(BundleContext bundleContext) {
-		_readerServiceTracker = new ServiceTracker<>(
-			bundleContext, SecretVaultReader.class, null);
+		_readerServiceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
+			bundleContext, SecretVaultReader.class, "providerId");
 
-		_readerServiceTracker.open();
-
-		_writerServiceTracker = new ServiceTracker<>(
-			bundleContext, SecretVaultWriter.class, null);
-
-		_writerServiceTracker.open();
+		_writerServiceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
+			bundleContext, SecretVaultWriter.class, "providerId");
 	}
 
 	@Deactivate
 	protected void deactivate() {
-		_readerServiceTracker.close();
-		_writerServiceTracker.close();
+		_readerServiceTrackerMap.close();
+		_writerServiceTrackerMap.close();
+	}
+
+	private List<String> _getSecretVaultReaderProviderIds(
+			long companyId, String providerId)
+		throws SecretManagerException {
+
+		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
+			List<String> providerIds = new ArrayList<>();
+
+			for (String trackedProviderId : _readerServiceTrackerMap.keySet()) {
+				SecretVaultReader reader = _readerServiceTrackerMap.getService(
+					trackedProviderId);
+
+				if (reader.isAllowedCompany(companyId)) {
+					providerIds.add(trackedProviderId);
+				}
+			}
+
+			return providerIds;
+		}
+
+		_getSecretVaultReader(companyId, providerId);
+
+		return Collections.singletonList(providerId);
 	}
 
 	private SecretVaultReader _getSecretVaultReader(
 			long companyId, String providerId)
 		throws SecretManagerException {
 
-		Map<ServiceReference<SecretVaultReader>, SecretVaultReader>
-			tracked = _readerServiceTracker.getTracked();
-
-		for (Map.Entry<ServiceReference<SecretVaultReader>, SecretVaultReader>
-				entry : tracked.entrySet()) {
-
-			ServiceReference<SecretVaultReader> serviceReference =
-				entry.getKey();
-
-			String trackedProviderId = GetterUtil.getString(
-				serviceReference.getProperty("providerId"));
-
-			if (providerId.equals(trackedProviderId)) {
-				SecretVaultReader reader = entry.getValue();
+		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
+			for (String trackedProviderId : _readerServiceTrackerMap.keySet()) {
+				SecretVaultReader reader = _readerServiceTrackerMap.getService(
+					trackedProviderId);
 
 				if (reader.isAllowedCompany(companyId)) {
 					return reader;
 				}
 			}
+		}
+
+		SecretVaultReader reader = _readerServiceTrackerMap.getService(
+			providerId);
+
+		if ((reader != null) && reader.isAllowedCompany(companyId)) {
+			return reader;
 		}
 
 		throw new SecretManagerException(
@@ -201,37 +202,34 @@ public class SecretManagerImpl implements SecretManager {
 				" and company ID: ", companyId));
 	}
 
+	private List<SecretVaultReader> _getSecretVaultReaders(
+			long companyId, String providerId)
+		throws SecretManagerException {
+
+		List<SecretVaultReader> readers = new ArrayList<>();
+
+		for (String id : _getSecretVaultReaderProviderIds(
+				companyId, providerId)) {
+
+			SecretVaultReader reader = _readerServiceTrackerMap.getService(id);
+
+			if (reader != null) {
+				readers.add(reader);
+			}
+		}
+
+		return readers;
+	}
+
 	private SecretVaultWriter _getSecretVaultWriter(
 			long companyId, String providerId)
 		throws SecretManagerException {
 
-		Map<ServiceReference<SecretVaultWriter>, SecretVaultWriter>
-			tracked = _writerServiceTracker.getTracked();
+		SecretVaultWriter writer = _writerServiceTrackerMap.getService(
+			providerId);
 
-		for (Map.Entry<ServiceReference<SecretVaultWriter>, SecretVaultWriter>
-				entry : tracked.entrySet()) {
-
-			ServiceReference<SecretVaultWriter> serviceReference =
-				entry.getKey();
-
-			String trackedProviderId = GetterUtil.getString(
-				serviceReference.getProperty("providerId"));
-
-			if (providerId.equals(trackedProviderId)) {
-				SecretVaultWriter writer = entry.getValue();
-
-				if (writer instanceof SecretVaultReader) {
-					SecretVaultReader reader = (SecretVaultReader)writer;
-
-					if (reader.isAllowedCompany(companyId)) {
-						return writer;
-					}
-				}
-				else {
-					// Fallback if writer doesn't implement reader (unlikely)
-					return writer;
-				}
-			}
+		if (writer != null && writer.isAllowedCompany(companyId)) {
+			return writer;
 		}
 
 		throw new SecretManagerException(
@@ -240,29 +238,30 @@ public class SecretManagerImpl implements SecretManager {
 				" and company ID: ", companyId));
 	}
 
-	@Reference(
-		cardinality = ReferenceCardinality.MULTIPLE,
-		policy = ReferencePolicy.DYNAMIC, service = SecretVaultReader.class
-	)
-	protected void addSecretVaultReader(SecretVaultReader secretVaultReader) {
+	private String _getDefaultSecretVaultWriterProviderId(long companyId)
+		throws SecretManagerException {
+
+		for (String trackedProviderId : _writerServiceTrackerMap.keySet()) {
+			SecretVaultWriter writer = _writerServiceTrackerMap.getService(
+				trackedProviderId);
+
+			if (writer.isAllowedCompany(companyId)) {
+				return trackedProviderId;
+			}
+		}
+
+		throw new SecretManagerException(
+			StringBundler.concat(
+				"No secret vault writer found for ANY provider",
+				" and company ID: ", companyId));
 	}
 
-	protected void removeSecretVaultReader(SecretVaultReader secretVaultReader) {
-	}
+	private static final Log _log = LogFactoryUtil.getLog(
+		SecretManagerImpl.class);
 
-	@Reference(
-		cardinality = ReferenceCardinality.MULTIPLE,
-		policy = ReferencePolicy.DYNAMIC, service = SecretVaultWriter.class
-	)
-	protected void addSecretVaultWriter(SecretVaultWriter secretVaultWriter) {
-	}
-
-	protected void removeSecretVaultWriter(SecretVaultWriter secretVaultWriter) {
-	}
-
-	private ServiceTracker<SecretVaultReader, SecretVaultReader>
-		_readerServiceTracker;
-	private ServiceTracker<SecretVaultWriter, SecretVaultWriter>
-		_writerServiceTracker;
+	private ServiceTrackerMap<String, SecretVaultReader>
+		_readerServiceTrackerMap;
+	private ServiceTrackerMap<String, SecretVaultWriter>
+		_writerServiceTrackerMap;
 
 }

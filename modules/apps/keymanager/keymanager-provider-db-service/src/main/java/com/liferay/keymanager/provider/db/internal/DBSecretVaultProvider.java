@@ -91,6 +91,10 @@ public class DBSecretVaultProvider
 			SecretEntry secretEntry = _secretEntryLocalService.fetchSecretEntry(
 				companyId, identifier);
 
+			if (secretEntry == null) {
+				return null;
+			}
+
 			// 1. Unwrap DEK
 
 			KeyReference masterKeyRef = KeyReference.fromString(

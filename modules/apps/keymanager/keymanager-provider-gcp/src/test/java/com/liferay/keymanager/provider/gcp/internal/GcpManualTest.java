@@ -290,7 +290,10 @@ public class GcpManualTest {
 		}
 
 		@Override
-		public void putSecret(long companyId, SecureSecret secureSecret) {
+		public KeyReference putSecret(
+			long companyId, SecureSecret secureSecret) {
+			
+			return null;
 		}
 
 		private final String _saJsonKey;

@@ -45,8 +45,7 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 		String value = getEnv(envVariableName);
 
 		if (Validator.isNull(value)) {
-			throw new SecretManagerException(
-				"Environment variable not found: " + envVariableName);
+			return null;
 		}
 
 		return new SecureSecret(

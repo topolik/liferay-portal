@@ -30,7 +30,7 @@ public interface SecretManager {
 			long companyId, String providerId)
 		throws SecretManagerException;
 
-	public void putSecret(long companyId, SecureSecret secureSecret)
+	public KeyReference putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException;
 
 }

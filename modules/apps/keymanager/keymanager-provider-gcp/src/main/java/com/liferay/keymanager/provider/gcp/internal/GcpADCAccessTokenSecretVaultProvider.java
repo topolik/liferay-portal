@@ -61,20 +61,18 @@ public class GcpADCAccessTokenSecretVaultProvider
 				"{\"access_token\":\"", accessToken.getTokenValue(),
 				"\", \"expires_at\":", expiresAt, "}");
 
-			try {
-				return new SecureSecret(
-					new KeyReference(
-						KeyReference.Type.SECRET, _providerId, identifier),
-					json.getBytes());
-			}
-			finally {
-			}
+			return new SecureSecret(
+				new KeyReference(
+					KeyReference.Type.SECRET, _providerId, identifier),
+				json.getBytes());
 		}
-		catch (Exception exception) {
-			String msg =
-				"Unable to fetch ADC token. Run 'gcloud auth login'.";
-
-			throw new SecretManagerException(msg, exception);
+		catch (Exception e) {
+			if (e.getMessage().contains("invalid_rapt")) {
+				throw new SecretManagerException(
+					"Unable to fetch ADC token. Use 'gcloud auth application-default login' for local development or set up Application Default Credentials for the cloud.", e);
+			}
+			
+			throw new SecretManagerException("Unable to read secret " + identifier + ": " + e.getMessage(), e);
 		}
 	}
 

@@ -98,9 +98,10 @@ public class KeymanagerConfigurationModelListener
 				new SecureSecret(keyReference, password);
 
 			try {
-				_secSecretManager.putSecret(companyId, secureSecret);
-				
-				properties.put(key, keyReference.toString());
+				KeyReference resolvedKeyReference = 
+					_secSecretManager.putSecret(companyId, secureSecret);
+
+				properties.put(key, resolvedKeyReference.toString());
 			}
 			catch (SecretManagerException e) {
 				throw new ConfigurationModelListenerException(
