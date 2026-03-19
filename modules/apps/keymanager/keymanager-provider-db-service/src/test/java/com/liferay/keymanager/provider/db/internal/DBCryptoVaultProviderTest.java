@@ -53,7 +53,7 @@ public class DBCryptoVaultProviderTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
-		_dbCryptoVaultProvider = new DBCryptoVaultProvider();
+		_dbCryptoVaultProvider = new DBCompanyCryptoVaultProvider();
 
 		_injectField("_cryptoManager", _cryptoManager);
 		_injectField("_keyEntryLocalService", _keyEntryLocalService);
@@ -62,7 +62,7 @@ public class DBCryptoVaultProviderTest {
 			HashMapBuilder.<String, Object>put(
 				"companyId", _COMPANY_ID
 			).put(
-				"masterKeyReference", "${keyRef:keystore:master}"
+				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
 			).put(
 				"providerId", "db"
 			).build());
@@ -104,10 +104,10 @@ public class DBCryptoVaultProviderTest {
 
 		keyEntry.setAlias(identifier);
 		keyEntry.setAlgorithm("AES");
-		keyEntry.setKeyType(DBCryptoVaultProvider.KeyType.SECRET.name());
+		keyEntry.setKeyType(BaseDBCryptoVaultProvider.KeyType.SECRET.name());
 		keyEntry.setCipherSpec(
 			"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128");
-		keyEntry.setKekReference("${keyRef:keystore:master}");
+		keyEntry.setKekReference("${keyRef:*:db-vault-provider-master-kek}");
 		keyEntry.setWrappedKeyBlob(
 			new OutputBlob(new ByteArrayInputStream(new byte[32]), 32));
 
@@ -293,7 +293,7 @@ public class DBCryptoVaultProviderTest {
 
 	private void _injectField(String fieldName, Object value) {
 		try {
-			Field field = DBCryptoVaultProvider.class.getDeclaredField(
+			Field field = BaseDBCryptoVaultProvider.class.getDeclaredField(
 				fieldName);
 
 			field.setAccessible(true);
@@ -309,7 +309,7 @@ public class DBCryptoVaultProviderTest {
 	@Mock
 	private CryptoManager _cryptoManager;
 
-	private DBCryptoVaultProvider _dbCryptoVaultProvider;
+	private DBCompanyCryptoVaultProvider _dbCryptoVaultProvider;
 
 	@Mock
 	private KeyEntryLocalService _keyEntryLocalService;

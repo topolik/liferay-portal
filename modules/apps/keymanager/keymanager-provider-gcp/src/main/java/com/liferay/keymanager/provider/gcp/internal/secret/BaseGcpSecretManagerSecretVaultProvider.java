@@ -285,7 +285,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 
 	protected void activate(Map<String, Object> properties) throws IOException {
 		String gcpAuthKeyReference = null;
-		String authType = null;
+		GcpClientManager.AuthType authType = null;
 		String impersonatedServiceAccount = null;
 
 		if (GetterUtil.getBoolean(properties.get("systemScope"))) {
@@ -301,7 +301,8 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 			_locations = configuration.locations();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
-			authType = configuration.gcpAuthType();
+			authType = GcpClientManager.AuthType.valueOf(
+				configuration.gcpAuthType());
 			impersonatedServiceAccount =
 				configuration.gcpImpersonatedServiceAccount();
 		}
@@ -319,7 +320,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 			_locations = configuration.locations();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
-			authType = "sa-key";
+			authType = GcpClientManager.AuthType.SA_KEY;
 		}
 
 		if (_gcpClientManager == null) {

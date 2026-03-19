@@ -80,7 +80,7 @@ public class KeymanagerConfigurationModelListener
 
 			Object value = properties.get(key);
 			
-			if (value != null && !(value instanceof String)) {
+			if (value == null || !(value instanceof String)) {
 				continue;
 			}
 			

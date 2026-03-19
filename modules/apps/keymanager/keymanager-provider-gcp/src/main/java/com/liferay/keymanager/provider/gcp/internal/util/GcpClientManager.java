@@ -29,9 +29,26 @@ import java.util.Objects;
  */
 public class GcpClientManager<T extends AutoCloseable> {
 
+	public enum AuthType {
+
+		ADC("adc"), IMPERSONATION("impersonation"), SA_KEY("sa-key");
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private AuthType(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
+	}
+
 	public GcpClientManager(
 		SecretManager secretManager, String gcpAuthKeyReference,
-		String authType, String impersonatedServiceAccount,
+		AuthType authType, String impersonatedServiceAccount,
 		ClientFactory<T> clientFactory) {
 
 		_secretManager = secretManager;
@@ -70,7 +87,7 @@ public class GcpClientManager<T extends AutoCloseable> {
 	}
 
 	public void updateConfiguration(
-		String gcpAuthKeyReference, String authType,
+		String gcpAuthKeyReference, AuthType authType,
 		String impersonatedServiceAccount) {
 
 		if (Objects.equals(_gcpAuthKeyReference, gcpAuthKeyReference) &&
@@ -142,7 +159,7 @@ public class GcpClientManager<T extends AutoCloseable> {
 	private GoogleCredentials _getGoogleCredentials(long companyId)
 		throws Exception {
 
-		if (Objects.equals(_authType, "impersonation") &&
+		if ((_authType == AuthType.IMPERSONATION) &&
 			Validator.isNotNull(_impersonatedServiceAccount)) {
 
 			return ImpersonatedCredentials.create(
@@ -178,7 +195,7 @@ public class GcpClientManager<T extends AutoCloseable> {
 	private volatile T _client;
 	private final ClientFactory<T> _clientFactory;
 	private volatile String _gcpAuthKeyReference;
-	private volatile String _authType;
+	private volatile AuthType _authType;
 	private volatile String _impersonatedServiceAccount;
 	private final SecretManager _secretManager;
 

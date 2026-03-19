@@ -9,7 +9,8 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
-import com.liferay.keymanager.provider.db.internal.configuration.DBCryptoVaultProviderConfiguration;
+import com.liferay.keymanager.provider.db.internal.configuration.DBCompanyCryptoVaultProviderConfiguration;
+import com.liferay.keymanager.provider.db.internal.configuration.DBSystemCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.provider.db.model.KeyEntry;
 import com.liferay.keymanager.provider.db.service.KeyEntryLocalService;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
@@ -17,6 +18,7 @@ import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
@@ -51,24 +53,19 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(
-	factory = "com.liferay.keymanager.provider.db.internal.DBCryptoVaultProvider",
-	service = CryptoVaultProvider.class
-)
-public class DBCryptoVaultProvider implements CryptoVaultProvider {
+public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
 	public byte[] decrypt(long companyId, String identifier, byte[] ciphertext)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
@@ -124,6 +121,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	public void deleteKey(long companyId, String identifier)
 		throws CryptoManagerException {
 
+		_checkPermission(companyId);
+
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.fetchKeyEntry(
 				companyId, identifier);
@@ -141,6 +140,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	@Override
 	public byte[] encrypt(long companyId, String identifier, byte[] plaintext)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
@@ -203,6 +204,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException {
 
+		_checkPermission(companyId);
+
 		try {
 			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
 				_parseKeyAlgorithm(algorithmSpec));
@@ -247,6 +250,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException {
 
+		_checkPermission(companyId);
+
 		try {
 			KeyGenerator keyGenerator = KeyGenerator.getInstance(
 				_parseKeyAlgorithm(algorithmSpec));
@@ -280,6 +285,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	public List<String> getKeyIdentifiers(long companyId)
 		throws CryptoManagerException {
 
+		_checkPermission(companyId);
+
 		try {
 			return _keyEntryLocalService.getKeyIdentifiers(companyId);
 		}
@@ -292,6 +299,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 	@Override
 	public CryptoKey getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
@@ -316,6 +325,8 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			long companyId, String identifier, byte[] rawKeyMaterial,
 			String algorithmSpec)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			String algorithm = _parseKeyAlgorithm(algorithmSpec);
@@ -378,18 +389,31 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 	}
 
-	@Activate
-	@Modified
 	protected void activate(Map<String, Object> properties) {
-		DBCryptoVaultProviderConfiguration dbCryptoVaultProviderConfiguration =
-			ConfigurableUtil.createConfigurable(
-				DBCryptoVaultProviderConfiguration.class, properties);
+		if (GetterUtil.getBoolean(properties.get("systemScope"))) {
+			DBSystemCryptoVaultProviderConfiguration configuration =
+				ConfigurableUtil.createConfigurable(
+					DBSystemCryptoVaultProviderConfiguration.class, properties);
 
-		_companyId = ConfigurationFactoryUtil.getCompanyId(
-			_companyLocalService, properties);
-		_masterKeyReference =
-			dbCryptoVaultProviderConfiguration.masterKeyReference();
-		_providerId = dbCryptoVaultProviderConfiguration.providerId();
+			_companyId = _getDefaultCompanyId();
+			_masterKeyReference = configuration.masterKeyReference();
+			_providerId = configuration.providerId();
+		}
+		else {
+			DBCompanyCryptoVaultProviderConfiguration configuration =
+				ConfigurableUtil.createConfigurable(
+					DBCompanyCryptoVaultProviderConfiguration.class,
+					properties);
+
+			_companyId = ConfigurationFactoryUtil.getCompanyId(
+				_companyLocalService, properties);
+			_masterKeyReference = configuration.masterKeyReference();
+			_providerId = configuration.providerId();
+		}
+	}
+
+	@Deactivate
+	protected void deactivate() {
 	}
 
 	private byte[] _blobToBytes(Blob blob) throws Exception {
@@ -401,6 +425,25 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 
 			return byteArrayOutputStream.toByteArray();
 		}
+	}
+
+	private void _checkPermission(long companyId)
+		throws CryptoManagerException {
+
+		if (!isAllowedCompany(companyId)) {
+			throw new CryptoManagerException(
+				"Company " + companyId + " is not allowed to use this provider");
+		}
+	}
+
+	private long _getDefaultCompanyId() {
+		List<Company> companies = _companyLocalService.getCompanies();
+
+		if (companies.isEmpty()) {
+			return 0;
+		}
+
+		return companies.get(0).getCompanyId();
 	}
 
 	private AlgorithmParameterSpec _getParameterSpec(
@@ -517,16 +560,16 @@ public class DBCryptoVaultProvider implements CryptoVaultProvider {
 			wrappedType);
 	}
 
-	private long _companyId;
+	private volatile long _companyId;
 
 	@Reference
-	private CompanyLocalService _companyLocalService;
+	protected CompanyLocalService _companyLocalService;
 
 	@Reference
-	private CryptoManager _cryptoManager;
+	protected CryptoManager _cryptoManager;
 
 	@Reference
-	private KeyEntryLocalService _keyEntryLocalService;
+	protected KeyEntryLocalService _keyEntryLocalService;
 
 	private volatile String _masterKeyReference;
 	private volatile String _providerId;

@@ -14,35 +14,32 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  */
 @ExtendedObjectClassDefinition(
 	category = "keymanager",
-	scope = ExtendedObjectClassDefinition.Scope.COMPANY
+	scope = ExtendedObjectClassDefinition.Scope.SYSTEM
 )
 @Meta.OCD(
-	id = "com.liferay.keymanager.provider.db.internal.configuration.DBSecretVaultProviderConfiguration",
+	id = "com.liferay.keymanager.provider.db.internal.configuration.DBSystemSecretVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "db-secret-vault-provider-configuration-name"
+	name = "db-system-secret-vault-provider-configuration-name"
 )
-public interface DBSecretVaultProviderConfiguration {
-
-	@Meta.AD(required = false)
-	public long companyId();
+public interface DBSystemSecretVaultProviderConfiguration {
 
 	@Meta.AD(
-		deflt = "AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128",
+		deflt = "AES/GCM/NoPadding; keySize=256; ivSize=12; gcmTag=128",
 		description = "dek-cipher-spec-description", name = "dek-cipher-spec",
 		required = false
 	)
 	public String dekCipherSpec();
 
 	@Meta.AD(
-		deflt = "${keyRef:keystore:master-key}",
+		deflt = "${keyRef:*:db-vault-provider-master-kek}",
 		description = "master-key-reference-description",
-		name = "master-key-reference"
+		name = "master-key-reference", required = false
 	)
 	public String masterKeyReference();
 
 	@Meta.AD(
-		deflt = "db", description = "db-secret-provider-id-description",
-		name = "provider-id"
+		deflt = "db-system", description = "db-secret-provider-id-description",
+		name = "provider-id", required = false
 	)
 	public String providerId();
 

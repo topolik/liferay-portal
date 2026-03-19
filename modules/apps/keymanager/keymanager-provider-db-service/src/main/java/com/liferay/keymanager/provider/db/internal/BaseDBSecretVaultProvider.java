@@ -7,7 +7,8 @@ package com.liferay.keymanager.provider.db.internal;
 
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoManager;
-import com.liferay.keymanager.provider.db.internal.configuration.DBSecretVaultProviderConfiguration;
+import com.liferay.keymanager.provider.db.internal.configuration.DBCompanySecretVaultProviderConfiguration;
+import com.liferay.keymanager.provider.db.internal.configuration.DBSystemSecretVaultProviderConfiguration;
 import com.liferay.keymanager.provider.db.model.SecretEntry;
 import com.liferay.keymanager.provider.db.service.SecretEntryLocalService;
 import com.liferay.keymanager.secret.SecretManagerException;
@@ -18,6 +19,7 @@ import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
+import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
@@ -46,28 +48,20 @@ import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(
-	factory = "com.liferay.keymanager.provider.db.internal.DBSecretVaultProvider",
-	service = {
-		SecretVaultProvider.class, SecretVaultReader.class,
-		SecretVaultWriter.class
-	}
-)
-public class DBSecretVaultProvider
+public abstract class BaseDBSecretVaultProvider
 	implements SecretVaultProvider, SecretVaultReader, SecretVaultWriter {
 
 	@Override
 	public void deleteSecret(long companyId, String identifier)
 		throws SecretManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			SecretEntry secretEntry = _secretEntryLocalService.fetchSecretEntry(
@@ -86,6 +80,8 @@ public class DBSecretVaultProvider
 	@Override
 	public SecureSecret getSecret(long companyId, String identifier)
 		throws SecretManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			SecretEntry secretEntry = _secretEntryLocalService.fetchSecretEntry(
@@ -152,6 +148,8 @@ public class DBSecretVaultProvider
 	public List<String> getSecretIdentifiers(long companyId)
 		throws SecretManagerException {
 
+		_checkPermission(companyId);
+
 		try {
 			return _secretEntryLocalService.getSecretIdentifiers(companyId);
 		}
@@ -173,6 +171,8 @@ public class DBSecretVaultProvider
 	@Override
 	public void putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException {
+
+		_checkPermission(companyId);
 
 		byte[] dekBytes = null;
 
@@ -244,21 +244,36 @@ public class DBSecretVaultProvider
 		}
 	}
 
-	@Activate
-	@Modified
 	protected void activate(Map<String, Object> properties) {
-		DBSecretVaultProviderConfiguration dbSecretVaultProviderConfiguration =
-			ConfigurableUtil.createConfigurable(
-				DBSecretVaultProviderConfiguration.class, properties);
+		String providerId = null;
+		String masterKeyReference = null;
+		String dekCipherSpec = null;
 
-		_companyId = ConfigurationFactoryUtil.getCompanyId(
-			_companyLocalService, properties);
-		_providerId = dbSecretVaultProviderConfiguration.providerId();
-		_masterKeyReference =
-			dbSecretVaultProviderConfiguration.masterKeyReference();
+		if (GetterUtil.getBoolean(properties.get("systemScope"))) {
+			DBSystemSecretVaultProviderConfiguration configuration =
+				ConfigurableUtil.createConfigurable(
+					DBSystemSecretVaultProviderConfiguration.class, properties);
 
-		String dekCipherSpec =
-			dbSecretVaultProviderConfiguration.dekCipherSpec();
+			_companyId = _getDefaultCompanyId();
+			providerId = configuration.providerId();
+			masterKeyReference = configuration.masterKeyReference();
+			dekCipherSpec = configuration.dekCipherSpec();
+		}
+		else {
+			DBCompanySecretVaultProviderConfiguration configuration =
+				ConfigurableUtil.createConfigurable(
+					DBCompanySecretVaultProviderConfiguration.class,
+					properties);
+
+			_companyId = ConfigurationFactoryUtil.getCompanyId(
+				_companyLocalService, properties);
+			providerId = configuration.providerId();
+			masterKeyReference = configuration.masterKeyReference();
+			dekCipherSpec = configuration.dekCipherSpec();
+		}
+
+		_providerId = providerId;
+		_masterKeyReference = masterKeyReference;
 
 		_encryptionAlgorithm = _parseAlgorithm(dekCipherSpec);
 
@@ -294,6 +309,15 @@ public class DBSecretVaultProvider
 		}
 	}
 
+	private void _checkPermission(long companyId)
+		throws SecretManagerException {
+
+		if (!isAllowedCompany(companyId)) {
+			throw new SecretManagerException(
+				"Company " + companyId + " is not allowed to use this provider");
+		}
+	}
+
 	private byte[] _decrypt(
 			Key key, byte[] ciphertext, String ivBase64, String algorithm)
 		throws Exception {
@@ -316,6 +340,16 @@ public class DBSecretVaultProvider
 		cipher.init(Cipher.ENCRYPT_MODE, key, _getParameterSpec(iv, algorithm));
 
 		return cipher.doFinal(plaintext);
+	}
+
+	private long _getDefaultCompanyId() {
+		List<Company> companies = _companyLocalService.getCompanies();
+
+		if (companies.isEmpty()) {
+			return 0;
+		}
+
+		return companies.get(0).getCompanyId();
 	}
 
 	private AlgorithmParameterSpec _getParameterSpec(
@@ -357,12 +391,12 @@ public class DBSecretVaultProvider
 	}
 
 	@Reference
-	private CryptoManager _cryptoManager;
+	protected CryptoManager _cryptoManager;
 
 	private volatile long _companyId;
 
 	@Reference
-	private CompanyLocalService _companyLocalService;
+	protected CompanyLocalService _companyLocalService;
 
 	private volatile String _encryptionAlgorithm;
 	private volatile int _gcmTagLength;
@@ -374,6 +408,6 @@ public class DBSecretVaultProvider
 	private final SecureRandom _secureRandom = new SecureRandom();
 
 	@Reference
-	private SecretEntryLocalService _secretEntryLocalService;
+	protected SecretEntryLocalService _secretEntryLocalService;
 
 }

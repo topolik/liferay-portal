@@ -17,17 +17,20 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 	scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
-	id = "com.liferay.keymanager.provider.db.internal.configuration.DBCryptoVaultProviderConfiguration",
+	id = "com.liferay.keymanager.provider.db.internal.configuration.DBCompanyCryptoVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "db-crypto-vault-provider-configuration-name"
+	name = "db-company-crypto-vault-provider-configuration-name"
 )
-public interface DBCryptoVaultProviderConfiguration {
+public interface DBCompanyCryptoVaultProviderConfiguration {
 
-	@Meta.AD(required = false)
+	@Meta.AD(
+		description = "company-id-description", name = "company-id",
+		required = false
+	)
 	public long companyId();
 
 	@Meta.AD(
-		deflt = "${keyRef:keystore:master}",
+		deflt = "${keyRef:*:db-vault-provider-master-kek}",
 		description = "master-key-reference-description",
 		name = "master-key-reference", required = false
 	)

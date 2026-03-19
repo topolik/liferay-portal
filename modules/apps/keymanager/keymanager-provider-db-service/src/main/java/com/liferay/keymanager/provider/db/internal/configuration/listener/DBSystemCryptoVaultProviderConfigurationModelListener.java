@@ -5,7 +5,7 @@
 
 package com.liferay.keymanager.provider.db.internal.configuration.listener;
 
-import com.liferay.keymanager.provider.db.internal.configuration.DBCryptoVaultProviderConfiguration;
+import com.liferay.keymanager.provider.db.internal.configuration.DBSystemCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.spi.configuration.listener.BaseConfigurationModelListener;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListener;
 
@@ -15,11 +15,11 @@ import org.osgi.service.component.annotations.Component;
  * @author Tomas Polesovsky
  */
 @Component(service = ConfigurationModelListener.class)
-public class DBCryptoVaultProviderConfigurationModelListener
-	extends BaseConfigurationModelListener<DBCryptoVaultProviderConfiguration> {
+public class DBSystemCryptoVaultProviderConfigurationModelListener
+	extends BaseConfigurationModelListener<DBSystemCryptoVaultProviderConfiguration> {
 
-	public DBCryptoVaultProviderConfigurationModelListener() {
-		super(DBCryptoVaultProviderConfiguration.class);
+	public DBSystemCryptoVaultProviderConfigurationModelListener() {
+		super(DBSystemCryptoVaultProviderConfiguration.class);
 	}
 
 }

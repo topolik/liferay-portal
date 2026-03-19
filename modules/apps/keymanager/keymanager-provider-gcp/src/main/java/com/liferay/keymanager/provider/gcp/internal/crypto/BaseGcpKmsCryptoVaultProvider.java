@@ -373,7 +373,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 	protected void activate(Map<String, Object> properties) throws IOException {
 		String gcpAuthKeyReference = null;
-		String authType = null;
+		GcpClientManager.AuthType authType = null;
 		String impersonatedServiceAccount = null;
 		String keyRingPath = null;
 		String newKeyProtectionLevel = null;
@@ -389,7 +389,8 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 			_providerId = configuration.providerId();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
-			authType = configuration.gcpAuthType();
+			authType = GcpClientManager.AuthType.valueOf(
+				configuration.gcpAuthType());
 			impersonatedServiceAccount =
 				configuration.gcpImpersonatedServiceAccount();
 			keyRingPath = configuration.keyRingPath();
@@ -408,7 +409,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 			_providerId = configuration.providerId();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
-			authType = "sa-key";
+			authType = GcpClientManager.AuthType.SA_KEY;
 			keyRingPath = configuration.keyRingPath();
 			newKeyProtectionLevel = configuration.newKeyProtectionLevel();
 			newKeyRotationPeriodSeconds =

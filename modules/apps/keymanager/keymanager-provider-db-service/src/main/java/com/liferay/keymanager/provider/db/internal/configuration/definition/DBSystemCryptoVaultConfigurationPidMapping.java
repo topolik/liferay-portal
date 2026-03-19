@@ -5,7 +5,7 @@
 
 package com.liferay.keymanager.provider.db.internal.configuration.definition;
 
-import com.liferay.keymanager.provider.db.internal.configuration.DBSecretVaultProviderConfiguration;
+import com.liferay.keymanager.provider.db.internal.configuration.DBSystemCryptoVaultProviderConfiguration;
 import com.liferay.portal.kernel.settings.definition.ConfigurationPidMapping;
 
 import org.osgi.service.component.annotations.Component;
@@ -14,18 +14,13 @@ import org.osgi.service.component.annotations.Component;
  * @author Tomas Polesovsky
  */
 @Component(service = ConfigurationPidMapping.class)
-public class DBSecretVaultConfigurationPidMapping
-	implements ConfigurationPidMapping {
+public class DBSystemCryptoVaultConfigurationPidMapping
+	extends BaseDBConfigurationPidMapping {
 
-	@Override
-	public Class<?> getConfigurationBeanClass() {
-		return DBSecretVaultProviderConfiguration.class;
-	}
-
-	@Override
-	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.db.internal.configuration." +
-			"DBSecretVaultProviderConfiguration.scoped";
+	public DBSystemCryptoVaultConfigurationPidMapping() {
+		super(
+			DBSystemCryptoVaultProviderConfiguration.class,
+			DBSystemCryptoVaultProviderConfiguration.class.getName());
 	}
 
 }

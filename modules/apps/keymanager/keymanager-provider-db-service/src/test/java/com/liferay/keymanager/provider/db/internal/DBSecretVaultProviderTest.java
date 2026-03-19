@@ -46,7 +46,7 @@ public class DBSecretVaultProviderTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
-		_dbSecretVaultProvider = new DBSecretVaultProvider();
+		_dbSecretVaultProvider = new DBCompanySecretVaultProvider();
 
 		_injectField("_cryptoManager", _cryptoManager);
 		_injectField("_secretEntryLocalService", _secretEntryLocalService);
@@ -58,7 +58,7 @@ public class DBSecretVaultProviderTest {
 				"dekCipherSpec",
 				"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128"
 			).put(
-				"masterKeyReference", "${keyRef:keystore:master}"
+				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
 			).put(
 				"providerId", "db"
 			).build());
@@ -180,7 +180,7 @@ public class DBSecretVaultProviderTest {
 
 	private void _injectField(String fieldName, Object value) {
 		try {
-			Field field = DBSecretVaultProvider.class.getDeclaredField(
+			Field field = BaseDBSecretVaultProvider.class.getDeclaredField(
 				fieldName);
 
 			field.setAccessible(true);
@@ -196,7 +196,7 @@ public class DBSecretVaultProviderTest {
 	@Mock
 	private CryptoManager _cryptoManager;
 
-	private DBSecretVaultProvider _dbSecretVaultProvider;
+	private DBCompanySecretVaultProvider _dbSecretVaultProvider;
 
 	@Mock
 	private SecretEntryLocalService _secretEntryLocalService;
