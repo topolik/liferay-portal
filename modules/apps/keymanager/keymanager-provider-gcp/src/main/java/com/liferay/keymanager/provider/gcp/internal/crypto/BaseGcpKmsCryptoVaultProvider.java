@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.keymanager.provider.gcp.internal;
+package com.liferay.keymanager.provider.gcp.internal.crypto;
 
 import com.google.cloud.kms.v1.CryptoKeyName;
 import com.google.cloud.kms.v1.CryptoKeyVersion;
@@ -49,20 +49,14 @@ import java.util.Map;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(
-	factory = "com.liferay.keymanager.provider.gcp.internal.GcpKmsCryptoVaultProvider",
-	property = "providerId=gcp-kms", service = CryptoVaultProvider.class
-)
-public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
+public abstract class BaseGcpKmsCryptoVaultProvider
+	implements CryptoVaultProvider {
 
 	@Override
 	public byte[] decrypt(long companyId, String identifier, byte[] ciphertext)
@@ -377,8 +371,6 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 		return encrypt(companyId, identifier, keyToWrap.getEncoded());
 	}
 
-	@Activate
-	@Modified
 	protected void activate(Map<String, Object> properties) throws IOException {
 		String gcpAuthKeyReference = null;
 		String authType = null;
@@ -496,15 +488,15 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	private volatile long _companyId;
 
 	@Reference
-	private CompanyLocalService _companyLocalService;
+	protected CompanyLocalService _companyLocalService;
 
-	private GcpClientManager<KeyManagementServiceClient> _gcpClientManager;
+	protected GcpClientManager<KeyManagementServiceClient> _gcpClientManager;
 	private volatile KeyRingName _keyRingName;
 	private volatile ProtectionLevel _protectionLevel;
 	private volatile String _providerId;
 	private volatile long _rotationPeriodSeconds;
 
 	@Reference
-	private SecretManager _secretManager;
+	protected SecretManager _secretManager;
 
 }

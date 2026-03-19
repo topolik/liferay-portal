@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.keymanager.provider.gcp.internal;
+package com.liferay.keymanager.provider.gcp.internal.secret;
 
 import com.google.api.gax.rpc.NotFoundException;
 import com.google.cloud.secretmanager.v1.AccessSecretVersionResponse;
@@ -51,24 +51,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(
-	factory = "com.liferay.keymanager.provider.gcp.internal.GcpSecretManagerSecretVaultProvider",
-	property = "providerId=gcp-secret-manager",
-	service = {
-		SecretVaultProvider.class, SecretVaultReader.class,
-		SecretVaultWriter.class
-	}
-)
-public class GcpSecretManagerSecretVaultProvider
+public abstract class BaseGcpSecretManagerSecretVaultProvider
 	implements SecretVaultProvider, SecretVaultReader, SecretVaultWriter {
 
 	@Override
@@ -294,8 +283,6 @@ public class GcpSecretManagerSecretVaultProvider
 		}
 	}
 
-	@Activate
-	@Modified
 	protected void activate(Map<String, Object> properties) throws IOException {
 		String gcpAuthKeyReference = null;
 		String authType = null;
@@ -397,17 +384,17 @@ public class GcpSecretManagerSecretVaultProvider
 		return "latest";
 	}
 
-	private static final Log _log = LogFactoryUtil.getLog(
-		GcpSecretManagerSecretVaultProvider.class);
+	protected static final Log _log = LogFactoryUtil.getLog(
+		BaseGcpSecretManagerSecretVaultProvider.class);
 
 	@Reference
-	private CompanyLocalService _companyLocalService;
+	protected CompanyLocalService _companyLocalService;
 
 	@Reference
-	private SecretManager _secretManager;
+	protected SecretManager _secretManager;
 
 	private volatile long _companyId;
-	private GcpClientManager<SecretManagerServiceClient> _gcpClientManager;
+	protected GcpClientManager<SecretManagerServiceClient> _gcpClientManager;
 	private volatile String _kmsKeyName;
 	private volatile String[] _locations;
 	private volatile String _projectId;

@@ -6,6 +6,9 @@
 package com.liferay.keymanager.provider.gcp.internal;
 
 import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.provider.gcp.internal.crypto.GcpKmsCompanyCryptoVaultProvider;
+import com.liferay.keymanager.provider.gcp.internal.crypto.GcpKmsSystemCryptoVaultProvider;
+import com.liferay.keymanager.provider.gcp.internal.secret.GcpSecretManagerCompanySecretVaultProvider;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
@@ -61,7 +64,8 @@ public class GcpManualTest {
 	public void testGcpKmsCompanyScoped() throws Exception {
 		Assume.assumeNotNull(_keyRingPath);
 
-		GcpKmsCryptoVaultProvider provider = new GcpKmsCryptoVaultProvider();
+		GcpKmsCompanyCryptoVaultProvider provider =
+			new GcpKmsCompanyCryptoVaultProvider();
 
 		_inject(provider, "_companyLocalService", _companyLocalService);
 		_inject(provider, "_secretManager", new MockSecretManager(_saJsonKey));
@@ -101,7 +105,8 @@ public class GcpManualTest {
 	public void testGcpKmsSystemScoped() throws Exception {
 		Assume.assumeNotNull(_keyRingPath);
 
-		GcpKmsCryptoVaultProvider provider = new GcpKmsCryptoVaultProvider();
+		GcpKmsSystemCryptoVaultProvider provider =
+			new GcpKmsSystemCryptoVaultProvider();
 
 		_inject(provider, "_companyLocalService", _companyLocalService);
 		_inject(provider, "_secretManager", new MockSecretManager(null));
@@ -141,8 +146,8 @@ public class GcpManualTest {
 	public void testGcpSecretManagerCompanyScoped() throws Exception {
 		Assume.assumeNotNull(_projectId);
 
-		GcpSecretManagerSecretVaultProvider provider =
-			new GcpSecretManagerSecretVaultProvider();
+		GcpSecretManagerCompanySecretVaultProvider provider =
+			new GcpSecretManagerCompanySecretVaultProvider();
 
 		_inject(provider, "_companyLocalService", _companyLocalService);
 		_inject(provider, "_secretManager", new MockSecretManager(_saJsonKey));
