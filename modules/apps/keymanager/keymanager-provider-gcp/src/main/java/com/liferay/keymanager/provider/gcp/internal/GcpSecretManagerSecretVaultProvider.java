@@ -75,6 +75,8 @@ public class GcpSecretManagerSecretVaultProvider
 	public void deleteSecret(long companyId, String identifier)
 		throws SecretManagerException {
 
+		_checkPermission(companyId);
+
 		try {
 			_gcpClientManager.execute(
 				companyId,
@@ -100,6 +102,8 @@ public class GcpSecretManagerSecretVaultProvider
 	@Override
 	public SecureSecret getSecret(long companyId, String identifier)
 		throws SecretManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			return _gcpClientManager.execute(
@@ -131,6 +135,8 @@ public class GcpSecretManagerSecretVaultProvider
 	@Override
 	public List<String> getSecretIdentifiers(long companyId)
 		throws SecretManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			return _gcpClientManager.execute(
@@ -172,6 +178,8 @@ public class GcpSecretManagerSecretVaultProvider
 	@Override
 	public void putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			_gcpClientManager.execute(
@@ -347,6 +355,15 @@ public class GcpSecretManagerSecretVaultProvider
 	protected void deactivate() {
 		if (_gcpClientManager != null) {
 			_gcpClientManager.close();
+		}
+	}
+
+	private void _checkPermission(long companyId)
+		throws SecretManagerException {
+
+		if (!isAllowedCompany(companyId)) {
+			throw new SecretManagerException(
+				"Company " + companyId + " is not allowed to use this provider");
 		}
 	}
 

@@ -68,6 +68,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	public byte[] decrypt(long companyId, String identifier, byte[] ciphertext)
 		throws CryptoManagerException {
 
+		_checkPermission(companyId);
+
 		try {
 			return _gcpClientManager.execute(
 				companyId,
@@ -91,12 +93,16 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	public void deleteKey(long companyId, String identifier)
 		throws CryptoManagerException {
 
+		_checkPermission(companyId);
+
 		throw new CryptoManagerException("Operation not supported");
 	}
 
 	@Override
 	public byte[] encrypt(long companyId, String identifier, byte[] plaintext)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			return _gcpClientManager.execute(
@@ -121,6 +127,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	public String generateAsymmetricKeyPair(
 			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			return _gcpClientManager.execute(
@@ -161,6 +169,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	public String generateSecretKey(
 			long companyId, String identifier, String algorithmSpec)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			return _gcpClientManager.execute(
@@ -220,6 +230,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	public List<String> getKeyIdentifiers(long companyId)
 		throws CryptoManagerException {
 
+		_checkPermission(companyId);
+
 		try {
 			return _gcpClientManager.execute(
 				companyId,
@@ -252,6 +264,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	@Override
 	public CryptoKey getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		try {
 			return _gcpClientManager.execute(
@@ -290,6 +304,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 			String algorithmSpec)
 		throws CryptoManagerException {
 
+		_checkPermission(companyId);
+
 		if ((rawKeyMaterial == null) || (algorithmSpec == null)) {
 			throw new CryptoManagerException("Operation not supported");
 		}
@@ -311,6 +327,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 			long companyId, String identifier, byte[] wrappedKeyBytes,
 			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		byte[] plaintext = null;
 
@@ -353,6 +371,8 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	@Override
 	public byte[] wrap(long companyId, String identifier, Key keyToWrap)
 		throws CryptoManagerException {
+
+		_checkPermission(companyId);
 
 		return encrypt(companyId, identifier, keyToWrap.getEncoded());
 	}
@@ -428,6 +448,15 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 	protected void deactivate() {
 		if (_gcpClientManager != null) {
 			_gcpClientManager.close();
+		}
+	}
+
+	private void _checkPermission(long companyId)
+		throws CryptoManagerException {
+
+		if (!isAllowedCompany(companyId)) {
+			throw new CryptoManagerException(
+				"Company " + companyId + " is not allowed to use this provider");
 		}
 	}
 

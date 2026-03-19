@@ -20,6 +20,7 @@ import com.liferay.portal.kernel.util.Validator;
 
 import java.io.ByteArrayInputStream;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 
@@ -118,8 +119,10 @@ public class GcpClientManager<T extends AutoCloseable> {
 	}
 
 	private T _getClient(long companyId) throws Exception {
-		if (_client != null) {
-			return _client;
+		T client = _client;
+
+		if (client != null) {
+			return client;
 		}
 
 		synchronized (this) {
@@ -159,15 +162,20 @@ public class GcpClientManager<T extends AutoCloseable> {
 
 			byte[] bytes = secureSecret.getBytes();
 
-			return GoogleCredentials.fromStream(
-				new ByteArrayInputStream(bytes));
+			try {
+				return GoogleCredentials.fromStream(
+					new ByteArrayInputStream(bytes));
+			}
+			finally {
+				Arrays.fill(bytes, (byte)0);
+			}
 		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
 		GcpClientManager.class);
 
-	private T _client;
+	private volatile T _client;
 	private final ClientFactory<T> _clientFactory;
 	private volatile String _gcpAuthKeyReference;
 	private volatile String _authType;
