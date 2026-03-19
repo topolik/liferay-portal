@@ -24,7 +24,7 @@ import com.google.cloud.secretmanager.v1.SecretVersionName;
 import com.google.protobuf.ByteString;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration;
+import com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerCompanySecretVaultProviderConfiguration;
 import com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSystemSecretVaultProviderConfiguration;
 import com.liferay.keymanager.provider.gcp.internal.util.GcpClientManager;
 import com.liferay.keymanager.secret.SecretManager;
@@ -311,9 +311,9 @@ public class GcpSecretManagerSecretVaultProvider
 				configuration.gcpImpersonatedServiceAccount();
 		}
 		else {
-			GcpSecretManagerSecretVaultProviderConfiguration configuration =
-				ConfigurableUtil.createConfigurable(
-					GcpSecretManagerSecretVaultProviderConfiguration.class,
+			GcpSecretManagerCompanySecretVaultProviderConfiguration
+				configuration = ConfigurableUtil.createConfigurable(
+					GcpSecretManagerCompanySecretVaultProviderConfiguration.class,
 					properties);
 
 			_companyId = ConfigurationFactoryUtil.getCompanyId(

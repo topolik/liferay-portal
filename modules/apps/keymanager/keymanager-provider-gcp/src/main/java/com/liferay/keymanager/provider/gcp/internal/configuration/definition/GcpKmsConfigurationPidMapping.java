@@ -5,7 +5,7 @@
 
 package com.liferay.keymanager.provider.gcp.internal.configuration.definition;
 
-import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration;
+import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration;
 import com.liferay.portal.kernel.settings.definition.ConfigurationPidMapping;
 
 import org.osgi.service.component.annotations.Component;
@@ -19,9 +19,9 @@ public class GcpKmsConfigurationPidMapping
 
 	public GcpKmsConfigurationPidMapping() {
 		super(
-			GcpKmsCryptoVaultProviderConfiguration.class,
+			GcpKmsCompanyCryptoVaultProviderConfiguration.class,
 			"com.liferay.keymanager.provider.gcp.internal.configuration." +
-				"GcpKmsCryptoVaultProviderConfiguration.scoped");
+				"GcpKmsCompanyCryptoVaultProviderConfiguration.scoped");
 	}
 
 }

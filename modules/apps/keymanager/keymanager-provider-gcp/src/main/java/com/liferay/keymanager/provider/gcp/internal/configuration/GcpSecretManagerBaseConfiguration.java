@@ -10,7 +10,7 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * @author Tomas Polesovsky
  */
-public interface GcpSecretManagerBaseConfiguration extends GcpBaseConfiguration {
+public interface GcpSecretManagerBaseConfiguration {
 
 	@Meta.AD(
 		description = "kms-key-name-description", name = "kms-key-name",

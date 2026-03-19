@@ -10,7 +10,7 @@ import aQute.bnd.annotation.metatype.Meta;
 /**
  * @author Tomas Polesovsky
  */
-public interface GcpKmsBaseConfiguration extends GcpBaseConfiguration {
+public interface GcpKmsBaseConfiguration {
 
 	@Meta.AD(description = "key-ring-path-description", name = "key-ring-path")
 	public String keyRingPath();

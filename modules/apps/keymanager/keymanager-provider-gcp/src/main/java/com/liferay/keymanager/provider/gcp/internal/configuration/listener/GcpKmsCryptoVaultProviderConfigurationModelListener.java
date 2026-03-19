@@ -5,7 +5,7 @@
 
 package com.liferay.keymanager.provider.gcp.internal.configuration.listener;
 
-import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration;
+import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.spi.configuration.listener.BaseConfigurationModelListener;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListener;
 
@@ -16,10 +16,10 @@ import org.osgi.service.component.annotations.Component;
  */
 @Component(service = ConfigurationModelListener.class)
 public class GcpKmsCryptoVaultProviderConfigurationModelListener
-	extends BaseConfigurationModelListener<GcpKmsCryptoVaultProviderConfiguration> {
+	extends BaseConfigurationModelListener<GcpKmsCompanyCryptoVaultProviderConfiguration> {
 
 	public GcpKmsCryptoVaultProviderConfigurationModelListener() {
-		super(GcpKmsCryptoVaultProviderConfiguration.class);
+		super(GcpKmsCompanyCryptoVaultProviderConfiguration.class);
 	}
 
 }

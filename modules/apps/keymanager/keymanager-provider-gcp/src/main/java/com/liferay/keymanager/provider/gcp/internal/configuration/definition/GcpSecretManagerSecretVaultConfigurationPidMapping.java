@@ -5,7 +5,7 @@
 
 package com.liferay.keymanager.provider.gcp.internal.configuration.definition;
 
-import com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration;
+import com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerCompanySecretVaultProviderConfiguration;
 import com.liferay.portal.kernel.settings.definition.ConfigurationPidMapping;
 
 import org.osgi.service.component.annotations.Component;
@@ -19,9 +19,9 @@ public class GcpSecretManagerSecretVaultConfigurationPidMapping
 
 	public GcpSecretManagerSecretVaultConfigurationPidMapping() {
 		super(
-			GcpSecretManagerSecretVaultProviderConfiguration.class,
+			GcpSecretManagerCompanySecretVaultProviderConfiguration.class,
 			"com.liferay.keymanager.provider.gcp.internal.configuration." +
-				"GcpSecretManagerSecretVaultProviderConfiguration.scoped");
+				"GcpSecretManagerCompanySecretVaultProviderConfiguration.scoped");
 	}
 
 }

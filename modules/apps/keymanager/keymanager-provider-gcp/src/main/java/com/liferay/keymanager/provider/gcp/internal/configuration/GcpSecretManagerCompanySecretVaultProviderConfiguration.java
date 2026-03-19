@@ -17,11 +17,11 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 	scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
-	id = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration",
+	id = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerCompanySecretVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "gcp-secret-manager-secret-vault-provider-configuration-name"
+	name = "gcp-secret-manager-company-secret-vault-provider-configuration-name"
 )
-public interface GcpSecretManagerSecretVaultProviderConfiguration
+public interface GcpSecretManagerCompanySecretVaultProviderConfiguration
 	extends GcpSecretManagerBaseConfiguration {
 
 	@Meta.AD(required = false)

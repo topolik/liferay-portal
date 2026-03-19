@@ -17,11 +17,11 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 	scope = ExtendedObjectClassDefinition.Scope.COMPANY
 )
 @Meta.OCD(
-	id = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration",
+	id = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration",
 	localization = "content/Language",
-	name = "gcp-kms-crypto-vault-provider-configuration-name"
+	name = "gcp-kms-company-crypto-vault-provider-configuration-name"
 )
-public interface GcpKmsCryptoVaultProviderConfiguration
+public interface GcpKmsCompanyCryptoVaultProviderConfiguration
 	extends GcpKmsBaseConfiguration {
 
 	@Meta.AD(required = false)

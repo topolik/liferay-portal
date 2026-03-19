@@ -22,7 +22,7 @@ import com.google.protobuf.Timestamp;
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
-import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCryptoVaultProviderConfiguration;
+import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsSystemCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.provider.gcp.internal.util.GcpClientManager;
 import com.liferay.keymanager.secret.SecretManager;
@@ -386,9 +386,10 @@ public class GcpKmsCryptoVaultProvider implements CryptoVaultProvider {
 				configuration.newKeyRotationPeriodSeconds();
 		}
 		else {
-			GcpKmsCryptoVaultProviderConfiguration configuration =
+			GcpKmsCompanyCryptoVaultProviderConfiguration configuration =
 				ConfigurableUtil.createConfigurable(
-					GcpKmsCryptoVaultProviderConfiguration.class, properties);
+					GcpKmsCompanyCryptoVaultProviderConfiguration.class,
+					properties);
 
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);

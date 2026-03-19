@@ -18,7 +18,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tomas Polesovsky
  */
 @Component(
-	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSecretVaultProviderConfiguration.scoped",
+	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerCompanySecretVaultProviderConfiguration.scoped",
 	configurationPolicy = ConfigurationPolicy.REQUIRE, service = {}
 )
 public class GcpSecretManagerSecretVaultProviderFactory
