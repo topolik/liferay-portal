@@ -319,6 +319,8 @@ public class DBCryptoVaultProviderTest {
 
 		systemProvider.activate(
 			HashMapBuilder.<String, Object>put(
+				"enabled", true
+			).put(
 				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
 			).put(
 				"providerId", "db-system"

@@ -36,19 +36,16 @@ public class EnvSecretVaultProviderTest {
 		_provider = new EnvSecretVaultProvider() {
 
 			@Override
-			protected Map<String, String> getEnv() {
+			protected Map<String, String> getSystemEnv() {
 				return _mockEnv;
-			}
-
-			@Override
-			protected String getEnv(String name) {
-				return _mockEnv.get(name);
 			}
 
 		};
 
 		_provider.activate(
 			HashMapBuilder.<String, Object>put(
+				"enabled", true
+			).put(
 				"envVariablePrefix", "LIFERAY_SECRET_"
 			).put(
 				"providerId", "env"
@@ -59,6 +56,15 @@ public class EnvSecretVaultProviderTest {
 	public void testGetSecret() throws Exception {
 		_mockEnv.put("LIFERAY_SECRET_PASSWORD", "secret123");
 
+		_provider.activate(
+			HashMapBuilder.<String, Object>put(
+				"enabled", true
+			).put(
+				"envVariablePrefix", "LIFERAY_SECRET_"
+			).put(
+				"providerId", "env"
+			).build());
+
 		try (SecureSecret secret = _provider.getSecret(
 				0L, "PASSWORD")) {
 
@@ -68,6 +74,15 @@ public class EnvSecretVaultProviderTest {
 
 	@Test
 	public void testGetSecretAccessDenied() throws Exception {
+		_provider.activate(
+			HashMapBuilder.<String, Object>put(
+				"enabled", true
+			).put(
+				"envVariablePrefix", "LIFERAY_SECRET_"
+			).put(
+				"providerId", "env"
+			).build());
+
 		Assert.assertNull(_provider.getSecret(0L, "PATH"));
 	}
 
@@ -76,14 +91,32 @@ public class EnvSecretVaultProviderTest {
 		_mockEnv.put("LIFERAY_SECRET_A", "1");
 		_mockEnv.put("OTHER_VAR", "2");
 
+		_provider.activate(
+			HashMapBuilder.<String, Object>put(
+				"enabled", true
+			).put(
+				"envVariablePrefix", "LIFERAY_SECRET_"
+			).put(
+				"providerId", "env"
+			).build());
+
 		List<String> identifiers = _provider.getSecretIdentifiers(0L);
 
-		Assert.assertTrue(identifiers.contains("A"));
+		Assert.assertTrue(identifiers.contains("a"));
 		Assert.assertFalse(identifiers.contains("OTHER_VAR"));
 	}
 
 	@Test
 	public void testGetSecretNotFound() throws Exception {
+		_provider.activate(
+			HashMapBuilder.<String, Object>put(
+				"enabled", true
+			).put(
+				"envVariablePrefix", "LIFERAY_SECRET_"
+			).put(
+				"providerId", "env"
+			).build());
+
 		Assert.assertNull(_provider.getSecret(0L, "LIFERAY_SECRET_MISSING"));
 	}
 

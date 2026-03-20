@@ -7,7 +7,6 @@ package com.liferay.keymanager.provider.os.internal;
 
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration;
-import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
@@ -75,7 +74,7 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 
 		_envKeysMap = new ConcurrentHashMap<>();
 		
-		for (String key : System.getenv().keySet()) {
+		for (String key : getSystemEnv().keySet()) {
 			if (Validator.isNull(envVariablePrefix)) {
 				_envKeysMap.put(key.toLowerCase(), key);
 			}
@@ -94,12 +93,12 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 		_providerId = envSecretVaultProviderConfiguration.providerId();
 	}
 
-	protected Map<String, String> getEnv() {
+	protected Map<String, String> getSystemEnv() {
 		return System.getenv();
 	}
 
 	protected String getEnv(String name) {
-		return System.getenv(_envKeysMap.get(name.toLowerCase()));
+		return getSystemEnv().get(_envKeysMap.get(name.toLowerCase()));
 	}
 
 	private volatile boolean _enabled;

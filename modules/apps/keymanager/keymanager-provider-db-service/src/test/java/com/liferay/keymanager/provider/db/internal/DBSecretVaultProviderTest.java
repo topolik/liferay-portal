@@ -138,6 +138,8 @@ public class DBSecretVaultProviderTest {
 				"dekCipherSpec",
 				"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128"
 			).put(
+				"enabled", true
+			).put(
 				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
 			).put(
 				"providerId", "db-secret-manager-system"
