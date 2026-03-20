@@ -37,48 +37,81 @@ public class SecretManagerImpl implements SecretManager {
 	public void deleteSecret(long companyId, KeyReference keyReference)
 		throws SecretManagerException {
 
-		String providerId = keyReference.getProviderId();
+		Objects.requireNonNull(keyReference, "No KeyReference provided!");
 
-		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
-			providerId = _getDefaultSecretVaultWriterProviderId(companyId);
+		String providerId = keyReference.getProviderId();
+		
+		try {
+
+			if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
+				providerId = _getDefaultSecretVaultWriterProviderId(companyId);
+			}
+
+			SecretVaultWriter secretVaultWriter = _getSecretVaultWriter(
+				companyId, providerId);
+
+			secretVaultWriter.deleteSecret(companyId, keyReference.getIdentifier());
+		}
+		catch (SecretManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to delete secret: " + e.getMessage(), e);
+			}
+
+			throw e;
 		}
 
-		SecretVaultWriter secretVaultWriter = _getSecretVaultWriter(
-			companyId, providerId);
-
-		secretVaultWriter.deleteSecret(companyId, keyReference.getIdentifier());
 	}
 
 	@Override
 	public List<String> getProviders(long companyId)
 		throws SecretManagerException {
+		
+		try {
+			return _getSecretVaultReaderProviderIds(
+				companyId, KeyReference.ANY_PROVIDER);
+		}
+		catch (SecretManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to get providers: " + e.getMessage(), e);
+			}
 
-		return _getSecretVaultReaderProviderIds(
-			companyId, KeyReference.ANY_PROVIDER);
+			throw e;
+		}
 	}
 
 	@Override
 	public SecureSecret getSecret(long companyId, KeyReference keyReference)
 		throws SecretManagerException {
 
-		for (SecretVaultReader reader : _getSecretVaultReaders(
+		Objects.requireNonNull(keyReference, "No KeyReference provided!");
+		
+		try {
+			for (SecretVaultReader reader : _getSecretVaultReaders(
 				companyId, keyReference.getProviderId())) {
 
-			try {
-				SecureSecret secureSecret = reader.getSecret(
-					companyId, keyReference.getIdentifier());
+				try {
+					SecureSecret secureSecret = reader.getSecret(
+						companyId, keyReference.getIdentifier());
 
-				if (secureSecret != null) {
-					return secureSecret;
+					if (secureSecret != null) {
+						return secureSecret;
+					}
+				}
+				catch (SecretManagerException secretManagerException) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(
+							"Unable to fetch secret from reader",
+							secretManagerException);
+					}
 				}
 			}
-			catch (SecretManagerException secretManagerException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						"Unable to fetch secret from reader",
-						secretManagerException);
-				}
+		}
+		catch (SecretManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to get secret: " + e.getMessage(), e);
 			}
+	
+			throw e;
 		}
 
 		return null;
@@ -91,24 +124,34 @@ public class SecretManagerImpl implements SecretManager {
 
 		List<KeyReference> keyReferences = new ArrayList<>();
 
-		for (String trackedProviderId : _getSecretVaultReaderProviderIds(
+		try {
+			for (String trackedProviderId : _getSecretVaultReaderProviderIds(
 				companyId, providerId)) {
 
-			SecretVaultReader reader = _readerServiceTrackerMap.getService(
-				trackedProviderId);
+				SecretVaultReader reader = _readerServiceTrackerMap.getService(
+					trackedProviderId);
 
-			if (reader == null) {
-				continue;
+				if (reader == null) {
+					continue;
+				}
+
+				List<String> identifiers = reader.getSecretIdentifiers(companyId);
+
+				for (String identifier : identifiers) {
+					keyReferences.add(
+						new KeyReference(
+							KeyReference.Type.SECRET, trackedProviderId,
+							identifier));
+				}
+			}
+		}
+		catch (SecretManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"Unable to get secret identifiers: " + e.getMessage(), e);
 			}
 
-			List<String> identifiers = reader.getSecretIdentifiers(companyId);
-
-			for (String identifier : identifiers) {
-				keyReferences.add(
-					new KeyReference(
-						KeyReference.Type.SECRET, trackedProviderId,
-						identifier));
-			}
+			throw e;
 		}
 
 		return keyReferences;
@@ -118,21 +161,34 @@ public class SecretManagerImpl implements SecretManager {
 	public KeyReference putSecret(long companyId, SecureSecret secureSecret)
 		throws SecretManagerException {
 
+		Objects.requireNonNull(secureSecret, "No SecureSecret provided!");
+		
 		KeyReference keyReference = secureSecret.getKeyReference();
 
+		Objects.requireNonNull(keyReference, "No KeyReference provided!");
+		
 		String providerId = keyReference.getProviderId();
+		
+		try {
+			if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
+				providerId = _getDefaultSecretVaultWriterProviderId(companyId);
+			}
 
-		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
-			providerId = _getDefaultSecretVaultWriterProviderId(companyId);
+			SecretVaultWriter secretVaultWriter = _getSecretVaultWriter(
+				companyId, providerId);
+
+			secretVaultWriter.putSecret(companyId, secureSecret);
+
+			return new KeyReference(
+				KeyReference.Type.SECRET, providerId, keyReference.getIdentifier());
 		}
-
-		SecretVaultWriter secretVaultWriter = _getSecretVaultWriter(
-			companyId, providerId);
-
-		secretVaultWriter.putSecret(companyId, secureSecret);
-
-		return new KeyReference(
-			KeyReference.Type.SECRET, providerId, keyReference.getIdentifier());
+		catch (SecretManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to save secret: " + e.getMessage(), e);
+			}
+			
+			throw e;
+		}
 	}
 
 	@Activate

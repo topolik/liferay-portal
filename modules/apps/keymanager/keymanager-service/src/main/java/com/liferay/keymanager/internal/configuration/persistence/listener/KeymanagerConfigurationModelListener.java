@@ -7,9 +7,14 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.osgi.service.tracker.collections.map.ServiceReferenceMapperFactory;
+import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
+import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClassDefinition;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListener;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListenerException;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.settings.SettingsLocatorHelper;
@@ -17,6 +22,8 @@ import com.liferay.portal.kernel.settings.definition.ConfigurationPidMapping;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.Validator;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -33,6 +40,8 @@ import java.util.Objects;
 )
 public class KeymanagerConfigurationModelListener 
 	implements ConfigurationModelListener {
+	
+	
 
 	@Override
 	public void onBeforeSave(String pid, Dictionary<String, Object> properties) 
@@ -52,10 +61,21 @@ public class KeymanagerConfigurationModelListener
 				ExtendedObjectClassDefinition.Scope.GROUP.getPropertyKey()),
 			GroupConstants.DEFAULT_PARENT_GROUP_ID);
 
-		ConfigurationPidMapping configurationPidMapping =
-			_settingsLocatorHelper.getConfigurationPidMapping(
-				ConfigurationPidUtil.getRawPid(pid));
+//		ConfigurationPidMapping configurationPidMapping =
+//			_settingsLocatorHelper.getConfigurationPidMapping(
+//				ConfigurationPidUtil.getRawPid(pid));
 
+		ConfigurationPidMapping configurationPidMapping = 
+			_serviceTrackerMap.getService(ConfigurationPidUtil.getRawPid(pid));
+		
+		if (configurationPidMapping == null) {
+			if (_log.isWarnEnabled()){
+				_log.warn("Unavailable class mapping for configuration: " + pid);
+			}
+			
+			return;
+		}
+		
 		Class<?> configurationBeanClass = 
 			configurationPidMapping.getConfigurationBeanClass();
 
@@ -113,6 +133,15 @@ public class KeymanagerConfigurationModelListener
 		}
 	}
 
+	@Activate
+	protected void activate(BundleContext bundleContext) {
+		_serviceTrackerMap = 
+			ServiceTrackerMapFactory.openSingleValueMap(
+			bundleContext, ConfigurationPidMapping.class, null,
+			ServiceReferenceMapperFactory.createFromFunction(
+				bundleContext, ConfigurationPidMapping::getConfigurationPid));
+	}
+
 	private static boolean _isNull(String value) {
 		if (Objects.equals(Meta.NULL, value) || Validator.isNull(value)) {
 			return true;
@@ -126,4 +155,9 @@ public class KeymanagerConfigurationModelListener
 
 	@Reference
 	private SettingsLocatorHelper _settingsLocatorHelper;
+	
+	private ServiceTrackerMap<String, ConfigurationPidMapping> _serviceTrackerMap;
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		KeymanagerConfigurationModelListener.class);
 }

@@ -9,6 +9,7 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
+import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
@@ -39,20 +40,32 @@ public class CryptoManagerImpl implements CryptoManager {
 			long companyId, KeyReference keyReference, byte[] ciphertext)
 		throws CryptoManagerException {
 
-		for (CryptoVaultProvider provider : _getCryptoVaultProviders(
+		Objects.requireNonNull(keyReference, "No KeyReference provided!");
+		Objects.requireNonNull(ciphertext, "No ciphertext provided!");
+		
+		try {
+			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
 				companyId, keyReference.getProviderId())) {
 
-			try {
-				return provider.decrypt(
-					companyId, keyReference.getIdentifier(), ciphertext);
-			}
-			catch (CryptoManagerException cryptoManagerException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						"Unable to decrypt with provider",
-						cryptoManagerException);
+				try {
+					return provider.decrypt(
+						companyId, keyReference.getIdentifier(), ciphertext);
+				}
+				catch (CryptoManagerException cryptoManagerException) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(
+							"Unable to decrypt with provider",
+							cryptoManagerException);
+					}
 				}
 			}
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to decrypt cipherText: " + e.getMessage(), e);
+			}
+
+			throw e;
 		}
 
 		throw new CryptoManagerException(
@@ -63,10 +76,21 @@ public class CryptoManagerImpl implements CryptoManager {
 	public void deleteKey(long companyId, KeyReference keyReference)
 		throws CryptoManagerException {
 
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			companyId, keyReference.getProviderId());
+		Objects.requireNonNull(keyReference, "No KeyReference provided!");
+		
+		try {
+			CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+				companyId, keyReference.getProviderId());
 
-		cryptoVaultProvider.deleteKey(companyId, keyReference.getIdentifier());
+			cryptoVaultProvider.deleteKey(companyId, keyReference.getIdentifier());
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to delete key: " + e.getMessage(), e);
+			}
+
+			throw e;
+		}
 	}
 
 	@Override
@@ -74,20 +98,32 @@ public class CryptoManagerImpl implements CryptoManager {
 			long companyId, KeyReference keyReference, byte[] plaintext)
 		throws CryptoManagerException {
 
-		for (CryptoVaultProvider provider : _getCryptoVaultProviders(
+		Objects.requireNonNull(keyReference, "No KeyReference provided!");
+		Objects.requireNonNull(plaintext, "No plaintext provided!");
+
+		try {
+			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
 				companyId, keyReference.getProviderId())) {
 
-			try {
-				return provider.encrypt(
-					companyId, keyReference.getIdentifier(), plaintext);
-			}
-			catch (CryptoManagerException cryptoManagerException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						"Unable to encrypt with provider",
-						cryptoManagerException);
+				try {
+					return provider.encrypt(
+						companyId, keyReference.getIdentifier(), plaintext);
+				}
+				catch (CryptoManagerException cryptoManagerException) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(
+							"Unable to encrypt with provider",
+							cryptoManagerException);
+					}
 				}
 			}
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to encrypt cipherText: " + e.getMessage(), e);
+			}
+
+			throw e;
 		}
 
 		throw new CryptoManagerException(
@@ -100,18 +136,27 @@ public class CryptoManagerImpl implements CryptoManager {
 			String algorithmSpec)
 		throws CryptoManagerException {
 
-		String resolvedProviderId = _getCryptoVaultProviderId(
-			companyId, providerId);
+		try {
+			String resolvedProviderId = _getCryptoVaultProviderId(
+				companyId, providerId);
 
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			companyId, resolvedProviderId);
+			CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+				companyId, resolvedProviderId);
 
-		String finalIdentifier = cryptoVaultProvider.generateAsymmetricKeyPair(
-			companyId, identifier, algorithmSpec);
+			String finalIdentifier = cryptoVaultProvider.generateAsymmetricKeyPair(
+				companyId, identifier, algorithmSpec);
 
-		return KeyReference.fromString(
-			StringBundler.concat(
-				"${keyRef:", resolvedProviderId, ":", finalIdentifier, "}"));
+			return new KeyReference(
+				KeyReference.Type.CRYPTO, resolvedProviderId, finalIdentifier);
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to get key pair: " + e.getMessage(), e);
+			}
+
+			throw e;
+		}
+		
 	}
 
 	@Override
@@ -120,18 +165,26 @@ public class CryptoManagerImpl implements CryptoManager {
 			String algorithmSpec)
 		throws CryptoManagerException {
 
-		String resolvedProviderId = _getCryptoVaultProviderId(
-			companyId, providerId);
+		try {
+			String resolvedProviderId = _getCryptoVaultProviderId(
+				companyId, providerId);
 
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			companyId, resolvedProviderId);
+			CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+				companyId, resolvedProviderId);
 
-		String finalIdentifier = cryptoVaultProvider.generateSecretKey(
-			companyId, identifier, algorithmSpec);
+			String finalIdentifier = cryptoVaultProvider.generateSecretKey(
+				companyId, identifier, algorithmSpec);
 
-		return KeyReference.fromString(
-			StringBundler.concat(
-				"${keyRef:", resolvedProviderId, ":", finalIdentifier, "}"));
+			return new KeyReference(
+				KeyReference.Type.CRYPTO, resolvedProviderId, finalIdentifier);
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to generate secret key: " + e.getMessage(), e);
+			}
+
+			throw e;
+		}
 	}
 
 	@Override
@@ -141,25 +194,33 @@ public class CryptoManagerImpl implements CryptoManager {
 
 		List<KeyReference> keyReferences = new ArrayList<>();
 
-		for (String trackedProviderId : _getCryptoVaultProviderIds(
+		try {
+			for (String trackedProviderId : _getCryptoVaultProviderIds(
 				companyId, providerId)) {
 
-			CryptoVaultProvider provider = _serviceTrackerMap.getService(
-				trackedProviderId);
+				CryptoVaultProvider provider = _serviceTrackerMap.getService(
+					trackedProviderId);
 
-			if (provider == null) {
-				continue;
+				if (provider == null) {
+					continue;
+				}
+
+				List<String> identifiers = provider.getKeyIdentifiers(companyId);
+
+				for (String identifier : identifiers) {
+					keyReferences.add(
+						new KeyReference(
+							KeyReference.Type.CRYPTO, trackedProviderId,
+							identifier));
+				}
+			}
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to get key identifiers: " + e.getMessage(), e);
 			}
 
-			List<String> identifiers = provider.getKeyIdentifiers(companyId);
-
-			for (String identifier : identifiers) {
-				keyReferences.add(
-					KeyReference.fromString(
-						StringBundler.concat(
-							"${keyRef:", trackedProviderId, ":", identifier,
-							"}")));
-			}
+			throw e;
 		}
 
 		return keyReferences;
@@ -170,20 +231,31 @@ public class CryptoManagerImpl implements CryptoManager {
 			long companyId, KeyReference keyReference)
 		throws CryptoManagerException {
 
-		for (CryptoVaultProvider provider : _getCryptoVaultProviders(
+		Objects.requireNonNull(keyReference, "No KeyReference provided!");
+
+		try {
+			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
 				companyId, keyReference.getProviderId())) {
 
-			try {
-				return provider.getKeyMetadata(
-					companyId, keyReference.getIdentifier());
-			}
-			catch (CryptoManagerException cryptoManagerException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						"Unable to fetch key metadata from provider",
-						cryptoManagerException);
+				try {
+					return provider.getKeyMetadata(
+						companyId, keyReference.getIdentifier());
+				}
+				catch (CryptoManagerException cryptoManagerException) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(
+							"Unable to fetch key metadata from provider",
+							cryptoManagerException);
+					}
 				}
 			}
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to get key metadata: " + e.getMessage(), e);
+			}
+
+			throw e;
 		}
 
 		throw new CryptoManagerException(
@@ -194,8 +266,17 @@ public class CryptoManagerImpl implements CryptoManager {
 	@Override
 	public List<String> getProviders(long companyId)
 		throws CryptoManagerException {
+		
+		try {
+			return _getCryptoVaultProviderIds(companyId, KeyReference.ANY_PROVIDER);
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to get providers: " + e.getMessage(), e);
+			}
 
-		return _getCryptoVaultProviderIds(companyId, KeyReference.ANY_PROVIDER);
+			throw e;
+		}
 	}
 
 	@Override
@@ -204,18 +285,32 @@ public class CryptoManagerImpl implements CryptoManager {
 			byte[] rawKeyMaterial, String algorithmSpec)
 		throws CryptoManagerException {
 
-		String resolvedProviderId = _getCryptoVaultProviderId(
-			companyId, providerId);
+		Objects.requireNonNull(providerId, "No providerId provided!");
+		Objects.requireNonNull(identifier, "No identifier provided!");
+		Objects.requireNonNull(rawKeyMaterial, "No rawKeyMaterial provided!");
+		Objects.requireNonNull(algorithmSpec, "No algorithmSpec provided!");
 
-		CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
-			companyId, resolvedProviderId);
+		try {
+			String resolvedProviderId = _getCryptoVaultProviderId(
+				companyId, providerId);
 
-		String finalIdentifier = cryptoVaultProvider.importSecretKey(
-			companyId, identifier, rawKeyMaterial, algorithmSpec);
+			CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
+				companyId, resolvedProviderId);
 
-		return KeyReference.fromString(
-			StringBundler.concat(
-				"${keyRef:", resolvedProviderId, ":", finalIdentifier, "}"));
+			String finalIdentifier = cryptoVaultProvider.importSecretKey(
+				companyId, identifier, rawKeyMaterial, algorithmSpec);
+
+			return new KeyReference(
+				KeyReference.Type.CRYPTO, resolvedProviderId, finalIdentifier);
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to import secret key: " + e.getMessage(), e);
+			}
+
+			throw e;
+		}
+		
 	}
 
 	@Override
@@ -225,21 +320,34 @@ public class CryptoManagerImpl implements CryptoManager {
 			int wrappedKeyCipherType)
 		throws CryptoManagerException {
 
-		for (CryptoVaultProvider provider : _getCryptoVaultProviders(
+		Objects.requireNonNull(masterKeyReference, "No KeyReference provided!");
+		Objects.requireNonNull(wrappedKeyBytes, "No wrappedKeyBytes provided!");
+		Objects.requireNonNull(wrappedKeyAlgorithm, "No wrappedKeyAlgorithm provided!");
+
+		try {
+			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
 				companyId, masterKeyReference.getProviderId())) {
 
-			try {
-				return provider.unwrap(
-					companyId, masterKeyReference.getIdentifier(),
-					wrappedKeyBytes, wrappedKeyAlgorithm, wrappedKeyCipherType);
-			}
-			catch (CryptoManagerException cryptoManagerException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						"Unable to unwrap key with provider",
-						cryptoManagerException);
+				try {
+					return provider.unwrap(
+						companyId, masterKeyReference.getIdentifier(),
+						wrappedKeyBytes, wrappedKeyAlgorithm, wrappedKeyCipherType);
+				}
+				catch (CryptoManagerException cryptoManagerException) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(
+							"Unable to unwrap key with provider",
+							cryptoManagerException);
+					}
 				}
 			}
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to unwrap key: " + e.getMessage(), e);
+			}
+
+			throw e;
 		}
 
 		throw new CryptoManagerException(
@@ -252,20 +360,32 @@ public class CryptoManagerImpl implements CryptoManager {
 			long companyId, KeyReference masterKeyReference, Key keyToWrap)
 		throws CryptoManagerException {
 
-		for (CryptoVaultProvider provider : _getCryptoVaultProviders(
+		Objects.requireNonNull(masterKeyReference, "No KeyReference provided!");
+		Objects.requireNonNull(keyToWrap, "No keyToWrap provided!");
+		
+		try {
+			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
 				companyId, masterKeyReference.getProviderId())) {
 
-			try {
-				return provider.wrap(
-					companyId, masterKeyReference.getIdentifier(), keyToWrap);
-			}
-			catch (CryptoManagerException cryptoManagerException) {
-				if (_log.isDebugEnabled()) {
-					_log.debug(
-						"Unable to wrap key with provider",
-						cryptoManagerException);
+				try {
+					return provider.wrap(
+						companyId, masterKeyReference.getIdentifier(), keyToWrap);
+				}
+				catch (CryptoManagerException cryptoManagerException) {
+					if (_log.isDebugEnabled()) {
+						_log.debug(
+							"Unable to wrap key with provider",
+							cryptoManagerException);
+					}
 				}
 			}
+		}
+		catch (CryptoManagerException e) {
+			if (_log.isWarnEnabled()) {
+				_log.warn("Unable to wrap key: " + e.getMessage(), e);
+			}
+
+			throw e;
 		}
 
 		throw new CryptoManagerException(
