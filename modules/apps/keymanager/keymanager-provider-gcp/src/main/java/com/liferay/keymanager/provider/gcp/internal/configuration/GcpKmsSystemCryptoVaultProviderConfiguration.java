@@ -23,6 +23,9 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface GcpKmsSystemCryptoVaultProviderConfiguration {
 
+	@Meta.AD(deflt = "false", name = "enabled", required = false)
+	public boolean enabled();
+
 	@Meta.AD(
 		deflt = "adc", description = "gcp-auth-type-description",
 		name = "gcp-auth-type",

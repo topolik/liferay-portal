@@ -20,6 +20,9 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface KeyStoreCryptoVaultProviderConfiguration {
 
+	@Meta.AD(deflt = "false", name = "enabled", required = false)
+	public boolean enabled();
+	
 	@Meta.AD(
 		deflt = "true", description = "auto-create-description",
 		name = "auto-create", required = false

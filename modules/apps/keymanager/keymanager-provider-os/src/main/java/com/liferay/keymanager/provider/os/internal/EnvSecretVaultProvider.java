@@ -16,6 +16,7 @@ import com.liferay.portal.kernel.util.Validator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -33,16 +34,9 @@ import org.osgi.service.component.annotations.Modified;
 public class EnvSecretVaultProvider implements SecretVaultReader {
 
 	@Override
-	public SecureSecret getSecret(long companyId, String identifier)
-		throws SecretManagerException {
+	public SecureSecret getSecret(long companyId, String identifier) {
 
-		String envVariableName = identifier;
-
-		if (Validator.isNotNull(_envVariablePrefix)) {
-			envVariableName = _envVariablePrefix + identifier;
-		}
-
-		String value = getEnv(envVariableName);
+		String value = getEnv(identifier);
 
 		if (Validator.isNull(value)) {
 			return null;
@@ -54,31 +48,16 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 	}
 
 	@Override
-	public List<String> getSecretIdentifiers(long companyId)
-		throws SecretManagerException {
-
-		List<String> identifiers = new ArrayList<>();
-
-		Map<String, String> env = getEnv();
-
-		for (String key : env.keySet()) {
-			if (Validator.isNull(_envVariablePrefix) ||
-				key.startsWith(_envVariablePrefix)) {
-
-				if (Validator.isNotNull(_envVariablePrefix)) {
-					identifiers.add(key.substring(_envVariablePrefix.length()));
-				}
-				else {
-					identifiers.add(key);
-				}
-			}
-		}
-
-		return identifiers;
+	public List<String> getSecretIdentifiers(long companyId) {
+		return new ArrayList(_envKeysMap.keySet());
 	}
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
+		if (!_enabled) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -89,8 +68,29 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 			ConfigurableUtil.createConfigurable(
 				EnvSecretVaultProviderConfiguration.class, properties);
 
-		_envVariablePrefix =
+		_enabled = envSecretVaultProviderConfiguration.enabled();
+
+		String envVariablePrefix =
 			envSecretVaultProviderConfiguration.envVariablePrefix();
+
+		_envKeysMap = new ConcurrentHashMap<>();
+		
+		for (String key : System.getenv().keySet()) {
+			if (Validator.isNull(envVariablePrefix)) {
+				_envKeysMap.put(key.toLowerCase(), key);
+			}
+			else {
+				String lowerCasePrefix = envVariablePrefix.toLowerCase();
+				String lowerCaseKey = key.toLowerCase();
+				
+				if (lowerCaseKey.startsWith(lowerCasePrefix)) {
+					_envKeysMap.put(
+						lowerCaseKey.substring(envVariablePrefix.length()), 
+						key);
+				}
+			}
+		}
+
 		_providerId = envSecretVaultProviderConfiguration.providerId();
 	}
 
@@ -99,10 +99,11 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 	}
 
 	protected String getEnv(String name) {
-		return System.getenv(name);
+		return System.getenv(_envKeysMap.get(name.toLowerCase()));
 	}
 
-	private volatile String _envVariablePrefix;
+	private volatile boolean _enabled;
 	private volatile String _providerId;
+	private volatile Map<String, String> _envKeysMap;
 
 }

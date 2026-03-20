@@ -329,6 +329,10 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
+		if (!_enabled) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -356,6 +360,8 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 				ConfigurableUtil.createConfigurable(
 					KeyStoreCryptoVaultProviderConfiguration.class,
 					properties);
+
+		_enabled = keyStoreCryptoVaultProviderConfiguration.enabled();
 
 		_keyStorePath =
 			keyStoreCryptoVaultProviderConfiguration.keystorePath();
@@ -445,10 +451,11 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		}
 	}
 
-	private String _keyStorePath;
-	private String _keyStoreType;
-	private String _keystorePasswordReference;
-	private String _providerId;
+	private volatile boolean _enabled;
+	private volatile String _keyStorePath;
+	private volatile String _keyStoreType;
+	private volatile String _keystorePasswordReference;
+	private volatile String _providerId;
 
 	protected void setSecretManager(SecretManager secretManager) {
 		_secretManager = secretManager;

@@ -165,6 +165,10 @@ public abstract class BaseDBSecretVaultProvider
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
+		if (!_enabled) {
+			return false;
+		}
+		
 		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
 		}
@@ -258,6 +262,7 @@ public abstract class BaseDBSecretVaultProvider
 				ConfigurableUtil.createConfigurable(
 					DBSystemSecretVaultProviderConfiguration.class, properties);
 
+			_enabled = configuration.enabled();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
 			providerId = configuration.providerId();
 			masterKeyReference = configuration.masterKeyReference();
@@ -268,7 +273,8 @@ public abstract class BaseDBSecretVaultProvider
 				ConfigurableUtil.createConfigurable(
 					DBCompanySecretVaultProviderConfiguration.class,
 					properties);
-
+			
+			_enabled = true;
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
 			providerId = configuration.providerId();
@@ -388,6 +394,7 @@ public abstract class BaseDBSecretVaultProvider
 	protected CryptoManager _cryptoManager;
 
 	private volatile long _companyId;
+	private volatile boolean _enabled;
 
 	@Reference
 	protected CompanyLocalService _companyLocalService;

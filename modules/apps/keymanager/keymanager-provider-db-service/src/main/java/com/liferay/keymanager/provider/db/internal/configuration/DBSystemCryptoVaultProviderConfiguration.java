@@ -23,6 +23,9 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface DBSystemCryptoVaultProviderConfiguration {
 
+	@Meta.AD(deflt = "false", name = "enabled", required = false)
+	public boolean enabled();
+
 	@Meta.AD(
 		deflt = "${keyRef:*:db-vault-provider-master-kek}",
 		description = "master-key-reference-description",

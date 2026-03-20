@@ -100,6 +100,10 @@ public class K8sFileSecretVaultProvider
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
+		if (!_enabled) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -128,11 +132,13 @@ public class K8sFileSecretVaultProvider
 				ConfigurableUtil.createConfigurable(
 					K8sFileSecretVaultProviderConfiguration.class, properties);
 
+		_enabled = fileSecretVaultProviderConfiguration.enabled();
 		_secretsDirectory =
 			fileSecretVaultProviderConfiguration.secretsDirectory();
 		_providerId = fileSecretVaultProviderConfiguration.providerId();
 	}
 
+	private volatile boolean _enabled;
 	private volatile String _providerId;
 	private volatile String _secretsDirectory;
 
