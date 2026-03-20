@@ -20,8 +20,8 @@ public class GcpKmsConfigurationPidMapping
 	public GcpKmsConfigurationPidMapping() {
 		super(
 			GcpKmsCompanyCryptoVaultProviderConfiguration.class,
-			"com.liferay.keymanager.provider.gcp.internal.configuration." +
-				"GcpKmsCompanyCryptoVaultProviderConfiguration.scoped");
+			GcpKmsCompanyCryptoVaultProviderConfiguration.class.getName()
+				+ ".scoped");
 	}
 
 }

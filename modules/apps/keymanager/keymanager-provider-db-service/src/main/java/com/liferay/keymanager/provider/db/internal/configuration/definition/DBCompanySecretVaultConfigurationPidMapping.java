@@ -20,8 +20,8 @@ public class DBCompanySecretVaultConfigurationPidMapping
 	public DBCompanySecretVaultConfigurationPidMapping() {
 		super(
 			DBCompanySecretVaultProviderConfiguration.class,
-			"com.liferay.keymanager.provider.db.internal.configuration." +
-				"DBCompanySecretVaultProviderConfiguration.scoped");
+			DBCompanySecretVaultProviderConfiguration.class.getName()
+				+ ".scoped");
 	}
 
 }

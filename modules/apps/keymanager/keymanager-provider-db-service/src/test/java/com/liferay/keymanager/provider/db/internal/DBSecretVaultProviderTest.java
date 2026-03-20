@@ -7,10 +7,14 @@ package com.liferay.keymanager.provider.db.internal;
 
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoManager;
+import com.liferay.keymanager.provider.db.internal.secret.DBCompanySecretVaultProvider;
+import com.liferay.keymanager.provider.db.internal.secret.DBSystemSecretVaultProvider;
 import com.liferay.keymanager.provider.db.model.SecretEntry;
 import com.liferay.keymanager.provider.db.model.impl.SecretEntryImpl;
 import com.liferay.keymanager.provider.db.service.SecretEntryLocalService;
 import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.portal.kernel.instance.PortalInstancePool;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
@@ -22,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -29,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -46,10 +52,21 @@ public class DBSecretVaultProviderTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
+		_portalInstancePoolMockedStatic = Mockito.mockStatic(
+			PortalInstancePool.class);
+
+		_portalInstancePoolMockedStatic.when(
+			PortalInstancePool::getDefaultCompanyId
+		).thenReturn(
+			_COMPANY_ID
+		);
+
 		_dbSecretVaultProvider = new DBCompanySecretVaultProvider();
 
-		_injectField("_cryptoManager", _cryptoManager);
-		_injectField("_secretEntryLocalService", _secretEntryLocalService);
+		_injectField(_dbSecretVaultProvider, "_cryptoManager", _cryptoManager);
+		_injectField(
+			_dbSecretVaultProvider, "_secretEntryLocalService",
+			_secretEntryLocalService);
 
 		_dbSecretVaultProvider.activate(
 			HashMapBuilder.<String, Object>put(
@@ -62,6 +79,11 @@ public class DBSecretVaultProviderTest {
 			).put(
 				"providerId", "db"
 			).build());
+	}
+
+	@After
+	public void tearDown() {
+		_portalInstancePoolMockedStatic.close();
 	}
 
 	@Test
@@ -98,6 +120,32 @@ public class DBSecretVaultProviderTest {
 
 		Assert.assertEquals(identifiers.toString(), 1, identifiers.size());
 		Assert.assertEquals("secret-1", identifiers.get(0));
+	}
+
+	@Test
+	public void testIsAllowedCompany() throws Exception {
+		Assert.assertTrue(_dbSecretVaultProvider.isAllowedCompany(0));
+		Assert.assertTrue(_dbSecretVaultProvider.isAllowedCompany(_COMPANY_ID));
+		Assert.assertFalse(_dbSecretVaultProvider.isAllowedCompany(1L));
+
+		DBSystemSecretVaultProvider systemProvider =
+			new DBSystemSecretVaultProvider();
+
+		_injectField(systemProvider, "_companyLocalService", _companyLocalService);
+
+		systemProvider.activate(
+			HashMapBuilder.<String, Object>put(
+				"dekCipherSpec",
+				"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128"
+			).put(
+				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
+			).put(
+				"providerId", "db-secret-manager-system"
+			).build());
+
+		Assert.assertTrue(systemProvider.isAllowedCompany(0));
+		Assert.assertTrue(systemProvider.isAllowedCompany(_COMPANY_ID));
+		Assert.assertFalse(systemProvider.isAllowedCompany(1L));
 	}
 
 	@Test
@@ -178,13 +226,25 @@ public class DBSecretVaultProviderTest {
 		Assert.assertEquals(_COMPANY_ID, secretEntry.getCompanyId());
 	}
 
-	private void _injectField(String fieldName, Object value) {
+	private void _injectField(Object target, String fieldName, Object value) {
 		try {
-			Field field = BaseDBSecretVaultProvider.class.getDeclaredField(
-				fieldName);
+			Field field = null;
+
+			Class<?> clazz = target.getClass();
+
+			while (clazz != null) {
+				try {
+					field = clazz.getDeclaredField(fieldName);
+
+					break;
+				}
+				catch (NoSuchFieldException noSuchFieldException) {
+					clazz = clazz.getSuperclass();
+				}
+			}
 
 			field.setAccessible(true);
-			field.set(_dbSecretVaultProvider, value);
+			field.set(target, value);
 		}
 		catch (Exception exception) {
 			throw new RuntimeException(exception);
@@ -194,11 +254,16 @@ public class DBSecretVaultProviderTest {
 	private static final long _COMPANY_ID = 12345L;
 
 	@Mock
+	private CompanyLocalService _companyLocalService;
+
+	@Mock
 	private CryptoManager _cryptoManager;
 
 	private DBCompanySecretVaultProvider _dbSecretVaultProvider;
 
 	@Mock
 	private SecretEntryLocalService _secretEntryLocalService;
+
+	private MockedStatic<PortalInstancePool> _portalInstancePoolMockedStatic;
 
 }

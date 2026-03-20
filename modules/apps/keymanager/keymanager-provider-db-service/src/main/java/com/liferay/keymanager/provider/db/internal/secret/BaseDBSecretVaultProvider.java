@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.keymanager.provider.db.internal;
+package com.liferay.keymanager.provider.db.internal.secret;
 
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoManager;
@@ -19,8 +19,12 @@ import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
+import com.liferay.portal.kernel.instance.PortalInstancePool;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
+import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -161,7 +165,7 @@ public abstract class BaseDBSecretVaultProvider
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
-		if (_companyId == companyId) {
+		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
 		}
 
@@ -254,7 +258,7 @@ public abstract class BaseDBSecretVaultProvider
 				ConfigurableUtil.createConfigurable(
 					DBSystemSecretVaultProviderConfiguration.class, properties);
 
-			_companyId = _getDefaultCompanyId();
+			_companyId = PortalInstancePool.getDefaultCompanyId();
 			providerId = configuration.providerId();
 			masterKeyReference = configuration.masterKeyReference();
 			dekCipherSpec = configuration.dekCipherSpec();
@@ -340,16 +344,6 @@ public abstract class BaseDBSecretVaultProvider
 		cipher.init(Cipher.ENCRYPT_MODE, key, _getParameterSpec(iv, algorithm));
 
 		return cipher.doFinal(plaintext);
-	}
-
-	private long _getDefaultCompanyId() {
-		List<Company> companies = _companyLocalService.getCompanies();
-
-		if (companies.isEmpty()) {
-			return 0;
-		}
-
-		return companies.get(0).getCompanyId();
 	}
 
 	private AlgorithmParameterSpec _getParameterSpec(

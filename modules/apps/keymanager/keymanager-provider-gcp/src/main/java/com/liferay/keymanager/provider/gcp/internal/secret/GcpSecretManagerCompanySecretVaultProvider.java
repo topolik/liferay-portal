@@ -36,7 +36,7 @@ public class GcpSecretManagerCompanySecretVaultProvider
 
 	@Activate
 	@Modified
-	protected void activate(Map<String, Object> properties) throws IOException {
+	public void activate(Map<String, Object> properties) throws IOException {
 		super.activate(
 			HashMapBuilder.<String, Object>putAll(
 				properties

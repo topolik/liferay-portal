@@ -28,7 +28,7 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	property = "providerId=env", service = SecretVaultReader.class
+	service = SecretVaultReader.class
 )
 public class EnvSecretVaultProvider implements SecretVaultReader {
 

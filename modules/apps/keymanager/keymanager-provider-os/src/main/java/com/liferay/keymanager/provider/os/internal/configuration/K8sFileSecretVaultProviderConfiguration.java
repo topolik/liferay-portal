@@ -22,13 +22,13 @@ public interface K8sFileSecretVaultProviderConfiguration {
 
 	@Meta.AD(
 		deflt = "k8s-file", description = "k8s-file-provider-id-description",
-		name = "provider-id", required = false
+		name = "provider-id", required = true
 	)
 	public String providerId();
 
 	@Meta.AD(
 		deflt = "/run/secrets", description = "secrets-directory-description",
-		name = "secrets-directory", required = false
+		name = "secrets-directory", required = true
 	)
 	public String secretsDirectory();
 

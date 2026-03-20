@@ -33,6 +33,16 @@ public class GcpClientManager<T extends AutoCloseable> {
 
 		ADC("adc"), IMPERSONATION("impersonation"), SA_KEY("sa-key");
 
+		public static AuthType create(String value) {
+			for (AuthType authType : values()) {
+				if (Objects.equals(authType._value, value)) {
+					return authType;
+				}
+			}
+
+			return ADC;
+		}
+
 		@Override
 		public String toString() {
 			return _value;

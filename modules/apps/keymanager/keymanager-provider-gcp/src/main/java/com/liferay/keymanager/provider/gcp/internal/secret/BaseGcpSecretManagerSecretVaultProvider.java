@@ -36,6 +36,7 @@ import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.instance.PortalInstancePool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.model.Company;
@@ -157,7 +158,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
-		if (_companyId == companyId) {
+		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
 		}
 
@@ -294,14 +295,14 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 					GcpSecretManagerSystemSecretVaultProviderConfiguration.class,
 					properties);
 
-			_companyId = _getDefaultCompanyId();
+			_companyId = PortalInstancePool.getDefaultCompanyId();
 			_providerId = configuration.providerId();
 			_projectId = configuration.projectId();
 			_kmsKeyName = configuration.kmsKeyName();
 			_locations = configuration.locations();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
-			authType = GcpClientManager.AuthType.valueOf(
+			authType = GcpClientManager.AuthType.create(
 				configuration.gcpAuthType());
 			impersonatedServiceAccount =
 				configuration.gcpImpersonatedServiceAccount();
@@ -353,16 +354,6 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 			throw new SecretManagerException(
 				"Company " + companyId + " is not allowed to use this provider");
 		}
-	}
-
-	private long _getDefaultCompanyId() {
-		List<Company> companies = _companyLocalService.getCompanies();
-
-		if (companies.isEmpty()) {
-			return 0;
-		}
-
-		return companies.get(0).getCompanyId();
 	}
 
 	private String _getSecretId(String identifier) {

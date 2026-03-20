@@ -9,10 +9,15 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
+import com.liferay.keymanager.provider.db.internal.crypto.BaseDBCryptoVaultProvider;
+import com.liferay.keymanager.provider.db.internal.crypto.DBCompanyCryptoVaultProvider;
+import com.liferay.keymanager.provider.db.internal.crypto.DBSystemCryptoVaultProvider;
 import com.liferay.keymanager.provider.db.model.KeyEntry;
 import com.liferay.keymanager.provider.db.model.impl.KeyEntryImpl;
 import com.liferay.keymanager.provider.db.service.KeyEntryLocalService;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
+import com.liferay.portal.kernel.instance.PortalInstancePool;
+import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
@@ -29,6 +34,7 @@ import java.util.List;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -36,6 +42,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -53,10 +60,21 @@ public class DBCryptoVaultProviderTest {
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
+		_portalInstancePoolMockedStatic = Mockito.mockStatic(
+			PortalInstancePool.class);
+
+		_portalInstancePoolMockedStatic.when(
+			PortalInstancePool::getDefaultCompanyId
+		).thenReturn(
+			_COMPANY_ID
+		);
+
 		_dbCryptoVaultProvider = new DBCompanyCryptoVaultProvider();
 
-		_injectField("_cryptoManager", _cryptoManager);
-		_injectField("_keyEntryLocalService", _keyEntryLocalService);
+		_injectField(_dbCryptoVaultProvider, "_cryptoManager", _cryptoManager);
+		_injectField(
+			_dbCryptoVaultProvider, "_keyEntryLocalService",
+			_keyEntryLocalService);
 
 		_dbCryptoVaultProvider.activate(
 			HashMapBuilder.<String, Object>put(
@@ -66,6 +84,11 @@ public class DBCryptoVaultProviderTest {
 			).put(
 				"providerId", "db"
 			).build());
+	}
+
+	@After
+	public void tearDown() {
+		_portalInstancePoolMockedStatic.close();
 	}
 
 	@Test
@@ -283,6 +306,29 @@ public class DBCryptoVaultProviderTest {
 		);
 	}
 
+	@Test
+	public void testIsAllowedCompany() throws Exception {
+		Assert.assertTrue(_dbCryptoVaultProvider.isAllowedCompany(0));
+		Assert.assertTrue(_dbCryptoVaultProvider.isAllowedCompany(_COMPANY_ID));
+		Assert.assertFalse(_dbCryptoVaultProvider.isAllowedCompany(1L));
+
+		DBSystemCryptoVaultProvider systemProvider =
+			new DBSystemCryptoVaultProvider();
+
+		_injectField(systemProvider, "_companyLocalService", _companyLocalService);
+
+		systemProvider.activate(
+			HashMapBuilder.<String, Object>put(
+				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
+			).put(
+				"providerId", "db-system"
+			).build());
+
+		Assert.assertTrue(systemProvider.isAllowedCompany(0));
+		Assert.assertTrue(systemProvider.isAllowedCompany(_COMPANY_ID));
+		Assert.assertFalse(systemProvider.isAllowedCompany(1L));
+	}
+
 	@Test(expected = CryptoManagerException.class)
 	public void testWrap() throws Exception {
 		String identifier = "test-key";
@@ -291,13 +337,25 @@ public class DBCryptoVaultProviderTest {
 		_dbCryptoVaultProvider.wrap(_COMPANY_ID, identifier, keyToWrap);
 	}
 
-	private void _injectField(String fieldName, Object value) {
+	private void _injectField(Object target, String fieldName, Object value) {
 		try {
-			Field field = BaseDBCryptoVaultProvider.class.getDeclaredField(
-				fieldName);
+			Field field = null;
+
+			Class<?> clazz = target.getClass();
+
+			while (clazz != null) {
+				try {
+					field = clazz.getDeclaredField(fieldName);
+
+					break;
+				}
+				catch (NoSuchFieldException noSuchFieldException) {
+					clazz = clazz.getSuperclass();
+				}
+			}
 
 			field.setAccessible(true);
-			field.set(_dbCryptoVaultProvider, value);
+			field.set(target, value);
 		}
 		catch (Exception exception) {
 			throw new RuntimeException(exception);
@@ -307,11 +365,16 @@ public class DBCryptoVaultProviderTest {
 	private static final long _COMPANY_ID = 999L;
 
 	@Mock
+	private CompanyLocalService _companyLocalService;
+
+	@Mock
 	private CryptoManager _cryptoManager;
 
 	private DBCompanyCryptoVaultProvider _dbCryptoVaultProvider;
 
 	@Mock
 	private KeyEntryLocalService _keyEntryLocalService;
+
+	private MockedStatic<PortalInstancePool> _portalInstancePoolMockedStatic;
 
 }

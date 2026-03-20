@@ -27,28 +27,28 @@ public interface KeyStoreCryptoVaultProviderConfiguration {
 	public boolean autoCreate();
 
 	@Meta.AD(
-		deflt = "${secretRef:env:KEYSTORE_PASSWORD}",
+		deflt = "${secretRef:env:CRYPTO_VAULT_KEYSTORE_PASSWORD}",
 		description = "keystore-password-description",
-		name = "keystore-password", required = false
+		name = "keystore-password", required = true
 	)
 	public String keystorePassword();
 
 	@Meta.AD(
-		deflt = "${liferay.home}/data/keystore.p12",
+		deflt = "${liferay.home}/data/crypto_vault_keystore.p12",
 		description = "keystore-path-description", name = "keystore-path",
-		required = false
+		required = true
 	)
 	public String keystorePath();
 
 	@Meta.AD(
 		deflt = "PKCS12", description = "keystore-type-description",
-		name = "keystore-type", required = false
+		name = "keystore-type", required = true
 	)
 	public String keystoreType();
 
 	@Meta.AD(
 		deflt = "keystore", description = "keystore-provider-id-description",
-		name = "provider-id", required = false
+		name = "provider-id", required = true
 	)
 	public String providerId();
 

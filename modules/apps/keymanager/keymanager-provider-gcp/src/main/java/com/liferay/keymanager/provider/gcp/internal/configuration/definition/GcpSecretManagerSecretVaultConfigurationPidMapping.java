@@ -5,6 +5,7 @@
 
 package com.liferay.keymanager.provider.gcp.internal.configuration.definition;
 
+import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration;
 import com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerCompanySecretVaultProviderConfiguration;
 import com.liferay.portal.kernel.settings.definition.ConfigurationPidMapping;
 
@@ -20,8 +21,7 @@ public class GcpSecretManagerSecretVaultConfigurationPidMapping
 	public GcpSecretManagerSecretVaultConfigurationPidMapping() {
 		super(
 			GcpSecretManagerCompanySecretVaultProviderConfiguration.class,
-			"com.liferay.keymanager.provider.gcp.internal.configuration." +
-				"GcpSecretManagerCompanySecretVaultProviderConfiguration.scoped");
+			GcpSecretManagerCompanySecretVaultProviderConfiguration.class.getName() + ".scoped");
 	}
 
 }

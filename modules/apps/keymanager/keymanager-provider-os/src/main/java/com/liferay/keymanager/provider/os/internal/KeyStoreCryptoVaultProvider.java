@@ -47,7 +47,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.KeyStoreCryptoVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	property = "providerId=keystore", service = CryptoVaultProvider.class
+	service = CryptoVaultProvider.class
 )
 public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 

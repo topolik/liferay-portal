@@ -34,7 +34,6 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.K8sFileSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	property = "providerId=k8s-file",
 	service = {
 		SecretVaultProvider.class, SecretVaultReader.class,
 		SecretVaultWriter.class

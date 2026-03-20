@@ -12,6 +12,7 @@ import com.liferay.keymanager.provider.gcp.internal.secret.GcpSecretManagerCompa
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.portal.kernel.instance.PortalInstancePool;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
@@ -23,12 +24,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 /**
@@ -58,6 +61,20 @@ public class GcpManualTest {
 		_saJsonKey = System.getenv("GCP_SA_JSON_KEY");
 
 		_companyLocalService = Mockito.mock(CompanyLocalService.class);
+
+		_portalInstancePoolMockedStatic = Mockito.mockStatic(
+			PortalInstancePool.class);
+
+		_portalInstancePoolMockedStatic.when(
+			PortalInstancePool::getDefaultCompanyId
+		).thenReturn(
+			20101L
+		);
+	}
+
+	@After
+	public void tearDown() {
+		_portalInstancePoolMockedStatic.close();
 	}
 
 	@Test
@@ -232,6 +249,8 @@ public class GcpManualTest {
 	private String _projectId;
 	private String _keyRingPath;
 	private String _saJsonKey;
+
+	private MockedStatic<PortalInstancePool> _portalInstancePoolMockedStatic;
 
 	private static class MockSecretManager implements SecretManager {
 

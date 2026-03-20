@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.keymanager.provider.db.internal;
+package com.liferay.keymanager.provider.db.internal.secret;
 
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.provider.db.service.SecretEntryLocalService;
@@ -37,7 +37,7 @@ public class DBSystemSecretVaultProvider extends BaseDBSecretVaultProvider {
 
 	@Activate
 	@Modified
-	protected void activate(Map<String, Object> properties) {
+	public void activate(Map<String, Object> properties) {
 		super.activate(
 			HashMapBuilder.<String, Object>putAll(
 				properties

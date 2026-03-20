@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.keymanager.provider.db.internal;
+package com.liferay.keymanager.provider.db.internal.crypto;
 
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.provider.db.service.KeyEntryLocalService;
@@ -23,20 +23,20 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tomas Polesovsky
  */
 @Component(
-	configurationPid = "com.liferay.keymanager.provider.db.internal.configuration.DBSystemCryptoVaultProviderConfiguration",
-	configurationPolicy = ConfigurationPolicy.OPTIONAL,
-	property = "providerId=db-system", service = CryptoVaultProvider.class
+	configurationPid = "com.liferay.keymanager.provider.db.internal.configuration.DBCompanyCryptoVaultProviderConfiguration.scoped",
+	configurationPolicy = ConfigurationPolicy.REQUIRE,
+	property = "providerId=db", service = CryptoVaultProvider.class
 )
-public class DBSystemCryptoVaultProvider extends BaseDBCryptoVaultProvider {
+public class DBCompanyCryptoVaultProvider extends BaseDBCryptoVaultProvider {
 
 	@Activate
 	@Modified
-	protected void activate(Map<String, Object> properties) {
+	public void activate(Map<String, Object> properties) {
 		super.activate(
 			HashMapBuilder.<String, Object>putAll(
 				properties
 			).put(
-				"systemScope", true
+				"systemScope", false
 			).build());
 	}
 

@@ -30,6 +30,7 @@ import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.instance.PortalInstancePool;
 import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -309,7 +310,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
-		if (_companyId == companyId) {
+		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
 		}
 
@@ -385,11 +386,11 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 					GcpKmsSystemCryptoVaultProviderConfiguration.class,
 					properties);
 
-			_companyId = _getDefaultCompanyId();
+			_companyId = PortalInstancePool.getDefaultCompanyId();
 			_providerId = configuration.providerId();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
-			authType = GcpClientManager.AuthType.valueOf(
+			authType = GcpClientManager.AuthType.create(
 				configuration.gcpAuthType());
 			impersonatedServiceAccount =
 				configuration.gcpImpersonatedServiceAccount();
@@ -468,16 +469,6 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 		return CryptoKeyVersion.CryptoKeyVersionAlgorithm.
 			CRYPTO_KEY_VERSION_ALGORITHM_UNSPECIFIED;
-	}
-
-	private long _getDefaultCompanyId() {
-		List<Company> companies = _companyLocalService.getCompanies();
-
-		if (companies.isEmpty()) {
-			return 0;
-		}
-
-		return companies.get(0).getCompanyId();
 	}
 
 	private String _getGcpKeyName(String alias) {
