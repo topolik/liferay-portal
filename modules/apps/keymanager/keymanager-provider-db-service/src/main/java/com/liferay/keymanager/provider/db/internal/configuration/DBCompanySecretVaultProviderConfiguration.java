@@ -49,4 +49,7 @@ public interface DBCompanySecretVaultProviderConfiguration {
 	)
 	public String providerId();
 
+	@Meta.AD(deflt = "10", name = "priority", required = false)
+	public int priority();
+
 }

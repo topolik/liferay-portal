@@ -77,6 +77,8 @@ public class DBSecretVaultProviderTest {
 			).put(
 				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
 			).put(
+				"priority", 10
+			).put(
 				"providerId", "db"
 			).build());
 	}
@@ -141,6 +143,8 @@ public class DBSecretVaultProviderTest {
 				"enabled", true
 			).put(
 				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
+			).put(
+				"priority", 10
 			).put(
 				"providerId", "db-secret-manager-system"
 			).build());

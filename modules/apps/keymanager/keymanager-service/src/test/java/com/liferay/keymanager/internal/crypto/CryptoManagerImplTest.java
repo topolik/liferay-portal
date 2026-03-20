@@ -18,6 +18,7 @@ import java.security.Key;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.junit.Assert;
@@ -48,12 +49,7 @@ public class CryptoManagerImplTest {
 
 		// Manually inject mock ServiceTrackerMap
 
-		Field field = CryptoManagerImpl.class.getDeclaredField(
-			"_serviceTrackerMap");
-
-		field.setAccessible(true);
-
-		field.set(_cryptoManagerImpl, _serviceTrackerMap);
+		_injectField(_cryptoManagerImpl, "_serviceTrackerMap", _serviceTrackerMap);
 
 		Mockito.when(
 			_serviceTrackerMap.getService("test-crypto-provider")
@@ -72,6 +68,105 @@ public class CryptoManagerImplTest {
 		).thenReturn(
 			true
 		);
+
+		Mockito.when(
+			_cryptoVaultProvider.getPriority()
+		).thenReturn(
+			100
+		);
+	}
+
+	@Test
+	public void testPriorityOrdering() throws Exception {
+		CryptoVaultProvider lowPriorityProvider = Mockito.mock(
+			CryptoVaultProvider.class, "lowPriorityProvider");
+
+		Mockito.when(
+			lowPriorityProvider.getPriority()
+		).thenReturn(
+			10
+		);
+		Mockito.when(
+			lowPriorityProvider.isAllowedCompany(Mockito.anyLong())
+		).thenReturn(
+			true
+		);
+
+		CryptoVaultProvider prioritizedProviderInstance = Mockito.mock(
+			CryptoVaultProvider.class, "prioritizedProviderInstance");
+
+		Mockito.when(
+			prioritizedProviderInstance.getPriority()
+		).thenReturn(
+			100
+		);
+		Mockito.when(
+			prioritizedProviderInstance.isAllowedCompany(Mockito.anyLong())
+		).thenReturn(
+			true
+		);
+
+		Mockito.when(
+			_serviceTrackerMap.keySet()
+		).thenReturn(
+			new LinkedHashSet<>(List.of("high", "low"))
+		);
+
+		Mockito.when(
+			_serviceTrackerMap.getService("low")
+		).thenReturn(
+			lowPriorityProvider
+		);
+		Mockito.when(
+			_serviceTrackerMap.getService("high")
+		).thenReturn(
+			prioritizedProviderInstance
+		);
+
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.CRYPTO, KeyReference.ANY_PROVIDER, "my-key");
+
+		byte[] plaintext = "hello".getBytes();
+		byte[] ciphertext = "encrypted".getBytes();
+
+		Mockito.when(
+			prioritizedProviderInstance.encrypt(0L, "my-key", plaintext)
+		).thenReturn(
+			ciphertext
+		);
+
+		_cryptoManagerImpl.encrypt(0L, keyRef, plaintext);
+
+		Mockito.verify(prioritizedProviderInstance).encrypt(0L, "my-key", plaintext);
+
+		// The low priority provider is never reached because high priority worked
+		Mockito.verify(lowPriorityProvider, Mockito.never()).encrypt(
+			Mockito.anyLong(), Mockito.anyString(), Mockito.any(byte[].class));
+	}
+
+	private void _injectField(Object target, String fieldName, Object value) {
+		try {
+			Field field = null;
+
+			Class<?> clazz = target.getClass();
+
+			while (clazz != null) {
+				try {
+					field = clazz.getDeclaredField(fieldName);
+
+					break;
+				}
+				catch (NoSuchFieldException noSuchFieldException) {
+					clazz = clazz.getSuperclass();
+				}
+			}
+
+			field.setAccessible(true);
+			field.set(target, value);
+		}
+		catch (Exception exception) {
+			throw new RuntimeException(exception);
+		}
 	}
 
 	@Test

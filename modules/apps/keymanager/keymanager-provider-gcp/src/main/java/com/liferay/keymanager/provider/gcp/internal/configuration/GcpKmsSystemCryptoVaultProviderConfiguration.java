@@ -70,4 +70,7 @@ public interface GcpKmsSystemCryptoVaultProviderConfiguration {
 	)
 	public String providerId();
 
+	@Meta.AD(deflt = "100", name = "priority", required = false)
+	public int priority();
+
 }

@@ -40,6 +40,10 @@ public class K8sFileSecretVaultProviderTest {
 
 		_provider.activate(
 			HashMapBuilder.<String, Object>put(
+				"enabled", true
+			).put(
+				"priority", 30
+			).put(
 				"providerId", "k8s-file"
 			).put(
 				"secretsDirectory", _secretsDir.getAbsolutePath()

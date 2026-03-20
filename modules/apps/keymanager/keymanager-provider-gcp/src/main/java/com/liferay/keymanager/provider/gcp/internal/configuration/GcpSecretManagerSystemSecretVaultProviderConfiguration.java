@@ -64,9 +64,13 @@ public interface GcpSecretManagerSystemSecretVaultProviderConfiguration {
 	public String projectId();
 
 	@Meta.AD(
-		deflt = "gcp-secrets-system",
-		description = "gcp-secrets-provider-id-description", name = "provider-id"
+		deflt = "gcp-secret-manager-system",
+		description = "gcp-secret-manager-provider-id-description",
+		name = "provider-id"
 	)
 	public String providerId();
+	
+	@Meta.AD(deflt = "100", name = "priority", required = false)
+	public int priority();
 
 }

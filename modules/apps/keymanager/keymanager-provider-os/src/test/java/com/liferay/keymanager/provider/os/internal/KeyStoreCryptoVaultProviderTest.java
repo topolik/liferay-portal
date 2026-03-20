@@ -65,11 +65,15 @@ public class KeyStoreCryptoVaultProviderTest {
 			HashMapBuilder.<String, Object>put(
 				"autoCreate", true
 			).put(
+				"enabled", true
+			).put(
 				"keystorePassword", "${secretRef:env:KEYSTORE_PASSWORD}"
 			).put(
 				"keystorePath", _keystoreFile.getAbsolutePath()
 			).put(
 				"keystoreType", "PKCS12"
+			).put(
+				"priority", 100
 			).put(
 				"providerId", "keystore"
 			).build());
@@ -89,11 +93,15 @@ public class KeyStoreCryptoVaultProviderTest {
 			HashMapBuilder.<String, Object>put(
 				"autoCreate", true
 			).put(
+				"enabled", true
+			).put(
 				"keystorePassword", "${secretRef:env:KEYSTORE_PASSWORD}"
 			).put(
 				"keystorePath", deepDir.getAbsolutePath()
 			).put(
 				"keystoreType", "PKCS12"
+			).put(
+				"priority", 100
 			).put(
 				"providerId", "keystore"
 			).build());

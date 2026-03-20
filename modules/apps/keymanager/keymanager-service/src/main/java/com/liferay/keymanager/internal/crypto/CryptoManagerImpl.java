@@ -7,10 +7,13 @@ package com.liferay.keymanager.internal.crypto;
 
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
+import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
-import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
+import java.util.ArrayList;
+import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReferenceComparator;
+import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReferenceMapper;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.petra.string.StringBundler;
@@ -20,11 +23,16 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import java.security.Key;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeMap;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -396,12 +404,39 @@ public class CryptoManagerImpl implements CryptoManager {
 	@Activate
 	protected void activate(BundleContext bundleContext) {
 		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, CryptoVaultProvider.class, "providerId");
+			bundleContext, CryptoVaultProvider.class, "(providerId=*)",
+			new PropertyServiceReferenceMapper<>("providerId"),
+			new PropertyServiceReferenceComparator<>("priority"));
 	}
 
 	@Deactivate
 	protected void deactivate() {
 		_serviceTrackerMap.close();
+	}
+
+	private Collection<String> _getProviderIds() {
+		TreeMap<Integer, List<String>> providersTreeMap = new TreeMap<>(
+			Collections.reverseOrder());
+
+		for (String providerId : _serviceTrackerMap.keySet()) {
+			CryptoVaultProvider cryptoVaultProvider =
+				_serviceTrackerMap.getService(providerId);
+
+			int priority = cryptoVaultProvider.getPriority();
+
+			List<String> providerIds = providersTreeMap.computeIfAbsent(
+				priority, k -> new ArrayList<>());
+
+			providerIds.add(providerId);
+		}
+
+		List<String> sortedProviderIds = new ArrayList<>();
+
+		for (List<String> providerIds : providersTreeMap.values()) {
+			sortedProviderIds.addAll(providerIds);
+		}
+
+		return sortedProviderIds;
 	}
 
 	private CryptoVaultProvider _getCryptoVaultProvider(
@@ -425,7 +460,7 @@ public class CryptoManagerImpl implements CryptoManager {
 		throws CryptoManagerException {
 
 		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
-			for (String trackedProviderId : _serviceTrackerMap.keySet()) {
+			for (String trackedProviderId : _getProviderIds()) {
 				CryptoVaultProvider provider = _serviceTrackerMap.getService(
 					trackedProviderId);
 
@@ -452,7 +487,7 @@ public class CryptoManagerImpl implements CryptoManager {
 		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
 			List<String> providerIds = new ArrayList<>();
 
-			for (String trackedProviderId : _serviceTrackerMap.keySet()) {
+			for (String trackedProviderId : _getProviderIds()) {
 				CryptoVaultProvider provider = _serviceTrackerMap.getService(
 					trackedProviderId);
 

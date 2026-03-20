@@ -289,6 +289,11 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
+	public int getPriority() {
+		return _priority;
+	}
+
+	@Override
 	public String importSecretKey(
 			long companyId, String identifier, byte[] rawKeyMaterial,
 			String algorithmSpec)
@@ -362,6 +367,7 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 					properties);
 
 		_enabled = keyStoreCryptoVaultProviderConfiguration.enabled();
+		_priority = keyStoreCryptoVaultProviderConfiguration.priority();
 
 		_keyStorePath =
 			keyStoreCryptoVaultProviderConfiguration.keystorePath();
@@ -452,6 +458,7 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	private volatile boolean _enabled;
+	private volatile int _priority;
 	private volatile String _keyStorePath;
 	private volatile String _keyStoreType;
 	private volatile String _keystorePasswordReference;

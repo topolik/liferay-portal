@@ -23,7 +23,7 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration.scoped",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	property = "providerId=gcp-kms", service = CryptoVaultProvider.class
+	service = CryptoVaultProvider.class
 )
 public class GcpKmsCompanyCryptoVaultProvider
 	extends BaseGcpKmsCryptoVaultProvider {

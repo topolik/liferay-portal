@@ -309,6 +309,11 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 	}
 
 	@Override
+	public int getPriority() {
+		return _priority;
+	}
+
+	@Override
 	public boolean isAllowedCompany(long companyId) {
 		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
@@ -387,6 +392,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 					properties);
 
 			_companyId = PortalInstancePool.getDefaultCompanyId();
+			_priority = configuration.priority();
 			_providerId = configuration.providerId();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
@@ -407,6 +413,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
+			_priority = configuration.priority();
 			_providerId = configuration.providerId();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
@@ -478,6 +485,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 	}
 
 	private volatile long _companyId;
+	private volatile int _priority;
 
 	@Reference
 	protected CompanyLocalService _companyLocalService;

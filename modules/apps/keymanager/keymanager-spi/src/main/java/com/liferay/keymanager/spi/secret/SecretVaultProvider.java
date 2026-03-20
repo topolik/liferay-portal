@@ -9,5 +9,9 @@ package com.liferay.keymanager.spi.secret;
  * @author Tomas Polesovsky
  */
 public interface SecretVaultProvider {
+
+	public int getPriority();
+
 	public boolean isAllowedCompany(long companyId);
+
 }

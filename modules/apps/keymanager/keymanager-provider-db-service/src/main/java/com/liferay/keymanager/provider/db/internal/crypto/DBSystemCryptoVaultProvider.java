@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.db.internal.configuration.DBSystemCryptoVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.OPTIONAL,
-	property = "providerId=db-system", service = CryptoVaultProvider.class
+	service = CryptoVaultProvider.class
 )
 public class DBSystemCryptoVaultProvider extends BaseDBCryptoVaultProvider {
 

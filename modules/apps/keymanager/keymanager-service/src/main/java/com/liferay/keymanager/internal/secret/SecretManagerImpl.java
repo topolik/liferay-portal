@@ -9,8 +9,12 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.keymanager.spi.secret.SecretVaultProvider;
 import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.keymanager.spi.secret.SecretVaultWriter;
+import java.util.ArrayList;
+import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReferenceComparator;
+import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReferenceMapper;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
 import com.liferay.petra.string.StringBundler;
@@ -18,11 +22,16 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeMap;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -194,16 +203,48 @@ public class SecretManagerImpl implements SecretManager {
 	@Activate
 	protected void activate(BundleContext bundleContext) {
 		_readerServiceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, SecretVaultReader.class, "providerId");
+			bundleContext, SecretVaultReader.class, "(providerId=*)",
+			new PropertyServiceReferenceMapper<>("providerId"),
+			new PropertyServiceReferenceComparator<>("priority"));
 
 		_writerServiceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, SecretVaultWriter.class, "providerId");
+			bundleContext, SecretVaultWriter.class, "(providerId=*)",
+			new PropertyServiceReferenceMapper<>("providerId"),
+			new PropertyServiceReferenceComparator<>("priority"));
 	}
 
 	@Deactivate
 	protected void deactivate() {
 		_readerServiceTrackerMap.close();
 		_writerServiceTrackerMap.close();
+	}
+
+	private Collection<String> _getProviderIds(
+		ServiceTrackerMap<String, ? extends SecretVaultProvider>
+			serviceTrackerMap) {
+
+		TreeMap<Integer, List<String>> providersTreeMap = new TreeMap<>(
+			Collections.reverseOrder());
+
+		for (String providerId : serviceTrackerMap.keySet()) {
+			SecretVaultProvider secretVaultProvider =
+				serviceTrackerMap.getService(providerId);
+
+			int priority = secretVaultProvider.getPriority();
+
+			List<String> providerIds = providersTreeMap.computeIfAbsent(
+				priority, k -> new ArrayList<>());
+
+			providerIds.add(providerId);
+		}
+
+		List<String> sortedProviderIds = new ArrayList<>();
+
+		for (List<String> providerIds : providersTreeMap.values()) {
+			sortedProviderIds.addAll(providerIds);
+		}
+
+		return sortedProviderIds;
 	}
 
 	private List<String> _getSecretVaultReaderProviderIds(
@@ -213,7 +254,7 @@ public class SecretManagerImpl implements SecretManager {
 		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
 			List<String> providerIds = new ArrayList<>();
 
-			for (String trackedProviderId : _readerServiceTrackerMap.keySet()) {
+			for (String trackedProviderId : _getProviderIds(_readerServiceTrackerMap)) {
 				SecretVaultReader reader = _readerServiceTrackerMap.getService(
 					trackedProviderId);
 
@@ -235,7 +276,7 @@ public class SecretManagerImpl implements SecretManager {
 		throws SecretManagerException {
 
 		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
-			for (String trackedProviderId : _readerServiceTrackerMap.keySet()) {
+			for (String trackedProviderId : _getProviderIds(_readerServiceTrackerMap)) {
 				SecretVaultReader reader = _readerServiceTrackerMap.getService(
 					trackedProviderId);
 
@@ -297,7 +338,7 @@ public class SecretManagerImpl implements SecretManager {
 	private String _getDefaultSecretVaultWriterProviderId(long companyId)
 		throws SecretManagerException {
 
-		for (String trackedProviderId : _writerServiceTrackerMap.keySet()) {
+		for (String trackedProviderId : _getProviderIds(_writerServiceTrackerMap)) {
 			SecretVaultWriter writer = _writerServiceTrackerMap.getService(
 				trackedProviderId);
 

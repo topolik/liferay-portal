@@ -36,4 +36,7 @@ public interface EnvSecretVaultProviderConfiguration {
 	)
 	public String providerId();
 
+	@Meta.AD(deflt = "20", name = "priority", required = false)
+	public int priority();
+
 }

@@ -99,6 +99,11 @@ public class K8sFileSecretVaultProvider
 	}
 
 	@Override
+	public int getPriority() {
+		return _priority;
+	}
+
+	@Override
 	public boolean isAllowedCompany(long companyId) {
 		if (!_enabled) {
 			return false;
@@ -133,12 +138,14 @@ public class K8sFileSecretVaultProvider
 					K8sFileSecretVaultProviderConfiguration.class, properties);
 
 		_enabled = fileSecretVaultProviderConfiguration.enabled();
+		_priority = fileSecretVaultProviderConfiguration.priority();
 		_secretsDirectory =
 			fileSecretVaultProviderConfiguration.secretsDirectory();
 		_providerId = fileSecretVaultProviderConfiguration.providerId();
 	}
 
 	private volatile boolean _enabled;
+	private volatile int _priority;
 	private volatile String _providerId;
 	private volatile String _secretsDirectory;
 

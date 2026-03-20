@@ -164,6 +164,11 @@ public abstract class BaseDBSecretVaultProvider
 	}
 
 	@Override
+	public int getPriority() {
+		return _priority;
+	}
+
+	@Override
 	public boolean isAllowedCompany(long companyId) {
 		if (!_enabled) {
 			return false;
@@ -263,6 +268,7 @@ public abstract class BaseDBSecretVaultProvider
 					DBSystemSecretVaultProviderConfiguration.class, properties);
 
 			_enabled = configuration.enabled();
+			_priority = configuration.priority();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
 			providerId = configuration.providerId();
 			masterKeyReference = configuration.masterKeyReference();
@@ -275,6 +281,7 @@ public abstract class BaseDBSecretVaultProvider
 					properties);
 			
 			_enabled = true;
+			_priority = configuration.priority();
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
 			providerId = configuration.providerId();
@@ -395,6 +402,7 @@ public abstract class BaseDBSecretVaultProvider
 
 	private volatile long _companyId;
 	private volatile boolean _enabled;
+	private volatile int _priority;
 
 	@Reference
 	protected CompanyLocalService _companyLocalService;

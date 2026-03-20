@@ -22,12 +22,11 @@ import org.osgi.service.component.annotations.Modified;
  */
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsSystemCryptoVaultProviderConfiguration",
-	configurationPolicy = ConfigurationPolicy.REQUIRE,
-	property = "providerId=gcp-kms-system", service = CryptoVaultProvider.class
+	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	service = CryptoVaultProvider.class
 )
 public class GcpKmsSystemCryptoVaultProvider
 	extends BaseGcpKmsCryptoVaultProvider {
-
 	@Activate
 	@Modified
 	public void activate(Map<String, Object> properties) throws IOException {

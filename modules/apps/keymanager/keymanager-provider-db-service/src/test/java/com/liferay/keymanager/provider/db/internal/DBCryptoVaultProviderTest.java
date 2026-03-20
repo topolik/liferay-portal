@@ -82,6 +82,8 @@ public class DBCryptoVaultProviderTest {
 			).put(
 				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
 			).put(
+				"priority", 10
+			).put(
 				"providerId", "db"
 			).build());
 	}
@@ -322,6 +324,8 @@ public class DBCryptoVaultProviderTest {
 				"enabled", true
 			).put(
 				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
+			).put(
+				"priority", 10
 			).put(
 				"providerId", "db-system"
 			).build());

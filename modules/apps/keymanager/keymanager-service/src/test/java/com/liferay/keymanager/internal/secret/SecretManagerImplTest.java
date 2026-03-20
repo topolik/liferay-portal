@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.junit.Assert;
@@ -47,19 +48,12 @@ public class SecretManagerImplTest {
 
 		// Manually inject mock ServiceTrackerMaps
 
-		Field readerField = SecretManagerImpl.class.getDeclaredField(
-			"_readerServiceTrackerMap");
-
-		readerField.setAccessible(true);
-
-		readerField.set(_secretManagerImpl, _readerServiceTrackerMap);
-
-		Field writerField = SecretManagerImpl.class.getDeclaredField(
-			"_writerServiceTrackerMap");
-
-		writerField.setAccessible(true);
-
-		writerField.set(_secretManagerImpl, _writerServiceTrackerMap);
+		_injectField(
+			_secretManagerImpl, "_readerServiceTrackerMap",
+			_readerServiceTrackerMap);
+		_injectField(
+			_secretManagerImpl, "_writerServiceTrackerMap",
+			_writerServiceTrackerMap);
 
 		Mockito.when(
 			_readerServiceTrackerMap.getService("test-provider")
@@ -96,6 +90,87 @@ public class SecretManagerImplTest {
 		).thenReturn(
 			true
 		);
+
+		Mockito.when(
+			_secretVaultReader.getPriority()
+		).thenReturn(
+			100
+		);
+
+		Mockito.when(
+			_secretVaultWriter.getPriority()
+		).thenReturn(
+			100
+		);
+	}
+
+	@Test
+	public void testPriorityOrdering() throws Exception {
+		SecretVaultReader lowPriorityReader = Mockito.mock(
+			SecretVaultReader.class, "lowPriorityReader");
+
+		Mockito.when(
+			lowPriorityReader.getPriority()
+		).thenReturn(
+			10
+		);
+		Mockito.when(
+			lowPriorityReader.isAllowedCompany(Mockito.anyLong())
+		).thenReturn(
+			true
+		);
+
+		SecretVaultReader specialPrioritizedReader = Mockito.mock(
+			SecretVaultReader.class, "specialPrioritizedReader");
+
+		Mockito.when(
+			specialPrioritizedReader.getPriority()
+		).thenReturn(
+			100
+		);
+		Mockito.when(
+			specialPrioritizedReader.isAllowedCompany(Mockito.anyLong())
+		).thenReturn(
+			true
+		);
+
+		Mockito.when(
+			_readerServiceTrackerMap.keySet()
+		).thenReturn(
+			new LinkedHashSet<>(List.of("high", "low"))
+		);
+
+		Mockito.when(
+			_readerServiceTrackerMap.getService("low")
+		).thenReturn(
+			lowPriorityReader
+		);
+		Mockito.when(
+			_readerServiceTrackerMap.getService("high")
+		).thenReturn(
+			specialPrioritizedReader
+		);
+
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.SECRET, KeyReference.ANY_PROVIDER, "my-secret");
+
+		SecureSecret mockSecret = Mockito.mock(SecureSecret.class);
+
+		Mockito.when(
+			specialPrioritizedReader.getSecret(0L, "my-secret")
+		).thenReturn(
+			mockSecret
+		);
+
+		SecureSecret result = _secretManagerImpl.getSecret(0L, keyRef);
+
+		Assert.assertEquals(mockSecret, result);
+
+		Mockito.verify(specialPrioritizedReader).getSecret(0L, "my-secret");
+
+		// The low priority reader is never reached because high priority worked
+		Mockito.verify(lowPriorityReader, Mockito.never()).getSecret(
+			Mockito.anyLong(), Mockito.anyString());
 	}
 
 	@Test
@@ -266,6 +341,37 @@ public class SecretManagerImplTest {
 		Assert.assertEquals(mockSecret, result);
 	}
 
+	private void _injectField(Object target, String fieldName, Object value) {
+		try {
+			Field field = null;
+
+			Class<?> clazz = target.getClass();
+
+			while (clazz != null) {
+				try {
+					field = clazz.getDeclaredField(fieldName);
+
+					break;
+				}
+				catch (NoSuchFieldException noSuchFieldException) {
+					clazz = clazz.getSuperclass();
+				}
+			}
+
+			field.setAccessible(true);
+			field.set(target, value);
+		}
+		catch (Exception exception) {
+			throw new RuntimeException(exception);
+		}
+	}
+
+	@Mock
+	private ServiceTrackerMap<String, SecretVaultReader> _readerServiceTrackerMap;
+
+	@Mock
+	private ServiceTrackerMap<String, SecretVaultWriter> _writerServiceTrackerMap;
+
 	private SecretManagerImpl _secretManagerImpl;
 
 	@Mock
@@ -273,13 +379,5 @@ public class SecretManagerImplTest {
 
 	@Mock
 	private SecretVaultWriter _secretVaultWriter;
-
-	@Mock
-	private ServiceTrackerMap<String, SecretVaultReader>
-		_readerServiceTrackerMap;
-
-	@Mock
-	private ServiceTrackerMap<String, SecretVaultWriter>
-		_writerServiceTrackerMap;
 
 }

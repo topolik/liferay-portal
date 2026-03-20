@@ -40,6 +40,8 @@ public interface CryptoVaultProvider {
 	public CryptoKey getKeyMetadata(long companyId, String identifier)
 		throws CryptoManagerException;
 
+	public int getPriority();
+
 	public String importSecretKey(
 			long companyId, String identifier, byte[] rawKeyMaterial,
 			String algorithmSpec)

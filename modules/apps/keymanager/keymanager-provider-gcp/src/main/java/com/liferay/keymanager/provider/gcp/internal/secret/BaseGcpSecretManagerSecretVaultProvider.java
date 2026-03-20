@@ -157,6 +157,11 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 	}
 
 	@Override
+	public int getPriority() {
+		return _priority;
+	}
+
+	@Override
 	public boolean isAllowedCompany(long companyId) {
 		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
@@ -296,6 +301,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 					properties);
 
 			_companyId = PortalInstancePool.getDefaultCompanyId();
+			_priority = configuration.priority();
 			_providerId = configuration.providerId();
 			_projectId = configuration.projectId();
 			_kmsKeyName = configuration.kmsKeyName();
@@ -315,6 +321,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
+			_priority = configuration.priority();
 			_providerId = configuration.providerId();
 			_projectId = configuration.projectId();
 			_kmsKeyName = configuration.kmsKeyName();
@@ -386,6 +393,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 	protected SecretManager _secretManager;
 
 	private volatile long _companyId;
+	private volatile int _priority;
 	protected GcpClientManager<SecretManagerServiceClient> _gcpClientManager;
 	private volatile String _kmsKeyName;
 	private volatile String[] _locations;

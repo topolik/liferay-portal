@@ -48,6 +48,8 @@ public class EnvSecretVaultProviderTest {
 			).put(
 				"envVariablePrefix", "LIFERAY_SECRET_"
 			).put(
+				"priority", 20
+			).put(
 				"providerId", "env"
 			).build());
 	}
@@ -61,6 +63,8 @@ public class EnvSecretVaultProviderTest {
 				"enabled", true
 			).put(
 				"envVariablePrefix", "LIFERAY_SECRET_"
+			).put(
+				"priority", 20
 			).put(
 				"providerId", "env"
 			).build());
@@ -80,6 +84,8 @@ public class EnvSecretVaultProviderTest {
 			).put(
 				"envVariablePrefix", "LIFERAY_SECRET_"
 			).put(
+				"priority", 20
+			).put(
 				"providerId", "env"
 			).build());
 
@@ -97,6 +103,8 @@ public class EnvSecretVaultProviderTest {
 			).put(
 				"envVariablePrefix", "LIFERAY_SECRET_"
 			).put(
+				"priority", 20
+			).put(
 				"providerId", "env"
 			).build());
 
@@ -113,6 +121,8 @@ public class EnvSecretVaultProviderTest {
 				"enabled", true
 			).put(
 				"envVariablePrefix", "LIFERAY_SECRET_"
+			).put(
+				"priority", 20
 			).put(
 				"providerId", "env"
 			).build());

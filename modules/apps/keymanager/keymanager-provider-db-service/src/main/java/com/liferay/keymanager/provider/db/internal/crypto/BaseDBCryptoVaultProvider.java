@@ -356,6 +356,11 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	@Override
+	public int getPriority() {
+		return _priority;
+	}
+
+	@Override
 	public boolean isAllowedCompany(long companyId) {
 		if (!_enabled) {
 			return false;
@@ -400,6 +405,7 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 					DBSystemCryptoVaultProviderConfiguration.class, properties);
 
 			_enabled = configuration.enabled();
+			_priority = configuration.priority();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
 			_masterKeyReference = configuration.masterKeyReference();
 			_providerId = configuration.providerId();
@@ -411,6 +417,7 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 					properties);
 
 			_enabled = true;
+			_priority = configuration.priority();
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
 			_masterKeyReference = configuration.masterKeyReference();
@@ -558,6 +565,7 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 	private volatile long _companyId;
 	private volatile boolean _enabled;
+	private volatile int _priority;
 		
 	@Reference
 	protected CompanyLocalService _companyLocalService;
