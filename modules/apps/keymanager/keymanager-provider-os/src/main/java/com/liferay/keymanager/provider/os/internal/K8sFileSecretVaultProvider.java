@@ -46,7 +46,7 @@ public class K8sFileSecretVaultProvider
 	public void deleteSecret(long companyId, String identifier)
 		throws SecretManagerException {
 
-		File file = new File(_secretsDirectory, identifier);
+		File file = _getFile(identifier);
 
 		if (file.exists()) {
 			file.delete();
@@ -57,7 +57,7 @@ public class K8sFileSecretVaultProvider
 	public SecureSecret getSecret(long companyId, String identifier)
 		throws SecretManagerException {
 
-		File file = new File(_secretsDirectory, identifier);
+		File file = _getFile(identifier);
 
 		if (!file.exists()) {
 			return null;
@@ -118,7 +118,7 @@ public class K8sFileSecretVaultProvider
 
 		KeyReference keyReference = secureSecret.getKeyReference();
 
-		File file = new File(_secretsDirectory, keyReference.getIdentifier());
+		File file = _getFile(keyReference.getIdentifier());
 
 		try {
 			FileUtil.write(file, secureSecret.getBytes());
@@ -142,6 +142,16 @@ public class K8sFileSecretVaultProvider
 		_secretsDirectory =
 			fileSecretVaultProviderConfiguration.secretsDirectory();
 		_providerId = fileSecretVaultProviderConfiguration.providerId();
+	}
+
+	private File _getFile(String identifier) throws SecretManagerException {
+		if (Validator.isNull(identifier) || identifier.contains("..") ||
+			identifier.contains("/") || identifier.contains("\\")) {
+
+			throw new SecretManagerException("Invalid identifier: " + identifier);
+		}
+
+		return new File(_secretsDirectory, identifier);
 	}
 
 	private volatile boolean _enabled;

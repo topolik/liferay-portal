@@ -230,6 +230,10 @@ public class SecretManagerImpl implements SecretManager {
 			SecretVaultProvider secretVaultProvider =
 				serviceTrackerMap.getService(providerId);
 
+			if (secretVaultProvider == null) {
+				continue;
+			}
+
 			int priority = secretVaultProvider.getPriority();
 
 			List<String> providerIds = providersTreeMap.computeIfAbsent(

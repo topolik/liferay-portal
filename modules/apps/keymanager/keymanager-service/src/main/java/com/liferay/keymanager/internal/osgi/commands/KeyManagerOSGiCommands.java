@@ -186,7 +186,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 		try (SecureSecret secureSecret = _secretManager.getSecret(
 				companyId, _parseKeyReference(keyReferenceString))) {
 
-			return new String(secureSecret.getBytes());
+			if (secureSecret == null) {
+				return "Secret not found";
+			}
+
+			byte[] bytes = secureSecret.getBytes();
+
+			return StringBundler.concat(
+				"Secret length: ", bytes.length, " bytes (Value is masked)");
 		}
 		catch (Exception e) {
 			return "Error: " + e.getMessage();

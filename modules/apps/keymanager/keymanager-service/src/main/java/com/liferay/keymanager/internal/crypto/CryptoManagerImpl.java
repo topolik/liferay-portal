@@ -422,6 +422,10 @@ public class CryptoManagerImpl implements CryptoManager {
 			CryptoVaultProvider cryptoVaultProvider =
 				_serviceTrackerMap.getService(providerId);
 
+			if (cryptoVaultProvider == null) {
+				continue;
+			}
+
 			int priority = cryptoVaultProvider.getPriority();
 
 			List<String> providerIds = providersTreeMap.computeIfAbsent(

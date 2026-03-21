@@ -5,6 +5,7 @@
 
 package com.liferay.keymanager.provider.os.internal;
 
+import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
@@ -87,12 +88,12 @@ public class K8sFileSecretVaultProviderTest {
 		Assert.assertNull(_provider.getSecret(0L, "non-existent-secret"));
 	}
 
-	@Test
+	@Test(expected = SecretManagerException.class)
 	public void testGetSecretPathTraversal() throws Exception {
 
 		// Attempt to read a file outside the secrets directory (security check)
 
-		Assert.assertNull(_provider.getSecret(0L, "../outside-secret"));
+		_provider.getSecret(0L, "../outside-secret");
 	}
 
 	@Rule

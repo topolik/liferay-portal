@@ -13,6 +13,7 @@ import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +49,10 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 
 	@Override
 	public List<String> getSecretIdentifiers(long companyId) {
+		if (companyId != 0) {
+			return Collections.emptyList();
+		}
+
 		return new ArrayList(_envKeysMap.keySet());
 	}
 
@@ -85,12 +90,12 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 				_envKeysMap.put(key.toLowerCase(), key);
 			}
 			else {
-				String lowerCasePrefix = envVariablePrefix.toLowerCase();
 				String lowerCaseKey = key.toLowerCase();
-				
+				String lowerCasePrefix = envVariablePrefix.toLowerCase();
+
 				if (lowerCaseKey.startsWith(lowerCasePrefix)) {
 					_envKeysMap.put(
-						lowerCaseKey.substring(envVariablePrefix.length()), 
+						lowerCaseKey.substring(lowerCasePrefix.length()), 
 						key);
 				}
 			}

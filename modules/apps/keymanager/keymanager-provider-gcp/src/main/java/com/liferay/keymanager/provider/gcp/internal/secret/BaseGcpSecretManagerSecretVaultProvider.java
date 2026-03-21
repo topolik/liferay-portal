@@ -163,6 +163,10 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
+		if (!_enabled) {
+			return false;
+		}
+
 		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
 		}
@@ -300,6 +304,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 					GcpSecretManagerSystemSecretVaultProviderConfiguration.class,
 					properties);
 
+			_enabled = configuration.enabled();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
 			_priority = configuration.priority();
 			_providerId = configuration.providerId();
@@ -319,6 +324,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 					GcpSecretManagerCompanySecretVaultProviderConfiguration.class,
 					properties);
 
+			_enabled = true;
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
 			_priority = configuration.priority();
@@ -393,6 +399,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 	protected SecretManager _secretManager;
 
 	private volatile long _companyId;
+	private volatile boolean _enabled;
 	private volatile int _priority;
 	protected GcpClientManager<SecretManagerServiceClient> _gcpClientManager;
 	private volatile String _kmsKeyName;

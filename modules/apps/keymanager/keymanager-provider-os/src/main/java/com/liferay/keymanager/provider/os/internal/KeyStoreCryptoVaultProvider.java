@@ -20,9 +20,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+import java.nio.ByteBuffer;
+
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
+import java.security.spec.AlgorithmParameterSpec;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +37,8 @@ import java.util.Map;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
@@ -72,6 +78,25 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 				if (key == null) {
 					throw new CryptoManagerException(
 						"Key not found: " + identifier);
+				}
+
+				if (key instanceof SecretKey) {
+					ByteBuffer byteBuffer = ByteBuffer.wrap(ciphertext);
+
+					byte[] iv = new byte[12];
+
+					byteBuffer.get(iv);
+
+					byte[] actualCiphertext = new byte[byteBuffer.remaining()];
+
+					byteBuffer.get(actualCiphertext);
+
+					Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+					cipher.init(
+						Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
+
+					return cipher.doFinal(actualCiphertext);
 				}
 
 				Cipher cipher = Cipher.getInstance(key.getAlgorithm());
@@ -149,6 +174,27 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 				if (key == null) {
 					throw new CryptoManagerException(
 						"Key not found: " + identifier);
+				}
+
+				if (key instanceof SecretKey) {
+					byte[] iv = new byte[12];
+
+					_secureRandom.nextBytes(iv);
+
+					Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+
+					cipher.init(
+						Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
+
+					byte[] ciphertext = cipher.doFinal(plaintext);
+
+					ByteBuffer byteBuffer = ByteBuffer.allocate(
+						iv.length + ciphertext.length);
+
+					byteBuffer.put(iv);
+					byteBuffer.put(ciphertext);
+
+					return byteBuffer.array();
 				}
 
 				Cipher cipher = Cipher.getInstance(key.getAlgorithm());
@@ -463,6 +509,8 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 	private volatile String _keyStoreType;
 	private volatile String _keystorePasswordReference;
 	private volatile String _providerId;
+
+	private final SecureRandom _secureRandom = new SecureRandom();
 
 	protected void setSecretManager(SecretManager secretManager) {
 		_secretManager = secretManager;

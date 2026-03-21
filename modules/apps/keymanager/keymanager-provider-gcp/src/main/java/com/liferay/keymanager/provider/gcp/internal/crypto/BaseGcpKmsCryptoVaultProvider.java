@@ -315,6 +315,10 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
+		if (!_enabled) {
+			return false;
+		}
+
 		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
 		}
@@ -391,6 +395,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 					GcpKmsSystemCryptoVaultProviderConfiguration.class,
 					properties);
 
+			_enabled = configuration.enabled();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
 			_priority = configuration.priority();
 			_providerId = configuration.providerId();
@@ -411,6 +416,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 					GcpKmsCompanyCryptoVaultProviderConfiguration.class,
 					properties);
 
+			_enabled = true;
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
 			_priority = configuration.priority();
@@ -485,6 +491,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 	}
 
 	private volatile long _companyId;
+	private volatile boolean _enabled;
 	private volatile int _priority;
 
 	@Reference

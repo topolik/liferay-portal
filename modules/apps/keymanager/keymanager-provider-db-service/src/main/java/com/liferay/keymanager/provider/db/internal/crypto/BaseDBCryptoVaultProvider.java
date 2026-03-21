@@ -86,6 +86,12 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 					cipherSpec);
 
 				int ivSize = GetterUtil.getInteger(cipherSpecMap.get("ivSize"));
+
+				if (ivSize <= 0) {
+					throw new CryptoManagerException(
+						"ivSize must be specified and greater than 0 for SECRET keys");
+				}
+
 				int gcmTag = GetterUtil.getInteger(cipherSpecMap.get("gcmTag"));
 
 				ByteBuffer byteBuffer = ByteBuffer.wrap(ciphertext);
@@ -163,6 +169,12 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 				int ivSize = GetterUtil.getInteger(
 					configurationMap.get("ivSize"));
+
+				if (ivSize <= 0) {
+					throw new CryptoManagerException(
+						"ivSize must be specified and greater than 0 for SECRET keys");
+				}
+
 				int gcmTag = GetterUtil.getInteger(
 					configurationMap.get("gcmTag"));
 
