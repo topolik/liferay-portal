@@ -145,13 +145,29 @@ public class K8sFileSecretVaultProvider
 	}
 
 	private File _getFile(String identifier) throws SecretManagerException {
-		if (Validator.isNull(identifier) || identifier.contains("..") ||
-			identifier.contains("/") || identifier.contains("\\")) {
-
-			throw new SecretManagerException("Invalid identifier: " + identifier);
+		if (Validator.isNull(identifier)) {
+			throw new SecretManagerException("Identifier is null");
 		}
 
-		return new File(_secretsDirectory, identifier);
+		try {
+			File secretsDirectory = new File(_secretsDirectory);
+
+			File file = new File(secretsDirectory, identifier);
+
+			String canonicalPath = file.getCanonicalPath();
+
+			if (!canonicalPath.startsWith(secretsDirectory.getCanonicalPath())) {
+				throw new SecretManagerException(
+					"Invalid identifier: " + identifier);
+			}
+
+			return file;
+		}
+		catch (IOException ioException) {
+			throw new SecretManagerException(
+				"Unable to resolve file path for identifier: " + identifier,
+				ioException);
+		}
 	}
 
 	private volatile boolean _enabled;
