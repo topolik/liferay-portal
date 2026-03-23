@@ -64,3 +64,9 @@ Liferay's `SourceFormatter` natively enforces the use of the internal wrapper vi
 ```
 
 This global exclusion ensures the Key Manager generates cryptographic material (like IVs and DEKs) via native Java standard libraries, preserving a clean and verifiable audit trail while keeping all other Liferay source code formatting rules active.
+
+---
+
+## Future Enhancements / TODOs
+
+*   **Key Rotation Lifecycle**: Implement lifecycle management for cryptographic keys. This includes periodic rotation of Master Keys (KEKs) and the corresponding re-wrapping of Data Encryption Keys (DEKs) to comply with strict security policies that require key rotation after a certain number of days.
