@@ -257,6 +257,15 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 					if (secretKeyEncoded != null) {
 						java.util.Arrays.fill(secretKeyEncoded, (byte)0);
 					}
+
+					if (!secretKey.isDestroyed()) {
+						try {
+							secretKey.destroy();
+						}
+						catch (Exception exception) {
+							// Ignore
+						}
+					}
 				}
 
 				return identifier;
@@ -363,13 +372,25 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 				SecretKey secretKey = new SecretKeySpec(
 					rawKeyMaterial, _parseAlgorithm(algorithmSpec));
 
-				KeyStore keyStore = _getKeyStore(password);
+				try {
+					KeyStore keyStore = _getKeyStore(password);
 
-				keyStore.setKeyEntry(identifier, secretKey, password, null);
+					keyStore.setKeyEntry(identifier, secretKey, password, null);
 
-				_saveKeyStore(keyStore, password);
+					_saveKeyStore(keyStore, password);
 
-				return identifier;
+					return identifier;
+				}
+				finally {
+					if (!secretKey.isDestroyed()) {
+						try {
+							secretKey.destroy();
+						}
+						catch (Exception exception) {
+							// Ignore
+						}
+					}
+				}
 			}
 		}
 		catch (Exception exception) {

@@ -160,7 +160,10 @@ public class K8sFileSecretVaultProvider
 
 			String canonicalPath = file.getCanonicalPath();
 
-			if (!canonicalPath.startsWith(secretsDirectory.getCanonicalPath())) {
+			if (!canonicalPath.equals(secretsDirectory.getCanonicalPath()) &&
+				!canonicalPath.startsWith(
+					secretsDirectory.getCanonicalPath() + File.separator)) {
+
 				throw new SecretManagerException(
 					"Invalid identifier: " + identifier);
 			}

@@ -313,6 +313,15 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 				if (secretKeyEncoded != null) {
 					Arrays.fill(secretKeyEncoded, (byte)0);
 				}
+
+				if (!secretKey.isDestroyed()) {
+					try {
+						secretKey.destroy();
+					}
+					catch (Exception exception) {
+						// Ignore
+					}
+				}
 			}
 
 			return identifier;
@@ -376,16 +385,28 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 			SecretKey secretKey = new SecretKeySpec(rawKeyMaterial, algorithm);
 
-			byte[] wrappedKeyBytes = _cryptoManager.wrap(
-				companyId, KeyReference.fromString(_masterKeyReference),
-				secretKey);
+			try {
+				byte[] wrappedKeyBytes = _cryptoManager.wrap(
+					companyId, KeyReference.fromString(_masterKeyReference),
+					secretKey);
 
-			_saveKeyEntry(
-				companyId, identifier, KeyType.SECRET,
-				secretKey.getAlgorithm(), wrappedKeyBytes, _masterKeyReference,
-				algorithmSpec);
+				_saveKeyEntry(
+					companyId, identifier, KeyType.SECRET,
+					secretKey.getAlgorithm(), wrappedKeyBytes, _masterKeyReference,
+					algorithmSpec);
 
-			return identifier;
+				return identifier;
+			}
+			finally {
+				if (!secretKey.isDestroyed()) {
+					try {
+						secretKey.destroy();
+					}
+					catch (Exception exception) {
+						// Ignore
+					}
+				}
+			}
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
