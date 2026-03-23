@@ -1,72 +1,49 @@
 # Liferay DXP Key Manager
 
-The Key Manager is a centralized security foundation for Liferay DXP, designed for strict **FIPS 140-2/3 compliance** and FedRAMP readiness. It establishes a fundamental boundary between **Secrets** (opaque credentials) and **Cryptographic Keys** (material used for functional crypto).
+The Key Manager is a centralized security foundation for Liferay DXP, designed for strict **FIPS 140-2/3 compliance** and FedRAMP readiness. It establishes a fundamental boundary between **Secrets** (opaque values like API keys) and **Keys** (cryptographic primitives like AES or RSA).
 
-## Architecture Overview
+## Core Architecture: Profile-Driven Routing
 
-### 1. Dual-Purpose Design
-The system is divided into two distinct logical managers:
-*   **Secret Manager**: Handles binary blobs like passwords and API tokens. It uses **Envelope Encryption** to ensure that secrets are never stored in plaintext in the database.
-*   **Crypto Manager**: Handles functional keys (AES, RSA). It supports **Opaque Operations**, meaning sensitive private material (like a Master Key in GCP KMS) never needs to enter the application's memory.
+The Key Manager uses a **Profile-Driven Architecture** to manage cryptographic topologies. Instead of relying on implicit provider priorities, all routing is explicitly defined by the active **Key Manager Profile**.
 
-### 2. Multi-Layered Security (Envelope Encryption)
-1.  **Material**: The actual secret or key.
-2.  **DEK (Data Encryption Key)**: A unique, transient key that encrypts the material.
-3.  **KEK (Key Encryption Key / Master Key)**: A system-wide key that encrypts the DEK. The KEK can be stored in a local File KeyStore (FIPS Level 1) or a Cloud HSM (FIPS Level 3).
+### Active Profile
+The active profile is controlled via the **Key Manager Global Configuration**.
+- **custom**: Allows manual selection of providers for each role.
+- **local-dev**: Automatically provisions a local PKCS12 keystore (~/.liferay/keymanager/local-master.p12) and configures the system to use it.
+- **gcp**: Automatically infers GCP Project ID and configures GCP KMS and Secret Manager providers.
 
-### 3. Tenant Isolation
-Every secret and key is strictly isolated by Liferay's **`companyId`**. Cross-company access is prevented at both the configuration and persistence layers.
+### Provider Roles
+Each profile defines four primary roles for cryptographic operations:
+1. **System KEK (Key Encryption Key)**: The root key used to wrap System Data Encryption Keys.
+2. **System DEK (Data Encryption Key)**: The key used for general system-level encryption (e.g., database-backed secrets).
+3. **Company KEK**: The root key used to wrap Data Encryption Keys for a specific virtual instance.
+4. **Company DEK**: The key used for instance-specific encryption.
 
----
+## FIPS 140-2/3 Compliance
 
-## Module Map
+When `LIFERAY_KEYMANAGER_FIPS_ENFORCED=true` is set in the environment:
+- **Strict Mode**: The system mandates that `BCFIPS` is the first security provider.
+- **Continuous Verification**: A heartbeat check is performed before every cryptographic operation.
+- **Zeroization**: All intermediate plaintext key material is explicitly zeroed out in memory using `Arrays.fill(..., (byte)0)` immediately after use.
+- **Configuration Guard**: An Omni-Listener intercepts all provider configurations and rejects non-compliant settings (e.g., non-AEAD modes or SOFTWARE protection in GCP KMS).
 
-| Module | Role |
-| :--- | :--- |
-| `keymanager-api` | Public interfaces for Liferay developers. |
-| `keymanager-spi` | Extension points for adding new backends. |
-| `keymanager-service` | Core dispatcher and manager implementations. |
-| `keymanager-provider-db` | Multitenant storage for secrets and keys. |
-| `keymanager-provider-os` | Integration with local KeyStores, K8s, and Env. |
-| `keymanager-provider-gcp` | Integration with Google Cloud KMS and Secret Manager. |
+## Diagnostic Engine
 
----
+The Key Manager includes a built-in diagnostic engine for troubleshooting.
 
-## Quick Start for Developers
+### Gogo Shell Commands
+- `keymanager:status`: Performs a full sweep of the Key Manager state, including FIPS status, active profile, and individual diagnostic tasks.
 
-### Opaque Secret Retrieval
-```java
-try (SecureSecret secret = _secretManager.getSecret(keyRef)) {
-    // use secret.getBytes()
-} // memory is zeroed out automatically
-```
+## Quick Start (Local Development)
 
-### Direct Data Encryption
-```java
-// No knowledge of algorithms or IVs required
-byte[] encrypted = _cryptoManager.encrypt(keyRef, plaintext);
-```
+1. Set the following environment variable:
+   `export LIFERAY_KEYMANAGER_FIPS_ENFORCED=false` (or `true` if BCFIPS is configured).
+2. Start Liferay DXP.
+3. In System Settings, navigate to **Key Manager > Global Configuration** and set **Active Profile ID** to `local-dev`.
+4. The system will automatically generate a master key and configure the providers.
 
-### Key Reference Syntax
-*   **Secret**: `${secretRef:[providerId]:[alias]}`
-*   **Key**: `${keyRef:[providerId]:[alias]}`
+## Key Reference Syntax
 
----
-
-## FIPS/FedRAMP Compliance Notes
-
-To meet strict FIPS and FedRAMP compliance auditing requirements, the Key Manager modules strictly use `java.security.SecureRandom` directly rather than relying on Liferay's custom wrapper (`com.liferay.portal.kernel.security.SecureRandom`). 
-
-Liferay's `SourceFormatter` natively enforces the use of the internal wrapper via the `IllegalImportsCheck`. Because local `source-formatter.properties` exclusions do not support rule-level suppression (only full file exclusions, which degrades code quality by disabling formatting), this enforcement has been explicitly bypassed in the workspace's root `source-formatter-suppressions.xml`:
-
-```xml
-<suppress checks="IllegalImportsCheck" files="modules/apps/keymanager/.*" />
-```
-
-This global exclusion ensures the Key Manager generates cryptographic material (like IVs and DEKs) via native Java standard libraries, preserving a clean and verifiable audit trail while keeping all other Liferay source code formatting rules active.
-
----
-
-## Future Enhancements / TODOs
-
-*   **Key Rotation Lifecycle**: Implement lifecycle management for cryptographic keys. This includes periodic rotation of Master Keys (KEKs) and the corresponding re-wrapping of Data Encryption Keys (DEKs) to comply with strict security policies that require key rotation after a certain number of days.
+- **Crypto Key**: `${keyRef:[providerId]:[alias]}`
+- **Secret**: `${secretRef:[providerId]:[alias]}`
+- **Auto-Routing**: `${keyRef:*:my-key}` (routes to the provider defined in the active profile).

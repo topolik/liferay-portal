@@ -27,6 +27,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.db.internal.configuration.DBSystemSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	property = "keymanager.provider.id=db-system-secret",
 	service = {
 		SecretVaultProvider.class, SecretVaultReader.class,
 		SecretVaultWriter.class

@@ -10,8 +10,6 @@ package com.liferay.keymanager.spi.secret;
  */
 public interface SecretVaultProvider {
 
-	public int getPriority();
-
 	public boolean isAllowedCompany(long companyId);
 
 }

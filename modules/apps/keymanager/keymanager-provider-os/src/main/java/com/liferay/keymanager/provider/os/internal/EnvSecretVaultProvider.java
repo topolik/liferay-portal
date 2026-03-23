@@ -29,6 +29,7 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
+	property = "keymanager.provider.id=env-secret",
 	service = SecretVaultReader.class
 )
 public class EnvSecretVaultProvider implements SecretVaultReader {
@@ -42,9 +43,20 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 			return null;
 		}
 
-		return new SecureSecret(
-			new KeyReference(KeyReference.Type.SECRET, _providerId, identifier),
-			value.getBytes());
+		byte[] bytes = value.getBytes();
+
+		try {
+			return new SecureSecret(
+				new KeyReference(
+					KeyReference.Type.SECRET, KeyReference.ANY_PROVIDER,
+					identifier),
+				bytes);
+		}
+		finally {
+			if (bytes != null) {
+				java.util.Arrays.fill(bytes, (byte)0);
+			}
+		}
 	}
 
 	@Override
@@ -54,11 +66,6 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 		}
 
 		return new ArrayList(_envKeysMap.keySet());
-	}
-
-	@Override
-	public int getPriority() {
-		return _priority;
 	}
 
 	@Override
@@ -78,13 +85,12 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 				EnvSecretVaultProviderConfiguration.class, properties);
 
 		_enabled = envSecretVaultProviderConfiguration.enabled();
-		_priority = envSecretVaultProviderConfiguration.priority();
 
 		String envVariablePrefix =
 			envSecretVaultProviderConfiguration.envVariablePrefix();
 
 		_envKeysMap = new ConcurrentHashMap<>();
-		
+
 		for (String key : getSystemEnv().keySet()) {
 			if (Validator.isNull(envVariablePrefix)) {
 				_envKeysMap.put(key.toLowerCase(), key);
@@ -95,13 +101,11 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 
 				if (lowerCaseKey.startsWith(lowerCasePrefix)) {
 					_envKeysMap.put(
-						lowerCaseKey.substring(lowerCasePrefix.length()), 
+						lowerCaseKey.substring(lowerCasePrefix.length()),
 						key);
 				}
 			}
 		}
-
-		_providerId = envSecretVaultProviderConfiguration.providerId();
 	}
 
 	protected Map<String, String> getSystemEnv() {
@@ -113,8 +117,6 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 	}
 
 	private volatile boolean _enabled;
-	private volatile int _priority;
-	private volatile String _providerId;
 	private volatile Map<String, String> _envKeysMap;
 
 }

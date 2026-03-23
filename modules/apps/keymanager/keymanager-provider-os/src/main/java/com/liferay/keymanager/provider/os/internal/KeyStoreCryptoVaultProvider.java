@@ -53,6 +53,7 @@ import org.osgi.service.component.annotations.Reference;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.KeyStoreCryptoVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
+	property = "keymanager.provider.id=keystore-crypto",
 	service = CryptoVaultProvider.class
 )
 public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
@@ -243,11 +244,20 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 
 				SecretKey secretKey = keyGenerator.generateKey();
 
-				KeyStore keyStore = _getKeyStore(password);
+				byte[] secretKeyEncoded = secretKey.getEncoded();
 
-				keyStore.setKeyEntry(identifier, secretKey, password, null);
+				try {
+					KeyStore keyStore = _getKeyStore(password);
 
-				_saveKeyStore(keyStore, password);
+					keyStore.setKeyEntry(identifier, secretKey, password, null);
+
+					_saveKeyStore(keyStore, password);
+				}
+				finally {
+					if (secretKeyEncoded != null) {
+						java.util.Arrays.fill(secretKeyEncoded, (byte)0);
+					}
+				}
 
 				return identifier;
 			}
@@ -324,19 +334,14 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 				return new CryptoKey(
 					KeyReference.fromString(
 						StringBundler.concat(
-							"${keyRef:", _providerId, ":", identifier, "}")),
-					algorithm, algorithm, createDate.getTime());
+							"${keyRef:", KeyReference.ANY_PROVIDER, ":",
+							identifier, "}")),					algorithm, algorithm, createDate.getTime());
 			}
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
 				"Unable to get key metadata for: " + identifier, exception);
 		}
-	}
-
-	@Override
-	public int getPriority() {
-		return _priority;
 	}
 
 	@Override
@@ -393,14 +398,72 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 			String wrappedKeyAlgorithm, int wrappedKeyCipherType)
 		throws CryptoManagerException {
 
-		throw new CryptoManagerException("Operation not supported");
+		try {
+			try (SecureSecret secureSecret = _getKeystorePasswordSecret(
+					companyId)) {
+
+				char[] password = null;
+
+				if (secureSecret != null) {
+					password = secureSecret.getChars();
+				}
+
+				KeyStore keyStore = _getKeyStore(password);
+
+				Key wrappingKey = keyStore.getKey(identifier, password);
+
+				if (wrappingKey == null) {
+					throw new CryptoManagerException(
+						"Wrapping key not found: " + identifier);
+				}
+
+				Cipher cipher = Cipher.getInstance(wrappingKey.getAlgorithm());
+
+				cipher.init(Cipher.UNWRAP_MODE, wrappingKey);
+
+				return cipher.unwrap(
+					wrappedKeyBytes, wrappedKeyAlgorithm, wrappedKeyCipherType);
+			}
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException(
+				"Unable to unwrap key", exception);
+		}
 	}
 
 	@Override
 	public byte[] wrap(long companyId, String identifier, Key keyToWrap)
 		throws CryptoManagerException {
 
-		throw new CryptoManagerException("Operation not supported");
+		try {
+			try (SecureSecret secureSecret = _getKeystorePasswordSecret(
+					companyId)) {
+
+				char[] password = null;
+
+				if (secureSecret != null) {
+					password = secureSecret.getChars();
+				}
+
+				KeyStore keyStore = _getKeyStore(password);
+
+				Key wrappingKey = keyStore.getKey(identifier, password);
+
+				if (wrappingKey == null) {
+					throw new CryptoManagerException(
+						"Wrapping key not found: " + identifier);
+				}
+
+				Cipher cipher = Cipher.getInstance(wrappingKey.getAlgorithm());
+
+				cipher.init(Cipher.WRAP_MODE, wrappingKey);
+
+				return cipher.wrap(keyToWrap);
+			}
+		}
+		catch (Exception exception) {
+			throw new CryptoManagerException("Unable to wrap key", exception);
+		}
 	}
 
 	@Activate
@@ -413,7 +476,6 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 					properties);
 
 		_enabled = keyStoreCryptoVaultProviderConfiguration.enabled();
-		_priority = keyStoreCryptoVaultProviderConfiguration.priority();
 
 		_keyStorePath =
 			keyStoreCryptoVaultProviderConfiguration.keystorePath();
@@ -421,8 +483,6 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 			keyStoreCryptoVaultProviderConfiguration.keystoreType();
 		_keystorePasswordReference =
 			keyStoreCryptoVaultProviderConfiguration.keystorePassword();
-		_providerId =
-			keyStoreCryptoVaultProviderConfiguration.providerId();
 	}
 
 	private KeyStore _getKeyStore(char[] password) throws Exception {
@@ -504,11 +564,9 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 	}
 
 	private volatile boolean _enabled;
-	private volatile int _priority;
 	private volatile String _keyStorePath;
 	private volatile String _keyStoreType;
 	private volatile String _keystorePasswordReference;
-	private volatile String _providerId;
 
 	private final SecureRandom _secureRandom = new SecureRandom();
 

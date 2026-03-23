@@ -30,13 +30,4 @@ public interface EnvSecretVaultProviderConfiguration {
 	)
 	public String envVariablePrefix();
 
-	@Meta.AD(
-		deflt = "env", description = "env-provider-id-description",
-		name = "provider-id", required = true
-	)
-	public String providerId();
-
-	@Meta.AD(deflt = "20", name = "priority", required = false)
-	public int priority();
-
 }

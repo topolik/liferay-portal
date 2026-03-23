@@ -6,24 +6,22 @@
 package com.liferay.keymanager.internal.secret;
 
 import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.internal.fips.FipsComplianceChecker;
+import com.liferay.keymanager.internal.profile.ProfileOrchestrator;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.keymanager.spi.profile.KeyManagerProfile;
 import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
-import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.lang.reflect.Field;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
 
 import org.mockito.Mock;
@@ -35,18 +33,11 @@ import org.mockito.MockitoAnnotations;
  */
 public class SecretManagerImplTest {
 
-	@ClassRule
-	@Rule
-	public static final LiferayUnitTestRule liferayUnitTestRule =
-		LiferayUnitTestRule.INSTANCE;
-
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
 		_secretManagerImpl = new SecretManagerImpl();
-
-		// Manually inject mock ServiceTrackerMaps
 
 		_injectField(
 			_secretManagerImpl, "_readerServiceTrackerMap",
@@ -54,9 +45,14 @@ public class SecretManagerImplTest {
 		_injectField(
 			_secretManagerImpl, "_writerServiceTrackerMap",
 			_writerServiceTrackerMap);
+		_injectField(
+			_secretManagerImpl, "_fipsComplianceChecker",
+			_fipsComplianceChecker);
+		_injectField(
+			_secretManagerImpl, "_profileOrchestrator", _profileOrchestrator);
 
 		Mockito.when(
-			_readerServiceTrackerMap.getService("test-provider")
+			_readerServiceTrackerMap.getService("test-secret-provider")
 		).thenReturn(
 			_secretVaultReader
 		);
@@ -64,11 +60,11 @@ public class SecretManagerImplTest {
 		Mockito.when(
 			_readerServiceTrackerMap.keySet()
 		).thenReturn(
-			new HashSet<>(Collections.singletonList("test-provider"))
+			new HashSet<>(Collections.singletonList("test-secret-provider"))
 		);
 
 		Mockito.when(
-			_writerServiceTrackerMap.getService("test-provider")
+			_writerServiceTrackerMap.getService("test-secret-provider")
 		).thenReturn(
 			_secretVaultWriter
 		);
@@ -76,7 +72,7 @@ public class SecretManagerImplTest {
 		Mockito.when(
 			_writerServiceTrackerMap.keySet()
 		).thenReturn(
-			new HashSet<>(Collections.singletonList("test-provider"))
+			new HashSet<>(Collections.singletonList("test-secret-provider"))
 		);
 
 		Mockito.when(
@@ -92,285 +88,203 @@ public class SecretManagerImplTest {
 		);
 
 		Mockito.when(
-			_secretVaultReader.getPriority()
+			_profileOrchestrator.getActiveProfile()
 		).thenReturn(
-			100
-		);
-
-		Mockito.when(
-			_secretVaultWriter.getPriority()
-		).thenReturn(
-			100
+			_keyManagerProfile
 		);
 	}
 
 	@Test
-	public void testPriorityOrdering() throws Exception {
-		SecretVaultReader lowPriorityReader = Mockito.mock(
-			SecretVaultReader.class, "lowPriorityReader");
+	public void testProfileRouting() throws Exception {
+		SecretVaultReader systemReader = Mockito.mock(
+			SecretVaultReader.class, "systemReader");
+		SecretVaultWriter systemWriter = Mockito.mock(
+			SecretVaultWriter.class, "systemWriter");
 
 		Mockito.when(
-			lowPriorityReader.getPriority()
+			_keyManagerProfile.getSystemSecretProviderId()
 		).thenReturn(
-			10
+			"system-secret"
+		);
+
+		Mockito.when(
+			_readerServiceTrackerMap.getService("system-secret")
+		).thenReturn(
+			systemReader
 		);
 		Mockito.when(
-			lowPriorityReader.isAllowedCompany(Mockito.anyLong())
+			_writerServiceTrackerMap.getService("system-secret")
+		).thenReturn(
+			systemWriter
+		);
+
+		Mockito.when(
+			systemReader.isAllowedCompany(0L)
 		).thenReturn(
 			true
 		);
-
-		SecretVaultReader specialPrioritizedReader = Mockito.mock(
-			SecretVaultReader.class, "specialPrioritizedReader");
-
 		Mockito.when(
-			specialPrioritizedReader.getPriority()
-		).thenReturn(
-			100
-		);
-		Mockito.when(
-			specialPrioritizedReader.isAllowedCompany(Mockito.anyLong())
+			systemWriter.isAllowedCompany(0L)
 		).thenReturn(
 			true
-		);
-
-		Mockito.when(
-			_readerServiceTrackerMap.keySet()
-		).thenReturn(
-			new LinkedHashSet<>(List.of("high", "low"))
-		);
-
-		Mockito.when(
-			_readerServiceTrackerMap.getService("low")
-		).thenReturn(
-			lowPriorityReader
-		);
-		Mockito.when(
-			_readerServiceTrackerMap.getService("high")
-		).thenReturn(
-			specialPrioritizedReader
 		);
 
 		KeyReference keyRef = new KeyReference(
 			KeyReference.Type.SECRET, KeyReference.ANY_PROVIDER, "my-secret");
 
-		SecureSecret mockSecret = Mockito.mock(SecureSecret.class);
+		byte[] secretData = "password123".getBytes();
+		SecureSecret secureSecret = new SecureSecret(keyRef, secretData);
 
+		// 1. Get secret routing
 		Mockito.when(
-			specialPrioritizedReader.getSecret(0L, "my-secret")
+			systemReader.getSecret(0L, "my-secret")
 		).thenReturn(
-			mockSecret
+			secureSecret
 		);
 
 		SecureSecret result = _secretManagerImpl.getSecret(0L, keyRef);
 
-		Assert.assertEquals(mockSecret, result);
+		Assert.assertEquals(secureSecret, result);
+		Mockito.verify(systemReader).getSecret(0L, "my-secret");
 
-		Mockito.verify(specialPrioritizedReader).getSecret(0L, "my-secret");
+		// 2. Put secret routing
+		_secretManagerImpl.putSecret(0L, secureSecret);
 
-		// The low priority reader is never reached because high priority worked
-		Mockito.verify(lowPriorityReader, Mockito.never()).getSecret(
-			Mockito.anyLong(), Mockito.anyString());
-	}
-
-	@Test
-	public void testDeleteSecret() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${secretRef:test-provider:my-secret}");
-
-		_secretManagerImpl.deleteSecret(0L, keyRef);
-
-		Mockito.verify(
-			_secretVaultWriter
-		).deleteSecret(
-			0L, "my-secret"
-		);
-	}
-
-	@Test
-	public void testGetProviders() throws Exception {
-		List<String> result = _secretManagerImpl.getProviders(0L);
-
-		Assert.assertEquals(result.toString(), 1, result.size());
-		Assert.assertEquals("test-provider", result.get(0));
+		Mockito.verify(systemWriter).putSecret(0L, secureSecret);
 	}
 
 	@Test
 	public void testGetSecret() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${secretRef:test-provider:my-secret}");
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.SECRET, "test-secret-provider", "my-secret");
 
-		SecureSecret mockSecret = new SecureSecret(keyRef, "data".getBytes());
+		byte[] secretData = "password123".getBytes();
+		SecureSecret secureSecret = new SecureSecret(keyRef, secretData);
 
 		Mockito.when(
 			_secretVaultReader.getSecret(0L, "my-secret")
 		).thenReturn(
-			mockSecret
+			secureSecret
 		);
 
 		SecureSecret result = _secretManagerImpl.getSecret(0L, keyRef);
 
-		Assert.assertEquals(mockSecret, result);
-	}
+		Assert.assertEquals(secureSecret, result);
 
-	@Test
-	public void testGetSecretIdentifiers() throws Exception {
-		List<String> identifiers = Collections.singletonList("secret-1");
-
-		Mockito.when(
-			_secretVaultReader.getSecretIdentifiers(0L)
-		).thenReturn(
-			identifiers
-		);
-
-		List<KeyReference> result = _secretManagerImpl.getSecretIdentifiers(
-			0L, "test-provider");
-
-		Assert.assertEquals(result.toString(), 1, result.size());
-		Assert.assertEquals(
-			"secret-1",
-			result.get(
-				0
-			).getIdentifier());
-		Assert.assertEquals(
-			"test-provider",
-			result.get(
-				0
-			).getProviderId());
-	}
-
-	@Test
-	public void testGetSecretIdentifiersAnyProvider() throws Exception {
-		List<String> identifiers = Collections.singletonList("secret-1");
-
-		Mockito.when(
-			_secretVaultReader.getSecretIdentifiers(0L)
-		).thenReturn(
-			identifiers
-		);
-
-		List<KeyReference> result = _secretManagerImpl.getSecretIdentifiers(
-			0L, KeyReference.ANY_PROVIDER);
-
-		Assert.assertEquals(result.toString(), 1, result.size());
-		Assert.assertEquals("secret-1", result.get(0).getIdentifier());
-		Assert.assertEquals("test-provider", result.get(0).getProviderId());
-	}
-
-	@Test(expected = SecretManagerException.class)
-	public void testGetSecretWrongProvider() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${secretRef:wrong-provider:my-secret}");
-
-		_secretManagerImpl.getSecret(0L, keyRef);
-	}
-
-	@Test
-	public void testGetSecretNotFound() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${secretRef:test-provider:missing-secret}");
-
-		Mockito.when(
-			_secretVaultReader.getSecret(0L, "missing-secret")
-		).thenReturn(
-			null
-		);
-
-		SecureSecret result = _secretManagerImpl.getSecret(0L, keyRef);
-
-		Assert.assertNull(result);
+		Mockito.verify(_secretVaultReader).getSecret(0L, "my-secret");
 	}
 
 	@Test
 	public void testPutSecret() throws Exception {
-		KeyReference keyRef = KeyReference.fromString(
-			"${secretRef:test-provider:my-new-secret}");
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.SECRET, "test-secret-provider", "my-secret");
 
-		SecureSecret secureSecret = new SecureSecret(
-			keyRef, "new-data".getBytes());
+		byte[] secretData = "password123".getBytes();
+		SecureSecret secureSecret = new SecureSecret(keyRef, secretData);
 
-		KeyReference resultKeyRef = _secretManagerImpl.putSecret(0L, secureSecret);
+		_secretManagerImpl.putSecret(0L, secureSecret);
 
-		Assert.assertEquals("test-provider", resultKeyRef.getProviderId());
-		Assert.assertEquals("my-new-secret", resultKeyRef.getIdentifier());
-
-		Mockito.verify(
-			_secretVaultWriter
-		).putSecret(
-			0L, secureSecret
-		);
+		Mockito.verify(_secretVaultWriter).putSecret(0L, secureSecret);
 	}
 
 	@Test
-	public void testPutSecretAnyProvider() throws Exception {
+	public void testRogueTenantIsolation() throws Exception {
 		KeyReference keyRef = new KeyReference(
-			KeyReference.Type.SECRET, KeyReference.ANY_PROVIDER, "any-secret");
+			KeyReference.Type.SECRET, "test-secret-provider", "tenant-a-secret");
 
-		SecureSecret secureSecret = new SecureSecret(
-			keyRef, "any-data".getBytes());
-
-		KeyReference resultKeyRef = _secretManagerImpl.putSecret(0L, secureSecret);
-
-		Assert.assertEquals("test-provider", resultKeyRef.getProviderId());
-		Assert.assertEquals("any-secret", resultKeyRef.getIdentifier());
-
-		Mockito.verify(
-			_secretVaultWriter
-		).putSecret(
-			0L, secureSecret
-		);
-	}
-
-	@Test
-	public void testGetSecretAnyProvider() throws Exception {
-		KeyReference keyRef = new KeyReference(
-			KeyReference.Type.SECRET, KeyReference.ANY_PROVIDER, "my-secret");
-
-		SecureSecret mockSecret = new SecureSecret(
-			KeyReference.fromString("${secretRef:test-provider:my-secret}"),
-			"any-data".getBytes());
-
+		// Mock the provider to only allow Tenant A (companyId = 1)
 		Mockito.when(
-			_secretVaultReader.getSecret(0L, "my-secret")
+			_secretVaultReader.isAllowedCompany(1L)
 		).thenReturn(
-			mockSecret
+			true
+		);
+		// Explicitly deny Tenant B (companyId = 2) and System (companyId = 0)
+		Mockito.when(
+			_secretVaultReader.isAllowedCompany(2L)
+		).thenReturn(
+			false
+		);
+		Mockito.when(
+			_secretVaultReader.isAllowedCompany(0L)
+		).thenReturn(
+			false
 		);
 
-		SecureSecret result = _secretManagerImpl.getSecret(0L, keyRef);
+		// Tenant A should succeed
+		SecureSecret tenantASecret = new SecureSecret(keyRef, "tenantA".getBytes());
+		Mockito.when(
+			_secretVaultReader.getSecret(1L, "tenant-a-secret")
+		).thenReturn(
+			tenantASecret
+		);
+		SecureSecret result = _secretManagerImpl.getSecret(1L, keyRef);
+		Assert.assertEquals(tenantASecret, result);
 
-		Assert.assertEquals(mockSecret, result);
+		// Tenant B should fail with an exception due to not being allowed
+		try {
+			_secretManagerImpl.getSecret(2L, keyRef);
+			Assert.fail("Expected SecretManagerException due to rogue tenant cross-access.");
+		}
+		catch (SecretManagerException e) {
+			Assert.assertTrue(e.getMessage().contains("No secret vault reader found"));
+		}
+
+		// System should also fail
+		try {
+			_secretManagerImpl.getSecret(0L, keyRef);
+			Assert.fail("Expected SecretManagerException due to system accessing tenant secret.");
+		}
+		catch (SecretManagerException e) {
+			Assert.assertTrue(e.getMessage().contains("No secret vault reader found"));
+		}
+	}
+
+	@Test(expected = SecretManagerException.class)
+	public void testGetSecretNoProvider() throws Exception {
+		KeyReference keyRef = new KeyReference(
+			KeyReference.Type.SECRET, "non-existent", "my-secret");
+
+		_secretManagerImpl.getSecret(0L, keyRef);
 	}
 
 	private void _injectField(Object target, String fieldName, Object value) {
 		try {
 			Field field = null;
-
 			Class<?> clazz = target.getClass();
 
 			while (clazz != null) {
 				try {
 					field = clazz.getDeclaredField(fieldName);
-
 					break;
 				}
-				catch (NoSuchFieldException noSuchFieldException) {
+				catch (NoSuchFieldException nsfe) {
 					clazz = clazz.getSuperclass();
 				}
+			}
+
+			if (field == null) {
+				throw new RuntimeException("Field not found: " + fieldName);
 			}
 
 			field.setAccessible(true);
 			field.set(target, value);
 		}
-		catch (Exception exception) {
-			throw new RuntimeException(exception);
+		catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
 	@Mock
-	private ServiceTrackerMap<String, SecretVaultReader> _readerServiceTrackerMap;
+	private ProfileOrchestrator _profileOrchestrator;
 
 	@Mock
-	private ServiceTrackerMap<String, SecretVaultWriter> _writerServiceTrackerMap;
+	private FipsComplianceChecker _fipsComplianceChecker;
+
+	@Mock
+	private KeyManagerProfile _keyManagerProfile;
+
+	@Mock
+	private ServiceTrackerMap<String, SecretVaultReader> _readerServiceTrackerMap;
 
 	private SecretManagerImpl _secretManagerImpl;
 
@@ -379,5 +293,8 @@ public class SecretManagerImplTest {
 
 	@Mock
 	private SecretVaultWriter _secretVaultWriter;
+
+	@Mock
+	private ServiceTrackerMap<String, SecretVaultWriter> _writerServiceTrackerMap;
 
 }

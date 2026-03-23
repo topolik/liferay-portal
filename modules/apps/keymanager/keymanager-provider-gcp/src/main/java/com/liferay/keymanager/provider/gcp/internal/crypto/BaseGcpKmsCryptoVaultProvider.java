@@ -27,6 +27,7 @@ import com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsSystemCr
 import com.liferay.keymanager.provider.gcp.internal.util.GcpClientManager;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
+import com.liferay.keymanager.util.GcpAliasUtil;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
@@ -277,8 +278,8 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 					return new CryptoKey(
 						KeyReference.fromString(
 							StringBundler.concat(
-								"${keyRef:", _providerId, ":", identifier,
-								"}")),
+								"${keyRef:", KeyReference.ANY_PROVIDER, ":",
+								identifier, "}")),
 						cryptoKey.getPurpose(
 						).name(),
 						cryptoKey.getVersionTemplate(
@@ -306,11 +307,6 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		}
 
 		throw new CryptoManagerException("Operation not supported");
-	}
-
-	@Override
-	public int getPriority() {
-		return _priority;
 	}
 
 	@Override
@@ -378,7 +374,16 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 		_checkPermission(companyId);
 
-		return encrypt(companyId, identifier, keyToWrap.getEncoded());
+		byte[] encoded = keyToWrap.getEncoded();
+
+		try {
+			return encrypt(companyId, identifier, encoded);
+		}
+		finally {
+			if (encoded != null) {
+				java.util.Arrays.fill(encoded, (byte)0);
+			}
+		}
 	}
 
 	protected void activate(Map<String, Object> properties) throws IOException {
@@ -397,8 +402,6 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 			_enabled = configuration.enabled();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
-			_priority = configuration.priority();
-			_providerId = configuration.providerId();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
 			authType = GcpClientManager.AuthType.create(
@@ -419,8 +422,6 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 			_enabled = true;
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
-			_priority = configuration.priority();
-			_providerId = configuration.providerId();
 
 			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
 			authType = GcpClientManager.AuthType.SA_KEY;
@@ -448,6 +449,25 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		else {
 			_gcpClientManager.updateConfiguration(
 				gcpAuthKeyReference, authType, impersonatedServiceAccount);
+		}
+
+		try {
+			_gcpClientManager.execute(
+				_companyId,
+				client -> {
+					client.getKeyRing(_keyRingName);
+
+					return null;
+				});
+		}
+		catch (Exception exception) {
+			if (GetterUtil.getBoolean(
+					System.getenv("LIFERAY_KEYMANAGER_FIPS_ENFORCED"))) {
+
+				throw new RuntimeException(
+					"Remediation Hint: ensure Workload Identity and roles/cloudkms.cryptoKeyEncrypterDecrypter are configured.",
+					exception);
+			}
 		}
 	}
 
@@ -487,12 +507,11 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 	private String _getGcpKeyName(String alias) {
 		return CryptoKeyName.of(
 			_keyRingName.getProject(), _keyRingName.getLocation(),
-			_keyRingName.getKeyRing(), alias).toString();
+			_keyRingName.getKeyRing(), GcpAliasUtil.normalize(alias)).toString();
 	}
 
 	private volatile long _companyId;
 	private volatile boolean _enabled;
-	private volatile int _priority;
 
 	@Reference
 	protected CompanyLocalService _companyLocalService;
@@ -500,7 +519,6 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 	protected GcpClientManager<KeyManagementServiceClient> _gcpClientManager;
 	private volatile KeyRingName _keyRingName;
 	private volatile ProtectionLevel _protectionLevel;
-	private volatile String _providerId;
 	private volatile long _rotationPeriodSeconds;
 
 	@Reference

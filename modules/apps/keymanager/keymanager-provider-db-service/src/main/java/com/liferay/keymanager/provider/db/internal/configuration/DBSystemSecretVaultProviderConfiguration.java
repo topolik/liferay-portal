@@ -40,13 +40,4 @@ public interface DBSystemSecretVaultProviderConfiguration {
 	)
 	public String masterKeyReference();
 
-	@Meta.AD(
-		deflt = "db-system", description = "db-secret-provider-id-description",
-		name = "provider-id", required = false
-	)
-	public String providerId();
-
-	@Meta.AD(deflt = "10", name = "priority", required = false)
-	public int priority();
-
 }

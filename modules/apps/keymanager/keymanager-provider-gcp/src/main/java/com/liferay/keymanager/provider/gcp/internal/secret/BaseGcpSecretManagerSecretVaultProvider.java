@@ -31,6 +31,7 @@ import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
+import com.liferay.keymanager.util.GcpAliasUtil;
 import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.keymanager.spi.secret.SecretVaultWriter;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
@@ -110,10 +111,18 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 					).getData(
 					).toByteArray();
 
-					return new SecureSecret(
-						new KeyReference(
-							KeyReference.Type.SECRET, _providerId, identifier),
-						bytes);
+					try {
+						return new SecureSecret(
+							new KeyReference(
+								KeyReference.Type.SECRET,
+								KeyReference.ANY_PROVIDER, identifier),
+							bytes);
+					}
+					finally {
+						if (bytes != null) {
+							java.util.Arrays.fill(bytes, (byte)0);
+						}
+					}
 				});
 		}
 		catch (Exception exception) {
@@ -154,11 +163,6 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 			throw new SecretManagerException(
 				"Unable to list GCP secrets", exception);
 		}
-	}
-
-	@Override
-	public int getPriority() {
-		return _priority;
 	}
 
 	@Override
@@ -306,8 +310,6 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 
 			_enabled = configuration.enabled();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
-			_priority = configuration.priority();
-			_providerId = configuration.providerId();
 			_projectId = configuration.projectId();
 			_kmsKeyName = configuration.kmsKeyName();
 			_locations = configuration.locations();
@@ -327,8 +329,6 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 			_enabled = true;
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
-			_priority = configuration.priority();
-			_providerId = configuration.providerId();
 			_projectId = configuration.projectId();
 			_kmsKeyName = configuration.kmsKeyName();
 			_locations = configuration.locations();
@@ -351,6 +351,25 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 			_gcpClientManager.updateConfiguration(
 				gcpAuthKeyReference, authType, impersonatedServiceAccount);
 		}
+
+		try {
+			_gcpClientManager.execute(
+				_companyId,
+				client -> {
+					client.listSecrets(ProjectName.of(_projectId));
+
+					return null;
+				});
+		}
+		catch (Exception exception) {
+			if (GetterUtil.getBoolean(
+					System.getenv("LIFERAY_KEYMANAGER_FIPS_ENFORCED"))) {
+
+				throw new RuntimeException(
+					"Remediation Hint: ensure roles/secretmanager.secretAccessor is configured.",
+					exception);
+			}
+		}
 	}
 
 	@Deactivate
@@ -370,13 +389,15 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 	}
 
 	private String _getSecretId(String identifier) {
+		String alias = identifier;
+
 		if (identifier.contains(":")) {
 			String[] parts = StringUtil.split(identifier, ":");
 
-			return parts[0];
+			alias = parts[0];
 		}
 
-		return identifier;
+		return GcpAliasUtil.normalize(alias);
 	}
 
 	private String _getVersionId(String identifier) {
@@ -400,11 +421,9 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 
 	private volatile long _companyId;
 	private volatile boolean _enabled;
-	private volatile int _priority;
 	protected GcpClientManager<SecretManagerServiceClient> _gcpClientManager;
 	private volatile String _kmsKeyName;
 	private volatile String[] _locations;
 	private volatile String _projectId;
-	private volatile String _providerId;
 
 }

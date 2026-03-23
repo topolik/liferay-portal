@@ -34,6 +34,7 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.os.internal.configuration.K8sFileSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.REQUIRE,
+	property = "keymanager.provider.id=k8s-secret",
 	service = {
 		SecretVaultProvider.class, SecretVaultReader.class,
 		SecretVaultWriter.class
@@ -63,15 +64,25 @@ public class K8sFileSecretVaultProvider
 			return null;
 		}
 
+		byte[] bytes = null;
+
 		try {
+			bytes = FileUtil.getBytes(file);
+
 			return new SecureSecret(
 				new KeyReference(
-					KeyReference.Type.SECRET, _providerId, identifier),
-				FileUtil.getBytes(file));
+					KeyReference.Type.SECRET, KeyReference.ANY_PROVIDER,
+					identifier),
+				bytes);
 		}
 		catch (IOException ioException) {
 			throw new SecretManagerException(
 				"Unable to read secret file: " + file, ioException);
+		}
+		finally {
+			if (bytes != null) {
+				java.util.Arrays.fill(bytes, (byte)0);
+			}
 		}
 	}
 
@@ -96,11 +107,6 @@ public class K8sFileSecretVaultProvider
 		}
 
 		return identifiers;
-	}
-
-	@Override
-	public int getPriority() {
-		return _priority;
 	}
 
 	@Override
@@ -138,10 +144,8 @@ public class K8sFileSecretVaultProvider
 					K8sFileSecretVaultProviderConfiguration.class, properties);
 
 		_enabled = fileSecretVaultProviderConfiguration.enabled();
-		_priority = fileSecretVaultProviderConfiguration.priority();
 		_secretsDirectory =
 			fileSecretVaultProviderConfiguration.secretsDirectory();
-		_providerId = fileSecretVaultProviderConfiguration.providerId();
 	}
 
 	private File _getFile(String identifier) throws SecretManagerException {
@@ -171,8 +175,6 @@ public class K8sFileSecretVaultProvider
 	}
 
 	private volatile boolean _enabled;
-	private volatile int _priority;
-	private volatile String _providerId;
 	private volatile String _secretsDirectory;
 
 }

@@ -64,13 +64,4 @@ public interface GcpKmsSystemCryptoVaultProviderConfiguration {
 	)
 	public long newKeyRotationPeriodSeconds();
 
-	@Meta.AD(
-		deflt = "gcp-kms-system",
-		description = "gcp-kms-provider-id-description", name = "provider-id"
-	)
-	public String providerId();
-
-	@Meta.AD(deflt = "100", name = "priority", required = false)
-	public int priority();
-
 }

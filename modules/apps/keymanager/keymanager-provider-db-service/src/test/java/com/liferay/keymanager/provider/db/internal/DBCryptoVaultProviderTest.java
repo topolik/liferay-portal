@@ -269,7 +269,7 @@ public class DBCryptoVaultProviderTest {
 			result.getKeyReference(
 			).getIdentifier());
 		Assert.assertEquals(
-			"db",
+			KeyReference.ANY_PROVIDER,
 			result.getKeyReference(
 			).getProviderId());
 	}

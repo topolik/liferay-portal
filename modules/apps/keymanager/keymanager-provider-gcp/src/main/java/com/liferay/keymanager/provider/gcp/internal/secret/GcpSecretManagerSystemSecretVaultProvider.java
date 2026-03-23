@@ -25,6 +25,7 @@ import org.osgi.service.component.annotations.Modified;
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSystemSecretVaultProviderConfiguration",
 	configurationPolicy = ConfigurationPolicy.OPTIONAL,
+	property = "keymanager.provider.id=gcp-secret-manager-system-secret",
 	service = {
 		SecretVaultProvider.class, SecretVaultReader.class,
 		SecretVaultWriter.class

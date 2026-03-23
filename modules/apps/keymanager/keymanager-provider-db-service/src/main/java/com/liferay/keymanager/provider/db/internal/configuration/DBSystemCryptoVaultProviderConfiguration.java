@@ -33,13 +33,4 @@ public interface DBSystemCryptoVaultProviderConfiguration {
 	)
 	public String masterKeyReference();
 
-	@Meta.AD(
-		deflt = "db-system", description = "db-crypto-provider-id-description",
-		name = "provider-id", required = false
-	)
-	public String providerId();
-
-	@Meta.AD(deflt = "10", name = "priority", required = false)
-	public int priority();
-
 }

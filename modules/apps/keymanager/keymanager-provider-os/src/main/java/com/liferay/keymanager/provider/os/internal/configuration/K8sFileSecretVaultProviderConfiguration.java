@@ -22,15 +22,6 @@ public interface K8sFileSecretVaultProviderConfiguration {
 
 	@Meta.AD(deflt = "false", name = "enabled", required = false)
 	public boolean enabled();
-	
-	@Meta.AD(
-		deflt = "k8s-file", description = "k8s-file-provider-id-description",
-		name = "provider-id", required = true
-	)
-	public String providerId();
-
-	@Meta.AD(deflt = "30", name = "priority", required = false)
-	public int priority();
 
 	@Meta.AD(
 		deflt = "/run/secrets", description = "secrets-directory-description",

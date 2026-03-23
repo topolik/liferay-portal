@@ -122,7 +122,8 @@ public abstract class BaseDBSecretVaultProvider
 
 					return new SecureSecret(
 						new KeyReference(
-							KeyReference.Type.SECRET, _providerId, identifier),
+							KeyReference.Type.SECRET, KeyReference.ANY_PROVIDER,
+							identifier),
 						plaintext);
 				}
 				finally {
@@ -161,11 +162,6 @@ public abstract class BaseDBSecretVaultProvider
 			throw new SecretManagerException(
 				"Unable to list secret identifiers", exception);
 		}
-	}
-
-	@Override
-	public int getPriority() {
-		return _priority;
 	}
 
 	@Override
@@ -258,7 +254,6 @@ public abstract class BaseDBSecretVaultProvider
 	}
 
 	protected void activate(Map<String, Object> properties) {
-		String providerId = null;
 		String masterKeyReference = null;
 		String dekCipherSpec = null;
 
@@ -268,9 +263,7 @@ public abstract class BaseDBSecretVaultProvider
 					DBSystemSecretVaultProviderConfiguration.class, properties);
 
 			_enabled = configuration.enabled();
-			_priority = configuration.priority();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
-			providerId = configuration.providerId();
 			masterKeyReference = configuration.masterKeyReference();
 			dekCipherSpec = configuration.dekCipherSpec();
 		}
@@ -279,17 +272,14 @@ public abstract class BaseDBSecretVaultProvider
 				ConfigurableUtil.createConfigurable(
 					DBCompanySecretVaultProviderConfiguration.class,
 					properties);
-			
+
 			_enabled = true;
-			_priority = configuration.priority();
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
-			providerId = configuration.providerId();
 			masterKeyReference = configuration.masterKeyReference();
 			dekCipherSpec = configuration.dekCipherSpec();
 		}
 
-		_providerId = providerId;
 		_masterKeyReference = masterKeyReference;
 
 		_encryptionAlgorithm = _parseAlgorithm(dekCipherSpec);
@@ -402,7 +392,6 @@ public abstract class BaseDBSecretVaultProvider
 
 	private volatile long _companyId;
 	private volatile boolean _enabled;
-	private volatile int _priority;
 
 	@Reference
 	protected CompanyLocalService _companyLocalService;
@@ -413,7 +402,6 @@ public abstract class BaseDBSecretVaultProvider
 	private volatile String _keyAlgorithm;
 	private volatile int _keySize;
 	private volatile String _masterKeyReference;
-	private volatile String _providerId;
 	private final SecureRandom _secureRandom = new SecureRandom();
 
 	@Reference

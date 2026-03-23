@@ -73,49 +73,60 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 			Key key = _unwrapKey(companyId, keyEntry);
 
-			String cipherSpec = keyEntry.getCipherSpec();
+			try {
+				String cipherSpec = keyEntry.getCipherSpec();
 
-			String transformation = _parseAlgorithm(cipherSpec);
+				String transformation = _parseAlgorithm(cipherSpec);
 
-			Cipher cipher = Cipher.getInstance(transformation);
+				Cipher cipher = Cipher.getInstance(transformation);
 
-			KeyType keyType = KeyType.valueOf(keyEntry.getKeyType());
+				KeyType keyType = KeyType.valueOf(keyEntry.getKeyType());
 
-			if (keyType == KeyType.SECRET) {
-				Map<String, String> cipherSpecMap = _parseCipherSpec(
-					cipherSpec);
+				if (keyType == KeyType.SECRET) {
+					Map<String, String> cipherSpecMap = _parseCipherSpec(
+						cipherSpec);
 
-				int ivSize = GetterUtil.getInteger(cipherSpecMap.get("ivSize"));
+					int ivSize = GetterUtil.getInteger(
+						cipherSpecMap.get("ivSize"));
 
-				if (ivSize <= 0) {
-					throw new CryptoManagerException(
-						"ivSize must be specified and greater than 0 for SECRET keys");
+					if (ivSize <= 0) {
+						throw new CryptoManagerException(
+							"ivSize must be specified and greater than 0 for SECRET keys");
+					}
+
+					int gcmTag = GetterUtil.getInteger(
+						cipherSpecMap.get("gcmTag"));
+
+					ByteBuffer byteBuffer = ByteBuffer.wrap(ciphertext);
+
+					byte[] iv = new byte[ivSize];
+
+					byteBuffer.get(iv);
+
+					byte[] actualCiphertext = new byte[byteBuffer.remaining()];
+
+					byteBuffer.get(actualCiphertext);
+
+					cipher.init(
+						Cipher.DECRYPT_MODE, key,
+						_getParameterSpec(iv, transformation, gcmTag));
+
+					return cipher.doFinal(actualCiphertext);
 				}
 
-				int gcmTag = GetterUtil.getInteger(cipherSpecMap.get("gcmTag"));
+				// Asymmetric (No IV handling in standard DBCryptoVaultProvider)
 
-				ByteBuffer byteBuffer = ByteBuffer.wrap(ciphertext);
+				cipher.init(Cipher.DECRYPT_MODE, key);
 
-				byte[] iv = new byte[ivSize];
-
-				byteBuffer.get(iv);
-
-				byte[] actualCiphertext = new byte[byteBuffer.remaining()];
-
-				byteBuffer.get(actualCiphertext);
-
-				cipher.init(
-					Cipher.DECRYPT_MODE, key,
-					_getParameterSpec(iv, transformation, gcmTag));
-
-				return cipher.doFinal(actualCiphertext);
+				return cipher.doFinal(ciphertext);
 			}
+			finally {
+				if ((key != null) && (key.getEncoded() != null)) {
+					byte[] encoded = key.getEncoded();
 
-			// Asymmetric (No IV handling in standard DBCryptoVaultProvider)
-
-			cipher.init(Cipher.DECRYPT_MODE, key);
-
-			return cipher.doFinal(ciphertext);
+					Arrays.fill(encoded, (byte)0);
+				}
+			}
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
@@ -234,11 +245,21 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 				companyId, KeyReference.fromString(_masterKeyReference),
 				keyPair.getPrivate());
 
-			_saveKeyEntry(
-				companyId, identifier, KeyType.PRIVATE,
-				keyPair.getPrivate(
-				).getAlgorithm(),
-				wrappedPrivateKeyBytes, _masterKeyReference, algorithmSpec);
+			byte[] privateKeyEncoded = keyPair.getPrivate(
+			).getEncoded();
+
+			try {
+				_saveKeyEntry(
+					companyId, identifier, KeyType.PRIVATE,
+					keyPair.getPrivate(
+					).getAlgorithm(),
+					wrappedPrivateKeyBytes, _masterKeyReference, algorithmSpec);
+			}
+			finally {
+				if (privateKeyEncoded != null) {
+					Arrays.fill(privateKeyEncoded, (byte)0);
+				}
+			}
 
 			_saveKeyEntry(
 				companyId, identifier + ".pub", KeyType.PUBLIC,
@@ -280,10 +301,19 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 				companyId, KeyReference.fromString(_masterKeyReference),
 				secretKey);
 
-			_saveKeyEntry(
-				companyId, identifier, KeyType.SECRET,
-				secretKey.getAlgorithm(), wrappedKeyBytes, _masterKeyReference,
-				algorithmSpec);
+			byte[] secretKeyEncoded = secretKey.getEncoded();
+
+			try {
+				_saveKeyEntry(
+					companyId, identifier, KeyType.SECRET,
+					secretKey.getAlgorithm(), wrappedKeyBytes,
+					_masterKeyReference, algorithmSpec);
+			}
+			finally {
+				if (secretKeyEncoded != null) {
+					Arrays.fill(secretKeyEncoded, (byte)0);
+				}
+			}
 
 			return identifier;
 		}
@@ -321,7 +351,8 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 			return new CryptoKey(
 				KeyReference.fromString(
 					StringBundler.concat(
-						"${keyRef:", _providerId, ":", identifier, "}")),
+						"${keyRef:", KeyReference.ANY_PROVIDER, ":",
+						identifier, "}")),
 				keyEntry.getAlgorithm(), keyEntry.getCipherSpec(),
 				keyEntry.getCreateDate(
 				).getTime());
@@ -365,11 +396,6 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 				Arrays.fill(rawKeyMaterial, (byte)0);
 			}
 		}
-	}
-
-	@Override
-	public int getPriority() {
-		return _priority;
 	}
 
 	@Override
@@ -417,10 +443,8 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 					DBSystemCryptoVaultProviderConfiguration.class, properties);
 
 			_enabled = configuration.enabled();
-			_priority = configuration.priority();
 			_companyId = PortalInstancePool.getDefaultCompanyId();
 			_masterKeyReference = configuration.masterKeyReference();
-			_providerId = configuration.providerId();
 		}
 		else {
 			DBCompanyCryptoVaultProviderConfiguration configuration =
@@ -429,11 +453,9 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 					properties);
 
 			_enabled = true;
-			_priority = configuration.priority();
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
 				_companyLocalService, properties);
 			_masterKeyReference = configuration.masterKeyReference();
-			_providerId = configuration.providerId();
 		}
 	}
 
@@ -577,7 +599,6 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 	private volatile long _companyId;
 	private volatile boolean _enabled;
-	private volatile int _priority;
 		
 	@Reference
 	protected CompanyLocalService _companyLocalService;
@@ -589,7 +610,6 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 	protected KeyEntryLocalService _keyEntryLocalService;
 
 	private volatile String _masterKeyReference;
-	private volatile String _providerId;
 	private final SecureRandom _secureRandom = new SecureRandom();
 
 }
