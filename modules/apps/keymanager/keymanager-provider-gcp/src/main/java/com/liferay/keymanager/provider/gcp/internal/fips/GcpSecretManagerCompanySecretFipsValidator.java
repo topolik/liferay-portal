@@ -17,11 +17,13 @@ import org.osgi.service.component.annotations.Component;
  * @author Tomas Polesovsky
  */
 @Component(service = FipsValidator.class)
-public class GcpSecretManagerCompanySecretFipsValidator extends BaseGcpFipsValidator {
+public class GcpSecretManagerCompanySecretFipsValidator
+	extends BaseGcpFipsValidator {
 
 	@Override
 	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerCompanySecretVaultProviderConfiguration";
+		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
+			"GcpSecretManagerCompanySecretVaultProviderConfiguration";
 	}
 
 	@Override
@@ -31,8 +33,9 @@ public class GcpSecretManagerCompanySecretFipsValidator extends BaseGcpFipsValid
 		}
 
 		if (Validator.isNull(properties.get("kms-key-name"))) {
-			return FipsReport.nonCompliant(
-				"kms-key-name is required for Customer-Managed Encryption Keys (CMEK) when FIPS is enforced.");
+			return FipsReport.noncompliant(
+				"kms-key-name is required for Customer-Managed Encryption " +
+					"Keys (CMEK) when FIPS is enforced.");
 		}
 
 		return FipsReport.compliant();

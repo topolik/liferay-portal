@@ -13,8 +13,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  * @author Tomas Polesovsky
  */
 @ExtendedObjectClassDefinition(
-	category = "keymanager",
-	scope = ExtendedObjectClassDefinition.Scope.SYSTEM
+	category = "keymanager", scope = ExtendedObjectClassDefinition.Scope.SYSTEM
 )
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.db.internal.configuration.DBSystemSecretVaultProviderConfiguration",
@@ -23,15 +22,15 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface DBSystemSecretVaultProviderConfiguration {
 
-	@Meta.AD(deflt = "false", name = "enabled", required = false)
-	public boolean enabled();
-
 	@Meta.AD(
 		deflt = "AES/GCM/NoPadding; keySize=256; ivSize=12; gcmTag=128",
 		description = "dek-cipher-spec-description", name = "dek-cipher-spec",
 		required = false
 	)
 	public String dekCipherSpec();
+
+	@Meta.AD(deflt = "false", name = "enabled", required = false)
+	public boolean enabled();
 
 	@Meta.AD(
 		deflt = "${keyRef:*:db-vault-provider-master-kek}",

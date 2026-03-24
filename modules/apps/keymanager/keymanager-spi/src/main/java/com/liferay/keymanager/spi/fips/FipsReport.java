@@ -14,7 +14,7 @@ public class FipsReport {
 		return new FipsReport(true, null);
 	}
 
-	public static FipsReport nonCompliant(String violationMessage) {
+	public static FipsReport noncompliant(String violationMessage) {
 		return new FipsReport(false, violationMessage);
 	}
 

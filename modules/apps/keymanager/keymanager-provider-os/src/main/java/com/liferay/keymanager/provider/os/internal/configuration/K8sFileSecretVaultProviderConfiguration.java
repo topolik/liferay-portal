@@ -25,7 +25,7 @@ public interface K8sFileSecretVaultProviderConfiguration {
 
 	@Meta.AD(
 		deflt = "/run/secrets", description = "secrets-directory-description",
-		name = "secrets-directory", required = true
+		name = "secrets-directory"
 	)
 	public String secretsDirectory();
 

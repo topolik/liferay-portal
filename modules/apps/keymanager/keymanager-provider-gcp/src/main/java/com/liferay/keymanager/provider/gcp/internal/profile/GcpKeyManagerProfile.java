@@ -5,6 +5,14 @@
 
 package com.liferay.keymanager.provider.gcp.internal.profile;
 
+import com.google.api.gax.rpc.AlreadyExistsException;
+import com.google.cloud.kms.v1.CryptoKey;
+import com.google.cloud.kms.v1.CryptoKeyVersion;
+import com.google.cloud.kms.v1.CryptoKeyVersionTemplate;
+import com.google.cloud.kms.v1.KeyManagementServiceClient;
+import com.google.cloud.kms.v1.KeyRing;
+import com.google.cloud.kms.v1.ProtectionLevel;
+
 import com.liferay.keymanager.spi.profile.KeyManagerProfile;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -36,7 +44,9 @@ public class GcpKeyManagerProfile implements KeyManagerProfile {
 		}
 
 		if (Validator.isNull(projectId)) {
-			_log.error("Unable to infer GCP Project ID from environment variables.");
+			_log.error(
+				"Unable to infer GCP project ID from environment variables");
+
 			return;
 		}
 
@@ -45,19 +55,17 @@ public class GcpKeyManagerProfile implements KeyManagerProfile {
 
 		String protectionLevel = fipsEnforced ? "HSM" : "SOFTWARE";
 
-		try (com.google.cloud.kms.v1.KeyManagementServiceClient client =
-				com.google.cloud.kms.v1.KeyManagementServiceClient.create()) {
+		try (KeyManagementServiceClient client =
+				KeyManagementServiceClient.create()) {
 
-			String locationName =
-				"projects/" + projectId + "/locations/global";
+			String locationName = "projects/" + projectId + "/locations/global";
 			String keyRingId = "liferay-keymanager";
 
 			try {
 				client.createKeyRing(
-					locationName, keyRingId,
-					com.google.cloud.kms.v1.KeyRing.getDefaultInstance());
+					locationName, keyRingId, KeyRing.getDefaultInstance());
 			}
-			catch (com.google.api.gax.rpc.AlreadyExistsException alreadyExistsException) {
+			catch (AlreadyExistsException alreadyExistsException) {
 				if (_log.isDebugEnabled()) {
 					_log.debug(
 						"KeyRing already exists", alreadyExistsException);
@@ -66,24 +74,25 @@ public class GcpKeyManagerProfile implements KeyManagerProfile {
 
 			String keyId = "system-master-kek";
 
-			com.google.cloud.kms.v1.CryptoKey cryptoKey =
-				com.google.cloud.kms.v1.CryptoKey.newBuilder(
-				).setPurpose(
-					com.google.cloud.kms.v1.CryptoKey.CryptoKeyPurpose.ENCRYPT_DECRYPT
-				).setVersionTemplate(
-					com.google.cloud.kms.v1.CryptoKeyVersionTemplate.newBuilder(
-					).setProtectionLevel(
-						fipsEnforced ? com.google.cloud.kms.v1.ProtectionLevel.HSM : com.google.cloud.kms.v1.ProtectionLevel.SOFTWARE
-					).setAlgorithm(
-						com.google.cloud.kms.v1.CryptoKeyVersion.CryptoKeyVersionAlgorithm.GOOGLE_SYMMETRIC_ENCRYPTION
-					).build()
-				).build();
+			CryptoKey cryptoKey = CryptoKey.newBuilder(
+			).setPurpose(
+				CryptoKey.CryptoKeyPurpose.ENCRYPT_DECRYPT
+			).setVersionTemplate(
+				CryptoKeyVersionTemplate.newBuilder(
+				).setProtectionLevel(
+					fipsEnforced ? ProtectionLevel.HSM :
+						ProtectionLevel.SOFTWARE
+				).setAlgorithm(
+					CryptoKeyVersion.CryptoKeyVersionAlgorithm.
+						GOOGLE_SYMMETRIC_ENCRYPTION
+				).build()
+			).build();
 
 			try {
 				client.createCryptoKey(
 					locationName + "/keyRings/" + keyRingId, keyId, cryptoKey);
 			}
-			catch (com.google.api.gax.rpc.AlreadyExistsException alreadyExistsException) {
+			catch (AlreadyExistsException alreadyExistsException) {
 				if (_log.isDebugEnabled()) {
 					_log.debug(
 						"CryptoKey already exists", alreadyExistsException);
@@ -92,29 +101,39 @@ public class GcpKeyManagerProfile implements KeyManagerProfile {
 		}
 
 		// Configure GCP KMS System Provider
+
 		_updateGcpKmsProvider(
-			"com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsSystemCryptoVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.gcp.internal.configuration." +
+				"GcpKmsSystemCryptoVaultProviderConfiguration",
 			projectId, protectionLevel);
 
 		// Configure GCP KMS Company Provider
+
 		_updateGcpKmsProvider(
-			"com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.gcp.internal.configuration." +
+				"GcpKmsCompanyCryptoVaultProviderConfiguration",
 			projectId, protectionLevel);
 
 		// Configure DB providers to use gcp-kms-system-crypto as KEK
-		String systemKekRef = "${keyRef:gcp-kms-system-crypto:system-master-kek}";
+
+		String systemKekRef =
+			"${keyRef:gcp-kms-system-crypto:system-master-kek}";
 
 		_updateDbProvider(
-			"com.liferay.keymanager.provider.db.internal.configuration.DBSystemCryptoVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.db.internal.configuration." +
+				"DBSystemCryptoVaultProviderConfiguration",
 			systemKekRef);
 		_updateDbProvider(
-			"com.liferay.keymanager.provider.db.internal.configuration.DBCompanyCryptoVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.db.internal.configuration." +
+				"DBCompanyCryptoVaultProviderConfiguration",
 			systemKekRef);
 		_updateDbProvider(
-			"com.liferay.keymanager.provider.db.internal.configuration.DBSystemSecretVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.db.internal.configuration." +
+				"DBSystemSecretVaultProviderConfiguration",
 			systemKekRef);
 		_updateDbProvider(
-			"com.liferay.keymanager.provider.db.internal.configuration.DBCompanySecretVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.db.internal.configuration." +
+				"DBCompanySecretVaultProviderConfiguration",
 			systemKekRef);
 	}
 
@@ -167,7 +186,7 @@ public class GcpKeyManagerProfile implements KeyManagerProfile {
 	private void _updateDbProvider(String pid, String masterKeyRef)
 		throws Exception {
 
-		Configuration config = _configurationAdmin.getConfiguration(pid, null);
+		Configuration config = _configurationAdmin.getConfiguration(pid, "?");
 
 		Dictionary<String, Object> props = config.getProperties();
 
@@ -185,7 +204,7 @@ public class GcpKeyManagerProfile implements KeyManagerProfile {
 			String pid, String projectId, String protectionLevel)
 		throws Exception {
 
-		Configuration config = _configurationAdmin.getConfiguration(pid, null);
+		Configuration config = _configurationAdmin.getConfiguration(pid, "?");
 
 		Dictionary<String, Object> props = config.getProperties();
 
@@ -196,7 +215,10 @@ public class GcpKeyManagerProfile implements KeyManagerProfile {
 		props.put("enabled", true);
 		props.put("projectId", projectId);
 		props.put("newKeyProtectionLevel", protectionLevel);
-		props.put("keyRingPath", "projects/" + projectId + "/locations/global/keyRings/liferay-keymanager");
+		props.put(
+			"keyRingPath",
+			"projects/" + projectId +
+				"/locations/global/keyRings/liferay-keymanager");
 
 		config.update(props);
 	}

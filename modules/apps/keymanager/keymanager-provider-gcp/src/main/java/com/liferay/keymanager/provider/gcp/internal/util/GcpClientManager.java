@@ -29,33 +29,6 @@ import java.util.Objects;
  */
 public class GcpClientManager<T extends AutoCloseable> {
 
-	public enum AuthType {
-
-		ADC("adc"), IMPERSONATION("impersonation"), SA_KEY("sa-key");
-
-		public static AuthType create(String value) {
-			for (AuthType authType : values()) {
-				if (Objects.equals(authType._value, value)) {
-					return authType;
-				}
-			}
-
-			return ADC;
-		}
-
-		@Override
-		public String toString() {
-			return _value;
-		}
-
-		private AuthType(String value) {
-			_value = value;
-		}
-
-		private final String _value;
-
-	}
-
 	public GcpClientManager(
 		SecretManager secretManager, String gcpAuthKeyReference,
 		AuthType authType, String impersonatedServiceAccount,
@@ -113,6 +86,33 @@ public class GcpClientManager<T extends AutoCloseable> {
 		_impersonatedServiceAccount = impersonatedServiceAccount;
 
 		close();
+	}
+
+	public enum AuthType {
+
+		ADC("adc"), IMPERSONATION("impersonation"), SA_KEY("sa-key");
+
+		public static AuthType create(String value) {
+			for (AuthType authType : values()) {
+				if (Objects.equals(authType._value, value)) {
+					return authType;
+				}
+			}
+
+			return ADC;
+		}
+
+		@Override
+		public String toString() {
+			return _value;
+		}
+
+		private AuthType(String value) {
+			_value = value;
+		}
+
+		private final String _value;
+
 	}
 
 	@FunctionalInterface
@@ -202,10 +202,10 @@ public class GcpClientManager<T extends AutoCloseable> {
 	private static final Log _log = LogFactoryUtil.getLog(
 		GcpClientManager.class);
 
+	private volatile AuthType _authType;
 	private volatile T _client;
 	private final ClientFactory<T> _clientFactory;
 	private volatile String _gcpAuthKeyReference;
-	private volatile AuthType _authType;
 	private volatile String _impersonatedServiceAccount;
 	private final SecretManager _secretManager;
 

@@ -9,20 +9,21 @@ import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
 import com.liferay.keymanager.crypto.CryptoManagerException;
-import com.liferay.keymanager.internal.fips.FipsComplianceChecker;
-import com.liferay.keymanager.internal.profile.ProfileOrchestrator;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
+import com.liferay.keymanager.spi.fips.FipsComplianceChecker;
 import com.liferay.keymanager.spi.profile.KeyManagerProfile;
+import com.liferay.keymanager.spi.profile.ProfileOrchestrator;
 import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReferenceMapper;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.util.StringBundler;
 
 import java.security.Key;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,8 +52,10 @@ public class CryptoManagerImpl implements CryptoManager {
 		Objects.requireNonNull(ciphertext, "No ciphertext provided!");
 
 		try {
-			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
-				companyId, keyReference.getProviderId(), ProviderRole.DEK)) {
+			for (CryptoVaultProvider provider :
+					_getCryptoVaultProviders(
+						companyId, keyReference.getProviderId(),
+						ProviderRole.DEK)) {
 
 				try {
 					return provider.decrypt(
@@ -67,12 +70,15 @@ public class CryptoManagerImpl implements CryptoManager {
 				}
 			}
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to decrypt cipherText: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to decrypt cipherText: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 
 		throw new CryptoManagerException(
@@ -89,14 +95,18 @@ public class CryptoManagerImpl implements CryptoManager {
 			CryptoVaultProvider cryptoVaultProvider = _getCryptoVaultProvider(
 				companyId, keyReference.getProviderId(), ProviderRole.DEK);
 
-			cryptoVaultProvider.deleteKey(companyId, keyReference.getIdentifier());
+			cryptoVaultProvider.deleteKey(
+				companyId, keyReference.getIdentifier());
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to delete key: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to delete key: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 	}
 
@@ -111,8 +121,10 @@ public class CryptoManagerImpl implements CryptoManager {
 		Objects.requireNonNull(plaintext, "No plaintext provided!");
 
 		try {
-			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
-				companyId, keyReference.getProviderId(), ProviderRole.DEK)) {
+			for (CryptoVaultProvider provider :
+					_getCryptoVaultProviders(
+						companyId, keyReference.getProviderId(),
+						ProviderRole.DEK)) {
 
 				try {
 					return provider.encrypt(
@@ -127,12 +139,15 @@ public class CryptoManagerImpl implements CryptoManager {
 				}
 			}
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to encrypt cipherText: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to encrypt cipherText: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 
 		throw new CryptoManagerException(
@@ -163,14 +178,15 @@ public class CryptoManagerImpl implements CryptoManager {
 					"${keyRef:", resolvedProviderId, ":", resultIdentifier,
 					"}"));
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
-					"Unable to generate asymmetric key pair: " + e.getMessage(),
-					e);
+					"Unable to generate asymmetric key pair: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 	}
 
@@ -197,13 +213,15 @@ public class CryptoManagerImpl implements CryptoManager {
 					"${keyRef:", resolvedProviderId, ":", resultIdentifier,
 					"}"));
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
-					"Unable to generate secret key: " + e.getMessage(), e);
+					"Unable to generate secret key: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 	}
 
@@ -215,8 +233,9 @@ public class CryptoManagerImpl implements CryptoManager {
 		List<KeyReference> keyReferences = new ArrayList<>();
 
 		try {
-			for (String resolvedProviderId : _getCryptoVaultProviderIds(
-					companyId, providerId, ProviderRole.DEK)) {
+			for (String resolvedProviderId :
+					_getCryptoVaultProviderIds(
+						companyId, providerId, ProviderRole.DEK)) {
 
 				CryptoVaultProvider provider = _serviceTrackerMap.getService(
 					resolvedProviderId);
@@ -235,13 +254,15 @@ public class CryptoManagerImpl implements CryptoManager {
 				}
 			}
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
-					"Unable to list key identifiers: " + e.getMessage(), e);
+					"Unable to list key identifiers: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 
 		return keyReferences;
@@ -254,8 +275,10 @@ public class CryptoManagerImpl implements CryptoManager {
 		Objects.requireNonNull(keyReference, "No KeyReference provided!");
 
 		try {
-			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
-				companyId, keyReference.getProviderId(), ProviderRole.DEK)) {
+			for (CryptoVaultProvider provider :
+					_getCryptoVaultProviders(
+						companyId, keyReference.getProviderId(),
+						ProviderRole.DEK)) {
 
 				try {
 					return provider.getKeyMetadata(
@@ -270,12 +293,15 @@ public class CryptoManagerImpl implements CryptoManager {
 				}
 			}
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to get key metadata: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to get key metadata: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 
 		throw new CryptoManagerException(
@@ -308,16 +334,19 @@ public class CryptoManagerImpl implements CryptoManager {
 					"${keyRef:", resolvedProviderId, ":", resultIdentifier,
 					"}"));
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to import secret key: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to import secret key: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 		finally {
 			if (rawKeyMaterial != null) {
-				java.util.Arrays.fill(rawKeyMaterial, (byte)0);
+				Arrays.fill(rawKeyMaterial, (byte)0);
 			}
 		}
 	}
@@ -334,9 +363,10 @@ public class CryptoManagerImpl implements CryptoManager {
 		Objects.requireNonNull(wrappedKeyBytes, "No wrappedKeyBytes provided!");
 
 		try {
-			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
-				companyId, masterKeyReference.getProviderId(),
-				ProviderRole.KEK)) {
+			for (CryptoVaultProvider provider :
+					_getCryptoVaultProviders(
+						companyId, masterKeyReference.getProviderId(),
+						ProviderRole.KEK)) {
 
 				try {
 					return provider.unwrap(
@@ -353,12 +383,15 @@ public class CryptoManagerImpl implements CryptoManager {
 				}
 			}
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to unwrap key: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to unwrap key: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 
 		throw new CryptoManagerException(
@@ -376,13 +409,15 @@ public class CryptoManagerImpl implements CryptoManager {
 		Objects.requireNonNull(keyToWrap, "No keyToWrap provided!");
 
 		try {
-			for (CryptoVaultProvider provider : _getCryptoVaultProviders(
-				companyId, masterKeyReference.getProviderId(),
-				ProviderRole.KEK)) {
+			for (CryptoVaultProvider provider :
+					_getCryptoVaultProviders(
+						companyId, masterKeyReference.getProviderId(),
+						ProviderRole.KEK)) {
 
 				try {
 					return provider.wrap(
-						companyId, masterKeyReference.getIdentifier(), keyToWrap);
+						companyId, masterKeyReference.getIdentifier(),
+						keyToWrap);
 				}
 				catch (CryptoManagerException cryptoManagerException) {
 					if (_log.isDebugEnabled()) {
@@ -393,12 +428,15 @@ public class CryptoManagerImpl implements CryptoManager {
 				}
 			}
 		}
-		catch (CryptoManagerException e) {
+		catch (CryptoManagerException cryptoManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to wrap key: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to wrap key: " +
+						cryptoManagerException.getMessage(),
+					cryptoManagerException);
 			}
 
-			throw e;
+			throw cryptoManagerException;
 		}
 
 		throw new CryptoManagerException(
@@ -419,10 +457,6 @@ public class CryptoManagerImpl implements CryptoManager {
 		_serviceTrackerMap.close();
 	}
 
-	private Collection<String> _getProviderIds() {
-		return _serviceTrackerMap.keySet();
-	}
-
 	private CryptoVaultProvider _getCryptoVaultProvider(
 			long companyId, String providerId, ProviderRole providerRole)
 		throws CryptoManagerException {
@@ -440,7 +474,7 @@ public class CryptoManagerImpl implements CryptoManager {
 		throw new CryptoManagerException(
 			StringBundler.concat(
 				"No crypto vault provider found for ID: ", resolvedProviderId,
-				" and company ID: ", String.valueOf(companyId)));
+				" and company ID: ", companyId));
 	}
 
 	private String _getCryptoVaultProviderId(
@@ -478,8 +512,8 @@ public class CryptoManagerImpl implements CryptoManager {
 
 			throw new CryptoManagerException(
 				StringBundler.concat(
-					"No crypto vault provider found for ANY provider",
-					" and company ID: ", String.valueOf(companyId)));
+					"No crypto vault provider found for ANY provider and ",
+					"company ID: ", companyId));
 		}
 
 		return providerId;
@@ -503,8 +537,9 @@ public class CryptoManagerImpl implements CryptoManager {
 
 		List<CryptoVaultProvider> providers = new ArrayList<>();
 
-		for (String id : _getCryptoVaultProviderIds(
-				companyId, providerId, providerRole)) {
+		for (String id :
+				_getCryptoVaultProviderIds(
+					companyId, providerId, providerRole)) {
 
 			CryptoVaultProvider provider = _serviceTrackerMap.getService(id);
 
@@ -515,7 +550,7 @@ public class CryptoManagerImpl implements CryptoManager {
 				throw new CryptoManagerException(
 					StringBundler.concat(
 						"No crypto vault provider found for ID: ", id,
-						" and company ID: ", String.valueOf(companyId)));
+						" and company ID: ", companyId));
 			}
 		}
 
@@ -524,17 +559,15 @@ public class CryptoManagerImpl implements CryptoManager {
 
 			throw new CryptoManagerException(
 				StringBundler.concat(
-					"No crypto vault provider found for ANY provider",
-					" and company ID: ", String.valueOf(companyId)));
+					"No crypto vault provider found for ANY provider and ",
+					"company ID: ", companyId));
 		}
 
 		return providers;
 	}
 
-	private enum ProviderRole {
-
-		DEK, KEK
-
+	private Collection<String> _getProviderIds() {
+		return _serviceTrackerMap.keySet();
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -547,5 +580,11 @@ public class CryptoManagerImpl implements CryptoManager {
 	private ProfileOrchestrator _profileOrchestrator;
 
 	private ServiceTrackerMap<String, CryptoVaultProvider> _serviceTrackerMap;
+
+	private enum ProviderRole {
+
+		DEK, KEK
+
+	}
 
 }

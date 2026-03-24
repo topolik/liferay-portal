@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.keymanager.provider.db.internal.configuration.listener;
+package com.liferay.keymanager.provider.os.internal.configuration.persistence.listener;
 
-import com.liferay.keymanager.provider.db.internal.configuration.DBCompanyCryptoVaultProviderConfiguration;
+import com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration;
 import com.liferay.keymanager.spi.configuration.listener.BaseConfigurationModelListener;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListener;
 
@@ -15,11 +15,12 @@ import org.osgi.service.component.annotations.Component;
  * @author Tomas Polesovsky
  */
 @Component(service = ConfigurationModelListener.class)
-public class DBCompanyCryptoVaultProviderConfigurationModelListener
-	extends BaseConfigurationModelListener<DBCompanyCryptoVaultProviderConfiguration> {
+public class EnvSecretVaultProviderConfigurationModelListener
+	extends BaseConfigurationModelListener
+		<EnvSecretVaultProviderConfiguration> {
 
-	public DBCompanyCryptoVaultProviderConfigurationModelListener() {
-		super(DBCompanyCryptoVaultProviderConfiguration.class);
+	public EnvSecretVaultProviderConfigurationModelListener() {
+		super(EnvSecretVaultProviderConfiguration.class);
 	}
 
 }

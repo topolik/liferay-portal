@@ -13,7 +13,6 @@ import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 
 /**
@@ -21,7 +20,6 @@ import org.osgi.service.component.annotations.Modified;
  */
 @Component(
 	configurationPid = "com.liferay.keymanager.internal.profile.configuration.KeyManagerCustomProfileConfiguration",
-	configurationPolicy = ConfigurationPolicy.OPTIONAL,
 	property = "keymanager.profile.id=custom", service = KeyManagerProfile.class
 )
 public class CustomKeyManagerProfile implements KeyManagerProfile {
@@ -32,17 +30,17 @@ public class CustomKeyManagerProfile implements KeyManagerProfile {
 
 	@Override
 	public String getCompanyDekProviderId() {
-		return _configuration.companyDekProviderId();
+		return _keyManagerCustomProfileConfiguration.companyDekProviderId();
 	}
 
 	@Override
 	public String getCompanyKekProviderId() {
-		return _configuration.companyKekProviderId();
+		return _keyManagerCustomProfileConfiguration.companyKekProviderId();
 	}
 
 	@Override
 	public String getCompanySecretProviderId() {
-		return _configuration.companySecretProviderId();
+		return _keyManagerCustomProfileConfiguration.companySecretProviderId();
 	}
 
 	@Override
@@ -52,36 +50,38 @@ public class CustomKeyManagerProfile implements KeyManagerProfile {
 
 	@Override
 	public String getSystemDekProviderId() {
-		return _configuration.systemDekProviderId();
+		return _keyManagerCustomProfileConfiguration.systemDekProviderId();
 	}
 
 	@Override
 	public String getSystemKekProviderId() {
-		return _configuration.systemKekProviderId();
+		return _keyManagerCustomProfileConfiguration.systemKekProviderId();
 	}
 
 	@Override
 	public String getSystemSecretProviderId() {
-		return _configuration.systemSecretProviderId();
+		return _keyManagerCustomProfileConfiguration.systemSecretProviderId();
 	}
 
 	@Override
 	public boolean isStrictMode() {
-		return _configuration.strictMode();
+		return _keyManagerCustomProfileConfiguration.strictMode();
 	}
 
 	@Override
 	public boolean requireFips() {
-		return _configuration.requireFips();
+		return _keyManagerCustomProfileConfiguration.requireFips();
 	}
 
 	@Activate
 	@Modified
 	protected void activate(Map<String, Object> properties) {
-		_configuration = ConfigurableUtil.createConfigurable(
-			KeyManagerCustomProfileConfiguration.class, properties);
+		_keyManagerCustomProfileConfiguration =
+			ConfigurableUtil.createConfigurable(
+				KeyManagerCustomProfileConfiguration.class, properties);
 	}
 
-	private volatile KeyManagerCustomProfileConfiguration _configuration;
+	private volatile KeyManagerCustomProfileConfiguration
+		_keyManagerCustomProfileConfiguration;
 
 }

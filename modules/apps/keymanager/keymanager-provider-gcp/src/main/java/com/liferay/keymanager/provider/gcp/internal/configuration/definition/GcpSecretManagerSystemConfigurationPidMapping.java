@@ -20,7 +20,8 @@ public class GcpSecretManagerSystemConfigurationPidMapping
 	public GcpSecretManagerSystemConfigurationPidMapping() {
 		super(
 			GcpSecretManagerSystemSecretVaultProviderConfiguration.class,
-			GcpSecretManagerSystemSecretVaultProviderConfiguration.class.getName());
+			GcpSecretManagerSystemSecretVaultProviderConfiguration.class.
+				getName());
 	}
 
 }

@@ -10,8 +10,6 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.DigesterUtil;
 import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.StringUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,16 +34,19 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tomas Polesovsky
  */
 @Component(
-	property = "keymanager.profile.id=local-dev", service = KeyManagerProfile.class
+	property = "keymanager.profile.id=local-dev",
+	service = KeyManagerProfile.class
 )
 public class LocalDevKeyManagerProfile implements KeyManagerProfile {
 
 	@Override
 	public void bootstrap() throws Exception {
 		String userName = System.getProperty("user.name");
-		String hostName = InetAddress.getLocalHost().getHostName();
+		String hostName = InetAddress.getLocalHost(
+		).getHostName();
 
-		String passwordString = DigesterUtil.digestHex(userName + "@" + hostName);
+		String passwordString = DigesterUtil.digestHex(
+			userName + "@" + hostName);
 
 		char[] password = passwordString.toCharArray();
 
@@ -54,7 +55,11 @@ public class LocalDevKeyManagerProfile implements KeyManagerProfile {
 			".liferay/keymanager/local-master.p12");
 
 		if (!keystoreFile.exists()) {
-			_log.info("Generating local development master keystore: " + keystoreFile.getAbsolutePath());
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					"Generating local development master keystore: " +
+						keystoreFile.getAbsolutePath());
+			}
 
 			FileUtil.mkdirs(keystoreFile.getParentFile());
 
@@ -68,18 +73,21 @@ public class LocalDevKeyManagerProfile implements KeyManagerProfile {
 
 			SecretKey secretKey = keyGenerator.generateKey();
 
-			keyStore.setKeyEntry(
-				"local-master-kek", secretKey, password, null);
+			keyStore.setKeyEntry("local-master-kek", secretKey, password, null);
 
-			try (FileOutputStream fos = new FileOutputStream(keystoreFile)) {
-				keyStore.store(fos, password);
+			try (FileOutputStream fileOutputStream = new FileOutputStream(
+					keystoreFile)) {
+
+				keyStore.store(fileOutputStream, password);
 			}
 		}
 
 		// Configure KeyStore provider
+
 		Configuration keystoreConfig = _configurationAdmin.getConfiguration(
-			"com.liferay.keymanager.provider.os.internal.configuration.KeyStoreCryptoVaultProviderConfiguration",
-			null);
+			"com.liferay.keymanager.provider.os.internal.configuration." +
+				"KeyStoreCryptoVaultProviderConfiguration",
+			"?");
 
 		Dictionary<String, Object> keystoreProps = new Hashtable<>();
 
@@ -87,27 +95,35 @@ public class LocalDevKeyManagerProfile implements KeyManagerProfile {
 		keystoreProps.put("keystorePath", keystoreFile.getAbsolutePath());
 		keystoreProps.put("keystoreType", "PKCS12");
 		keystoreProps.put(
-			"keystorePassword", "${secretRef:env:LIFERAY_KEYMANAGER_LOCAL_PWD}");
+			"keystorePassword",
+			"${secretRef:env:LIFERAY_KEYMANAGER_LOCAL_PWD}");
 
-		// We need to ensure the environment variable is set for the provider to read it,
-		// or just use the derived password directly if we can.
-		// For local dev, let's just put the password in a system property that we can reference.
+		// We need to ensure the environment variable is set for the provider
+		// to read it, or just use the derived password directly if we can.
+		// For local dev, let's just put the password in a system property
+		// that we can reference.
+
 		System.setProperty("LIFERAY_KEYMANAGER_LOCAL_PWD", passwordString);
 
 		keystoreConfig.update(keystoreProps);
 
 		// Configure DB providers to use keystore-crypto as KEK
+
 		_updateDbProvider(
-			"com.liferay.keymanager.provider.db.internal.configuration.DBSystemCryptoVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.db.internal.configuration." +
+				"DBSystemCryptoVaultProviderConfiguration",
 			"${keyRef:keystore-crypto:local-master-kek}");
 		_updateDbProvider(
-			"com.liferay.keymanager.provider.db.internal.configuration.DBCompanyCryptoVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.db.internal.configuration." +
+				"DBCompanyCryptoVaultProviderConfiguration",
 			"${keyRef:keystore-crypto:local-master-kek}");
 		_updateDbProvider(
-			"com.liferay.keymanager.provider.db.internal.configuration.DBSystemSecretVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.db.internal.configuration." +
+				"DBSystemSecretVaultProviderConfiguration",
 			"${keyRef:keystore-crypto:local-master-kek}");
 		_updateDbProvider(
-			"com.liferay.keymanager.provider.db.internal.configuration.DBCompanySecretVaultProviderConfiguration",
+			"com.liferay.keymanager.provider.db.internal.configuration." +
+				"DBCompanySecretVaultProviderConfiguration",
 			"${keyRef:keystore-crypto:local-master-kek}");
 	}
 
@@ -159,7 +175,7 @@ public class LocalDevKeyManagerProfile implements KeyManagerProfile {
 	private void _updateDbProvider(String pid, String masterKeyRef)
 		throws Exception {
 
-		Configuration config = _configurationAdmin.getConfiguration(pid, null);
+		Configuration config = _configurationAdmin.getConfiguration(pid, "?");
 
 		Dictionary<String, Object> props = config.getProperties();
 

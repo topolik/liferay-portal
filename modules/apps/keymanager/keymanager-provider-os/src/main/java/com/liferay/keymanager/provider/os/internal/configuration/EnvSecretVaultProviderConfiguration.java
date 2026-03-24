@@ -22,7 +22,7 @@ public interface EnvSecretVaultProviderConfiguration {
 
 	@Meta.AD(deflt = "false", name = "enabled", required = false)
 	public boolean enabled();
-	
+
 	@Meta.AD(
 		deflt = "LIFERAY_SECRET_",
 		description = "env-variable-prefix-description",

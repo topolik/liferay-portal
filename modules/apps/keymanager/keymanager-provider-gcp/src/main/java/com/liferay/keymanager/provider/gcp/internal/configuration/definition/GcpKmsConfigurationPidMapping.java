@@ -20,8 +20,8 @@ public class GcpKmsConfigurationPidMapping
 	public GcpKmsConfigurationPidMapping() {
 		super(
 			GcpKmsCompanyCryptoVaultProviderConfiguration.class,
-			GcpKmsCompanyCryptoVaultProviderConfiguration.class.getName()
-				+ ".scoped");
+			GcpKmsCompanyCryptoVaultProviderConfiguration.class.getName() +
+				".scoped");
 	}
 
 }

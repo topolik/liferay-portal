@@ -5,11 +5,6 @@
 
 package com.liferay.keymanager.provider.os.internal;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManagerException;
@@ -33,6 +28,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+
 /**
  * @author Tomas Polesovsky
  */
@@ -47,12 +45,14 @@ public class KeyStoreCryptoVaultProviderTest {
 	public void setUp() throws Exception {
 		_provider = new KeyStoreCryptoVaultProvider();
 
-		_secretManager = mock(SecretManager.class);
+		_secretManager = Mockito.mock(SecretManager.class);
 
 		_provider.setSecretManager(_secretManager);
 
-		when(
-			_secretManager.getSecret(anyLong(), any(KeyReference.class))
+		Mockito.when(
+			_secretManager.getSecret(
+				ArgumentMatchers.anyLong(),
+				ArgumentMatchers.any(KeyReference.class))
 		).thenAnswer(
 			invocation -> new SecureSecret(
 				(KeyReference)invocation.getArgument(1),
@@ -132,15 +132,24 @@ public class KeyStoreCryptoVaultProviderTest {
 
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		_provider.importSecretKey(0L, "delete-me", secretKey.getEncoded(), "AES");
+		_provider.importSecretKey(
+			0L, "delete-me", secretKey.getEncoded(), "AES");
 
 		Assert.assertTrue(
-			_provider.getKeyIdentifiers(0L).contains("delete-me"));
+			_provider.getKeyIdentifiers(
+				0L
+			).contains(
+				"delete-me"
+			));
 
 		_provider.deleteKey(0L, "delete-me");
 
 		Assert.assertFalse(
-			_provider.getKeyIdentifiers(0L).contains("delete-me"));
+			_provider.getKeyIdentifiers(
+				0L
+			).contains(
+				"delete-me"
+			));
 	}
 
 	@Test(expected = CryptoManagerException.class)
@@ -158,7 +167,11 @@ public class KeyStoreCryptoVaultProviderTest {
 		_provider.generateSecretKey(0L, "test-key-gen", "AES");
 
 		Assert.assertTrue(
-			_provider.getKeyIdentifiers(0L).contains("test-key-gen"));
+			_provider.getKeyIdentifiers(
+				0L
+			).contains(
+				"test-key-gen"
+			));
 	}
 
 	@Test
@@ -169,7 +182,8 @@ public class KeyStoreCryptoVaultProviderTest {
 
 		SecretKey secretKey = keyGenerator.generateKey();
 
-		_provider.importSecretKey(0L, "meta-key", secretKey.getEncoded(), "AES");
+		_provider.importSecretKey(
+			0L, "meta-key", secretKey.getEncoded(), "AES");
 
 		CryptoKey metadata = _provider.getKeyMetadata(0L, "meta-key");
 
@@ -193,7 +207,16 @@ public class KeyStoreCryptoVaultProviderTest {
 		// 1. Verify it's in the list
 
 		Assert.assertTrue(
-			_provider.getKeyIdentifiers(0L).contains(identifier));
+			_provider.getKeyIdentifiers(
+				0L
+			).contains(
+				identifier
+			));
+	}
+
+	@Test(expected = CryptoManagerException.class)
+	public void testUnwrapNotSupported() throws Exception {
+		_provider.unwrap(0L, "any", new byte[0], "AES", Cipher.SECRET_KEY);
 	}
 
 	@Test(expected = CryptoManagerException.class)
@@ -205,11 +228,6 @@ public class KeyStoreCryptoVaultProviderTest {
 		SecretKey secretKey = keyGenerator.generateKey();
 
 		_provider.wrap(0L, "any", secretKey);
-	}
-
-	@Test(expected = CryptoManagerException.class)
-	public void testUnwrapNotSupported() throws Exception {
-		_provider.unwrap(0L, "any", new byte[0], "AES", Cipher.SECRET_KEY);
 	}
 
 	@Rule

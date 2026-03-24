@@ -32,7 +32,6 @@ import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.instance.PortalInstancePool;
-import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 
@@ -67,7 +66,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _gcpClientManager.execute(
+			return gcpClientManager.execute(
 				companyId,
 				client -> {
 					String name = _getGcpKeyName(identifier);
@@ -101,7 +100,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _gcpClientManager.execute(
+			return gcpClientManager.execute(
 				companyId,
 				client -> {
 					String name = _getGcpKeyName(identifier);
@@ -127,13 +126,15 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _gcpClientManager.execute(
+			return gcpClientManager.execute(
 				companyId,
 				client -> {
-					com.google.cloud.kms.v1.CryptoKey.Builder cryptoKeyBuilder = com.google.cloud.kms.v1.CryptoKey.newBuilder();
+					com.google.cloud.kms.v1.CryptoKey.Builder cryptoKeyBuilder =
+						com.google.cloud.kms.v1.CryptoKey.newBuilder();
 
 					cryptoKeyBuilder.setPurpose(
-						com.google.cloud.kms.v1.CryptoKey.CryptoKeyPurpose.ASYMMETRIC_DECRYPT);
+						com.google.cloud.kms.v1.CryptoKey.CryptoKeyPurpose.
+							ASYMMETRIC_DECRYPT);
 
 					CryptoKeyVersionTemplate.Builder
 						cryptoKeyVersionTemplateBuilder =
@@ -169,17 +170,19 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _gcpClientManager.execute(
+			return gcpClientManager.execute(
 				companyId,
 				client -> {
 					if (algorithmSpec == null) {
 						return null;
 					}
 
-					com.google.cloud.kms.v1.CryptoKey.Builder cryptoKeyBuilder = com.google.cloud.kms.v1.CryptoKey.newBuilder();
+					com.google.cloud.kms.v1.CryptoKey.Builder cryptoKeyBuilder =
+						com.google.cloud.kms.v1.CryptoKey.newBuilder();
 
 					cryptoKeyBuilder.setPurpose(
-						com.google.cloud.kms.v1.CryptoKey.CryptoKeyPurpose.ENCRYPT_DECRYPT);
+						com.google.cloud.kms.v1.CryptoKey.CryptoKeyPurpose.
+							ENCRYPT_DECRYPT);
 
 					CryptoKeyVersionTemplate.Builder
 						cryptoKeyVersionTemplateBuilder =
@@ -229,19 +232,23 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _gcpClientManager.execute(
+			return gcpClientManager.execute(
 				companyId,
 				client -> {
 					List<String> identifiers = new ArrayList<>();
 
 					ListCryptoKeysRequest request =
 						ListCryptoKeysRequest.newBuilder(
-						).setParent(_keyRingName.toString()).build();
+						).setParent(
+							_keyRingName.toString()
+						).build();
 
 					KeyManagementServiceClient.ListCryptoKeysPagedResponse
 						response = client.listCryptoKeys(request);
 
-					for (com.google.cloud.kms.v1.CryptoKey cryptoKey : response.iterateAll()) {
+					for (com.google.cloud.kms.v1.CryptoKey cryptoKey :
+							response.iterateAll()) {
+
 						String name = cryptoKey.getName();
 
 						identifiers.add(
@@ -264,12 +271,13 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _gcpClientManager.execute(
+			return gcpClientManager.execute(
 				companyId,
 				client -> {
 					String name = _getGcpKeyName(identifier);
 
-					com.google.cloud.kms.v1.CryptoKey cryptoKey = client.getCryptoKey(name);
+					com.google.cloud.kms.v1.CryptoKey cryptoKey =
+						client.getCryptoKey(name);
 
 					Timestamp createTime = cryptoKey.getCreateTime();
 
@@ -381,7 +389,7 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		}
 		finally {
 			if (encoded != null) {
-				java.util.Arrays.fill(encoded, (byte)0);
+				Arrays.fill(encoded, (byte)0);
 			}
 		}
 	}
@@ -396,39 +404,54 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 		if (GetterUtil.getBoolean(properties.get("systemScope"))) {
 			GcpKmsSystemCryptoVaultProviderConfiguration
-				configuration = ConfigurableUtil.createConfigurable(
-					GcpKmsSystemCryptoVaultProviderConfiguration.class,
-					properties);
+				gcpKmsSystemCryptoVaultProviderConfiguration =
+					ConfigurableUtil.createConfigurable(
+						GcpKmsSystemCryptoVaultProviderConfiguration.class,
+						properties);
 
-			_enabled = configuration.enabled();
-			_companyId = PortalInstancePool.getDefaultCompanyId();
-
-			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
+			_enabled = gcpKmsSystemCryptoVaultProviderConfiguration.enabled();
+			gcpAuthKeyReference =
+				gcpKmsSystemCryptoVaultProviderConfiguration.
+					gcpServiceAccountKey();
 			authType = GcpClientManager.AuthType.create(
-				configuration.gcpAuthType());
+				gcpKmsSystemCryptoVaultProviderConfiguration.gcpAuthType());
 			impersonatedServiceAccount =
-				configuration.gcpImpersonatedServiceAccount();
-			keyRingPath = configuration.keyRingPath();
-			newKeyProtectionLevel = configuration.newKeyProtectionLevel();
+				gcpKmsSystemCryptoVaultProviderConfiguration.
+					gcpImpersonatedServiceAccount();
+			keyRingPath =
+				gcpKmsSystemCryptoVaultProviderConfiguration.keyRingPath();
+			newKeyProtectionLevel =
+				gcpKmsSystemCryptoVaultProviderConfiguration.
+					newKeyProtectionLevel();
 			newKeyRotationPeriodSeconds =
-				configuration.newKeyRotationPeriodSeconds();
+				gcpKmsSystemCryptoVaultProviderConfiguration.
+					newKeyRotationPeriodSeconds();
+
+			_companyId = PortalInstancePool.getDefaultCompanyId();
 		}
 		else {
-			GcpKmsCompanyCryptoVaultProviderConfiguration configuration =
-				ConfigurableUtil.createConfigurable(
-					GcpKmsCompanyCryptoVaultProviderConfiguration.class,
-					properties);
+			GcpKmsCompanyCryptoVaultProviderConfiguration
+				gcpKmsCompanyCryptoVaultProviderConfiguration =
+					ConfigurableUtil.createConfigurable(
+						GcpKmsCompanyCryptoVaultProviderConfiguration.class,
+						properties);
 
 			_enabled = true;
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
-				_companyLocalService, properties);
+				companyLocalService, properties);
 
-			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
+			gcpAuthKeyReference =
+				gcpKmsCompanyCryptoVaultProviderConfiguration.
+					gcpServiceAccountKey();
 			authType = GcpClientManager.AuthType.SA_KEY;
-			keyRingPath = configuration.keyRingPath();
-			newKeyProtectionLevel = configuration.newKeyProtectionLevel();
+			keyRingPath =
+				gcpKmsCompanyCryptoVaultProviderConfiguration.keyRingPath();
+			newKeyProtectionLevel =
+				gcpKmsCompanyCryptoVaultProviderConfiguration.
+					newKeyProtectionLevel();
 			newKeyRotationPeriodSeconds =
-				configuration.newKeyRotationPeriodSeconds();
+				gcpKmsCompanyCryptoVaultProviderConfiguration.
+					newKeyRotationPeriodSeconds();
 		}
 
 		_keyRingName = KeyRingName.parse(keyRingPath);
@@ -436,9 +459,9 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 		_protectionLevel = ProtectionLevel.valueOf(newKeyProtectionLevel);
 		_rotationPeriodSeconds = newKeyRotationPeriodSeconds;
 
-		if (_gcpClientManager == null) {
-			_gcpClientManager = new GcpClientManager<>(
-				_secretManager, gcpAuthKeyReference, authType,
+		if (gcpClientManager == null) {
+			gcpClientManager = new GcpClientManager<>(
+				secretManager, gcpAuthKeyReference, authType,
 				impersonatedServiceAccount,
 				fixedCredentialsProvider -> KeyManagementServiceClient.create(
 					KeyManagementServiceSettings.newBuilder(
@@ -447,12 +470,12 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 					).build()));
 		}
 		else {
-			_gcpClientManager.updateConfiguration(
+			gcpClientManager.updateConfiguration(
 				gcpAuthKeyReference, authType, impersonatedServiceAccount);
 		}
 
 		try {
-			_gcpClientManager.execute(
+			gcpClientManager.execute(
 				_companyId,
 				client -> {
 					client.getKeyRing(_keyRingName);
@@ -465,7 +488,9 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 					System.getenv("LIFERAY_KEYMANAGER_FIPS_ENFORCED"))) {
 
 				throw new RuntimeException(
-					"Remediation Hint: ensure Workload Identity and roles/cloudkms.cryptoKeyEncrypterDecrypter are configured.",
+					"Remediation hint: ensure Workload Identity and " +
+						"roles/cloudkms.cryptoKeyEncrypterDecrypter are " +
+							"configured",
 					exception);
 			}
 		}
@@ -473,17 +498,26 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 
 	@Deactivate
 	protected void deactivate() {
-		if (_gcpClientManager != null) {
-			_gcpClientManager.close();
+		if (gcpClientManager != null) {
+			gcpClientManager.close();
 		}
 	}
+
+	@Reference
+	protected CompanyLocalService companyLocalService;
+
+	protected GcpClientManager<KeyManagementServiceClient> gcpClientManager;
+
+	@Reference
+	protected SecretManager secretManager;
 
 	private void _checkPermission(long companyId)
 		throws CryptoManagerException {
 
 		if (!isAllowedCompany(companyId)) {
 			throw new CryptoManagerException(
-				"Company " + companyId + " is not allowed to use this provider");
+				"Company " + companyId +
+					" is not allowed to use this provider");
 		}
 	}
 
@@ -507,21 +541,14 @@ public abstract class BaseGcpKmsCryptoVaultProvider
 	private String _getGcpKeyName(String alias) {
 		return CryptoKeyName.of(
 			_keyRingName.getProject(), _keyRingName.getLocation(),
-			_keyRingName.getKeyRing(), GcpAliasUtil.normalize(alias)).toString();
+			_keyRingName.getKeyRing(), GcpAliasUtil.normalize(alias)
+		).toString();
 	}
 
 	private volatile long _companyId;
 	private volatile boolean _enabled;
-
-	@Reference
-	protected CompanyLocalService _companyLocalService;
-
-	protected GcpClientManager<KeyManagementServiceClient> _gcpClientManager;
 	private volatile KeyRingName _keyRingName;
 	private volatile ProtectionLevel _protectionLevel;
 	private volatile long _rotationPeriodSeconds;
-
-	@Reference
-	protected SecretManager _secretManager;
 
 }

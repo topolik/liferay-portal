@@ -6,12 +6,12 @@
 package com.liferay.keymanager.internal.secret;
 
 import com.liferay.keymanager.KeyReference;
-import com.liferay.keymanager.internal.fips.FipsComplianceChecker;
-import com.liferay.keymanager.internal.profile.ProfileOrchestrator;
 import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.keymanager.spi.fips.FipsComplianceChecker;
 import com.liferay.keymanager.spi.profile.KeyManagerProfile;
+import com.liferay.keymanager.spi.profile.ProfileOrchestrator;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
 import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.keymanager.spi.secret.SecretVaultWriter;
@@ -61,12 +61,15 @@ public class SecretManagerImpl implements SecretManager {
 			secretVaultWriter.deleteSecret(
 				companyId, keyReference.getIdentifier());
 		}
-		catch (SecretManagerException e) {
+		catch (SecretManagerException secretManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to delete secret: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to delete secret: " +
+						secretManagerException.getMessage(),
+					secretManagerException);
 			}
 
-			throw e;
+			throw secretManagerException;
 		}
 	}
 
@@ -78,12 +81,15 @@ public class SecretManagerImpl implements SecretManager {
 			return _getSecretVaultReaderProviderIds(
 				companyId, KeyReference.ANY_PROVIDER);
 		}
-		catch (SecretManagerException e) {
+		catch (SecretManagerException secretManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to get providers: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to get providers: " +
+						secretManagerException.getMessage(),
+					secretManagerException);
 			}
 
-			throw e;
+			throw secretManagerException;
 		}
 	}
 
@@ -96,8 +102,9 @@ public class SecretManagerImpl implements SecretManager {
 		Objects.requireNonNull(keyReference, "No KeyReference provided!");
 
 		try {
-			for (SecretVaultReader reader : _getSecretVaultReaders(
-					companyId, keyReference.getProviderId())) {
+			for (SecretVaultReader reader :
+					_getSecretVaultReaders(
+						companyId, keyReference.getProviderId())) {
 
 				try {
 					SecureSecret secureSecret = reader.getSecret(
@@ -116,12 +123,15 @@ public class SecretManagerImpl implements SecretManager {
 				}
 			}
 		}
-		catch (SecretManagerException e) {
+		catch (SecretManagerException secretManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to get secret: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to get secret: " +
+						secretManagerException.getMessage(),
+					secretManagerException);
 			}
 
-			throw e;
+			throw secretManagerException;
 		}
 
 		return null;
@@ -135,8 +145,8 @@ public class SecretManagerImpl implements SecretManager {
 		List<KeyReference> keyReferences = new ArrayList<>();
 
 		try {
-			for (String trackedProviderId : _getSecretVaultReaderProviderIds(
-					companyId, providerId)) {
+			for (String trackedProviderId :
+					_getSecretVaultReaderProviderIds(companyId, providerId)) {
 
 				SecretVaultReader reader = _readerServiceTrackerMap.getService(
 					trackedProviderId);
@@ -156,13 +166,15 @@ public class SecretManagerImpl implements SecretManager {
 				}
 			}
 		}
-		catch (SecretManagerException e) {
+		catch (SecretManagerException secretManagerException) {
 			if (_log.isWarnEnabled()) {
 				_log.warn(
-					"Unable to list secret identifiers: " + e.getMessage(), e);
+					"Unable to list secret identifiers: " +
+						secretManagerException.getMessage(),
+					secretManagerException);
 			}
 
-			throw e;
+			throw secretManagerException;
 		}
 
 		return keyReferences;
@@ -194,12 +206,15 @@ public class SecretManagerImpl implements SecretManager {
 				KeyReference.Type.SECRET, providerId,
 				keyReference.getIdentifier());
 		}
-		catch (SecretManagerException e) {
+		catch (SecretManagerException secretManagerException) {
 			if (_log.isWarnEnabled()) {
-				_log.warn("Unable to put secret: " + e.getMessage(), e);
+				_log.warn(
+					"Unable to put secret: " +
+						secretManagerException.getMessage(),
+					secretManagerException);
 			}
 
-			throw e;
+			throw secretManagerException;
 		}
 	}
 
@@ -243,8 +258,8 @@ public class SecretManagerImpl implements SecretManager {
 			return activeProfile.getCompanySecretProviderId();
 		}
 
-		for (String trackedProviderId : _getProviderIds(
-				_writerServiceTrackerMap)) {
+		for (String trackedProviderId :
+				_getProviderIds(_writerServiceTrackerMap)) {
 
 			SecretVaultWriter writer = _writerServiceTrackerMap.getService(
 				trackedProviderId);
@@ -256,35 +271,8 @@ public class SecretManagerImpl implements SecretManager {
 
 		throw new SecretManagerException(
 			StringBundler.concat(
-				"No secret vault writer found for ANY provider",
-				" and company ID: ", String.valueOf(companyId)));	}
-
-	private SecretVaultReader _getSecretVaultReader(
-			long companyId, String providerId)
-		throws SecretManagerException {
-
-		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
-			String resolvedProviderId = _getSecretVaultProviderId(companyId);
-
-			SecretVaultReader reader = _readerServiceTrackerMap.getService(
-				resolvedProviderId);
-
-			if (reader != null) {
-				return reader;
-			}
-		}
-
-		SecretVaultReader reader = _readerServiceTrackerMap.getService(
-			providerId);
-
-		if ((reader != null) && reader.isAllowedCompany(companyId)) {
-			return reader;
-		}
-
-		throw new SecretManagerException(
-			StringBundler.concat(
-				"No secret vault reader found for ID: ", providerId,
-				" and company ID: ", String.valueOf(companyId)));
+				"No secret vault writer found for ANY provider and company ",
+				"ID: ", companyId));
 	}
 
 	private List<String> _getSecretVaultReaderProviderIds(
@@ -292,7 +280,8 @@ public class SecretManagerImpl implements SecretManager {
 		throws SecretManagerException {
 
 		if (Objects.equals(providerId, KeyReference.ANY_PROVIDER)) {
-			return Collections.singletonList(_getSecretVaultProviderId(companyId));
+			return Collections.singletonList(
+				_getSecretVaultProviderId(companyId));
 		}
 
 		return Collections.singletonList(providerId);
@@ -304,8 +293,8 @@ public class SecretManagerImpl implements SecretManager {
 
 		List<SecretVaultReader> readers = new ArrayList<>();
 
-		for (String id : _getSecretVaultReaderProviderIds(
-				companyId, providerId)) {
+		for (String id :
+				_getSecretVaultReaderProviderIds(companyId, providerId)) {
 
 			SecretVaultReader reader = _readerServiceTrackerMap.getService(id);
 
@@ -316,7 +305,7 @@ public class SecretManagerImpl implements SecretManager {
 				throw new SecretManagerException(
 					StringBundler.concat(
 						"No secret vault reader found for ID: ", id,
-						" and company ID: ", String.valueOf(companyId)));
+						" and company ID: ", companyId));
 			}
 		}
 
@@ -325,8 +314,8 @@ public class SecretManagerImpl implements SecretManager {
 
 			throw new SecretManagerException(
 				StringBundler.concat(
-					"No secret vault reader found for ANY provider",
-					" and company ID: ", String.valueOf(companyId)));
+					"No secret vault reader found for ANY provider and ",
+					"company ID: ", companyId));
 		}
 
 		return readers;
@@ -346,7 +335,7 @@ public class SecretManagerImpl implements SecretManager {
 		throw new SecretManagerException(
 			StringBundler.concat(
 				"No secret vault writer found for ID: ", providerId,
-				" and company ID: ", String.valueOf(companyId)));
+				" and company ID: ", companyId));
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
@@ -358,7 +347,9 @@ public class SecretManagerImpl implements SecretManager {
 	@Reference
 	private ProfileOrchestrator _profileOrchestrator;
 
-	private ServiceTrackerMap<String, SecretVaultReader> _readerServiceTrackerMap;
-	private ServiceTrackerMap<String, SecretVaultWriter> _writerServiceTrackerMap;
+	private ServiceTrackerMap<String, SecretVaultReader>
+		_readerServiceTrackerMap;
+	private ServiceTrackerMap<String, SecretVaultWriter>
+		_writerServiceTrackerMap;
 
 }

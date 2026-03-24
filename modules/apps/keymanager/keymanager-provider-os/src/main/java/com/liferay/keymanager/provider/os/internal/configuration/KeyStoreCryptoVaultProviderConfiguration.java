@@ -20,32 +20,31 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
 )
 public interface KeyStoreCryptoVaultProviderConfiguration {
 
-	@Meta.AD(deflt = "false", name = "enabled", required = false)
-	public boolean enabled();
-	
 	@Meta.AD(
 		deflt = "true", description = "auto-create-description",
 		name = "auto-create", required = false
 	)
 	public boolean autoCreate();
 
+	@Meta.AD(deflt = "false", name = "enabled", required = false)
+	public boolean enabled();
+
 	@Meta.AD(
 		deflt = "${secretRef:env:CRYPTO_VAULT_KEYSTORE_PASSWORD}",
 		description = "keystore-password-description",
-		name = "keystore-password", required = true
+		name = "keystore-password"
 	)
 	public String keystorePassword();
 
 	@Meta.AD(
 		deflt = "${liferay.home}/data/crypto_vault_keystore.p12",
-		description = "keystore-path-description", name = "keystore-path",
-		required = true
+		description = "keystore-path-description", name = "keystore-path"
 	)
 	public String keystorePath();
 
 	@Meta.AD(
 		deflt = "PKCS12", description = "keystore-type-description",
-		name = "keystore-type", required = true
+		name = "keystore-type"
 	)
 	public String keystoreType();
 

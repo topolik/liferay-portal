@@ -31,16 +31,14 @@ import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.keymanager.secret.SecretManagerException;
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultProvider;
-import com.liferay.keymanager.util.GcpAliasUtil;
 import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.keymanager.spi.secret.SecretVaultWriter;
+import com.liferay.keymanager.util.GcpAliasUtil;
 import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
-import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.instance.PortalInstancePool;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -50,6 +48,7 @@ import com.liferay.portal.kernel.util.Validator;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -69,14 +68,15 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			_gcpClientManager.execute(
+			gcpClientManager.execute(
 				companyId,
 				client -> {
 					DeleteSecretRequest request =
 						DeleteSecretRequest.newBuilder(
 						).setName(
 							SecretName.of(
-								_projectId, _getSecretId(identifier)).toString()
+								_projectId, _getSecretId(identifier)
+							).toString()
 						).build();
 
 					client.deleteSecret(request);
@@ -97,12 +97,13 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _gcpClientManager.execute(
+			return gcpClientManager.execute(
 				companyId,
 				client -> {
 					String name = SecretVersionName.of(
 						_projectId, _getSecretId(identifier),
-						_getVersionId(identifier)).toString();
+						_getVersionId(identifier)
+					).toString();
 
 					AccessSecretVersionResponse response =
 						client.accessSecretVersion(name);
@@ -120,7 +121,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 					}
 					finally {
 						if (bytes != null) {
-							java.util.Arrays.fill(bytes, (byte)0);
+							Arrays.fill(bytes, (byte)0);
 						}
 					}
 				});
@@ -138,13 +139,17 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _gcpClientManager.execute(
+			return gcpClientManager.execute(
 				companyId,
 				client -> {
 					List<String> identifiers = new ArrayList<>();
 
 					ListSecretsRequest request = ListSecretsRequest.newBuilder(
-					).setParent(ProjectName.of(_projectId).toString()).build();
+					).setParent(
+						ProjectName.of(
+							_projectId
+						).toString()
+					).build();
 
 					SecretManagerServiceClient.ListSecretsPagedResponse
 						response = client.listSecrets(request);
@@ -185,7 +190,7 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			_gcpClientManager.execute(
+			gcpClientManager.execute(
 				companyId,
 				client -> {
 					KeyReference keyReference = secureSecret.getKeyReference();
@@ -194,7 +199,8 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 						keyReference.getIdentifier());
 
 					String secretPath = SecretName.of(
-						_projectId, secretId).toString();
+						_projectId, secretId
+					).toString();
 
 					// 1. Ensure secret exists
 
@@ -259,7 +265,9 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 						CreateSecretRequest createSecretRequest =
 							CreateSecretRequest.newBuilder(
 							).setParent(
-								ProjectName.of(_projectId).toString()
+								ProjectName.of(
+									_projectId
+								).toString()
 							).setSecretId(
 								secretId
 							).setSecret(
@@ -304,42 +312,67 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 
 		if (GetterUtil.getBoolean(properties.get("systemScope"))) {
 			GcpSecretManagerSystemSecretVaultProviderConfiguration
-				configuration = ConfigurableUtil.createConfigurable(
-					GcpSecretManagerSystemSecretVaultProviderConfiguration.class,
-					properties);
+				gcpSecretManagerSystemSecretVaultProviderConfiguration =
+					ConfigurableUtil.createConfigurable(
+						GcpSecretManagerSystemSecretVaultProviderConfiguration.
+							class,
+						properties);
 
-			_enabled = configuration.enabled();
-			_companyId = PortalInstancePool.getDefaultCompanyId();
-			_projectId = configuration.projectId();
-			_kmsKeyName = configuration.kmsKeyName();
-			_locations = configuration.locations();
+			_enabled =
+				gcpSecretManagerSystemSecretVaultProviderConfiguration.
+					enabled();
+			_projectId =
+				gcpSecretManagerSystemSecretVaultProviderConfiguration.
+					projectId();
+			_kmsKeyName =
+				gcpSecretManagerSystemSecretVaultProviderConfiguration.
+					kmsKeyName();
+			_locations =
+				gcpSecretManagerSystemSecretVaultProviderConfiguration.
+					locations();
 
-			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
+			gcpAuthKeyReference =
+				gcpSecretManagerSystemSecretVaultProviderConfiguration.
+					gcpServiceAccountKey();
 			authType = GcpClientManager.AuthType.create(
-				configuration.gcpAuthType());
+				gcpSecretManagerSystemSecretVaultProviderConfiguration.
+					gcpAuthType());
 			impersonatedServiceAccount =
-				configuration.gcpImpersonatedServiceAccount();
+				gcpSecretManagerSystemSecretVaultProviderConfiguration.
+					gcpImpersonatedServiceAccount();
+
+			_companyId = PortalInstancePool.getDefaultCompanyId();
 		}
 		else {
 			GcpSecretManagerCompanySecretVaultProviderConfiguration
-				configuration = ConfigurableUtil.createConfigurable(
-					GcpSecretManagerCompanySecretVaultProviderConfiguration.class,
-					properties);
+				gcpSecretManagerCompanySecretVaultProviderConfiguration =
+					ConfigurableUtil.createConfigurable(
+						GcpSecretManagerCompanySecretVaultProviderConfiguration.
+							class,
+						properties);
 
 			_enabled = true;
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
-				_companyLocalService, properties);
-			_projectId = configuration.projectId();
-			_kmsKeyName = configuration.kmsKeyName();
-			_locations = configuration.locations();
+				companyLocalService, properties);
+			_projectId =
+				gcpSecretManagerCompanySecretVaultProviderConfiguration.
+					projectId();
+			_kmsKeyName =
+				gcpSecretManagerCompanySecretVaultProviderConfiguration.
+					kmsKeyName();
+			_locations =
+				gcpSecretManagerCompanySecretVaultProviderConfiguration.
+					locations();
 
-			gcpAuthKeyReference = configuration.gcpServiceAccountKey();
+			gcpAuthKeyReference =
+				gcpSecretManagerCompanySecretVaultProviderConfiguration.
+					gcpServiceAccountKey();
 			authType = GcpClientManager.AuthType.SA_KEY;
 		}
 
-		if (_gcpClientManager == null) {
-			_gcpClientManager = new GcpClientManager<>(
-				_secretManager, gcpAuthKeyReference, authType,
+		if (gcpClientManager == null) {
+			gcpClientManager = new GcpClientManager<>(
+				secretManager, gcpAuthKeyReference, authType,
 				impersonatedServiceAccount,
 				fixedCredentialsProvider -> SecretManagerServiceClient.create(
 					SecretManagerServiceSettings.newBuilder(
@@ -348,12 +381,12 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 					).build()));
 		}
 		else {
-			_gcpClientManager.updateConfiguration(
+			gcpClientManager.updateConfiguration(
 				gcpAuthKeyReference, authType, impersonatedServiceAccount);
 		}
 
 		try {
-			_gcpClientManager.execute(
+			gcpClientManager.execute(
 				_companyId,
 				client -> {
 					client.listSecrets(ProjectName.of(_projectId));
@@ -366,7 +399,8 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 					System.getenv("LIFERAY_KEYMANAGER_FIPS_ENFORCED"))) {
 
 				throw new RuntimeException(
-					"Remediation Hint: ensure roles/secretmanager.secretAccessor is configured.",
+					"Remediation hint: ensure " +
+						"roles/secretmanager.secretAccessor is configured",
 					exception);
 			}
 		}
@@ -374,17 +408,26 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 
 	@Deactivate
 	protected void deactivate() {
-		if (_gcpClientManager != null) {
-			_gcpClientManager.close();
+		if (gcpClientManager != null) {
+			gcpClientManager.close();
 		}
 	}
+
+	@Reference
+	protected CompanyLocalService companyLocalService;
+
+	protected GcpClientManager<SecretManagerServiceClient> gcpClientManager;
+
+	@Reference
+	protected SecretManager secretManager;
 
 	private void _checkPermission(long companyId)
 		throws SecretManagerException {
 
 		if (!isAllowedCompany(companyId)) {
 			throw new SecretManagerException(
-				"Company " + companyId + " is not allowed to use this provider");
+				"Company " + companyId +
+					" is not allowed to use this provider");
 		}
 	}
 
@@ -410,18 +453,11 @@ public abstract class BaseGcpSecretManagerSecretVaultProvider
 		return "latest";
 	}
 
-	protected static final Log _log = LogFactoryUtil.getLog(
+	private static final Log _log = LogFactoryUtil.getLog(
 		BaseGcpSecretManagerSecretVaultProvider.class);
-
-	@Reference
-	protected CompanyLocalService _companyLocalService;
-
-	@Reference
-	protected SecretManager _secretManager;
 
 	private volatile long _companyId;
 	private volatile boolean _enabled;
-	protected GcpClientManager<SecretManagerServiceClient> _gcpClientManager;
 	private volatile String _kmsKeyName;
 	private volatile String[] _locations;
 	private volatile String _projectId;

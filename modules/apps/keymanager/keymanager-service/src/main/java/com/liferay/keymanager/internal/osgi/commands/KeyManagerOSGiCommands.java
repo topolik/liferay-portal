@@ -43,7 +43,9 @@ import org.osgi.service.component.annotations.Reference;
 )
 public class KeyManagerOSGiCommands implements OSGiCommands {
 
-	@Descriptor("Decrypt data: decrypt <companyId> <keyReferenceString> <base64Ciphertext>")
+	@Descriptor(
+		"Decrypt data: decrypt <companyId> <keyReferenceString> <base64Ciphertext>"
+	)
 	public String decrypt(
 		long companyId, String keyReferenceString, String base64Ciphertext) {
 
@@ -51,13 +53,12 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 			byte[] ciphertext = Base64.decode(base64Ciphertext);
 
 			byte[] plaintext = _cryptoManager.decrypt(
-				companyId, _parseKeyReference(keyReferenceString),
-				ciphertext);
+				companyId, _parseKeyReference(keyReferenceString), ciphertext);
 
 			return new String(plaintext);
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
@@ -69,8 +70,8 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 
 			return "Key deleted successfully";
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
@@ -82,12 +83,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 
 			return "Secret deleted successfully";
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
-	@Descriptor("Encrypt data: encrypt <companyId> <keyReferenceString> <plaintext>")
+	@Descriptor(
+		"Encrypt data: encrypt <companyId> <keyReferenceString> <plaintext>"
+	)
 	public String encrypt(
 		long companyId, String keyReferenceString, String plaintext) {
 
@@ -98,12 +101,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 
 			return Base64.encode(ciphertext);
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
-	@Descriptor("Generate asymmetric key pair: generateAsymmetricKeyPair <companyId> <providerId> <identifier> <algorithmSpec>")
+	@Descriptor(
+		"Generate asymmetric key pair: generateAsymmetricKeyPair <companyId> <providerId> <identifier> <algorithmSpec>"
+	)
 	public String generateAsymmetricKeyPair(
 		long companyId, String providerId, String identifier,
 		String algorithmSpec) {
@@ -115,12 +120,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 
 			return "Generated Key Pair: " + keyReference.toString();
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
-	@Descriptor("Generate secret key: generateSecretKey <companyId> <providerId> <identifier> <algorithmSpec>")
+	@Descriptor(
+		"Generate secret key: generateSecretKey <companyId> <providerId> <identifier> <algorithmSpec>"
+	)
 	public String generateSecretKey(
 		long companyId, String providerId, String identifier,
 		String algorithmSpec) {
@@ -131,8 +138,8 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 
 			return "Generated Key: " + keyReference.toString();
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
@@ -145,12 +152,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 				System.out.println(provider);
 			}
 		}
-		catch (Exception e) {
-			System.out.println("Error: " + e.getMessage());
+		catch (Exception exception) {
+			System.out.println("Error: " + exception.getMessage());
 		}
 	}
 
-	@Descriptor("List key identifiers: getKeyIdentifiers <companyId> <providerId>")
+	@Descriptor(
+		"List key identifiers: getKeyIdentifiers <companyId> <providerId>"
+	)
 	public void getKeyIdentifiers(long companyId, String providerId) {
 		try {
 			List<KeyReference> keyReferences = _cryptoManager.getKeyIdentifiers(
@@ -160,12 +169,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 				System.out.println(keyReference);
 			}
 		}
-		catch (Exception e) {
-			System.out.println("Error: " + e.getMessage());
+		catch (Exception exception) {
+			System.out.println("Error: " + exception.getMessage());
 		}
 	}
 
-	@Descriptor("Get key metadata: getKeyMetadata <companyId> <keyReferenceString>")
+	@Descriptor(
+		"Get key metadata: getKeyMetadata <companyId> <keyReferenceString>"
+	)
 	public String getKeyMetadata(long companyId, String keyReferenceString) {
 		try {
 			CryptoKey cryptoKeyMetadata = _cryptoManager.getKeyMetadata(
@@ -176,8 +187,8 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 				", Cipher Spec: ", cryptoKeyMetadata.getCipherSpec(),
 				", Created: ", cryptoKeyMetadata.getCreationDate());
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
@@ -195,12 +206,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 			return StringBundler.concat(
 				"Secret length: ", bytes.length, " bytes (Value is masked)");
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
-	@Descriptor("List secret identifiers: getSecretIdentifiers <companyId> <providerId>")
+	@Descriptor(
+		"List secret identifiers: getSecretIdentifiers <companyId> <providerId>"
+	)
 	public void getSecretIdentifiers(long companyId, String providerId) {
 		try {
 			List<KeyReference> keyReferences =
@@ -210,8 +223,8 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 				System.out.println(keyReference);
 			}
 		}
-		catch (Exception e) {
-			System.out.println("Error: " + e.getMessage());
+		catch (Exception exception) {
+			System.out.println("Error: " + exception.getMessage());
 		}
 	}
 
@@ -224,12 +237,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 				System.out.println(provider);
 			}
 		}
-		catch (Exception e) {
-			System.out.println("Error: " + e.getMessage());
+		catch (Exception exception) {
+			System.out.println("Error: " + exception.getMessage());
 		}
 	}
 
-	@Descriptor("Import secret key: importSecretKey <companyId> <providerId> <identifier> <base64RawKey> <algorithmSpec>")
+	@Descriptor(
+		"Import secret key: importSecretKey <companyId> <providerId> <identifier> <base64RawKey> <algorithmSpec>"
+	)
 	public String importSecretKey(
 		long companyId, String providerId, String identifier,
 		String base64RawKey, String algorithmSpec) {
@@ -241,12 +256,14 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 
 			return "Imported Key: " + keyReference.toString();
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 
-	@Descriptor("Put secret: putSecret <companyId> <providerId> <identifier> <secretValue>")
+	@Descriptor(
+		"Put secret: putSecret <companyId> <providerId> <identifier> <secretValue>"
+	)
 	public String putSecret(
 		long companyId, String providerId, String identifier,
 		String secretValue) {
@@ -262,8 +279,8 @@ public class KeyManagerOSGiCommands implements OSGiCommands {
 
 			return "Secret stored successfully";
 		}
-		catch (Exception e) {
-			return "Error: " + e.getMessage();
+		catch (Exception exception) {
+			return "Error: " + exception.getMessage();
 		}
 	}
 

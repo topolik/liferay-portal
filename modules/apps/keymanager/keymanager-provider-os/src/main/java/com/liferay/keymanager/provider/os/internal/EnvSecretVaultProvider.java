@@ -10,9 +10,11 @@ import com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultP
 import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.secret.SecretVaultReader;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,6 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 
 	@Override
 	public SecureSecret getSecret(long companyId, String identifier) {
-
 		String value = getEnv(identifier);
 
 		if (Validator.isNull(value)) {
@@ -54,7 +55,7 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 		}
 		finally {
 			if (bytes != null) {
-				java.util.Arrays.fill(bytes, (byte)0);
+				Arrays.fill(bytes, (byte)0);
 			}
 		}
 	}
@@ -70,19 +71,16 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
-		if (!_enabled) {
-			return false;
-		}
-
-		return true;
+		return _enabled;
 	}
 
 	@Activate
 	@Modified
 	protected void activate(Map<String, Object> properties) {
-		EnvSecretVaultProviderConfiguration envSecretVaultProviderConfiguration =
-			ConfigurableUtil.createConfigurable(
-				EnvSecretVaultProviderConfiguration.class, properties);
+		EnvSecretVaultProviderConfiguration
+			envSecretVaultProviderConfiguration =
+				ConfigurableUtil.createConfigurable(
+					EnvSecretVaultProviderConfiguration.class, properties);
 
 		_enabled = envSecretVaultProviderConfiguration.enabled();
 
@@ -93,27 +91,28 @@ public class EnvSecretVaultProvider implements SecretVaultReader {
 
 		for (String key : getSystemEnv().keySet()) {
 			if (Validator.isNull(envVariablePrefix)) {
-				_envKeysMap.put(key.toLowerCase(), key);
+				_envKeysMap.put(StringUtil.toLowerCase(key), key);
 			}
 			else {
-				String lowerCaseKey = key.toLowerCase();
-				String lowerCasePrefix = envVariablePrefix.toLowerCase();
+				String lowerCaseKey = StringUtil.toLowerCase(key);
+				String lowerCasePrefix = StringUtil.toLowerCase(
+					envVariablePrefix);
 
 				if (lowerCaseKey.startsWith(lowerCasePrefix)) {
 					_envKeysMap.put(
-						lowerCaseKey.substring(lowerCasePrefix.length()),
-						key);
+						lowerCaseKey.substring(lowerCasePrefix.length()), key);
 				}
 			}
 		}
 	}
 
-	protected Map<String, String> getSystemEnv() {
-		return System.getenv();
+	protected String getEnv(String name) {
+		return getSystemEnv().get(
+			_envKeysMap.get(StringUtil.toLowerCase(name)));
 	}
 
-	protected String getEnv(String name) {
-		return getSystemEnv().get(_envKeysMap.get(name.toLowerCase()));
+	protected Map<String, String> getSystemEnv() {
+		return System.getenv();
 	}
 
 	private volatile boolean _enabled;

@@ -7,7 +7,7 @@ package com.liferay.keymanager.internal.diagnostic;
 
 import com.liferay.keymanager.diagnostic.KeyManagerDiagnosticResult;
 import com.liferay.keymanager.diagnostic.KeyManagerDiagnosticTask;
-import com.liferay.keymanager.internal.fips.FipsComplianceChecker;
+import com.liferay.keymanager.spi.fips.FipsComplianceChecker;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -26,9 +26,9 @@ public class FipsHealthCheck implements KeyManagerDiagnosticTask {
 			return KeyManagerDiagnosticResult.ok(
 				"FIPS compliance check passed.");
 		}
-		catch (Exception e) {
+		catch (Exception exception) {
 			return KeyManagerDiagnosticResult.fail(
-				"FIPS compliance violation: " + e.getMessage());
+				"FIPS compliance violation: " + exception.getMessage());
 		}
 	}
 

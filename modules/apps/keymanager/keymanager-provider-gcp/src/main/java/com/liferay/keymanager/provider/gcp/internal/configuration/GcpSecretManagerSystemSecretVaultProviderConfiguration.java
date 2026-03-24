@@ -13,8 +13,7 @@ import com.liferay.portal.configuration.metatype.annotations.ExtendedObjectClass
  * @author Tomas Polesovsky
  */
 @ExtendedObjectClassDefinition(
-	category = "keymanager",
-	scope = ExtendedObjectClassDefinition.Scope.SYSTEM
+	category = "keymanager", scope = ExtendedObjectClassDefinition.Scope.SYSTEM
 )
 @Meta.OCD(
 	id = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSystemSecretVaultProviderConfiguration",
@@ -30,8 +29,7 @@ public interface GcpSecretManagerSystemSecretVaultProviderConfiguration {
 		deflt = "adc", description = "gcp-auth-type-description",
 		name = "gcp-auth-type",
 		optionLabels = {"ADC", "Impersonation", "Service Account Key"},
-		optionValues = {"adc", "impersonation", "sa-key"},
-		required = false
+		optionValues = {"adc", "impersonation", "sa-key"}, required = false
 	)
 	public String gcpAuthType();
 

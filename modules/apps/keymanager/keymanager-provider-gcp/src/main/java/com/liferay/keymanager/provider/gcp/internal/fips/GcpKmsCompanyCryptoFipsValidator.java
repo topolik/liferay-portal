@@ -10,6 +10,7 @@ import com.liferay.keymanager.spi.fips.FipsValidator;
 import com.liferay.portal.kernel.util.GetterUtil;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.osgi.service.component.annotations.Component;
 
@@ -21,7 +22,8 @@ public class GcpKmsCompanyCryptoFipsValidator extends BaseGcpFipsValidator {
 
 	@Override
 	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration";
+		return "com.liferay.keymanager.provider.gcp.internal.configuration." +
+			"GcpKmsCompanyCryptoVaultProviderConfiguration";
 	}
 
 	@Override
@@ -33,8 +35,8 @@ public class GcpKmsCompanyCryptoFipsValidator extends BaseGcpFipsValidator {
 		String protectionLevel = GetterUtil.getString(
 			properties.get("new-key-protection-level"));
 
-		if (!"HSM".equals(protectionLevel)) {
-			return FipsReport.nonCompliant(
+		if (!Objects.equals(protectionLevel, "HSM")) {
+			return FipsReport.noncompliant(
 				"Only HSM protection level is allowed when FIPS is enforced.");
 		}
 

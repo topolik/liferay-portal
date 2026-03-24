@@ -17,7 +17,8 @@ public class KeyStoreCryptoFipsValidator extends BaseOsFipsValidator {
 
 	@Override
 	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.os.internal.configuration.KeyStoreCryptoVaultProviderConfiguration";
+		return "com.liferay.keymanager.provider.os.internal.configuration." +
+			"KeyStoreCryptoVaultProviderConfiguration";
 	}
 
 }

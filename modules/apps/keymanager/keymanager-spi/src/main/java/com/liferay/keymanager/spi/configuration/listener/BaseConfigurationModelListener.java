@@ -5,6 +5,7 @@
 
 package com.liferay.keymanager.spi.configuration.listener;
 
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListener;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListenerException;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -41,18 +42,20 @@ public abstract class BaseConfigurationModelListener<T>
 			return;
 		}
 
-		long companyId = GetterUtil.getLong(properties.get("companyId"), 0);
+		long companyId = GetterUtil.getLong(properties.get("companyId"));
 
 		try {
 			Configuration[] configurations =
-				_configurationAdmin.listConfigurations(
-					"(&(providerId=" + providerId + ")(service.pid=*" +
-						_configurationClass.getSimpleName() + "*))");
+				configurationAdmin.listConfigurations(
+					StringBundler.concat(
+						"(&(providerId=", providerId, ")(service.pid=*",
+						_configurationClass.getSimpleName(), "*))"));
 
 			if (configurations == null) {
-				configurations = _configurationAdmin.listConfigurations(
-					"(&(provider-id=" + providerId + ")(service.pid=*" +
-						_configurationClass.getSimpleName() + "*))");
+				configurations = configurationAdmin.listConfigurations(
+					StringBundler.concat(
+						"(&(provider-id=", providerId, ")(service.pid=*",
+						_configurationClass.getSimpleName(), "*))"));
 			}
 
 			if (configurations != null) {
@@ -67,7 +70,7 @@ public abstract class BaseConfigurationModelListener<T>
 						configuration.getProperties();
 
 					long existingCompanyId = GetterUtil.getLong(
-						existingProperties.get("companyId"), 0);
+						existingProperties.get("companyId"));
 
 					if (companyId == existingCompanyId) {
 						throw new ConfigurationModelListenerException(
@@ -78,17 +81,19 @@ public abstract class BaseConfigurationModelListener<T>
 				}
 			}
 		}
-		catch (ConfigurationModelListenerException cmle) {
-			throw cmle;
+		catch (ConfigurationModelListenerException
+					configurationModelListenerException) {
+
+			throw configurationModelListenerException;
 		}
-		catch (Exception e) {
+		catch (Exception exception) {
 			throw new ConfigurationModelListenerException(
-				e, _configurationClass, getClass(), properties);
+				exception, _configurationClass, getClass(), properties);
 		}
 	}
 
 	@Reference
-	private ConfigurationAdmin _configurationAdmin;
+	protected ConfigurationAdmin configurationAdmin;
 
 	private final Class<T> _configurationClass;
 

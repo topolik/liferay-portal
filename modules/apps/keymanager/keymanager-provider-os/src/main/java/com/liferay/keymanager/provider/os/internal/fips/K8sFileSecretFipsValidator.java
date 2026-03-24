@@ -17,7 +17,8 @@ public class K8sFileSecretFipsValidator extends BaseOsFipsValidator {
 
 	@Override
 	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.os.internal.configuration.K8sFileSecretVaultProviderConfiguration";
+		return "com.liferay.keymanager.provider.os.internal.configuration." +
+			"K8sFileSecretVaultProviderConfiguration";
 	}
 
 }

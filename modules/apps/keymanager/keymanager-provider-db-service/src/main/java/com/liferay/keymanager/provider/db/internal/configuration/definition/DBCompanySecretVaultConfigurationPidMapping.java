@@ -20,8 +20,8 @@ public class DBCompanySecretVaultConfigurationPidMapping
 	public DBCompanySecretVaultConfigurationPidMapping() {
 		super(
 			DBCompanySecretVaultProviderConfiguration.class,
-			DBCompanySecretVaultProviderConfiguration.class.getName()
-				+ ".scoped");
+			DBCompanySecretVaultProviderConfiguration.class.getName() +
+				".scoped");
 	}
 
 }

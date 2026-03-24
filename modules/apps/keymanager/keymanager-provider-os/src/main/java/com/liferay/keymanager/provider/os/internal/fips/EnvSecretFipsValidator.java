@@ -17,7 +17,8 @@ public class EnvSecretFipsValidator extends BaseOsFipsValidator {
 
 	@Override
 	public String getConfigurationPid() {
-		return "com.liferay.keymanager.provider.os.internal.configuration.EnvSecretVaultProviderConfiguration";
+		return "com.liferay.keymanager.provider.os.internal.configuration." +
+			"EnvSecretVaultProviderConfiguration";
 	}
 
 }

@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: LGPL-2.1-or-later OR LicenseRef-Liferay-DXP-EULA-2.0.0-2023-06
  */
 
-package com.liferay.keymanager.internal.fips;
+package com.liferay.keymanager.internal.configuration.persistence.listener;
 
+import com.liferay.keymanager.spi.fips.FipsComplianceChecker;
 import com.liferay.keymanager.spi.fips.FipsReport;
 import com.liferay.keymanager.spi.fips.FipsValidator;
 import com.liferay.osgi.service.tracker.collections.map.ServiceReferenceMapper;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListener;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListenerException;
 import com.liferay.portal.kernel.log.Log;
@@ -74,8 +76,9 @@ public class KeyManagerConfigurationModelListener
 
 			if (_log.isWarnEnabled()) {
 				_log.warn(
-					"Configuration " + pid + " is not FIPS compliant: " +
-						fipsReport.getViolationMessage());
+					StringBundler.concat(
+						"Configuration ", pid, " is not FIPS compliant: ",
+						fipsReport.getViolationMessage()));
 			}
 		}
 	}

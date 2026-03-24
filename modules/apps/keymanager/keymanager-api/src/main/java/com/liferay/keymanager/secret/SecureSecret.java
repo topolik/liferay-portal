@@ -7,13 +7,14 @@ package com.liferay.keymanager.secret;
 
 import com.liferay.keymanager.KeyReference;
 
-import javax.security.auth.Destroyable;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import java.util.Arrays;
+
+import javax.security.auth.Destroyable;
 
 /**
  * @author Tomas Polesovsky
@@ -30,7 +31,7 @@ public final class SecureSecret implements AutoCloseable, Destroyable {
 			_bytes = Arrays.copyOf(bytes, bytes.length);
 		}
 	}
-	
+
 	public SecureSecret(KeyReference keyReference, char[] chars) {
 		_keyReference = keyReference;
 
@@ -40,8 +41,8 @@ public final class SecureSecret implements AutoCloseable, Destroyable {
 		else {
 			_chars = Arrays.copyOf(chars, chars.length);
 
-			ByteBuffer byteBuffer = 
-				StandardCharsets.UTF_8.encode(CharBuffer.wrap(chars));
+			ByteBuffer byteBuffer = StandardCharsets.UTF_8.encode(
+				CharBuffer.wrap(chars));
 
 			_bytes = new byte[byteBuffer.remaining()];
 
@@ -50,7 +51,7 @@ public final class SecureSecret implements AutoCloseable, Destroyable {
 	}
 
 	public SecureSecret(KeyReference keyReference, String value) {
-		this(keyReference, value != null ? value.toCharArray() : null);
+		this(keyReference, (value != null) ? value.toCharArray() : null);
 	}
 
 	@Override
@@ -71,11 +72,6 @@ public final class SecureSecret implements AutoCloseable, Destroyable {
 		}
 	}
 
-	@Override
-	public synchronized boolean isDestroyed() {
-		return _destroyed;
-	}
-
 	public synchronized byte[] getBytes() {
 		if (_destroyed) {
 			throw new IllegalArgumentException("Secret is destroyed");
@@ -85,14 +81,23 @@ public final class SecureSecret implements AutoCloseable, Destroyable {
 	}
 
 	public char[] getChars() {
-		return getChars(StandardCharsets.UTF_8);
+		return _getChars(StandardCharsets.UTF_8);
 	}
 
-	private synchronized char[] getChars(Charset charset) {
+	public KeyReference getKeyReference() {
+		return _keyReference;
+	}
+
+	@Override
+	public synchronized boolean isDestroyed() {
+		return _destroyed;
+	}
+
+	private synchronized char[] _getChars(Charset charset) {
 		if (_destroyed) {
 			throw new IllegalArgumentException("Secret is destroyed");
 		}
-		
+
 		if (_chars != null) {
 			return _chars;
 		}
@@ -106,12 +111,9 @@ public final class SecureSecret implements AutoCloseable, Destroyable {
 		return _chars;
 	}
 
-	public KeyReference getKeyReference() {
-		return _keyReference;
-	}
-
 	private volatile byte[] _bytes;
 	private volatile char[] _chars;
 	private volatile boolean _destroyed;
 	private final KeyReference _keyReference;
+
 }

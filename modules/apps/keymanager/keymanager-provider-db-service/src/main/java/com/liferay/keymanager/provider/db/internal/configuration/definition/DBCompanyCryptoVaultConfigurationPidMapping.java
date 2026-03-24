@@ -20,8 +20,8 @@ public class DBCompanyCryptoVaultConfigurationPidMapping
 	public DBCompanyCryptoVaultConfigurationPidMapping() {
 		super(
 			DBCompanyCryptoVaultProviderConfiguration.class,
-			DBCompanyCryptoVaultProviderConfiguration.class.getName()
-				+ ".scoped");
+			DBCompanyCryptoVaultProviderConfiguration.class.getName() +
+				".scoped");
 	}
 
 }

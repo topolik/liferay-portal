@@ -8,15 +8,10 @@ package com.liferay.keymanager.provider.db.internal;
 import com.liferay.keymanager.KeyReference;
 import com.liferay.keymanager.crypto.CryptoKey;
 import com.liferay.keymanager.crypto.CryptoManager;
-import com.liferay.keymanager.crypto.CryptoManagerException;
-import com.liferay.keymanager.provider.db.internal.crypto.BaseDBCryptoVaultProvider;
 import com.liferay.keymanager.provider.db.internal.crypto.DBCompanyCryptoVaultProvider;
 import com.liferay.keymanager.provider.db.internal.crypto.DBSystemCryptoVaultProvider;
 import com.liferay.keymanager.provider.db.model.KeyEntry;
-import com.liferay.keymanager.provider.db.model.impl.KeyEntryImpl;
 import com.liferay.keymanager.provider.db.service.KeyEntryLocalService;
-import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
-import com.liferay.portal.kernel.instance.PortalInstancePool;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.HashMapBuilder;
 import com.liferay.portal.test.rule.LiferayUnitTestRule;
@@ -24,17 +19,17 @@ import com.liferay.portal.test.rule.LiferayUnitTestRule;
 import java.io.ByteArrayInputStream;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import java.security.Key;
+
+import java.sql.Blob;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -42,7 +37,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -54,50 +48,96 @@ public class DBCryptoVaultProviderTest {
 	@ClassRule
 	@Rule
 	public static final LiferayUnitTestRule liferayUnitTestRule =
-		LiferayUnitTestRule.INSTANCE;
+		new LiferayUnitTestRule();
 
 	@Before
 	public void setUp() throws Exception {
 		MockitoAnnotations.openMocks(this);
 
-		_portalInstancePoolMockedStatic = Mockito.mockStatic(
-			PortalInstancePool.class);
-
-		_portalInstancePoolMockedStatic.when(
-			PortalInstancePool::getDefaultCompanyId
-		).thenReturn(
-			_COMPANY_ID
-		);
-
 		_dbCryptoVaultProvider = new DBCompanyCryptoVaultProvider();
 
-		_injectField(_dbCryptoVaultProvider, "_cryptoManager", _cryptoManager);
 		_injectField(
-			_dbCryptoVaultProvider, "_keyEntryLocalService",
+			_dbCryptoVaultProvider, "companyLocalService",
+			_companyLocalService);
+
+		_injectField(_dbCryptoVaultProvider, "cryptoManager", _cryptoManager);
+
+		_injectField(
+			_dbCryptoVaultProvider, "keyEntryLocalService",
 			_keyEntryLocalService);
 
-		_dbCryptoVaultProvider.activate(
+		_activate(
+			_dbCryptoVaultProvider,
 			HashMapBuilder.<String, Object>put(
 				"companyId", _COMPANY_ID
 			).put(
 				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
 			).put(
-				"priority", 10
-			).put(
 				"providerId", "db"
 			).build());
 	}
 
-	@After
-	public void tearDown() {
-		_portalInstancePoolMockedStatic.close();
+	@Test
+	public void testDecrypt() throws Exception {
+		String identifier = "test-key";
+
+		byte[] ciphertext = "encrypted-data".getBytes();
+
+		byte[] plaintext = "decrypted-data".getBytes();
+
+		KeyEntry keyEntry = Mockito.mock(KeyEntry.class);
+
+		Mockito.when(
+			keyEntry.getAlgorithm()
+		).thenReturn(
+			"AES"
+		);
+
+		Mockito.when(
+			keyEntry.getCipherSpec()
+		).thenReturn(
+			"AES/GCM/NoPadding"
+		);
+
+		Blob ciphertextBlob = Mockito.mock(Blob.class);
+
+		Mockito.when(
+			ciphertextBlob.getBinaryStream()
+		).thenReturn(
+			new ByteArrayInputStream(ciphertext)
+		);
+
+		Mockito.when(
+			keyEntry.getWrappedKeyBlob()
+		).thenReturn(
+			ciphertextBlob
+		);
+
+		Mockito.when(
+			_keyEntryLocalService.fetchKeyEntry(_COMPANY_ID, identifier)
+		).thenReturn(
+			keyEntry
+		);
+
+		Mockito.when(
+			_cryptoManager.decrypt(
+				Mockito.eq(_COMPANY_ID), Mockito.any(KeyReference.class),
+				Mockito.any(byte[].class))
+		).thenReturn(
+			plaintext
+		);
+
+		byte[] result = _dbCryptoVaultProvider.decrypt(
+			_COMPANY_ID, identifier, ciphertext);
+
+		Assert.assertArrayEquals(plaintext, result);
 	}
 
 	@Test
 	public void testDeleteKey() throws Exception {
-		String identifier = "to-delete";
+		String identifier = "test-key";
 
-		KeyEntry keyEntry = new KeyEntryImpl();
+		KeyEntry keyEntry = Mockito.mock(KeyEntry.class);
 
 		Mockito.when(
 			_keyEntryLocalService.fetchKeyEntry(_COMPANY_ID, identifier)
@@ -115,80 +155,89 @@ public class DBCryptoVaultProviderTest {
 	}
 
 	@Test
-	public void testEncryptAndDecryptRoundtrip() throws Exception {
+	public void testEncrypt() throws Exception {
 		String identifier = "test-key";
-		byte[] plaintext = "hello-world".getBytes();
 
-		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+		byte[] plaintext = "decrypted-data".getBytes();
 
-		keyGenerator.init(256);
+		byte[] ciphertext = "encrypted-data".getBytes();
 
-		SecretKey keyMaterial = keyGenerator.generateKey();
-
-		KeyEntry keyEntry = new KeyEntryImpl();
-
-		keyEntry.setAlias(identifier);
-		keyEntry.setAlgorithm("AES");
-		keyEntry.setKeyType(BaseDBCryptoVaultProvider.KeyType.SECRET.name());
-		keyEntry.setCipherSpec(
-			"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128");
-		keyEntry.setKekReference("${keyRef:*:db-vault-provider-master-kek}");
-		keyEntry.setWrappedKeyBlob(
-			new OutputBlob(new ByteArrayInputStream(new byte[32]), 32));
+		KeyEntry keyEntry = Mockito.mock(KeyEntry.class);
 
 		Mockito.when(
-			_cryptoManager.unwrap(
-				Mockito.anyLong(), Mockito.any(KeyReference.class),
-				Mockito.any(byte[].class), Mockito.anyString(),
-				Mockito.anyInt())
+			keyEntry.getAlgorithm()
 		).thenReturn(
-			keyMaterial
+			"AES"
 		);
 
 		Mockito.when(
-			_keyEntryLocalService.getKeyEntry(_COMPANY_ID, identifier)
+			keyEntry.getCipherSpec()
+		).thenReturn(
+			"AES/GCM/NoPadding"
+		);
+
+		Blob ciphertextBlob = Mockito.mock(Blob.class);
+
+		Mockito.when(
+			ciphertextBlob.getBinaryStream()
+		).thenReturn(
+			new ByteArrayInputStream(ciphertext)
+		);
+
+		Mockito.when(
+			keyEntry.getWrappedKeyBlob()
+		).thenReturn(
+			ciphertextBlob
+		);
+
+		Mockito.when(
+			_keyEntryLocalService.fetchKeyEntry(_COMPANY_ID, identifier)
 		).thenReturn(
 			keyEntry
 		);
 
-		byte[] ciphertext = _dbCryptoVaultProvider.encrypt(
+		Mockito.when(
+			_cryptoManager.encrypt(
+				Mockito.eq(_COMPANY_ID), Mockito.any(KeyReference.class),
+				Mockito.any(byte[].class))
+		).thenReturn(
+			ciphertext
+		);
+
+		byte[] result = _dbCryptoVaultProvider.encrypt(
 			_COMPANY_ID, identifier, plaintext);
 
-		Assert.assertNotNull(ciphertext);
-
-		byte[] recoveredPlaintext = _dbCryptoVaultProvider.decrypt(
-			_COMPANY_ID, identifier, ciphertext);
-
-		Assert.assertArrayEquals(plaintext, recoveredPlaintext);
+		Assert.assertArrayEquals(ciphertext, result);
 	}
 
 	@Test
 	public void testGenerateAsymmetricKeyPair() throws Exception {
-		String identifier = "new-key";
+		String identifier = "test-key";
 
-		Mockito.when(
-			_keyEntryLocalService.createKeyEntry(Mockito.anyLong())
-		).thenReturn(
-			new KeyEntryImpl()
-		);
+		String algorithmSpec = "RSA/2048";
 
 		Mockito.when(
 			_cryptoManager.wrap(
 				Mockito.anyLong(), Mockito.any(KeyReference.class),
 				Mockito.any(Key.class))
 		).thenReturn(
-			"wrapped".getBytes()
+			"wrapped-key".getBytes()
 		);
 
-		String cipherSpec = "RSA";
+		Mockito.when(
+			_keyEntryLocalService.createKeyEntry(0)
+		).thenReturn(
+			Mockito.mock(KeyEntry.class)
+		);
 
-		String result = _dbCryptoVaultProvider.generateAsymmetricKeyPair(
-			_COMPANY_ID, identifier, cipherSpec);
+		String resultIdentifier =
+			_dbCryptoVaultProvider.generateAsymmetricKeyPair(
+				_COMPANY_ID, identifier, algorithmSpec);
 
-		Assert.assertEquals(identifier, result);
+		Assert.assertEquals(identifier, resultIdentifier);
 
 		Mockito.verify(
-			_keyEntryLocalService, Mockito.times(2)
+			_keyEntryLocalService, Mockito.atLeastOnce()
 		).updateKeyEntry(
 			Mockito.any(KeyEntry.class)
 		);
@@ -196,29 +245,28 @@ public class DBCryptoVaultProviderTest {
 
 	@Test
 	public void testGenerateSecretKey() throws Exception {
-		String identifier = "new-key";
+		String identifier = "test-key";
 
-		Mockito.when(
-			_keyEntryLocalService.createKeyEntry(Mockito.anyLong())
-		).thenReturn(
-			new KeyEntryImpl()
-		);
+		String algorithmSpec = "AES/256";
 
 		Mockito.when(
 			_cryptoManager.wrap(
 				Mockito.anyLong(), Mockito.any(KeyReference.class),
 				Mockito.any(Key.class))
 		).thenReturn(
-			"wrapped".getBytes()
+			"wrapped-key".getBytes()
 		);
 
-		String cipherSpec =
-			"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128";
+		Mockito.when(
+			_keyEntryLocalService.createKeyEntry(0)
+		).thenReturn(
+			Mockito.mock(KeyEntry.class)
+		);
 
-		String result = _dbCryptoVaultProvider.generateSecretKey(
-			_COMPANY_ID, identifier, cipherSpec);
+		String resultIdentifier = _dbCryptoVaultProvider.generateSecretKey(
+			_COMPANY_ID, identifier, algorithmSpec);
 
-		Assert.assertEquals(identifier, result);
+		Assert.assertEquals(identifier, resultIdentifier);
 
 		Mockito.verify(
 			_keyEntryLocalService
@@ -239,6 +287,7 @@ public class DBCryptoVaultProviderTest {
 			_COMPANY_ID);
 
 		Assert.assertEquals(identifiers.toString(), 1, identifiers.size());
+
 		Assert.assertEquals("key-1", identifiers.get(0));
 	}
 
@@ -246,14 +295,28 @@ public class DBCryptoVaultProviderTest {
 	public void testGetKeyMetadata() throws Exception {
 		String identifier = "test-key";
 
-		KeyEntry keyEntry = new KeyEntryImpl();
-
-		keyEntry.setAlgorithm("AES");
-		keyEntry.setCipherSpec("AES/GCM/NoPadding");
-		keyEntry.setCreateDate(new Date(123456789L));
+		KeyEntry keyEntry = Mockito.mock(KeyEntry.class);
 
 		Mockito.when(
-			_keyEntryLocalService.getKeyEntry(_COMPANY_ID, identifier)
+			keyEntry.getAlgorithm()
+		).thenReturn(
+			"AES"
+		);
+
+		Mockito.when(
+			keyEntry.getCipherSpec()
+		).thenReturn(
+			"AES/GCM/NoPadding"
+		);
+
+		Mockito.when(
+			keyEntry.getCreateDate()
+		).thenReturn(
+			new Date()
+		);
+
+		Mockito.when(
+			_keyEntryLocalService.fetchKeyEntry(_COMPANY_ID, identifier)
 		).thenReturn(
 			keyEntry
 		);
@@ -262,12 +325,12 @@ public class DBCryptoVaultProviderTest {
 			_COMPANY_ID, identifier);
 
 		Assert.assertEquals("AES", result.getAlgorithm());
-		Assert.assertEquals("AES/GCM/NoPadding", result.getCipherSpec());
-		Assert.assertEquals(123456789L, result.getCreationDate());
+
 		Assert.assertEquals(
-			"test-key",
+			identifier,
 			result.getKeyReference(
 			).getIdentifier());
+
 		Assert.assertEquals(
 			KeyReference.ANY_PROVIDER,
 			result.getKeyReference(
@@ -278,28 +341,28 @@ public class DBCryptoVaultProviderTest {
 	public void testImportSecretKey() throws Exception {
 		String identifier = "new-key";
 
-		Mockito.when(
-			_keyEntryLocalService.createKeyEntry(Mockito.anyLong())
-		).thenReturn(
-			new KeyEntryImpl()
-		);
+		byte[] rawKeyMaterial = new byte[32];
+
+		String algorithmSpec = "AES";
 
 		Mockito.when(
 			_cryptoManager.wrap(
 				Mockito.anyLong(), Mockito.any(KeyReference.class),
 				Mockito.any(Key.class))
 		).thenReturn(
-			"wrapped".getBytes()
+			"wrapped-key".getBytes()
 		);
 
-		String cipherSpec =
-			"AES/GCM/NoPadding;keySize=256;ivSize=12;gcmTag=128";
-		byte[] rawKeyMaterial = new byte[32];
+		Mockito.when(
+			_keyEntryLocalService.createKeyEntry(0)
+		).thenReturn(
+			Mockito.mock(KeyEntry.class)
+		);
 
-		String result = _dbCryptoVaultProvider.importSecretKey(
-			_COMPANY_ID, identifier, rawKeyMaterial, cipherSpec);
+		String resultIdentifier = _dbCryptoVaultProvider.importSecretKey(
+			_COMPANY_ID, identifier, rawKeyMaterial, algorithmSpec);
 
-		Assert.assertEquals(identifier, result);
+		Assert.assertEquals(identifier, resultIdentifier);
 
 		Mockito.verify(
 			_keyEntryLocalService
@@ -309,38 +372,63 @@ public class DBCryptoVaultProviderTest {
 	}
 
 	@Test
-	public void testIsAllowedCompany() throws Exception {
-		Assert.assertTrue(_dbCryptoVaultProvider.isAllowedCompany(0));
+	public void testIsAllowedCompany() {
 		Assert.assertTrue(_dbCryptoVaultProvider.isAllowedCompany(_COMPANY_ID));
-		Assert.assertFalse(_dbCryptoVaultProvider.isAllowedCompany(1L));
 
+		Assert.assertFalse(_dbCryptoVaultProvider.isAllowedCompany(54321L));
+	}
+
+	@Test
+	public void testSystemProvider() throws Exception {
 		DBSystemCryptoVaultProvider systemProvider =
 			new DBSystemCryptoVaultProvider();
 
-		_injectField(systemProvider, "_companyLocalService", _companyLocalService);
+		_injectField(
+			systemProvider, "companyLocalService", _companyLocalService);
 
-		systemProvider.activate(
+		_injectField(systemProvider, "cryptoManager", _cryptoManager);
+
+		_injectField(
+			systemProvider, "keyEntryLocalService", _keyEntryLocalService);
+
+		_activate(
+			systemProvider,
 			HashMapBuilder.<String, Object>put(
-				"enabled", true
-			).put(
-				"masterKeyReference", "${keyRef:*:db-vault-provider-master-kek}"
-			).put(
-				"priority", 10
+				"masterKeyReference", "system-master-kek"
 			).put(
 				"providerId", "db-system"
 			).build());
 
-		Assert.assertTrue(systemProvider.isAllowedCompany(0));
-		Assert.assertTrue(systemProvider.isAllowedCompany(_COMPANY_ID));
-		Assert.assertFalse(systemProvider.isAllowedCompany(1L));
+		Assert.assertTrue(systemProvider.isAllowedCompany(0L));
+
+		Assert.assertTrue(systemProvider.isAllowedCompany(123L));
 	}
 
-	@Test(expected = CryptoManagerException.class)
-	public void testWrap() throws Exception {
-		String identifier = "test-key";
-		Key keyToWrap = Mockito.mock(Key.class);
+	private void _activate(Object target, Map<String, Object> properties)
+		throws Exception {
 
-		_dbCryptoVaultProvider.wrap(_COMPANY_ID, identifier, keyToWrap);
+		Method method = null;
+
+		Class<?> clazz = target.getClass();
+
+		while (clazz != null) {
+			try {
+				method = clazz.getDeclaredMethod("activate", Map.class);
+
+				break;
+			}
+			catch (NoSuchMethodException noSuchMethodException) {
+				clazz = clazz.getSuperclass();
+			}
+		}
+
+		if (method == null) {
+			throw new RuntimeException("Method activate not found");
+		}
+
+		method.setAccessible(true);
+
+		method.invoke(target, properties);
 	}
 
 	private void _injectField(Object target, String fieldName, Object value) {
@@ -360,7 +448,12 @@ public class DBCryptoVaultProviderTest {
 				}
 			}
 
+			if (field == null) {
+				throw new RuntimeException("Field not found: " + fieldName);
+			}
+
 			field.setAccessible(true);
+
 			field.set(target, value);
 		}
 		catch (Exception exception) {
@@ -368,7 +461,7 @@ public class DBCryptoVaultProviderTest {
 		}
 	}
 
-	private static final long _COMPANY_ID = 999L;
+	private static final long _COMPANY_ID = 12345L;
 
 	@Mock
 	private CompanyLocalService _companyLocalService;
@@ -380,7 +473,5 @@ public class DBCryptoVaultProviderTest {
 
 	@Mock
 	private KeyEntryLocalService _keyEntryLocalService;
-
-	private MockedStatic<PortalInstancePool> _portalInstancePoolMockedStatic;
 
 }

@@ -14,6 +14,9 @@ import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.keymanager.spi.crypto.CryptoVaultProvider;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Validator;
 
 import java.io.File;
@@ -26,7 +29,6 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
-import java.security.spec.AlgorithmParameterSpec;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +40,6 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.osgi.service.component.annotations.Activate;
@@ -95,7 +96,8 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 					Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
 					cipher.init(
-						Cipher.DECRYPT_MODE, key, new GCMParameterSpec(128, iv));
+						Cipher.DECRYPT_MODE, key,
+						new GCMParameterSpec(128, iv));
 
 					return cipher.doFinal(actualCiphertext);
 				}
@@ -185,7 +187,8 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 					Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
 					cipher.init(
-						Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(128, iv));
+						Cipher.ENCRYPT_MODE, key,
+						new GCMParameterSpec(128, iv));
 
 					byte[] ciphertext = cipher.doFinal(plaintext);
 
@@ -255,7 +258,7 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 				}
 				finally {
 					if (secretKeyEncoded != null) {
-						java.util.Arrays.fill(secretKeyEncoded, (byte)0);
+						Arrays.fill(secretKeyEncoded, (byte)0);
 					}
 
 					if (!secretKey.isDestroyed()) {
@@ -263,7 +266,9 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 							secretKey.destroy();
 						}
 						catch (Exception exception) {
-							// Ignore
+							if (_log.isDebugEnabled()) {
+								_log.debug(exception);
+							}
 						}
 					}
 				}
@@ -344,7 +349,8 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 					KeyReference.fromString(
 						StringBundler.concat(
 							"${keyRef:", KeyReference.ANY_PROVIDER, ":",
-							identifier, "}")),					algorithm, algorithm, createDate.getTime());
+							identifier, "}")),
+					algorithm, algorithm, createDate.getTime());
 			}
 		}
 		catch (Exception exception) {
@@ -387,7 +393,9 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 							secretKey.destroy();
 						}
 						catch (Exception exception) {
-							// Ignore
+							if (_log.isDebugEnabled()) {
+								_log.debug(exception);
+							}
 						}
 					}
 				}
@@ -406,11 +414,7 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
-		if (!_enabled) {
-			return false;
-		}
-
-		return true;
+		return _enabled;
 	}
 
 	@Override
@@ -447,8 +451,7 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 			}
 		}
 		catch (Exception exception) {
-			throw new CryptoManagerException(
-				"Unable to unwrap key", exception);
+			throw new CryptoManagerException("Unable to unwrap key", exception);
 		}
 	}
 
@@ -493,17 +496,18 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		KeyStoreCryptoVaultProviderConfiguration
 			keyStoreCryptoVaultProviderConfiguration =
 				ConfigurableUtil.createConfigurable(
-					KeyStoreCryptoVaultProviderConfiguration.class,
-					properties);
+					KeyStoreCryptoVaultProviderConfiguration.class, properties);
 
 		_enabled = keyStoreCryptoVaultProviderConfiguration.enabled();
 
-		_keyStorePath =
-			keyStoreCryptoVaultProviderConfiguration.keystorePath();
-		_keyStoreType =
-			keyStoreCryptoVaultProviderConfiguration.keystoreType();
+		_keyStorePath = keyStoreCryptoVaultProviderConfiguration.keystorePath();
+		_keyStoreType = keyStoreCryptoVaultProviderConfiguration.keystoreType();
 		_keystorePasswordReference =
 			keyStoreCryptoVaultProviderConfiguration.keystorePassword();
+	}
+
+	protected void setSecretManager(SecretManager secretManager) {
+		_secretManager = secretManager;
 	}
 
 	private KeyStore _getKeyStore(char[] password) throws Exception {
@@ -512,8 +516,8 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		File file = new File(_keyStorePath);
 
 		if (file.exists()) {
-			try (FileInputStream fis = new FileInputStream(file)) {
-				keyStore.load(fis, password); // here
+			try (FileInputStream fileInputStream = new FileInputStream(file)) {
+				keyStore.load(fileInputStream, password); // here
 			}
 		}
 		else {
@@ -542,7 +546,9 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 		int pos = spec.indexOf(';');
 
 		if (pos > 0) {
-			return spec.substring(0, pos).trim();
+			return spec.substring(
+				0, pos
+			).trim();
 		}
 
 		return spec.trim();
@@ -562,7 +568,10 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 				end = spec.length();
 			}
 
-			return Integer.parseInt(spec.substring(pos + 8, end).trim());
+			return GetterUtil.getInteger(
+				spec.substring(
+					pos + 8, end
+				).trim());
 		}
 
 		return defaultSize;
@@ -579,23 +588,22 @@ public class KeyStoreCryptoVaultProvider implements CryptoVaultProvider {
 			parentFile.mkdirs();
 		}
 
-		try (FileOutputStream fos = new FileOutputStream(file)) {
-			keyStore.store(fos, password);  // here
+		try (FileOutputStream fileOutputStream = new FileOutputStream(file)) {
+			keyStore.store(fileOutputStream, password);  // here
 		}
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		KeyStoreCryptoVaultProvider.class);
+
 	private volatile boolean _enabled;
+	private volatile String _keystorePasswordReference;
 	private volatile String _keyStorePath;
 	private volatile String _keyStoreType;
-	private volatile String _keystorePasswordReference;
-
-	private final SecureRandom _secureRandom = new SecureRandom();
-
-	protected void setSecretManager(SecretManager secretManager) {
-		_secretManager = secretManager;
-	}
 
 	@Reference
 	private SecretManager _secretManager;
+
+	private final SecureRandom _secureRandom = new SecureRandom();
 
 }

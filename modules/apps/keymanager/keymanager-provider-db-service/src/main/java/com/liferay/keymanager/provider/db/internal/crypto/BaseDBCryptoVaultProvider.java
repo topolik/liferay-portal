@@ -19,6 +19,8 @@ import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
 import com.liferay.portal.kernel.instance.PortalInstancePool;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.service.CompanyLocalService;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
@@ -68,7 +70,7 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 		_checkPermission(companyId);
 
 		try {
-			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
+			KeyEntry keyEntry = keyEntryLocalService.getKeyEntry(
 				companyId, identifier);
 
 			Key key = _unwrapKey(companyId, keyEntry);
@@ -91,7 +93,8 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 					if (ivSize <= 0) {
 						throw new CryptoManagerException(
-							"ivSize must be specified and greater than 0 for SECRET keys");
+							"ivSize must be specified and greater than 0 for " +
+								"SECRET keys");
 					}
 
 					int gcmTag = GetterUtil.getInteger(
@@ -122,9 +125,7 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 			}
 			finally {
 				if ((key != null) && (key.getEncoded() != null)) {
-					byte[] encoded = key.getEncoded();
-
-					Arrays.fill(encoded, (byte)0);
+					Arrays.fill(key.getEncoded(), (byte)0);
 				}
 			}
 		}
@@ -141,11 +142,11 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 		_checkPermission(companyId);
 
 		try {
-			KeyEntry keyEntry = _keyEntryLocalService.fetchKeyEntry(
+			KeyEntry keyEntry = keyEntryLocalService.fetchKeyEntry(
 				companyId, identifier);
 
 			if (keyEntry != null) {
-				_keyEntryLocalService.deleteKeyEntry(keyEntry);
+				keyEntryLocalService.deleteKeyEntry(keyEntry);
 			}
 		}
 		catch (Exception exception) {
@@ -161,7 +162,7 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 		_checkPermission(companyId);
 
 		try {
-			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
+			KeyEntry keyEntry = keyEntryLocalService.getKeyEntry(
 				companyId, identifier);
 
 			Key key = _unwrapKey(companyId, keyEntry);
@@ -183,7 +184,8 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 				if (ivSize <= 0) {
 					throw new CryptoManagerException(
-						"ivSize must be specified and greater than 0 for SECRET keys");
+						"ivSize must be specified and greater than 0 for " +
+							"SECRET keys");
 				}
 
 				int gcmTag = GetterUtil.getInteger(
@@ -241,12 +243,9 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 			KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
-			byte[] wrappedPrivateKeyBytes = _cryptoManager.wrap(
+			byte[] wrappedPrivateKeyBytes = cryptoManager.wrap(
 				companyId, KeyReference.fromString(_masterKeyReference),
 				keyPair.getPrivate());
-
-			byte[] privateKeyEncoded = keyPair.getPrivate(
-			).getEncoded();
 
 			try {
 				_saveKeyEntry(
@@ -256,6 +255,9 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 					wrappedPrivateKeyBytes, _masterKeyReference, algorithmSpec);
 			}
 			finally {
+				byte[] privateKeyEncoded = keyPair.getPrivate(
+				).getEncoded();
+
 				if (privateKeyEncoded != null) {
 					Arrays.fill(privateKeyEncoded, (byte)0);
 				}
@@ -297,11 +299,9 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 			SecretKey secretKey = keyGenerator.generateKey();
 
-			byte[] wrappedKeyBytes = _cryptoManager.wrap(
+			byte[] wrappedKeyBytes = cryptoManager.wrap(
 				companyId, KeyReference.fromString(_masterKeyReference),
 				secretKey);
-
-			byte[] secretKeyEncoded = secretKey.getEncoded();
 
 			try {
 				_saveKeyEntry(
@@ -310,8 +310,8 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 					_masterKeyReference, algorithmSpec);
 			}
 			finally {
-				if (secretKeyEncoded != null) {
-					Arrays.fill(secretKeyEncoded, (byte)0);
+				if (secretKey.getEncoded() != null) {
+					Arrays.fill(secretKey.getEncoded(), (byte)0);
 				}
 
 				if (!secretKey.isDestroyed()) {
@@ -319,7 +319,9 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 						secretKey.destroy();
 					}
 					catch (Exception exception) {
-						// Ignore
+						if (_log.isDebugEnabled()) {
+							_log.debug(exception);
+						}
 					}
 				}
 			}
@@ -339,7 +341,7 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 		_checkPermission(companyId);
 
 		try {
-			return _keyEntryLocalService.getKeyIdentifiers(companyId);
+			return keyEntryLocalService.getKeyIdentifiers(companyId);
 		}
 		catch (Exception exception) {
 			throw new CryptoManagerException(
@@ -354,14 +356,14 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 		_checkPermission(companyId);
 
 		try {
-			KeyEntry keyEntry = _keyEntryLocalService.getKeyEntry(
+			KeyEntry keyEntry = keyEntryLocalService.getKeyEntry(
 				companyId, identifier);
 
 			return new CryptoKey(
 				KeyReference.fromString(
 					StringBundler.concat(
-						"${keyRef:", KeyReference.ANY_PROVIDER, ":",
-						identifier, "}")),
+						"${keyRef:", KeyReference.ANY_PROVIDER, ":", identifier,
+						"}")),
 				keyEntry.getAlgorithm(), keyEntry.getCipherSpec(),
 				keyEntry.getCreateDate(
 				).getTime());
@@ -386,14 +388,14 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 			SecretKey secretKey = new SecretKeySpec(rawKeyMaterial, algorithm);
 
 			try {
-				byte[] wrappedKeyBytes = _cryptoManager.wrap(
+				byte[] wrappedKeyBytes = cryptoManager.wrap(
 					companyId, KeyReference.fromString(_masterKeyReference),
 					secretKey);
 
 				_saveKeyEntry(
 					companyId, identifier, KeyType.SECRET,
-					secretKey.getAlgorithm(), wrappedKeyBytes, _masterKeyReference,
-					algorithmSpec);
+					secretKey.getAlgorithm(), wrappedKeyBytes,
+					_masterKeyReference, algorithmSpec);
 
 				return identifier;
 			}
@@ -403,7 +405,9 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 						secretKey.destroy();
 					}
 					catch (Exception exception) {
-						// Ignore
+						if (_log.isDebugEnabled()) {
+							_log.debug(exception);
+						}
 					}
 				}
 			}
@@ -459,30 +463,46 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 	protected void activate(Map<String, Object> properties) {
 		if (GetterUtil.getBoolean(properties.get("systemScope"))) {
-			DBSystemCryptoVaultProviderConfiguration configuration =
-				ConfigurableUtil.createConfigurable(
-					DBSystemCryptoVaultProviderConfiguration.class, properties);
+			DBSystemCryptoVaultProviderConfiguration
+				dbSystemCryptoVaultProviderConfiguration =
+					ConfigurableUtil.createConfigurable(
+						DBSystemCryptoVaultProviderConfiguration.class,
+						properties);
 
-			_enabled = configuration.enabled();
+			_enabled = dbSystemCryptoVaultProviderConfiguration.enabled();
+			_masterKeyReference =
+				dbSystemCryptoVaultProviderConfiguration.masterKeyReference();
+
 			_companyId = PortalInstancePool.getDefaultCompanyId();
-			_masterKeyReference = configuration.masterKeyReference();
 		}
 		else {
-			DBCompanyCryptoVaultProviderConfiguration configuration =
-				ConfigurableUtil.createConfigurable(
-					DBCompanyCryptoVaultProviderConfiguration.class,
-					properties);
+			DBCompanyCryptoVaultProviderConfiguration
+				dbCompanyCryptoVaultProviderConfiguration =
+					ConfigurableUtil.createConfigurable(
+						DBCompanyCryptoVaultProviderConfiguration.class,
+						properties);
 
 			_enabled = true;
+			_masterKeyReference =
+				dbCompanyCryptoVaultProviderConfiguration.masterKeyReference();
+
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
-				_companyLocalService, properties);
-			_masterKeyReference = configuration.masterKeyReference();
+				companyLocalService, properties);
 		}
 	}
 
 	@Deactivate
 	protected void deactivate() {
 	}
+
+	@Reference
+	protected CompanyLocalService companyLocalService;
+
+	@Reference
+	protected CryptoManager cryptoManager;
+
+	@Reference
+	protected KeyEntryLocalService keyEntryLocalService;
 
 	private byte[] _blobToBytes(Blob blob) throws Exception {
 		try (InputStream inputStream = blob.getBinaryStream()) {
@@ -500,7 +520,8 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 
 		if (!isAllowedCompany(companyId)) {
 			throw new CryptoManagerException(
-				"Company " + companyId + " is not allowed to use this provider");
+				"Company " + companyId +
+					" is not allowed to use this provider");
 		}
 	}
 
@@ -567,11 +588,11 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 			byte[] blobBytes, String kekReference, String cipherSpec)
 		throws Exception {
 
-		KeyEntry keyEntry = _keyEntryLocalService.fetchKeyEntry(
+		KeyEntry keyEntry = keyEntryLocalService.fetchKeyEntry(
 			companyId, alias);
 
 		if (keyEntry == null) {
-			keyEntry = _keyEntryLocalService.createKeyEntry(0);
+			keyEntry = keyEntryLocalService.createKeyEntry(0);
 
 			keyEntry.setCompanyId(companyId);
 			keyEntry.setAlias(alias);
@@ -585,7 +606,7 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 		keyEntry.setKekReference(kekReference);
 		keyEntry.setCipherSpec(cipherSpec);
 
-		_keyEntryLocalService.updateKeyEntry(keyEntry);
+		keyEntryLocalService.updateKeyEntry(keyEntry);
 	}
 
 	private Key _unwrapKey(long companyId, KeyEntry keyEntry) throws Exception {
@@ -613,23 +634,16 @@ public abstract class BaseDBCryptoVaultProvider implements CryptoVaultProvider {
 			wrappedType = Cipher.PRIVATE_KEY;
 		}
 
-		return _cryptoManager.unwrap(
+		return cryptoManager.unwrap(
 			companyId, masterKeyRef, encryptedKeyBytes, keyEntry.getAlgorithm(),
 			wrappedType);
 	}
 
+	private static final Log _log = LogFactoryUtil.getLog(
+		BaseDBCryptoVaultProvider.class);
+
 	private volatile long _companyId;
 	private volatile boolean _enabled;
-		
-	@Reference
-	protected CompanyLocalService _companyLocalService;
-
-	@Reference
-	protected CryptoManager _cryptoManager;
-
-	@Reference
-	protected KeyEntryLocalService _keyEntryLocalService;
-
 	private volatile String _masterKeyReference;
 	private final SecureRandom _secureRandom = new SecureRandom();
 

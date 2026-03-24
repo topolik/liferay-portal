@@ -5,10 +5,13 @@
 
 package com.liferay.keymanager.internal.fips;
 
+import com.liferay.keymanager.internal.configuration.persistence.listener.KeyManagerConfigurationModelListener;
+import com.liferay.keymanager.spi.fips.FipsComplianceChecker;
 import com.liferay.keymanager.spi.fips.FipsReport;
 import com.liferay.keymanager.spi.fips.FipsValidator;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.portal.configuration.persistence.listener.ConfigurationModelListenerException;
+import com.liferay.portal.test.rule.LiferayUnitTestRule;
 
 import java.lang.reflect.Field;
 
@@ -17,6 +20,7 @@ import java.util.Hashtable;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.mockito.Mock;
@@ -34,17 +38,25 @@ public class KeyManagerConfigurationModelListenerTest {
 
 		_listener = new KeyManagerConfigurationModelListener();
 
-		_injectField(_listener, "_fipsComplianceChecker", _fipsComplianceChecker);
+		_injectField(
+			_listener, "_fipsComplianceChecker", _fipsComplianceChecker);
 		_injectField(_listener, "_serviceTrackerMap", _serviceTrackerMap);
 	}
 
 	@Test
-	public void testSchrodingersFipsConfigurationGuardBypass() throws Exception {
-		String pid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpKmsCompanyCryptoVaultProviderConfiguration";
+	public void testSchrodingersFipsConfigurationGuardBypass()
+		throws Exception {
+
+		String pid =
+			"com.liferay.keymanager.provider.gcp.internal.configuration." +
+				"GcpKmsCompanyCryptoVaultProviderConfiguration";
+
 		Dictionary<String, Object> properties = new Hashtable<>();
+
 		properties.put("newKeyProtectionLevel", "SOFTWARE");
 
 		// Simulate FIPS Enforced = true
+
 		Mockito.when(
 			_fipsComplianceChecker.isFipsEnforced()
 		).thenReturn(
@@ -52,6 +64,7 @@ public class KeyManagerConfigurationModelListenerTest {
 		);
 
 		// The validator realizes this violates the mandate
+
 		Mockito.when(
 			_serviceTrackerMap.getService(pid)
 		).thenReturn(
@@ -61,28 +74,47 @@ public class KeyManagerConfigurationModelListenerTest {
 		Mockito.when(
 			_fipsValidator.validate(Mockito.anyMap())
 		).thenReturn(
-			FipsReport.nonCompliant("SOFTWARE protection level is not allowed when FIPS is enforced.")
+			FipsReport.noncompliant(
+				"SOFTWARE protection level is not allowed when FIPS is " +
+					"enforced.")
 		);
 
 		try {
+
 			// Try to save the non-compliant configuration
+
 			_listener.onBeforeSave(pid, properties);
-			Assert.fail("Expected ConfigurationModelListenerException to block the save.");
+
+			Assert.fail(
+				"Expected ConfigurationModelListenerException to block the " +
+					"save.");
 		}
-		catch (ConfigurationModelListenerException e) {
-			Assert.assertTrue(e.getMessage().contains("SOFTWARE protection level is not allowed"));
+		catch (ConfigurationModelListenerException
+					configurationModelListenerException) {
+
+			String message = configurationModelListenerException.getMessage();
+
+			Assert.assertTrue(
+				message.contains("SOFTWARE protection level is not allowed"));
 		}
 	}
 
+	@Rule
+	public final LiferayUnitTestRule liferayUnitTestRule =
+		new LiferayUnitTestRule();
+
 	private void _injectField(Object target, String fieldName, Object value) {
 		try {
-			Field field = target.getClass().getDeclaredField(fieldName);
+			Field field = target.getClass(
+			).getDeclaredField(
+				fieldName
+			);
 
 			field.setAccessible(true);
 			field.set(target, value);
 		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
+		catch (Exception exception) {
+			throw new RuntimeException(exception);
 		}
 	}
 

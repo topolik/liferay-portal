@@ -5,6 +5,7 @@
 
 package com.liferay.keymanager.internal.fips;
 
+import com.liferay.keymanager.spi.fips.FipsComplianceChecker;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
@@ -12,15 +13,18 @@ import com.liferay.portal.kernel.util.GetterUtil;
 import java.security.Provider;
 import java.security.Security;
 
+import java.util.Objects;
+
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
 /**
  * @author Tomas Polesovsky
  */
-@Component(immediate = true, service = FipsComplianceChecker.class)
-public class FipsComplianceChecker {
+@Component(service = FipsComplianceChecker.class)
+public class FipsComplianceCheckerImpl implements FipsComplianceChecker {
 
+	@Override
 	public void check() {
 		if (!isFipsEnforced()) {
 			return;
@@ -29,14 +33,15 @@ public class FipsComplianceChecker {
 		Provider[] providers = Security.getProviders();
 
 		if ((providers.length == 0) ||
-			!providers[0].getName().equals("BCFIPS")) {
+			!Objects.equals(providers[0].getName(), "BCFIPS")) {
 
 			throw new RuntimeException(
-				"FIPS compliance violation: BCFIPS must be the first security " +
-					"provider when FIPS is enforced.");
+				"FIPS compliance violation: BCFIPS must be the first " +
+					"security provider when FIPS is enforced");
 		}
 	}
 
+	@Override
 	public boolean isFipsEnforced() {
 		return GetterUtil.getBoolean(
 			System.getenv("LIFERAY_KEYMANAGER_FIPS_ENFORCED"));
@@ -45,16 +50,20 @@ public class FipsComplianceChecker {
 	@Activate
 	protected void activate() {
 		if (isFipsEnforced()) {
-			_log.info("Key Manager is running in STRICT FIPS Mode.");
+			if (_log.isInfoEnabled()) {
+				_log.info("Key manager is running in strict FIPS mode");
+			}
 
 			check();
 		}
 		else {
-			_log.info("Key Manager is running in Standard Mode.");
+			if (_log.isInfoEnabled()) {
+				_log.info("Key manager is running in standard mode");
+			}
 		}
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(
-		FipsComplianceChecker.class);
+		FipsComplianceCheckerImpl.class);
 
 }

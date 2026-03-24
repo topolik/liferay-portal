@@ -28,13 +28,13 @@ public abstract class BaseDBFipsValidator implements FipsValidator {
 		String dekCipherSpec = (String)properties.get("dek-cipher-spec");
 
 		if (Validator.isNull(dekCipherSpec)) {
-			return FipsReport.nonCompliant(
+			return FipsReport.noncompliant(
 				"dek-cipher-spec must be specified and use AES/GCM mode when " +
 					"FIPS is enforced");
 		}
 
 		if (!dekCipherSpec.startsWith("AES/GCM/")) {
-			return FipsReport.nonCompliant(
+			return FipsReport.noncompliant(
 				"Only AES/GCM mode is allowed for dek-cipher-spec when FIPS " +
 					"is enforced");
 		}

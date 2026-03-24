@@ -16,7 +16,6 @@ import java.util.Map;
 
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Modified;
 
 /**
@@ -24,7 +23,6 @@ import org.osgi.service.component.annotations.Modified;
  */
 @Component(
 	configurationPid = "com.liferay.keymanager.provider.gcp.internal.configuration.GcpSecretManagerSystemSecretVaultProviderConfiguration",
-	configurationPolicy = ConfigurationPolicy.OPTIONAL,
 	property = "keymanager.provider.id=gcp-secret-manager-system-secret",
 	service = {
 		SecretVaultProvider.class, SecretVaultReader.class,
@@ -36,7 +34,7 @@ public class GcpSecretManagerSystemSecretVaultProvider
 
 	@Activate
 	@Modified
-	public void activate(Map<String, Object> properties) throws IOException {
+	protected void activate(Map<String, Object> properties) throws IOException {
 		super.activate(
 			HashMapBuilder.<String, Object>putAll(
 				properties

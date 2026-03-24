@@ -10,7 +10,6 @@ import com.liferay.portal.kernel.model.CompanyConstants;
 import com.liferay.portal.kernel.model.GroupConstants;
 import com.liferay.portal.kernel.util.GetterUtil;
 
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,31 +18,11 @@ import java.util.regex.Pattern;
  */
 public class ConfigurationKeyReference extends KeyReference {
 
-	public static boolean isConfigurationKeyReference(String value) {
-		if (value == null) {
-			return false;
-		}
-
-		KeyReference keyReference = KeyReference.fromString(value);
-		
-		if (keyReference == null) {
-			return false;
-		}
-		
-		Matcher matcher = _pattern.matcher(value);
-
-		if (!matcher.matches()) {
-			return false;
-		}
-		
-		return true;
-	}
-
 	public static ConfigurationKeyReference fromString(String value) {
 		if (value == null) {
 			return null;
 		}
-		
+
 		KeyReference keyReference = KeyReference.fromString(value);
 
 		if (keyReference == null) {
@@ -64,6 +43,22 @@ public class ConfigurationKeyReference extends KeyReference {
 		return new ConfigurationKeyReference(pid, key, companyId, groupId);
 	}
 
+	public static boolean isConfigurationKeyReference(String value) {
+		if (value == null) {
+			return false;
+		}
+
+		KeyReference keyReference = KeyReference.fromString(value);
+
+		if (keyReference == null) {
+			return false;
+		}
+
+		Matcher matcher = _pattern.matcher(value);
+
+		return matcher.matches();
+	}
+
 	public ConfigurationKeyReference(String pid, String key) {
 		this(pid, key, CompanyConstants.SYSTEM);
 	}
@@ -72,43 +67,53 @@ public class ConfigurationKeyReference extends KeyReference {
 		this(pid, key, companyId, GroupConstants.DEFAULT_PARENT_GROUP_ID);
 	}
 
-	public ConfigurationKeyReference(String pid, String key, long companyId, long groupId) {
-		this(KeyReference.Type.SECRET, ANY_PROVIDER, pid, key, companyId, groupId);
+	public ConfigurationKeyReference(
+		String pid, String key, long companyId, long groupId) {
+
+		this(
+			KeyReference.Type.SECRET, ANY_PROVIDER, pid, key, companyId,
+			groupId);
 	}
 
-	public ConfigurationKeyReference(Type type, String provider, String pid, String key, long companyId, long groupId) {
-		super(type, provider, StringBundler.concat(
-			"config:", pid, ":", Long.toString(companyId), ":", Long.toString(groupId), ":", key));
+	public ConfigurationKeyReference(
+		Type type, String provider, String pid, String key, long companyId,
+		long groupId) {
 
-		this._pid = pid;
-		this._key = key;
-		this._companyId = companyId;
-		this._groupId = groupId;
+		super(
+			type, provider,
+			StringBundler.concat(
+				"config:", pid, ":", String.valueOf(companyId), ":",
+				String.valueOf(groupId), ":", key));
+
+		_pid = pid;
+		_key = key;
+		_companyId = companyId;
+		_groupId = groupId;
 	}
-	
-	private static final Pattern _pattern = Pattern.compile(
-		"^config:([^:]+):([^:]+):([^:]+):([^:]+)$");
 
-	private static final long serialVersionUID = 1L;
+	public long getCompanyId() {
+		return _companyId;
+	}
+
+	public long getGroupId() {
+		return _groupId;
+	}
+
+	public String getKey() {
+		return _key;
+	}
 
 	public String getPid() {
 		return _pid;
 	}
-	
-	public String getKey() {
-		return _key;
-	}
-	
-	public long getCompanyId() {
-		return _companyId;
-	}
-	
-	public long getGroupId() {
-		return _groupId;
-	}
-	
-	private final String _pid;
-	private final String _key;
+
+	private static final Pattern _pattern = Pattern.compile(
+		"^config:([^:]+):([^:]+):([^:]+):([^:]+)$");
+	private static final long serialVersionUID = 1L;
+
 	private final long _companyId;
 	private final long _groupId;
+	private final String _key;
+	private final String _pid;
+
 }

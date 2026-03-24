@@ -69,9 +69,7 @@ public class EnvSecretVaultProviderTest {
 				"providerId", "env"
 			).build());
 
-		try (SecureSecret secret = _provider.getSecret(
-				0L, "PASSWORD")) {
-
+		try (SecureSecret secret = _provider.getSecret(0L, "PASSWORD")) {
 			Assert.assertArrayEquals("secret123".getBytes(), secret.getBytes());
 		}
 	}

@@ -102,9 +102,9 @@ public class GcpManualTest {
 			).put(
 				"new-key-protection-level", "HSM"
 			).put(
-				"newKeyProtectionLevel", "HSM"
-			).put(
 				"new-key-rotation-period-seconds", 7776000L
+			).put(
+				"newKeyProtectionLevel", "HSM"
 			).put(
 				"newKeyRotationPeriodSeconds", 7776000L
 			).put(
@@ -131,8 +131,6 @@ public class GcpManualTest {
 		_activate(
 			provider,
 			HashMapBuilder.<String, Object>put(
-				"systemScope", true
-			).put(
 				"gcp-auth-type", "adc"
 			).put(
 				"gcpAuthType", "adc"
@@ -143,15 +141,17 @@ public class GcpManualTest {
 			).put(
 				"new-key-protection-level", "HSM"
 			).put(
-				"newKeyProtectionLevel", "HSM"
-			).put(
 				"new-key-rotation-period-seconds", 7776000L
+			).put(
+				"newKeyProtectionLevel", "HSM"
 			).put(
 				"newKeyRotationPeriodSeconds", 7776000L
 			).put(
 				"provider-id", "gcp-kms-system"
 			).put(
 				"providerId", "gcp-kms-system"
+			).put(
+				"systemScope", true
 			).build());
 
 		List<String> aliases = provider.getKeyIdentifiers(0L);
@@ -178,6 +178,12 @@ public class GcpManualTest {
 			).put(
 				"gcpServiceAccountKey", "db:sa-key"
 			).put(
+				"kms-key-name", ""
+			).put(
+				"kmsKeyName", ""
+			).put(
+				"locations", new String[0]
+			).put(
 				"project-id", _projectId
 			).put(
 				"projectId", _projectId
@@ -185,12 +191,6 @@ public class GcpManualTest {
 				"provider-id", "gcp-ssm"
 			).put(
 				"providerId", "gcp-ssm"
-			).put(
-				"kms-key-name", ""
-			).put(
-				"kmsKeyName", ""
-			).put(
-				"locations", new String[0]
 			).build());
 
 		List<String> ids = provider.getSecretIdentifiers(12345L);
@@ -202,15 +202,20 @@ public class GcpManualTest {
 		throws Exception {
 
 		try {
-			Method method = target.getClass().getDeclaredMethod(
-				"activate", Map.class);
+			Method method = target.getClass(
+			).getDeclaredMethod(
+				"activate", Map.class
+			);
 
 			method.setAccessible(true);
 
 			method.invoke(target, properties);
 		}
 		catch (NoSuchMethodException noSuchMethodException) {
-			Method method = target.getClass().getDeclaredMethod("activate");
+			Method method = target.getClass(
+			).getDeclaredMethod(
+				"activate"
+			);
 
 			method.setAccessible(true);
 
@@ -246,11 +251,10 @@ public class GcpManualTest {
 	}
 
 	private CompanyLocalService _companyLocalService;
-	private String _projectId;
 	private String _keyRingPath;
-	private String _saJsonKey;
-
 	private MockedStatic<PortalInstancePool> _portalInstancePoolMockedStatic;
+	private String _projectId;
+	private String _saJsonKey;
 
 	private static class MockSecretManager implements SecretManager {
 
@@ -288,7 +292,7 @@ public class GcpManualTest {
 		@Override
 		public KeyReference putSecret(
 			long companyId, SecureSecret secureSecret) {
-			
+
 			return null;
 		}
 

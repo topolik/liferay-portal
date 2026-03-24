@@ -20,11 +20,7 @@ import com.liferay.osgi.util.configuration.ConfigurationFactoryUtil;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.dao.jdbc.OutputBlob;
 import com.liferay.portal.kernel.instance.PortalInstancePool;
-import com.liferay.portal.kernel.log.Log;
-import com.liferay.portal.kernel.log.LogFactoryUtil;
-import com.liferay.portal.kernel.model.Company;
 import com.liferay.portal.kernel.service.CompanyLocalService;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringUtil;
@@ -50,9 +46,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 
 /**
@@ -68,11 +62,11 @@ public abstract class BaseDBSecretVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			SecretEntry secretEntry = _secretEntryLocalService.fetchSecretEntry(
+			SecretEntry secretEntry = secretEntryLocalService.fetchSecretEntry(
 				companyId, identifier);
 
 			if (secretEntry != null) {
-				_secretEntryLocalService.deleteSecretEntry(secretEntry);
+				secretEntryLocalService.deleteSecretEntry(secretEntry);
 			}
 		}
 		catch (Exception exception) {
@@ -88,7 +82,7 @@ public abstract class BaseDBSecretVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			SecretEntry secretEntry = _secretEntryLocalService.fetchSecretEntry(
+			SecretEntry secretEntry = secretEntryLocalService.fetchSecretEntry(
 				companyId, identifier);
 
 			if (secretEntry == null) {
@@ -102,7 +96,7 @@ public abstract class BaseDBSecretVaultProvider
 
 			byte[] dekBytes = _blobToBytes(secretEntry.getEncryptedDEKBlob());
 
-			Key dek = _cryptoManager.unwrap(
+			Key dek = cryptoManager.unwrap(
 				companyId, masterKeyRef, dekBytes, _keyAlgorithm,
 				Cipher.SECRET_KEY);
 
@@ -134,9 +128,7 @@ public abstract class BaseDBSecretVaultProvider
 			}
 			finally {
 				if ((dek != null) && (dek.getEncoded() != null)) {
-					byte[] encoded = dek.getEncoded();
-
-					Arrays.fill(encoded, (byte)0);
+					Arrays.fill(dek.getEncoded(), (byte)0);
 				}
 			}
 		}
@@ -156,7 +148,7 @@ public abstract class BaseDBSecretVaultProvider
 		_checkPermission(companyId);
 
 		try {
-			return _secretEntryLocalService.getSecretIdentifiers(companyId);
+			return secretEntryLocalService.getSecretIdentifiers(companyId);
 		}
 		catch (Exception exception) {
 			throw new SecretManagerException(
@@ -169,7 +161,7 @@ public abstract class BaseDBSecretVaultProvider
 		if (!_enabled) {
 			return false;
 		}
-		
+
 		if ((companyId == 0) || (_companyId == companyId)) {
 			return true;
 		}
@@ -211,33 +203,40 @@ public abstract class BaseDBSecretVaultProvider
 			KeyReference masterKeyRef = KeyReference.fromString(
 				_masterKeyReference);
 
-			byte[] encryptedDek = _cryptoManager.wrap(
+			byte[] encryptedDek = cryptoManager.wrap(
 				companyId, masterKeyRef, dek);
 
 			// 4. Persist
 
-			SecretEntry secretEntry = _secretEntryLocalService.fetchSecretEntry(
-				companyId, secureSecret.getKeyReference().getIdentifier());
+			SecretEntry secretEntry = secretEntryLocalService.fetchSecretEntry(
+				companyId,
+				secureSecret.getKeyReference(
+				).getIdentifier());
 
 			if (secretEntry == null) {
-				secretEntry = _secretEntryLocalService.createSecretEntry(0);
+				secretEntry = secretEntryLocalService.createSecretEntry(0);
 
 				secretEntry.setCompanyId(companyId);
 				secretEntry.setAlias(
-					secureSecret.getKeyReference().getIdentifier());
+					secureSecret.getKeyReference(
+					).getIdentifier());
 			}
 
 			secretEntry.setCiphertextBlob(
 				new OutputBlob(
 					new ByteArrayInputStream(ciphertext), ciphertext.length));
-			secretEntry.setIv(Base64.getEncoder().encodeToString(iv));
+			secretEntry.setIv(
+				Base64.getEncoder(
+				).encodeToString(
+					iv
+				));
 			secretEntry.setEncryptedDEKBlob(
 				new OutputBlob(
 					new ByteArrayInputStream(encryptedDek),
 					encryptedDek.length));
 			secretEntry.setKekReference(_masterKeyReference);
 
-			_secretEntryLocalService.updateSecretEntry(secretEntry);
+			secretEntryLocalService.updateSecretEntry(secretEntry);
 		}
 		catch (Exception exception) {
 			KeyReference keyReference = secureSecret.getKeyReference();
@@ -258,26 +257,35 @@ public abstract class BaseDBSecretVaultProvider
 		String dekCipherSpec = null;
 
 		if (GetterUtil.getBoolean(properties.get("systemScope"))) {
-			DBSystemSecretVaultProviderConfiguration configuration =
-				ConfigurableUtil.createConfigurable(
-					DBSystemSecretVaultProviderConfiguration.class, properties);
+			DBSystemSecretVaultProviderConfiguration
+				dbSystemSecretVaultProviderConfiguration =
+					ConfigurableUtil.createConfigurable(
+						DBSystemSecretVaultProviderConfiguration.class,
+						properties);
 
-			_enabled = configuration.enabled();
+			_enabled = dbSystemSecretVaultProviderConfiguration.enabled();
+			masterKeyReference =
+				dbSystemSecretVaultProviderConfiguration.masterKeyReference();
+			dekCipherSpec =
+				dbSystemSecretVaultProviderConfiguration.dekCipherSpec();
+
 			_companyId = PortalInstancePool.getDefaultCompanyId();
-			masterKeyReference = configuration.masterKeyReference();
-			dekCipherSpec = configuration.dekCipherSpec();
 		}
 		else {
-			DBCompanySecretVaultProviderConfiguration configuration =
-				ConfigurableUtil.createConfigurable(
-					DBCompanySecretVaultProviderConfiguration.class,
-					properties);
+			DBCompanySecretVaultProviderConfiguration
+				dbCompanySecretVaultProviderConfiguration =
+					ConfigurableUtil.createConfigurable(
+						DBCompanySecretVaultProviderConfiguration.class,
+						properties);
 
 			_enabled = true;
+			masterKeyReference =
+				dbCompanySecretVaultProviderConfiguration.masterKeyReference();
+			dekCipherSpec =
+				dbCompanySecretVaultProviderConfiguration.dekCipherSpec();
+
 			_companyId = ConfigurationFactoryUtil.getCompanyId(
-				_companyLocalService, properties);
-			masterKeyReference = configuration.masterKeyReference();
-			dekCipherSpec = configuration.dekCipherSpec();
+				companyLocalService, properties);
 		}
 
 		_masterKeyReference = masterKeyReference;
@@ -305,6 +313,15 @@ public abstract class BaseDBSecretVaultProvider
 		_keyAlgorithm = StringUtil.split(_encryptionAlgorithm, "/")[0];
 	}
 
+	@Reference
+	protected CompanyLocalService companyLocalService;
+
+	@Reference
+	protected CryptoManager cryptoManager;
+
+	@Reference
+	protected SecretEntryLocalService secretEntryLocalService;
+
 	private byte[] _blobToBytes(Blob blob) throws Exception {
 		try (InputStream inputStream = blob.getBinaryStream()) {
 			ByteArrayOutputStream byteArrayOutputStream =
@@ -321,7 +338,8 @@ public abstract class BaseDBSecretVaultProvider
 
 		if (!isAllowedCompany(companyId)) {
 			throw new SecretManagerException(
-				"Company " + companyId + " is not allowed to use this provider");
+				"Company " + companyId +
+					" is not allowed to use this provider");
 		}
 	}
 
@@ -331,7 +349,10 @@ public abstract class BaseDBSecretVaultProvider
 
 		Cipher cipher = Cipher.getInstance(algorithm);
 
-		byte[] iv = Base64.getDecoder().decode(ivBase64);
+		byte[] iv = Base64.getDecoder(
+		).decode(
+			ivBase64
+		);
 
 		cipher.init(Cipher.DECRYPT_MODE, key, _getParameterSpec(iv, algorithm));
 
@@ -387,15 +408,8 @@ public abstract class BaseDBSecretVaultProvider
 		return map;
 	}
 
-	@Reference
-	protected CryptoManager _cryptoManager;
-
 	private volatile long _companyId;
 	private volatile boolean _enabled;
-
-	@Reference
-	protected CompanyLocalService _companyLocalService;
-
 	private volatile String _encryptionAlgorithm;
 	private volatile int _gcmTagLength;
 	private volatile int _ivLength;
@@ -403,8 +417,5 @@ public abstract class BaseDBSecretVaultProvider
 	private volatile int _keySize;
 	private volatile String _masterKeyReference;
 	private final SecureRandom _secureRandom = new SecureRandom();
-
-	@Reference
-	protected SecretEntryLocalService _secretEntryLocalService;
 
 }

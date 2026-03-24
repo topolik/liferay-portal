@@ -22,8 +22,9 @@ public abstract class BaseOsFipsValidator implements FipsValidator {
 	@Override
 	public FipsReport validate(Map<String, ?> properties) {
 		if (isFipsEnforced()) {
-			return FipsReport.nonCompliant(
-				"OS-based providers are not FIPS certified and cannot be used when FIPS is enforced.");
+			return FipsReport.noncompliant(
+				"OS-based providers are not FIPS certified and cannot be " +
+					"used when FIPS is enforced.");
 		}
 
 		return FipsReport.compliant();

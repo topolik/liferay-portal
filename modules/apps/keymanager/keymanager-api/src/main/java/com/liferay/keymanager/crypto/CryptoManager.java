@@ -40,11 +40,11 @@ public interface CryptoManager {
 			String algorithmSpec)
 		throws CryptoManagerException;
 
-	public List<KeyReference> getKeyIdentifiers(long companyId, String providerId)
+	public List<KeyReference> getKeyIdentifiers(
+			long companyId, String providerId)
 		throws CryptoManagerException;
 
-	public CryptoKey getKeyMetadata(
-			long companyId, KeyReference keyReference)
+	public CryptoKey getKeyMetadata(long companyId, KeyReference keyReference)
 		throws CryptoManagerException;
 
 	public List<String> getProviders(long companyId)

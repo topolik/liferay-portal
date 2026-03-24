@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -81,7 +82,7 @@ public class K8sFileSecretVaultProvider
 		}
 		finally {
 			if (bytes != null) {
-				java.util.Arrays.fill(bytes, (byte)0);
+				Arrays.fill(bytes, (byte)0);
 			}
 		}
 	}
@@ -111,11 +112,7 @@ public class K8sFileSecretVaultProvider
 
 	@Override
 	public boolean isAllowedCompany(long companyId) {
-		if (!_enabled) {
-			return false;
-		}
-
-		return true;
+		return _enabled;
 	}
 
 	@Override
@@ -139,13 +136,13 @@ public class K8sFileSecretVaultProvider
 	@Modified
 	protected void activate(Map<String, Object> properties) {
 		K8sFileSecretVaultProviderConfiguration
-			fileSecretVaultProviderConfiguration =
+			k8sFileSecretVaultProviderConfiguration =
 				ConfigurableUtil.createConfigurable(
 					K8sFileSecretVaultProviderConfiguration.class, properties);
 
-		_enabled = fileSecretVaultProviderConfiguration.enabled();
+		_enabled = k8sFileSecretVaultProviderConfiguration.enabled();
 		_secretsDirectory =
-			fileSecretVaultProviderConfiguration.secretsDirectory();
+			k8sFileSecretVaultProviderConfiguration.secretsDirectory();
 	}
 
 	private File _getFile(String identifier) throws SecretManagerException {

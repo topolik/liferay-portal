@@ -39,6 +39,19 @@ public class KeyReferenceTest {
 	}
 
 	@Test
+	public void testFromStringAnyProvider() {
+		String raw = "${secretRef:*:my-secret}";
+
+		KeyReference keyReference = KeyReference.fromString(raw);
+
+		Assert.assertNotNull(keyReference);
+		Assert.assertEquals(
+			KeyReference.ANY_PROVIDER, keyReference.getProviderId());
+		Assert.assertEquals("my-secret", keyReference.getIdentifier());
+		Assert.assertEquals(raw, keyReference.toString());
+	}
+
+	@Test
 	public void testFromStringCrypto() {
 		String raw = "${keyRef:keystore:master-key}";
 
@@ -76,19 +89,6 @@ public class KeyReferenceTest {
 		Assert.assertEquals(KeyReference.Type.SECRET, keyReference.getType());
 		Assert.assertEquals("db", keyReference.getProviderId());
 		Assert.assertEquals("jdbc-password", keyReference.getIdentifier());
-		Assert.assertEquals(raw, keyReference.toString());
-	}
-
-	@Test
-	public void testFromStringAnyProvider() {
-		String raw = "${secretRef:*:my-secret}";
-
-		KeyReference keyReference = KeyReference.fromString(raw);
-
-		Assert.assertNotNull(keyReference);
-		Assert.assertEquals(
-			KeyReference.ANY_PROVIDER, keyReference.getProviderId());
-		Assert.assertEquals("my-secret", keyReference.getIdentifier());
 		Assert.assertEquals(raw, keyReference.toString());
 	}
 

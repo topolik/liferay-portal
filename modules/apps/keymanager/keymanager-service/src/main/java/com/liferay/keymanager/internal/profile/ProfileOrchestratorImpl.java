@@ -7,6 +7,7 @@ package com.liferay.keymanager.internal.profile;
 
 import com.liferay.keymanager.internal.profile.configuration.KeyManagerGlobalConfiguration;
 import com.liferay.keymanager.spi.profile.KeyManagerProfile;
+import com.liferay.keymanager.spi.profile.ProfileOrchestrator;
 import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReferenceMapper;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
@@ -27,10 +28,12 @@ import org.osgi.service.component.annotations.Modified;
 	configurationPid = "com.liferay.keymanager.internal.profile.configuration.KeyManagerGlobalConfiguration",
 	service = ProfileOrchestrator.class
 )
-public class ProfileOrchestrator {
+public class ProfileOrchestratorImpl implements ProfileOrchestrator {
 
+	@Override
 	public KeyManagerProfile getActiveProfile() {
-		String activeProfileId = _configuration.activeProfileId();
+		String activeProfileId =
+			_keyManagerGlobalConfiguration.activeProfileId();
 
 		KeyManagerProfile keyManagerProfile = _serviceTrackerMap.getService(
 			activeProfileId);
@@ -46,12 +49,11 @@ public class ProfileOrchestrator {
 	protected void activate(
 		BundleContext bundleContext, Map<String, Object> properties) {
 
-		_configuration = ConfigurableUtil.createConfigurable(
+		_keyManagerGlobalConfiguration = ConfigurableUtil.createConfigurable(
 			KeyManagerGlobalConfiguration.class, properties);
 
 		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, KeyManagerProfile.class,
-			"(keymanager.profile.id=*)",
+			bundleContext, KeyManagerProfile.class, "(keymanager.profile.id=*)",
 			new PropertyServiceReferenceMapper<>("keymanager.profile.id"));
 	}
 
@@ -62,11 +64,12 @@ public class ProfileOrchestrator {
 
 	@Modified
 	protected void modified(Map<String, Object> properties) {
-		_configuration = ConfigurableUtil.createConfigurable(
+		_keyManagerGlobalConfiguration = ConfigurableUtil.createConfigurable(
 			KeyManagerGlobalConfiguration.class, properties);
 	}
 
-	private volatile KeyManagerGlobalConfiguration _configuration;
+	private volatile KeyManagerGlobalConfiguration
+		_keyManagerGlobalConfiguration;
 	private ServiceTrackerMap<String, KeyManagerProfile> _serviceTrackerMap;
 
 }
