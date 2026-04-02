@@ -109,7 +109,8 @@ public interface SamlConfiguration {
 
 	@Meta.AD(
 		deflt = "liferay", id = "saml.keystore.password",
-		name = "saml-key-store-password", required = false
+		name = "saml-key-store-password", required = false, 
+		type = Meta.Type.Password
 	)
 	public String keyStorePassword();
 

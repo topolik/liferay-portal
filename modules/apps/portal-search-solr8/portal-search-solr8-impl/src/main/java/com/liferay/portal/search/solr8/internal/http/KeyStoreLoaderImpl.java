@@ -41,7 +41,7 @@ public class KeyStoreLoaderImpl implements KeyStoreLoader {
 		KeyStore keyStore = KeyStore.getInstance(keyStoreType);
 
 		try (InputStream inputStream = loadFile(keyStoreLocation)) {
-			keyStore.load(inputStream, keyStorePassword);
+			keyStore.load(inputStream, keyStorePassword);  // HERE
 
 			if (_log.isDebugEnabled()) {
 				dumpKeyStore(keyStore);

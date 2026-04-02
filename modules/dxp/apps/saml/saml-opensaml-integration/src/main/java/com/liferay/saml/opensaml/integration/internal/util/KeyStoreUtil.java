@@ -5,6 +5,12 @@
 
 package com.liferay.saml.opensaml.integration.internal.util;
 
+import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.secret.SecretManager;
+import com.liferay.keymanager.secret.SecretManagerException;
+import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.saml.runtime.credential.KeyStoreManager;
 import com.liferay.saml.runtime.exception.CredentialAuthException;
@@ -15,6 +21,8 @@ import java.security.KeyStoreException;
 import java.security.UnrecoverableKeyException;
 
 import org.opensaml.security.credential.UsageType;
+
+import javax.security.auth.DestroyFailedException;
 
 /**
  * @author João Victor Alves
@@ -34,14 +42,54 @@ public class KeyStoreUtil {
 
 	public static KeyStore.Entry getKeyStoreEntry(
 			String alias, String certificateKeyPassword,
-			KeyStoreManager keyStoreManager)
+			KeyStoreManager keyStoreManager, SecretManager secretManager)
 		throws CredentialAuthException {
+
+		long companyId = CompanyThreadLocal.getCompanyId();
 
 		KeyStore.PasswordProtection keyStorePasswordProtection = null;
 
 		if (certificateKeyPassword != null) {
-			keyStorePasswordProtection = new KeyStore.PasswordProtection(
-				certificateKeyPassword.toCharArray());
+			if (!KeyReference.isKeyReference(certificateKeyPassword)) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"FIPS compliance warning: SAML keystore password " +
+							"is not saved in secure storage!");
+				}
+
+				keyStorePasswordProtection = new KeyStore.PasswordProtection(
+					certificateKeyPassword.toCharArray());
+			} 
+			else {
+				try (SecureSecret secureSecret =
+					 secretManager.getSecret(
+						 companyId, 
+						 KeyReference.fromString(certificateKeyPassword))) {
+
+					if (secureSecret == null) {
+						Class<? extends KeyStoreManager> clazz = keyStoreManager.getClass();
+
+						throw new CredentialAuthException.GeneralCredentialAuthException(
+							String.format(
+								"SecretManager could not resolve keystore entry password reference %s for company %s using %s",
+								certificateKeyPassword, companyId, clazz.getSimpleName()),
+							new GeneralSecurityException());
+					}
+
+					keyStorePasswordProtection =
+						new KeyStore.PasswordProtection(
+							secureSecret.getChars());
+				}
+				catch (SecretManagerException secretManagerException) {
+					Class<? extends KeyStoreManager> clazz = keyStoreManager.getClass();
+
+					throw new CredentialAuthException.GeneralCredentialAuthException(
+						String.format(
+							"SecretManager could not resolve keystore password reference for company %s using %s",
+							companyId, clazz.getSimpleName()),
+						new GeneralSecurityException(secretManagerException));
+				}
+			}
 		}
 
 		try {
@@ -51,7 +99,6 @@ public class KeyStoreUtil {
 		}
 		catch (GeneralSecurityException generalSecurityException) {
 			Class<? extends KeyStoreManager> clazz = keyStoreManager.getClass();
-			long companyId = CompanyThreadLocal.getCompanyId();
 
 			if (generalSecurityException instanceof KeyStoreException) {
 				UnrecoverableKeyException unrecoverableKeyException =
@@ -92,6 +139,20 @@ public class KeyStoreUtil {
 					companyId, clazz.getSimpleName()),
 				generalSecurityException);
 		}
+		finally {
+			if (keyStorePasswordProtection != null && 
+				!keyStorePasswordProtection.isDestroyed()) {
+				
+				try {
+					keyStorePasswordProtection.destroy();
+				}
+				catch (DestroyFailedException e) {
+					_log.warn(
+						"FIPS Compliance warning: Unable to destroy password " +
+							"material: " + e.getMessage(), e);
+				}
+			}
+		}
 	}
 
 	private static <T> T _getCauseThrowable(
@@ -113,5 +174,7 @@ public class KeyStoreUtil {
 
 		return null;
 	}
+
+	private static final Log _log = LogFactoryUtil.getLog(KeyStoreUtil.class);
 
 }

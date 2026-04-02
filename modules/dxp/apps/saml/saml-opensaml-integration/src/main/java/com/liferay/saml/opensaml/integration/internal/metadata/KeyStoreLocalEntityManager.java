@@ -5,6 +5,11 @@
 
 package com.liferay.saml.opensaml.integration.internal.metadata;
 
+import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.secret.SecretManager;
+import com.liferay.keymanager.secret.SecureSecret;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.saml.opensaml.integration.internal.util.KeyStoreUtil;
@@ -42,6 +47,8 @@ import org.opensaml.security.x509.X509Credential;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import javax.security.auth.DestroyFailedException;
+
 /**
  * @author João Victor Alves
  */
@@ -62,12 +69,12 @@ public class KeyStoreLocalEntityManager implements LocalEntityManager {
 		if (certificateUsage == CertificateUsage.ENCRYPTION) {
 			entry = KeyStoreUtil.getKeyStoreEntry(
 				KeyStoreUtil.getAlias(entityId, UsageType.ENCRYPTION),
-				certificateKeyPassword, _keyStoreManager);
+				certificateKeyPassword, _keyStoreManager, _secretManager);
 		}
 		else {
 			entry = KeyStoreUtil.getKeyStoreEntry(
 				KeyStoreUtil.getAlias(entityId, UsageType.SIGNING),
-				certificateKeyPassword, _keyStoreManager);
+				certificateKeyPassword, _keyStoreManager, _secretManager);
 		}
 
 		if (entry == null) {
@@ -175,15 +182,62 @@ public class KeyStoreLocalEntityManager implements LocalEntityManager {
 
 		KeyStore keyStore = _keyStoreManager.getKeyStore();
 
-		keyStore.setEntry(
-			KeyStoreUtil.getAlias(
-				getLocalEntityId(), _getUsageType(certificateUsage)),
-			new KeyStore.PrivateKeyEntry(
-				privateKey, new Certificate[] {x509Certificate}),
-			new KeyStore.PasswordProtection(
-				certificateKeyPassword.toCharArray()));
+		KeyStore.PasswordProtection keyStorePasswordProtection = null;
 
-		_keyStoreManager.saveKeyStore(keyStore);
+		if (!KeyReference.isKeyReference(certificateKeyPassword)) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"FIPS compliance warning: SAML keystore password is not " +
+						"saved in secure storage!");
+			}
+
+			keyStorePasswordProtection = new KeyStore.PasswordProtection(
+				certificateKeyPassword.toCharArray());
+		}
+		else {
+			long companyId = CompanyThreadLocal.getCompanyId();
+
+			try (SecureSecret secureSecret = _secretManager.getSecret(
+					companyId,
+					KeyReference.fromString(certificateKeyPassword))) {
+
+				if (secureSecret == null) {
+					throw new Exception(
+						String.format(
+							"SecretManager could not resolve keystore entry " +
+								"password reference %s for company %s",
+							certificateKeyPassword, companyId));
+				}
+
+				keyStorePasswordProtection = new KeyStore.PasswordProtection(
+					secureSecret.getChars());
+			}
+		}
+
+		try {
+			keyStore.setEntry(
+				KeyStoreUtil.getAlias(
+					getLocalEntityId(), _getUsageType(certificateUsage)),
+				new KeyStore.PrivateKeyEntry(
+					privateKey, new Certificate[] {x509Certificate}),
+				keyStorePasswordProtection);
+
+			_keyStoreManager.saveKeyStore(keyStore);
+		}
+		finally {
+			if ((keyStorePasswordProtection != null) &&
+				!keyStorePasswordProtection.isDestroyed()) {
+
+				try {
+					keyStorePasswordProtection.destroy();
+				}
+				catch (DestroyFailedException e) {
+					_log.warn(
+						"FIPS Compliance warning: Unable to destroy password " +
+							"material: " + e.getMessage(), e);
+				}
+			}
+		}
 	}
 
 	private UsageType _getUsageType(CertificateUsage certificateUsage) {
@@ -210,5 +264,11 @@ public class KeyStoreLocalEntityManager implements LocalEntityManager {
 
 	@Reference
 	private SamlSpIdpConnectionLocalService _samlSpIdpConnectionLocalService;
+	
+	@Reference
+	private SecretManager _secretManager;
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		KeyStoreLocalEntityManager.class);
 
 }

@@ -5,6 +5,9 @@
 
 package com.liferay.saml.opensaml.integration.internal.credential;
 
+import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.secret.SecretManager;
+import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -25,6 +28,7 @@ import java.util.Map;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Mika Koivisto
@@ -69,11 +73,39 @@ public class FileSystemKeyStoreManagerImpl extends BaseKeyStoreManagerImpl {
 
 		String samlKeyStorePassword = getSamlKeyStorePassword();
 
+		if (!KeyReference.isKeyReference(samlKeyStorePassword)) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"FIPS compliance warning: SAML keystore password " +
+						"is not saved in secure storage!");
+			}
+
+			try (FileOutputStream fileOutputStream = new FileOutputStream(
+				samlKeyStoreFile)) {
+				
+				_keyStore.store(
+					fileOutputStream, samlKeyStorePassword.toCharArray());
+			}
+
+			return;
+		}
+		
 		try (FileOutputStream fileOutputStream = new FileOutputStream(
 				samlKeyStoreFile)) {
 
-			_keyStore.store(
-				fileOutputStream, samlKeyStorePassword.toCharArray());
+			try (SecureSecret secureSecret =
+				 _secretManager.getSecret(getCompanyId(),
+					 getSamlKeyStorePasswordKeyReference())) {
+
+				if (secureSecret == null) {
+					throw new Exception(
+						"SecretManager could not resolve SAML keystore " +
+							"password reference " + samlKeyStorePassword);
+				}
+				
+				_keyStore.store(
+					fileOutputStream, secureSecret.getChars());
+			}
 		}
 	}
 
@@ -135,8 +167,33 @@ public class FileSystemKeyStoreManagerImpl extends BaseKeyStoreManagerImpl {
 	private void _doLoadKeyStore() throws Exception {
 		String samlKeyStorePassword = getSamlKeyStorePassword();
 
+		if (!KeyReference.isKeyReference(samlKeyStorePassword)) {
+			if (_log.isWarnEnabled()) {
+				_log.warn(
+					"FIPS compliance warning: SAML keystore password " +
+						"is not saved in secure storage!");
+			}
+
+			try (InputStream inputStream = _getInputStream()) {
+				_keyStore.load(inputStream, samlKeyStorePassword.toCharArray());
+			}
+			
+			return;
+		}
+		
 		try (InputStream inputStream = _getInputStream()) {
-			_keyStore.load(inputStream, samlKeyStorePassword.toCharArray());
+			try (SecureSecret secureSecret =
+				 _secretManager.getSecret(getCompanyId(),
+					 getSamlKeyStorePasswordKeyReference())) {
+
+				if (secureSecret == null) {
+					throw new Exception(
+						"SecretManager could not resolve SAML keystore " +
+								"password reference " + samlKeyStorePassword);
+				}
+				
+				_keyStore.load(inputStream, secureSecret.getChars());
+			}
 		}
 	}
 
@@ -208,4 +265,6 @@ public class FileSystemKeyStoreManagerImpl extends BaseKeyStoreManagerImpl {
 	private volatile KeyStoreException _keyStoreException;
 	private volatile FileWatcher _samlKeyStoreFileWatcher;
 
+	@Reference
+	private SecretManager _secretManager;
 }

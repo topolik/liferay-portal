@@ -43,7 +43,7 @@ public class KeyStoreLoader {
 
 			KeyStore keyStore = KeyStore.getInstance("jks");
 
-			keyStore.load(inputStream, keyStorePassword.toCharArray());
+			keyStore.load(inputStream, keyStorePassword.toCharArray());  // HERE
 
 			return keyStore;
 		}

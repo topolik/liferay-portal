@@ -452,7 +452,7 @@ public class DDMRESTDataProvider implements DDMDataProvider {
 				).put(
 					"login", ddmRESTDataProviderSettings.username()
 				).put(
-					"password", ddmRESTDataProviderSettings.password()
+					"password", ddmRESTDataProviderSettings.password()  // here
 				).put(
 					"protocol", uri.getScheme()
 				).put(

@@ -272,7 +272,7 @@ public class OpenSearchConnection {
 
 			KeyStore keyStore = KeyStore.getInstance(_truststoreType);
 
-			keyStore.load(inputStream, _truststorePassword.toCharArray());
+			keyStore.load(inputStream, _truststorePassword.toCharArray());  // HERE
 
 			SSLContextBuilder sslContextBuilder = SSLContexts.custom();
 

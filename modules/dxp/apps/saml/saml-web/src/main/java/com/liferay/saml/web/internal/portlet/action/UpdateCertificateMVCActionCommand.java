@@ -5,6 +5,10 @@
 
 package com.liferay.saml.web.internal.portlet.action;
 
+import com.liferay.keymanager.ConfigurationKeyReference;
+import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.secret.SecretManager;
+import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -13,6 +17,7 @@ import com.liferay.portal.kernel.portlet.LiferayWindowState;
 import com.liferay.portal.kernel.portlet.bridges.mvc.BaseMVCActionCommand;
 import com.liferay.portal.kernel.portlet.bridges.mvc.MVCActionCommand;
 import com.liferay.portal.kernel.repository.model.FileEntry;
+import com.liferay.portal.kernel.security.auth.CompanyThreadLocal;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
 import com.liferay.portal.kernel.security.permission.PermissionChecker;
 import com.liferay.portal.kernel.servlet.SessionErrors;
@@ -28,6 +33,7 @@ import com.liferay.saml.constants.SamlPortletKeys;
 import com.liferay.saml.constants.SamlWebKeys;
 import com.liferay.saml.runtime.certificate.CertificateEntityId;
 import com.liferay.saml.runtime.certificate.CertificateTool;
+import com.liferay.saml.runtime.configuration.SamlProviderConfiguration;
 import com.liferay.saml.runtime.configuration.SamlProviderConfigurationHelper;
 import com.liferay.saml.runtime.exception.CertificateKeyPasswordException;
 import com.liferay.saml.runtime.exception.UnsupportedBindingException;
@@ -114,6 +120,27 @@ public class UpdateCertificateMVCActionCommand extends BaseMVCActionCommand {
 			_getCertificateUsagePropertyKey(certificateUsage));
 
 		if (Validator.isNotNull(keystoreCredentialPassword)) {
+			if (!KeyReference.isKeyReference(keystoreCredentialPassword)) {
+
+				String configurationKey = 
+					_getCertificateUsagePropertyKey(certificateUsage);
+
+				long companyId = CompanyThreadLocal.getCompanyId();
+
+				KeyReference keyReference =
+					new ConfigurationKeyReference(
+						SamlProviderConfiguration.class.getName(), 
+						configurationKey, companyId);
+
+				_secretManager.putSecret(
+					companyId, new SecureSecret(
+						keyReference, keystoreCredentialPassword));
+
+				unicodeProperties.setProperty(
+					configurationKey, 
+					keyReference.toString());
+			}
+
 			_samlProviderConfigurationHelper.updateProperties(
 				unicodeProperties);
 		}
@@ -257,14 +284,27 @@ public class UpdateCertificateMVCActionCommand extends BaseMVCActionCommand {
 			LocalEntityManager.CertificateUsage.valueOf(
 				ParamUtil.getString(actionRequest, "certificateUsage"));
 
+		String configurationKey = 
+			_getCertificateUsagePropertyKey(certificateUsage);
+
+		long companyId = CompanyThreadLocal.getCompanyId();
+
+		KeyReference keyReference = 
+			new ConfigurationKeyReference(
+				SamlProviderConfiguration.class.getName(), configurationKey, 
+				companyId);
+
+		_secretManager.putSecret(
+			companyId, new SecureSecret(keyReference, keyStorePassword));
+		
 		_localEntityManager.storeLocalEntityCertificate(
-			privateKeyEntry.getPrivateKey(), keyStorePassword, x509Certificate,
-			certificateUsage);
+			privateKeyEntry.getPrivateKey(), keyReference.toString(), 
+			x509Certificate, certificateUsage);
 
 		_samlProviderConfigurationHelper.updateProperties(
 			UnicodePropertiesBuilder.put(
-				_getCertificateUsagePropertyKey(certificateUsage),
-				keyStorePassword
+				configurationKey,
+				keyReference.toString()
 			).build());
 
 		SamlTempFileEntryUtil.deleteTempFileEntry(user, selectUploadedFile);
@@ -358,6 +398,9 @@ public class UpdateCertificateMVCActionCommand extends BaseMVCActionCommand {
 	@Reference
 	private LocalEntityManager _localEntityManager;
 
+	@Reference
+	private SecretManager _secretManager;
+	
 	@Reference
 	private SamlProviderConfigurationHelper _samlProviderConfigurationHelper;
 

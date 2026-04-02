@@ -5,6 +5,7 @@
 
 package com.liferay.saml.opensaml.integration.internal.credential;
 
+import com.liferay.keymanager.secret.SecretManager;
 import com.liferay.saml.opensaml.integration.internal.util.KeyStoreUtil;
 import com.liferay.saml.runtime.configuration.SamlProviderConfiguration;
 import com.liferay.saml.runtime.configuration.SamlProviderConfigurationHelper;
@@ -78,7 +79,7 @@ public class KeyStoreCredentialResolver extends AbstractCredentialResolver {
 
 		KeyStore.Entry entry = KeyStoreUtil.getKeyStoreEntry(
 			KeyStoreUtil.getAlias(entityId, usageType),
-			keyStoreCredentialPassword, _keyStoreManager);
+			keyStoreCredentialPassword, _keyStoreManager, _secretManager);
 
 		if (entry == null) {
 			return Collections.emptySet();
@@ -169,6 +170,9 @@ public class KeyStoreCredentialResolver extends AbstractCredentialResolver {
 
 	@Reference(name = "KeyStoreManager", target = "(default=true)")
 	private KeyStoreManager _keyStoreManager;
+	
+	@Reference
+	private SecretManager _secretManager;
 
 	@Reference
 	private SamlProviderConfigurationHelper _samlProviderConfigurationHelper;

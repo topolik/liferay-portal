@@ -7,6 +7,9 @@ package com.liferay.saml.opensaml.integration.internal.credential;
 
 import com.liferay.document.library.kernel.exception.NoSuchFileException;
 import com.liferay.document.library.kernel.store.Store;
+import com.liferay.keymanager.KeyReference;
+import com.liferay.keymanager.secret.SecretManager;
+import com.liferay.keymanager.secret.SecureSecret;
 import com.liferay.petra.string.StringBundler;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
@@ -48,7 +51,32 @@ public class DLKeyStoreManagerImpl extends BaseKeyStoreManagerImpl {
 
 			String samlKeyStorePassword = getSamlKeyStorePassword();
 
-			keyStore.load(inputStream, samlKeyStorePassword.toCharArray());
+			if (!KeyReference.isKeyReference(samlKeyStorePassword)) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"FIPS compliance warning: SAML keystore password " +
+							"is not saved in secure storage!");
+				}
+
+				keyStore.load(inputStream, samlKeyStorePassword.toCharArray());
+
+				return keyStore;
+			}
+			
+			try (SecureSecret secureSecret = 
+					 _secretManager.getSecret(getCompanyId(),
+						 getSamlKeyStorePasswordKeyReference())) {
+
+				if (secureSecret == null) {
+					throw new Exception(
+						"SecretManager could not resolve SAML keystore " +
+							"password reference " + samlKeyStorePassword);
+				}
+				
+				keyStore.load(inputStream, secureSecret.getChars());
+				
+				return keyStore;
+			}
 		}
 		catch (NoSuchFileException noSuchFileException) {
 
@@ -90,9 +118,32 @@ public class DLKeyStoreManagerImpl extends BaseKeyStoreManagerImpl {
 		try {
 			String samlKeyStorePassword = getSamlKeyStorePassword();
 
-			keyStore.store(
-				new FileOutputStream(tempFile),
-				samlKeyStorePassword.toCharArray());
+			if (!KeyReference.isKeyReference(samlKeyStorePassword)) {
+				if (_log.isWarnEnabled()) {
+					_log.warn(
+						"FIPS compliance warning: SAML keystore password " +
+							"is not saved in secure storage!");
+				}
+
+				keyStore.store(
+					new FileOutputStream(tempFile), 
+					samlKeyStorePassword.toCharArray());
+			} 
+			else {
+				try (SecureSecret secureSecret =
+						 _secretManager.getSecret(getCompanyId(),
+							 getSamlKeyStorePasswordKeyReference())) {
+
+					if (secureSecret == null) {
+						throw new Exception(
+							"SecretManager could not resolve SAML keystore " +
+								"password reference " + samlKeyStorePassword);
+					}
+					
+					keyStore.store(
+						new FileOutputStream(tempFile), secureSecret.getChars());
+				}
+			}
 
 			if (_store.hasFile(
 					getCompanyId(), CompanyConstants.SYSTEM,
@@ -123,6 +174,9 @@ public class DLKeyStoreManagerImpl extends BaseKeyStoreManagerImpl {
 	private static final Log _log = LogFactoryUtil.getLog(
 		DLKeyStoreManagerImpl.class);
 
+	@Reference
+	private SecretManager _secretManager;
+	
 	@Reference(target = "(default=true)")
 	private Store _store;
 

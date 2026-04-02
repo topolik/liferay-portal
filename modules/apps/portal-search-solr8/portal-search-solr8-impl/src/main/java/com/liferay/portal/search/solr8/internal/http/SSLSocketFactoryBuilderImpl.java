@@ -41,7 +41,7 @@ public class SSLSocketFactoryBuilderImpl implements SSLSocketFactoryBuilder {
 	@Override
 	public SSLConnectionSocketFactory build() throws Exception {
 		KeyStore keyStore = _keyStoreLoader.load(
-			_keyStoreType, _keyStorePath, _keyStorePassword);
+			_keyStoreType, _keyStorePath, _keyStorePassword);  // here
 
 		if (keyStore == null) {
 			if (_log.isDebugEnabled()) {
@@ -56,7 +56,7 @@ public class SSLSocketFactoryBuilderImpl implements SSLSocketFactoryBuilder {
 
 		if (_verifyServerCertificate) {
 			KeyStore trustKeyStore = _keyStoreLoader.load(
-				_trustStoreType, _trustStorePath, _trustStorePassword);
+				_trustStoreType, _trustStorePath, _trustStorePassword);  // here
 
 			if (trustKeyStore == null) {
 				if (_log.isDebugEnabled()) {
