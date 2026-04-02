@@ -8,12 +8,15 @@ package com.liferay.keymanager.internal.profile;
 import com.liferay.keymanager.internal.profile.configuration.KeyManagerGlobalConfiguration;
 import com.liferay.keymanager.spi.profile.KeyManagerProfile;
 import com.liferay.keymanager.spi.profile.ProfileOrchestrator;
-import com.liferay.osgi.service.tracker.collections.map.PropertyServiceReferenceMapper;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMap;
 import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapFactory;
+import com.liferay.osgi.service.tracker.collections.map.ServiceTrackerMapListener;
 import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
+import com.liferay.portal.kernel.log.Log;
+import com.liferay.portal.kernel.log.LogFactoryUtil;
 
 import java.util.Map;
+import java.util.Objects;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
@@ -53,8 +56,31 @@ public class ProfileOrchestratorImpl implements ProfileOrchestrator {
 			KeyManagerGlobalConfiguration.class, properties);
 
 		_serviceTrackerMap = ServiceTrackerMapFactory.openSingleValueMap(
-			bundleContext, KeyManagerProfile.class, "(keymanager.profile.id=*)",
-			new PropertyServiceReferenceMapper<>("keymanager.profile.id"));
+			bundleContext, KeyManagerProfile.class, "keymanager.profile.id",
+			new ServiceTrackerMapListener
+				<String, KeyManagerProfile, KeyManagerProfile>() {
+
+				@Override
+				public void keyEmitted(
+					ServiceTrackerMap<String, KeyManagerProfile>
+						serviceTrackerMap,
+					String key, KeyManagerProfile keyManagerProfile,
+					KeyManagerProfile content) {
+
+					_bootstrap(keyManagerProfile);
+				}
+
+				@Override
+				public void keyRemoved(
+					ServiceTrackerMap<String, KeyManagerProfile>
+						serviceTrackerMap,
+					String key, KeyManagerProfile keyManagerProfile,
+					KeyManagerProfile content) {
+				}
+
+			});
+
+		_bootstrap(getActiveProfile());
 	}
 
 	@Deactivate
@@ -66,7 +92,46 @@ public class ProfileOrchestratorImpl implements ProfileOrchestrator {
 	protected void modified(Map<String, Object> properties) {
 		_keyManagerGlobalConfiguration = ConfigurableUtil.createConfigurable(
 			KeyManagerGlobalConfiguration.class, properties);
+
+		_bootstrap(getActiveProfile());
 	}
+
+	private void _bootstrap(KeyManagerProfile keyManagerProfile) {
+		if ((keyManagerProfile == null) ||
+			(_keyManagerGlobalConfiguration == null)) {
+
+			return;
+		}
+
+		String activeProfileId =
+			_keyManagerGlobalConfiguration.activeProfileId();
+
+		if (!Objects.equals(
+				activeProfileId, keyManagerProfile.getProfileId())) {
+
+			return;
+		}
+
+		try {
+			if (_log.isInfoEnabled()) {
+				_log.info(
+					"Bootstrapping Key Manager profile: " + activeProfileId);
+			}
+
+			System.out.println(
+				"BOOTSTRAP: Key Manager profile: " + activeProfileId);
+
+			keyManagerProfile.bootstrap();
+		}
+		catch (Exception exception) {
+			_log.error(
+				"Unable to bootstrap Key Manager profile: " + activeProfileId,
+				exception);
+		}
+	}
+
+	private static final Log _log = LogFactoryUtil.getLog(
+		ProfileOrchestratorImpl.class);
 
 	private volatile KeyManagerGlobalConfiguration
 		_keyManagerGlobalConfiguration;

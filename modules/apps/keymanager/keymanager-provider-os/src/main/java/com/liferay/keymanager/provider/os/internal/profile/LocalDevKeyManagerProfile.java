@@ -41,6 +41,8 @@ public class LocalDevKeyManagerProfile implements KeyManagerProfile {
 
 	@Override
 	public void bootstrap() throws Exception {
+		System.out.println("LocalDevKeyManagerProfile.bootstrap entered");
+
 		String userName = System.getProperty("user.name");
 		String hostName = InetAddress.getLocalHost(
 		).getHostName();
@@ -134,7 +136,7 @@ public class LocalDevKeyManagerProfile implements KeyManagerProfile {
 
 	@Override
 	public String getCompanyKekProviderId() {
-		return "db-company-crypto";
+		return "keystore-crypto";
 	}
 
 	@Override
@@ -154,7 +156,7 @@ public class LocalDevKeyManagerProfile implements KeyManagerProfile {
 
 	@Override
 	public String getSystemKekProviderId() {
-		return "db-system-crypto";
+		return "keystore-crypto";
 	}
 
 	@Override
