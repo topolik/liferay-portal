@@ -1,7 +1,7 @@
 {
 	"dependencies": {
 		"@angular/animations": "^16.2.0",
-		"@angular/common": "^16.2.0",
+		"@angular/common": "^19.2.16",
 		"@angular/compiler": "^16.2.0",
 		"@angular/core": "^16.2.0",
 		"@angular/elements": "^15.0.0",
