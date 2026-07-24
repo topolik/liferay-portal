@@ -10,13 +10,19 @@ import com.liferay.oauth.client.persistence.service.OAuthClientASLocalMetadataLo
 import com.liferay.portal.kernel.cache.PortalCache;
 import com.liferay.portal.kernel.cache.PortalCacheHelperUtil;
 import com.liferay.portal.kernel.cache.PortalCacheManagerNames;
+import com.liferay.portal.kernel.util.InetAddressUtil;
+import com.liferay.portal.kernel.util.StringUtil;
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.security.sso.openid.connect.OpenIdConnectServiceException;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 
+import java.net.InetAddress;
+import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -49,8 +55,16 @@ public class AuthorizationServerMetadataResolver {
 			return oidcProviderMetadata;
 		}
 
+		if (!_isValidAuthServerWellKnownURI(authServerWellKnownURI)) {
+			throw new OpenIdConnectServiceException.ProviderException(
+				"Invalid authorization server well-known URI: " +
+					authServerWellKnownURI);
+		}
+
 		HTTPRequest httpRequest = new HTTPRequest(
 			HTTPRequest.Method.GET, new URL(authServerWellKnownURI));
+
+		httpRequest.setFollowRedirects(false);
 
 		HTTPResponse httpResponse = httpRequest.send();
 
@@ -66,6 +80,51 @@ public class AuthorizationServerMetadataResolver {
 			oAuthClientEntryId, oidcProviderMetadata, metadataCacheInSeconds);
 
 		return oidcProviderMetadata;
+	}
+
+	private boolean _isValidAuthServerWellKnownURI(
+		String authServerWellKnownURI) {
+
+		if (Validator.isBlank(authServerWellKnownURI)) {
+			return false;
+		}
+
+		URI uri = null;
+
+		try {
+			uri = new URI(authServerWellKnownURI);
+		}
+		catch (Exception exception) {
+			return false;
+		}
+
+		String scheme = uri.getScheme();
+
+		if ((scheme == null) ||
+			(!StringUtil.equalsIgnoreCase(scheme, "http") &&
+			 !StringUtil.equalsIgnoreCase(scheme, "https"))) {
+
+			return false;
+		}
+
+		String host = uri.getHost();
+
+		if (Validator.isBlank(host)) {
+			return false;
+		}
+
+		try {
+			for (InetAddress inetAddress : InetAddress.getAllByName(host)) {
+				if (InetAddressUtil.isLocalInetAddress(inetAddress)) {
+					return false;
+				}
+			}
+		}
+		catch (UnknownHostException unknownHostException) {
+			return false;
+		}
+
+		return true;
 	}
 
 	@Reference

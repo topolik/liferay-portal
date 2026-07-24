@@ -24,6 +24,7 @@ import com.liferay.portal.kernel.model.User;
 import com.liferay.portal.kernel.service.ResourceLocalService;
 import com.liferay.portal.kernel.service.UserLocalService;
 import com.liferay.portal.kernel.util.Http;
+import com.liferay.portal.kernel.util.InetAddressUtil;
 import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 
@@ -36,7 +37,9 @@ import com.nimbusds.oauth2.sdk.util.JSONObjectUtils;
 import com.nimbusds.openid.connect.sdk.rp.OIDCClientInformation;
 
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 
 import java.util.List;
 
@@ -345,9 +348,16 @@ public class OAuthClientEntryLocalServiceImpl
 				return;
 			}
 
+			if (!_isValidAuthServerWellKnownURI(authServerWellKnownURI)) {
+				throw new OAuthClientEntryAuthServerWellKnownURIException(
+					"Invalid authorization server well-known URI: " +
+						authServerWellKnownURI);
+			}
+
 			Http.Options httpOptions = new Http.Options();
 
 			httpOptions.setCookieSpec(Http.CookieSpec.STANDARD);
+			httpOptions.setFollowRedirects(false);
 			httpOptions.setLocation(authServerWellKnownURI);
 
 			_http.URLtoString(httpOptions);
@@ -363,6 +373,51 @@ public class OAuthClientEntryLocalServiceImpl
 			throw new OAuthClientEntryAuthServerWellKnownURIException(
 				exception);
 		}
+	}
+
+	private boolean _isValidAuthServerWellKnownURI(
+		String authServerWellKnownURI) {
+
+		if (Validator.isBlank(authServerWellKnownURI)) {
+			return false;
+		}
+
+		URI uri = null;
+
+		try {
+			uri = new URI(authServerWellKnownURI);
+		}
+		catch (Exception exception) {
+			return false;
+		}
+
+		String scheme = uri.getScheme();
+
+		if ((scheme == null) ||
+			(!StringUtil.equalsIgnoreCase(scheme, "http") &&
+			 !StringUtil.equalsIgnoreCase(scheme, "https"))) {
+
+			return false;
+		}
+
+		String host = uri.getHost();
+
+		if (Validator.isBlank(host)) {
+			return false;
+		}
+
+		try {
+			for (InetAddress inetAddress : InetAddress.getAllByName(host)) {
+				if (InetAddressUtil.isLocalInetAddress(inetAddress)) {
+					return false;
+				}
+			}
+		}
+		catch (UnknownHostException unknownHostException) {
+			return false;
+		}
+
+		return true;
 	}
 
 	private void _validateClientId(
