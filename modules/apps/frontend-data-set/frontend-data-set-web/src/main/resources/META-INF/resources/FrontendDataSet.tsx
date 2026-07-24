@@ -14,6 +14,7 @@ import {
 	ClientExtensionDefinition,
 	ClientExtensionResolution,
 	deepClone,
+	escapeHTML,
 	fetch,
 	getObjectValueFromPath,
 	loadClientExtensions,
@@ -1386,7 +1387,11 @@ const FrontendDataSetContent = ({
 		logError(apiErrorMessage);
 
 		openToast({
-			message: apiErrorMessage,
+
+			// openToast renders message as HTML (dangerouslySetInnerHTML), so
+			// escape the server-reflected error text at this sink.
+
+			message: escapeHTML(apiErrorMessage),
 			title: `${Liferay.Language.get('error')} ${statusCode}`,
 			type: 'danger',
 		});
