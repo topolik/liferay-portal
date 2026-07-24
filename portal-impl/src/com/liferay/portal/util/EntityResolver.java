@@ -96,6 +96,13 @@ public class EntityResolver implements org.xml.sax.EntityResolver {
 
 				throw new XNIException("Invalid system id " + systemId);
 			}
+
+			// The system id is a remote http(s) resource that is not in the
+			// local whitelist above. Refuse it so that a crafted
+			// xsi:schemaLocation or external DTD/schema reference cannot make
+			// the server issue an outbound request (SSRF).
+
+			throw new XNIException("Invalid system id " + systemId);
 		}
 
 		if (_log.isDebugEnabled()) {
