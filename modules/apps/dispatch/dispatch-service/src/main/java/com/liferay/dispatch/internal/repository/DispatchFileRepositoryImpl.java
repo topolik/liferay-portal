@@ -73,8 +73,11 @@ public class DispatchFileRepositoryImpl implements DispatchFileRepository {
 			Company company = _companyLocalService.getCompany(
 				dispatchTrigger.getCompanyId());
 
-			Folder folder = _getFolder(
-				company.getGroupId(), dispatchTrigger.getUserId());
+			Folder folder = _fetchFolder(company.getGroupId());
+
+			if (folder == null) {
+				return null;
+			}
 
 			return _portletFileRepository.fetchPortletFileEntry(
 				company.getGroupId(), folder.getFolderId(),
@@ -144,13 +147,33 @@ public class DispatchFileRepositoryImpl implements DispatchFileRepository {
 		return _serviceTrackerMap.getService("default");
 	}
 
+	private Folder _fetchFolder(long groupId) throws PortalException {
+		Repository repository = _portletFileRepository.fetchPortletRepository(
+			groupId, DispatchPortletKeys.DISPATCH);
+
+		if (repository == null) {
+			return null;
+		}
+
+		try {
+			return _portletFileRepository.getPortletFolder(
+				repository.getRepositoryId(),
+				DispatchConstants.REPOSITORY_DEFAULT_PARENT_FOLDER_ID,
+				DispatchConstants.REPOSITORY_FOLDER_NAME);
+		}
+		catch (PortalException portalException) {
+			if (_log.isDebugEnabled()) {
+				_log.debug(portalException);
+			}
+
+			return null;
+		}
+	}
+
 	private Folder _getFolder(long groupId, long userId)
 		throws PortalException {
 
 		ServiceContext serviceContext = new ServiceContext();
-
-		serviceContext.setAddGroupPermissions(true);
-		serviceContext.setAddGuestPermissions(true);
 
 		Repository repository = _portletFileRepository.addPortletRepository(
 			groupId, DispatchPortletKeys.DISPATCH, serviceContext);
