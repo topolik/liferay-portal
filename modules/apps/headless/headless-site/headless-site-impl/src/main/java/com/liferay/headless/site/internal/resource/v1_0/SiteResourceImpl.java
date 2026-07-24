@@ -105,8 +105,8 @@ public class SiteResourceImpl extends BaseSiteResourceImpl {
 	}
 
 	@Override
-	public Site getSite(Long siteId) {
-		Group group = _groupLocalService.fetchGroup(siteId);
+	public Site getSite(Long siteId) throws Exception {
+		Group group = _groupService.getGroup(siteId);
 
 		return _toSite(group);
 	}
