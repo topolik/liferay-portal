@@ -1,0 +1,3 @@
+com/liferay/account/admin/web/internal/display/AccountEntryDisplay.getStatusLabel()Ljava/lang/String;:SAFE
+com/liferay/account/admin/web/internal/display/AccountUserDisplay.getAccountEntryNamesStyle()Ljava/lang/String;:SAFE
+com/liferay/account/admin/web/internal/display/context/EditContactInformationDisplayContext.getSheetTitle()Ljava/lang/String;:SAFE

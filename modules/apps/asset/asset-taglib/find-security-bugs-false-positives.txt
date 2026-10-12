@@ -1,0 +1,1 @@
+com/liferay/asset/taglib/internal/display/context/AssetCategoriesNavigationDisplayContext.getNamespace()Ljava/lang/String;:SAFE

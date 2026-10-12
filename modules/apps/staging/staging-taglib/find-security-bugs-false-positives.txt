@@ -1,0 +1,2 @@
+com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(UNKNOWN,UNKNOWN):SAFE@org/apache/jsp/process_005ferror/page_jsp
+com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(UNKNOWN,UNKNOWN):SAFE@org/apache/jsp/process_005fin_005fprogress/page_jsp

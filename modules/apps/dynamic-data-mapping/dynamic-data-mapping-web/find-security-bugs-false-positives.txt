@@ -10,8 +10,4 @@ com/liferay/dynamic/data/mapping/web/internal/display/context/DDMDisplayContext.
 com/liferay/dynamic/data/mapping/web/internal/display/context/DDMDisplayContext.getStorageTypes()Ljava/util/Set;:SAFE
 com/liferay/portal/kernel/exception/LocaleException.getSourceAvailableLocales()Ljava/util/Collection;:SAFE
 com/liferay/portal/kernel/exception/LocaleException.getTargetAvailableLocales()Ljava/util/Collection;:SAFE
-com/liferay/portal/kernel/json/JSONArray.toString()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/json/JSONObject.toString()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(Ljava/util/Locale;Ljava/lang/String;)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/LocaleUtil.getSiteDefault()Ljava/util/Locale;:SAFE
 com/liferay/taglib/search/ResultRow.getParameter("rowHREF"):SAFE@org/apache/jsp/template_005fdescription_jsp

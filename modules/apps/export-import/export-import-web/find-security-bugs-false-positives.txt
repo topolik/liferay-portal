@@ -1,0 +1,5 @@
+com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(UNKNOWN,UNKNOWN):SAFE@org/apache/jsp/export/processes_005flist/export_005flayouts_005fprocesses_jsp
+com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(UNKNOWN,UNKNOWN):SAFE@org/apache/jsp/export_005fimport_005fprocess_jsp
+com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(UNKNOWN,UNKNOWN):SAFE@org/apache/jsp/import_/new_005fimport/import_005flayouts_005fresources_jsp
+com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(UNKNOWN,UNKNOWN):SAFE@org/apache/jsp/publish/edit_005fpublish_005fconfiguration_jsp
+com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(UNKNOWN,UNKNOWN):SAFE@org/apache/jsp/publish_005fprocess_005fmessage_jsp

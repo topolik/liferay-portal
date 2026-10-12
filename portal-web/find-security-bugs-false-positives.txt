@@ -1,0 +1,4 @@
+com/liferay/portal/kernel/json/JSONArray.toString():SAFE@org/apache/jsp/html/taglib/ui/search_005fiterator/deprecated/list_jsp
+com/liferay/portal/kernel/json/JSONArray.toString():SAFE@org/apache/jsp/html/taglib/ui/search_005fiterator/descriptive_jsp
+com/liferay/portal/kernel/json/JSONArray.toString():SAFE@org/apache/jsp/html/taglib/ui/search_005fiterator/icon_jsp
+com/liferay/portal/kernel/json/JSONArray.toString():SAFE@org/apache/jsp/html/taglib/ui/search_005fiterator/list_jsp

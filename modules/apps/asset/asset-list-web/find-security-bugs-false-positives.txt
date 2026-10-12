@@ -10,6 +10,3 @@ com/liferay/asset/list/web/internal/display/context/EditAssetListDisplayContext.
 com/liferay/asset/list/web/internal/display/context/SelectAssetListDisplayContext.getEventName()Ljava/lang/String;:TAINTED
 com/liferay/portal/kernel/model/Group.getScopeDescriptiveName(Lcom/liferay/portal/kernel/theme/ThemeDisplay;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/model/Group.getScopeLabel(Lcom/liferay/portal/kernel/theme/ThemeDisplay;)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/security/permission/ResourceActionsUtil.getModelResource(Ljava/util/Locale;Ljava/lang/String;)Ljava/lang/String;:0
-com/liferay/portal/kernel/util/HtmlUtil.getAUICompatibleId(Ljava/lang/String;)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/workflow/WorkflowConstants.getStatusLabel(I)Ljava/lang/String;:SAFE

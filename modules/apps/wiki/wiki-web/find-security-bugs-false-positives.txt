@@ -1,0 +1,1 @@
+com/liferay/wiki/web/internal/util/WikiUtil.getFormatLabel(Lcom/liferay/wiki/engine/WikiEngineRenderer;Ljava/lang/String;Ljava/util/Locale;)Ljava/lang/String;:SAFE

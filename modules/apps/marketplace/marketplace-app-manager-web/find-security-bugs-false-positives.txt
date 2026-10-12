@@ -1,0 +1,1 @@
+com/liferay/marketplace/app/manager/web/internal/util/AppDisplay.getStoreURL(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
