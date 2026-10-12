@@ -377,8 +377,34 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 						"liferay-config/liferay-XssServletDetector.txt|" +
 							"XSS_SERVLET");
 
+					String securityXMLPackage =
+						"com/liferay/portal/kernel/security/xml/";
+
+					String secureXMLFactoryProvider =
+						securityXMLPackage + "SecureXMLFactoryProvider";
+
+					findSecurityBugsJavaExec.systemProperty(
+						"findsecbugs.xxe.securefactories",
+						String.join(
+							",",
+							secureXMLFactoryProvider +
+								".newDocumentBuilderFactory",
+							secureXMLFactoryProvider + ".newXMLInputFactory",
+							secureXMLFactoryProvider + ".newXMLReader",
+							secureXMLFactoryProvider +
+								"Util.newDocumentBuilderFactory",
+							secureXMLFactoryProvider +
+								"Util.newXMLInputFactory",
+							secureXMLFactoryProvider + "Util.newXMLReader",
+							"com/liferay/portal/kernel/xml/StAXReaderUtil." +
+								"getXMLInputFactory"));
+
 					findSecurityBugsJavaExec.systemProperty(
 						"findsecbugs.taint.outputconfigs", "true");
+
+					findSecurityBugsJavaExec.systemProperty(
+						"findsecbugs.taint.workaroundvisitinvokedynamic",
+						"true");
 
 					String customConfigFile = "liferay-config/liferay.txt";
 
@@ -543,7 +569,7 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 	private static final String _FIND_SECURITY_BUGS_INCLUDE_FILE_NAME =
 		"fsb-include.xml";
 
-	private static final String _VERSION = "1.13.0.LIFERAY-PATCHED-1";
+	private static final String _VERSION = "1.13.0.LIFERAY-PATCHED-2";
 
 	private static final Transformer<File, Task> _reportsFileGetter =
 		new Transformer<File, Task>() {
