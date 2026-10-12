@@ -1,0 +1,14 @@
+<FindBugsFilter>
+	<Match>
+		<Class name="~com\.liferay\.batch\.engine\.internal\.bundle\.(Advanced|Classic)BundleBatchEngineUnitImpl" />
+		<Bug pattern="URLCONNECTION_SSRF_FD" />
+	</Match>
+	<Match>
+		<Class name="com.liferay.batch.engine.internal.unit.BatchEngineUnitProcessorImpl" />
+		<Or>
+			<Method name="_isProcessed" />
+			<Method name="_markProcessed" />
+		</Or>
+		<Bug pattern="PATH_TRAVERSAL_IN,PATH_TRAVERSAL_OUT" />
+	</Match>
+</FindBugsFilter>
