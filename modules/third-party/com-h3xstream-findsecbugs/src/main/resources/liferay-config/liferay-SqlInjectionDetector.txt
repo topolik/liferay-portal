@@ -17,8 +17,8 @@ com/liferay/portal/kernel/dao/orm/Session.createSynchronizedSQLQuery(Ljava/lang/
 - Here are OrderByComparator impls that _can_ be insecure source so let's consider them as SQLi sink source.
 - Insecure OrderByComparator is the one that doesn't use constants for getOrderBy(), getOrderByFields() and getOrderByConditionFields() return values.
 -
-com/liferay/portal/kernel/dao/orm/QueryDefinition.getOrderByComparator(Ljava/lang/String;)Lcom/liferay/portal/kernel/util/OrderByComparator:0
-com/liferay/portal/kernel/util/OrderByComparatorFactoryUtil.create(Ljava/lang/String;[Ljava/lang/Object;)Lcom/liferay/portal/kernel/util/OrderByComparator:0,1
+com/liferay/portal/kernel/dao/orm/QueryDefinition.getOrderByComparator(Ljava/lang/String;)Lcom/liferay/portal/kernel/util/OrderByComparator;:0
+com/liferay/portal/kernel/util/OrderByComparatorFactoryUtil.create(Ljava/lang/String;[Ljava/lang/Object;)Lcom/liferay/portal/kernel/util/OrderByComparator;:0,1
 com/liferay/portal/kernel/util/TableNameOrderByComparator.<init>(Lcom/liferay/portal/kernel/util/OrderByComparator;Ljava/lang/String;)V:0
 com/liferay/portal/kernel/util/TableNameOrderByComparator.setTableName(Ljava/lang/String;)V:0
 com/liferay/portal/kernel/workflow/comparator/WorkflowDefinitionNameComparator.<init>(ZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V:0,1,2
@@ -33,3 +33,8 @@ com/liferay/portal/kernel/workflow/comparator/WorkflowTaskCreateDateComparator.<
 com/liferay/portal/kernel/workflow/comparator/WorkflowTaskDueDateComparator.<init>(ZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V:0,1,2
 com/liferay/portal/kernel/workflow/comparator/WorkflowTaskNameComparator.<init>(ZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V:0,1,2
 com/liferay/portal/kernel/workflow/comparator/WorkflowTaskUserIdComparator.<init>(ZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V:0,1,2
+com/liferay/portal/kernel/workflow/comparator/WorkflowDefinitionModifiedDateComparator.<init>(ZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V:0,1,2
+com/liferay/portal/kernel/workflow/comparator/WorkflowTaskInstanceIdComparator.<init>(ZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V:0,1,2
+com/liferay/portal/kernel/workflow/comparator/WorkflowTaskModifiedDateComparator.<init>(ZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V:0,1,2
+com/liferay/redirect/web/internal/util/comparator/RedirectComparator.<init>(Ljava/lang/String;Ljava/lang/String;Ljava/util/function/Function;Z)V:2,3
+com/liferay/redirect/web/internal/util/comparator/RedirectDateComparator.<init>(Ljava/lang/String;Ljava/lang/String;Ljava/util/function/Function;Z)V:2,3
