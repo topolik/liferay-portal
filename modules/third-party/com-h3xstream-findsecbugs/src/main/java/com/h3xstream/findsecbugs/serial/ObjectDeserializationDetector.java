@@ -71,6 +71,7 @@ public class ObjectDeserializationDetector implements Detector {
 
             try {
                 if((OBJECT_INPUTSTREAM_READ_METHODS.contains(m.getName()) && InterfaceUtils.isSubtype(javaClass, "java.io.Serializable")) ||
+                        (m.getName().equals("readExternal") && InterfaceUtils.isSubtype(javaClass, "java.io.Externalizable")) ||
                         (InterfaceUtils.isSubtype(javaClass, "java.lang.reflect.InvocationHandler"))) {
                     continue;
                 }

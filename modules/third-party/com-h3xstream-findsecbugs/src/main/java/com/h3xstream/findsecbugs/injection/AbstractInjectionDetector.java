@@ -20,7 +20,9 @@ package com.h3xstream.findsecbugs.injection;
 import com.h3xstream.findsecbugs.BCELUtil;
 import com.h3xstream.findsecbugs.common.ByteCode;
 import com.h3xstream.findsecbugs.taintanalysis.Taint;
+import com.h3xstream.findsecbugs.taintanalysis.TaintDataflowEngine;
 import com.h3xstream.findsecbugs.taintanalysis.TaintFrame;
+import com.h3xstream.findsecbugs.taintanalysis.TaintTag;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.Priorities;
 import edu.umd.cs.findbugs.SourceLineAnnotation;
@@ -40,8 +42,11 @@ import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.INVOKEDYNAMIC;
+import org.apache.bcel.generic.INVOKESTATIC;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InvokeInstruction;
+import org.apache.bcel.generic.Type;
 
 /**
  * Detector designed for extension to detect injection vulnerabilities
@@ -72,6 +77,7 @@ public abstract class AbstractInjectionDetector extends AbstractTaintDetector {
         for (InjectionSink injectionSink : injectionSinksToReport) {
             bugReporter.reportBug(injectionSink.generateBugInstance(false));
         }
+        TaintDataflowEngine.writeConfigUsage();
     }
     
     @Override
@@ -149,27 +155,69 @@ public abstract class AbstractInjectionDetector extends AbstractTaintDetector {
         }
     }
     
+    @Override
+    protected void analyzeLambdaLocation(ClassContext classContext, Method method, InstructionHandle handle,
+            ConstantPoolGen cpg, INVOKEDYNAMIC invoke, TaintFrame fact, ClassMethodSignature classMethodSignature)
+            throws DataflowAnalysisException {
+        Method lambda = getLambdaImplementation(classContext.getJavaClass(), cpg, invoke);
+        if (lambda == null) {
+            return;
+        }
+        ClassMethodSignature lambdaSignature = new ClassMethodSignature(
+                BCELUtil.getSlashedClassName(classContext.getJavaClass()), lambda.getName(), lambda.getSignature());
+        Set<InjectionSink> sinks = injectionSinks.get(lambdaSignature);
+        if (sinks == null) {
+            return;
+        }
+        // only the captured arguments are on the stack, the remaining lambda parameters come from the functional interface
+        int shift = getArgumentSlots(lambda.getSignature()) + (lambda.isStatic() ? 0 : 1)
+                - getArgumentSlots(invoke.getSignature(cpg));
+        SourceLineAnnotation sourceLine = SourceLineAnnotation.fromVisitedInstruction(classContext, method, handle);
+        checkSinks(getMethodAndSinks(lambdaSignature, sinks), shift, fact, sourceLine, classMethodSignature);
+    }
+
+    private static int getArgumentSlots(String signature) {
+        int slots = 0;
+        for (Type type : Type.getArgumentTypes(signature)) {
+            slots += type.getSize();
+        }
+        return slots;
+    }
+
     private void checkSink(ConstantPoolGen cpg, InvokeInstruction invoke, TaintFrame fact,
                            SourceLineAnnotation line, ClassMethodSignature classMethodSignature) throws DataflowAnalysisException {
-        for (MethodAndSink methodAndSink : getSinks(cpg, invoke, fact)) {
+        checkSinks(getSinks(cpg, invoke, fact), 0, fact, line, classMethodSignature);
+    }
+
+    /**
+     * @param shift number of the callee parameter slots which are not on the stack
+     */
+    private void checkSinks(Set<MethodAndSink> methodAndSinks, int shift, TaintFrame fact,
+                            SourceLineAnnotation line, ClassMethodSignature classMethodSignature) throws DataflowAnalysisException {
+        for (MethodAndSink methodAndSink : methodAndSinks) {
             Taint sinkTaint = sinkTaints.get(methodAndSink);
             assert sinkTaint != null : "sink taint not stored in advance";
             Set<Integer> taintParameters = sinkTaint.getParameters();
             Taint finalTaint = Taint.valueOf(sinkTaint.getNonParametricState());
             for (Integer offset : taintParameters) {
-                Taint parameterTaint = fact.getStackValue(offset);
+                if (offset < shift) {
+                    // a lambda parameter supplied later by the functional interface call
+                    finalTaint = Taint.merge(finalTaint, new Taint(Taint.State.UNKNOWN));
+                    continue;
+                }
+                Taint parameterTaint = fact.getStackValue(offset - shift);
                 finalTaint = Taint.merge(finalTaint, parameterTaint);
             }
             if (finalTaint == null) {
                 continue;
             }
             if (!sinkTaint.isSafe() && sinkTaint.hasTags()) {
-                for (Taint.Tag tag : sinkTaint.getTags()) {
+                for (TaintTag tag : sinkTaint.getTags()) {
                     finalTaint.addTag(tag);
                 }
             }
             if (sinkTaint.isRemovingTags()) {
-                for (Taint.Tag tag : sinkTaint.getTagsToRemove()) {
+                for (TaintTag tag : sinkTaint.getTagsToRemove()) {
                     finalTaint.removeTag(tag);
                 }
             }
@@ -245,6 +293,10 @@ public abstract class AbstractInjectionDetector extends AbstractTaintDetector {
     }
 
     private static String getInstanceClassName(ConstantPoolGen cpg, InvokeInstruction invoke, TaintFrame frame) {
+        if (invoke instanceof INVOKESTATIC || invoke instanceof INVOKEDYNAMIC) {
+            // there is no instance, the first argument is not the receiver
+            return BCELUtil.getSlashedClassName(cpg, invoke);
+        }
         try {
             int instanceIndex = BCELUtil.getNumArgumentsIncludingObjectInstance(invoke, cpg) - 1;
             if (instanceIndex != -1) {

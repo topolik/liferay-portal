@@ -54,6 +54,7 @@ public class TaintAnalysis extends FrameDataflowAnalysis<Taint, TaintFrame> {
     private final TaintFrameModelingVisitor visitor;
     private int parameterStackSize;
     private List<Integer> slotToParameter;
+    private List<Boolean> safeSlots;
 
     private static final List<String> TAINTED_ANNOTATIONS = loadFileContent(
             "taint-config/taint-param-annotations.txt"
@@ -73,7 +74,7 @@ public class TaintAnalysis extends FrameDataflowAnalysis<Taint, TaintFrame> {
         this.methodGen = methodGen;
         this.methodDescriptor = (MethodInfo) descriptor;
         this.visitor = new TaintFrameModelingVisitor(methodGen.getConstantPool(), descriptor, taintConfig, visitors, methodGen);
-        computeParametersInfo(descriptor.getSignature(), descriptor.isStatic());
+        computeParametersInfo(descriptor.getSignature(), descriptor.isStatic(), taintConfig);
     }
 
     @Override
@@ -111,7 +112,8 @@ public class TaintAnalysis extends FrameDataflowAnalysis<Taint, TaintFrame> {
             if (i < numLocals) {
                 if (i < parameterStackSize) {
                     int stackOffset = parameterStackSize - i - 1;
-                    if (isTaintedByAnnotation(i - 1)) {
+                    // slot 0 holds this in instance methods
+                    if (isTaintedByAnnotation(methodDescriptor.isStatic() ? i : i - 1)) {
                         value = new Taint(Taint.State.TAINTED);
                         // this would add line number for the first instruction in the method
                         //value.addLocation(new TaintLocation(methodDescriptor, 0,""), true);
@@ -121,6 +123,8 @@ public class TaintAnalysis extends FrameDataflowAnalysis<Taint, TaintFrame> {
                         } else {
                             value = new Taint(Taint.State.SAFE);
                         }
+                    } else if (safeSlots.get(i)) {
+                        value = new Taint(Taint.State.SAFE);
                     } else {
                         value.addParameter(stackOffset);
                     }
@@ -234,9 +238,10 @@ public class TaintAnalysis extends FrameDataflowAnalysis<Taint, TaintFrame> {
      *
      * @param signature
      * @param isStatic
+     * @param taintConfig configured taint states of parameter classes
      * @return
      */
-    private void computeParametersInfo(String signature, boolean isStatic) {
+    private void computeParametersInfo(String signature, boolean isStatic, TaintConfig taintConfig) {
         assert signature != null && !signature.isEmpty();
         // static methods does not have reference to this
         int stackSize = isStatic ? 0 : 1;
@@ -244,20 +249,37 @@ public class TaintAnalysis extends FrameDataflowAnalysis<Taint, TaintFrame> {
         Iterator<String> iterator = parser.parameterSignatureIterator();
         int paramIdx = 0;
         slotToParameter = new ArrayList<Integer>();
+        safeSlots = new ArrayList<Boolean>();
+        if (!isStatic) {
+            safeSlots.add(false);
+        }
         while (iterator.hasNext()) {
             String parameter = iterator.next();
+            boolean safe = isSafeParameterType(parameter, taintConfig);
             if (parameter.equals("D") || parameter.equals("J")) {
                 // double and long types takes two slots
                 stackSize += 2;
                 slotToParameter.add(paramIdx);
                 slotToParameter.add(paramIdx);
+                safeSlots.add(safe);
+                safeSlots.add(safe);
             } else {
                 stackSize++;
                 slotToParameter.add(paramIdx);
+                safeSlots.add(safe);
             }
             paramIdx++;
         }
         parameterStackSize = stackSize;
+    }
+
+    private static boolean isSafeParameterType(String parameter, TaintConfig taintConfig) {
+        // byte, char, short and int reach code point methods like Character.getName(int)
+        // without a conversion, the conversion of other primitives resets the taint anyway
+        if (parameter.length() == 1) {
+            return "DFJZ".contains(parameter);
+        }
+        return taintConfig.isClassTaintSafe(parameter);
     }
 
     private static List<String> loadFileContent(String path) {

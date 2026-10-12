@@ -69,40 +69,66 @@ public class BCELUtil {
         Set<String> classNames = reference == null ? null : reference.get();
 
         if (classNames == null) {
-            classNames = new HashSet<>();
-
-            Queue<JavaClass> queue = new LinkedList<>();
-            queue.offer(javaClass);
-            while (!queue.isEmpty()) {
-                JavaClass clazz = queue.poll();
-                if (clazz != javaClass) {
-                    classNames.add(BCELUtil.getSlashedClassName(clazz));
-                }
-
-                try {
-                    JavaClass superClass = clazz.getSuperClass();
-                    if (superClass != null) {
-                        queue.offer(superClass);
-                    }
-                } catch (ClassNotFoundException ex) {
-                    AnalysisContext.reportMissingClass(ex);
-
-                    classNames.add(ClassName.toSlashedClassName(clazz.getSuperclassName()));
-                }
-                try {
-                    for (JavaClass interfaceClass : clazz.getInterfaces()) {
-                        queue.offer(interfaceClass);
-                    }
-                } catch (ClassNotFoundException ex) {
-                    AnalysisContext.reportMissingClass(ex);
-
-                    for (String interfaceClassName : clazz.getInterfaceNames()) {
-                        classNames.add(ClassName.toSlashedClassName(interfaceClassName));
-                    }
-                }
-            }
+            classNames = collectParentClassNames(javaClass, true);
 
             superMap.put(key, new SoftReference<>(classNames));
+        }
+
+        return classNames;
+    }
+
+    /**
+     * Returns the same names in the same iteration order as {@link #getParentClassNames(JavaClass)}
+     * without reporting missing classes and without caching the result, for observers that
+     * must not change the analysis output
+     */
+    public static Set<String> getParentClassNamesQuietly(JavaClass javaClass) {
+        SoftReference<Set<String>> reference = superMap.get(javaClass.getClassName());
+        Set<String> classNames = reference == null ? null : reference.get();
+
+        if (classNames == null) {
+            classNames = collectParentClassNames(javaClass, false);
+        }
+
+        return classNames;
+    }
+
+    private static Set<String> collectParentClassNames(JavaClass javaClass, boolean report) {
+        Set<String> classNames = new HashSet<>();
+
+        Queue<JavaClass> queue = new LinkedList<>();
+        queue.offer(javaClass);
+        while (!queue.isEmpty()) {
+            JavaClass clazz = queue.poll();
+            if (clazz != javaClass) {
+                classNames.add(BCELUtil.getSlashedClassName(clazz));
+            }
+
+            try {
+                JavaClass superClass = clazz.getSuperClass();
+                if (superClass != null) {
+                    queue.offer(superClass);
+                }
+            } catch (ClassNotFoundException ex) {
+                if (report) {
+                    AnalysisContext.reportMissingClass(ex);
+                }
+
+                classNames.add(ClassName.toSlashedClassName(clazz.getSuperclassName()));
+            }
+            try {
+                for (JavaClass interfaceClass : clazz.getInterfaces()) {
+                    queue.offer(interfaceClass);
+                }
+            } catch (ClassNotFoundException ex) {
+                if (report) {
+                    AnalysisContext.reportMissingClass(ex);
+                }
+
+                for (String interfaceClassName : clazz.getInterfaceNames()) {
+                    classNames.add(ClassName.toSlashedClassName(interfaceClassName));
+                }
+            }
         }
 
         return classNames;
@@ -126,13 +152,17 @@ public class BCELUtil {
 
                 case 'B':
                 case 'C':
-                case 'D':
                 case 'F':
                 case 'I':
-                case 'J':
                 case 'S':
                 case 'Z':
                     count++;
+                    break;
+
+                case 'D':
+                case 'J':
+                    // long and double take two stack slots
+                    count += 2;
                     break;
 
                 case 'L':

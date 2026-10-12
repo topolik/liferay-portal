@@ -18,6 +18,7 @@
 package com.h3xstream.findsecbugs.injection;
 
 import com.h3xstream.findsecbugs.taintanalysis.TaintDataflow;
+import com.h3xstream.findsecbugs.taintanalysis.TaintDataflowEngine;
 import com.h3xstream.findsecbugs.taintanalysis.TaintFrame;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.Detector;
@@ -30,13 +31,22 @@ import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
 import edu.umd.cs.findbugs.classfile.Global;
 import edu.umd.cs.findbugs.classfile.MethodDescriptor;
 import java.util.Iterator;
+import org.apache.bcel.classfile.Attribute;
+import org.apache.bcel.classfile.BootstrapMethod;
+import org.apache.bcel.classfile.BootstrapMethods;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantCP;
+import org.apache.bcel.classfile.ConstantInvokeDynamic;
+import org.apache.bcel.classfile.ConstantMethodHandle;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantPool;
+import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.ConstantPoolGen;
 import org.apache.bcel.generic.INVOKEDYNAMIC;
 import org.apache.bcel.generic.Instruction;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.InvokeInstruction;
-import org.apache.bcel.generic.MethodGen;
 
 /**
  * Detector designed for extension to allow usage of taint analysis
@@ -69,28 +79,7 @@ public abstract class AbstractTaintDetector implements Detector {
         if(!shouldAnalyzeClass(classContext)) {
             return;
         }
-        for (Method method : classContext.getMethodsInCallOrder()) {
-            if (classContext.getMethodGen(method) == null) {
-                continue;
-            }
-            if (!method.isStatic()) {
-                continue;
-            }
-            try {
-                analyzeMethod(classContext, method);
-            } catch (CheckedAnalysisException e) {
-                logException(classContext, method, e);
-            } catch (RuntimeException e) {
-                logException(classContext, method, e);
-            }
-        }
-        for (Method method : classContext.getMethodsInCallOrder()) {
-            if (classContext.getMethodGen(method) == null) {
-                continue;
-            }
-            if (method.isStatic()) {
-                continue;
-            }
+        for (Method method : TaintFixpoint.analyze(classContext)) {
             try {
                 analyzeMethod(classContext, method);
             } catch (CheckedAnalysisException e) {
@@ -101,8 +90,25 @@ public abstract class AbstractTaintDetector implements Detector {
         }
     }
 
+    static Method getSameClassMethod(JavaClass javaClass, ConstantPoolGen cpg, InvokeInstruction invoke) {
+        if (!javaClass.getClassName().equals(invoke.getReferenceType(cpg).toString())) {
+            return null;
+        }
+        return findMethod(javaClass, invoke.getMethodName(cpg), invoke.getSignature(cpg));
+    }
+
+    private static Method findMethod(JavaClass javaClass, String name, String signature) {
+        for (Method method : javaClass.getMethods()) {
+            if (method.getName().equals(name) && method.getSignature().equals(signature)) {
+                return method;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void report() {
+        TaintDataflowEngine.writeConfigUsage();
     }
     
     protected void analyzeMethod(ClassContext classContext, Method method)
@@ -115,13 +121,17 @@ public abstract class AbstractTaintDetector implements Detector {
             Location location = i.next();
             InstructionHandle handle = location.getHandle();
             Instruction instruction = handle.getInstruction();
-            if (!(instruction instanceof InvokeInstruction) || instruction instanceof INVOKEDYNAMIC) {
+            if (!(instruction instanceof InvokeInstruction)) {
                 continue;
             }
             InvokeInstruction invoke = (InvokeInstruction) instruction;
             TaintFrame fact = dataflow.getFactAtLocation(location);
             assert fact != null;
             if (!fact.isValid()) {
+                continue;
+            }
+            if (invoke instanceof INVOKEDYNAMIC) {
+                analyzeLambdaLocation(classContext, method, handle, cpg, (INVOKEDYNAMIC) invoke, fact, classMethodSignature);
                 continue;
             }
             analyzeLocation(classContext, method, handle, cpg, invoke, fact, classMethodSignature);
@@ -151,4 +161,48 @@ public abstract class AbstractTaintDetector implements Detector {
     abstract protected void analyzeLocation(ClassContext classContext, Method method, InstructionHandle handle,
             ConstantPoolGen cpg, InvokeInstruction invoke, TaintFrame fact, ClassMethodSignature classMethodSignature)
             throws DataflowAnalysisException;
+
+    /**
+     * Called for each invokedynamic instruction, the default implementation does nothing.
+     */
+    protected void analyzeLambdaLocation(ClassContext classContext, Method method, InstructionHandle handle,
+            ConstantPoolGen cpg, INVOKEDYNAMIC invoke, TaintFrame fact, ClassMethodSignature classMethodSignature)
+            throws DataflowAnalysisException {
+    }
+
+    protected static Method getLambdaImplementation(JavaClass javaClass, ConstantPoolGen cpg, INVOKEDYNAMIC invoke) {
+        ConstantPool cp = cpg.getConstantPool();
+        BootstrapMethods bootstrapMethods = null;
+        for (Attribute attribute : javaClass.getAttributes()) {
+            if (attribute instanceof BootstrapMethods) {
+                bootstrapMethods = (BootstrapMethods) attribute;
+            }
+        }
+        if (bootstrapMethods == null) {
+            return null;
+        }
+        ConstantInvokeDynamic invokeDynamic = (ConstantInvokeDynamic) cp.getConstant(invoke.getIndex());
+        BootstrapMethod bootstrapMethod =
+                bootstrapMethods.getBootstrapMethods()[invokeDynamic.getBootstrapMethodAttrIndex()];
+        ConstantMethodHandle bootstrapHandle =
+                (ConstantMethodHandle) cp.getConstant(bootstrapMethod.getBootstrapMethodRef());
+        ConstantCP bootstrapReference = (ConstantCP) cp.getConstant(bootstrapHandle.getReferenceIndex());
+        int[] bootstrapArguments = bootstrapMethod.getBootstrapArguments();
+        if (!"java.lang.invoke.LambdaMetafactory".equals(bootstrapReference.getClass(cp))
+                || bootstrapArguments.length < 2) {
+            return null;
+        }
+        Constant implementation = cp.getConstant(bootstrapArguments[1]);
+        if (!(implementation instanceof ConstantMethodHandle)) {
+            return null;
+        }
+        ConstantCP implementationReference =
+                (ConstantCP) cp.getConstant(((ConstantMethodHandle) implementation).getReferenceIndex());
+        if (!javaClass.getClassName().equals(implementationReference.getClass(cp))) {
+            return null;
+        }
+        ConstantNameAndType nameAndType =
+                (ConstantNameAndType) cp.getConstant(implementationReference.getNameAndTypeIndex());
+        return findMethod(javaClass, nameAndType.getName(cp), nameAndType.getSignature(cp));
+    }
 }
