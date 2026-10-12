@@ -431,10 +431,12 @@ public class TaintFrameModelingVisitor extends AbstractFrameModelingVisitor<Tain
             String value = taint.getConstantValue();
             assert value != null;
 
-            String taintMethodConfigWithArgumentsAndLocationConfig =
-                    "javax/servlet/jsp/PageContext.findAttribute(\"" + value + "\"):SAFE@" + methodDescriptor.getSlashedClassName();
+            for (String pageContextClassName : new String[] {"jakarta/servlet/jsp/PageContext", "javax/servlet/jsp/PageContext"}) {
+                String taintMethodConfigWithArgumentsAndLocationConfig =
+                        pageContextClassName + ".findAttribute(\"" + value + "\"):SAFE@" + methodDescriptor.getSlashedClassName();
 
-            taintConfig.load(new java.io.ByteArrayInputStream(taintMethodConfigWithArgumentsAndLocationConfig.getBytes()), false);
+                taintConfig.load(new java.io.ByteArrayInputStream(taintMethodConfigWithArgumentsAndLocationConfig.getBytes()), false);
+            }
 
         } catch (DataflowAnalysisException ex) {
             throw new InvalidBytecodeException("Not enough values on the stack", ex);

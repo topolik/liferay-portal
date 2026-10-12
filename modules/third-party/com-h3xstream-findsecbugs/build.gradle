@@ -19,9 +19,52 @@ patch {
 		autoClean = false
 	}
 
+	fileNames "**/com/h3xstream/findsecbugs/BCELUtil.java"
+	fileNames "**/com/h3xstream/findsecbugs/PermissiveCORSDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/RedosAnnotationDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/common/ByteCode.java"
+	fileNames "**/com/h3xstream/findsecbugs/common/InterfaceUtils.java"
+	fileNames "**/com/h3xstream/findsecbugs/cookie/CookieFlagsDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/cookie/CookieReadDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/cookie/PersistentCookieDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/cookie/UrlRewritingDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/endpoint/JaxRsEndpointDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/endpoint/JaxWsEndpointDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/endpoint/ServletEndpointDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/injection/AbstractInjectionDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/injection/AbstractTaintDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/injection/BasicInjectionDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/injection/redirect/RedirectionSource.java"
+	fileNames "**/com/h3xstream/findsecbugs/jsp/JspIncludeDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/jsp/JstlOutDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/jsp/XslTransformJspDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/serial/ObjectDeserializationDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/spring/SpringEntityLeakDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/taintanalysis/TaintAnalysis.java"
 	fileNames "**/com/h3xstream/findsecbugs/taintanalysis/TaintConfigLoader.java"
+	fileNames "**/com/h3xstream/findsecbugs/taintanalysis/TaintDataflowEngine.java"
 	fileNames "**/com/h3xstream/findsecbugs/taintanalysis/TaintFrameModelingVisitor.java"
+	fileNames "**/com/h3xstream/findsecbugs/taintanalysis/extra/JstlExpressionWhiteLister.java"
+	fileNames "**/com/h3xstream/findsecbugs/xss/XSSRequestWrapperDetector.java"
+	fileNames "**/com/h3xstream/findsecbugs/xss/XssServletDetector.java"
+	fileNames "**/injection-sinks/path-traversal-in.txt"
+	fileNames "**/metadata/findbugs.xml"
+	fileNames "**/metadata/messages.xml"
+	fileNames "**/metadata/messages_ja.xml"
+	fileNames "**/safe-encoders/other.txt"
 	originalLibModuleName = "findsecbugs-plugin"
+}
+
+processResources {
+	includeEmptyDirs = false
+
+	eachFile {
+		if (it.path.startsWith("metadata/")) {
+			it.path = it.name
+		}
+	}
+
+	mustRunAfter patch
 }
 
 updateFileVersions {

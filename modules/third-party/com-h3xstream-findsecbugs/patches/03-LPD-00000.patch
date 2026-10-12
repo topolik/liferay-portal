@@ -1,0 +1,1823 @@
+diff --git a/com/h3xstream/findsecbugs/BCELUtil.java m/com/h3xstream/findsecbugs/BCELUtil.java
+index a7b8b6d816450f69549139ac7aa20c76f822ee2c..2e366bc6a03b99697daedcec8ef51ce606e4c0bc 100644
+--- a/com/h3xstream/findsecbugs/BCELUtil.java
++++ m/com/h3xstream/findsecbugs/BCELUtil.java
+@@ -22,17 +22,19 @@ import edu.umd.cs.findbugs.util.ClassName;
+ import org.apache.bcel.Const;
+ import org.apache.bcel.classfile.ConstantCP;
+ import org.apache.bcel.classfile.ConstantPool;
+-import org.apache.bcel.generic.FieldOrMethod;
+ import org.apache.bcel.classfile.JavaClass;
+ import org.apache.bcel.generic.ConstantPoolGen;
++import org.apache.bcel.generic.FieldOrMethod;
+ import org.apache.bcel.generic.InvokeInstruction;
+ 
++import java.lang.ref.SoftReference;
++import java.util.Collections;
++import java.util.HashMap;
+ import java.util.HashSet;
+ import java.util.LinkedList;
+ import java.util.Map;
+ import java.util.Queue;
+ import java.util.Set;
+-import java.util.WeakHashMap;
+ 
+ /**
+  * @author Tomas Polesovsky
+@@ -43,7 +45,7 @@ public class BCELUtil {
+     /**
+      * Caching class inheritance.
+      */
+-    private static Map<String, Set<String>> superMap = new WeakHashMap<>();
++    private static Map<String, SoftReference<Set<String>>> superMap = Collections.synchronizedMap(new HashMap<>());
+ 
+     public static String getSlashedClassName(ConstantPoolGen cpg, FieldOrMethod obj) {
+         if (Const.INVOKEDYNAMIC == obj.getOpcode()) {
+@@ -62,7 +64,9 @@ public class BCELUtil {
+     }
+ 
+     public static Set<String> getParentClassNames(JavaClass javaClass) {
+-        Set<String> classNames = superMap.get(javaClass.getClassName());
++        String key = javaClass.getClassName();
++        SoftReference<Set<String>> reference = superMap.get(key);
++        Set<String> classNames = reference == null ? null : reference.get();
+ 
+         if (classNames == null) {
+             classNames = new HashSet<>();
+@@ -98,7 +102,7 @@ public class BCELUtil {
+                 }
+             }
+ 
+-            superMap.put(javaClass.getClassName(), classNames);
++            superMap.put(key, new SoftReference<>(classNames));
+         }
+ 
+         return classNames;
+diff --git a/com/h3xstream/findsecbugs/PermissiveCORSDetector.java m/com/h3xstream/findsecbugs/PermissiveCORSDetector.java
+index 7dfd45804141dea3e089787425621bb4e25663e9..1f978edc035f3019f07a2ee220ac8aac39b00016 100644
+--- a/com/h3xstream/findsecbugs/PermissiveCORSDetector.java
++++ m/com/h3xstream/findsecbugs/PermissiveCORSDetector.java
+@@ -35,16 +35,21 @@ import static com.h3xstream.findsecbugs.common.matcher.InstructionDSL.invokeInst
+ public class PermissiveCORSDetector extends BasicInjectionDetector {
+ 
+     private static final String PERMISSIVE_CORS = "PERMISSIVE_CORS";
+-    private static final String HTTP_SERVLET_RESPONSE_CLASS = "javax.servlet.http.HttpServletResponse";
++    private static final String JAVAX_HTTP_SERVLET_RESPONSE_CLASS = "javax.servlet.http.HttpServletResponse";
++    private static final String JAKARTA_HTTP_SERVLET_RESPONSE_CLASS = "jakarta.servlet.http.HttpServletResponse";
+     private static final String HEADER_KEY = "Access-Control-Allow-Origin";
+ 
+     private static final InvokeMatcherBuilder SERVLET_RESPONSE_ADD_HEADER_METHOD = invokeInstruction()
+-            .atClass(HTTP_SERVLET_RESPONSE_CLASS).atMethod("addHeader")
++            .atMethod("addHeader")
+             .withArgs("(Ljava/lang/String;Ljava/lang/String;)V");
++    private static final InvokeMatcherBuilder JAVAX_SERVLET_RESPONSE_ADD_HEADER_METHOD = SERVLET_RESPONSE_ADD_HEADER_METHOD.atClass(JAVAX_HTTP_SERVLET_RESPONSE_CLASS);
++    private static final InvokeMatcherBuilder JAKARTA_SERVLET_RESPONSE_ADD_HEADER_METHOD = SERVLET_RESPONSE_ADD_HEADER_METHOD.atClass(JAKARTA_HTTP_SERVLET_RESPONSE_CLASS);
+ 
+     private static final InvokeMatcherBuilder SERVLET_RESPONSE_SET_HEADER_METHOD = invokeInstruction()
+-            .atClass(HTTP_SERVLET_RESPONSE_CLASS).atMethod("setHeader")
++            .atMethod("setHeader")
+             .withArgs("(Ljava/lang/String;Ljava/lang/String;)V");
++    private static final InvokeMatcherBuilder JAVAX_SERVLET_RESPONSE_SET_HEADER_METHOD = SERVLET_RESPONSE_SET_HEADER_METHOD.atClass(JAVAX_HTTP_SERVLET_RESPONSE_CLASS);
++    private static final InvokeMatcherBuilder JAKARTA_SERVLET_RESPONSE_SET_HEADER_METHOD = SERVLET_RESPONSE_SET_HEADER_METHOD.atClass(JAKARTA_HTTP_SERVLET_RESPONSE_CLASS);
+ 
+     public PermissiveCORSDetector(BugReporter bugReporter) {
+         super(bugReporter);
+@@ -55,16 +60,24 @@ public class PermissiveCORSDetector extends BasicInjectionDetector {
+             InstructionHandle handle) {
+         assert invoke != null && cpg != null;
+ 
+-        if (SERVLET_RESPONSE_ADD_HEADER_METHOD.matches(invoke, cpg)) {
++        if (isServletResponseAddHeaderMethod(invoke, cpg)) {
+             return new InjectionPoint(new int[] { 0 }, PERMISSIVE_CORS);
+         }
+ 
+-        if (SERVLET_RESPONSE_SET_HEADER_METHOD.matches(invoke, cpg)) {
++        if (isServletResponseSetHeaderMethod(invoke, cpg)) {
+             return new InjectionPoint(new int[] { 0 }, PERMISSIVE_CORS);
+         }
+         return InjectionPoint.NONE;
+     }
+ 
++    private boolean isServletResponseSetHeaderMethod(InvokeInstruction invoke, ConstantPoolGen cpg) {
++        return JAVAX_SERVLET_RESPONSE_SET_HEADER_METHOD.matches(invoke, cpg) || JAKARTA_SERVLET_RESPONSE_SET_HEADER_METHOD.matches(invoke, cpg);
++    }
++
++    private boolean isServletResponseAddHeaderMethod(InvokeInstruction invoke, ConstantPoolGen cpg) {
++        return JAVAX_SERVLET_RESPONSE_ADD_HEADER_METHOD.matches(invoke, cpg) || JAKARTA_SERVLET_RESPONSE_ADD_HEADER_METHOD.matches(invoke, cpg);
++    }
++
+     @Override
+     protected int getPriorityFromTaintFrame(TaintFrame fact, int offset) throws DataflowAnalysisException {
+         // Get the value of the Access-Control-Allow-Origin parameter (Second argument from setHeader(2nd,1rst))
+diff --git a/com/h3xstream/findsecbugs/RedosAnnotationDetector.java m/com/h3xstream/findsecbugs/RedosAnnotationDetector.java
+index 00322162a7e8fc7176a4d52137192a328b46eca8..d0f6a63aa615401b44944940d5d44e4cbec0c068 100644
+--- a/com/h3xstream/findsecbugs/RedosAnnotationDetector.java
++++ m/com/h3xstream/findsecbugs/RedosAnnotationDetector.java
+@@ -38,7 +38,8 @@ public class RedosAnnotationDetector implements Detector {
+ 
+     private static final String REDOS_TYPE = "REDOS";
+ 
+-    private static final String REGEX_ANNOTATION_TYPES = "Ljavax/validation/constraints/Pattern;";
++    private static final String JAVAX_REGEX_ANNOTATION_TYPES = "Ljavax/validation/constraints/Pattern;";
++    private static final String JAKARTA_REGEX_ANNOTATION_TYPES = "Ljakarta/validation/constraints/Pattern;";
+ 
+     private BugReporter bugReporter;
+ 
+@@ -53,7 +54,7 @@ public class RedosAnnotationDetector implements Detector {
+ 
+             for (AnnotationEntry ae : f.getAnnotationEntries()) {
+ 
+-                if (REGEX_ANNOTATION_TYPES.equals(ae.getAnnotationType())) {
++                if (isRegexAnnotation(ae)) {
+ 
+                     ElementValuePair[] values = ae.getElementValuePairs();
+ 
+@@ -83,6 +84,10 @@ public class RedosAnnotationDetector implements Detector {
+         }
+     }
+ 
++    private boolean isRegexAnnotation(AnnotationEntry ae) {
++        return JAVAX_REGEX_ANNOTATION_TYPES.equals(ae.getAnnotationType()) || JAKARTA_REGEX_ANNOTATION_TYPES.equals(ae.getAnnotationType());
++    }
++
+     @Override
+     public void report() {
+ 
+diff --git a/com/h3xstream/findsecbugs/common/ByteCode.java m/com/h3xstream/findsecbugs/common/ByteCode.java
+index 93f5122077aa98fb0988d32adb0c34b6105b412d..89af910eee25c154de04311bfd325e0463702557 100644
+--- a/com/h3xstream/findsecbugs/common/ByteCode.java
++++ m/com/h3xstream/findsecbugs/common/ByteCode.java
+@@ -169,4 +169,22 @@ public class ByteCode {
+         return null;
+     }
+ 
++    /**
++     * Strips the array marker from a class signature, e.g., {@code [Ljava.lang.String;} becomes
++     * {@code java.lang.String}.
++     *
++     * @param className The "classname" string as returned from
++     *          {@link InvokeInstruction#getClassName(ConstantPoolGen)}.
++     * @return The sanitized class name.
++     */
++    public static String stripObjectArrayFromClassName(String className) {
++      if (className.endsWith(";") && className.startsWith("[L")) {
++        className = className.substring(0, className.length() - 1);
++        while (className.indexOf('[') == 0) {
++          className = className.substring(1);
++        }
++        className = className.substring(1);
++      }
++      return className;
++    }
+ }
+diff --git a/com/h3xstream/findsecbugs/common/InterfaceUtils.java m/com/h3xstream/findsecbugs/common/InterfaceUtils.java
+index 12891e5a2dea86ee69548d6e6b0d83a4e6cb2519..8950ae94a9dad9ac073de7737914cde8f47231e7 100644
+--- a/com/h3xstream/findsecbugs/common/InterfaceUtils.java
++++ m/com/h3xstream/findsecbugs/common/InterfaceUtils.java
+@@ -52,6 +52,11 @@ public class InterfaceUtils {
+      * @return
+      */
+     public static boolean isSubtype(String className, String... superClasses) {
++        className = ByteCode.stripObjectArrayFromClassName(className);
++        if (className.startsWith("[")) {
++            // an array of a non-object type
++            return false;
++        }
+         for(String potentialSuperClass : superClasses) {
+             try {
+                 if(Hierarchy.isSubtype(className, potentialSuperClass)) {
+diff --git a/com/h3xstream/findsecbugs/cookie/CookieFlagsDetector.java m/com/h3xstream/findsecbugs/cookie/CookieFlagsDetector.java
+index 15216e92b124d01b4ecdc7f3c64f37140059c105..51eacc086ee2934e1161e459be00e68f2ab12e3d 100644
+--- a/com/h3xstream/findsecbugs/cookie/CookieFlagsDetector.java
++++ m/com/h3xstream/findsecbugs/cookie/CookieFlagsDetector.java
+@@ -78,8 +78,7 @@ public class CookieFlagsDetector implements Detector {
+             Instruction inst = loc.getHandle().getInstruction();
+             if(inst instanceof INVOKESPECIAL) {
+                 INVOKESPECIAL invoke = (INVOKESPECIAL) inst;
+-                if ("javax.servlet.http.Cookie".equals(invoke.getClassName(cpg)) &&
+-                        "<init>".equals(invoke.getMethodName(cpg))) {
++                if (isCookieClass(invoke, cpg) && "<init>".equals(invoke.getMethodName(cpg))) {
+ 
+                     // The following call should push the cookie onto the stack
+                     Instruction cookieStoreInstruction = loc.getHandle().getNext().getInstruction();
+@@ -88,8 +87,7 @@ public class CookieFlagsDetector implements Detector {
+                         // We will use the position of the object on the stack to track the cookie
+                         ASTORE storeInstruction = (ASTORE)cookieStoreInstruction;
+ 
+-                        Location setSecureLocation = getSetSecureLocation(cpg, loc, storeInstruction.getIndex());
+-                        if (setSecureLocation == null) {
++                        if (!isSecureFlagSet(cpg, loc, storeInstruction.getIndex())) {
+ 
+                             JavaClass javaClass = classContext.getJavaClass();
+ 
+@@ -99,8 +97,7 @@ public class CookieFlagsDetector implements Detector {
+                                     .addSourceLine(classContext, m, loc));
+                         }
+ 
+-                        Location setHttpOnlyLocation = getSetHttpOnlyLocation(cpg, loc, storeInstruction.getIndex());
+-                        if (setHttpOnlyLocation == null) {
++                        if (!isHttpOnlyFlagSet(cpg, loc, storeInstruction.getIndex())) {
+ 
+                             JavaClass javaClass = classContext.getJavaClass();
+ 
+@@ -115,6 +112,10 @@ public class CookieFlagsDetector implements Detector {
+         }
+     }
+ 
++    private boolean isCookieClass(INVOKESPECIAL invoke, ConstantPoolGen cpg) {
++        return "javax.servlet.http.Cookie".equals(invoke.getClassName(cpg)) || "jakarta.servlet.http.Cookie".equals(invoke.getClassName(cpg));
++    }
++
+     /**
+      * This method is used to track calls made on a specific object. For instance, this could be used to track if "setHttpOnly(true)"
+      * was executed on a specific cookie object.
+@@ -169,12 +170,16 @@ public class CookieFlagsDetector implements Detector {
+         return null;
+     }
+ 
+-    private Location getSetSecureLocation(ConstantPoolGen cpg, Location startLocation, int stackLocation) {
+-        return getCookieInstructionLocation(cpg, startLocation, stackLocation, "javax.servlet.http.Cookie.setSecure");
++    private boolean isSecureFlagSet(ConstantPoolGen cpg, Location startLocation, int stackLocation) {
++        Location javaxSetSecureLocation = getCookieInstructionLocation(cpg, startLocation, stackLocation, "javax.servlet.http.Cookie.setSecure");
++        Location jakartaSetSecureLocation = getCookieInstructionLocation(cpg, startLocation, stackLocation, "jakarta.servlet.http.Cookie.setSecure");
++        return javaxSetSecureLocation != null || jakartaSetSecureLocation != null;
+     }
+ 
+-    private Location getSetHttpOnlyLocation(ConstantPoolGen cpg, Location startLocation, int stackLocation) {
+-        return getCookieInstructionLocation(cpg, startLocation, stackLocation, "javax.servlet.http.Cookie.setHttpOnly");
++    private boolean isHttpOnlyFlagSet(ConstantPoolGen cpg, Location startLocation, int stackLocation) {
++        Location javaxSetHttpOnlyLocation = getCookieInstructionLocation(cpg, startLocation, stackLocation, "javax.servlet.http.Cookie.setHttpOnly");
++        Location jakartaHttpOnlyLocation = getCookieInstructionLocation(cpg, startLocation, stackLocation, "jakarta.servlet.http.Cookie.setHttpOnly");
++        return javaxSetHttpOnlyLocation != null || jakartaHttpOnlyLocation != null;
+     }
+ 
+     @Override
+diff --git a/com/h3xstream/findsecbugs/cookie/CookieReadDetector.java m/com/h3xstream/findsecbugs/cookie/CookieReadDetector.java
+index 4415a8e6f1541281f5b1b507ae52bc15d5941889..435427ef2b0293a59d7032072e5481a11d8f8eee 100644
+--- a/com/h3xstream/findsecbugs/cookie/CookieReadDetector.java
++++ m/com/h3xstream/findsecbugs/cookie/CookieReadDetector.java
+@@ -36,7 +36,7 @@ public class CookieReadDetector extends OpcodeStackDetector {
+     @Override
+     public void sawOpcode(int seen) {
+ 
+-        if (seen == Const.INVOKEVIRTUAL && getClassConstantOperand().equals("javax/servlet/http/Cookie")
++        if (seen == Const.INVOKEVIRTUAL && isCookieClass()
+                 && (getNameConstantOperand().equals("getName") || getNameConstantOperand().equals("getValue") ||
+                 getNameConstantOperand().equals("getPath"))) {
+ 
+@@ -44,4 +44,8 @@ public class CookieReadDetector extends OpcodeStackDetector {
+                     .addClass(this).addMethod(this).addSourceLine(this));
+         }
+     }
++
++    private boolean isCookieClass() {
++        return getClassConstantOperand().equals("javax/servlet/http/Cookie") || getClassConstantOperand().equals("jakarta/servlet/http/Cookie");
++    }
+ }
+diff --git a/com/h3xstream/findsecbugs/cookie/PersistentCookieDetector.java m/com/h3xstream/findsecbugs/cookie/PersistentCookieDetector.java
+index ca5a9dfd0ca0f88b8591b6ce98634731abaca707..dde8faeffa426e7de94b38d49a428a9c51166e7a 100644
+--- a/com/h3xstream/findsecbugs/cookie/PersistentCookieDetector.java
++++ m/com/h3xstream/findsecbugs/cookie/PersistentCookieDetector.java
+@@ -34,7 +34,7 @@ public class PersistentCookieDetector extends OpcodeStackDetector {
+     @Override
+     public void sawOpcode(int seen) {
+ 
+-        if (seen == Const.INVOKEVIRTUAL && getClassConstantOperand().equals("javax/servlet/http/Cookie")
++        if (seen == Const.INVOKEVIRTUAL && isCookieClass()
+                 && getNameConstantOperand().equals("setMaxAge")) {
+ 
+             Object maxAge = stack.getStackItem(0).getConstant();
+@@ -47,4 +47,8 @@ public class PersistentCookieDetector extends OpcodeStackDetector {
+             }
+         }
+     }
++
++    private boolean isCookieClass() {
++        return getClassConstantOperand().equals("javax/servlet/http/Cookie") || getClassConstantOperand().equals("jakarta/servlet/http/Cookie");
++    }
+ }
+\ No newline at end of file
+diff --git a/com/h3xstream/findsecbugs/cookie/UrlRewritingDetector.java m/com/h3xstream/findsecbugs/cookie/UrlRewritingDetector.java
+index 5dfc3ff80a81f4a38977464155cfb12e62866d73..89b5f82564f9dcb85b277db6a28a3fc7dcbfa1b9 100644
+--- a/com/h3xstream/findsecbugs/cookie/UrlRewritingDetector.java
++++ m/com/h3xstream/findsecbugs/cookie/UrlRewritingDetector.java
+@@ -36,7 +36,7 @@ public class UrlRewritingDetector extends OpcodeStackDetector {
+     @Override
+     public void sawOpcode(int seen) {
+ 
+-        if (seen == Const.INVOKEINTERFACE && getClassConstantOperand().equals("javax/servlet/http/HttpServletResponse")
++        if (seen == Const.INVOKEINTERFACE && isHttpServletResponseClass()
+                 && (getNameConstantOperand().equals("encodeURL") || getNameConstantOperand().equals("encodeUrl") ||
+                 getNameConstantOperand().equals("encodeRedirectURL") || getNameConstantOperand().equals("encodeRedirectUrl"))) {
+ 
+@@ -44,4 +44,8 @@ public class UrlRewritingDetector extends OpcodeStackDetector {
+                     .addClass(this).addMethod(this).addSourceLine(this));
+         }
+     }
++
++    private boolean isHttpServletResponseClass() {
++        return getClassConstantOperand().equals("javax/servlet/http/HttpServletResponse") || getClassConstantOperand().equals("jakarta/servlet/http/HttpServletResponse");
++    }
+ }
+diff --git a/com/h3xstream/findsecbugs/endpoint/JaxRsEndpointDetector.java m/com/h3xstream/findsecbugs/endpoint/JaxRsEndpointDetector.java
+index 3f203e5e532d86a7d18891b27d47c70d0d98d1b0..9eb29d1f1a713a5d403432f1cfdda3da09c88dd4 100644
+--- a/com/h3xstream/findsecbugs/endpoint/JaxRsEndpointDetector.java
++++ m/com/h3xstream/findsecbugs/endpoint/JaxRsEndpointDetector.java
+@@ -48,8 +48,8 @@ public class JaxRsEndpointDetector implements Detector {
+ 
+             for (AnnotationEntry ae : m.getAnnotationEntries()) {
+ 
+-                //Every method mark with @javax.ws.rs.Path is mark as an Endpoint
+-                if (ae.getAnnotationType().equals("Ljavax/ws/rs/Path;")) {
++                //Every method mark with @javax(or jakarta).ws.rs.Path is mark as an Endpoint
++                if (isRsEndpointAnnotation(ae)) {
+                     bugReporter.reportBug(new BugInstance(this, JAXRS_ENDPOINT_TYPE, Priorities.LOW_PRIORITY) //
+                             .addClassAndMethod(javaClass, m));
+                 }
+@@ -57,6 +57,10 @@ public class JaxRsEndpointDetector implements Detector {
+         }
+     }
+ 
++    private boolean isRsEndpointAnnotation(AnnotationEntry ae) {
++        return ae.getAnnotationType().equals("Ljavax/ws/rs/Path;") || ae.getAnnotationType().equals("Ljakarta/ws/rs/Path;");
++    }
++
+     @Override
+     public void report() {
+ 
+diff --git a/com/h3xstream/findsecbugs/endpoint/JaxWsEndpointDetector.java m/com/h3xstream/findsecbugs/endpoint/JaxWsEndpointDetector.java
+index bd3c7da9a263b9f1ca29f6a6c0bbe5af73c10525..7007aff31d48c16ea6fb052b70b8ea042e7598a2 100644
+--- a/com/h3xstream/findsecbugs/endpoint/JaxWsEndpointDetector.java
++++ m/com/h3xstream/findsecbugs/endpoint/JaxWsEndpointDetector.java
+@@ -46,8 +46,8 @@ public class JaxWsEndpointDetector implements Detector {
+ 
+             for (AnnotationEntry ae : m.getAnnotationEntries()) {
+ 
+-                //Every method mark with @javax.jws.WebMethod is mark as an Endpoint
+-                if (ae.getAnnotationType().equals("Ljavax/jws/WebMethod;")) {
++                //Every method mark with @javax(or jakarta).jws.WebMethod is mark as an Endpoint
++                if (isJaxWsEndpointAnnotation(ae)) {
+                     bugReporter.reportBug(new BugInstance(this, JAXWS_ENDPOINT_TYPE, Priorities.LOW_PRIORITY) //
+                             .addClassAndMethod(javaClass, m));
+                 }
+@@ -55,6 +55,10 @@ public class JaxWsEndpointDetector implements Detector {
+         }
+     }
+ 
++    private boolean isJaxWsEndpointAnnotation(AnnotationEntry ae) {
++        return ae.getAnnotationType().equals("Ljavax/jws/WebMethod;") || ae.getAnnotationType().equals("Ljakarta/jws/WebMethod;");
++    }
++
+     @Override
+     public void report() {
+ 
+diff --git a/com/h3xstream/findsecbugs/endpoint/ServletEndpointDetector.java m/com/h3xstream/findsecbugs/endpoint/ServletEndpointDetector.java
+index 7dcd637832495b8bcb7a591aeb2ce24e1a5159bc..1ced63b56892755932714ddad80774722e7f4417 100644
+--- a/com/h3xstream/findsecbugs/endpoint/ServletEndpointDetector.java
++++ m/com/h3xstream/findsecbugs/endpoint/ServletEndpointDetector.java
+@@ -51,8 +51,7 @@ public class ServletEndpointDetector extends OpcodeStackDetector {
+     public void sawOpcode(int seen) {
+ 
+         //All call to ServletRequest
+-        if (seen == Const.INVOKEINTERFACE && (getClassConstantOperand().equals("javax/servlet/ServletRequest") ||
+-                getClassConstantOperand().equals("javax/servlet/http/HttpServletRequest"))) {
++        if (seen == Const.INVOKEINTERFACE && isServletRequestOrHttpServletRequestClass()) {
+ 
+             //ServletRequest
+ 
+@@ -107,4 +106,11 @@ public class ServletEndpointDetector extends OpcodeStackDetector {
+             }
+         }
+     }
++
++    private boolean isServletRequestOrHttpServletRequestClass() {
++        return getClassConstantOperand().equals("javax/servlet/ServletRequest") ||
++                getClassConstantOperand().equals("jakarta/servlet/ServletRequest") ||
++                getClassConstantOperand().equals("javax/servlet/http/HttpServletRequest") ||
++                getClassConstantOperand().equals("jakarta/servlet/http/HttpServletRequest");
++    }
+ }
+diff --git a/com/h3xstream/findsecbugs/injection/AbstractInjectionDetector.java m/com/h3xstream/findsecbugs/injection/AbstractInjectionDetector.java
+index 5b39feda89bd028747b46e4cc26427e6fff45897..aca5cefe405adc16a750f91963a761d01076483a 100644
+--- a/com/h3xstream/findsecbugs/injection/AbstractInjectionDetector.java
++++ m/com/h3xstream/findsecbugs/injection/AbstractInjectionDetector.java
+@@ -18,6 +18,7 @@
+ package com.h3xstream.findsecbugs.injection;
+ 
+ import com.h3xstream.findsecbugs.BCELUtil;
++import com.h3xstream.findsecbugs.common.ByteCode;
+ import com.h3xstream.findsecbugs.taintanalysis.Taint;
+ import com.h3xstream.findsecbugs.taintanalysis.TaintFrame;
+ import edu.umd.cs.findbugs.BugReporter;
+@@ -202,11 +203,17 @@ public abstract class AbstractInjectionDetector extends AbstractTaintDetector {
+             return getMethodAndSinks(classMethodSignature, sinks);
+         }
+         try {
+-            if (classMethodSignature.getClassName().endsWith("]")) {
++            String className = classMethodSignature.getClassName();
++            if (className.endsWith("]")) {
+                 // not a real class
+                 return Collections.emptySet();
+             }
+-            JavaClass javaClass = Repository.lookupClass(classMethodSignature.getClassName());
++            className = ByteCode.stripObjectArrayFromClassName(className);
++            if (className.startsWith("[")) {
++              // an array of a non-object type
++              return Collections.emptySet();
++            }
++            JavaClass javaClass = Repository.lookupClass(className);
+             assert javaClass != null;
+             return getSuperSinks(javaClass, classMethodSignature);
+         } catch (ClassNotFoundException ex) {
+diff --git a/com/h3xstream/findsecbugs/injection/AbstractTaintDetector.java m/com/h3xstream/findsecbugs/injection/AbstractTaintDetector.java
+index dc290c10698b93a98d56fc0abd47770dd05bd629..76ca3f601a2a39980a806229d09568ab9fa6ac36 100644
+--- a/com/h3xstream/findsecbugs/injection/AbstractTaintDetector.java
++++ m/com/h3xstream/findsecbugs/injection/AbstractTaintDetector.java
+@@ -32,6 +32,7 @@ import edu.umd.cs.findbugs.classfile.MethodDescriptor;
+ import java.util.Iterator;
+ import org.apache.bcel.classfile.Method;
+ import org.apache.bcel.generic.ConstantPoolGen;
++import org.apache.bcel.generic.INVOKEDYNAMIC;
+ import org.apache.bcel.generic.Instruction;
+ import org.apache.bcel.generic.InstructionHandle;
+ import org.apache.bcel.generic.InvokeInstruction;
+@@ -114,7 +115,7 @@ public abstract class AbstractTaintDetector implements Detector {
+             Location location = i.next();
+             InstructionHandle handle = location.getHandle();
+             Instruction instruction = handle.getInstruction();
+-            if (!(instruction instanceof InvokeInstruction)) {
++            if (!(instruction instanceof InvokeInstruction) || instruction instanceof INVOKEDYNAMIC) {
+                 continue;
+             }
+             InvokeInstruction invoke = (InvokeInstruction) instruction;
+diff --git a/com/h3xstream/findsecbugs/injection/BasicInjectionDetector.java m/com/h3xstream/findsecbugs/injection/BasicInjectionDetector.java
+index a76eb26303ef3fd25817af22bfb69db417914f74..610d2a14577bb8c4bb21e0a7e8ef46ee68208102 100644
+--- a/com/h3xstream/findsecbugs/injection/BasicInjectionDetector.java
++++ m/com/h3xstream/findsecbugs/injection/BasicInjectionDetector.java
+@@ -19,11 +19,11 @@ package com.h3xstream.findsecbugs.injection;
+ 
+ import com.h3xstream.findsecbugs.BCELUtil;
+ import com.h3xstream.findsecbugs.FindSecBugsGlobalConfig;
++import com.h3xstream.findsecbugs.common.ByteCode;
+ import com.h3xstream.findsecbugs.taintanalysis.TaintDataflowEngine;
+ import com.h3xstream.findsecbugs.taintanalysis.TaintFrameAdditionalVisitor;
+ import edu.umd.cs.findbugs.BugReporter;
+ import edu.umd.cs.findbugs.ba.AnalysisContext;
+-import edu.umd.cs.findbugs.io.IO;
+ 
+ import java.io.File;
+ import java.io.FileInputStream;
+@@ -76,7 +76,12 @@ public abstract class BasicInjectionDetector extends AbstractInjectionDetector {
+ 
+         try {
+             //2. Verify if the super classes match a known sink
+-            JavaClass classDef = Repository.lookupClass(invoke.getClassName(cpg));
++            String className = ByteCode.stripObjectArrayFromClassName(invoke.getClassName(cpg));
++            if (className.startsWith("[")) {
++                // an array of a non-object type
++                return InjectionPoint.NONE;
++            }
++            JavaClass classDef = Repository.lookupClass(className);
+             Set<String> parentClassNames = BCELUtil.getParentClassNames(classDef);
+             for (String parentClassName : parentClassNames) {
+                 classMethodSignature.setClassName(parentClassName);
+diff --git a/com/h3xstream/findsecbugs/injection/redirect/RedirectionSource.java m/com/h3xstream/findsecbugs/injection/redirect/RedirectionSource.java
+index e1b2db74c0f0cd003e2557d10856b4dbbc19bd39..959ddb8c3d4a1a5db9f0525e1d61d0c7a0a70b07 100644
+--- a/com/h3xstream/findsecbugs/injection/redirect/RedirectionSource.java
++++ m/com/h3xstream/findsecbugs/injection/redirect/RedirectionSource.java
+@@ -35,8 +35,7 @@ public class RedirectionSource implements InjectionSource {
+         if (ins instanceof INVOKEINTERFACE) {
+             String methodName = ins.getMethodName(cpg);
+             String className = ins.getReferenceType(cpg).toString();
+-            if (className.equals("javax.servlet.http.HttpServletResponse")
+-                    || className.equals("javax.servlet.http.HttpServletResponseWrapper")) {
++            if (isHttpServletResponseOrResponseWrapperClass(className)) {
+                 if (methodName.equals("sendRedirect")) {
+                     InjectionPoint ip = new InjectionPoint(new int[]{0}, UNVALIDATED_REDIRECT_TYPE);
+                     //ip.setInjectableMethod(className.concat(".sendRedirect(...)"));
+@@ -58,4 +57,11 @@ public class RedirectionSource implements InjectionSource {
+         }
+         return InjectionPoint.NONE;
+     }
++
++    private boolean isHttpServletResponseOrResponseWrapperClass(String className) {
++        return className.equals("javax.servlet.http.HttpServletResponse") ||
++                className.equals("jakarta.servlet.http.HttpServletResponse") ||
++                className.equals("javax.servlet.http.HttpServletResponseWrapper") ||
++                className.equals("jakarta.servlet.http.HttpServletResponseWrapper");
++    }
+ }
+diff --git a/com/h3xstream/findsecbugs/jsp/JspIncludeDetector.java m/com/h3xstream/findsecbugs/jsp/JspIncludeDetector.java
+index 915b8781e1d1ef376933875186fcc9991581b86c..7bf6315495942dc56957663df7e172b676ca996d 100644
+--- a/com/h3xstream/findsecbugs/jsp/JspIncludeDetector.java
++++ m/com/h3xstream/findsecbugs/jsp/JspIncludeDetector.java
+@@ -49,7 +49,7 @@ public class JspIncludeDetector extends OpcodeStackDetector {
+ 
+ 
+         if (seen == Const.INVOKESTATIC && ("org/apache/jasper/runtime/JspRuntimeLibrary".equals(getClassConstantOperand()) || "org/apache/sling/scripting/jsp/jasper/runtime/JspRuntimeLibrary".equals(getClassConstantOperand()))
+-                && getNameConstantOperand().equals("include") && getSigConstantOperand().equals("(Ljavax/servlet/ServletRequest;Ljavax/servlet/ServletResponse;Ljava/lang/String;Ljavax/servlet/jsp/JspWriter;Z)V")) {
++                && getNameConstantOperand().equals("include") && includeMethodSignatureMatches()) {
+ 
+             if (StackUtils.isVariableString(stack.getStackItem(2))) {
+                 bugReporter.reportBug(new BugInstance(this, JSP_INCLUDE_TYPE, Priorities.HIGH_PRIORITY) //
+@@ -64,4 +64,9 @@ public class JspIncludeDetector extends OpcodeStackDetector {
+         }
+ 
+     }
++
++    private boolean includeMethodSignatureMatches() {
++        return getSigConstantOperand().equals("(Ljavax/servlet/ServletRequest;Ljavax/servlet/ServletResponse;Ljava/lang/String;Ljavax/servlet/jsp/JspWriter;Z)V") ||
++                getSigConstantOperand().equals("(Ljakarta/servlet/ServletRequest;Ljakarta/servlet/ServletResponse;Ljava/lang/String;Ljakarta/servlet/jsp/JspWriter;Z)V");
++    }
+ }
+diff --git a/com/h3xstream/findsecbugs/jsp/JstlOutDetector.java m/com/h3xstream/findsecbugs/jsp/JstlOutDetector.java
+index 6ce7f0a2b0ce1691b32c7a0c1c08caa7a03c0413..72827b4204233251700fe8dbbd2c2440121436da 100644
+--- a/com/h3xstream/findsecbugs/jsp/JstlOutDetector.java
++++ m/com/h3xstream/findsecbugs/jsp/JstlOutDetector.java
+@@ -67,7 +67,7 @@ public class JstlOutDetector implements Detector {
+         JavaClass javaClass = classContext.getJavaClass();
+ 
+         try {
+-            if(!Hierarchy.isSubtype(javaClass.getClassName(), "javax.servlet.http.HttpServlet")) {
++            if(!isHttpServletSubtype(javaClass)) {
+                 return;
+             }
+         } catch (ClassNotFoundException e) {
+@@ -82,6 +82,11 @@ public class JstlOutDetector implements Detector {
+         }
+     }
+ 
++    private boolean isHttpServletSubtype(JavaClass javaClass) throws ClassNotFoundException {
++        return Hierarchy.isSubtype(javaClass.getClassName(), "javax.servlet.http.HttpServlet") ||
++                Hierarchy.isSubtype(javaClass.getClassName(), "jakarta.servlet.http.HttpServlet");
++    }
++
+     private void analyzeMethod(Method m, ClassContext classContext) throws CFGBuilderException, DataflowAnalysisException {
+ 
+         //Conditions that needs to fill to identify the vulnerability
+diff --git a/com/h3xstream/findsecbugs/jsp/XslTransformJspDetector.java m/com/h3xstream/findsecbugs/jsp/XslTransformJspDetector.java
+index 5d83305b3c177296d744f7a804781fc74efcdb84..7de8672d51d52705c4da12025af7740b52f0e4f0 100644
+--- a/com/h3xstream/findsecbugs/jsp/XslTransformJspDetector.java
++++ m/com/h3xstream/findsecbugs/jsp/XslTransformJspDetector.java
+@@ -54,7 +54,7 @@ public class XslTransformJspDetector implements Detector {
+     public void visitClassContext(ClassContext classContext) {
+         JavaClass javaClass = classContext.getJavaClass();
+         try {
+-            if (!Hierarchy.isSubtype(javaClass.getClassName(), "javax.servlet.http.HttpServlet")) {
++            if (!isHttpServletSubtype(javaClass)) {
+                 return;
+             }
+         } catch (ClassNotFoundException e) {
+@@ -69,6 +69,11 @@ public class XslTransformJspDetector implements Detector {
+         }
+     }
+ 
++    private boolean isHttpServletSubtype(JavaClass javaClass) throws ClassNotFoundException {
++        return Hierarchy.isSubtype(javaClass.getClassName(), "javax.servlet.http.HttpServlet") ||
++                Hierarchy.isSubtype(javaClass.getClassName(), "jakarta.servlet.http.HttpServlet");
++    }
++
+     private void analyzeMethod(Method m, ClassContext classContext) throws CFGBuilderException, DataflowAnalysisException {
+ 
+         //Bytecode representation of the TransformTag instantiation
+diff --git a/com/h3xstream/findsecbugs/serial/ObjectDeserializationDetector.java m/com/h3xstream/findsecbugs/serial/ObjectDeserializationDetector.java
+index 78ee93178f40fe42c7ad6d98fbc2a48cb4f4393a..f6f3d4a54ed5c71f963c0cf1093226db16a4dc6f 100644
+--- a/com/h3xstream/findsecbugs/serial/ObjectDeserializationDetector.java
++++ m/com/h3xstream/findsecbugs/serial/ObjectDeserializationDetector.java
+@@ -30,6 +30,7 @@ import edu.umd.cs.findbugs.ba.bcp.Invoke;
+ import org.apache.bcel.classfile.JavaClass;
+ import org.apache.bcel.classfile.Method;
+ import org.apache.bcel.generic.ConstantPoolGen;
++import org.apache.bcel.generic.INVOKEDYNAMIC;
+ import org.apache.bcel.generic.Instruction;
+ import org.apache.bcel.generic.InstructionHandle;
+ import org.apache.bcel.generic.InvokeInstruction;
+@@ -98,7 +99,7 @@ public class ObjectDeserializationDetector implements Detector {
+             Instruction inst = location.getHandle().getInstruction();
+ 
+             //
+-            if (inst instanceof InvokeInstruction) {
++            if (inst instanceof InvokeInstruction && !(inst instanceof INVOKEDYNAMIC)) {
+                 InvokeInstruction invoke = (InvokeInstruction) inst;
+ 
+                 String className = invoke.getClassName(cpg);
+diff --git a/com/h3xstream/findsecbugs/spring/SpringEntityLeakDetector.java m/com/h3xstream/findsecbugs/spring/SpringEntityLeakDetector.java
+index abec1706fb016f4abc7821c09a166e5e209b5a4a..48f54ddc319f1c2494937c21f1ff0382b561ea65 100644
+--- a/com/h3xstream/findsecbugs/spring/SpringEntityLeakDetector.java
++++ m/com/h3xstream/findsecbugs/spring/SpringEntityLeakDetector.java
+@@ -50,6 +50,7 @@ public class SpringEntityLeakDetector implements Detector {
+ 
+ 	private static final List<String> ENTITY_ANNOTATION_TYPES = Arrays.asList(
+ 			"Ljavax/persistence/Entity;",
++			"Ljakarta/persistence/Entity;",
+ 			"Ljavax/jdo/spi/PersistenceCapable;",
+ 			"Lorg/springframework/data/mongodb/core/mapping/Document;");
+ 
+diff --git a/com/h3xstream/findsecbugs/taintanalysis/TaintAnalysis.java m/com/h3xstream/findsecbugs/taintanalysis/TaintAnalysis.java
+index f5c56728e6d6ded6f8d27e69c621a27eb629cb98..bd7ec3608746ed8cff972b7c9811ddc1a02a900f 100644
+--- a/com/h3xstream/findsecbugs/taintanalysis/TaintAnalysis.java
++++ m/com/h3xstream/findsecbugs/taintanalysis/TaintAnalysis.java
+@@ -30,7 +30,6 @@ import edu.umd.cs.findbugs.ba.generic.GenericSignatureParser;
+ import edu.umd.cs.findbugs.classfile.MethodDescriptor;
+ import edu.umd.cs.findbugs.classfile.analysis.AnnotationValue;
+ import edu.umd.cs.findbugs.classfile.analysis.MethodInfo;
+-import edu.umd.cs.findbugs.io.IO;
+ import java.io.BufferedReader;
+ import java.io.IOException;
+ import java.io.InputStream;
+diff --git a/com/h3xstream/findsecbugs/taintanalysis/TaintDataflowEngine.java m/com/h3xstream/findsecbugs/taintanalysis/TaintDataflowEngine.java
+index 5e42ac2fdbb21d13a763ecd69529f1a4ff7fed31..0b756f65d69479818372f13760b5a6c121fc036a 100644
+--- a/com/h3xstream/findsecbugs/taintanalysis/TaintDataflowEngine.java
++++ m/com/h3xstream/findsecbugs/taintanalysis/TaintDataflowEngine.java
+@@ -27,7 +27,6 @@ import edu.umd.cs.findbugs.classfile.CheckedAnalysisException;
+ import edu.umd.cs.findbugs.classfile.IAnalysisCache;
+ import edu.umd.cs.findbugs.classfile.IMethodAnalysisEngine;
+ import edu.umd.cs.findbugs.classfile.MethodDescriptor;
+-import edu.umd.cs.findbugs.io.IO;
+ 
+ import java.io.BufferedWriter;
+ import java.io.File;
+@@ -148,14 +147,10 @@ public class TaintDataflowEngine implements IMethodAnalysisEngine<TaintDataflow>
+     }
+     
+     private void addCustomConfig(String path) {
+-        InputStream stream = null;
+-        try {
+-            File file = new File(path);
+-            if (file.exists()) {
+-                stream = new FileInputStream(file);
+-            } else {
+-                stream = getClass().getClassLoader().getResourceAsStream(path);
+-            }
++        File file = new File(path);
++        try (InputStream stream = file.exists()
++                ? new FileInputStream(file)
++                : getClass().getClassLoader().getResourceAsStream(path)) {
+             if (stream == null) {
+                 String message = String.format("Could not add custom config. "
+                         + "Neither file %s nor resource matching %s found.",
+@@ -166,8 +161,6 @@ public class TaintDataflowEngine implements IMethodAnalysisEngine<TaintDataflow>
+             LOGGER.log(Level.INFO, "Custom taint config loaded from {0}", path);
+         } catch (IOException ex) {
+             throw new RuntimeException("Cannot load custom taint config from " + path, ex);
+-        } finally {
+-            IO.close(stream);
+         }
+     }
+     
+diff --git a/com/h3xstream/findsecbugs/taintanalysis/extra/JstlExpressionWhiteLister.java m/com/h3xstream/findsecbugs/taintanalysis/extra/JstlExpressionWhiteLister.java
+index 34a0a39b47ac43664f6cd99e788582b5843de433..fe675368a3f43916bb2ed2e07e9a8ae97e6070c0 100644
+--- a/com/h3xstream/findsecbugs/taintanalysis/extra/JstlExpressionWhiteLister.java
++++ m/com/h3xstream/findsecbugs/taintanalysis/extra/JstlExpressionWhiteLister.java
+@@ -69,10 +69,14 @@ public class JstlExpressionWhiteLister extends BasicInjectionDetector implements
+     private static final Pattern TAG_SAFE_QUOTE_PATTERN = Pattern.compile("^\\$\\{\\s*[a-zA-Z]+:safeQuote\\([a-zA-Z0-9\\-#,\\\'\\\"\\&\\[\\]@\\\\ \\._\\(\\):]+\\)\\s*\\}$");
+     private static final String CONTEXT_PATH_PATTERN = "${pageContext.request.contextPath}";
+ 
+-    private static final InvokeMatcherBuilder PROPRIETARY_EVALUATE = invokeInstruction()
++    private static final InvokeMatcherBuilder JAVAX_PROPRIETARY_EVALUATE = invokeInstruction()
+             .atClass("org/apache/jasper/runtime/PageContextImpl")
+             .atMethod("proprietaryEvaluate")
+             .withArgs("(Ljava/lang/String;Ljava/lang/Class;Ljavax/servlet/jsp/PageContext;Lorg/apache/jasper/runtime/ProtectedFunctionMapper;)Ljava/lang/Object;");
++    private static final InvokeMatcherBuilder JAKARTA_PROPRIETARY_EVALUATE = invokeInstruction()
++            .atClass("org/apache/jasper/runtime/PageContextImpl")
++            .atMethod("proprietaryEvaluate")
++            .withArgs("(Ljava/lang/String;Ljava/lang/Class;Ljakarta/servlet/jsp/PageContext;Lorg/apache/jasper/runtime/ProtectedFunctionMapper;)Ljava/lang/Object;");
+ 
+     private final List<Pattern> safePatterns;
+ 
+@@ -88,7 +92,7 @@ public class JstlExpressionWhiteLister extends BasicInjectionDetector implements
+     @Override
+     public void visitInvoke(InvokeInstruction invoke, MethodGen methodGen, TaintFrame frameType, List<Taint> parameters, ConstantPoolGen cpg) throws DataflowAnalysisException {
+ 
+-        if(PROPRIETARY_EVALUATE.matches(invoke,cpg)) {
++        if(isProprietaryEvaluateMethod(invoke, cpg)) {
+             Taint defaultVal = parameters.get(3); //The expression is the fourth parameter starting from the right. (Top of the stack last arguments)
+             if(defaultVal.getConstantValue() != null) {
+ 
+@@ -113,6 +117,10 @@ public class JstlExpressionWhiteLister extends BasicInjectionDetector implements
+         }
+     }
+ 
++    private boolean isProprietaryEvaluateMethod(InvokeInstruction invoke, ConstantPoolGen cpg) {
++        return JAVAX_PROPRIETARY_EVALUATE.matches(invoke, cpg) || JAKARTA_PROPRIETARY_EVALUATE.matches(invoke, cpg);
++    }
++
+     @Override
+     public void visitLoad(LoadInstruction load, MethodGen methodGen, TaintFrame frameType, int numProduced, ConstantPoolGen cpg) {
+     }
+diff --git a/com/h3xstream/findsecbugs/xss/XSSRequestWrapperDetector.java m/com/h3xstream/findsecbugs/xss/XSSRequestWrapperDetector.java
+index bba840da5ba5d760b925fc73712bfd5065fd18d4..af378c93f23b92133be3c142a076a51c2e999c50 100644
+--- a/com/h3xstream/findsecbugs/xss/XSSRequestWrapperDetector.java
++++ m/com/h3xstream/findsecbugs/xss/XSSRequestWrapperDetector.java
+@@ -51,7 +51,8 @@ public class XSSRequestWrapperDetector implements Detector {
+         JavaClass javaClass = classContext.getJavaClass();
+ 
+         //The class extends HttpServletRequestWrapper
+-        boolean isRequestWrapper = InterfaceUtils.isSubtype(javaClass, "javax.servlet.http.HttpServletRequestWrapper");
++        boolean isRequestWrapper = InterfaceUtils.isSubtype(javaClass, "javax.servlet.http.HttpServletRequestWrapper") ||
++                InterfaceUtils.isSubtype(javaClass, "jakarta.servlet.http.HttpServletRequestWrapper");
+ 
+         //Not the target of this detector
+         if (!isRequestWrapper) return;
+diff --git a/com/h3xstream/findsecbugs/xss/XssServletDetector.java m/com/h3xstream/findsecbugs/xss/XssServletDetector.java
+index b9f440665fcf9bf1cb1e4b09637bcd292d0d3dbd..235d0578637b40b99deeeed8fe71eb178fda1692 100644
+--- a/com/h3xstream/findsecbugs/xss/XssServletDetector.java
++++ m/com/h3xstream/findsecbugs/xss/XssServletDetector.java
+@@ -30,10 +30,14 @@ public class XssServletDetector extends BasicInjectionDetector {
+ 
+     private static final String XSS_SERVLET_TYPE = "XSS_SERVLET";
+     private static final String[] REQUIRED_CLASSES = {
+-        "Ljavax/servlet/http/ServletResponse;",
+-        "Ljavax/servlet/http/ServletResponseWrapper;",
++        "Ljavax/servlet/ServletResponse;",
++        "Ljakarta/servlet/ServletResponse;",
++        "Ljavax/servlet/ServletResponseWrapper;",
++        "Ljakarta/servlet/ServletResponseWrapper;",
+         "Ljavax/servlet/http/HttpServletResponse;",
++        "Ljakarta/servlet/http/HttpServletResponse;",
+         "Ljavax/servlet/http/HttpServletResponseWrapper;",
++        "Ljakarta/servlet/http/HttpServletResponseWrapper;",
+         "Lorg/apache/jetspeed/portlet/PortletResponse;",
+         "Lorg/apache/jetspeed/portlet/PortletResponseWrapper;",
+         "Ljavax/portlet/RenderResponse;",
+diff --git a/injection-sinks/path-traversal-in.txt m/injection-sinks/path-traversal-in.txt
+index f6412c1ff0a392ab0264ba2bf85543c2df7d4cb4..66775106622e29eb678340f1b6ff0baec8e679e6 100644
+--- a/injection-sinks/path-traversal-in.txt
++++ m/injection-sinks/path-traversal-in.txt
+@@ -7,6 +7,9 @@ java/io/RandomAccessFile.<init>(Ljava/lang/String;Ljava/lang/String;)V:1
+ java/io/FileReader.<init>(Ljava/lang/String;)V:0
+ java/io/FileInputStream.<init>(Ljava/lang/String;)V:0
+ 
++java/nio/file/Path.of(Ljava/lang/String;[Ljava/lang/String;)Ljava/nio/file/Path;:0,1
++java/nio/file/Path.of(Ljava/net/URI;)Ljava/nio/file/Path;:0
++
+ java/nio/file/Paths.get(Ljava/lang/String;[Ljava/lang/String;)Ljava/nio/file/Path;:0,1
+ java/nio/file/Paths.get(Ljava/net/URI;)Ljava/nio/file/Path;:0
+ 
+@@ -14,6 +17,7 @@ java/io/File.createTempFile(Ljava/lang/String;Ljava/lang/String;)Ljava/io/File;:
+ java/io/File.createTempFile(Ljava/lang/String;Ljava/lang/String;Ljava/io/File;)Ljava/io/File;:0,1,2
+ 
+ javax/activation/FileDataSource.<init>(Ljava/lang/String;)V:0
++jakarta/activation/FileDataSource.<init>(Ljava/lang/String;)V:0
+ 
+ java/nio/file/Files.createTempFile(Ljava/nio/file/Path;Ljava/lang/String;Ljava/lang/String;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;:1,2
+ java/nio/file/Files.createTempFile(Ljava/lang/String;Ljava/lang/String;[Ljava/nio/file/attribute/FileAttribute;)Ljava/nio/file/Path;:1,2
+diff --git a/metadata/findbugs.xml m/metadata/findbugs.xml
+index 532044a89843b75f0c682ddbce55cd3a43d2db65..e25feb0ae820b68a5c4c26b3ae141185ab5e4ee9 100644
+--- a/metadata/findbugs.xml
++++ m/metadata/findbugs.xml
+@@ -143,29 +143,29 @@
+     <Detector class="com.h3xstream.findsecbugs.injection.xml.XmlInjectionDetector" reports="POTENTIAL_XML_INJECTION"/>
+ 
+ 
+-    <BugPattern type="HTTP_PARAMETER_POLLUTION" abbrev="SECHPP" category="SECURITY"/>
+-    <BugPattern type="SMTP_HEADER_INJECTION" abbrev="SECSMTP" category="SECURITY"/>
+-    <BugPattern type="FORMAT_STRING_MANIPULATION" abbrev="SECFSM" category="SECURITY"/>
+-    <BugPattern type="SPRING_FILE_DISCLOSURE" abbrev="SECSF" category="SECURITY"/>
+-    <BugPattern type="STRUTS_FILE_DISCLOSURE" abbrev="SECSFD" category="SECURITY"/>
+-    <BugPattern type="REQUESTDISPATCHER_FILE_DISCLOSURE" abbrev="SECSFDR" category="SECURITY"/>
+-    <BugPattern type="BEAN_PROPERTY_INJECTION" abbrev="SECBPI" category="SECURITY"/>
+-    <BugPattern type="AWS_QUERY_INJECTION" abbrev="SECAQI" category="SECURITY"/>
+-    <BugPattern type="INSECURE_SMTP_SSL" abbrev="SECISC" category="SECURITY"/>
+-    <BugPattern type="URL_REWRITING" abbrev="SECURLR" category="SECURITY"/>
++    <BugPattern type="HTTP_PARAMETER_POLLUTION" abbrev="SECHPP" category="SECURITY" cweid="235"/>
++    <BugPattern type="SMTP_HEADER_INJECTION" abbrev="SECSMTP" category="SECURITY" cweid="93"/>
++    <BugPattern type="FORMAT_STRING_MANIPULATION" abbrev="SECFSM" category="SECURITY" cweid="134"/>
++    <BugPattern type="SPRING_FILE_DISCLOSURE" abbrev="SECSF" category="SECURITY" cweid="552"/>
++    <BugPattern type="STRUTS_FILE_DISCLOSURE" abbrev="SECSFD" category="SECURITY" cweid="552"/>
++    <BugPattern type="REQUESTDISPATCHER_FILE_DISCLOSURE" abbrev="SECSFDR" category="SECURITY" cweid="552"/>
++    <BugPattern type="BEAN_PROPERTY_INJECTION" abbrev="SECBPI" category="SECURITY" cweid="15"/>
++    <BugPattern type="AWS_QUERY_INJECTION" abbrev="SECAQI" category="SECURITY" cweid="943"/>
++    <BugPattern type="INSECURE_SMTP_SSL" abbrev="SECISC" category="SECURITY" cweid="297"/>
++    <BugPattern type="URL_REWRITING" abbrev="SECURLR" category="SECURITY" cweid="601"/>
+     <BugPattern type="COOKIE_PERSISTENT" abbrev="SECCP" category="SECURITY" cweid="539"/>
+-    <BugPattern type="PERMISSIVE_CORS" abbrev="SECCORS" category="SECURITY"/>
++    <BugPattern type="PERMISSIVE_CORS" abbrev="SECCORS" category="SECURITY" cweid="942"/>
+     <BugPattern type="PREDICTABLE_RANDOM" abbrev="SECPR" category="SECURITY" cweid="330"/>
+     <BugPattern type="PREDICTABLE_RANDOM_SCALA" abbrev="SECPRS" category="SECURITY" cweid="330"/>
+-    <BugPattern type="SERVLET_PARAMETER" abbrev="SECSP" category="SECURITY"/>
+-    <BugPattern type="SERVLET_CONTENT_TYPE" abbrev="SECSCT" category="SECURITY"/>
+-    <BugPattern type="SERVLET_SERVER_NAME" abbrev="SECSSN" category="SECURITY"/>
+-    <BugPattern type="SERVLET_SESSION_ID" abbrev="SECSSID" category="SECURITY"/>
+-    <BugPattern type="SERVLET_QUERY_STRING" abbrev="SECSSQ" category="SECURITY"/>
+-    <BugPattern type="SERVLET_HEADER" abbrev="SECSH" category="SECURITY"/>
+-    <BugPattern type="SERVLET_HEADER_REFERER" abbrev="SECSHR" category="SECURITY"/>
+-    <BugPattern type="SERVLET_HEADER_USER_AGENT" abbrev="SECSHUA" category="SECURITY"/>
+-    <BugPattern type="COOKIE_USAGE" abbrev="SECCU" category="SECURITY"/>
++    <BugPattern type="SERVLET_PARAMETER" abbrev="SECSP" category="SECURITY" cweid="20"/>
++    <BugPattern type="SERVLET_CONTENT_TYPE" abbrev="SECSCT" category="SECURITY" cweid="807"/>
++    <BugPattern type="SERVLET_SERVER_NAME" abbrev="SECSSN" category="SECURITY" cweid="807"/>
++    <BugPattern type="SERVLET_SESSION_ID" abbrev="SECSSID" category="SECURITY" cweid="20"/>
++    <BugPattern type="SERVLET_QUERY_STRING" abbrev="SECSSQ" category="SECURITY" cweid="20"/>
++    <BugPattern type="SERVLET_HEADER" abbrev="SECSH" category="SECURITY" cweid="807"/>
++    <BugPattern type="SERVLET_HEADER_REFERER" abbrev="SECSHR" category="SECURITY" cweid="807"/>
++    <BugPattern type="SERVLET_HEADER_USER_AGENT" abbrev="SECSHUA" category="SECURITY" cweid="807"/>
++    <BugPattern type="COOKIE_USAGE" abbrev="SECCU" category="SECURITY" cweid="315"/>
+     <BugPattern type="INSECURE_COOKIE" abbrev="SECIC" category="SECURITY" cweid="614"/>
+     <BugPattern type="HTTPONLY_COOKIE" abbrev="SECHOC" category="SECURITY" cweid="1004"/>
+     <BugPattern type="PATH_TRAVERSAL_IN" abbrev="SECPTI" category="SECURITY" cweid="22"/>
+@@ -173,19 +173,19 @@
+     <BugPattern type="SCALA_PATH_TRAVERSAL_IN" abbrev="SSECPTI" category="SECURITY" cweid="22"/>
+     <BugPattern type="COMMAND_INJECTION" abbrev="SECCI" category="SECURITY" cweid="78"/>
+     <BugPattern type="SCALA_COMMAND_INJECTION" abbrev="SECSCI" category="SECURITY" cweid="78"/>
+-    <BugPattern type="WEAK_FILENAMEUTILS" abbrev="SECWF" category="SECURITY"/>
++    <BugPattern type="WEAK_FILENAMEUTILS" abbrev="SECWF" category="SECURITY" cweid="158"/>
+     <BugPattern type="WEAK_TRUST_MANAGER" abbrev="SECWTM" category="SECURITY" cweid="295"/>
+     <BugPattern type="WEAK_HOSTNAME_VERIFIER" abbrev="SECWHV" category="SECURITY" cweid="295"/>
+-    <BugPattern type="JAXWS_ENDPOINT" abbrev="SECJWS" category="SECURITY"/>
+-    <BugPattern type="JAXRS_ENDPOINT" abbrev="SECJRS" category="SECURITY"/>
+-    <BugPattern type="TAPESTRY_ENDPOINT" abbrev="SECTE" category="SECURITY"/>
+-    <BugPattern type="WICKET_ENDPOINT" abbrev="SECWE" category="SECURITY"/>
++    <BugPattern type="JAXWS_ENDPOINT" abbrev="SECJWS" category="SECURITY" cweid="20"/>
++    <BugPattern type="JAXRS_ENDPOINT" abbrev="SECJRS" category="SECURITY" cweid="20"/>
++    <BugPattern type="TAPESTRY_ENDPOINT" abbrev="SECTE" category="SECURITY" cweid="20"/>
++    <BugPattern type="WICKET_ENDPOINT" abbrev="SECWE" category="SECURITY" cweid="20"/>
+     <BugPattern type="WEAK_MESSAGE_DIGEST_MD5" abbrev="SECMD5" category="SECURITY" cweid="328"/>
+     <BugPattern type="WEAK_MESSAGE_DIGEST_SHA1" abbrev="SECSHA1" category="SECURITY" cweid="328"/>
+     <BugPattern type="DEFAULT_HTTP_CLIENT" abbrev="SECHTTPCLIENT" category="SECURITY"/>
+     <BugPattern type="SSL_CONTEXT" abbrev="SECSSL" category="SECURITY"/>
+     <BugPattern type="CUSTOM_MESSAGE_DIGEST" abbrev="SECCMD" category="SECURITY" cweid="327"/>
+-    <BugPattern type="FILE_UPLOAD_FILENAME" abbrev="SECFUN" category="SECURITY"/>
++    <BugPattern type="FILE_UPLOAD_FILENAME" abbrev="SECFUN" category="SECURITY" cweid="22"/>
+     <BugPattern type="REDOS" abbrev="SECRD" category="SECURITY" cweid="400"/>
+     <BugPattern type="XXE_SAXPARSER" abbrev="SECXXESAX" category="SECURITY" cweid="611"/>
+     <BugPattern type="XXE_XMLREADER" abbrev="SECXXEREAD" category="SECURITY" cweid="611"/>
+@@ -203,10 +203,10 @@
+     <BugPattern type="SPRING_CSRF_PROTECTION_DISABLED" abbrev="SECSPRCSRFPD" category="SECURITY" cweid="352"/>
+     <BugPattern type="SPRING_CSRF_UNRESTRICTED_REQUEST_MAPPING" abbrev="SECSPRCSRFURM" category="SECURITY" cweid="352"/>
+     <BugPattern type="SAML_IGNORE_COMMENTS" abbrev="SECSAMLC" category="SECURITY"/>
+-    <BugPattern type="CUSTOM_INJECTION" abbrev="SECCUSTOMI" category="SECURITY" cweid="74"/>
+-    <BugPattern type="SQL_INJECTION" abbrev="SECSQLIHIB" category="SECURITY" cweid="564"/>
+-    <BugPattern type="SQL_INJECTION_VERTX" abbrev="SECSQLIVX" category="SECURITY" cweid="564"/>
+-    <BugPattern type="SQL_INJECTION_TURBINE" abbrev="SECSQLITU" category="SECURITY" cweid="564"/>
++    <BugPattern type="CUSTOM_INJECTION" abbrev="SECCUSTOMI" category="SECURITY" cweid="89"/>
++    <BugPattern type="SQL_INJECTION" abbrev="SECSQLIHIB" category="SECURITY" cweid="89"/>
++    <BugPattern type="SQL_INJECTION_VERTX" abbrev="SECSQLIVX" category="SECURITY" cweid="89"/>
++    <BugPattern type="SQL_INJECTION_TURBINE" abbrev="SECSQLITU" category="SECURITY" cweid="89"/>
+     <BugPattern type="SQL_INJECTION_HIBERNATE" abbrev="SECSQLIHIB" category="SECURITY" cweid="564"/>
+     <BugPattern type="SQL_INJECTION_JDO" abbrev="SECSQLIJDO" category="SECURITY" cweid="89"/>
+     <BugPattern type="SQL_INJECTION_JPA" abbrev="SECSQLIJPA" category="SECURITY" cweid="89"/>
+@@ -239,7 +239,7 @@
+     <BugPattern type="ENTITY_LEAK" abbrev="SECELEAK" category="SECURITY" cweid="212"/>
+     <BugPattern type="ENTITY_MASS_ASSIGNMENT" abbrev="SECEMA" category="SECURITY" cweid="915"/>
+     <BugPattern type="XSS_JSP_PRINT" abbrev="SECXSS1" category="SECURITY" cweid="79"/>
+-    <BugPattern type="JSP_INCLUDE" abbrev="SECJSPINC" category="SECURITY" cweid="98"/>
++    <BugPattern type="JSP_INCLUDE" abbrev="SECJSPINC" category="SECURITY" cweid="917"/>
+     <BugPattern type="JSP_SPRING_EVAL" abbrev="SECJSPSPRING" category="SECURITY" cweid="917"/>
+     <BugPattern type="JSP_JSTL_OUT" abbrev="SECJSPJSTL" category="SECURITY" cweid="79"/>
+     <BugPattern type="JSP_XSLT" abbrev="SECJSPXSLT" category="SECURITY" cweid="94"/>
+@@ -250,7 +250,7 @@
+     <BugPattern type="ECB_MODE" abbrev="SECECB" category="SECURITY" cweid="327"/>
+     <BugPattern type="PADDING_ORACLE" abbrev="PADORA" category="SECURITY" cweid="326"/>
+     <BugPattern type="CIPHER_INTEGRITY" abbrev="CIPINT" category="SECURITY" cweid="353"/>
+-    <BugPattern type="ESAPI_ENCRYPTOR" abbrev="ESAPIENC" category="SECURITY"/>
++    <BugPattern type="ESAPI_ENCRYPTOR" abbrev="ESAPIENC" category="SECURITY" cweid="310"/>
+     <BugPattern type="SCRIPT_ENGINE_INJECTION" abbrev="SCRIPTE" category="SECURITY" cweid="94"/>
+     <BugPattern type="SPEL_INJECTION" abbrev="SPELI" category="SECURITY" cweid="94"/>
+     <BugPattern type="EL_INJECTION" abbrev="SECEL" category="SECURITY" cweid="94"/>
+@@ -265,7 +265,7 @@
+     <BugPattern type="ANDROID_WORLD_WRITABLE" abbrev="SECWW" category="SECURITY" cweid="276"/>
+     <BugPattern type="ANDROID_GEOLOCATION" abbrev="SECGEO" category="SECURITY" cweid="359"/>
+     <BugPattern type="ANDROID_WEB_VIEW_JAVASCRIPT" abbrev="SECWVJ" category="SECURITY" cweid="79"/>
+-    <BugPattern type="ANDROID_WEB_VIEW_JAVASCRIPT_INTERFACE" abbrev="SECWVJI" category="SECURITY" cweid="285"/>
++    <BugPattern type="ANDROID_WEB_VIEW_JAVASCRIPT_INTERFACE" abbrev="SECWVJI" category="SECURITY" cweid="749"/>
+     <BugPattern type="OBJECT_DESERIALIZATION" abbrev="SECOBDES" category="SECURITY" cweid="502"/>
+     <BugPattern type="JACKSON_UNSAFE_DESERIALIZATION" abbrev="SECUJDES" category="SECURITY" cweid="502"/>
+     <BugPattern type="DESERIALIZATION_GADGET" abbrev="SECDESGAD" category="SECURITY" cweid="502" experimental="true"/>
+@@ -281,10 +281,10 @@
+     <BugPattern type="INFORMATION_EXPOSURE_THROUGH_AN_ERROR_MESSAGE" abbrev="ERRMSG" category="SECURITY" cweid="209"/>
+     <BugPattern type="RPC_ENABLED_EXTENSIONS" abbrev="RPCEXT" category="SECURITY"/>
+     <BugPattern type="WICKET_XSS1" abbrev="WICXSS1" category="SECURITY" cweid="79"/>
+-    <BugPattern type="OVERLY_PERMISSIVE_FILE_PERMISSION" abbrev="SECOPFP" category="SECURITY"/>
++    <BugPattern type="OVERLY_PERMISSIVE_FILE_PERMISSION" abbrev="SECOPFP" category="SECURITY" cweid="732"/>
+     <BugPattern type="IMPROPER_UNICODE" abbrev="SECUNI" category="SECURITY" cweid="176"/>
+-    <BugPattern type="MODIFICATION_AFTER_VALIDATION" abbrev="SECMOD" category="SECURITY" cweid="176"/>
+-    <BugPattern type="NORMALIZATION_AFTER_VALIDATION" abbrev="SECNORM" category="SECURITY" cweid="176"/>
++    <BugPattern type="MODIFICATION_AFTER_VALIDATION" abbrev="SECMOD" category="SECURITY" cweid="179"/>
++    <BugPattern type="NORMALIZATION_AFTER_VALIDATION" abbrev="SECNORM" category="SECURITY" cweid="180"/>
+     <BugPattern type="DANGEROUS_PERMISSION_COMBINATION" abbrev="SECPERM" category="SECURITY" cweid="732"/>
+     <BugPattern type="POTENTIAL_XML_INJECTION" abbrev="SECXML" category="SECURITY"/>
+ </FindbugsPlugin>
+diff --git a/metadata/messages.xml m/metadata/messages.xml
+index 3024e786914415e29459d8d17d12f4b93c1932c0..e0f7ad044216414583173d9bd24cea130c596f5b 100644
+--- a/metadata/messages.xml
++++ m/metadata/messages.xml
+@@ -677,7 +677,7 @@ Detailed information for a proper implementation is available at:
+ </p>
+ <br/>
+ <p>
+-    <b>Solution (TrustMangager based on a keystore):</b><br/>
++    <b>Solution (TrustManager based on a keystore):</b><br/>
+ <pre>KeyStore ks = //Load keystore containing the certificates trusted
+ 
+ SSLContext sc = SSLContext.getInstance("TLS");
+@@ -906,6 +906,7 @@ mapped in this way are properly validated before they are used.</p>
+ <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf">NIST: Recommendation for Password-Based Key Derivation</a><br/>
+ <a href="https://stackoverflow.com/q/22580853/89769">Stackoverflow: Reliable implementation of PBKDF2-HMAC-SHA256 for Java</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a>
++<a href="https://cwe.mitre.org/data/definitions/328.html">CWE-328: Use of Weak Hash</a>
+ </p>
+ ]]>
+         </Details>
+@@ -974,6 +975,7 @@ uses. <b>PBKDF2</b> should be used to hash password for example.</p>
+ <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf">NIST: Recommendation for Password-Based Key Derivation</a><br/>
+ <a href="https://stackoverflow.com/q/22580853/89769">Stackoverflow: Reliable implementation of PBKDF2-HMAC-SHA256 for Java</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a>
++<a href="https://cwe.mitre.org/data/definitions/328.html">CWE-328: Use of Weak Hash</a>
+ </p>
+ ]]>
+         </Details>
+@@ -1139,7 +1141,6 @@ contains no unauthorized path characters (e.g., / \), and refers to an authorize
+ <a href="http://projects.webappsec.org/w/page/13246952/Path%20Traversal">WASC-33: Path Traversal</a><br/>
+ <a href="https://www.owasp.org/index.php/Path_Traversal">OWASP: Path Traversal</a><br/>
+ <a href="https://capec.mitre.org/data/definitions/126.html">CAPEC-126: Path Traversal</a><br/>
+-<a href="https://cwe.mitre.org/data/definitions/22.html">CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')</a>
+ </p>
+ ]]>
+         </Details>
+@@ -2063,6 +2064,7 @@ validator.validate(source);
+ ]]>
+         </Details>
+     </BugPattern>
++    <BugCode abbrev="SECXXEVAL">XXE Vulnerability using an XML Validator</BugCode>
+ 
+     <!-- XPath Injection for Javax -->
+     <Detector class="com.h3xstream.findsecbugs.xpath.XPathInjectionDetector">
+@@ -3092,6 +3094,7 @@ In general, method evaluating OGNL expression should not receive user input. It
+     <a href="https://blog.gdssecurity.com/labs/2017/3/27/an-analysis-of-cve-2017-5638.html">Gotham Digital Science: An Analysis Of CVE-2017-5638</a><br/>
+     <a href="https://struts.apache.org/docs/s2-016.html">Apache Struts2: Vulnerability S2-016</a><br/>
+     <a href="https://struts.apache.org/docs/ognl.html">Apache Struts 2 Documentation: OGNL</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -3132,6 +3135,7 @@ In general, method evaluating Groovy expression should not receive user input fr
+     <a href="https://github.com/orangetw/awesome-jenkins-rce-2019">Jenkins RCE payloads</a> by Orange Tsai<br/>
+     <a href="https://github.com/adamyordan/cve-2019-1003000-jenkins-rce-poc">POC for CVE-2019-1003001</a> by Adam Jordan<br/>
+     <a href="https://github.com/welk1n/exploiting-groovy-in-Java/">Various payloads of exploiting Groovy code evaluation</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -3343,6 +3347,7 @@ In this situation, the method <code>Integer.toHexString()</code> should be repla
+ <a href="http://projects.webappsec.org/w/page/13246945/Insufficient%20Transport%20Layer%20Protection">WASC-04: Insufficient Transport Layer Protection</a><br/>
+ <a href="https://docs.hazelcast.org/docs/3.5/manual/html/encryption.html">Hazelcast Documentation: Encryption</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/326.html">CWE-326: Inadequate Encryption Strength</a>
++<a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a>
+ </p>
+ ]]>
+         </Details>
+@@ -3466,7 +3471,7 @@ to do this correctly.
+ 
+     <!-- DES usage -->
+     <Detector class="com.h3xstream.findsecbugs.crypto.cipher.DesUsageDetector">
+-        <Details>DES should be replace by AES</Details>
++        <Details>DES should be replaced by AES</Details>
+     </Detector>
+     <BugPattern type="DES_USAGE">
+         <ShortDescription>DES is insecure</ShortDescription>
+@@ -3494,6 +3499,7 @@ byte[] cipherText = c.doFinal(plainText);</pre>
+ <b>References</b><br/>
+ <a href="https://www.nist.gov/news-events/news/2005/06/nist-withdraws-outdated-data-encryption-standard">NIST Withdraws Outdated Data Encryption Standard</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/326.html">CWE-326: Inadequate Encryption Strength</a>
++<a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a>
+ </p>
+ ]]>
+         </Details>
+@@ -3796,7 +3802,7 @@ the XSS protection rules defined in the OWASP XSS Prevention Cheat Sheet.
+             <![CDATA[
+ <p>
+ The Blowfish cipher supports key sizes from 32 bits to 448 bits. A small key size makes the ciphertext vulnerable to brute force attacks.
+-At least 128 bits of entropy should be used when generating the key if use of Blowfish is required.
++At least 128 bits of entropy should be used when generating the key if the use of Blowfish is required.
+ </p>
+ <p>
+ If the algorithm can be changed, the AES block cipher should be used instead.
+@@ -4077,7 +4083,7 @@ class UserController {
+     <ul>
+         <li>Data transfer objects should be used instead including only the parameters needed as input/response to/from the API.</li>
+         <li>Sensitive parameters should be removed properly before transferring to UI.</li>
+-        <li>Data should be persisted in database only after proper sanitisation checks.</li>
++        <li>Data should be persisted in database only after proper sanitization checks.</li>
+     </ul>
+ </p>
+ <p>
+@@ -4163,7 +4169,7 @@ class UserController {
+     <ul>
+         <li>Data transfer objects should be used instead including only the parameters needed as input/response to/from the API.</li>
+         <li>Sensitive parameters should be removed properly before transferring to UI.</li>
+-        <li>Data should be persisted in database only after proper sanitisation checks.</li>
++        <li>Data should be persisted in database only after proper sanitization checks.</li>
+     </ul>
+ </p>
+ <p>
+@@ -4237,6 +4243,7 @@ attacker gets the ability to execute any code.
+ <b>References</b><br/>
+ <a href="https://resources.infosecinstitute.com/file-inclusion-attacks/">InfosecInstitute: File Inclusion Attacks</a><br/>
+ <a href="http://projects.webappsec.org/w/page/13246955/Remote%20File%20Inclusion">WASC-05: Remote File Inclusion</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/917.html">CWE-917: Improper Neutralization of Special Elements used in an Expression Language Statement ('Expression Language Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -4275,6 +4282,7 @@ attacker gets the ability to execute any code.
+ <b>References</b><br/>
+     <a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+     <a href="https://cwe.mitre.org/data/definitions/95.html">CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/917.html">CWE-917: Improper Neutralization of Special Elements used in an Expression Language Statement ('Expression Language Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -4284,7 +4292,7 @@ attacker gets the ability to execute any code.
+ 
+     <!-- JSTL OUT -->
+     <Detector class="com.h3xstream.findsecbugs.jsp.JstlOutDetector">
+-        <Details>Detect output where the escaping of special XML characters is disable.</Details>
++        <Details>Detect output where the escaping of special XML characters is disabled.</Details>
+     </Detector>
+     <BugPattern type="JSP_JSTL_OUT">
+         <ShortDescription>Escaping of special XML characters is disabled</ShortDescription>
+@@ -4468,6 +4476,7 @@ The solution is to avoid using XMLDecoder to parse content from an untrusted sou
+ <a href="http://blog.diniscruz.com/2013/08/using-xmldecoder-to-execute-server-side.html">Dinis Cruz Blog: Using XMLDecoder to execute server-side Java Code on a Restlet application</a><br/>
+ <a href="https://securityblog.redhat.com/2014/01/23/java-deserialization-flaws-part-2-xml-deserialization/">RedHat blog : Java deserialization flaws: Part 2, XML deserialization</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/20.html">CWE-20: Improper Input Validation</a>
++<a href="https://cwe.mitre.org/data/definitions/502.html">CWE-502: Deserialization of Untrusted Data</a>
+ </p>
+             ]]>
+         </Details>
+@@ -4559,6 +4568,7 @@ byte[] cipherText = c.doFinal(plainText);</pre>
+ <a href="https://csrc.nist.gov/projects/block-cipher-techniques/bcm/modes-develoment#01">NIST: Authenticated Encryption Modes</a><br/>
+ <a href="https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29">Wikipedia: Block cipher modes of operation</a><br/>
+ <a href="https://csrc.nist.gov/publications/detail/sp/800-38a/final">NIST: Recommendation for Block Cipher Modes of Operation</a>
++<a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -4597,6 +4607,7 @@ byte[] cipherText = c.doFinal(plainText);</pre>
+     <a href="https://csrc.nist.gov/projects/block-cipher-techniques/bcm/modes-develoment#01">NIST: Authenticated Encryption Modes</a><br/>
+     <a href="https://capec.mitre.org/data/definitions/463.html">CAPEC: Padding Oracle Crypto Attack</a><br/>
+     <a href="https://cwe.mitre.org/data/definitions/696.html">CWE-696: Incorrect Behavior Order</a>
++    <a href="https://cwe.mitre.org/data/definitions/326.html">CWE-326: Inadequate Encryption Strength</a>
+ </p>
+ ]]>
+         </Details>
+@@ -4787,6 +4798,7 @@ fos.write(string.getBytes());
+     <a href="https://www.securecoding.cert.org/confluence/display/java/DRD00-J.+Do+not+store+sensitive+information+on+external+storage+%28SD+card%29+unless+encrypted+first">CERT: DRD00-J: Do not store sensitive information on external storage [...]</a><br/>
+     <a href="https://developer.android.com/guide/topics/data/data-storage.html#filesExternal">Android Official Doc: Using the External Storage</a><br/>
+     <a href="https://www.owasp.org/index.php/Mobile_Top_10_2014-M2">OWASP Mobile Top 10 2014-M2: Insecure Data Storage</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/276.html">CWE-276: Incorrect Default Permissions</a>
+     <a href="https://cwe.mitre.org/data/definitions/312.html">CWE-312: Cleartext Storage of Sensitive Information</a>
+ </p>
+ ]]>
+@@ -4871,6 +4883,7 @@ sendBroadcast(v1);
+     <a href="https://developer.android.com/reference/android/content/BroadcastReceiver.html#Security">Android Official Doc: BroadcastReceiver (Security)</a><br/>
+     <a href="https://developer.android.com/guide/topics/manifest/receiver-element.html">Android Official Doc: Receiver configuration (see <code>android:permission</code>)</a><br/>
+     <sup>[1]</sup> <a href="https://stackoverflow.com/a/21513368/89769">StackOverflow: How to set permissions in broadcast sender and receiver in android</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/276.html">CWE-276: Incorrect Default Permissions</a><br/>
+     <a href="https://cwe.mitre.org/data/definitions/925.html">CWE-925: Improper Verification of Intent by Broadcast Receiver</a><br/>
+     <a href="https://cwe.mitre.org/data/definitions/927.html">CWE-927: Use of Implicit Intent for Sensitive Communication</a>
+ </p>
+@@ -4922,6 +4935,7 @@ create on external storage. See references below for implementation guidelines.
+     <a href="https://www.vogella.com/tutorials/AndroidSQLite/article.html#databasetutorial_database">vogella.com: Android SQLite database and content provider - Tutorial</a><br/>
+     <a href="https://www.vogella.com/tutorials/AndroidSQLite/article.html#databasetutorial_database">vogella.com: Android SQLite database and content provider - Tutorial</a><br/>
+     <a href="https://www.owasp.org/index.php/Mobile_Top_10_2014-M2">OWASP Mobile Top 10 2014-M2: Insecure Data Storage</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/276.html">CWE-276: Incorrect Default Permissions</a>
+     <a href="https://cwe.mitre.org/data/definitions/312.html">CWE-312: Cleartext Storage of Sensitive Information</a>
+ </p>
+ ]]>
+@@ -4974,6 +4988,7 @@ webView.setWebChromeClient(new WebChromeClient() {
+     <a href="https://www.securecoding.cert.org/confluence/display/java/DRD15-J.+Consider+privacy+concerns+when+using+Geolocation+API">CERT: DRD15-J. Consider privacy concerns when using Geolocation API</a><br/>
+     <a href="https://en.wikipedia.org/wiki/W3C_Geolocation_API">Wikipedia: W3C Geolocation API</a><br/>
+     <a href="https://w3c.github.io/geolocation-api/">W3C: Geolocation Specification</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/359.html">CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</a>
+ </p>
+ ]]>
+         </Details>
+@@ -5068,6 +5083,7 @@ class FileWriteUtil {
+ <p>
+     <b>References</b><br/>
+     <a href="https://developer.android.com/reference/android/webkit/WebView.html#addJavascriptInterface%28java.lang.Object,%20java.lang.String%29">Android Official Doc: <code>WebView.addJavascriptInterface()</code></a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a>
+     <a href="https://cwe.mitre.org/data/definitions/749.html">CWE-749: Exposed Dangerous Method or Function</a>
+ </p>
+ ]]>
+@@ -5082,7 +5098,7 @@ class FileWriteUtil {
+ 
+     <BugPattern type="INSECURE_COOKIE">
+         <ShortDescription>Cookie without the secure flag</ShortDescription>
+-        <LongDescription>Cookie without the secure flag could be sent in clear text if a HTTP URL is visited</LongDescription>
++        <LongDescription>Cookie without the secure flag could be sent in clear text if an HTTP URL is visited</LongDescription>
+         <Details>
+             <![CDATA[
+ <p>
+@@ -5186,6 +5202,7 @@ cookie.setHttpOnly(true); //HttpOnly flag
+ <a href="https://blog.codinghorror.com/protecting-your-cookies-httponly/">Coding Horror blog: Protecting Your Cookies: HttpOnly</a><br/>
+ <a href="https://www.owasp.org/index.php/HttpOnly">OWASP: HttpOnly</a><br/>
+ <a href="https://www.rapid7.com/db/vulnerabilities/http-cookie-http-only-flag">Rapid7: Missing HttpOnly Flag From Cookie</a>
++<a href="https://cwe.mitre.org/data/definitions/1004.html">CWE-1004: Sensitive Cookie Without 'HttpOnly' Flag</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -5264,7 +5281,7 @@ Avoid deserializing object provided by remote users.
+ <b>Solutions:</b><br/>
+ <p>
+ Explicitly define what types and subtypes you want to be available when using polymorphism through JsonTypeInfo.Id.NAME.
+-Also, never call <code>ObjectMapper.enableDefaultTyping</code> (and then <code>readValue</code> a type that holds a Object or Serializable or Comparable or a known deserialization type).
++Also, never call <code>ObjectMapper.enableDefaultTyping</code> (and then <code>readValue</code> a type that holds an Object or Serializable or Comparable or a known deserialization type).
+ </p>
+ 
+ <p>
+@@ -5300,6 +5317,7 @@ public class Example {
+ <b>References</b><br/>
+ <a href="https://github.com/FasterXML/jackson-databind/issues/1599">Jackson Deserializer security vulnerability</a><br>
+ <a href="https://github.com/mbechler/marshalsec">Java Unmarshaller Security - Turning your data into code execution</a><br>
++<a href="https://cwe.mitre.org/data/definitions/502.html">CWE-502: Deserialization of Untrusted Data</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -5435,6 +5453,7 @@ Path traversal <sup>[3][4]</sup> are not possible.
+ <a href="https://www.w3.org/TR/xslt">w3.org XSL Transformations (XSLT) Version 1.0</a> : w3c specification<br/>
+ [3] <a href="http://projects.webappsec.org/w/page/13246952/Path%20Traversal">WASC: Path Traversal</a><br/>
+ [4] <a href="https://www.owasp.org/index.php/Path_Traversal">OWASP: Path Traversal</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5493,6 +5512,7 @@ Path traversal <sup>[3][4]</sup> are not possible.
+ <a href="https://www.w3.org/TR/xslt">w3.org XSL Transformations (XSLT) Version 1.0</a> : w3c specification<br/>
+ [3] <a href="http://projects.webappsec.org/w/page/13246952/Path%20Traversal">WASC: Path Traversal</a><br/>
+ [4] <a href="https://www.owasp.org/index.php/Path_Traversal">OWASP: Path Traversal</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5744,6 +5764,7 @@ prefer logic-less template engines such as Handlebars or Moustache (See referenc
+ <b>References</b><br/>
+ <a href="https://blog.portswigger.net/2015/08/server-side-template-injection.html">PortSwigger: Server-Side Template Injection </a><br/>
+ <a href="https://jknack.github.io/handlebars.java/">Handlebars.java</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5781,6 +5802,7 @@ prefer logic-less template engines such as Handlebars or Moustache (See referenc
+ <b>References</b><br/>
+ <a href="https://portswigger.net/research/server-side-template-injection">PortSwigger: Server-Side Template Injection</a><br/>
+ <a href="https://jknack.github.io/handlebars.java/">Handlebars.java</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5819,6 +5841,7 @@ prefer logic-less template engines such as Handlebars or Moustache (See referenc
+ <a href="https://research.securitum.com/server-side-template-injection-on-the-example-of-pebble/">Server Side Template Injection – on the example of Pebble</a> by Michał Bentkowski<br/>
+ <a href="https://portswigger.net/research/server-side-template-injection">PortSwigger: Server-Side Template Injection</a><br/>
+ <a href="https://jknack.github.io/handlebars.java/">Handlebars.java</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5854,6 +5877,7 @@ Avoid using * as the value of the Access-Control-Allow-Origin header, which indi
+ <b>References</b><br/>
+ <a href="https://www.w3.org/TR/cors/">W3C Cross-Origin Resource Sharing</a><br/>
+ <a href="https://enable-cors.org/">Enable Cross-Origin Resource Sharing</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/942.html">CWE-942: Permissive Cross-domain Policy with Untrusted Domains</a><br/>
+ </p>]]>
+         </Details>
+     </BugPattern>
+@@ -5950,6 +5974,7 @@ ctx.search(query, filter,
+ (<a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf">slides</a> &amp; <a href="https://www.youtube.com/watch?v=Y8a5nB-vy78">video</a>) by Alvaro Mu&#xF1;oz and Oleksandr Mirosh<br/>
+ <a href="https://community.hpe.com/t5/Security-Research/Introducing-JNDI-Injection-and-LDAP-Entry-Poisoning/ba-p/6885118">HP Enterprise: Introducing JNDI Injection and LDAP Entry Poisoning</a> by Alvaro Mu&#xF1;oz<br/>
+ <a href="http://blog.trendmicro.com/trendlabs-security-intelligence/new-headaches-how-the-pawn-storm-zero-day-evaded-javas-click-to-play-protection/">TrendMicro: How The Pawn Storm Zero-Day Evaded Java's Click-to-Play Protection</a> by Jack Tang
++<a href="https://cwe.mitre.org/data/definitions/90.html">CWE-90: Improper Neutralization of Special Elements used in an LDAP Query ('LDAP Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -6034,6 +6059,7 @@ Avoid using those methods. If you are looking to encode a URL String or form par
+ <p>
+ <b>References</b><br/>
+ <a href="https://www.owasp.org/index.php/Top_10_2010-A3-Broken_Authentication_and_Session_Management">OWASP Top 10 2010-A3-Broken Authentication and Session Management</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/601.html">CWE-601: URL Redirection to Untrusted Site ('Open Redirect')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -6349,6 +6375,7 @@ HttpGet httpget = new HttpGet(uriBuilder.build().toString()); //OK
+ <p>
+ <b>References</b><br/>
+ <a href="https://capec.mitre.org/data/definitions/460.html">CAPEC-460: HTTP Parameter Pollution (HPP)</a>
++<a href="https://cwe.mitre.org/data/definitions/235.html">CWE-235: Improper Handling of Extra Parameters</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -6407,7 +6434,7 @@ The sensitive information may be valuable information on its own (such as a pass
+         <Details>
+             <![CDATA[
+ <p>
+-Simple Mail Transfer Protocol (SMTP) is a the text based protocol used for email delivery.
++Simple Mail Transfer Protocol (SMTP) is a text based protocol used for email delivery.
+ Like with HTTP, headers are separate by new line separator.
+ If user input is place in a header line, the application should remove
+ or replace new line characters (<code>CR</code> / <code>LF</code>).
+@@ -6596,8 +6623,8 @@ If the file affected is a configuration, a binary, a script or sensitive data, i
+ </p>
+ <p>
+ It is possible that another service, running on the same host as your application, gets compromised.
+-Services typically run under a different user. A compromised service account could be use to read your configuration, add execution instruction to scripts or alter the data file.
+-To limite the damage from other services or local users, you should limited to permission of your application files.
++Services typically run under a different user. A compromised service account could be used to read your configuration, add execution instruction to scripts or alter the data file.
++To limite the damage from other services or local users, you should limit the permission of your application files.
+ </p>
+ 
+ <p>
+@@ -6685,7 +6712,7 @@ if(username.toUpperCase().equals("ADMIN")) {
+ </p>
+ 
+ <p>
+-Similar characters transformations can occurs with normalization functions.
++Similar characters transformations can occur with normalization functions.
+ In the code bellow, the string <code>"BAC\u212AUP"</code> would cause the condition to be true.
+ When the normalization transformation is applied, the character `\u212A` will become '\u004B' (K).<br/>
+ <pre>
+@@ -6751,6 +6778,8 @@ if (matcher.find()) {
+ <p>
+ <b>References</b><br/>
+ <a href="https://wiki.sei.cmu.edu/confluence/display/java/IDS11-J.+Perform+any+string+modifications+before+validation">CERT: IDS11-J. Perform any string modifications before validation</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/179.html">CWE-179: Incorrect Behavior Order: Early Validation</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/182.html">CWE-182: Collapse of Data into Unsafe Value</a><br/>
+ </p>
+ 
+             ]]>
+@@ -6763,15 +6792,15 @@ if (matcher.find()) {
+         <Details>Identify string normalization after validation and not before it.</Details>
+     </Detector>
+     <BugPattern type="NORMALIZATION_AFTER_VALIDATION">
+-        <ShortDescription>String is normalzied after validation and not before it</ShortDescription>
+-        <LongDescription>String is normalzied after validation and not before it. Tricky attackers may pass malicious strings which bypass validation.</LongDescription>
++        <ShortDescription>String is normalized after validation and not before it</ShortDescription>
++        <LongDescription>String is normalized after validation and not before it. Tricky attackers may pass malicious strings which bypass validation.</LongDescription>
+         <Details>
+             <![CDATA[
+ <p>
+ A string must not be normalized after validation because it may allow an attacker to bypass validation using a tricky
+ string which becomes malicious after the normalization. For example, a program may filter out the &langle;script&rangle; tags from
+ HTML input to avoid cross-site scripting (XSS) and other vulnerabilities. However, in unicode, the same string can have
+-many different representations. For example, \uFE64 is normalized to &langle; and \uFE65 is normalized to &rangle;. Thus the
++many different representations. For example, \uFE64 is normalized to &langle; and \uFE65 is normalized to &rangle;. Thus,
+ if an attacker passes the string "\uFE64" + "script" + "\uFE65" the validation check fails to detect the &langle;script&rangle; tag,
+ but thereafter the string is normalized to the &langle;script&rangle; tag in the input:
+ <pre>
+@@ -6800,6 +6829,9 @@ if (matcher.find()) {
+ <p>
+ <b>References</b><br/>
+ <a href="https://wiki.sei.cmu.edu/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">CERT: IDS01-J. Normalize strings before validating them</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/179.html">CWE-179: Incorrect Behavior Order: Early Validation</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/180.html">CWE-180: Incorrect Behavior Order: Validate Before Canonicalize</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/289.html">CWE-289: Authentication Bypass by Alternate Name</a><br/>
+ </p>
+ 
+             ]]>
+@@ -6845,6 +6877,7 @@ pc.add(new RuntimePermission("createClassLoader"));
+ 
+ <p>References</b><br>
+ <a href="https://wiki.sei.cmu.edu/confluence/display/java/ENV03-J.+Do+not+grant+dangerous+combinations+of+permissions">CERT: ENV03-J. Do not grant dangerous combinations of permissions</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/732.html">CWE-732: Incorrect Permission Assignment for Critical Resource</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -6861,7 +6894,7 @@ pc.add(new RuntimePermission("createClassLoader"));
+         <![CDATA[
+ <p>
+ Unsafe strings (e.g. from a user input) may contain XML tags. If such a string is inserted into an XML document then it
+-may change its structure to a valid but semanticallly different document. To prevent this unsafe strings must b
++may change its structure to a valid but semantically different document. To prevent this unsafe strings must b
+ sanitized first.
+ </p>
+ 
+diff --git a/metadata/messages_ja.xml m/metadata/messages_ja.xml
+index 68035cfb38c4dc35596af92794075bda13867cad..3d7e2d86da5ab01358478be8c937d58fa171f3e7 100644
+--- a/metadata/messages_ja.xml
++++ m/metadata/messages_ja.xml
+@@ -898,6 +898,7 @@ Tapestry アプリケーションは，各ページのバッキング Java ク
+ <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf">NIST: Recommendation for Password-Based Key Derivation</a><br/>
+ <a href="https://stackoverflow.com/q/22580853/89769">Stackoverflow: Reliable implementation of PBKDF2-HMAC-SHA256 for Java</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a>
++<a href="https://cwe.mitre.org/data/definitions/328.html">CWE-328: Use of Weak Hash</a>
+ </p>
+ ]]>
+         </Details>
+@@ -965,6 +966,7 @@ Tapestry アプリケーションは，各ページのバッキング Java ク
+ <a href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf">NIST: Recommendation for Password-Based Key Derivation</a><br/>
+ <a href="https://stackoverflow.com/q/22580853/89769">Stackoverflow: Reliable implementation of PBKDF2-HMAC-SHA256 for Java</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a>
++<a href="https://cwe.mitre.org/data/definitions/328.html">CWE-328: Use of Weak Hash</a>
+ </p>
+ ]]>
+         </Details>
+@@ -1127,7 +1129,6 @@ sha256Digest.update(password.getBytes());</pre>
+ <a href="http://projects.webappsec.org/w/page/13246952/Path%20Traversal">WASC-33: Path Traversal</a><br/>
+ <a href="https://www.owasp.org/index.php/Path_Traversal">OWASP: Path Traversal</a><br/>
+ <a href="https://capec.mitre.org/data/definitions/126.html">CAPEC-126: Path Traversal</a><br/>
+-<a href="https://cwe.mitre.org/data/definitions/22.html">CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')</a>
+ </p>
+ ]]>
+         </Details>
+@@ -2762,6 +2763,7 @@ public void getUserProperty(String property) {
+     <a href="https://blog.gdssecurity.com/labs/2017/3/27/an-analysis-of-cve-2017-5638.html">Gotham Digital Science: An Analysis Of CVE-2017-5638</a><br/>
+     <a href="https://struts.apache.org/docs/s2-016.html">Apache Struts2: Vulnerability S2-016</a><br/>
+     <a href="https://struts.apache.org/docs/ognl.html">Apache Struts 2 Documentation: OGNL</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -2769,6 +2771,47 @@ public void getUserProperty(String property) {
+     <BugCode abbrev="SECOGNL">OGNL 式インジェクション</BugCode>
+ 
+ 
++    <!-- Groovy Shell injection -->
++    <Detector class="com.h3xstream.findsecbugs.groovy.GroovyShellDetector">
++        <Details>Identify GroovyShell injection</Details>
++    </Detector>
++
++    <BugPattern type="GROOVY_SHELL">
++        <ShortDescription>Potential code injection when using GroovyShell</ShortDescription>
++        <LongDescription>Potential code injection when using GroovyShell</LongDescription>
++        <Details>
++            <![CDATA[
++<p>
++    A expression is built with a dynamic value. The source of the value(s) should be verified to avoid
++    that unfiltered values fall into this risky code evaluation.
++</p>
++<p><b>Code at risk:</b></p>
++<p>
++<pre>
++public void evaluateScript(String script) {
++  GroovyShell shell = new GroovyShell();
++  shell.evaluate(script);
++}
++</pre>
++</p>
++<p><b>Solution:</b></p>
++<p>
++In general, method evaluating Groovy expression should not receive user input from low privilege users.
++</p>
++<br/>
++<p>
++    <b>References</b><br/>
++    <a href="https://blog.orange.tw/2019/02/abusing-meta-programming-for-unauthenticated-rce.html">Hacking Jenkins Part 2 - Abusing Meta Programming for Unauthenticated RCE!</a> by Orange Tsai<br/>
++    <a href="https://github.com/orangetw/awesome-jenkins-rce-2019">Jenkins RCE payloads</a> by Orange Tsai<br/>
++    <a href="https://github.com/adamyordan/cve-2019-1003000-jenkins-rce-poc">POC for CVE-2019-1003001</a> by Adam Jordan<br/>
++    <a href="https://github.com/welk1n/exploiting-groovy-in-Java/">Various payloads of exploiting Groovy code evaluation</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
++</p>
++]]>
++        </Details>
++    </BugPattern>
++    <BugCode abbrev="SECGROSH">GroovyShell expression injection</BugCode>
++
+     <!-- HTTP Response Splitting -->
+     <Detector class="com.h3xstream.findsecbugs.HttpResponseSplittingDetector">
+         <Details>HTTP レスポンス分割の弱点を検索します。</Details>
+@@ -2965,6 +3008,7 @@ return stringBuilder.toString();</pre>
+ <a href="http://projects.webappsec.org/w/page/13246945/Insufficient%20Transport%20Layer%20Protection">WASC-04: Insufficient Transport Layer Protection</a><br/>
+ <a href="https://docs.hazelcast.org/docs/3.5/manual/html/encryption.html">Hazelcast Documentation: Encryption</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/326.html">CWE-326: Inadequate Encryption Strength</a>
++<a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a>
+ </p>
+ ]]>
+         </Details>
+@@ -3114,6 +3158,7 @@ byte[] cipherText = c.doFinal(plainText);</pre>
+ <b>参考文献</b><br/>
+ <a href="https://www.nist.gov/news-events/news/2005/06/nist-withdraws-outdated-data-encryption-standard">NIST Withdraws Outdated Data Encryption Standard</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/326.html">CWE-326: Inadequate Encryption Strength</a>
++<a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a>
+ </p>
+ ]]>
+         </Details>
+@@ -3845,6 +3890,7 @@ class UserController {
+ <b>参考文献</b><br/>
+ <a href="https://resources.infosecinstitute.com/file-inclusion-attacks/">InfosecInstitute: File Inclusion Attacks</a><br/>
+ <a href="http://projects.webappsec.org/w/page/13246955/Remote%20File%20Inclusion">WASC-05: Remote File Inclusion</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/917.html">CWE-917: Improper Neutralization of Special Elements used in an Expression Language Statement ('Expression Language Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -3883,6 +3929,7 @@ class UserController {
+ <b>参考文献</b><br/>
+     <a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+     <a href="https://cwe.mitre.org/data/definitions/95.html">CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/917.html">CWE-917: Improper Neutralization of Special Elements used in an Expression Language Statement ('Expression Language Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -4077,6 +4124,7 @@ try {
+ <a href="http://blog.diniscruz.com/2013/08/using-xmldecoder-to-execute-server-side.html">Dinis Cruz Blog: Using XMLDecoder to execute server-side Java Code on an Restlet application</a><br/>
+ <a href="https://securityblog.redhat.com/2014/01/23/java-deserialization-flaws-part-2-xml-deserialization/">RedHat blog : Java deserialization flaws: Part 2, XML deserialization</a><br/>
+ <a href="https://cwe.mitre.org/data/definitions/20.html">CWE-20: Improper Input Validation</a>
++<a href="https://cwe.mitre.org/data/definitions/502.html">CWE-502: Deserialization of Untrusted Data</a>
+ </p>
+             ]]>
+         </Details>
+@@ -4167,6 +4215,7 @@ byte[] cipherText = c.doFinal(plainText);</pre>
+ <a href="https://csrc.nist.gov/projects/block-cipher-techniques/bcm/modes-develoment#01">NIST: Authenticated Encryption Modes</a><br/>
+ <a href="https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation#Electronic_codebook_.28ECB.29">Wikipedia: Block cipher modes of operation</a><br/>
+ <a href="https://csrc.nist.gov/publications/detail/sp/800-38a/final">NIST: Recommendation for Block Cipher Modes of Operation</a>
++<a href="https://cwe.mitre.org/data/definitions/327.html">CWE-327: Use of a Broken or Risky Cryptographic Algorithm</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -4205,6 +4254,7 @@ byte[] cipherText = c.doFinal(plainText);</pre>
+     <a href="https://csrc.nist.gov/projects/block-cipher-techniques/bcm/modes-develoment#01">NIST: Authenticated Encryption Modes</a><br/>
+     <a href="https://capec.mitre.org/data/definitions/463.html">CAPEC: Padding Oracle Crypto Attack</a><br/>
+     <a href="https://cwe.mitre.org/data/definitions/696.html">CWE-696: Incorrect Behavior Order</a>
++    <a href="https://cwe.mitre.org/data/definitions/326.html">CWE-326: Inadequate Encryption Strength</a>
+ </p>
+ ]]>
+         </Details>
+@@ -4394,6 +4444,7 @@ fos.write(string.getBytes());
+     <a href="https://www.securecoding.cert.org/confluence/display/java/DRD00-J.+Do+not+store+sensitive+information+on+external+storage+%28SD+card%29+unless+encrypted+first">CERT: DRD00-J: Do not store sensitive information on external storage [...]</a><br/>
+     <a href="https://developer.android.com/guide/topics/data/data-storage.html#filesExternal">Android Official Doc: Using the External Storage</a><br/>
+     <a href="https://www.owasp.org/index.php/Mobile_Top_10_2014-M2">OWASP Mobile Top 10 2014-M2: Insecure Data Storage</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/276.html">CWE-276: Incorrect Default Permissions</a>
+     <a href="https://cwe.mitre.org/data/definitions/312.html">CWE-312: Cleartext Storage of Sensitive Information</a>
+ </p>
+ ]]>
+@@ -4477,6 +4528,7 @@ sendBroadcast(v1);
+     <a href="https://developer.android.com/reference/android/content/BroadcastReceiver.html#Security">Android Official Doc: BroadcastReceiver (Security)</a><br/>
+     <a href="https://developer.android.com/guide/topics/manifest/receiver-element.html">Android Official Doc: Receiver configuration (see <code>android:permission</code>)</a><br/>
+     <sup>[1]</sup> <a href="https://stackoverflow.com/a/21513368/89769">StackOverflow: How to set permissions in broadcast sender and receiver in android</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/276.html">CWE-276: Incorrect Default Permissions</a><br/>
+     <a href="https://cwe.mitre.org/data/definitions/925.html">CWE-925: Improper Verification of Intent by Broadcast Receiver</a><br/>
+     <a href="https://cwe.mitre.org/data/definitions/927.html">CWE-927: Use of Implicit Intent for Sensitive Communication</a>
+ </p>
+@@ -4527,6 +4579,7 @@ fos = openFileOutput(filename, MODE_PRIVATE);
+     <a href="https://www.vogella.com/tutorials/AndroidSQLite/article.html#databasetutorial_database">vogella.com: Android SQLite database and content provider - Tutorial</a><br/>
+     <a href="https://www.vogella.com/tutorials/AndroidSQLite/article.html#databasetutorial_database">vogella.com: Android SQLite database and content provider - Tutorial</a><br/>
+     <a href="https://www.owasp.org/index.php/Mobile_Top_10_2014-M2">OWASP Mobile Top 10 2014-M2: Insecure Data Storage</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/276.html">CWE-276: Incorrect Default Permissions</a>
+     <a href="https://cwe.mitre.org/data/definitions/312.html">CWE-312: Cleartext Storage of Sensitive Information</a>
+ </p>
+ ]]>
+@@ -4579,6 +4632,7 @@ webView.setWebChromeClient(new WebChromeClient() {
+     <a href="https://www.securecoding.cert.org/confluence/display/java/DRD15-J.+Consider+privacy+concerns+when+using+Geolocation+API">CERT: DRD15-J. Consider privacy concerns when using Geolocation API</a><br/>
+     <a href="https://en.wikipedia.org/wiki/W3C_Geolocation_API">Wikipedia: W3C Geolocation API</a><br/>
+     <a href="https://w3c.github.io/geolocation-api/">W3C: Geolocation Specification</a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/359.html">CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</a>
+ </p>
+ ]]>
+         </Details>
+@@ -4672,6 +4726,7 @@ class FileWriteUtil {
+ <p>
+     <b>参考文献</b><br/>
+     <a href="https://developer.android.com/reference/android/webkit/WebView.html#addJavascriptInterface%28java.lang.Object,%20java.lang.String%29">Android Official Doc: <code>WebView.addJavascriptInterface()</code></a><br/>
++    <a href="https://cwe.mitre.org/data/definitions/285.html">CWE-285: Improper Authorization</a>
+     <a href="https://cwe.mitre.org/data/definitions/749.html">CWE-749: Exposed Dangerous Method or Function</a>
+ </p>
+ ]]>
+@@ -4788,6 +4843,7 @@ cookie.setHttpOnly(true); //HttpOnly flag
+ <a href="https://blog.codinghorror.com/protecting-your-cookies-httponly/">Coding Horror blog: Protecting Your Cookies: HttpOnly</a><br/>
+ <a href="https://www.owasp.org/index.php/HttpOnly">OWASP: HttpOnly</a><br/>
+ <a href="https://www.rapid7.com/db/vulnerabilities/http-cookie-http-only-flag">Rapid7: Missing HttpOnly Flag From Cookie</a>
++<a href="https://cwe.mitre.org/data/definitions/1004.html">CWE-1004: Sensitive Cookie Without 'HttpOnly' Flag</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -4901,6 +4957,7 @@ public class Example {
+ <b>参考文献</b><br/>
+ <a href="https://github.com/FasterXML/jackson-databind/issues/1599">Jackson Deserializer security vulnerability</a><br>
+ <a href="https://github.com/mbechler/marshalsec">Java Unmarshaller Security - Turning your data into code execution</a><br>
++<a href="https://cwe.mitre.org/data/definitions/502.html">CWE-502: Deserialization of Untrusted Data</a><br/>
+ </p>
+ ]]>
+         </Details>
+@@ -5032,6 +5089,7 @@ public void loginEvent(HttpServletRequest req, String userSubmitted) {
+ <a href="https://www.w3.org/TR/xslt">w3.org XSL Transformations (XSLT) Version 1.0</a> : w3c specification<br/>
+ [3] <a href="http://projects.webappsec.org/w/page/13246952/Path%20Traversal">WASC: Path Traversal</a><br/>
+ [4] <a href="https://www.owasp.org/index.php/Path_Traversal">OWASP: Path Traversal</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5089,6 +5147,7 @@ Transformer transformer = factory.newTransformer(xslt);
+ <a href="https://www.w3.org/TR/xslt">w3.org XSL Transformations (XSLT) Version 1.0</a> : w3c specification<br/>
+ [3] <a href="http://projects.webappsec.org/w/page/13246952/Path%20Traversal">WASC: Path Traversal</a><br/>
+ [4] <a href="https://www.owasp.org/index.php/Path_Traversal">OWASP: Path Traversal</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5333,6 +5392,7 @@ Velocity.evaluate(context, swOut, "test", userInput);</pre>
+ <b>参考文献</b><br/>
+ <a href="https://blog.portswigger.net/2015/08/server-side-template-injection.html">PortSwigger: Server-Side Template Injection </a><br/>
+ <a href="https://jknack.github.io/handlebars.java/">Handlebars.java</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5370,6 +5430,7 @@ template.process(data, swOut);</pre>
+ <b>参考文献</b><br/>
+ <a href="https://portswigger.net/research/server-side-template-injection">PortSwigger: Server-Side Template Injection</a><br/>
+ <a href="https://jknack.github.io/handlebars.java/">Handlebars.java</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5408,6 +5469,7 @@ compiledTemplate.evaluate(writer, context);</pre>
+ <a href="https://research.securitum.com/server-side-template-injection-on-the-example-of-pebble/">Server Side Template Injection ? on the example of Pebble</a> by Micha? Bentkowski<br/>
+ <a href="https://portswigger.net/research/server-side-template-injection">PortSwigger: Server-Side Template Injection</a><br/>
+ <a href="https://jknack.github.io/handlebars.java/">Handlebars.java</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/94.html">CWE-94: Improper Control of Generation of Code ('Code Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5445,6 +5507,7 @@ Access Control-Allow-Origin ヘッダーの値としてワイルドカード (*)
+ <b>参考文献</b><br/>
+ <a href="https://www.w3.org/TR/cors/">W3C Cross-Origin Resource Sharing</a><br/>
+ <a href="https://enable-cors.org/">Enable Cross-Origin Resource Sharing</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/942.html">CWE-942: Permissive Cross-domain Policy with Untrusted Domains</a><br/>
+ </p>]]>
+         </Details>
+     </BugPattern>
+@@ -5539,6 +5602,7 @@ ctx.search(query, filter,
+ (<a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE.pdf">slides</a> &amp; <a href="https://www.youtube.com/watch?v=Y8a5nB-vy78">video</a>) by Alvaro Mu&#xF1;oz and Oleksandr Mirosh<br/>
+ <a href="https://community.hpe.com/t5/Security-Research/Introducing-JNDI-Injection-and-LDAP-Entry-Poisoning/ba-p/6885118">HP Enterprise: Introducing JNDI Injection and LDAP Entry Poisoning</a> by Alvaro Mu&#xF1;oz<br/>
+ <a href="http://blog.trendmicro.com/trendlabs-security-intelligence/new-headaches-how-the-pawn-storm-zero-day-evaded-javas-click-to-play-protection/">TrendMicro: How The Pawn Storm Zero-Day Evaded Java's Click-to-Play Protection</a> by Jack Tang
++<a href="https://cwe.mitre.org/data/definitions/90.html">CWE-90: Improper Neutralization of Special Elements used in an LDAP Query ('LDAP Injection')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5625,6 +5689,7 @@ URL のセッション ID は，さまざまな方法で公開できます。た
+ <p>
+ <b>参考文献</b><br/>
+ <a href="https://www.owasp.org/index.php/Top_10_2010-A3-Broken_Authentication_and_Session_Management">OWASP Top 10 2010-A3-Broken Authentication and Session Management</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/601.html">CWE-601: URL Redirection to Untrusted Site ('Open Redirect')</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -5936,6 +6001,7 @@ HTTP パラメーターで使用する前にユーザー入力をエスケープ
+ <p>
+ <b>参考文献</b><br/>
+ <a href="https://capec.mitre.org/data/definitions/460.html">CAPEC-460: HTTP Parameter Pollution (HPP)</a>
++<a href="https://cwe.mitre.org/data/definitions/235.html">CWE-235: Improper Handling of Extra Parameters</a><br/>
+ </p>
+             ]]>
+         </Details>
+@@ -6246,4 +6312,248 @@ perms.add(PosixFilePermission.GROUP_EXECUTE);
+     </BugPattern>
+     <BugCode abbrev="SECOPFP">過剰に許可されたファイルパーミッション</BugCode>
+ 
++    <!-- Improper handling of Unicode transformation -->
++    <Detector class="com.h3xstream.findsecbugs.ImproperHandlingUnicodeDetector">
++        <Details>Identify improper handling of Unicode transformations (case mapping and normalization).</Details>
++    </Detector>
++    <BugPattern type="IMPROPER_UNICODE">
++        <ShortDescription>Improper handling of Unicode transformations</ShortDescription>
++        <LongDescription>Improper handling of Unicode transformations such as case mapping and normalization.</LongDescription>
++        <Details>
++            <![CDATA[
++<p>
++Unexpected behavior in unicode transformations can sometimes lead to bugs, some of them affecting software security.
++A code that applies the uppercase transformation to two strings could mistakenly interpret both strings as being equal.
++</p>
++
++<p>
++In the code bellow, the string <code>"ADM\u0131N"</code> would cause the condition to be true.
++When the uppercase transformation is applied, the character `\u0131` will become '\u0049' (I).
++It can be an issue if the developer only one user to be <code>"ADMIN"</code>.<br/>
++<pre>
++if(username.toUpperCase().equals("ADMIN")) {
++  //...
++}
++</pre>
++</p>
++
++<p>
++Similar characters transformations can occur with normalization functions.
++In the code bellow, the string <code>"BAC\u212AUP"</code> would cause the condition to be true.
++When the normalization transformation is applied, the character `\u212A` will become '\u004B' (K).<br/>
++<pre>
++if(Normalizer.normalize(input, Normalizer.Form.NFC).equals("BACKUP")) {
++  //...
++}
++</pre>
++</p>
++
++<p>
++<b>References</b><br/>
++<a href="https://www.gosecure.net/blog/2020/08/04/unicode-for-security-professionals/">Unicode for Security Professionals</a><br/>
++<a href="http://websec.github.io/unicode-security-guide/character-transformations/">Unicode Security Guide: Character Transformations</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/176.html">CWE-176: Improper Handling of Unicode Encoding</a><br/>
++<a href="http://unicode.org/reports/tr36/">Unicode: Unicode Security Considerations</a><br/>
++</p>
++
++            ]]>
++        </Details>
++    </BugPattern>
++    <BugCode abbrev="SECUNI">Improper handling of Unicode transformations</BugCode>
++
++    <!-- Perform any string modifications before validation -->
++    <Detector class="com.h3xstream.findsecbugs.ModificationAfterValidationDetector">
++        <Details>Identify string modifications after validation and not before it.</Details>
++    </Detector>
++    <BugPattern type="MODIFICATION_AFTER_VALIDATION">
++        <ShortDescription>String is modified after validation and not before it</ShortDescription>
++        <LongDescription>String is modified after validation and not before it. Tricky attackers may pass malicious strings which bypass validation.</LongDescription>
++        <Details>
++            <![CDATA[
++<p>
++A string must not be modified after validation because it may allow an attacker to bypass validation using a tricky
++string which becomes malicious after the modification. For example, a program may filter out the &langle;script&rangle; tags from
++HTML input to avoid cross-site scripting (XSS) and other vulnerabilities. If non-character code points  are deleted
++from the input following validation, an attacker may pass the string "&langle;scr"+"\uFDEF"+"ipt&rangle;" so that the validation
++check fails to detect the &langle;script&rangle; tag, but the subsequent removal of the non-character code pont creates a &langle;script&rangle;
++tag in the input:
++<pre>
++Pattern pattern = Pattern.compile("&lt;script&gt;");
++Matcher matcher = pattern.matcher(s);
++if (matcher.find()) {
++  throw new IllegalArgumentException("Invalid input");
++}
++
++s = s.replaceAll("[\\p{Cn}]", "");
++</pre>
++</p>
++
++<p>
++The proper way is to perform the modification before the validation so the passed string is first changed to &langle;script&rangle;
++which fails to be validated:
++<pre>
++s = s.replaceAll("[\\p{Cn}]", "\uFFFD");
++Pattern pattern = Pattern.compile("&lt;script&gt;");
++Matcher matcher = pattern.matcher(s);
++if (matcher.find()) {
++  throw new IllegalArgumentException("Invalid input");
++}
++</pre>
++</p>
++
++<p>
++<b>References</b><br/>
++<a href="https://wiki.sei.cmu.edu/confluence/display/java/IDS11-J.+Perform+any+string+modifications+before+validation">CERT: IDS11-J. Perform any string modifications before validation</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/179.html">CWE-179: Incorrect Behavior Order: Early Validation</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/180.html">CWE-180: Incorrect Behavior Order: Validate Before Canonicalize</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/289.html">CWE-289: Authentication Bypass by Alternate Name</a><br/>
++</p>
++
++            ]]>
++        </Details>
++    </BugPattern>
++    <BugCode abbrev="SECMOD">String if modified after validation and not before it</BugCode>
++
++    <!-- Normalize strings before validating them -->
++    <Detector class="com.h3xstream.findsecbugs.NormalizationAfterValidationDetector">
++        <Details>Identify string normalization after validation and not before it.</Details>
++    </Detector>
++    <BugPattern type="NORMALIZATION_AFTER_VALIDATION">
++        <ShortDescription>String is normalized after validation and not before it</ShortDescription>
++        <LongDescription>String is normalized after validation and not before it. Tricky attackers may pass malicious strings which bypass validation.</LongDescription>
++        <Details>
++            <![CDATA[
++<p>
++A string must not be normalized after validation because it may allow an attacker to bypass validation using a tricky
++string which becomes malicious after the normalization. For example, a program may filter out the &langle;script&rangle; tags from
++HTML input to avoid cross-site scripting (XSS) and other vulnerabilities. However, in unicode, the same string can have
++many different representations. For example, \uFE64 is normalized to &langle; and \uFE65 is normalized to &rangle;. Thus,
++if an attacker passes the string "\uFE64" + "script" + "\uFE65" the validation check fails to detect the &langle;script&rangle; tag,
++but thereafter the string is normalized to the &langle;script&rangle; tag in the input:
++<pre>
++Pattern pattern = Pattern.compile("[<>]"); // Check for angle brackets
++Matcher matcher = pattern.matcher(s);
++if (matcher.find()) {
++  throw new IllegalStateException();
++}
++s = Normalizer.normalize(s, Form.NFKC);
++</pre>
++</p>
++
++<p>
++The proper way is to do the normalization before the validation so the passed string is first changed to &langle;script&rangle;
++which fails to be validated:
++<pre>
++s = Normalizer.normalize(s, Form.NFKC);
++Pattern pattern = Pattern.compile("[<>]");
++Matcher matcher = pattern.matcher(s);
++if (matcher.find()) {
++  throw new IllegalStateException();
++}
++</pre>
++</p>
++
++<p>
++<b>References</b><br/>
++<a href="https://wiki.sei.cmu.edu/confluence/display/java/IDS01-J.+Normalize+strings+before+validating+them">CERT: IDS01-J. Normalize strings before validating them</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/179.html">CWE-179: Incorrect Behavior Order: Early Validation</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/182.html">CWE-182: Collapse of Data into Unsafe Value</a><br/>
++</p>
++
++            ]]>
++        </Details>
++    </BugPattern>
++    <BugCode abbrev="SECNORM">Normalize strings before validating them</BugCode>
++
++    <Detector class="com.h3xstream.findsecbugs.DangerousPermissionCombination">
++        <Details>Detector for patterns where combination of dangerous permissions are granted.</Details>
++    </Detector>
++    <BugPattern type="DANGEROUS_PERMISSION_COMBINATION">
++        <ShortDescription>Dangerous combination of permissions granted</ShortDescription>
++        <LongDescription>Granting permission {2} on the target {3} in method {1} is dangerous.</LongDescription>
++        <Details>
++            <![CDATA[
++<p>
++Certain combinations of permissions can produce significant capability increases and should not be granted. Granting
++ReflectPermission on the target suppressAccessChecks is dangerous in that information (possibly confidential) and
++methods normally unavailable would be accessible to malicious code. Similarly, the permission
++<code>java.lang.RuntimePermission</code> applied to target createClassLoader grants code the permission to create a
++<code>ClassLoader</code> object.
++This is extremely dangerous, because malicious applications that can instantiate their own class loaders could
++then load their own rogue classes into the system. These newly loaded classes could be placed into any protection
++domain by the class loader, thereby automatically granting the classes the permissions for that domain.
++</p>
++
++
++<p>
++<b>Dangerous permission combinations:</b><br/>
++
++<pre>
++PermissionCollection pc = super.getPermissions(cs);
++pc.add(new ReflectPermission("suppressAccessChecks"));
++</pre>
++<br/>
++
++<pre>
++PermissionCollection pc = super.getPermissions(cs);
++pc.add(new RuntimePermission("createClassLoader"));
++</pre>
++</p>
++
++
++<p>References</b><br>
++<a href="https://wiki.sei.cmu.edu/confluence/display/java/ENV03-J.+Do+not+grant+dangerous+combinations+of+permissions">CERT: ENV03-J. Do not grant dangerous combinations of permissions</a><br/>
++<a href="https://cwe.mitre.org/data/definitions/732.html">CWE-732: Incorrect Permission Assignment for Critical Resource</a><br/>
++</p>
++            ]]>
++        </Details>
++    </BugPattern>
++    <BugCode abbrev="SECPERM">Dangerous Permission Combination</BugCode>
++
++    <Detector class="com.h3xstream.findsecbugs.injection.xml.XmlInjectionDetector">
++        <Details>Detector for unsafe strings potentially inserted into an XML string.</Details>
++    </Detector>
++    <BugPattern type="POTENTIAL_XML_INJECTION">
++        <ShortDescription>An unsafe string is potentially injected into an XML string</ShortDescription>
++        <LongDescription>{3} is potentially injected into an XML string in method {1}.</LongDescription>
++        <Details>
++            <![CDATA[
++<p>
++Unsafe strings (e.g. from a user input) may contain XML tags. If such a string is inserted into an XML document then it
++may change its structure to a valid but semantically different document. To prevent this unsafe strings must b
++sanitized first.
++</p>
++
++<p>
++<b>Example:</b><br/>
++
++An XML document may look like this:<br/>
++
++<pre>
++&langle;product&rangle;
++    &langle;name&rangle;Cell Phone&langle;/name&rangle;
++    &langle;price&rangle;800&langle;/price&rangle;
++    &langle;amount&rangle;1&langle;/amount&rangle;
++&langle;/product&rangle;
++</pre>
++<br/>
++
++An attacker may put the following string to the field "amount":<br/>
++
++<pre>
++1&langle;/amount&rangle;&langle;price&rangle;1&langle;/price&rangle;&langle;amount&rangle;1
++</pre>
++<br/>
++
++If the XML parser works in a way that the second price overwrites the first one then the attacker may buy the cell
++phone for 1 singe dollar.
++</p>
++
++<p>References</b><br>
++<a href="https://wiki.sei.cmu.edu/confluence/display/java/IDS16-J.+Prevent+XML+Injection">IDS16-J. Prevent XML Injection</a><br/>
++</p>
++        ]]>
++        </Details>
++    </BugPattern>
++    <BugCode abbrev="SECXML">Potential XML Injection</BugCode>
+ </MessageCollection>
+diff --git a/safe-encoders/other.txt m/safe-encoders/other.txt
+index ff499e8b580091ce0190b8d52f44d155e1d912ae..0dc232db33425eb1e4c6c31b191e1529da3b64dc 100644
+--- a/safe-encoders/other.txt
++++ m/safe-encoders/other.txt
+@@ -37,3 +37,9 @@ com/google/common/escape/Escaper.escape(Ljava/lang/String;)Ljava/lang/String;:0|
+ --HTTPClient
+ org/apache/http/client/utils/URIBuilder.build()Ljava/net/URI;:SAFE
+ org/apache/http/client/utils/URIBuilder.toString()Ljava/lang/String;:SAFE
++
++--Java SQL Statement enquote methods (Java 9+)
++--These methods properly escape SQL literals and identifiers to prevent SQL injection
++java/sql/Statement.enquoteLiteral(Ljava/lang/String;)Ljava/lang/String;:0|+SQL_INJECTION_SAFE
++java/sql/Statement.enquoteIdentifier(Ljava/lang/String;Z)Ljava/lang/String;:0|+SQL_INJECTION_SAFE
++java/sql/Statement.enquoteNCharLiteral(Ljava/lang/String;)Ljava/lang/String;:0|+SQL_INJECTION_SAFE
