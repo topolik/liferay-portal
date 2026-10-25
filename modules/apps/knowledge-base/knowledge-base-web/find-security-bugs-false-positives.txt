@@ -4,7 +4,4 @@ com/liferay/knowledge/base/model/KBTemplateModel.getContent()Ljava/lang/String;:
 com/liferay/knowledge/base/web/internal/portlet/action/AddTempAttachmentMVCActionCommand._toXSSSafeJSON(Ljava/lang/String;)Ljava/lang/String;:0|+XSS_SAFE
 com/liferay/knowledge/base/web/internal/portlet/action/DeleteTempAttachmentMVCActionCommand._toXSSSafeJSON(Ljava/lang/String;)Ljava/lang/String;:0|+XSS_SAFE
 com/liferay/knowledge/base/web/internal/util/KBArticleAssetEntriesUtil.getURL(Ljakarta/servlet/http/HttpServletRequest;Lcom/liferay/portal/kernel/theme/ThemeDisplay;Lcom/liferay/asset/kernel/model/AssetRendererFactory;Lcom/liferay/asset/kernel/model/AssetRenderer;)Ljava/lang/String;:SAFE
-com/liferay/knowledge/base/web/internal/util/KBArticleAssetEntriesUtil.getURL(Ljavax/servlet/http/HttpServletRequest;Lcom/liferay/portal/kernel/theme/ThemeDisplay;Lcom/liferay/asset/kernel/model/AssetRendererFactory;Lcom/liferay/asset/kernel/model/AssetRenderer;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/dao/search/SearchContainer.getEmptyResultsMessage():SAFE@org/apache/jsp/section/view_jsp
-com/liferay/portal/kernel/util/StringUtil.shorten(UNKNOWN,SAFE,""):SAFE@org/apache/jsp/admin/common/article_005fattachments_jsp
-org/apache/jsp/admin/common/edit_005farticle_jsp._getFriendlyURLPrefix(JJ)Ljava/lang/String;:SAFE

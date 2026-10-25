@@ -1,4 +1,3 @@
 com/liferay/portal/workflow/kaleo/internal/upgrade/v1_3_0/BaseUpgradeClassNames.getWhereClause()Ljava/lang/String;:SAFE
-com/liferay/portal/workflow/kaleo/service/persistence/impl/KaleoTaskInstanceTokenFinderImpl.appendOrderByComparator(Lcom/liferay/portal/kernel/util/StringBundler;Ljava/lang/String;Lcom/liferay/portal/kernel/util/OrderByComparator;)V:1,2
 com/liferay/portal/workflow/kaleo/service/persistence/impl/KaleoTaskInstanceTokenFinderImpl.getRoleIds(Lcom/liferay/portal/workflow/kaleo/service/persistence/KaleoTaskInstanceTokenQuery;)Ljava/lang/String;:SAFE
 com/liferay/portal/workflow/kaleo/service/persistence/impl/KaleoTaskInstanceTokenFinderImpl.getSearchByUserRoles(Lcom/liferay/portal/workflow/kaleo/service/persistence/KaleoTaskInstanceTokenQuery;)Ljava/lang/String;:SAFE

@@ -1,1 +1,0 @@
-com/google/api/services/drive/model/File.getExportLinks():SAFE@com/liferay/document/library/opener/google/drive/web/internal/DLOpenerGoogleDriveManagerImpl

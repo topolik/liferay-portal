@@ -1,1 +1,0 @@
-com/liferay/portal/kernel/util/Portal.getCurrentCompleteURL(UNKNOWN):SAFE@com/liferay/saml/internal/servlet/filter/SamlSpSsoFilter

@@ -1,2 +1,0 @@
-com/liferay/commerce/currency/internal/util/CommercePriceFormatterImpl.format(Lcom/liferay/commerce/currency/model/CommerceCurrency;ZLjava/util/Locale;Ljava/math/BigDecimal;)Ljava/lang/String;:SAFE
-com/liferay/commerce/currency/internal/util/CommercePriceFormatterImpl.formatAsRelative(Lcom/liferay/commerce/currency/model/CommerceCurrency;ZLjava/util/Locale;Ljava/math/BigDecimal;)Ljava/lang/String;:SAFE
