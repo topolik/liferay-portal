@@ -88,6 +88,55 @@ com/liferay/portal/kernel/util/URLCodec.encodeURL(Ljava/lang/String;)Ljava/lang/
 com/liferay/portal/kernel/util/URLCodec.encodeURL(Ljava/lang/String;Z)Ljava/lang/String;:1|+CR_ENCODED,+LF_ENCODED,+QUOTE_ENCODED,+LT_ENCODED,+REDIRECT_SAFE
 com/liferay/portal/kernel/util/URLCodec.encodeURL(Ljava/lang/String;Ljava/lang/String;Z)Ljava/lang/String;:2|+CR_ENCODED,+LF_ENCODED,+QUOTE_ENCODED,+LT_ENCODED,+REDIRECT_SAFE
 
+------ TRUST POLICY ------
+
+-- The engine derives these values as tainted, and they are trusted because the portal sets them. Removing any entry adds findings.
+
+-- Theme display paths, portal URL and CDN hosts come from portal configuration and the validated Host header
+com/liferay/portal/kernel/theme/ThemeDisplay.getCDNBaseURL()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getCDNDynamicResourcesHost()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getPathContext()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getPathFriendlyURLPrivateGroup()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getPathFriendlyURLPublic()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getPathImage()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getPathMain()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getPathThemeImages()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getPathThemeSpritemap()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getPortalURL()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getURLSignIn()Ljava/lang/String;:SAFE
+
+-- Locales and language IDs come from portal and site settings and the available locales
+com/liferay/portal/kernel/theme/ThemeDisplay.getLanguageId()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/ThemeDisplay.getSiteDefaultLocale()Ljava/util/Locale;:SAFE
+com/liferay/portal/kernel/util/LocaleUtil.getDefault()Ljava/util/Locale;:SAFE
+com/liferay/portal/kernel/util/LocaleUtil.getSiteDefault()Ljava/util/Locale;:SAFE
+
+-- Portlet IDs, namespaces and configuration URLs are built by the portal from registered portlet names
+com/liferay/portal/kernel/portlet/PortletProviderUtil.getPortletId(Ljava/lang/String;Lcom/liferay/portal/kernel/portlet/PortletProvider$Action;)Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/PortletDisplay.getNamespace()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/PortletDisplay.getRootPortletId()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/PortletDisplay.getURLConfiguration()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/theme/PortletDisplay.getURLConfigurationJS()Ljava/lang/String;:SAFE
+com/liferay/taglib/aui/AUIUtil.getNamespace(Ljakarta/portlet/PortletRequest;Ljakarta/portlet/PortletResponse;)Ljava/lang/String;:SAFE
+com/liferay/taglib/aui/AUIUtil.getNamespace(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
+
+-- Theme output is rendered from developer templates
+com/liferay/portal/kernel/theme/ThemeUtil.include(Ljakarta/servlet/ServletContext;Ljakarta/servlet/http/HttpServletRequest;Ljakarta/servlet/http/HttpServletResponse;Ljava/lang/String;Lcom/liferay/portal/kernel/model/Theme;Z)Ljava/lang/String;:SAFE
+
+-- Portal properties and company preferences are set by administrators
+com/liferay/portal/kernel/util/PrefsPropsUtil.getStringArray(JLjava/lang/String;Ljava/lang/String;)[Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/util/PropsUtil.get(Ljava/lang/String;)Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/util/PropsUtil.get(Ljava/lang/String;Lcom/liferay/portal/kernel/configuration/Filter;)Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/util/PropsUtil.getArray(Ljava/lang/String;)[Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/util/PropsUtil.getProperties(Ljava/lang/String;Z)Ljava/util/Properties;:SAFE
+
+-- SQL comes from the custom SQL files bundled with each module
+com/liferay/util/dao/orm/CustomSQL.get(Ljava/lang/String;)Ljava/lang/String;:SAFE
+
+-- Generated identifiers and tokens
+com/liferay/portal/kernel/util/StringUtil.randomId()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/webserver/WebServerServletTokenUtil.getToken(J)Ljava/lang/String;:SAFE
+
 ------ TAINT HINTS ------
 
 -- Validated against ^[\w-]+$ before it is stored
@@ -140,32 +189,19 @@ com/liferay/portal/kernel/model/SiteConstants.getNameGeneralRestrictions(Ljava/u
 com/liferay/portal/kernel/model/User.getPortraitURL(Lcom/liferay/portal/kernel/theme/ThemeDisplay;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/model/role/RoleConstants.getNameGeneralRestrictions(Ljava/util/Locale;Z)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/model/role/RoleConstants.getTypeLabel(I)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getPathFriendlyURLPrivateGroup()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getPathFriendlyURLPrivateUser()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getPathFriendlyURLPublic()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/CalendarUtil.getDays(Ljava/util/Locale;)[Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/HttpComponentsUtil.getProtocol(Ljakarta/portlet/ActionRequest;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/HttpComponentsUtil.getProtocol(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
 com/liferay/ratings/kernel/transformer/RatingsDataTransformerUtil.getPropertyKey(Ljava/lang/String;)Ljava/lang/String;:0
-
--- Theme display paths, portal URL and CDN hosts come from portal configuration and the validated Host header
-com/liferay/portal/kernel/theme/ThemeDisplay.getCDNBaseURL()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getCDNDynamicResourcesHost()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getCDNHost()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getPathContext()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getPortalURL()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/LocaleUtil.getDefault()Ljava/util/Locale;:SAFE
 
 -- Theme settings and color schemes are defined by theme developers, and theme or layout edit output is rendered from developer templates
 com/liferay/portal/kernel/model/ColorScheme.getColorSchemeId()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/model/LayoutTypeController.includeEditContent(Ljakarta/servlet/http/HttpServletRequest;Ljakarta/servlet/http/HttpServletResponse;Lcom/liferay/portal/kernel/model/Layout;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/model/ThemeSetting.getScript()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/model/ThemeSetting.getType()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeUtil.include(Ljakarta/servlet/ServletContext;Ljakarta/servlet/http/HttpServletRequest;Ljakarta/servlet/http/HttpServletResponse;Ljava/lang/String;Lcom/liferay/portal/kernel/model/Theme;Z)Ljava/lang/String;:SAFE
 
 -- Image types are validated before they are stored
 com/liferay/journal/model/JournalArticle.getSmallImageType()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/model/Image.getType()Ljava/lang/String;:SAFE
 
 -- Reserved keywords or numeric layout IDs that the submitted friendly URL collides with
 com/liferay/portal/kernel/exception/GroupFriendlyURLException.getKeywordConflict()Ljava/lang/String;:SAFE
@@ -176,7 +212,6 @@ com/liferay/portal/kernel/content/security/policy/ContentSecurityPolicyNonceProv
 com/liferay/portal/kernel/content/security/policy/ContentSecurityPolicyNonceProviderUtil.getNonce(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/content/security/policy/ContentSecurityPolicyNonceProviderUtil.getNonceAttribute(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/dao/search/RowChecker.getRowCheckBox(Ljakarta/servlet/http/HttpServletRequest;Lcom/liferay/portal/kernel/dao/search/ResultRow;)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/dao/search/RowChecker.getRowCheckBox(Ljakarta/servlet/http/HttpServletRequest;ZZLjava/lang/String;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/Portal.getUniqueElementId()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/PortalUtil.getUniqueElementId()Ljava/lang/String;:SAFE
 
@@ -203,7 +238,6 @@ com/liferay/roles/admin/role/type/contributor/RoleTypeContributor.getIcon()Ljava
 java/lang/Class.getComponentType()Ljava/lang/Class;:SAFE
 org/osgi/framework/Bundle.getSymbolicName()Ljava/lang/String;:SAFE
 org/osgi/framework/Bundle.getVersion()Lorg/osgi/framework/Version;:SAFE
-org/osgi/framework/Version.toString()Ljava/lang/String;:SAFE
 
 -- Absolute portal URL builders keep the taint of the request and the passed path segments
 com/liferay/portal/url/builder/AbsolutePortalURLBuilder.forBrowserModule(Ljava/lang/String;)Lcom/liferay/portal/url/builder/BrowserModuleAbsolutePortalURLBuilder;:0,1
@@ -243,7 +277,6 @@ com/liferay/object/model/ObjectField.getDBColumnName()Ljava/lang/String;:SAFE
 com/liferay/object/model/ObjectField.getDBColumnNames()[Ljava/lang/String;:SAFE
 com/liferay/object/model/ObjectField.getDBTableName()Ljava/lang/String;:SAFE
 com/liferay/object/model/ObjectField.getSortableDBColumnName()Ljava/lang/String;:SAFE
-com/liferay/object/model/ObjectRelationship.getDBTableName()Ljava/lang/String;:SAFE
 com/liferay/object/petra/sql/dsl/DynamicObjectDefinitionLocalizationTable.getForeignKeyColumnName()Ljava/lang/String;:SAFE
 com/liferay/object/petra/sql/dsl/DynamicObjectDefinitionLocalizationTable.getTableName()Ljava/lang/String;:SAFE
 com/liferay/object/petra/sql/dsl/DynamicObjectDefinitionTable.getName()Ljava/lang/String;:SAFE
@@ -261,9 +294,7 @@ com/liferay/portal/kernel/service/persistence/change/tracking/CTPersistence.getU
 Lcom/liferay/calendar/recurrence/Frequency;:SAFE
 Lcom/liferay/calendar/recurrence/Weekday;:SAFE
 com/liferay/calendar/recurrence/Frequency.getValue()Ljava/lang/String;:SAFE
-com/liferay/calendar/recurrence/Frequency.toString()Ljava/lang/String;:SAFE
 com/liferay/calendar/recurrence/Weekday.getValue()Ljava/lang/String;:SAFE
-com/liferay/calendar/recurrence/Weekday.toString()Ljava/lang/String;:SAFE
 
 -- Prices are formatted from numbers and currency settings
 com/liferay/commerce/currency/util/CommercePriceFormatter.format(Lcom/liferay/commerce/currency/model/CommerceCurrency;ZLjava/util/Locale;Ljava/math/BigDecimal;)Ljava/lang/String;:SAFE
@@ -353,7 +384,6 @@ com/liferay/portal/kernel/util/ArrayUtil.toString([Ljava/lang/Object;Lcom/lifera
 com/liferay/portal/kernel/util/ArrayUtil.toStringArray([Z)[Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/ArrayUtil.toStringArray([C)[Ljava/lang/String;:0
 com/liferay/portal/kernel/util/ArrayUtil.toStringArray(Ljava/util/Collection;)[Ljava/lang/String;:0
-com/liferay/portal/kernel/util/ArrayUtil.toStringArray([Ljava/util/Date;Ljava/text/DateFormat;)[Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/ArrayUtil.toStringArray([D)[Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/ArrayUtil.toStringArray([F)[Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/ArrayUtil.toStringArray([I)[Ljava/lang/String;:SAFE
@@ -401,8 +431,6 @@ com/liferay/portal/kernel/util/ListUtil.toList(Ljava/lang/Object;)Ljava/util/Lis
 com/liferay/portal/kernel/util/ListUtil.toList(Ljava/util/List;Lcom/liferay/portal/kernel/util/Accessor;)Ljava/util/List;:1
 com/liferay/portal/kernel/util/ListUtil.toList(Ljava/util/List;Ljava/util/function/Function;)Ljava/util/List;:1
 com/liferay/portal/kernel/util/ListUtil.toList(Ljava/util/List;)Ljava/util/List;:0
-com/liferay/portal/kernel/util/ListUtil.toLongArray(Ljava/util/List;Lcom/liferay/portal/kernel/util/Accessor;)[J:SAFE
-com/liferay/portal/kernel/util/ListUtil.toLongArray(Ljava/util/List;Ljava/util/function/ToLongFunction;)[J:SAFE
 com/liferay/portal/kernel/util/ListUtil.toString(Ljava/util/List;Lcom/liferay/portal/kernel/util/Accessor;)Ljava/lang/String;:1
 com/liferay/portal/kernel/util/ListUtil.toString(Ljava/util/List;Lcom/liferay/portal/kernel/util/Accessor;Ljava/lang/String;)Ljava/lang/String;:0,2
 com/liferay/portal/kernel/util/ListUtil.toString(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;:0,1
@@ -437,8 +465,6 @@ com/liferay/portal/kernel/bean/BeanParamUtil.getStringSilent(Ljava/lang/Object;L
 com/liferay/portal/kernel/bean/BeanParamUtil.getStringSilent(Ljava/lang/Object;Ljakarta/portlet/PortletRequest;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;:TAINTED
 com/liferay/portal/kernel/bean/BeanParamUtil.getStringSilent(Ljava/lang/Object;Ljakarta/servlet/http/HttpServletRequest;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;:TAINTED
 
-com/liferay/portal/kernel/portlet/PortletProviderUtil.getPortletId(Ljava/lang/String;Lcom/liferay/portal/kernel/portlet/PortletProvider$Action;)Ljava/lang/String;:SAFE
-
 com/liferay/portal/kernel/util/Validator.isNull(Ljava/lang/Object;)Z:0#0
 
 com/liferay/portal/kernel/portlet/PortletURLFactoryUtil.create(Ljakarta/servlet/http/HttpServletRequest;Ljava/lang/String;Lcom/liferay/portal/kernel/model/Layout;Ljava/lang/String;)Lcom/liferay/portal/kernel/portlet/LiferayPortletURL;:SAFE
@@ -452,9 +478,6 @@ Lcom/liferay/portal/kernel/portlet/LiferayPortletURL;:SAFE
 - Our implementation is safe, taint state is not modified
 jakarta/portlet/BaseURL.setParameter(Ljava/lang/String;Ljava/lang/String;)V:2#2
 jakarta/portlet/BaseURL.setParameter(Ljava/lang/String;[Ljava/lang/String;)V:2#2
-jakarta/portlet/BaseURL.setParameters(Ljava/util/Map;)V:1#1
-jakarta/portlet/BaseURL.addProperty(Ljava/lang/String;Ljava/lang/String;)V:2#2
-jakarta/portlet/BaseURL.setProperty(Ljava/lang/String;Ljava/lang/String;)V:2#2
 
 - For Meaning of :0,1#2 syntax please see https://github.com/find-sec-bugs/find-sec-bugs/issues/103
 - In general:
@@ -540,7 +563,6 @@ com/liferay/portal/kernel/util/StringUtil.trimTrailing(Ljava/lang/String;)Ljava/
 com/liferay/portal/kernel/util/StringUtil.trimTrailing(Ljava/lang/String;C)Ljava/lang/String;:1
 com/liferay/portal/kernel/util/StringUtil.trimTrailing(Ljava/lang/String;[C)Ljava/lang/String;:1
 
-com/liferay/portal/kernel/util/StringUtil.randomId()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/StringUtil.split(Ljava/lang/String;C)[Ljava/lang/String;:1
 com/liferay/portal/kernel/util/StringUtil.toLowerCase(Ljava/lang/String;)Ljava/lang/String;:0
 com/liferay/portal/kernel/util/StringUtil.toLowerCase(Ljava/lang/String;Ljava/util/Locale;)Ljava/lang/String;:1
@@ -658,11 +680,6 @@ com/liferay/portal/kernel/language/Language.getTimeDescription(Ljava/util/Locale
 com/liferay/portal/kernel/language/Language.getLanguageId(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/language/Language.getLanguageId(Ljava/util/Locale;)Ljava/lang/String;:0
 com/liferay/portal/kernel/language/Language.getLanguageId(Ljakarta/portlet/PortletRequest;)Ljava/lang/String;:SAFE
-
-com/liferay/portal/kernel/theme/PortletDisplay.getInstanceId()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/PortletDisplay.getRootPortletId()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/PortletDisplay.getURLConfigurationJS()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/PortletDisplay.getURLConfiguration()Ljava/lang/String;:SAFE
 
 com/liferay/portal/kernel/webdav/WebDAVUtil.getStorageToken(Lcom/liferay/portal/kernel/model/Portlet;)Ljava/lang/String;:SAFE
 
@@ -783,7 +800,6 @@ com/liferay/portal/kernel/upload/UploadServletRequest.getFile(Ljava/lang/String;
 com/liferay/portal/kernel/upload/UploadServletRequest.getFiles(Ljava/lang/String;)[Ljava/io/File;:TAINTED|+PATH_TRAVERSAL_SAFE
 
 java/lang/ClassLoader.getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;:0
-java/lang/Class.getResourceAsStream(Ljava/lang/String;)Ljava/io/InputStream;:0
 
 com/liferay/portal/kernel/util/HashMapBuilder.put(Ljava/util/Collection;Lcom/liferay/portal/kernel/util/BaseMapBuilder$UnsafeFunction;)Lcom/liferay/portal/kernel/util/HashMapBuilder$HashMapWrapper;:0,1
 com/liferay/portal/kernel/util/HashMapBuilder.put(Ljava/lang/Object;Lcom/liferay/portal/kernel/util/BaseMapBuilder$UnsafeSupplier;)Lcom/liferay/portal/kernel/util/HashMapBuilder$HashMapWrapper;:0,1
@@ -890,29 +906,17 @@ com/liferay/portal/kernel/util/PortalUtil.getStaticResourceURL(Ljakarta/servlet/
 com/liferay/portal/kernel/util/PortalUtil.getURLWithSessionId(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;:0,1
 
 
-com/liferay/portal/kernel/theme/ThemeDisplay.getPathImage()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getPathMain()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getPathThemeImages()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getPathThemeSpritemap()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/theme/ThemeDisplay.getPpid()Ljava/lang/String;:TAINTED
 com/liferay/portal/kernel/frontend/esm/FrontendESMUtil.buildExportsURL(Lcom/liferay/portal/kernel/theme/ThemeDisplay;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;:0,1
 com/liferay/portal/kernel/frontend/esm/FrontendESMUtil.buildURL(Lcom/liferay/portal/kernel/theme/ThemeDisplay;Ljava/lang/String;)Ljava/lang/String;:0
 com/liferay/portal/kernel/frontend/esm/FrontendESMUtil.buildURL(Lcom/liferay/portal/kernel/theme/ThemeDisplay;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;:0,1
-com/liferay/portal/kernel/theme/ThemeDisplay.getSiteDefaultLocale()Ljava/util/Locale;:SAFE
 com/liferay/portal/kernel/theme/ThemeDisplay.getURLCurrent()Ljava/lang/String;:TAINTED
-com/liferay/portal/kernel/theme/ThemeDisplay.getURLSignIn()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/theme/ThemeDisplay.getURLSignOut()Ljava/lang/String;:SAFE
 
 
 com/liferay/portal/security/ldap/internal/DefaultPortalLDAP.encodeFilterAttribute(Ljava/lang/String;Z)Ljava/lang/String;:1|+LDAP_INJECTION_SAFE
 
-com/liferay/portal/kernel/util/PropsUtil.get(Ljava/lang/String;)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PropsUtil.get(Ljava/lang/String;Lcom/liferay/portal/kernel/configuration/Filter;)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PropsUtil.getArray(Ljava/lang/String;)[Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PropsUtil.getArray(Ljava/lang/String;Lcom/liferay/portal/kernel/configuration/Filter;)[Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/PropsUtil.getProperties()Ljava/util/Properties;:SAFE
-com/liferay/portal/kernel/util/PropsUtil.getProperties(Z)Ljava/util/Properties;:SAFE
-com/liferay/portal/kernel/util/PropsUtil.getProperties(Ljava/lang/String;Z)Ljava/util/Properties;:SAFE
 
 com/liferay/portal/kernel/util/PropsValues.ACCESS_CONTROL_SANITIZE_SECURITY_EXCEPTION:SAFE
 com/liferay/portal/kernel/util/PropsValues.ADMIN_ANALYTICS_TYPES:SAFE
@@ -1620,17 +1624,8 @@ com/liferay/portal/kernel/util/PropsValues.XML_VALIDATION_ENABLED:SAFE
 com/liferay/portal/kernel/util/PropsValues.YUI_COMPRESSOR_CSS_LINE_BREAK:SAFE
 com/liferay/portal/kernel/util/PropsValues.ZIP_FILE_WRITER_EXPORT_BUFFER_SIZE:SAFE
 
-com/liferay/portal/kernel/util/PrefsPropsUtil.getContent(JLjava/lang/String;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/PrefsPropsUtil.getPreferences()Ljakarta/portlet/PortletPreferences;:SAFE
-com/liferay/portal/kernel/util/PrefsPropsUtil.getPreferences(J)Ljakarta/portlet/PortletPreferences;:SAFE
-com/liferay/portal/kernel/util/PrefsPropsUtil.getString(JLjava/lang/String;)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PrefsPropsUtil.getString(JLjava/lang/String;Ljava/lang/String;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/PrefsPropsUtil.getString(Ljava/lang/String;)Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PrefsPropsUtil.getStringArray(JLjava/lang/String;Ljava/lang/String;)[Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PrefsPropsUtil.getStringArray(JLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)[Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PrefsPropsUtil.getStringArray(Ljakarta/portlet/PortletPreferences;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)[Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PrefsPropsUtil.getStringArray(Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/util/PrefsPropsUtil.getStringFromNames(J[Ljava/lang/String;)Ljava/lang/String;:SAFE
 
 
 com/liferay/portal/kernel/portletfilerepository/PortletFileRepositoryUtil.getPortletFileEntryURL(Lcom/liferay/portal/kernel/theme/ThemeDisplay;Lcom/liferay/portal/kernel/repository/model/FileEntry;Ljava/lang/String;)Ljava/lang/String;:0
@@ -1645,7 +1640,6 @@ jakarta/portlet/WindowState.MINIMIZED:SAFE
 
 -- Portal URLs URL-encode every parameter name and value. The raw parts are RenderURL.setFragmentIdentifier, which no DXP code calls, and {%name} route fragments in routes.xml
 jakarta/portlet/ActionURL.toString()Ljava/lang/String;:SAFE
-jakarta/portlet/BaseURL.toString()Ljava/lang/String;:SAFE
 jakarta/portlet/PortletURL.toString()Ljava/lang/String;:SAFE
 jakarta/portlet/RenderURL.toString()Ljava/lang/String;:SAFE
 jakarta/portlet/ResourceURL.toString()Ljava/lang/String;:SAFE
@@ -1680,14 +1674,11 @@ com/liferay/portal/kernel/util/LocaleUtil.toW3cLanguageId(Ljava/lang/String;)Lja
 com/liferay/portal/kernel/util/LocaleUtil.toW3cLanguageIds([Ljava/util/Locale;)[Ljava/lang/String;:0
 com/liferay/portal/kernel/util/LocaleUtil.toW3cLanguageIds([Ljava/lang/String;)[Ljava/lang/String;:0
 
-com/liferay/portal/kernel/webserver/WebServerServletTokenUtil.getToken(J)Ljava/lang/String;:SAFE
-
 -- Trust OrderByComparator in general; insecure implementations are modeled as SQL injection sinks on their inputs
 com/liferay/portal/kernel/util/OrderByComparator.getOrderByFields()[Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/OrderByComparator.getOrderBy()Ljava/lang/String;:SAFE
 
 com/liferay/util/dao/orm/CustomSQLUtil.appendCriteria(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;:0,1
-com/liferay/util/dao/orm/CustomSQL.get(Ljava/lang/String;)Ljava/lang/String;:SAFE
 com/liferay/util/dao/orm/CustomSQL.get(Ljava/lang/String;Lcom/liferay/portal/kernel/dao/orm/QueryDefinition;Ljava/lang/String;)Ljava/lang/String;:0
 com/liferay/util/dao/orm/CustomSQLUtil.keywords(Ljava/lang/String;)[Ljava/lang/String;:0
 com/liferay/util/dao/orm/CustomSQLUtil.keywords(Ljava/lang/String;Z)[Ljava/lang/String;:1
@@ -1724,11 +1715,7 @@ com/liferay/taglib/aui/AUIUtil.buildData(Ljava/util/Map;)Ljava/lang/String;:0
 com/liferay/taglib/aui/AUIUtil.buildLabel(Ljava/lang/String;ZZLjava/lang/String;)Ljava/lang/String;:SAFE
 com/liferay/taglib/aui/AUIUtil.buildLabel(Ljava/lang/String;ZZLjava/lang/String;Z)Ljava/lang/String;:SAFE
 com/liferay/taglib/aui/AUIUtil.buildLabel(Ljava/lang/String;ZZLjava/lang/String;ZLjava/lang/String;)Ljava/lang/String;:0
-com/liferay/taglib/aui/AUIUtil.getNamespace(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
-com/liferay/taglib/aui/AUIUtil.getNamespace(Ljakarta/portlet/PortletRequest;Ljakarta/portlet/PortletResponse;)Ljava/lang/String;:SAFE
 com/liferay/taglib/aui/AUIUtil.normalizeId(Ljava/lang/String;)Ljava/lang/String;:0|+XSS_SAFE
-com/liferay/portal/kernel/portlet/LiferayPortletResponse.getNamespace()Ljava/lang/String;:SAFE
-com/liferay/portal/kernel/theme/PortletDisplay.getNamespace()Ljava/lang/String;:SAFE
 
 
 -- Taglibs usually don't modify input, we need to keep the taint state as is
@@ -1742,14 +1729,11 @@ com/liferay/taglib/util/AttributesTagSupport.setDynamicAttribute(Ljava/lang/Stri
 com/liferay/taglib/util/AttributesTagSupport.setNamespacedAttribute(Ljakarta/servlet/http/HttpServletRequest;Ljava/lang/String;Ljava/lang/Object;)V:0#0
 
 -- Also writing to the output doesn't change taint state
-jakarta/servlet/jsp/JspWriter.print(Ljava/lang/Object;)V:0#0
 
 -- Tomcat strips CR and LF while parsing request headers, and HTTP/2 forbids them. Request wrappers that override these getters are not covered
 jakarta/servlet/http/HttpServletRequest.getHeader(Ljava/lang/String;)Ljava/lang/String;:TAINTED|+CR_ENCODED,+LF_ENCODED
 
 -- The query string and URI are the raw, undecoded request line, which cannot hold CR or LF
-jakarta/servlet/http/HttpServletRequest.getQueryString()Ljava/lang/String;:TAINTED|+CR_ENCODED,+LF_ENCODED
-jakarta/servlet/http/HttpServletRequest.getRequestURI()Ljava/lang/String;:TAINTED|+CR_ENCODED,+LF_ENCODED
 
 
 com/liferay/portal/kernel/security/auth/ScreenNameValidator.getAUIValidatorJS()Ljava/lang/String;:SAFE
@@ -1846,16 +1830,13 @@ com/liferay/exportimport/kernel/lar/PortletDataHandlerBoolean.getLabel()Ljava/la
 com/liferay/exportimport/kernel/lar/PortletDataHandlerBoolean.getName()Ljava/lang/String;:SAFE
 com/liferay/exportimport/kernel/lar/PortletDataHandlerBoolean.getNamespacedName()Ljava/lang/String;:SAFE
 com/liferay/exportimport/kernel/lar/PortletDataHandlerControl.getLabel()Ljava/lang/String;:SAFE
-com/liferay/exportimport/kernel/lar/PortletDataHandlerControl.getName()Ljava/lang/String;:SAFE
 com/liferay/exportimport/kernel/lar/PortletDataHandlerControl.getNamespacedName()Ljava/lang/String;:SAFE
 com/liferay/frontend/taglib/form/navigator/FormNavigatorEntry.getCategoryKey()Ljava/lang/String;:SAFE
 com/liferay/frontend/taglib/form/navigator/FormNavigatorEntry.getFormNavigatorId()Ljava/lang/String;:SAFE
 com/liferay/frontend/taglib/form/navigator/FormNavigatorEntry.getKey()Ljava/lang/String;:SAFE
 com/liferay/frontend/taglib/form/navigator/FormNavigatorEntry.getLabel(Ljava/util/Locale;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/scripting/ScriptingUtil.getSupportedLanguages()Ljava/util/Set;:SAFE
-com/liferay/portal/kernel/theme/ThemeDisplay.getLanguageId()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/util/LocaleUtil.fromLanguageId(Ljava/lang/String;)Ljava/util/Locale;:0
-com/liferay/portal/kernel/util/LocaleUtil.getSiteDefault()Ljava/util/Locale;:SAFE
 com/liferay/portal/kernel/util/ResourceBundleUtil.getString(Ljava/util/ResourceBundle;Ljava/lang/String;)Ljava/lang/String;:1
 com/liferay/portal/kernel/util/ResourceBundleUtil.getString(Ljava/util/ResourceBundle;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;:0,2
 com/liferay/portal/kernel/util/ReleaseInfo.getReleaseInfo()Ljava/lang/String;:SAFE

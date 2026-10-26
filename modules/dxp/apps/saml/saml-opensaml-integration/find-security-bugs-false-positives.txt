@@ -1,2 +1,1 @@
 com/liferay/saml/opensaml/integration/internal/credential/BaseKeyStoreManagerImpl.getSamlKeyStorePath()Ljava/lang/String;:SAFE
-com/liferay/saml/persistence/model/SamlSpSession.getSamlSpSessionKey()Ljava/lang/String;:SAFE

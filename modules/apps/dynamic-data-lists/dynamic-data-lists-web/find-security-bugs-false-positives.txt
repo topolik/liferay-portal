@@ -1,5 +1,4 @@
 Lcom/liferay/portal/kernel/json/JSONArray;:SAFE
 com/liferay/dynamic/data/lists/model/DDLRecordVersion.getVersion()Ljava/lang/String;:SAFE
 com/liferay/dynamic/data/lists/web/internal/template/DDLDisplayTemplateTransformer.transform()Ljava/lang/String;:SAFE
-com/liferay/dynamic/data/mapping/storage/DDMFormValues.getAvailableLocales()Ljava/util/Set;:SAFE
 com/liferay/dynamic/data/mapping/storage/DDMFormValues.getDefaultLocale()Ljava/util/Locale;:SAFE

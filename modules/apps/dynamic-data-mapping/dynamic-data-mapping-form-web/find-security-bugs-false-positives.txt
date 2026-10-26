@@ -1,6 +1,4 @@
 Lcom/liferay/portal/kernel/json/JSONArray;:SAFE
 Lcom/liferay/portal/kernel/json/JSONObject;:SAFE
-com/liferay/dynamic/data/mapping/form/web/internal/display/context/DDMFormAdminDisplayContext.getAvailableLocales()[Ljava/util/Locale;:SAFE
-com/liferay/dynamic/data/mapping/form/web/internal/display/context/DDMFormAdminDisplayContext.getDefaultLanguageId()Ljava/lang/String;:SAFE
 com/liferay/dynamic/data/mapping/form/web/internal/display/context/DDMFormDisplayContext.getContainerId()Ljava/lang/String;:SAFE
 com/liferay/dynamic/data/mapping/model/DDMFormInstanceRecordVersion.getVersion()Ljava/lang/String;:SAFE
