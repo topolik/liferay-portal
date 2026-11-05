@@ -146,6 +146,12 @@ com/liferay/adaptive/media/image/configuration/AMImageConfigurationEntry.getUUID
 com/liferay/application/list/PanelApp.getPortletId()Ljava/lang/String;:SAFE
 com/liferay/application/list/PanelCategory.getKey()Ljava/lang/String;:SAFE
 com/liferay/application/list/PanelCategory.getLabel(Ljava/util/Locale;)Ljava/lang/String;:SAFE
+com/liferay/depot/application/DepotApplication.getPortletId()Ljava/lang/String;:SAFE
+com/liferay/portal/kernel/util/PortalUtil.getPortletTitle(Lcom/liferay/portal/kernel/model/Portlet;Ljakarta/servlet/ServletContext;Ljava/util/Locale;)Ljava/lang/String;:SAFE
+com/liferay/portal/settings/configuration/admin/display/PortalSettingsConfigurationScreenContributor.getName(Ljava/util/Locale;)Ljava/lang/String;:SAFE
+com/liferay/saml/opensaml/integration/field/expression/handler/UserFieldExpressionHandler.getSectionLabel(Ljava/util/Locale;)Ljava/lang/String;:SAFE
+com/liferay/segments/source/provider/SegmentsSourceDetailsProvider.getLabel(Ljava/util/Locale;)Ljava/lang/String;:SAFE
+com/liferay/social/bookmarks/SocialBookmark.getName(Ljava/util/Locale;)Ljava/lang/String;:SAFE
 
 com/liferay/asset/kernel/model/AssetRendererFactory.getIconCssClass()Ljava/lang/String;:SAFE
 com/liferay/asset/kernel/model/Renderer.getIconCssClass()Ljava/lang/String;:SAFE
@@ -153,6 +159,7 @@ com/liferay/asset/kernel/model/Renderer.getIconCssClass()Ljava/lang/String;:SAFE
 -- Return string literals only
 com/liferay/batch/planner/constants/BatchPlannerPlanConstants.getStatusCssClass(I)Ljava/lang/String;:SAFE
 com/liferay/batch/planner/constants/BatchPlannerPlanConstants.getStatusLabel(I)Ljava/lang/String;:SAFE
+com/liferay/document/library/display/context/DLEditFileEntryDisplayContext.getPublishButtonLabel()Ljava/lang/String;:SAFE
 
 -- Class names of registered models, set by the portal and not by the request
 com/liferay/portal/kernel/comment/Comment.getModelClassName()Ljava/lang/String;:SAFE
@@ -207,7 +214,8 @@ com/liferay/journal/model/JournalArticle.getSmallImageType()Ljava/lang/String;:S
 com/liferay/portal/kernel/exception/GroupFriendlyURLException.getKeywordConflict()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/exception/LayoutFriendlyURLException.getKeywordConflict()Ljava/lang/String;:SAFE
 
--- Generated element IDs, CSP nonces and search row checkboxes are built by the portal
+-- Generated element IDs, cluster node IDs, CSP nonces and search row checkboxes are built by the portal
+com/liferay/portal/kernel/cluster/ClusterNode.getClusterNodeId()Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/content/security/policy/ContentSecurityPolicyNonceProvider.getNonce(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/content/security/policy/ContentSecurityPolicyNonceProviderUtil.getNonce(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
 com/liferay/portal/kernel/content/security/policy/ContentSecurityPolicyNonceProviderUtil.getNonceAttribute(Ljakarta/servlet/http/HttpServletRequest;)Ljava/lang/String;:SAFE
@@ -300,9 +308,13 @@ com/liferay/calendar/recurrence/Weekday.getValue()Ljava/lang/String;:SAFE
 com/liferay/commerce/currency/util/CommercePriceFormatter.format(Lcom/liferay/commerce/currency/model/CommerceCurrency;ZLjava/util/Locale;Ljava/math/BigDecimal;)Ljava/lang/String;:SAFE
 com/liferay/commerce/currency/util/CommercePriceFormatter.formatAsRelative(Lcom/liferay/commerce/currency/model/CommerceCurrency;ZLjava/util/Locale;Ljava/math/BigDecimal;)Ljava/lang/String;:SAFE
 
+-- Product friendly URLs join the portal URL, URL titles normalized on save and encoded parameters, so they are XSS safe only
+com/liferay/commerce/product/content/helper/CPContentHelper.getFriendlyURL(Lcom/liferay/commerce/product/catalog/CPCatalogEntry;Lcom/liferay/portal/kernel/theme/ThemeDisplay;)Ljava/lang/String;:UNKNOWN|+XSS_SAFE
+
 -- Exception message keys are Language keys set by the throwing code
 com/liferay/client/extension/exception/ClientExtensionEntryTypeSettingsException.getMessageKey()Ljava/lang/String;:SAFE
 com/liferay/document/library/kernel/antivirus/AntivirusScannerException.getMessageKey()Ljava/lang/String;:SAFE
+com/liferay/portal/security/ldap/LDAPConfigurationModelListenerException.getMessageKey()Ljava/lang/String;:SAFE
 
 -- Conversion extensions come from the portal configuration
 com/liferay/document/library/kernel/document/conversion/DocumentConversionUtil.getConversions(Ljava/lang/String;)[Ljava/lang/String;:SAFE
