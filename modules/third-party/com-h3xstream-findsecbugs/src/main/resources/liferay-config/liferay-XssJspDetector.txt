@@ -243,12 +243,15 @@ com/liferay/frontend/data/set/taglib/servlet/taglib/BaseDisplayTag.setPropsTrans
 com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setBulkActionDropdownItems(Ljava/util/List;)V:0
 com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setCreationMenu(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/CreationMenu;)V:0
 com/liferay/frontend/data/set/taglib/servlet/taglib/BaseDisplayTag.setAdditionalProps(Ljava/util/Map;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setDataProviderKey(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setId(Ljava/lang/String;)V:0
 
 -- frontend-data-set:headless-display
 com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setBulkActionDropdownItems(Ljava/util/List;)V:0
 com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setCreationMenu(Lcom/liferay/frontend/taglib/clay/servlet/taglib/util/CreationMenu;)V:0
 com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setFdsActionDropdownItems(Ljava/util/List;)V:0
 com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setFdsFilters(Ljava/util/List;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/HeadlessDisplayTag.setApiURL(Ljava/lang/String;)V:0
 
 -- liferay-adaptive-media:img
 
@@ -578,9 +581,12 @@ com/liferay/taglib/aui/base/BaseInputTag.setSuffix(Ljava/lang/String;)V:0
 com/liferay/taglib/aui/base/BaseInputTag.setTitle(Ljava/lang/String;)V:0
 com/liferay/taglib/aui/base/BaseInputTag.setType(Ljava/lang/String;)V:0
 com/liferay/taglib/aui/base/BaseInputTag.setWrapperCssClass(Ljava/lang/String;)V:0
+com/liferay/taglib/aui/base/BaseInputTag.setBean(Ljava/lang/Object;)V:0
+com/liferay/taglib/aui/base/BaseInputTag.setValue(Ljava/lang/Object;)V:0
 
 -- aui:model-context
 com/liferay/taglib/aui/base/BaseModelContextTag.setDefaultLanguageId(Ljava/lang/String;)V:0
+com/liferay/taglib/aui/base/BaseModelContextTag.setBean(Ljava/lang/Object;)V:0
 
 -- aui:nav-bar-search
 
@@ -630,6 +636,7 @@ com/liferay/taglib/aui/base/BaseWorkflowStatusTag.setVersion(Ljava/lang/String;)
 com/liferay/taglib/aui/base/BaseOptionTag.setData(Ljava/util/Map;)V:0
 com/liferay/taglib/aui/base/BaseOptionTag.setCssClass(Ljava/lang/String;)V:0
 com/liferay/taglib/aui/base/BaseOptionTag.setStyle(Ljava/lang/String;)V:0
+com/liferay/taglib/aui/base/BaseOptionTag.setLabel(Ljava/lang/Object;)V:0
 
 -- liferay-frontend:sidebar-toggler-button
 com/liferay/frontend/taglib/servlet/taglib/SidebarTogglerButtonTag.setCssClass(Ljava/lang/String;)V:0
@@ -1100,6 +1107,8 @@ com/liferay/taglib/ui/SearchContainerTag.setOrderByColParam(Ljava/lang/String;)V
 com/liferay/taglib/ui/SearchContainerTag.setOrderByTypeParam(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/SearchContainerTag.setSummary(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/SearchContainerTag.setRowChecker(Lcom/liferay/portal/kernel/dao/search/RowChecker;)V:0
+com/liferay/taglib/ui/SearchContainerTag.setIteratorURL(Ljakarta/portlet/PortletURL;)V:0
+com/liferay/taglib/ui/SearchContainerTag.setSearchContainer(Lcom/liferay/portal/kernel/dao/search/SearchContainer;)V:0
 
 -- liferay-ui:search-container-column-jsp
 com/liferay/taglib/ui/SearchContainerColumnJSPTag.setHref(Ljava/lang/Object;)V:0
@@ -1109,6 +1118,7 @@ com/liferay/taglib/ui/SearchContainerColumnUserTag.setOrderableProperty(Ljava/la
 com/liferay/taglib/ui/SearchContainerColumnUserTag.setProperty(Ljava/lang/String;)V:0
 
 -- liferay-ui:search-container-results
+com/liferay/taglib/ui/SearchContainerResultsTag.setResults(Ljava/util/List;)V:0
 
 -- liferay-ui:search-container-row
 com/liferay/taglib/ui/SearchContainerRowTag.setAriaLabel(Ljava/lang/String;)V:0
@@ -1153,6 +1163,7 @@ com/liferay/taglib/ui/SearchContainerColumnDateTag.setProperty(Ljava/lang/String
 -- liferay-ui:search-container-row-parameter
 
 -- liferay-ui:search-form
+com/liferay/taglib/ui/SearchFormTag.setSearchContainer(Lcom/liferay/portal/kernel/dao/search/SearchContainer;)V:0
 
 -- liferay-ui:search-iterator
 com/liferay/taglib/ui/SearchIteratorTag.setSearchResultCssClass(Ljava/lang/String;)V:0
@@ -1389,6 +1400,7 @@ com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseHTMLFieldTag.set
 
 -- liferay-ddm:template-renderer
 com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseTemplateRendererTag.setContextObjects(Ljava/util/Map;)V:0
+com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseTemplateRendererTag.setEntries(Ljava/util/List;)V:0
 
 -- liferay-ddm:template-selector
 com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseTemplateSelectorTag.setRefreshURL(Ljava/lang/String;)V:0

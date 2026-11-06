@@ -1,0 +1,15 @@
+java/util/Formatter.format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/util/Formatter;:1
+java/util/Formatter.format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/util/Formatter;:1
+
+java/io/PrintStream.printf(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;:1
+java/io/PrintStream.printf(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;:1
+
+java/io/PrintStream.format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;:1
+java/io/PrintStream.format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;:1
+
+java/lang/String.format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;:1
+java/lang/String.format(Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;:1
+com/liferay/asset/taglib/servlet/taglib/CategorizationFilterTag.setAssetType(Ljava/lang/String;)V:0
+com/liferay/frontend/editor/taglib/servlet/taglib/EditorTag.setPlaceholder(Ljava/lang/String;)V:0
+com/liferay/frontend/taglib/clay/servlet/taglib/ProgressBarTag.setMessages(Ljava/util/Map;)V:0
+com/liferay/taglib/ui/MessageTag.setKey(Ljava/lang/String;)V:0

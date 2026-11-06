@@ -15,3 +15,4 @@ com/liferay/taglib/ui/PageIteratorTag.setCurParam(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/PageIteratorTag.setDeltaParam(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/SearchContainerTag.setCurParam(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/TabsTag.setParam(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchFormTag.setSearchContainer(Lcom/liferay/portal/kernel/dao/search/SearchContainer;)V:0

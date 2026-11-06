@@ -1,0 +1,10 @@
+org/apache/commons/beanutils/BeanUtils.copyProperties(Ljava/lang/Object;Ljava/lang/Object;)V:0
+org/springframework/beans/BeanUtils.copyProperties(Ljava/lang/Object;Ljava/lang/Object;)V:1
+org/apache/commons/beanutils/BeanUtils.populate(Ljava/lang/Object;Ljava/util/Map;)V:0
+org/apache/commons/beanutils/BeanUtilsBean.populate(Ljava/lang/Object;Ljava/util/Map;)V:0
+com/liferay/taglib/ui/SearchContainerColumnDateTag.setProperty(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchContainerColumnStatusTag.setProperty(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchContainerColumnTextTag.setProperty(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchContainerColumnUserTag.setProperty(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchContainerRowTag.setKeyProperty(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchContainerRowTag.setRowIdProperty(Ljava/lang/String;)V:0
