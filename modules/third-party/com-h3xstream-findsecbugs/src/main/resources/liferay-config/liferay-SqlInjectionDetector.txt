@@ -38,3 +38,5 @@ com/liferay/portal/kernel/workflow/comparator/WorkflowTaskInstanceIdComparator.<
 com/liferay/portal/kernel/workflow/comparator/WorkflowTaskModifiedDateComparator.<init>(ZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;)V:0,1,2
 com/liferay/redirect/web/internal/util/comparator/RedirectComparator.<init>(Ljava/lang/String;Ljava/lang/String;Ljava/util/function/Function;Z)V:2,3
 com/liferay/redirect/web/internal/util/comparator/RedirectDateComparator.<init>(Ljava/lang/String;Ljava/lang/String;Ljava/util/function/Function;Z)V:2,3
+org/apache/taglibs/standard/tag/rt/sql/QueryTag.setSql(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/sql/UpdateTag.setSql(Ljava/lang/String;)V:0

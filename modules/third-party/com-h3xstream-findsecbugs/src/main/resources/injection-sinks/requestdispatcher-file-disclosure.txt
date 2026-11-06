@@ -7,3 +7,14 @@ com/liferay/taglib/theme/WrapPortletTag.setPage(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/SearchContainerColumnJSPTag.setPath(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/SearchIteratorTag.setDisplayStyle(Ljava/lang/String;)V:0
 com/liferay/taglib/util/IncludeTag.setPage(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/core/ImportTag.setContext(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/core/ImportTag.setUrl(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/xml/ParseTag.setDoc(Ljava/lang/Object;)V:0
+org/apache/taglibs/standard/tag/rt/xml/ParseTag.setSystemId(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/xml/ParseTag.setXml(Ljava/lang/Object;)V:0
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setDoc(Ljava/lang/Object;)V:0
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setDocSystemId(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setXml(Ljava/lang/Object;)V:0
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setXmlSystemId(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setXslt(Ljava/lang/Object;)V:0
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setXsltSystemId(Ljava/lang/String;)V:0

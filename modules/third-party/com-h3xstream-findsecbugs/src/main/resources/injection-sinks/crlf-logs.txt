@@ -245,3 +245,7 @@ com/liferay/taglib/portletext/PreviewTag.setPortletName(Ljava/lang/String;)V:0
 com/liferay/taglib/portletext/RuntimeTag.setPortletName(Ljava/lang/String;)V:0
 com/liferay/taglib/theme/WrapPortletTag.setPage(Ljava/lang/String;)V:0
 com/liferay/taglib/util/IncludeTag.setPage(Ljava/lang/String;)V:0
+com/liferay/expando/taglib/servlet/taglib/CustomAttributeListTag.setAvailableLocales(Ljava/util/Set;)V:0
+com/liferay/frontend/editor/taglib/servlet/taglib/EditorTag.setContentsLanguageId(Ljava/lang/String;)V:0
+com/liferay/learn/taglib/servlet/taglib/JSONTag.setResource(Ljava/lang/String;)V:0
+com/liferay/taglib/portletext/RuntimeTag.setInstanceId(Ljava/lang/String;)V:0

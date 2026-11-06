@@ -13,3 +13,4 @@ com/liferay/asset/taglib/servlet/taglib/CategorizationFilterTag.setAssetType(Lja
 com/liferay/frontend/editor/taglib/servlet/taglib/EditorTag.setPlaceholder(Ljava/lang/String;)V:0
 com/liferay/frontend/taglib/clay/servlet/taglib/ProgressBarTag.setMessages(Ljava/util/Map;)V:0
 com/liferay/taglib/ui/MessageTag.setKey(Ljava/lang/String;)V:0
+com/liferay/info/taglib/servlet/taglib/InfoListBasicTableTag.setInfoListObjectColumnNames(Ljava/util/List;)V:0

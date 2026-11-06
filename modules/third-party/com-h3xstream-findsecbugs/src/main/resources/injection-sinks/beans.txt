@@ -8,3 +8,4 @@ com/liferay/taglib/ui/SearchContainerColumnTextTag.setProperty(Ljava/lang/String
 com/liferay/taglib/ui/SearchContainerColumnUserTag.setProperty(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/SearchContainerRowTag.setKeyProperty(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/SearchContainerRowTag.setRowIdProperty(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/core/SetTag.setProperty(Ljava/lang/String;)V:0

@@ -40,8 +40,11 @@ org/apache/taglibs/standard/tag/rt/core/ImportTag.setUrl(Ljava/lang/String;)V:0
 
 -- c:out
 org/apache/taglibs/standard/tag/rt/core/OutTag.setValue(Ljava/lang/Object;)V:0
+org/apache/taglibs/standard/tag/rt/core/OutTag.setDefault(Ljava/lang/String;)V:0
 
 -- c:param
+org/apache/taglibs/standard/tag/rt/core/ParamTag.setName(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/core/ParamTag.setValue(Ljava/lang/String;)V:0
 
 -- c:redirect
 
@@ -238,6 +241,22 @@ com/liferay/frontend/taglib/clay/servlet/taglib/VerticalCardTag.setVerticalCard(
 -- clay:vertical-nav
 com/liferay/frontend/taglib/clay/servlet/taglib/VerticalNavTag.setVerticalNavItems(Ljava/util/List;)V:0
 
+-- fmt:bundle
+org/apache/taglibs/standard/tag/rt/fmt/BundleTag.setPrefix(Ljava/lang/String;)V:0
+
+-- fmt:formatDate
+org/apache/taglibs/standard/tag/rt/fmt/FormatDateTag.setPattern(Ljava/lang/String;)V:0
+
+-- fmt:formatNumber
+org/apache/taglibs/standard/tag/rt/fmt/FormatNumberTag.setCurrencySymbol(Ljava/lang/String;)V:0
+org/apache/taglibs/standard/tag/rt/fmt/FormatNumberTag.setPattern(Ljava/lang/String;)V:0
+
+-- fmt:message
+org/apache/taglibs/standard/tag/rt/fmt/MessageTag.setKey(Ljava/lang/String;)V:0
+
+-- fmt:param
+org/apache/taglibs/standard/tag/rt/fmt/ParamTag.setValue(Ljava/lang/Object;)V:0
+
 -- frontend-data-set:classic-display
 com/liferay/frontend/data/set/taglib/servlet/taglib/BaseDisplayTag.setPropsTransformer(Ljava/lang/String;)V:0
 com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setBulkActionDropdownItems(Ljava/util/List;)V:0
@@ -336,6 +355,7 @@ com/liferay/frontend/editor/taglib/servlet/taglib/EditorTag.setName(Ljava/lang/S
 com/liferay/frontend/editor/taglib/servlet/taglib/EditorTag.setPlaceholder(Ljava/lang/String;)V:0
 com/liferay/frontend/editor/taglib/servlet/taglib/EditorTag.setContents(Ljava/lang/String;)V:0
 com/liferay/frontend/editor/taglib/servlet/taglib/EditorTag.setFileBrowserParams(Ljava/util/Map;)V:0
+com/liferay/frontend/editor/taglib/servlet/taglib/EditorTag.setData(Ljava/util/Map;)V:0
 
 -- liferay-editor:input-localized
 com/liferay/frontend/editor/taglib/servlet/taglib/InputLocalizedTag.setXml(Ljava/lang/String;)V:0
@@ -350,6 +370,7 @@ com/liferay/expando/taglib/servlet/taglib/CustomAttributeTag.setAvailableLocales
 
 -- liferay-expando:custom-attribute-list
 com/liferay/expando/taglib/servlet/taglib/CustomAttributeListTag.setClassName(Ljava/lang/String;)V:0
+com/liferay/expando/taglib/servlet/taglib/CustomAttributeListTag.setAvailableLocales(Ljava/util/Set;)V:0
 
 -- liferay-export-import-changeset:publish-entity-menu-item
 
@@ -650,9 +671,11 @@ com/liferay/frontend/taglib/servlet/taglib/StylesheetTag.setCss(Ljava/lang/Strin
 -- liferay-frontend:translation-manager
 
 -- liferay-info:info-list-basic-list
+com/liferay/info/taglib/servlet/taglib/InfoListBasicListTag.setInfoListObjects(Ljava/util/List;)V:0
 
 -- liferay-info:info-list-table
 com/liferay/info/taglib/servlet/taglib/InfoListBasicTableTag.setInfoListObjectColumnNames(Ljava/util/List;)V:0
+com/liferay/info/taglib/servlet/taglib/InfoListBasicTableTag.setInfoListObjects(Ljava/util/List;)V:0
 
 -- liferay-journal:journal-article
 com/liferay/journal/taglib/servlet/taglib/JournalArticleTag.setWrapperCssClass(Ljava/lang/String;)V:0
@@ -673,6 +696,7 @@ com/liferay/layout/taglib/servlet/taglib/LayoutTemplatesListTag.setLayoutTemplat
 
 -- liferay-layout:render-editor
 com/liferay/layout/taglib/servlet/taglib/RenderEditorTag.setLabel(Ljava/lang/String;)V:0
+com/liferay/layout/taglib/servlet/taglib/RenderEditorTag.setContent(Ljava/lang/String;)V:0
 
 -- liferay-layout:render-fragment-layout
 
@@ -685,6 +709,7 @@ com/liferay/layout/taglib/servlet/taglib/RenderEditorTag.setLabel(Ljava/lang/Str
 -- liferay-layout:select-layout
 
 -- liferay-learn:json
+com/liferay/learn/taglib/servlet/taglib/JSONTag.setResource(Ljava/lang/String;)V:0
 
 -- liferay-learn:message
 com/liferay/learn/taglib/servlet/taglib/MessageTag.setResource(Ljava/lang/String;)V:0
@@ -702,6 +727,8 @@ com/liferay/map/taglib/servlet/taglib/MapProviderSelectorTag.setName(Ljava/lang/
 -- com/liferay/taglib/portlet/ActionURLTag SAFE
 
 -- liferay-portlet:icon-options
+com/liferay/taglib/portletext/IconOptionsTag.setDirection(Ljava/lang/String;)V:0
+com/liferay/taglib/portletext/IconOptionsTag.setPortletConfigurationIcons(Ljava/util/List;)V:0
 -- covered by existing com/liferay/taglib/ui/IconTag entries (IconOptionsTag extends IconTag)
 
 -- liferay-portlet:icon-portlet
@@ -729,6 +756,7 @@ com/liferay/taglib/aui/base/BaseValidatorTagImpl.setName(Ljava/lang/String;)V:0
 -- liferay-portlet:runtime
 com/liferay/taglib/portletext/RuntimeTag.setPortletProviderClassName(Ljava/lang/String;)V:0
 com/liferay/taglib/portletext/RuntimeTag.setPortletName(Ljava/lang/String;)V:0
+com/liferay/taglib/portletext/RuntimeTag.setInstanceId(Ljava/lang/String;)V:0
 
 -- liferay-product-navigation:control-menu
 
@@ -737,6 +765,7 @@ com/liferay/product/navigation/taglib/servlet/taglib/ProductNavigationPersonalMe
 com/liferay/product/navigation/taglib/servlet/taglib/ProductNavigationPersonalMenuTag.setSize(Ljava/lang/String;)V:0
 
 -- liferay-ratings:ratings
+com/liferay/ratings/taglib/servlet/taglib/RatingsTag.setUrl(Ljava/lang/String;)V:0
 
 -- liferay-reading-time:reading-time
 com/liferay/reading/time/taglib/servlet/taglib/ReadingTimeTag.setId(Ljava/lang/String;)V:0
@@ -1017,6 +1046,7 @@ com/liferay/taglib/ui/InputEditorTag.setInlineEditSaveURL(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/InputEditorTag.setName(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/InputEditorTag.setPlaceholder(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/InputEditorTag.setContents(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/InputEditorTag.setData(Ljava/util/Map;)V:0
 
 -- liferay-ui:input-field
 com/liferay/taglib/ui/InputFieldTag.setAutoComplete(Ljava/lang/String;)V:0
@@ -1191,6 +1221,7 @@ com/liferay/taglib/ui/TabsTag.setTabsValues(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/TabsTag.setType(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/TabsTag.setUrl(Ljava/lang/String;)V:0
 com/liferay/taglib/ui/TabsTag.setUrls([Ljava/lang/String;)V:0
+com/liferay/taglib/ui/TabsTag.setPortletURL(Ljakarta/portlet/PortletURL;)V:0
 
 -- liferay-ui:user-display
 com/liferay/taglib/ui/UserDisplayTag.setUrl(Ljava/lang/String;)V:0
@@ -1347,6 +1378,7 @@ com/liferay/commerce/frontend/taglib/servlet/taglib/MiniCartTag.setCssClasses(Lj
 com/liferay/commerce/frontend/taglib/servlet/taglib/MiniCartTag.setViews(Ljava/util/Map;)V:0
 
 -- liferay-commerce-ui:modal
+com/liferay/commerce/frontend/taglib/servlet/taglib/ModalTag.setUrl(Ljava/lang/String;)V:0
 
 -- liferay-commerce-ui:modal-content
 com/liferay/commerce/frontend/taglib/servlet/taglib/ModalContentTag.setRedirect(Ljava/lang/String;)V:0
@@ -1397,6 +1429,7 @@ com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseHTMLTag.setDefau
 -- liferay-ddm:html-field
 com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseHTMLFieldTag.setFieldsNamespace(Ljava/lang/String;)V:0
 com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseHTMLFieldTag.setField(Lcom/liferay/dynamic/data/mapping/storage/Field;)V:0
+com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseHTMLFieldTag.setRequestedLocale(Ljava/util/Locale;)V:0
 
 -- liferay-ddm:template-renderer
 com/liferay/dynamic/data/mapping/taglib/servlet/taglib/base/BaseTemplateRendererTag.setContextObjects(Ljava/util/Map;)V:0
@@ -1498,3 +1531,11 @@ com/liferay/frontend/taglib/react/servlet/taglib/ComponentTag.setProps(Ljava/uti
 -- need to evaluate SOY templates
 --com/liferay/frontend/taglib/soy/servlet/taglib/TemplateRendererTag.setContext(Ljava/util/Map;)V:0
 --com/liferay/frontend/taglib/soy/servlet/taglib/TemplateRendererTag.setModule(Ljava/lang/String;)V:0
+
+-- x:param
+org/apache/taglibs/standard/tag/rt/xml/ParamTag.setValue(Ljava/lang/Object;)V:0
+
+-- x:transform
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setDoc(Ljava/lang/Object;)V:0
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setXml(Ljava/lang/Object;)V:0
+org/apache/taglibs/standard/tag/rt/xml/TransformTag.setXslt(Ljava/lang/Object;)V:0
