@@ -56,3 +56,4 @@ com/liferay/portal/kernel/util/FileUtil.toProperties(Ljava/lang/String;)Ljava/ut
 com/liferay/portal/kernel/util/FileUtil.unzip(Ljava/io/File;Ljava/io/File;)V:1
 com/liferay/portal/kernel/util/ListUtil.fromFile(Ljava/io/File;)Ljava/util/List;:0
 com/liferay/portal/kernel/util/ListUtil.fromFile(Ljava/lang/String;)Ljava/util/List;:0
+com/liferay/learn/taglib/servlet/taglib/MessageTag.setResource(Ljava/lang/String;)V:0

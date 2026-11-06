@@ -19,3 +19,4 @@ com/liferay/portal/kernel/util/HttpUtil.URLtoString(Lcom/liferay/portal/kernel/u
 com/liferay/portal/kernel/util/HttpUtil.URLtoString(Ljava/lang/String;)Ljava/lang/String;:0
 com/liferay/portal/kernel/util/HttpUtil.URLtoString(Ljava/lang/String;Z)Ljava/lang/String;:1
 com/liferay/portal/kernel/util/HttpUtil.URLtoString(Ljava/net/URL;)Ljava/lang/String;:0
+com/liferay/learn/taglib/servlet/taglib/MessageTag.setResource(Ljava/lang/String;)V:0

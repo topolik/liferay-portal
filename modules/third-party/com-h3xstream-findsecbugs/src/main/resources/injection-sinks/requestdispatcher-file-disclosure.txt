@@ -2,3 +2,8 @@ javax/servlet/RequestDispatcher.forward(Ljavax/servlet/ServletRequest;Ljavax/ser
 jakarta/servlet/RequestDispatcher.forward(Ljakarta/servlet/ServletRequest;Ljakarta/servlet/ServletResponse;)V:2
 javax/servlet/RequestDispatcher.include(Ljavax/servlet/ServletRequest;Ljavax/servlet/ServletResponse;)V:2
 jakarta/servlet/RequestDispatcher.include(Ljakarta/servlet/ServletRequest;Ljakarta/servlet/ServletResponse;)V:2
+com/liferay/asset/taglib/servlet/taglib/AssetDisplayTag.setTemplate(Ljava/lang/String;)V:0
+com/liferay/taglib/theme/WrapPortletTag.setPage(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchContainerColumnJSPTag.setPath(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchIteratorTag.setDisplayStyle(Ljava/lang/String;)V:0
+com/liferay/taglib/util/IncludeTag.setPage(Ljava/lang/String;)V:0

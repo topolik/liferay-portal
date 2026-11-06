@@ -1,0 +1,17 @@
+org/apache/commons/httpclient/methods/GetMethod.<init>(Ljava/lang/String;)V:0
+org/apache/commons/httpclient/methods/GetMethod.setQueryString(Ljava/lang/String;)V:0
+
+org/apache/http/client/methods/HttpGet.<init>(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setContextParams(Ljava/util/Map;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setDataProviderKey(Ljava/lang/String;)V:0
+com/liferay/frontend/data/set/taglib/servlet/taglib/ClassicDisplayTag.setId(Ljava/lang/String;)V:0
+com/liferay/layout/taglib/servlet/taglib/LayoutClassedModelUsagesViewTag.setClassName(Ljava/lang/String;)V:0
+com/liferay/social/bookmarks/taglib/servlet/taglib/SocialBookmarkTag.setUrl(Ljava/lang/String;)V:0
+com/liferay/social/bookmarks/taglib/servlet/taglib/SocialBookmarksTag.setUrl(Ljava/lang/String;)V:0
+com/liferay/social/bookmarks/taglib/servlet/taglib/SocialBookmarksTag.setUrlImpl(Ljakarta/portlet/PortletURL;)V:0
+com/liferay/taglib/portletext/PreviewTag.setQueryString(Ljava/lang/String;)V:0
+com/liferay/taglib/portletext/RuntimeTag.setQueryString(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/PageIteratorTag.setCurParam(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/PageIteratorTag.setDeltaParam(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/SearchContainerTag.setCurParam(Ljava/lang/String;)V:0
+com/liferay/taglib/ui/TabsTag.setParam(Ljava/lang/String;)V:0
