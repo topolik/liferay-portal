@@ -150,7 +150,7 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 				public void execute(DependencySet dependencySet) {
 					GradleUtil.addDependency(
 						project, FIND_SECURITY_BUGS_CONFIGURATION_NAME,
-						"com.github.spotbugs", "spotbugs", "4.9.3");
+						"com.github.spotbugs", "spotbugs", "4.10.5");
 				}
 
 			});
