@@ -17,8 +17,10 @@ import java.nio.file.Path;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.gradle.api.Action;
+import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -34,6 +36,7 @@ import org.gradle.api.plugins.JavaBasePlugin;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.reporting.ReportingExtension;
 import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.JavaExec;
@@ -42,6 +45,7 @@ import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.language.base.plugins.LifecycleBasePlugin;
+import org.gradle.process.ExecResult;
 
 /**
  * @author Andrea Di Giorgi
@@ -252,12 +256,22 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 
 						});
 
+					final AtomicBoolean failOnExitValue = new AtomicBoolean();
+
 					findSecurityBugsJavaExec.doFirst(
 						new Action<Task>() {
 
 							@Override
 							public void execute(Task task) {
 								JavaExec javaExec = (JavaExec)task;
+
+								// SpotBugs also flags missing classes in the
+								// exit value, which must not fail the task
+
+								failOnExitValue.set(
+									!javaExec.isIgnoreExitValue());
+
+								javaExec.setIgnoreExitValue(true);
 
 								Logger logger = javaExec.getLogger();
 
@@ -281,6 +295,47 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 									logger.lifecycle(
 										"Using Find Security Bugs version " +
 											_VERSION);
+								}
+							}
+
+						});
+
+					findSecurityBugsJavaExec.doLast(
+						new Action<Task>() {
+
+							@Override
+							public void execute(Task task) {
+								if (!failOnExitValue.get()) {
+									return;
+								}
+
+								JavaExec javaExec = (JavaExec)task;
+
+								Provider<ExecResult> execResultProvider =
+									javaExec.getExecutionResult();
+
+								ExecResult execResult =
+									execResultProvider.get();
+
+								int exitValue = execResult.getExitValue();
+
+								if ((exitValue < 0) ||
+									(exitValue > _EXIT_VALUE_MAX)) {
+
+									throw new GradleException(
+										"Find Security Bugs exited with " +
+											"value " + exitValue);
+								}
+
+								if ((exitValue & _EXIT_VALUE_BUGS_FLAG) != 0) {
+									throw new GradleException(
+										"Find Security Bugs found bugs");
+								}
+
+								if ((exitValue & _EXIT_VALUE_ERROR_FLAG) != 0) {
+									throw new GradleException(
+										"Find Security Bugs reported " +
+											"analysis errors");
 								}
 							}
 
@@ -562,6 +617,12 @@ public class FindSecurityBugsPlugin implements Plugin<Project> {
 
 		return sourceSetContainer.getByName(name);
 	}
+
+	private static final int _EXIT_VALUE_BUGS_FLAG = 1;
+
+	private static final int _EXIT_VALUE_ERROR_FLAG = 4;
+
+	private static final int _EXIT_VALUE_MAX = 7;
 
 	private static final String _FIND_SECURITY_BUGS_EXCLUDE_FILE_NAME =
 		"fsb-exclude.xml";
